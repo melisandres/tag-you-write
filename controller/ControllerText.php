@@ -8,7 +8,7 @@ class ControllerText extends Controller{
     public function index(){
        
         $text = new Text;
-        $select = $text->select();
+        $select = $text->selectTexts();
       
         Twig::render('text-index.php', ['texts'=>$select]);
     }
@@ -27,10 +27,10 @@ class ControllerText extends Controller{
     }
 
     public function show($id){
-        $writer = new Writer;
-        $selectId = $writer->selectId($id);
-       //print_r($selectId);
-       Twig::render('writer-show.php', ['writer' => $selectId]);
+        $text = new Text;
+        $selectId = $text->selectIdText($id);
+        $keywords = $text->selectKeyword($id);
+        Twig::render('text-show.php', ['text' => $selectId, 'keywords'=> $keywords]);
     }
 
     public function edit($id){

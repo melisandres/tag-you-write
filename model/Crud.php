@@ -76,6 +76,69 @@ abstract class Crud extends PDO{
 
     }
 
+    //returns all the  texts along with the name of the writer of the text
+    //in the display all texts page
+    public function selectTexts(){
+        $sql = "SELECT text.*, 
+                writer.firstName AS firstName, 
+                writer.lastName AS lastName
+                FROM text
+                INNER JOIN writer 
+                ON text.writer_id = writer.id;";
+
+        $stmt = $this->query($sql);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
+        //returns the text as well as the first and last name of the writer
+    //by id I'm not using the variables I'm passing--this is a little confusing 
+    //it might make sense to also get the keywords here.
+    public function selectIdText($idValue, $url='writer'){
+        $table = $this->table;
+        $primaryKey = $this->primaryKey;
+        $sql = "SELECT text.*, writer.firstName AS firstName, 
+                writer.lastName AS lastName 
+                FROM $table INNER JOIN writer 
+                ON text.writer_id = writer.id 
+                WHERE $table.$primaryKey = :$primaryKey;";
+
+        
+        $stmt = $this->prepare($sql);
+        $stmt->bindValue(":$primaryKey", $idValue);
+        $stmt->execute();
+
+        $count = $stmt->rowCount();
+        if ($count == 1){
+            return $stmt->fetch();
+        }else{
+            //header("location:$url.php");
+            exit;
+        }
+    }
+
+    //returns an array where the keys are keyword.id and the values are keyword.word. These values are only the ones associated to the text.id sent to the function
+    public function selectKeyword($idValue){
+        $sql = "SELECT word, id 
+                FROM keyword 
+                INNER JOIN text_has_keyword 
+                ON keyword_id = keyword.id 
+                WHERE text_id = :$this->primaryKey";
+
+        $stmt = $this->prepare($sql);
+        $stmt->bindValue(":$this->primaryKey", $idValue);
+        $stmt->execute();
+
+        $result = array();
+
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $result[$row['id']] = $row['word'];
+        }
+    
+        return $result;
+    }
+
 
 }
 
