@@ -15,15 +15,15 @@
 
 
 
-    <form action="text-delete.php" method="POST">
+    <form action="{{path}}/text/delete" method="POST">
         <input type="hidden" name="id" value="{{ text.id }}" >
         <input type="submit" value="delete" >
     </form>
-    <form action="text-edit.php" method="POST">
+    <form action="{{path}}/text/edit" method="POST">
         <input type="hidden" name="id" value="{{ text.id }}" >
         <input type="submit" value="edit" >
     </form>
-    <form action="text-iterate.php" method="POST">  
+    <form action="{{path}}/text/iterate" method="POST">  
         <!--parent id is the id of the parent text-->    
         <input type="hidden" name="parent_id" value="{{ text.id }}" >
         <input type="submit" value="iterate" >

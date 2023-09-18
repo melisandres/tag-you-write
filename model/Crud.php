@@ -30,11 +30,15 @@ abstract class Crud extends PDO{
         }   
     }
 
-    public function insert($data){
+    public function insert($data, $keyWordInsert = false){
         $fieldName = implode(', ', array_keys($data));
         $fieldValue = ":".implode(', :', array_keys($data));
+        $keywordExtra = null;
+        if ($keyWordInsert){
+            $keywordExtra = "ON DUPLICATE KEY UPDATE word = VALUES(word)";
+        }
 
-        $sql = "INSERT INTO $this->table ($fieldName) VALUES ($fieldValue)";
+        $sql = "INSERT INTO $this->table ($fieldName) VALUES ($fieldValue) $keywordExtra";
 
         $stmt = $this->prepare($sql);
 
@@ -137,6 +141,24 @@ abstract class Crud extends PDO{
         }
     
         return $result;
+    }
+
+    //returns the id of the keyword sent as the value of a one-item associative array
+    //I'm iterating elsewhere and sending it here... but it may be better to combine functions
+    public function selectWordId($assArr){
+        $value = $assArr['word'];
+        $sql = "SELECT id FROM keyword WHERE word = :word;";
+
+        $stmt = $this->prepare($sql);
+        $stmt->bindValue(":word", $value);
+        $stmt->execute();
+
+        $count = $stmt->rowCount();
+        if ($count == 1){
+            return $stmt->fetch();
+        }else{
+            exit;
+        }
     }
 
 

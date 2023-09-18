@@ -1,6 +1,6 @@
 {{ include('header.php', {title: 'write something!'})}}
 
-<form action="text-store.php" method="post">
+<form action="{{path}}/text/store" method="post">
 
     <label for="writer-select">writer:</label>
     <select name="writer_id">
@@ -20,8 +20,8 @@
     <label>keywords (max 3, seperated by commas please)
         <input type="text" name="keywords">
     </label>
-    </label>
-        <input type="hidden" name="date" value="<?= date("Y-m-d H:i:s") ?>">
+
+    <input type="hidden" name="date" value="{{ 'now'|date('Y-m-d H:i:s') }}">
     <input type="submit" value="save">
 </form>
 
