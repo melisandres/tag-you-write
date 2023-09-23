@@ -25,7 +25,7 @@
     </form>
     <form action="{{path}}/text/iterate" method="POST">  
         <!--parent id is the id of the parent text-->    
-        <input type="hidden" name="parent_id" value="{{ text.id }}" >
+        <input type="hidden" name="id" value="{{ text.id }}" >
         <input type="submit" value="iterate" >
     </form>
 

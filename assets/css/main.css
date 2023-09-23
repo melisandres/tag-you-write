@@ -47,14 +47,22 @@ footer{
 
 }
 
-td, th,tr,p,form,textarea,h1{
+td, th, tr, form, textarea, h2, h1, p{
     padding:20px;
 }
+
+.very-small{
+    font-size: 15px;
+    display: block;
+    max-width: 40ch;
+    color: rgb(139, 7, 47);
+}
+
 th{
     text-align: left;
 }
 
-.author{
+.author, .title{
     color: hotpink;
 }
 
@@ -63,7 +71,7 @@ th{
     padding:10px;
     padding-left:20px;
     font-size: 15px;
-    color:red;
+    color:tomato;
 }
 
 .keyword::before{

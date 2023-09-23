@@ -16,12 +16,19 @@ class ControllerText extends Controller{
         Twig::render('text-index.php', ['texts'=>$select]);
     }
 
+
+
+    
     public function create(){
         $writer = new Writer;
         $select = $writer->select();
       
         Twig::render('text-create.php', ['writers'=>$select]);
     }
+
+
+
+
 
     public function store(){
         $text = new Text;
@@ -66,12 +73,21 @@ class ControllerText extends Controller{
         RequirePage::redirect('text');
     }
 
+
+
+
+
     public function show($id){
         $text = new Text;
         $selectId = $text->selectIdText($id);
         $keywords = $text->selectKeyword($id);
         Twig::render('text-show.php', ['text' => $selectId, 'keywords'=> $keywords]);
     }
+
+
+
+
+
 
     //show and edit are almost exactly the same. 
     public function edit(){
@@ -89,6 +105,11 @@ class ControllerText extends Controller{
         //send it to the form
         Twig::render('text-edit.php', ['text' => $selectId, 'keywords'=> $cleanKeywordString]);
     }
+
+
+
+
+
 
     public function update(){
         $text = new Text;
@@ -163,15 +184,6 @@ class ControllerText extends Controller{
                 //delete text_has_id lines for keywords no longer used
                 $textHasKeyword->deleteTextHasKeyword($word, $_POST['id']);
 
-
-
-                //I'm getting errors here: I should possibly combine these two to make
-/*                 $wordsToCheck = array_filter($wordsToCheck, function($word) {
-                    return !empty($word);
-                }); */
-
-                //i think this may need work here... 
-
                 //get an associative array with the whole keyword line
                 $keywordInfos = $keyword->selectId($word, 'word');
 
@@ -185,6 +197,10 @@ class ControllerText extends Controller{
 
         //Twig::render('client-show.php', ['writer'=> $update]);
     }
+
+
+
+
     public function delete(){
         $id = $_POST['id']; 
         $text = new Text;
@@ -212,6 +228,30 @@ class ControllerText extends Controller{
         }else{
             RequirePage::redirect('text');
         }
+    }
+
+
+
+
+
+
+    public function iterate(){
+        $text = new Text;
+        $writer = new Writer;
+        $selectWriter = $writer->select();
+        $selectId = $text->selectIdText($_POST['id']);
+        $keywords = $text->selectKeyword($_POST['id']);
+
+        //prepare the keywords
+        $keywordString = "";
+        foreach ($keywords as $key => $value) {
+            $keywordString .= $value.", ";
+        }
+        $cleanKeywordString= trim($keywordString, ", ");
+
+        //send it to the form
+        Twig::render('text-iterate.php', ['text' => $selectId, 'keywords'=> $cleanKeywordString, 'writers' => $selectWriter]);
+
     }
 
 }
