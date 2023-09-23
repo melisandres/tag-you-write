@@ -43,6 +43,12 @@ class ControllerWriter extends Controller{
         RequirePage::redirect('writer');
     }
 
+    public function destroy(){
+        $writer = new Writer;
+        $delete = $writer->delete($_POST['id']);
+        RequirePage::redirect('writer');
+    }
+
 }
 
 ?>

@@ -15,4 +15,8 @@
         </label>
         <input type="submit" value="Save">
     </form>
+    <form action="{{path}}writer/destroy" method="post">
+        <input type="hidden" name="id" value="{{writer.id}}">
+        <input type="submit" value="delete">
+    </form>
 {{include('footer.php')}}

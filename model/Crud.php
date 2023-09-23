@@ -12,12 +12,13 @@ abstract class Crud extends PDO{
         return $stmt->fetchAll();
     }
 
-    public function selectId($value){
-        $sql = "SELECT * FROM $this->table WHERE $this->primaryKey = :$this->primaryKey";
+    public function selectId($value, $id = null){
+        if($id == null) $id = $this->primaryKey;
 
+        $sql = "SELECT * FROM $this->table WHERE $id = :$id";
 
         $stmt = $this->prepare($sql);
-        $stmt->bindValue(":$this->primaryKey", $value);
+        $stmt->bindValue(":$id", $value);
         $stmt->execute();
 
         $count = $stmt->rowCount();
@@ -25,6 +26,13 @@ abstract class Crud extends PDO{
             //print_r($stmt->fetch());
             return $stmt->fetch();
         }else{
+            echo "this is your count:";
+            echo $count;
+            echo "<br> we are adding to this table: <br>";
+            echo $this->table;
+            echo"<br> We tried to add this value, which is supposed to be an id: <br>";
+            echo $value;
+            die();
             header("location: ../../home/error");
             exit;
         }   
@@ -49,7 +57,7 @@ abstract class Crud extends PDO{
         if($stmt->execute()){
             return $this->lastInsertId();
         }else{
-            print_r($stmt->errorInfo());
+            return $stmt->errorInfo();
         }
 
         return $this->lastInsertId();
@@ -96,7 +104,7 @@ abstract class Crud extends PDO{
         return $stmt->fetchAll();
     }
 
-        //returns the text as well as the first and last name of the writer
+    //returns the text as well as the first and last name of the writer
     //by id I'm not using the variables I'm passing--this is a little confusing 
     //it might make sense to also get the keywords here.
     public function selectIdText($idValue, $url='writer'){
@@ -160,6 +168,19 @@ abstract class Crud extends PDO{
             exit;
         }
     }
+
+    public function delete($value){
+        $sql = "DELETE FROM $this->table WHERE $this->primaryKey = :$this->primaryKey;";
+        $stmt = $this->prepare($sql); 
+        $stmt->bindValue(":$this->primaryKey", $value);
+        if ($stmt->execute()){
+            return true;
+        }else{
+            echo "OMG YOU GOT AN ERROR";
+            print_r($stmt->errorInfo());
+        }
+    }
+
 
 
 }

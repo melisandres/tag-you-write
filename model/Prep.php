@@ -4,9 +4,9 @@ class Prep {
         $words = explode(',', $words);
         $cleanedWordArray = [];
         foreach ($words as $word) {
-            $word = trim($word);
-            if(!empty(trim($word))){
-                array_push($cleanedWordArray, trim($word));
+            $cleanWord = trim($word);
+            if(!empty($cleanWord)){
+                array_push($cleanedWordArray, $cleanWord);
             }
         }
         return $cleanedWordArray;

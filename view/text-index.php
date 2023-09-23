@@ -13,7 +13,7 @@
             <tr>
                 <td><a href="{{path}}text/show/{{text.id}}">{{ text.title }}</a></td>
                 <td>{{ text.date }}</td>
-                <td>{{ text.firstName }} {{ text.lastName }}{{text.id}}</td> 
+                <td>{{ text.firstName }} {{ text.lastName }}</td> 
             </tr>
 
     {% endfor %}
