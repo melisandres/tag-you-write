@@ -10,20 +10,17 @@
         <p class='keyword' data-keyword-index='{{ key }}'>keyword {{ count }}: {{ value }}</p>
     {% endfor %}
 
-
     <p><strong>text: </strong>{{ text.writing }}</p>
 
-
-
-    <form action="{{path}}/text/delete" method="POST">
+    <form action="{{path}}text/delete" method="POST">
         <input type="hidden" name="id" value="{{ text.id }}" >
         <input type="submit" value="delete" >
     </form>
-    <form action="{{path}}/text/edit" method="POST">
+    <form action="{{path}}text/edit" method="POST">
         <input type="hidden" name="id" value="{{ text.id }}" >
         <input type="submit" value="edit" >
     </form>
-    <form action="{{path}}/text/iterate" method="POST">  
+    <form action="{{path}}text/iterate" method="POST">  
         <!--parent id is the id of the parent text-->    
         <input type="hidden" name="id" value="{{ text.id }}" >
         <input type="submit" value="iterate" >

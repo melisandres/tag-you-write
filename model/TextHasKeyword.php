@@ -6,6 +6,9 @@ class TextHasKeyword extends Crud{
     public $table = 'text_has_keyword';
     public $primaryKey = 'text_id';
     public $secondaryKey = 'keyword_id';
+    public $fillable = ['text_id',
+                        'keyword_id'
+                        ];
 
 
     //this is specific for inserting text_has_keyword entry
