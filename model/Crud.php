@@ -6,8 +6,9 @@ abstract class Crud extends PDO{
         parent::__construct('mysql:host=localhost; dbname=tag; port=8889; charset=utf8', 'root', '');
     }
 
-    public function select($field = 'id', $order = null){
-        $sql = "SELECT * FROM $this->table ORDER BY $field $order";
+    //this is only being called by writer, at the moment, but it's so general I hesitate to put it in the writer model
+    public function select($order = null){
+        $sql = "SELECT * FROM $this->table ORDER BY $this->primaryKey $order";
         $stmt = $this->query($sql);
         return $stmt->fetchAll();
     }
@@ -23,18 +24,9 @@ abstract class Crud extends PDO{
 
         $count = $stmt->rowCount();
         if($count == 1){
-            //print_r($stmt->fetch());
             return $stmt->fetch();
         }else{
-            echo "this is your count:";
-            echo $count;
-            echo "<br> we are adding to this table: <br>";
-            echo $this->table;
-            echo"<br> We tried to add this value, which is supposed to be an id: <br>";
-            echo $value;
-            die();
-            header("location: ../../home/error");
-            exit;
+            Twig::render('home/error', ['message' => "Sorry, we were unnable to process your request."]);
         }   
     }
 
@@ -88,21 +80,6 @@ abstract class Crud extends PDO{
 
     }
 
-    //returns all the  texts along with the name of the writer of the text
-    //in the display all texts page
-    public function selectTexts(){
-        $sql = "SELECT text.*, 
-                writer.firstName AS firstName, 
-                writer.lastName AS lastName
-                FROM text
-                INNER JOIN writer 
-                ON text.writer_id = writer.id;";
-
-        $stmt = $this->query($sql);
-        $stmt->execute();
-
-        return $stmt->fetchAll();
-    }
 
     //returns the text as well as the first and last name of the writer
     //by id I'm not using the variables I'm passing--this is a little confusing 

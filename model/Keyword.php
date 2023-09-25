@@ -5,6 +5,7 @@ class Keyword extends Crud{
 
     public $table = 'keyword';
     public $primaryKey = 'id';
+    public $secondaryKey = 'word';
     public $fillable = ['id',
                         'word',
                         ];
