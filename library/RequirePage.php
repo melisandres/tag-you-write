@@ -7,6 +7,7 @@ class RequirePage{
 
     static public function redirect($page){
         header('location:http://localhost:8888/tag-you-write-repo/tag-you-write/'.$page);
+
     }
 }
 

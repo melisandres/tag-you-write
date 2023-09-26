@@ -26,7 +26,7 @@ abstract class Crud extends PDO{
         if($count == 1){
             return $stmt->fetch();
         }else{
-            Twig::render('home/error', ['message' => "Sorry, we were unnable to process your request."]);
+            return false;
         }   
     }
 
@@ -55,6 +55,7 @@ abstract class Crud extends PDO{
         return $this->lastInsertId();
     }
 
+
     public function update($data){
         $fieldName = null;
 
@@ -69,13 +70,12 @@ abstract class Crud extends PDO{
         $stmt = $this->prepare($sql);
         foreach ($data as $key => $value) {
             $stmt->bindValue(":$key", $value);
-
         }
 
         if($stmt->execute()){
-            return $this->lastInsertId();
+            return;
         }else{
-            print_r($stmt->errorInfo);
+            Twig::render('home-error.php', ['message'=> "Sorry, there was an error updating."]);
         }
 
     }
@@ -92,7 +92,6 @@ abstract class Crud extends PDO{
                 FROM $table INNER JOIN writer 
                 ON text.writer_id = writer.id 
                 WHERE $table.$primaryKey = :$primaryKey;";
-
         
         $stmt = $this->prepare($sql);
         $stmt->bindValue(":$primaryKey", $idValue);
@@ -102,7 +101,6 @@ abstract class Crud extends PDO{
         if ($count == 1){
             return $stmt->fetch();
         }else{
-            //header("location:$url.php");
             exit;
         }
     }
@@ -153,13 +151,9 @@ abstract class Crud extends PDO{
         if ($stmt->execute()){
             return true;
         }else{
-            echo "OMG YOU GOT AN ERROR";
-            print_r($stmt->errorInfo());
+            return false;
         }
     }
-
-
-
 }
 
 ?>

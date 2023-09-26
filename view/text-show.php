@@ -14,11 +14,21 @@
 
     <form action="{{path}}text/delete" method="POST">
         <input type="hidden" name="id" value="{{ text.id }}" >
-        <input type="submit" value="delete" >
+        <input type="hidden" name="parent_id" value="{{ text.parent_id}}">
+        {% if isParent %}
+        <input type="submit" disabled="true" value="delete" title="Can not be deleted. Other texts iterate on it.">
+        {% else %}
+        <input type="submit" value="delete">
+        {% endif %}
     </form>
     <form action="{{path}}text/edit" method="POST">
         <input type="hidden" name="id" value="{{ text.id }}" >
-        <input type="submit" value="edit" >
+        <input type="hidden" name="parent_id" value="{{ text.parent_id}}">
+        {% if isParent %}
+        <input type="submit" disabled="true" value="edit" title="Can not be changed. Other texts iterate on it.">
+        {% else %}
+        <input type="submit" value="edit">
+        {% endif %}
     </form>
     <form action="{{path}}text/iterate" method="POST">  
         <!--parent id is the id of the parent text-->    
