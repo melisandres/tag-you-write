@@ -6,12 +6,16 @@ abstract class Crud extends PDO{
         parent::__construct('mysql:host=localhost; dbname=tag; port=8889; charset=utf8', 'root', '');
     }
 
+
+    
     //this is only being called by writer, at the moment, but it's so general I hesitate to put it in the writer model
     public function select($order = null){
         $sql = "SELECT * FROM $this->table ORDER BY $this->primaryKey $order";
         $stmt = $this->query($sql);
         return $stmt->fetchAll();
     }
+
+
 
     public function selectId($value, $id = null){
         if($id == null) $id = $this->primaryKey;
@@ -29,6 +33,8 @@ abstract class Crud extends PDO{
             return false;
         }   
     }
+
+
 
     public function insert($data, $keyWordInsert = false){
         $fieldName = implode(', ', array_keys($data));
@@ -56,6 +62,7 @@ abstract class Crud extends PDO{
     }
 
 
+
     public function update($data){
         $fieldName = null;
 
@@ -81,29 +88,6 @@ abstract class Crud extends PDO{
     }
 
 
-    //returns the text as well as the first and last name of the writer
-    //by id I'm not using the variables I'm passing--this is a little confusing 
-    //it might make sense to also get the keywords here.
-    public function selectIdText($idValue, $url='writer'){
-        $table = $this->table;
-        $primaryKey = $this->primaryKey;
-        $sql = "SELECT text.*, writer.firstName AS firstName, 
-                writer.lastName AS lastName 
-                FROM $table INNER JOIN writer 
-                ON text.writer_id = writer.id 
-                WHERE $table.$primaryKey = :$primaryKey;";
-        
-        $stmt = $this->prepare($sql);
-        $stmt->bindValue(":$primaryKey", $idValue);
-        $stmt->execute();
-
-        $count = $stmt->rowCount();
-        if ($count == 1){
-            return $stmt->fetch();
-        }else{
-            exit;
-        }
-    }
 
     //returns an array where the keys are keyword.id and the values are keyword.word. These values are only the ones associated to the text.id sent to the function
     public function selectKeyword($idValue){
@@ -122,27 +106,11 @@ abstract class Crud extends PDO{
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $result[$row['id']] = $row['word'];
         }
-    
+
         return $result;
     }
 
-    //returns the id of the keyword sent as the value of a one-item associative array
-    //I'm iterating elsewhere and sending it here... but it may be better to combine functions
-    public function selectWordId($assArr){
-        $value = $assArr['word'];
-        $sql = "SELECT id FROM keyword WHERE word = :word;";
 
-        $stmt = $this->prepare($sql);
-        $stmt->bindValue(":word", $value);
-        $stmt->execute();
-
-        $count = $stmt->rowCount();
-        if ($count == 1){
-            return $stmt->fetch();
-        }else{
-            exit;
-        }
-    }
 
     public function delete($value){
         $sql = "DELETE FROM $this->table WHERE $this->primaryKey = :$this->primaryKey;";

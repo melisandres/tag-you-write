@@ -34,6 +34,8 @@ class Keyword extends Crud{
         }
     }
 
+
+    
     //returns all the keyword_ids associated to this current text.
     public function selectKeywordIds($id, $field='id'){
         $sql ="SELECT keyword_id
@@ -47,6 +49,26 @@ class Keyword extends Crud{
         $count = $stmt->rowCount();
         if ($count >= 1){
             return $stmt->fetchAll();
+        }
+    }
+
+
+
+    //returns the id of the keyword sent as the value of a one-item associative array
+    //I'm iterating elsewhere and sending it here... but it may be better to combine functions
+    public function selectWordId($assArr){
+        $value = $assArr['word'];
+        $sql = "SELECT id FROM keyword WHERE word = :word;";
+
+        $stmt = $this->prepare($sql);
+        $stmt->bindValue(":word", $value);
+        $stmt->execute();
+
+        $count = $stmt->rowCount();
+        if ($count == 1){
+            return $stmt->fetch();
+        }else{
+            exit;
         }
     }
 }

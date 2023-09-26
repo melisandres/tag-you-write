@@ -28,6 +28,32 @@ class Text extends Crud{
 
         return $stmt->fetchAll();
     }
+
+
+
+    //returns the text as well as the first and last name of the writer
+    //by id I'm not using the variables I'm passing--this is a little confusing 
+    //it might make sense to also get the keywords here.
+    public function selectIdText($idValue, $url='writer'){
+        $table = $this->table;
+        $primaryKey = $this->primaryKey;
+        $sql = "SELECT text.*, writer.firstName AS firstName, 
+                writer.lastName AS lastName 
+                FROM $table INNER JOIN writer 
+                ON text.writer_id = writer.id 
+                WHERE $table.$primaryKey = :$primaryKey;";
+        
+        $stmt = $this->prepare($sql);
+        $stmt->bindValue(":$primaryKey", $idValue);
+        $stmt->execute();
+
+        $count = $stmt->rowCount();
+        if ($count == 1){
+            return $stmt->fetch();
+        }else{
+            exit;
+        }
+    }
 }
 
 

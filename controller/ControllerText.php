@@ -137,11 +137,9 @@ class ControllerText extends Controller{
         $cleanedLastKeywords = $prep->keywords($lastKeywords);
         $wordsToCheck = array_diff($cleanedLastKeywords, $cleanedKeywords);
 
-
-        //FROM TEXT STORE-- except, we already did the trim
         //each keyword needs to be treated:
         foreach ($cleanedKeywords as $word) {
-            //cleaned of spaces (really shouldn't have to clean again?!)
+            //they have been cleaned of spaces in Prep
             //$assArr = ['word' => trim($word)];
             $assArr = ['word' => $word];
 
@@ -155,12 +153,11 @@ class ControllerText extends Controller{
             $textHasKeywordArray = ['text_id' => $_POST['id'], 'keyword_id' => $keywordIdFromInsert['id']];
 
             //now we can insert this keyword into text_has_keyword
-            echo "<br>textHasKeyword insert here... and loop again<br>";
             $textHasKeyword->insertTextHasKeyWord($textHasKeywordArray);
         }
 
-        //earlier, you compared previous keywords to current keywords, and 
-        //you placed the difference in $wordsToCheck
+        //earlier, previous keywords was compared to current keywords 
+        //the difference was placed in $wordsToCheck
         if(isset($wordsToCheck) && !empty($wordsToCheck)){
             foreach($wordsToCheck as $word){
                 //delete text_has_id lines for keywords no longer used
@@ -176,8 +173,6 @@ class ControllerText extends Controller{
         }else{
             RequirePage::redirect('text');
         }
-
-        //Twig::render('client-show.php', ['writer'=> $update]);
     }
 
 
@@ -188,10 +183,9 @@ class ControllerText extends Controller{
         $keyword = new Keyword;
         $textHasKeyword = new TextHasKeyword;
 
-        //let's first check to see if this text has any children. 
+        //first check to see if this text has any children. 
         //we should not be able to delete it if it has children
         $select = $text->selectId($id, 'parent_id');
-
         if($select){
             Twig::render('home-error.php', ['message'=> "Another writer has iterated on this text, and therefore it can no longer be deleted. Sorry."]);
             return;
@@ -222,6 +216,7 @@ class ControllerText extends Controller{
     }
 
 
+
     //almost the same as show and edit,
     //but we must add the writer select field
     public function iterate(){
@@ -243,7 +238,6 @@ class ControllerText extends Controller{
         //send it all to the form
         Twig::render('text-iterate.php', ['text' => $selectId, 'keywords'=> $cleanKeywordString, 'writers' => $selectWriter]);
     }
-
 }
 
 ?>
