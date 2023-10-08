@@ -5,6 +5,7 @@ RequirePage::model('Writer');
 class ControllerWriter extends Controller{
 
     public function index(){
+        CheckSession::sessionAuth();
         $writer = new Writer;
         $select = $writer->select();
         Twig::render('writer-index.php', ['writers'=>$select]);

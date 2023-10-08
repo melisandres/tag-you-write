@@ -13,5 +13,8 @@
         <a class="nav-link writers" href="{{path}}writer/create">create a writer</a>
         <a class="nav-link texts" href="{{path}}text/create">write something</a>
         <a class="nav-link texts" href="{{path}}text">see all the texts</a>
+        <a class="nav-link writers" href="{{path}}user/create">join our community<a>
+        <a class="nav-link writers" href="{{path}}login">Login<a>
+        <a class="nav-link writers" href="{{path}}login/logout">Log out<a>
     </nav>
 <main>
