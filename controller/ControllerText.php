@@ -8,25 +8,39 @@ RequirePage::model('Prep');
 
 class ControllerText extends Controller{
 
+    //show the page with all the texts
     public function index(){
+        //TO-DO: available to all
+        //TO-DO: show the texts writen by the person logged-in
+        //differently--if a writer is logged in. 
         $text = new Text;
         $select = $text->selectTexts();
         Twig::render('text-index.php', ['texts'=>$select]);
     }
 
 
-    
+    //show the page from which someone can write a new text
+    //it will be important to get the writer id here, so 
+    //they do not have to select their name, but have it 
+    //already entered.
     public function create(){
+        //TO-DO: available only to writers
+        //TO-DO: take away select, and replace it with 
+        //the writer who is logged in
         $writer = new Writer;
         $select = $writer->select();
         Twig::render('text-create.php', ['writers'=>$select]);
     }
 
 
-
+    //this is where we save the text entered, and its 
+    //associated keywords, etc. 
     public function store(){
         $text = new Text;
         $keyWord = new Keyword;
+        
+        //validate the $_POST
+        $this->validateText($_POST);
 
         //get the keywords from POST
         $keywords = $_POST['keywords'];
@@ -65,8 +79,16 @@ class ControllerText extends Controller{
     }
 
 
-
+    //this will show a specific text, based on the
+    //text's id: options available from this page are
+    //edit (if this is your text), iterate (if this is
+    //another person's text OR if it has already been 
+    //iterated on), and delete(if this is your text 
+    //and it has never been iterated on)
     public function show($id){
+        //TO-DO: This will also be altered by 
+        //whether or not the user is logged in--buttons 
+        //should not show if the user is not logged in
         $text = new Text;
         $selectId = $text->selectIdText($id);
         $keywords = $text->selectKeyword($id);
@@ -85,8 +107,12 @@ class ControllerText extends Controller{
 
 
 
-    //show and edit are almost exactly the same. 
+    //edit creates the page from which the writer can edit a text
     public function edit(){
+        //TO-DO: this should not be available if the user is 
+        //not logged in--AND, if the user is the author of 
+        //the current text
+
         $text = new Text;
         $selectId = $text->selectIdText($_POST['id']);
         $keywords = $text->selectKeyword($_POST['id']);
@@ -107,18 +133,29 @@ class ControllerText extends Controller{
         }
         $cleanKeywordString= trim($keywordString, ", ");
 
+        //create a data array that will send the values
+        //to the page legibly...
+        $data = $selectId;
+        $data["keywords"] = $cleanKeywordString;
+        $data["lastKeywords"] = $cleanKeywordString;
+
         //send it to the form
-        Twig::render('text-edit.php', ['text' => $selectId, 'keywords'=> $cleanKeywordString]);
+        Twig::render('text-edit.php', ['data' => $data]);
     }
 
 
-
+    //update send an edited text to the database
     public function update(){
         $text = new Text;
         $writer = new Writer;
         $keyword = new Keyword;
         $textHasKeyword = new TextHasKeyword;
         $prep = new Prep;
+
+/*         var_dump($_POST);
+        die; */
+        //validate the $_POST
+        $this->validateText($_POST);
 
         //get the new keywords from POST, copy, and remove
         $keywords = $_POST['keywords'];
@@ -176,7 +213,7 @@ class ControllerText extends Controller{
     }
 
 
-
+    //deletes a text from the database
     public function delete(){
         $id = $_POST['id']; 
         $text = new Text;
@@ -217,9 +254,15 @@ class ControllerText extends Controller{
 
 
 
-    //almost the same as show and edit,
-    //but we must add the writer select field
+    //like show and edit, it presents a filled-out form
+    //with the text to be iterated, but with a "writer select" field
     public function iterate(){
+        //TO-DO: now that there is a log in, you may want to 
+        //eliminate this. Just make sure there's nothing needed
+        //here that isn't in what you would replace it with... edit?
+        //and then... you'll compare writer-iterate with writer-edit. 
+        //if you can combine them with a few variables... all the better.
+        //they both send their $_POST to store...
         $text = new Text;
         $writer = new Writer;
         //first prepare the list of writers for the select field
@@ -235,8 +278,36 @@ class ControllerText extends Controller{
         }
         $cleanKeywordString= trim($keywordString, ", ");
 
+        //create a data array that will send the values
+        //to the page legibly...
+        $data = $selectId;
+        $data["keywords"] = $cleanKeywordString;
+
         //send it all to the form
-        Twig::render('text-iterate.php', ['text' => $selectId, 'keywords'=> $cleanKeywordString, 'writers' => $selectWriter]);
+        Twig::render('text-iterate.php', ['data' => $data]);
+    }
+
+
+
+    public function validateText($data){
+        RequirePage::library('Validation');
+        $val = new Validation;
+
+        //$val->name('date')->value($data["date"])->pattern('date_ymd');
+        $val->name('writing')->value($data["writing"])->pattern('words')->required();
+        $val->name('title')->value($data["title"])->max(75);
+        $val->name('keywords')->value($data["keywords"])->pattern('keywords');
+
+
+        if($val->isSuccess()){
+            //if this is successful, I just want to continue the code
+            //so... I need not do anything
+        }else{
+            $errors = $val->displayErrors();
+            //send it to the form
+            Twig::render($data["currentPage"], ['data' => $data, 'errors' => $errors]);
+            exit();
+        };
     }
 }
 

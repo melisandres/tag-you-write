@@ -20,7 +20,6 @@ class ControllerUser extends Controller {
             exit();
         }
 
-
         extract($_POST);
         RequirePage::library('Validation');
         $val = new Validation;

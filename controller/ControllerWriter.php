@@ -5,6 +5,7 @@ RequirePage::model('Writer');
 class ControllerWriter extends Controller{
 
     public function index(){
+        //this is where you are blocking access... 
         CheckSession::sessionAuth();
         $writer = new Writer;
         $select = $writer->select();

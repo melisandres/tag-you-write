@@ -37,7 +37,8 @@ class Text extends Crud{
     public function selectIdText($idValue, $url='writer'){
         $table = $this->table;
         $primaryKey = $this->primaryKey;
-        $sql = "SELECT text.*, writer.firstName AS firstName, 
+        $sql = "SELECT text.*, 
+                writer.firstName AS firstName, 
                 writer.lastName AS lastName 
                 FROM $table INNER JOIN writer 
                 ON text.writer_id = writer.id 
