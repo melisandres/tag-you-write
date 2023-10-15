@@ -294,9 +294,9 @@ class ControllerText extends Controller{
         $val = new Validation;
 
         //$val->name('date')->value($data["date"])->pattern('date_ymd');
-        $val->name('writing')->value($data["writing"])->pattern('words')->required();
+        $val->name('writing')->value($data["writing"])->pattern('words')->required()->max(65000);
         $val->name('title')->value($data["title"])->max(75);
-        $val->name('keywords')->value($data["keywords"])->pattern('keywords');
+        $val->name('keywords')->value($data["keywords"])->pattern('keywords')->max(75);
 
 
         if($val->isSuccess()){
