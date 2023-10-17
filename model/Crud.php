@@ -57,7 +57,6 @@ abstract class Crud extends PDO{
         }else{
             return $stmt->errorInfo();
         }
-
         return $this->lastInsertId();
     }
 

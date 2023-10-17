@@ -10,7 +10,7 @@
 <form action="{{path}}login/auth" method="post">
 
         <label>username
-            <input type="email" name="username" value={{data.username}}>
+            <input type="email" name="email" value={{data.email}}>
         </label>
         <label>password
             <input type="password" name="password">

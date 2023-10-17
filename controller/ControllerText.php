@@ -24,9 +24,9 @@ class ControllerText extends Controller{
     //they do not have to select their name, but have it 
     //already entered.
     public function create(){
-        //TO-DO: available only to writers
-        //TO-DO: take away select, and replace it with 
-        //the writer who is logged in
+        //available only to those logged in (ie: writers)
+        CheckSession::sessionAuth();
+
         $writer = new Writer;
         $select = $writer->select();
         Twig::render('text-create.php', ['writers'=>$select]);
@@ -36,6 +36,15 @@ class ControllerText extends Controller{
     //this is where we save the text entered, and its 
     //associated keywords, etc. 
     public function store(){
+        //make sure the page is being accessed with a post...
+        if($_SERVER["REQUEST_METHOD"] !== "POST"){
+            //just to make uniform, check if the writer is logged in
+            CheckSession::sessionAuth();
+            //if logged in, direct to texts..
+            RequirePage::redirect('text');
+            exit();
+        }
+
         $text = new Text;
         $keyWord = new Keyword;
         
@@ -45,8 +54,9 @@ class ControllerText extends Controller{
         //get the keywords from POST
         $keywords = $_POST['keywords'];
 
-        //remove the keywords from POST
+        //remove the keywords and redirectPage reference from POST
         unset($_POST['keywords']);
+        unset($_POST['currentPage']);
 
         //send what's left of the POST (text info) to CRUD
         $textIdFromInsert = $text->insert($_POST);
@@ -85,18 +95,25 @@ class ControllerText extends Controller{
     //another person's text OR if it has already been 
     //iterated on), and delete(if this is your text 
     //and it has never been iterated on)
-    public function show($id){
-        //TO-DO: This will also be altered by 
-        //whether or not the user is logged in--buttons 
-        //should not show if the user is not logged in
+    public function show($id = null){
+        //TO-DO: if id = null or if it doesn't exist
+        //in the database, you need to 
         $text = new Text;
         $selectId = $text->selectIdText($id);
+
+        //here, you check if the id doesn't exist, or if it's null
+        if($id == null || !$selectId){
+            Twig::render('home-error.php', ['message'=> "Something went wrong. Sorry."]);
+            exit;
+        }
+
         $keywords = $text->selectKeyword($id);
         $isParent = false;
 
-        //first, lets check if the text to be updated
-        //has any children... if it has children, it should
-        //not be possible to update it. 
+        //check if the text to be updated
+        //has any children... if it has children, its buttons
+        //should be displayed differently... because it can no 
+        //longer be updated
         $select = $text->selectId($id, 'parent_id');
         if($select){
             $isParent = true;
@@ -106,20 +123,23 @@ class ControllerText extends Controller{
     }
 
 
-
     //edit creates the page from which the writer can edit a text
     public function edit(){
-        //TO-DO: this should not be available if the user is 
-        //not logged in--AND, if the user is the author of 
-        //the current text
+        //no access if you are not logged in
+        CheckSession::sessionAuth();
 
         $text = new Text;
         $selectId = $text->selectIdText($_POST['id']);
         $keywords = $text->selectKeyword($_POST['id']);
 
-        //first, lets check if the text to be updated
-        //has any children... if it has children, it should
-        //not be possible to update it. 
+        //block the page if the writer logged in is not this text's writer
+        if($selectId['writer_id'] !== $_SESSION['writer_id']){
+            Twig::render('home-error.php', ['message'=> "You can't edit another writer's text. Try iterating instead."]);
+            return;
+        }
+
+        //if the text to be updated has any children...
+        //it should not be possible to update it. 
         $select = $text->selectId($_POST['id'], 'parent_id');
         if($select){
             Twig::render('home-error.php', ['message'=> "Another writer has iterated on this text, and therefore it can no longer be deleted. Sorry."]);
@@ -146,20 +166,44 @@ class ControllerText extends Controller{
 
     //update send an edited text to the database
     public function update(){
+        //no access if you are not logged in
+        CheckSession::sessionAuth();
+
+        //make sure the page is being accessed with a post...
+        if($_SERVER["REQUEST_METHOD"] !== "POST"){
+            RequirePage::redirect('text');
+            exit();
+        }
+
+        //block the functionality if the writer 
+        //logged in is not this text's writer
+        if($_POST['writer_id'] !== $_SESSION['writer_id']){
+            Twig::render('home-error.php', ['message'=> "You can't edit another writer's text. Try iterating instead."]);
+            return;
+        }
+
         $text = new Text;
+        //check if the text is a parent, it should not be
+        //able to be be updated
+        $select = $text->selectId($_POST["id"], 'parent_id');
+        if($select){
+            RequirePage::redirect('text');
+            exit();
+        }
+
+
         $writer = new Writer;
         $keyword = new Keyword;
         $textHasKeyword = new TextHasKeyword;
         $prep = new Prep;
 
-/*         var_dump($_POST);
-        die; */
         //validate the $_POST
         $this->validateText($_POST);
 
         //get the new keywords from POST, copy, and remove
         $keywords = $_POST['keywords'];
         unset($_POST['keywords']);
+        unset($_POST['currentPage']);
 
         //get the previous keywords from POST, also remove
         $lastKeywords = $_POST['lastKeywords'];
@@ -215,6 +259,9 @@ class ControllerText extends Controller{
 
     //deletes a text from the database
     public function delete(){
+        //no access if you are not logged in
+        CheckSession::sessionAuth();
+
         $id = $_POST['id']; 
         $text = new Text;
         $keyword = new Keyword;
@@ -225,6 +272,13 @@ class ControllerText extends Controller{
         $select = $text->selectId($id, 'parent_id');
         if($select){
             Twig::render('home-error.php', ['message'=> "Another writer has iterated on this text, and therefore it can no longer be deleted. Sorry."]);
+            return;
+        }
+
+        //block the functionality if the writer 
+        //logged in is not this text's writer
+        if($_POST['writer_id'] !== $_SESSION['writer_id']){
+            Twig::render('home-error.php', ['message'=> "You can't edit another writer's text. Try iterating instead."]);
             return;
         }
 
@@ -253,16 +307,12 @@ class ControllerText extends Controller{
     }
 
 
-
     //like show and edit, it presents a filled-out form
     //with the text to be iterated, but with a "writer select" field
     public function iterate(){
-        //TO-DO: now that there is a log in, you may want to 
-        //eliminate this. Just make sure there's nothing needed
-        //here that isn't in what you would replace it with... edit?
-        //and then... you'll compare writer-iterate with writer-edit. 
-        //if you can combine them with a few variables... all the better.
-        //they both send their $_POST to store...
+        //no access if you are not logged in
+        CheckSession::sessionAuth();
+
         $text = new Text;
         $writer = new Writer;
         //first prepare the list of writers for the select field
@@ -288,20 +338,25 @@ class ControllerText extends Controller{
     }
 
 
-
     public function validateText($data){
         RequirePage::library('Validation');
         $val = new Validation;
 
         //$val->name('date')->value($data["date"])->pattern('date_ymd');
-        $val->name('writing')->value($data["writing"])->pattern('words')->required()->max(65000);
+        $val->name('writing')->value($data["writing"])->required()->max(65000);
         $val->name('title')->value($data["title"])->max(75);
         $val->name('keywords')->value($data["keywords"])->pattern('keywords')->max(75);
+        //TO-DO: eventually, add the logic of word-count... this will count
+        //and store the previous word count (or start at zero), and send that amount to 
+        //the front end. I don't want to prevent people from going OVER... but I'd 
+        //want to have something happen front-end... I think its important to be 
+        //as flexible as possible in terms of allowing rule-breaking... but perhaps in
+        //reminding users of rules on the front end.  
 
 
         if($val->isSuccess()){
-            //if this is successful, I just want to continue the code
-            //so... I need not do anything
+            //if this is successful, continue the code
+            //so... do nothing
         }else{
             $errors = $val->displayErrors();
             //send it to the form

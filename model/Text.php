@@ -52,7 +52,7 @@ class Text extends Crud{
         if ($count == 1){
             return $stmt->fetch();
         }else{
-            exit;
+            return false;
         }
     }
 }

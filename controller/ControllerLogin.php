@@ -1,5 +1,5 @@
 <?php
-RequirePage::model('User');
+RequirePage::model('Writer');
 
 class ControllerLogin extends Controller {
 
@@ -10,7 +10,7 @@ class ControllerLogin extends Controller {
     public function auth(){
         //this is to make sure there's a post...
         if($_SERVER["REQUEST_METHOD"] !== "POST"){
-            RequirePage::redirect('user/create');
+            RequirePage::redirect('writer/create');
             exit();
         }
 
@@ -18,17 +18,17 @@ class ControllerLogin extends Controller {
         extract($_POST);
         RequirePage::library('Validation');
         $val = new Validation;
-        $val->name('username')->value($username)->pattern('email')->required()->max(50);
+        $val->name('email')->value($email)->pattern('email')->required()->max(50);
         $val->name('password')->value($password)->pattern('alphanum')->min(6)->max(20);
 
 
 
         if($val->isSuccess()){
-            $user = new User;
-            if($user->checkUser($username, $password)){
-                RequirePage::redirect('writer');
+            $writer = new Writer;
+            if($writer->checkWriter($email, $password)){
+                RequirePage::redirect('text');
             }else{
-                RequirePage::redirect('login');
+                Twig::render('login.php', ["errors"=>"username and/or password don't match", "data"=>$_POST]);
             }
 
             //RequirePage::redirect('user/create');

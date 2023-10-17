@@ -19,6 +19,7 @@
 
     <input type="hidden" name="date" value="{{ 'now'|date('Y-m-d H:i:s') }}">
     <input type="hidden" name="id" value="{{ data.id }}">
+    <input type="hidden" name="writer_id" value="{{ data.writer_id }}">
     <input type="hidden" name="lastKeywords" value="{{ data.lastKeywords }}">
     <input type="hidden" name="currentPage" value="text-edit.php">
     <input type="submit" value="save">

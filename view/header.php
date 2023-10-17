@@ -8,13 +8,17 @@
     <link rel="stylesheet" href="{{path}}assets/css/main.css">
 </head>
 <body>
-    <nav>
+    <nav>     
+        <a class="nav-link texts" href="{{path}}text">see all the texts</a>     
+    {% if guest %}
+        <a class="nav-link writers" href="{{path}}writer/create">join our community</a>
+        <a class="nav-link writers" href="{{path}}login">Login</a>
+    {% else %}
         <a class="nav-link writers" href="{{path}}writer">show all writers</a>
-        <a class="nav-link writers" href="{{path}}writer/create">create a writer</a>
         <a class="nav-link texts" href="{{path}}text/create">write something</a>
-        <a class="nav-link texts" href="{{path}}text">see all the texts</a>
-        <a class="nav-link writers" href="{{path}}user/create">join our community<a>
-        <a class="nav-link writers" href="{{path}}login">Login<a>
-        <a class="nav-link writers" href="{{path}}login/logout">Log out<a>
+        <a class="nav-link writers" href="{{path}}login/logout">Log out</a>
+    {% endif %}
+
     </nav>
+    <p>Hello{{ " " ~ session.writer_firstName ~ " " ~ session.writer_lastName }},</p>
 <main>

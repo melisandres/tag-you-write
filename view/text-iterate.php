@@ -27,6 +27,7 @@
         <input type="text" name="keywords" value="{{ data.keywords }}"> 
     </label>
 
+    <input type="hidden" name="writer_id" value="{{ session.writer_id }}">
     <input type="hidden" name="date" value="{{ 'now'|date('Y-m-d H:i:s') }}">
     <input type="hidden" name="parent_id" value="{{ data.id }}">
     <input type="hidden" name="currentPage" value="text-iterate.php">

@@ -4,17 +4,8 @@
     <span class='error'>{{ errors|raw}}</span>
 {% endif %}
 
-<form action="{{path}}/text/store" method="post">
-
-    <label for="writer-select">writer:</label>
-    <select name="writer_id">
-        <option value="">...write as:</option>
-        {% for writer in writers %}
-            <option value="{{ writer.id }}">{{ writer.firstName }}  {{ writer.lastName }}</option>
-        {% endfor %}
-    </select>
-
-
+<form action="{{path}}text/store" method="post">
+    
     <label>title
         <input type="text" name="title" value={{data.text}}>
     </label>
@@ -25,6 +16,7 @@
         <input type="text" name="keywords" value={{data.keywords}}>
     </label>
 
+    <input type="hidden" name="writer_id" value="{{ session.writer_id }}">
     <input type="hidden" name="date" value="{{ 'now'|date('Y-m-d H:i:s') }}">
     <input type="hidden" name="currentPage" value="text-create.php">
 
