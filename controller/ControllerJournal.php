@@ -11,8 +11,6 @@ class ControllerJournal extends Controller{
     }
     public function addToJournal(){
         $ip = $_SERVER['REMOTE_ADDR'];
-
-/*         $page = "uri: ".$_SERVER["REQUEST_URI"]." url: ".$_SERVER["REDIRECT_URL"]; */
         
         $page = $_SERVER["REDIRECT_URL"];
 
