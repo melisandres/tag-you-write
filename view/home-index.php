@@ -1,5 +1,6 @@
 {{ include('header.php', {title: 'Welcome'})}}
 {# comments #}
+    <p>{{message}}</p>
     <h1>collaborative writing</h1>
     <p>Add a few words to someone else's.</p>
     <p>Write a sentence, and see it develop, grow legs.</p>

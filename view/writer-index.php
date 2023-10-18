@@ -4,7 +4,7 @@
         <tr>
             <th>first name</th>
             <th>last name</th>
-            {% if session.privilege_id == 1 %}
+            {% if session.privilege == 1 %}
             <th>email<th>
             {% endif %}
         </tr>
@@ -14,7 +14,7 @@
                 <tr>
                     <td><a href="{{path}}writer/show/{{writer.id}}">{{ writer.firstName }}</a></td>
                     <td>{{ writer.lastName }}</td>
-                    {% if session.privilege_id == 1 %}
+                    {% if session.privilege == 1 %}
                     <td>{{ writer.email }}</td>
                     {% endif %}
                 </tr>

@@ -20,5 +20,8 @@
     {% endif %}
 
     </nav>
-    <p>Hello{{ " " ~ session.writer_firstName ~ " " ~ session.writer_lastName }},</p>
+    <p>
+        {% if not guest %} Hello{{ " " ~ session.writer_firstName ~ " " ~ session.writer_lastName }},
+        {% endif %}
+    </p>
 <main>
