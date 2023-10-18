@@ -16,12 +16,18 @@
     {% else %}
         <a class="nav-link writers" href="{{path}}writer">show all writers</a>
         <a class="nav-link texts" href="{{path}}text/create">write something</a>
+        {% if session.privilege == 1 %}
+            <a class="nav-link writers" href="{{path}}journal">journal</a>
+        {% endif %}
         <a class="nav-link writers" href="{{path}}login/logout">Log out</a>
     {% endif %}
 
+
+
     </nav>
     <p>
-        {% if not guest %} Hello{{ " " ~ session.writer_firstName ~ " " ~ session.writer_lastName }},
+        {% if not guest %} 
+            Hello{{ " " ~ session.writer_firstName ~ " " ~ session.writer_lastName }},
         {% endif %}
     </p>
 <main>

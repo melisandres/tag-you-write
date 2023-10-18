@@ -47,6 +47,7 @@ class Writer extends Crud{
                 //if I use a user, all of this will be in the user controller etc...
                 $_SESSION['writer_firstName'] = $writer['firstName'];
                 $_SESSION['writer_lastName'] = $writer['lastName'];
+                $_SESSION['writer_userName'] = $writer['email'];
                 $_SESSION['fingerPrint'] = md5($_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR']);
                 /* RequirePage::redirect('client'); */
                 return true;

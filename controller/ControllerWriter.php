@@ -6,7 +6,7 @@ RequirePage::model('Privilege');
 class ControllerWriter extends Controller{
 
     public function index(){
-        //this is where you are blocking access... 
+        //block access to guests... 
         CheckSession::sessionAuth();
 
         $writer = new Writer;
@@ -17,6 +17,9 @@ class ControllerWriter extends Controller{
     public function create(){
         //this should not be available if you 
         //are logged in already
+        //TODO: check if this is the best way to check...
+        //you could build another CheckSession::sessionAuth, that
+        //basically does the opposite... it would live better there.
         if(isSet($_SESSION['fingerPrint'])){
             Twig::render('home-error.php', ['message'=> "You already seem to have an account ;P"]);
             return;
