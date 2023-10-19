@@ -2,6 +2,7 @@
 
 RequirePage::model('Writer');
 RequirePage::model('Privilege');
+RequirePage::library('Email');
 
 class ControllerWriter extends Controller{
 
@@ -27,6 +28,7 @@ class ControllerWriter extends Controller{
 
         $privilege = new Privilege;
         $select = $privilege->select();
+
         Twig::render('writer-create.php', ['privilege' => $select]);
     }
 
@@ -56,6 +58,10 @@ class ControllerWriter extends Controller{
         $passwordHash = password_hash($password, PASSWORD_BCRYPT, $options);
         $_POST['password']= $passwordHash;
         $insert = $writer->insert($_POST);
+        //it shouldn't be here, but it's easier to put it here
+        //for now
+        $email = new Email;
+        $email->welcome($_POST['email']);
         RequirePage::redirect('writer');
     }
 

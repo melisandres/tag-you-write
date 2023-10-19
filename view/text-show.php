@@ -16,6 +16,7 @@
     <form action="{{path}}text/delete" method="POST">
         <input type="hidden" name="id" value="{{ text.id }}" >
         <input type="hidden" name="parent_id" value="{{ text.parent_id}}">
+        <input type="hidden" name="writer_id" value="{{ text.writer_id}}">
         {% if isParent or session.writer_id != text.writer_id %}
         <input type="submit" disabled="true" value="delete" title="Can not be deleted. Other texts iterate on it.">
         {% else %}

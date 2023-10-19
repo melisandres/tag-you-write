@@ -278,7 +278,8 @@ class ControllerText extends Controller{
         //block the functionality if the writer 
         //logged in is not this text's writer
         if($_POST['writer_id'] !== $_SESSION['writer_id']){
-            Twig::render('home-error.php', ['message'=> "You can't edit another writer's text. Try iterating instead."]);
+
+            Twig::render('home-error.php', ['message'=> "You can't delete another writer's text."]);
             return;
         }
 
