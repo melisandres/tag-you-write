@@ -1,122 +1,26 @@
-*{
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+/* atoms: small details */
+@import url(./atoms/buttons.css);
+@import url(./atoms/contributed.css);
+@import url(./atoms/links.css);
+@import url(./atoms/unreads.css);
 
-input,textarea{
-    display: block;
-    margin-top: 5px;
-    margin-bottom: 35px;
-}
+/* cards: repeated structures */
+@import url(./cards/story.css);
 
-label{
-    display: block;
-}
+/* elements: elements that reoccur */
+@import url(./elements/footer.css);
+@import url(./elements/forms.css);
+@import url(./elements/modal.css);
+@import url(./elements/nav.css);
+@import url(./elements/tables.css);
+@import url(./elements/showcase.css);
 
-select{
-    margin-bottom: 35px;
-}
+/* general: a catch-all  */
+@import url(./general/general.css);
+@import url(./general/variables.css);
 
-nav{
-    max-width: 100vw;
-    display: flex;
-    justify-content: center;
-    background-color: black;
-}
+/* layouts: grids, flexboxes, and other visualizations */
+@import url(./layouts/tree.css);
+@import url(./layouts/shelf.css);
+@import url(./layouts/stories.css);
 
-body{
-    display: flex;
-    flex-direction: column;
-    font-size: 25px;
-    min-height: 100vh;
-}
-
-main{
-    min-height: 100%;
-    flex-grow: 1;
-}
-
-footer{
-    display: flex;
-    align-items: center;
-    background-color: black;
-    color: white;
-    justify-content: center;
-    min-width: 100vw;
-
-}
-
-td, th, tr, form, textarea, h2, h1, p{
-    padding:20px;
-}
-
-.very-small{
-    font-size: 15px;
-    display: block;
-    max-width: 40ch;
-    color: rgb(139, 7, 47);
-}
-
-th{
-    text-align: left;
-}
-
-.author, .title{
-    color: hotpink;
-}
-
-.keyword{
-    display: inline;
-    padding:10px;
-    padding-left:20px;
-    font-size: 15px;
-    color:tomato;
-}
-
-.keyword::before{
-    content:"-"
-}
-
-input[type="submit"]{
-    padding: 10px;
-    margin: 0;
-}
-
-
-
-a {
-    text-decoration: none;
-    font-family: 'Courier New', Courier, monospace;
-    color: purple;
-}
-
-a:hover{
-    color: rgb(40, 8, 40);
-    font-weight: 500;
-    text-decoration: underline;
-}
-
-a:visited{
-    color: rgba(191, 145, 191, 0.401);
-}
-
-a.nav-link{
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 20px;
-    padding:15px;
-    color: white;
-    text-decoration: none;
-    max-width: 150px;
-    border-bottom: black solid 3px;
-}
-
-
-a.nav-link:hover{
-    border-bottom: hotpink solid 3px;
-    color: pink;
-}
-
-.error{
-    color: tomato;
-    }

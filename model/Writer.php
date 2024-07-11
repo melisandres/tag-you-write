@@ -15,6 +15,23 @@ class Writer extends Crud{
                         'privilege_id'
                         ];
 
+
+    public function writerExists($email){
+
+        $sql = "SELECT * FROM $this->table WHERE email = :$email";
+
+        $stmt = $this->prepare($sql);
+        $stmt->bindValue(":$email", $email);
+        $stmt->execute();
+
+        $count = $stmt->rowCount();
+        if($count == 1){
+            return $stmt->fetch();
+        }else{
+            return false;
+        }  
+    }
+
     public function checkWriter($email, $password){
         $sql = "SELECT * FROM $this->table WHERE email = ?";
         $stmt = $this->prepare($sql);

@@ -1,0 +1,111 @@
+/* this is the dark grey background */
+.modal-background{
+    position: fixed; /* Fixed positioning */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%; /* Adjust as needed */
+    background-color: rgba(0, 0, 0, 0.35); /* Semi-transparent background */
+    z-index: 10; /* Ensure modal appears above other elements */
+}
+
+/* this is the container with tab/buttons and paper */
+.modal-with-btns{
+    width: 80%;
+    margin: 20% auto;
+    justify-content: center;
+    display:flex;
+}
+
+/* this is the buttons area -- the close button is always there */
+
+.modal-btns{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: space-between;
+}
+
+.modal-btns .close-modal{
+    font-family: math;
+    border: none;
+    width: 47px;
+    height: 42px;
+    background: #f2f47be6;
+    font-size: 44px;
+    font-weight: 100;
+    line-height: 0;
+    margin-top: 7px;
+    cursor: pointer;
+}
+
+/* an area just for the buttons that are inserted dynamically */
+.modal-dynamic-btns{
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 50%;
+}
+
+.modal-btns .iterate{
+    background: #99ededea;
+    width: 49px;
+    height: 43px;
+    border: none;
+    cursor: pointer;
+}
+
+.iterate svg {
+    fill: currentColor;
+    width: 37px; /* Adjust size as needed */
+    height: 37px; /* Adjust size as needed */
+}
+
+
+.modal-btns .vote{
+    background: #ff9df5eb;
+    width: 49px;
+    height: 43px;
+}
+
+/* this is the "paper" area */
+.modal{
+    background: #FFFCF3;
+    box-shadow: -1px 1px 10px 2px rgba(0, 0, 0, 0.07), 1px 1px 50px 1px rgba(255, 225, 120, 0.25) inset;
+    /* margin: 15% auto; */
+    padding: 25px;
+    width: 60%; /* Adjust width as needed */
+}
+
+.iterate-form{
+    padding: 0;
+}
+
+/* this is everything on the "paper" */
+.modal-dynamic-content{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.modal-dynamic-content .headline{
+    text-align: center;
+    font-weight: 100;
+    font-size: 23px;
+    padding: 0;
+}
+
+.modal-dynamic-content .author{
+    text-align: center;
+    font-size: 12px;
+    font-weight: 100;
+    color: rgb(59, 57, 57);
+}
+
+.modal-dynamic-content p{
+    font-size: 15px;
+    font-weight: 100;
+    color: black; 
+    padding: 0;
+    padding-bottom: 10px;
+}
+

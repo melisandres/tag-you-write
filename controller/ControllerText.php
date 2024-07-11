@@ -10,14 +10,131 @@ class ControllerText extends Controller{
 
     //show the page with all the texts
     public function index(){
-        //TO-DO: available to all
-        //TO-DO: show the texts writen by the person logged-in
-        //differently--if a writer is logged in. 
         $text = new Text;
         $select = $text->selectTexts();
-        Twig::render('text-index.php', ['texts'=>$select]);
+
+        // Get only the parent texts
+        $texts = [];
+        foreach ($select as $textNode){
+            if ($textNode['parent_id'] == null){
+                $texts[] = $textNode;
+            }
+        }
+
+        // Get the current user ID from the session
+        $currentUserId = $_SESSION['writer_id'] ?? null;
+
+        // Build the full hierarchy
+        $hierarchy = $this->buildHierarchy($select, 'parent_id');
+
+        // Check contributions and flag root texts
+        foreach ($texts as &$rootText) {
+            $rootText['hasContributed'] = $this->hasContributed($rootText['id'], $hierarchy, $currentUserId);
+        }
+        
+        // Send the JSON data to the front end
+        //Twig::render('text-index.php', ['texts' => $hierarchy, 'hierachyText' => $jsonData]);
+        Twig::render('text-index.php', ['texts' => $texts]);
     }
 
+/*     public function buildHierarchy($array, $parentId = null) {
+        $hierarchy = [];
+    
+        foreach ($array as $element) {
+            if ($element['parent_id'] == $parentId) {
+                $element['children'] = $this->buildHierarchy($array, $element['id']);
+                $hierarchy[] = $element;
+            }
+        }
+    
+        return $hierarchy;
+    } */
+
+    private function hasContributed($textId, $hierarchy, $currentUserId) {
+        // Helper function to recursively check contributions
+        $stack = [$this->findTextById($textId, $hierarchy)];
+        while (!empty($stack)) {
+            $node = array_pop($stack);
+            if ($node['writer_id'] == $currentUserId) {
+                return true;
+            }
+            if (!empty($node['children'])) {
+                foreach ($node['children'] as $child) {
+                    $stack[] = $child;
+                }
+            }
+        }
+        return false;
+    }
+
+    private function findTextById($textId, $hierarchy) {
+        foreach ($hierarchy as $node) {
+            if ($node['id'] == $textId) {
+                return $node;
+            }
+            if (!empty($node['children'])) {
+                $result = $this->findTextById($textId, $node['children']);
+                if ($result) {
+                    return $result;
+                }
+            }
+        }
+        return null;
+    }
+
+
+    //If you want ALL the data in a hierarchy, $targettedIdType will be 'parent_id', no third arg.
+    //If you want just one tree, $targettedIdType will be 'id', third arg will be the root id
+    private function buildHierarchy($array, $targettedIdType, $targetId = null) {
+        $hierarchy = [];
+    
+        foreach ($array as $element) {
+            if ($element[$targettedIdType] == $targetId) {
+                $element['children'] = $this->buildHierarchy($array, 'parent_id', $element['id']);
+                $hierarchy[] = $element;
+            }
+        }
+    
+        return $hierarchy;
+    }
+
+    // An end point from which you can receive a single tree from the db
+    public function getTree($id = null){
+        $text = new Text;
+        $select = $text->selectTexts();
+
+        // Get the current user Id
+        $currentUserId = $_SESSION['writer_id'] ?? null;
+
+        // Get the requested tree
+        $tree = $this->buildHierarchy($select, 'id', $id);
+
+        // Add permissions to each node iteratively
+        $this->addPermissions($tree[0], $currentUserId);
+
+        // Convert the hierarchical array to JSON format
+        $jsonData = json_encode($tree);
+
+        return $jsonData;
+    }
+
+    // Recursive function to add permissions to each node
+    private function addPermissions(&$node, $currentUserId) {
+        $isParent = !empty($node['children']);
+
+        $node['permissions'] = [
+            'canEdit' => !$isParent && $currentUserId === $node['writer_id'],
+            'canDelete' => !$isParent && $currentUserId === $node['writer_id'],
+            'canIterate' => $currentUserId !== null && $currentUserId !== $node['writer_id'],
+            'isMyText' => $currentUserId === $node['writer_id']
+        ];
+
+        if (!empty($node['children'])) {
+            foreach ($node['children'] as &$child) {
+                $this->addPermissions($child, $currentUserId);
+            }
+        }
+    }
 
     //show the page from which someone can write a new text
     //it will be important to get the writer id here, so 
@@ -96,8 +213,8 @@ class ControllerText extends Controller{
     //iterated on), and delete(if this is your text 
     //and it has never been iterated on)
     public function show($id = null){
-        //TO-DO: if id = null or if it doesn't exist
-        //in the database, you need to 
+        //TODO: if id = null or if it doesn't exist
+        //in the database, you need to... 
         $text = new Text;
         $selectId = $text->selectIdText($id);
 
@@ -133,7 +250,7 @@ class ControllerText extends Controller{
         $keywords = $text->selectKeyword($_POST['id']);
 
         //block the page if the writer logged in is not this text's writer
-        if($selectId['writer_id'] !== $_SESSION['writer_id']){
+        if($selectId['writer_id'] != $_SESSION['writer_id']){
             Twig::render('home-error.php', ['message'=> "You can't edit another writer's text. Try iterating instead."]);
             return;
         }
@@ -177,7 +294,7 @@ class ControllerText extends Controller{
 
         //block the functionality if the writer 
         //logged in is not this text's writer
-        if($_POST['writer_id'] !== $_SESSION['writer_id']){
+        if($_POST['writer_id'] != $_SESSION['writer_id']){
             Twig::render('home-error.php', ['message'=> "You can't edit another writer's text. Try iterating instead."]);
             return;
         }
@@ -277,7 +394,7 @@ class ControllerText extends Controller{
 
         //block the functionality if the writer 
         //logged in is not this text's writer
-        if($_POST['writer_id'] !== $_SESSION['writer_id']){
+        if($_POST['writer_id'] != $_SESSION['writer_id']){
 
             Twig::render('home-error.php', ['message'=> "You can't delete another writer's text."]);
             return;

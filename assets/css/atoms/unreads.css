@@ -1,0 +1,4 @@
+.unreads{
+    /* https://getcssscan.com/css-box-shadow-examples by Aligator */
+    box-shadow: rgb(244, 218, 90, 1) -1px 0px, white -6px 0px, rgb(244, 218, 90, 0.7) -7px 0px, white -12px 0px, rgb(244, 218, 90, 0.4) -13px 0px, white -18px 0px, rgb(244, 218, 90, 0.1) -19px 0px;
+}

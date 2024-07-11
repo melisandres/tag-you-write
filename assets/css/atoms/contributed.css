@@ -1,0 +1,31 @@
+.contributed::before {
+    content: "☆ ";
+    font-weight: 100;
+    color: purple;
+}
+
+.contributed {
+    position: relative; /* Ensure that the tooltip is positioned relative to this element */
+}
+
+.contributed::after {
+    content: "☆ contributor"; /* Tooltip content */
+    position: absolute;
+    left: 20px; /* Adjust position as needed */
+    top: 0;
+    background-color: rgba(0, 0, 0, 0.75);
+    font-size: 12px;
+    font-weight: 100;
+    color: white;
+    padding: 2px 6px;
+    white-space: nowrap;
+    opacity: 0; /* Hide the tooltip initially */
+    transition: opacity 0.3s ease-in-out; /* Smooth transition */
+    pointer-events: none; /* Prevent the tooltip from capturing pointer events */
+}
+
+.contributed:hover::after {
+    opacity: 1; /* Show the tooltip on hover */
+    transition-delay: 8s; 
+    transition: opacity 3s ease-in-out; /* Smooth transition */
+}

@@ -1,0 +1,78 @@
+/* this is used in the text-index page where all the stories are listed... these are the styles for each individual story */
+.story {
+    display: grid;
+    grid-template-columns: 45% auto;
+    grid-template-rows: auto auto;
+    box-shadow: 1px 1px 30px 3px rgba(255, 238, 151, 0.40);
+    /* box-shadow: #ffee977e 0px 0.1px 39px; */
+    background-color: white;
+}
+
+.story-btns{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;    
+}
+
+.story-has-showcase .story-btns{
+    grid-column-start: span 2;
+}
+
+.story-title{
+    display: flex;
+    margin-left: 20px;
+    align-items: center;
+    height: 98%;
+}
+
+.story-title h2 {
+    padding: 20px 10px 20px 10px;
+    font-size: clamp(0.8rem, 2vw, 2rem); 
+}
+
+.story-title:hover{
+    background-image: radial-gradient(circle, rgba(255, 253, 132, 0.20) 0%, rgba(244, 218, 90, 0) 90%);
+    cursor: pointer;
+}
+
+.story-writing{
+    margin: 20px 10px 30px 10px;
+    overflow: hidden;
+    grid-column-start: span 2;
+}
+
+.story-writing>p{
+    padding:0;
+    font-size: 12px;
+    max-height: 30px;
+    overflow: hidden; /* Hide overflowing content */
+    text-overflow: ellipsis; /* Show ellipsis for overflow */
+}
+
+@media screen and (min-width: 600px) {
+    .story{
+        grid-template-rows: auto;
+        grid-template-columns: 20% 20% auto;
+        gap: 5px;
+        width: 100%;
+    }
+
+    .story-writing{
+        margin-top: auto;
+        margin-bottom: auto;
+        margin-right: 20px;
+        overflow: hidden;
+        grid-column-start: span 1;
+    }
+    
+    .story-writing>p{
+        padding:0;
+        font-size: 12px;
+        max-height: 30px;
+        overflow: hidden; /* Hide overflowing content */
+        text-overflow: ellipsis; /* Show ellipsis for overflow */
+    }
+
+    .story-has-showcase .story-btns{
+        grid-column-start: span 1;
+    }
+}

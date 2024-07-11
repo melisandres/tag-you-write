@@ -12,6 +12,10 @@
      */
 
     class Validation {
+        public $name;
+        public $value;
+        public $file;
+        /**TODO: all values need to be initialised here */
 
         /**
          * @var array $patterns

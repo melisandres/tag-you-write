@@ -1,0 +1,29 @@
+/* Custom styles for the tree */
+#showcase.with-tree{
+    height: 300px;
+}
+
+.node circle {
+    fill: pink;
+    stroke: palevioletred;
+    stroke-width: 1px;
+    cursor: pointer; 
+}
+
+.node-title {
+    cursor: pointer;
+}
+
+.node text {
+    font: 14px sans-serif;
+    cursor: pointer; 
+}
+.node .text-by{
+    font: 10px sans-serif;
+}
+
+.link {
+    fill: none;
+    stroke: #ccc;
+    stroke-width: 1px;
+}

@@ -1,0 +1,8 @@
+.stories{
+    font-family: livvic;
+    font-weight: 100;
+    /* display: flex; */
+    flex-direction: column;
+    gap: 0px;
+    flex-wrap: wrap;
+}

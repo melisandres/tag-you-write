@@ -1,0 +1,22 @@
+nav{
+    max-width: 100vw;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    background-color: black;
+}
+
+a.nav-link{
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 20px;
+    padding:15px;
+    color: white;
+    text-decoration: none;
+    max-width: 150px;
+    border-bottom: black solid 3px;
+}
+
+a.nav-link:hover{
+    border-bottom: hotpink solid 3px;
+    color: pink;
+}

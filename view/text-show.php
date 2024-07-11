@@ -12,6 +12,7 @@
 
     <p><strong>text: </strong>{{ text.writing }}</p>
 
+   <!--  The buttons -->
     {% if session.writer_id == text.writer_id %}
     <form action="{{path}}text/delete" method="POST">
         <input type="hidden" name="id" value="{{ text.id }}" >

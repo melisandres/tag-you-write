@@ -33,6 +33,10 @@ class ControllerWriter extends Controller{
     }
 
     public function store(){
+        //TODO: I think the privileges are being set by a hidden selectbox... this is not secure. But if the priveileges don't give access to anything important... you might be able to do it that way
+        $privileges = '';
+        $errors = "";
+
         //block access without a post... 
         if($_SERVER["REQUEST_METHOD"] !== "POST"){
             RequirePage::redirect('user/create');
@@ -50,6 +54,17 @@ class ControllerWriter extends Controller{
         extract($_POST);
         unset($_POST['currentPage']);
 
+        //check if the user exists already
+        $writer = new Writer;
+        $answer = $writer->selectId($email, "email");
+
+        //I'm confused... maybe this was the begining of a solution that was not well implemented? 
+        if($answer){
+            $errors = "We already have a user registered with that email address.";
+            Twig::render("writer-create.php", ['privilege' => $privileges, 'errors' => $errors, 'data' => $_POST]);
+            exit();
+        }
+
         $writer = new Writer;
         $options =[
             'cost'=>10,
@@ -58,10 +73,14 @@ class ControllerWriter extends Controller{
         $passwordHash = password_hash($password, PASSWORD_BCRYPT, $options);
         $_POST['password']= $passwordHash;
         $insert = $writer->insert($_POST);
-        //it shouldn't be here, but it's easier to put it here
+
+        //it's easier to put it here
         //for now
         $email = new Email;
-        $email->welcome($_POST['email']);
+        $name = $firstName . " " .$lastName;
+        $subject = 'Welcome to the Tag You Write family';
+        $message = 'Welcome ' . $name . '! Welcome! Tag you write is an experiment. I\'m hoping it will be a fun way to write small pieces collaboratively. If you have any issues with your account, or any feedback, just hit "reply". Thanks for participating!';
+        $email->welcome($_POST['email'], $name, $subject, $message);
         RequirePage::redirect('writer');
     }
 
@@ -163,8 +182,8 @@ class ControllerWriter extends Controller{
         if($val->isSuccess()){
             //continue
         }else{
-
             $errors = $val->displayErrors();
+            //why are privilges being accessed here?
             $privilege = new Privilege;
             $privileges = $privilege->select();
             Twig::render($currentPage, ['privilege' => $privileges, 'errors' => $errors, 'data' => $_POST]);

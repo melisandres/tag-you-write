@@ -1,0 +1,8 @@
+#showcase{
+    margin: auto;
+    grid-column-start: span 3;
+    border:#ccc solid 1px;
+    overflow: hidden;
+    width: 90%;
+    margin-bottom: 40px;
+}

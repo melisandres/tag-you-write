@@ -1,0 +1,20 @@
+.story-btn:hover{
+    background-image: radial-gradient(circle, rgba(255, 253, 132, 0.501) 0%, rgba(244, 218, 90, 0) 70%);
+    cursor: pointer;
+}
+
+.story-btn{
+    align-self: center;
+    background-color: white;
+    width: 40px;
+    height: 40px;
+    border: none;
+}
+
+.bookmark-btn svg path {
+    fill:#ffc44e54;
+}
+
+.bookmark-btn {
+    align-self: auto; /* align top */
+}

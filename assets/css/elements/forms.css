@@ -1,0 +1,18 @@
+input,textarea{
+    display: block;
+    margin-top: 5px;
+    margin-bottom: 35px;
+}
+
+label{
+    display: block;
+}
+
+select{
+    margin-bottom: 35px;
+}
+
+input[type="submit"]{
+    padding: 10px;
+    margin: 0;
+}

@@ -1,0 +1,10 @@
+a {
+    text-decoration: none;
+    font-family: 'Livvic', Courier, monospace;
+    color: grey;
+    font-weight: 100;
+}
+
+a:visited{
+    color: rgba(191, 145, 191, 0.401);
+}
