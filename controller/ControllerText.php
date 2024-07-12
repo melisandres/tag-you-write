@@ -125,8 +125,11 @@ class ControllerText extends Controller{
         $node['permissions'] = [
             'canEdit' => !$isParent && $currentUserId === $node['writer_id'],
             'canDelete' => !$isParent && $currentUserId === $node['writer_id'],
+            //TODO: you may want to make a player vote before they can make a second or third iteration... 
             'canIterate' => $currentUserId !== null && $currentUserId !== $node['writer_id'],
-            'isMyText' => $currentUserId === $node['writer_id']
+            'isMyText' => $currentUserId === $node['writer_id'],
+            //TODO: there needs to be more logic around ability to vote. 
+            'canVote' => $currentUserId !== $node['writer_id'] 
         ];
 
         if (!empty($node['children'])) {
@@ -164,6 +167,12 @@ class ControllerText extends Controller{
 
         $text = new Text;
         $keyWord = new Keyword;
+
+        //TODO: there may be two different types of store... 1.first text 2.iteration
+        //consider if they are differnt enough to call two different functions. 
+        //if only certain values can be saved in one and others in the other...
+        //you may want to filter down your $_POST and send only the acceptable values to the model
+        //just in case someone is bypassing your frontend, and adding form fields, for instance.
         
         //validate the $_POST
         $this->validateText($_POST);
@@ -174,6 +183,11 @@ class ControllerText extends Controller{
         //remove the keywords and redirectPage reference from POST
         unset($_POST['keywords']);
         unset($_POST['currentPage']);
+
+        //remove the other extra values from POST so that you can send off your POST to insert
+        unset($_POST['firstName']);
+        unset($_POST['lastName']);
+        unset($_POST['previous_title']);
 
         //send what's left of the POST (text info) to CRUD
         $textIdFromInsert = $text->insert($_POST);
@@ -255,13 +269,16 @@ class ControllerText extends Controller{
             return;
         }
 
-        //if the text to be updated has any children...
-        //it should not be possible to update it. 
-        $select = $text->selectId($_POST['id'], 'parent_id');
+        //in prior logic, the user could not edit their text if it had children... but
+        //I'm changing the logic of editing, for now... so that a user can ALWAYS edit--
+        //but in editing, ALL a user can do is leave a note, or edit the note. 
+
+/*         $select = $text->selectId($_POST['id'], 'parent_id');
         if($select){
             Twig::render('home-error.php', ['message'=> "Another writer has iterated on this text, and therefore it can no longer be deleted. Sorry."]);
             return;
-        }
+        } */
+
 
         //prepare the keywords
         $keywordString = "";
@@ -315,7 +332,13 @@ class ControllerText extends Controller{
         $prep = new Prep;
 
         //validate the $_POST
-        $this->validateText($_POST);
+        $this->validateNote($_POST);
+
+
+        //although I am not keeping the functionality of editing keywords,
+        //I'm keeping the code here, because I remember it was a little 
+        //complicated to work out, and ultimately, editing keywords is fine--
+        //I could decide to make the functionality available again.
 
         //get the new keywords from POST, copy, and remove
         $keywords = $_POST['keywords'];
@@ -327,7 +350,15 @@ class ControllerText extends Controller{
         unset($_POST['lastKeywords']); 
 
         //send what's left of the POST (text info) to CRUD
-        $update = $text->update($_POST);
+        //if you want to allow a user to edit EVERYTHING:
+
+        //$update = $text->update($_POST);
+
+        //but for now, you are only allowing a user to edit the NOTE:
+        $updateNote['note'] = $_POST['note'];
+        $updateNote['note_date'] = $_POST['note_date'];
+        $updateNote['id'] = $_POST['id'];
+        $update = $text->update($updateNote);
 
         //using class Prep to prepare keywords arrays... 
         //words come in as strings, come out a clean arrays
@@ -450,6 +481,9 @@ class ControllerText extends Controller{
         //to the page legibly...
         $data = $selectId;
         $data["keywords"] = $cleanKeywordString;
+        //to deal with the previous title and the title of the iteration separately
+        $data["previous_title"] = $data["title"];
+        $data["title"] = "";
 
         //send it all to the form
         Twig::render('text-iterate.php', ['data' => $data]);
@@ -462,7 +496,7 @@ class ControllerText extends Controller{
 
         //$val->name('date')->value($data["date"])->pattern('date_ymd');
         $val->name('writing')->value($data["writing"])->required()->max(65000);
-        $val->name('title')->value($data["title"])->max(75);
+        $val->name('title')->value($data["title"])->required()->max(75);
         $val->name('keywords')->value($data["keywords"])->pattern('keywords')->max(75);
         //TO-DO: eventually, add the logic of word-count... this will count
         //and store the previous word count (or start at zero), and send that amount to 
@@ -481,6 +515,23 @@ class ControllerText extends Controller{
             Twig::render($data["currentPage"], ['data' => $data, 'errors' => $errors]);
             exit();
         };
+    }
+
+    public function validateNote($data){
+        RequirePage::library('Validation');
+        $val = new Validation;
+        $val->name('note')->value($data["note"])->max(500);
+
+        if($val->isSuccess()){
+            //if this is successful, continue the code
+            //so... do nothing
+        }else{
+            $errors = $val->displayErrors();
+            //send it to the form
+            Twig::render($data["currentPage"], ['data' => $data, 'errors' => $errors]);
+            exit();
+        };
+
     }
 }
 

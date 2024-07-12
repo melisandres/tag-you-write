@@ -29,6 +29,14 @@ export class Modal {
           </button>
         </form>
       ` : ''}
+      ${data.permissions.canEdit ? `
+        <form action="${this.path}text/edit" method="POST" class="edit-form">
+          <input type="hidden" name="id" value="${data.id}">
+          <button type="submit" class="edit">
+            ${SVGManager.editSVG}
+          </button>
+        </form>
+      ` : ''}
     `;
 
     }

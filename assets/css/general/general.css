@@ -16,7 +16,7 @@ main{
     flex-grow: 1;
 }
 
-td, th, tr, form, textarea, h3, h2, h1, p, ul{
+td, th, tr, form, input, textarea, h3, h2, h1, p, ul{
     padding:20px;
 }
 

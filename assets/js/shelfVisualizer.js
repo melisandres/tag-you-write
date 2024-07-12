@@ -44,6 +44,7 @@ export class ShelfVisualizer {
         <div class="writing hidden">
           <div class="node-buttons">
             ${node.permissions.canIterate ? this.getIterateForm(node) : ''}
+            ${node.permissions.canEdit ? this.getEditForm(node) : ''}
           </div>
           <p>
             ${node.writing}
@@ -64,16 +65,7 @@ export class ShelfVisualizer {
     return drawerHTML;
   }
 
-/*   getEditForm(node) {
-    return `
-      <form action="${this.path}text/edit" method="POST">
-        <input type="hidden" name="id" value="${node.id}">
-        <input type="hidden" name="parent_id" value="${node.parent_id}">
-        <input type="submit" value="Edit">
-      </form>
-    `;
-  }
-
+  /*
   getDeleteForm(node) {
     const disabled = node.permissions.isParent || node.permissions.canIterate;
     return `
@@ -94,6 +86,18 @@ export class ShelfVisualizer {
         ${SVGManager.iterateSVG}
       </button>
     </form>
+    `;
+  }
+
+  getEditForm(node) {
+    return `
+      <form action="${this.path}text/edit" method="POST">
+        <input type="hidden" name="id" value="${node.id}">
+        <input type="hidden" name="parent_id" value="${node.parent_id}">
+        <button type="submit" class="edit" value="Edit">
+          ${SVGManager.editSVG}
+        </button>
+      </form>
     `;
   }
 
@@ -118,7 +122,6 @@ export class ShelfVisualizer {
 
 
 
-/* ${node.permissions.canEdit ? this.getEditForm(node) : ''}
-${node.permissions.canDelete ? this.getDeleteForm(node) : ''}  */
+/*  ${node.permissions.canDelete ? this.getDeleteForm(node) : ''}  */
 
 

@@ -47,8 +47,8 @@
         </div>
     </div>
     <p>
-        {% if not guest %} 
+<!--         {% if not guest %} 
             Hello{{ " " ~ session.writer_firstName ~ " " ~ session.writer_lastName }},
-        {% endif %}
+        {% endif %} -->
     </p>
 <main>

@@ -24,6 +24,20 @@
     cursor: pointer;
 }
 
+.with-shelf button.edit{
+    width: 37px;
+    height: 37px;
+    background-color: rgba(238, 108, 108, 0.886);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.with-shelf button.edit svg{
+    width: 35px;
+    height: 40px;
+}
+
 .node-title h2 {
     margin: 0; /* Remove all margins */
     padding: 0; /* Remove all padding */

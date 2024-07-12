@@ -4,6 +4,10 @@ input,textarea{
     margin-bottom: 35px;
 }
 
+textarea, input{
+    width: 90%;
+}
+
 label{
     display: block;
 }

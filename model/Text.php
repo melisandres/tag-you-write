@@ -6,11 +6,14 @@ class Text extends Crud{
     public $table = 'text';
     public $primaryKey = 'id';
     public $fillable = ['id',
+                        'prompt',
                         'date',
                         'writing',
                         'writer_id',
                         'parent_id',
-                        'title'
+                        'title',
+                        'note',
+                        'note_date'
                         ];
 
     //returns all the  texts along with the name of the writer of the text

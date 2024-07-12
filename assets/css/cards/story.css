@@ -43,7 +43,7 @@
 .story-writing>p{
     padding:0;
     font-size: 12px;
-    max-height: 30px;
+    /* max-height: 30px; */
     overflow: hidden; /* Hide overflowing content */
     text-overflow: ellipsis; /* Show ellipsis for overflow */
 }
@@ -67,7 +67,7 @@
     .story-writing>p{
         padding:0;
         font-size: 12px;
-        max-height: 30px;
+        /* max-height: 30px; */
         overflow: hidden; /* Hide overflowing content */
         text-overflow: ellipsis; /* Show ellipsis for overflow */
     }

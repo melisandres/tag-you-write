@@ -46,6 +46,17 @@
     margin-bottom: 50%;
 }
 
+/* the buttons are currently all in forms, so you don't need to do fetches */
+.iterate-form, .edit-form{
+    padding: 0;
+}
+
+.iterate svg {
+    fill: currentColor;
+    width: 37px; /* Adjust size as needed */
+    height: 37px; /* Adjust size as needed */
+}
+
 .modal-btns .iterate{
     background: #99ededea;
     width: 49px;
@@ -54,10 +65,17 @@
     cursor: pointer;
 }
 
-.iterate svg {
+.edit svg {
     fill: currentColor;
-    width: 37px; /* Adjust size as needed */
-    height: 37px; /* Adjust size as needed */
+    width: 35px;
+    height: 55px;
+}
+
+.modal-btns .edit{
+    background-color: rgba(238, 108, 108, 0.886);
+    padding: 8px 15px 1px 7px;
+    border: none;
+    cursor: pointer;
 }
 
 
@@ -74,10 +92,6 @@
     /* margin: 15% auto; */
     padding: 25px;
     width: 60%; /* Adjust width as needed */
-}
-
-.iterate-form{
-    padding: 0;
 }
 
 /* this is everything on the "paper" */
