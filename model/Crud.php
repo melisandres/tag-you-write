@@ -35,7 +35,6 @@ abstract class Crud extends PDO{
     }
 
 
-
     public function insert($data, $keyWordInsert = false){
         $fieldName = implode(', ', array_keys($data));
         $fieldValue = ":".implode(', :', array_keys($data));
@@ -121,6 +120,95 @@ abstract class Crud extends PDO{
             return false;
         }
     }
+
+
+    // Select a row based on composite primary key
+    public function selectCompositeId($values) {
+        // Ensure the values contain all primary key fields
+        foreach ($this->primaryKey as $key) {
+            if (!isset($values[$key])) {
+                throw new Exception("Missing value for primary key $key.");
+            }
+        }
+
+        // Build the WHERE clause with the composite key
+        $whereClause = [];
+        foreach ($this->primaryKey as $key) {
+            $whereClause[] = "$key = :$key";
+        }
+        $whereClause = implode(" AND ", $whereClause);
+
+        $sql = "SELECT * FROM $this->table WHERE $whereClause";
+
+        $stmt = $this->prepare($sql);
+
+        // Bind values
+        foreach ($values as $key => $value) {
+            $stmt->bindValue(":$key", $value);
+        }
+        $stmt->execute();
+
+        $count = $stmt->rowCount();
+        if ($count == 1) {
+            return $stmt->fetch();
+        } else {
+            return false;
+        }
+    }
+
+    // Save a row with composite primary key
+    public function saveComposite($values) {
+        // Ensure values contain all primary key fields
+        foreach ($this->primaryKey as $key) {
+            if (!isset($values[$key])) {
+                throw new Exception("Missing value for primary key $key.");
+            }
+        }
+
+        $columns = implode(", ", array_keys($values));
+        $placeholders = implode(", ", array_map(function($key) { return ":$key"; }, array_keys($values)));
+        $updateClause = implode(", ", array_map(function($key) { return "$key = VALUES($key)"; }, array_keys($values)));
+
+        $sql = "INSERT INTO $this->table ($columns) VALUES ($placeholders)
+                ON DUPLICATE KEY UPDATE $updateClause";
+
+        $stmt = $this->prepare($sql);
+
+        // Bind values
+        foreach ($values as $key => $value) {
+            $stmt->bindValue(":$key", $value);
+        }
+
+        return $stmt->execute();
+    }
+
+    // Delete a row with composite primary key
+    public function deleteComposite($values) {
+        // Ensure values contain all primary key fields
+        foreach ($this->primaryKey as $key) {
+            if (!isset($values[$key])) {
+                throw new Exception("Missing value for primary key $key.");
+            }
+        }
+
+        $whereClause = [];
+        foreach ($this->primaryKey as $key) {
+            $whereClause[] = "$key = :$key";
+        }
+        $whereClause = implode(" AND ", $whereClause);
+
+        $sql = "DELETE FROM $this->table WHERE $whereClause";
+
+        $stmt = $this->prepare($sql);
+
+        // Bind values
+        foreach ($values as $key => $value) {
+            $stmt->bindValue(":$key", $value);
+        }
+
+        return $stmt->execute();
+    }
+
 }
 
 ?>

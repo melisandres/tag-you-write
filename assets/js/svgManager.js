@@ -146,7 +146,308 @@ export class SVGManager{
          font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif"
          id="text14">from the Noun Project</text>
       </svg>
-
       `;    
+  }
+
+  static get shelfSVG() {
+   return `
+      <svg
+         data-name="Слой 1"
+         viewBox="0 0 49.262329 46.120129"
+         x="0px"
+         y="0px"
+         version="1.1"
+         id="svg6"
+         sodipodi:docname="noun-menu-2723108.svg"
+         width="27"
+         height="27"
+         inkscape:version="1.3.2 (091e20e, 2023-11-25)"
+         xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+         xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+         xmlns="http://www.w3.org/2000/svg"
+         xmlns:svg="http://www.w3.org/2000/svg">
+      <defs
+         id="defs6" />
+      <sodipodi:namedview
+         id="namedview6"
+         pagecolor="#ffffff"
+         bordercolor="#000000"
+         borderopacity="0.25"
+         inkscape:showpageshadow="2"
+         inkscape:pageopacity="0.0"
+         inkscape:pagecheckerboard="0"
+         inkscape:deskcolor="#d1d1d1"
+         inkscape:zoom="1.888"
+         inkscape:cx="29.925847"
+         inkscape:cy="35.487288"
+         inkscape:window-width="1312"
+         inkscape:window-height="449"
+         inkscape:window-x="0"
+         inkscape:window-y="37"
+         inkscape:window-maximized="0"
+         inkscape:current-layer="svg6" />
+      <title
+         id="title1">view shelf</title>
+      <g
+         id="g5"
+         transform="translate(-20.366581,-26.9403)"
+         fill="#FFC34E"
+         >
+
+         <circle
+            stroke="FFC34E"
+            cx="26.428961"
+            cy="33.00256"
+            r="6.0622602"
+            id="circle1" />
+         <circle
+            cx="26.428961"
+            cy="50.000118"
+            r="6.0622602"
+            id="circle2" />
+         <circle
+            cx="26.428961"
+            cy="66.998047"
+            r="6.0623798"
+            id="circle3" />
+         <rect
+            x="34.561039"
+            y="32.50293"
+            width="35.067871"
+            height="1"
+            id="rect3" />
+         <rect
+            x="34.561039"
+            y="49.5"
+            width="35.067871"
+            height="1"
+            id="rect4" />
+         <rect
+            x="34.561039"
+            y="66.498047"
+            width="35.067871"
+            height="1"
+            id="rect5" />
+      </g>
+      <text
+         x="-20.366581"
+         y="88.0597"
+         fill="#000000"
+         font-size="5px"
+         font-weight="bold"
+         font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif"
+         id="text5">Created by Roman</text>
+      <text
+         x="-20.366581"
+         y="93.0597"
+         fill="#000000"
+         font-size="5px"
+         font-weight="bold"
+         font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif"
+         id="text6">from the Noun Project</text>
+      </svg>
+
+   `;
+  }
+
+  static get treeSVG() {
+   return `
+      <svg
+         version="1.1"
+         x="0px"
+         y="0px"
+         viewBox="0 0 71.599998 89.5"
+         xml:space="preserve"
+         id="svg2"
+         sodipodi:docname="noun-graph-theory-374731.svg"
+         width="30"
+         height="30"
+         inkscape:version="1.3.2 (091e20e, 2023-11-25)"
+         xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+         xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+         xmlns="http://www.w3.org/2000/svg"
+         xmlns:svg="http://www.w3.org/2000/svg"><defs
+         id="defs2" /><sodipodi:namedview
+         id="namedview2"
+         pagecolor="#ffffff"
+         bordercolor="#000000"
+         borderopacity="0.25"
+         inkscape:showpageshadow="2"
+         inkscape:pageopacity="0.0"
+         inkscape:pagecheckerboard="0"
+         inkscape:deskcolor="#d1d1d1"
+         inkscape:zoom="1.888"
+         inkscape:cx="35.752119"
+         inkscape:cy="57.20339"
+         inkscape:window-width="1312"
+         inkscape:window-height="449"
+         inkscape:window-x="0"
+         inkscape:window-y="37"
+         inkscape:window-maximized="0"
+         inkscape:current-layer="svg2" />
+            <title
+               id="title1">view tree</title>
+         <path
+         fill="#FFC34E"
+         d="M 56.9,41.6 C 50.3,41.6 44.7,46 42.8,51.9 L 26.7,48.5 c 0.1,-0.6 0.2,-1.2 0.2,-1.8 0,-5.3 -4.3,-9.6 -9.6,-9.6 -0.3,0 -0.7,0 -1,0.1 L 13,19.8 c 4.6,-0.9 8,-5 8,-9.8 C 21,4.5 16.5,0 11,0 5.5,0 1,4.5 1,10 c 0,5.5 4.5,10 10,10 0.4,0 0.8,0 1.3,-0.1 l 3.3,17.4 c -4.4,0.8 -7.8,4.7 -7.8,9.4 0,4.1 2.6,7.7 6.3,9 L 8.4,75.4 C 8,75.3 7.6,75.3 7.1,75.3 3.2,75.3 0,78.5 0,82.4 c 0,3.9 3.2,7.1 7.1,7.1 3.9,0 7.1,-3.2 7.1,-7.1 0,-3.2 -2.1,-5.9 -5,-6.8 L 14.8,56 c 0.8,0.2 1.6,0.3 2.5,0.3 4.4,0 8.1,-2.9 9.2,-7 l 16.1,3.4 c -0.3,1.2 -0.4,2.4 -0.4,3.6 0,8.1 6.6,14.7 14.7,14.7 C 65,71 71.6,64.4 71.6,56.3 71.6,48.2 65,41.6 56.9,41.6 Z"
+         id="path1" /><text
+         x="-14.2"
+         y="109.7"
+         fill="#000000"
+         font-size="5px"
+         font-weight="bold"
+         font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif"
+         id="text1">Created by Ecem Afacan</text><text
+         x="-14.2"
+         y="114.7"
+         fill="#000000"
+         font-size="5px"
+         font-weight="bold"
+         font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif"
+         id="text2">from the Noun Project</text></svg>
+      `;
+  }
+
+  static get voteSVG() {
+   return `
+      <svg
+         viewBox="0 0 38.000065 56"
+         x="0px"
+         y="0px"
+         version="1.1"
+         id="svg2"
+         sodipodi:docname="noun-vote-6099049.svg"
+         width="38.000065"
+         height="56"
+         inkscape:version="1.3.2 (091e20e, 2023-11-25)"
+         xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+         xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+         xmlns="http://www.w3.org/2000/svg"
+         xmlns:svg="http://www.w3.org/2000/svg">
+      <defs
+         id="defs2" />
+      <title
+         id="title1">vote!</title>
+      <g
+         id="g1"
+         transform="translate(-12.999968,-3.9999997)">
+         <path
+            d="M 32,4 A 18.99658,18.99658 0 0 0 28,41.568 V 57 a 3.00328,3.00328 0 0 0 3,3 h 2 a 3.00328,3.00328 0 0 0 3,-3 V 41.568 A 18.99658,18.99658 0 0 0 32,4 Z m 2,53 a 1.00068,1.00068 0 0 1 -1,1 H 31 A 1.00068,1.00068 0 0 1 30,57 V 41.89252 a 18.66135,18.66135 0 0 0 4,0 z M 32,40 A 17,17 0 1 1 49,23 17.019,17.019 0 0 1 32,40 Z m 3.55566,-25.48828 h -0.02051 a 5.95517,5.95517 0 0 0 -3.51953,1.13965 5.95685,5.95685 0 0 0 -3.53125,-1.16309 H 28.46386 A 5.99937,5.99937 0 0 0 24.208,24.7168 l 7.04785,7.09473 a 0.99965,0.99965 0 0 0 1.41406,0.0039 l 7.09473,-7.04785 a 5.99954,5.99954 0 0 0 -4.209,-10.25586 z m 2.79883,8.83789 -6.38477,6.34277 -6.34372,-6.38574 a 4,4 0 0 1 2.83789,-6.81836 h 0.01367 a 3.98,3.98 0 0 1 2.8252,1.18164 1.00052,1.00052 0 0 0 1.41406,0.0039 3.97187,3.97187 0 0 1 2.81836,-1.16211 h 0.01367 a 4,4 0 0 1 2.80566,6.83789 z"
+            id="path1" />
+      </g>
+      <text
+         x="-12.999969"
+         y="75"
+         fill="#000000"
+         font-size="5px"
+         font-weight="bold"
+         font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif"
+         id="text1">Created by mim studio</text>
+      <text
+         x="-12.999969"
+         y="80"
+         fill="#000000"
+         font-size="5px"
+         font-weight="bold"
+         font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif"
+         id="text2">from the Noun Project</text>
+      </svg>
+   `;
+  }
+
+  static get bookmarkSVG() {
+   return `
+      <svg
+         version="1.1"
+         viewBox="-5 -10 28.78447 100.00342"
+         id="svg2"
+         sodipodi:docname="noun-bookmark-6789846.svg"
+         width="14.4"
+         height="50"
+         inkscape:version="1.3.2 (091e20e, 2023-11-25)"
+         xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+         xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+         xmlns="http://www.w3.org/2000/svg"
+         xmlns:svg="http://www.w3.org/2000/svg">
+      <defs
+         id="defs2" />
+      <title
+         id="title1">bookmark (coming soon!)</title>
+      <path
+         fill="currentColor"
+         d="m 9.4289287,77.394656 c -1.5742,1.5859 -3.0273,3.0703 -4.4961,4.543 l -7.3086,7.3164 -0.17188,0.17578 c -1,0.95703 -1.9727,0.69922 -2.3281,-0.64453 l -0.0039,-0.0039 c -0.08984,-0.41016 -0.13281,-0.83203 -0.11719,-1.2539 v -27.625 -67.797 c 0,-1.3633 0.23828,-2.1055 2.0703,-2.1055 8.2344,0.042969 16.4800003,0 24.7070003,0 1.6328,0 2.0039,0.36328 2.0039,1.9883 v 95.652 c 0.0039,0.52344 -0.08984,1.043 -0.27344,1.5352 -0.11719,0.39062 -0.43359,0.6875 -0.82813,0.78125 -0.39453,0.09375 -0.80859,-0.03125 -1.0859,-0.32812 -0.19922,-0.17188 -0.37891,-0.36328 -0.5625,-0.55078 l -10.953,-10.922 c -0.2031203,-0.19922 -0.3710903,-0.4375 -0.6523403,-0.76172 z m -12.023,8.6562 c 0.12891,-0.07813 0.25391,-0.16797 0.37109,-0.26562 l 10.582,-10.625 c 0.23438,-0.32812 0.61328,-0.51953 1.0156,-0.51953 0.40234,0 0.7812503,0.19141 1.0156003,0.51953 l 10.582,10.602 c 0.11719,0.09766 0.24609,0.18359 0.37891,0.25391 0.17188,-1.4844 0.10547,-80.227 -0.05859,-80.762 H -2.5944613 Z m 0,-83.262 23.9960003,0.0039 v -10.387 l -23.9960003,-0.0039 z"
+         id="path1" />
+      <text
+         x="-40.606071"
+         y="107.49966"
+         font-size="5px"
+         font-weight="bold"
+         font-family="'Arbeit Regular', Helvetica, Arial-Unicode, Arial, Sans-serif"
+         fill="#000000"
+         id="text1">Created by carna diri</text>
+      <text
+         x="-40.606071"
+         y="112.49966"
+         font-size="5px"
+         font-weight="bold"
+         font-family="'Arbeit Regular', Helvetica, Arial-Unicode, Arial, Sans-serif"
+         fill="#000000"
+         id="text2">from Noun Project</text>
+      </svg>
+   `;
+  }
+
+  static get votesSVG (){
+   return `
+      <svg
+         version="1.1"
+         x="0px"
+         y="0px"
+         viewBox="0 0 73.981689 66.008743"
+         id="svg2"
+         sodipodi:docname="noun-heart-1742985.svg"
+         width="73.981689"
+         height="66.008743"
+         inkscape:version="1.3.2 (091e20e, 2023-11-25)"
+         xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+         xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+         xmlns="http://www.w3.org/2000/svg"
+         xmlns:svg="http://www.w3.org/2000/svg">
+      <defs
+         id="defs2" />
+         <title title="# of votes"/>
+      <g
+         transform="translate(-13.009156,-969.35779)"
+         id="g1">
+         <path
+            style="fill:currentColor;text-indent:0;text-transform:none;direction:ltr;baseline-shift:baseline;enable-background:accumulate"
+            d="m 31.748519,969.35779 c -4.8057,0 -9.5885,1.91807 -13.25,5.75 -7.3231,7.6637 -7.3152,19.98594 0,27.65621 l 30.75,32.2813 a 1.0001,1.0001 0 0 0 1.4688,0 c 10.2681,-10.7459 20.513,-21.504 30.7812,-32.25 7.3231,-7.66386 7.3231,-19.99241 0,-27.65626 -7.3231,-7.66383 -19.2081,-7.66399 -26.5312,0 l -4.9688,5.15625 -4.9687,-5.1875 c -3.6616,-3.83192 -8.4756,-5.75 -13.2813,-5.75 z m 0,1.96875 c 4.2679,0 8.5526,1.71195 11.8438,5.15625 l 5.6875,6 a 1.0001,1.0001 0 0 0 1.4687,0 l 5.6563,-5.9375 c 6.5823,-6.88873 17.0739,-6.88857 23.6562,0 6.5823,6.88859 6.5823,17.98641 0,24.87501 -10.0189,10.4851 -20.0436,20.9838 -30.0625,31.4687 l -30.0625,-31.5 c -6.5768,-6.89605 -6.5823,-18.01777 0,-24.90621 3.2911,-3.44429 7.5446,-5.15625 11.8125,-5.15625 z"
+            fill="#000000"
+            fill-opacity="1"
+            stroke="none"
+            marker="none"
+            visibility="visible"
+            display="inline"
+            overflow="visible"
+            id="path1" />
+      </g>
+      <text
+         x="-13.009156"
+         y="98.004387"
+         fill="#000000"
+         font-size="5px"
+         font-weight="bold"
+         font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif"
+         id="text1">Created by il Capitano</text>
+      <text
+         x="-13.009156"
+         y="103.00439"
+         fill="#000000"
+         font-size="5px"
+         font-weight="bold"
+         font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif"
+         id="text2">from the Noun Project</text>
+      </svg>
+   `;
   }
 }

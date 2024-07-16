@@ -17,25 +17,50 @@
     margin-left: var(--indent-size);
 }
 
+.with-shelf .node-buttons{
+    display: flex;
+    gap: 15px;
+}
+
+.with-shelf button{
+    border: none;
+    cursor: pointer;
+    border-radius: 50%;
+    width: 37px;
+    height: 37px;
+}
+
+.with-shelf i svg{
+    border: none;
+    width: 37px;
+    height: 37px;
+}
+
 .with-shelf button.iterate{
     background: #99ededea;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
 }
 
 .with-shelf button.edit{
-    width: 37px;
-    height: 37px;
     background-color: rgba(238, 108, 108, 0.886);
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
+}
+
+.with-shelf button.vote{
+    background-color: rgba(243, 119, 225, 0.951);
 }
 
 .with-shelf button.edit svg{
     width: 35px;
     height: 40px;
+}
+
+.with-shelf button.vote svg{
+    width: 25px;
+    height: 45px;
+    transform: rotate(145deg);
+}
+
+.with-shelf button.vote.voted svg{
+    transform: rotate(-30deg);
 }
 
 .node-title h2 {

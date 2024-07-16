@@ -13,12 +13,110 @@ class Text extends Crud{
                         'parent_id',
                         'title',
                         'note',
-                        'note_date'
+                        'note_date', 
+                        'game_id'
                         ];
 
-    //returns all the  texts along with the name of the writer of the text
+   /*  //returns all the  texts along with the name of the writer of the text
     //in the display all texts page
-    public function selectTexts(){
+    public function selectTexts($current_writer = null){
+        // Base SQL part
+        $sql = "SELECT text.*, 
+                       writer.firstName AS firstName, 
+                       writer.lastName AS lastName,
+                       COUNT(vote.text_id) AS voteCount, 
+                       COUNT(game_has_player.game_id) AS playerCount";
+                       
+        // Check if current_writer is provided or not
+        if ($current_writer) {
+            // When a writer is logged in
+            $sql .= " , CASE WHEN vote.writer_id IS NOT NULL THEN 1 ELSE 0 END AS hasVoted
+                      FROM text
+                      INNER JOIN writer ON text.writer_id = writer.id
+                      LEFT JOIN vote ON text.id = vote.text_id AND (vote.writer_id = :currentUserId)
+                      LEFT JOIN game_has_player ON text.game_id = game_has_player.game_id
+                      GROUP BY text.id, vote.writer_id, game_has_player.game_id";
+        } else {
+            // When no writer is logged in
+            $sql .= "FROM text
+                     INNER JOIN writer ON text.writer_id = writer.id
+                     LEFT JOIN vote ON text.id = vote.text_id
+                     LEFT JOIN game_has_player ON text.game_id = game_has_player.game_id
+                     GROUP BY text.id";
+        }
+        
+        $stmt = $this->prepare($sql);
+        
+        // Bind the current writer ID only if it's provided
+        if ($current_writer) {
+            $stmt->bindValue(':currentUserId', $current_writer);
+        }
+        
+        $stmt->execute();
+        //die($sql);
+        return $stmt->fetchAll();
+    } */
+
+    public function selectTexts($current_writer = null) {
+        // Base SQL part
+        $sql = "SELECT text.*, 
+                       writer.firstName AS firstName, 
+                       writer.lastName AS lastName,
+                       IFNULL(voteCounts.voteCount, 0) AS voteCount,
+                       IFNULL(playerCounts.playerCount, 0) AS playerCount";
+                           
+        // Check if current_writer is provided or not
+        if ($current_writer) {
+            // When a writer is logged in
+            $sql .= ", CASE WHEN vote.writer_id IS NOT NULL THEN 1 ELSE 0 END AS hasVoted
+                      FROM text
+                      INNER JOIN writer ON text.writer_id = writer.id
+                      LEFT JOIN (
+                          SELECT text_id, COUNT(*) AS voteCount
+                          FROM vote
+                          GROUP BY text_id
+                      ) AS voteCounts ON text.id = voteCounts.text_id
+                      LEFT JOIN (
+                          SELECT game_id, COUNT(*) AS playerCount
+                          FROM game_has_player
+                          GROUP BY game_id
+                      ) AS playerCounts ON text.game_id = playerCounts.game_id
+                      LEFT JOIN vote ON text.id = vote.text_id AND vote.writer_id = :currentUserId
+                      GROUP BY text.id";
+        } else {
+            // When no writer is logged in
+            $sql .= " FROM text
+                      INNER JOIN writer ON text.writer_id = writer.id
+                      LEFT JOIN (
+                          SELECT text_id, COUNT(*) AS voteCount
+                          FROM vote
+                          GROUP BY text_id
+                      ) AS voteCounts ON text.id = voteCounts.text_id
+                      LEFT JOIN (
+                          SELECT game_id, COUNT(*) AS playerCount
+                          FROM game_has_player
+                          GROUP BY game_id
+                      ) AS playerCounts ON text.game_id = playerCounts.game_id
+                      LEFT JOIN vote ON text.id = vote.text_id
+                      GROUP BY text.id";
+        }
+        
+        $stmt = $this->prepare($sql);
+        
+        // Bind the current writer ID only if it's provided
+        if ($current_writer) {
+            $stmt->bindValue(':currentUserId', $current_writer);
+        }
+        
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+    
+    
+    
+    
+    
+/*     public function selectTexts(){
         $sql = "SELECT text.*, 
                 writer.firstName AS firstName, 
                 writer.lastName AS lastName
@@ -30,7 +128,7 @@ class Text extends Crud{
         $stmt->execute();
 
         return $stmt->fetchAll();
-    }
+    } */
 
 
     //returns the text as well as the first and last name of the writer

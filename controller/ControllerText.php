@@ -11,7 +11,11 @@ class ControllerText extends Controller{
     //show the page with all the texts
     public function index(){
         $text = new Text;
-        $select = $text->selectTexts();
+        $current_writer = null;
+        if(isset($_SESSION['writer_id'])){
+            $current_writer = $_SESSION['writer_id'];
+        }
+        $select = $text->selectTexts($current_writer);
 
         // Get only the parent texts
         $texts = [];
@@ -49,6 +53,18 @@ class ControllerText extends Controller{
     
         return $hierarchy;
     } */
+
+    private function getRootParent($textId){
+        $text = new Text;
+        $select = $text->selectTexts();
+        $currentText = [];
+
+        foreach ($select as $element){
+            if ($element['id'] === $textId) {
+              $currentText = $element;
+            };
+        }
+    }
 
     private function hasContributed($textId, $hierarchy, $currentUserId) {
         // Helper function to recursively check contributions
@@ -101,7 +117,7 @@ class ControllerText extends Controller{
     // An end point from which you can receive a single tree from the db
     public function getTree($id = null){
         $text = new Text;
-        $select = $text->selectTexts();
+        $select = $text->selectTexts($_SESSION['writer_id']);
 
         // Get the current user Id
         $currentUserId = $_SESSION['writer_id'] ?? null;
@@ -109,8 +125,11 @@ class ControllerText extends Controller{
         // Get the requested tree
         $tree = $this->buildHierarchy($select, 'id', $id);
 
+        //Check if the current user has contributed to this tree
+        $hasContributed = $this->hasContributed($id, $tree, $currentUserId);
+
         // Add permissions to each node iteratively
-        $this->addPermissions($tree[0], $currentUserId);
+        $this->addPermissions($tree[0], $currentUserId, $tree, $hasContributed);
 
         // Convert the hierarchical array to JSON format
         $jsonData = json_encode($tree);
@@ -119,22 +138,22 @@ class ControllerText extends Controller{
     }
 
     // Recursive function to add permissions to each node
-    private function addPermissions(&$node, $currentUserId) {
+    private function addPermissions(&$node, $currentUserId, $hierarchy, $hasContributed) {
         $isParent = !empty($node['children']);
 
         $node['permissions'] = [
-            'canEdit' => !$isParent && $currentUserId === $node['writer_id'],
+            'canEdit' => $currentUserId === $node['writer_id'],
             'canDelete' => !$isParent && $currentUserId === $node['writer_id'],
-            //TODO: you may want to make a player vote before they can make a second or third iteration... 
             'canIterate' => $currentUserId !== null && $currentUserId !== $node['writer_id'],
             'isMyText' => $currentUserId === $node['writer_id'],
-            //TODO: there needs to be more logic around ability to vote. 
-            'canVote' => $currentUserId !== $node['writer_id'] 
+            'canVote' => $currentUserId !== $node['writer_id'] && $hasContributed 
         ];
+
+        $node['hasContributed'] = $hasContributed;
 
         if (!empty($node['children'])) {
             foreach ($node['children'] as &$child) {
-                $this->addPermissions($child, $currentUserId);
+                $this->addPermissions($child, $currentUserId, $hierarchy, $hasContributed);
             }
         }
     }

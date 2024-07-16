@@ -1,12 +1,30 @@
 import { StoryManager } from './storyManager.js';
 import { Modal } from './modal.js';
+import { SVGManager } from './svgManager.js';
 
 export class UIManager {
   constructor(storyManager, modal) {
     this.storyManager = storyManager;
     this.modal = modal;
+    this.SVGManager = SVGManager;
+    this.initSvgs();
     this.initEventListeners();
     this.stories = document.querySelector(".stories");
+  }
+
+  initSvgs(){
+    const svgContainers = document.querySelectorAll('[data-svg]');
+    svgContainers.forEach(element => {
+/*       requestAnimationFrame(() => { */
+        const svgType = element.getAttribute('data-svg');
+        if(SVGManager[svgType + 'SVG']) {
+          element.innerHTML = SVGManager[svgType + 'SVG'];
+        } else {
+          console.error(`Method ${svgType}SVG not found on SVGManager.`);
+        }
+      });
+/*     }); */
+
   }
 
   initEventListeners() {

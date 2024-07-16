@@ -31,6 +31,7 @@ export class ShelfVisualizer {
     let author = node.permissions.isMyText ? 
     `<span class="author">by you</span>` : 
     `<span class="author">by ${node.firstName} ${node.lastName}</span>`;
+    console.log(node);
 
     let drawerHTML = `
       <li class="node" style="--node-depth: ${depth}">
@@ -39,12 +40,14 @@ export class ShelfVisualizer {
             <span class="arrow">▶</span>
             <span class="title">${node.title}</span>
             ${author}
+            <span>${this.getNumberOfVotes(node)}</span>
           </h2>
         </div>
         <div class="writing hidden">
           <div class="node-buttons">
             ${node.permissions.canIterate ? this.getIterateForm(node) : ''}
             ${node.permissions.canEdit ? this.getEditForm(node) : ''}
+            ${node.permissions.canVote ? this.getVoteButton(node) : ''}
           </div>
           <p>
             ${node.writing}
@@ -100,6 +103,38 @@ export class ShelfVisualizer {
       </form>
     `;
   }
+
+/*   getVoteForm(node) {
+    return `
+      <form action="${this.path}vote/voteToggle" method="POST">
+        <input type="hidden" name="id" value="${node.id}">
+        <input type="hidden" name="parent_id" value="${node.parent_id}">
+        <button type="submit" class="vote" value="Vote" data-vote=${node.id}>
+          ${SVGManager.voteSVG}
+        </button>
+      </form>
+    `;
+  } */  
+
+  getVoteButton(node) {
+      return `
+        <button class="vote ${node.hasVoted == 1? 'voted' : ''}" data-vote=${node.id}>
+          ${SVGManager.voteSVG}
+        </button>
+    `;
+  }
+
+  getNumberOfVotes(node) {
+    return `
+        <i>
+          ${SVGManager.votesSVG}
+        </i>
+        <span class="small"  data-vote-count=${node.voteCount} data-player-count=${node.playerCount - 1}>
+          ${node.voteCount}/${node.playerCount - 1}
+        </span>
+    `;
+  }
+  
 
   addEventListeners() {
     const titles = this.container.querySelectorAll('.node-title');

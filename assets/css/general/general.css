@@ -27,6 +27,11 @@ td, th, tr, form, input, textarea, h3, h2, h1, p, ul{
     color: rgb(139, 7, 47);
 }
 
+.small{
+    font-size: 17px;
+    color: rgb(139, 7, 47);
+}
+
 .author, .title{
     color: hotpink;
 }
