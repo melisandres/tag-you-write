@@ -5,6 +5,9 @@ RequirePage::model('Writer');
 RequirePage::model('Keyword');
 RequirePage::model('TextHasKeyword');
 RequirePage::model('Prep');
+RequirePage::model('Game');
+RequirePage::model('GameHasPlayer');
+RequirePage::controller('ControllerGame');
 
 class ControllerText extends Controller{
 
@@ -37,22 +40,8 @@ class ControllerText extends Controller{
         }
         
         // Send the JSON data to the front end
-        //Twig::render('text-index.php', ['texts' => $hierarchy, 'hierachyText' => $jsonData]);
         Twig::render('text-index.php', ['texts' => $texts]);
     }
-
-/*     public function buildHierarchy($array, $parentId = null) {
-        $hierarchy = [];
-    
-        foreach ($array as $element) {
-            if ($element['parent_id'] == $parentId) {
-                $element['children'] = $this->buildHierarchy($array, $element['id']);
-                $hierarchy[] = $element;
-            }
-        }
-    
-        return $hierarchy;
-    } */
 
     private function getRootParent($textId){
         $text = new Text;
@@ -98,9 +87,8 @@ class ControllerText extends Controller{
         return null;
     }
 
-
-    //If you want ALL the data in a hierarchy, $targettedIdType will be 'parent_id', no third arg.
-    //If you want just one tree, $targettedIdType will be 'id', third arg will be the root id
+    // If you want ALL the data in a hierarchy, $targettedIdType will be 'parent_id', no third arg.
+    // If you want just one tree, $targettedIdType will be 'id', third arg will be the root id
     private function buildHierarchy($array, $targettedIdType, $targetId = null) {
         $hierarchy = [];
     
@@ -110,17 +98,15 @@ class ControllerText extends Controller{
                 $hierarchy[] = $element;
             }
         }
-    
         return $hierarchy;
     }
 
     // An end point from which you can receive a single tree from the db
     public function getTree($id = null){
         $text = new Text;
-        $select = $text->selectTexts($_SESSION['writer_id']);
-
         // Get the current user Id
         $currentUserId = $_SESSION['writer_id'] ?? null;
+        $select = $text->selectTexts($currentUserId);
 
         // Get the requested tree
         $tree = $this->buildHierarchy($select, 'id', $id);
@@ -141,6 +127,7 @@ class ControllerText extends Controller{
     private function addPermissions(&$node, $currentUserId, $hierarchy, $hasContributed) {
         $isParent = !empty($node['children']);
 
+        // TODO: You can reuse this logic in every method, to ensure that we enforce these permissions.
         $node['permissions'] = [
             'canEdit' => $currentUserId === $node['writer_id'],
             'canDelete' => !$isParent && $currentUserId === $node['writer_id'],
@@ -171,15 +158,16 @@ class ControllerText extends Controller{
         Twig::render('text-create.php', ['writers'=>$select]);
     }
 
-
     //this is where we save the text entered, and its 
-    //associated keywords, etc. 
+    //associated keywords, etc. be it a new text or an iteration
+    //IF its a new text, we create a new game.
     public function store(){
         //make sure the page is being accessed with a post...
         if($_SERVER["REQUEST_METHOD"] !== "POST"){
-            //just to make uniform, check if the writer is logged in
+            // Just to make uniform, check if the writer is logged in
             CheckSession::sessionAuth();
-            //if logged in, direct to texts..
+            // TODO: this seems off. You can rework the logic later.
+            // If logged in, direct to texts..
             RequirePage::redirect('text');
             exit();
         }
@@ -187,14 +175,30 @@ class ControllerText extends Controller{
         $text = new Text;
         $keyWord = new Keyword;
 
-        //TODO: there may be two different types of store... 1.first text 2.iteration
-        //consider if they are differnt enough to call two different functions. 
-        //if only certain values can be saved in one and others in the other...
-        //you may want to filter down your $_POST and send only the acceptable values to the model
-        //just in case someone is bypassing your frontend, and adding form fields, for instance.
+        // Check if this is a root text
+        $isRootText = !isset($_POST['game_id']) && !isset($_POST['parent_id']);
         
-        //validate the $_POST
-        $this->validateText($_POST);
+        // Validate the $_POST 
+        $this->validateText($_POST, $isRootText);
+
+        //TODO: i wonder if this is the best way to check... as 
+        //a person could toy with the hidden fields and mess with the 
+        //database but if they add both a parent_id and a game_id... 
+        //then they are NOT saving a new game...
+
+        // Create a new game via the ControllerGame 
+        // IF we receive neither a game_id NOR a parent_id
+         if ($isRootText) {
+            $gameController = new ControllerGame;
+            $gameId = $gameController->createGame($_POST);
+
+            if ($gameId === false) {
+                Twig::render($_POST["currentPage"], ['data' => $_POST, 'errors' => 'Failed to create game']);
+                exit();
+            }
+
+            $_POST['game_id'] = $gameId;
+        } 
 
         //get the keywords from POST
         $keywords = $_POST['keywords'];
@@ -207,9 +211,19 @@ class ControllerText extends Controller{
         unset($_POST['firstName']);
         unset($_POST['lastName']);
         unset($_POST['previous_title']);
+        unset($_POST['prompt']);
 
         //send what's left of the POST (text info) to CRUD
         $textIdFromInsert = $text->insert($_POST);
+
+        //send the writer_id and the game_id to game_has_player
+        $gameHasPlayer = new GameHasPlayer;
+        $gameHasPlayerData = [
+            'player_id' => $_POST['writer_id'],
+            'game_id' => $_POST['game_id'],
+            'active' => 1
+        ];
+        $gameHasPlayer->insert($gameHasPlayerData);
 
         //prepare keywords array... to send to CRUD
         //$keywords = explode(',', $keywords);
@@ -232,7 +246,7 @@ class ControllerText extends Controller{
             $textHasKeywordArray = ['text_id' => $textIdFromInsert, 'keyword_id' => $keywordIdFromInsert['id']];
 
             //now we can insert this keyword into text_has_keyword
-            $textHasKeyword->insert( $textHasKeywordArray);
+            $textHasKeyword->insert($textHasKeywordArray);
         }
 
         RequirePage::redirect('text');
@@ -509,21 +523,25 @@ class ControllerText extends Controller{
     }
 
 
-    public function validateText($data){
+    public function validateText($data, $isRoot){
         RequirePage::library('Validation');
         $val = new Validation;
 
-        //$val->name('date')->value($data["date"])->pattern('date_ymd');
         $val->name('writing')->value($data["writing"])->required()->max(65000);
         $val->name('title')->value($data["title"])->required()->max(75);
         $val->name('keywords')->value($data["keywords"])->pattern('keywords')->max(75);
-        //TO-DO: eventually, add the logic of word-count... this will count
+        // validate the prompt, but only if this is a root text
+        if($isRoot){
+            $val->name('prompt')->value($data["prompt"])->required()->max(200);
+        }
+
+        // Verify for prompt only if this is a 
+        // TODO: eventually, add the logic of word-count... this will count
         //and store the previous word count (or start at zero), and send that amount to 
         //the front end. I don't want to prevent people from going OVER... but I'd 
         //want to have something happen front-end... I think its important to be 
         //as flexible as possible in terms of allowing rule-breaking... but perhaps in
         //reminding users of rules on the front end.  
-
 
         if($val->isSuccess()){
             //if this is successful, continue the code
@@ -550,7 +568,6 @@ class ControllerText extends Controller{
             Twig::render($data["currentPage"], ['data' => $data, 'errors' => $errors]);
             exit();
         };
-
     }
 }
 

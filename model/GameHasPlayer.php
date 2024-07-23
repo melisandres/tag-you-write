@@ -1,14 +1,13 @@
 <?php
 require_once('Crud.php');
 
-class TextHasKeyword extends Crud{
+class GameHasPlayer extends Crud{
 
-    public $table = 'text_has_keyword';
-    public $primaryKey = ['game_id', 'player_id'];
+    public $table = 'game_has_player';
+    public $primaryKey = 'game_id';
+    public $secondaryKey = 'player_id';
     public $fillable = ['game_id',
                         'player_id',
                         'active' /* to manage instances where players are invited, but don't accept invitation */
-                        ];
-
-    
+                        ]; 
 }

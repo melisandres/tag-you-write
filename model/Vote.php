@@ -36,7 +36,8 @@ class Vote extends Crud{
 
         $count = $stmt->rowCount();
         if($count == 1){
-            return $stmt->fetch();
+            /* return $stmt->fetch(); */
+            return true;
         }else{
             return false;
         }
@@ -71,5 +72,16 @@ class Vote extends Crud{
         $stmt->bindValue(':text_id', $values['text_id']);
     
         return $stmt->execute();
-    }    
+    }   
+    
+    public function checkWin($text_id){
+        // Fetch the updated vote count and player count
+        $sql = "SELECT 
+                    (SELECT COUNT(*) FROM vote WHERE text_id = :text_id) AS voteCount,
+                    (SELECT COUNT(*) - 1 FROM game_has_player WHERE game_id = (SELECT game_id FROM text WHERE id = :text_id)) AS playerCountMinusOne";
+        $stmt = $this->prepare($sql);
+        $stmt->bindValue(':text_id', $text_id);
+        $stmt->execute();
+        return $stmt->fetch();
+    }
 }

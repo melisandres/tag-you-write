@@ -36,12 +36,18 @@ if($url == '/'){
 
         if(isset($url[1])){
             $method = $url[1]; 
-            if(isset($url[2])){
-                $id= $url[2];
-                echo $controller->$method($id);
-            }else{
-                echo $controller->$method();
-            }
+
+        if(isset($url[3])){
+            $param = $url[3];
+            $id = $url[2];
+            echo $controller->$method($id, $param);
+        }
+        elseif(isset($url[2])){
+            $id = $url[2];
+            echo $controller->$method($id);
+        }else{
+            echo $controller->$method();
+        } 
        }else{
          echo $controller->index();
        }

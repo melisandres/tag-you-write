@@ -29,14 +29,14 @@
     <label>
         <span class="headline">keywords</span>
         <span class="additional-info">(max 3, seperated by commas please):</span>
-        <input type="text" name="keywords" placeholder="adventure, rainboots" value={{data.keywords}} >
+        <input type="text" name="keywords" placeholder="adventure, rainboots" value="{{ data.keywords }}" >
     </label>
 
     <input type="hidden" name="firstName" value="{{ data.firstName }}">
     <input type="hidden" name="lastName" value="{{ data.lastName }}">
     <input type="hidden" name="previous_title" value="{{ data.previous_title }}">
     <input type="hidden" name="writer_id" value="{{ session.writer_id }}">
-    <input type="hidden" name="prompt" value="{{ data.prompt }}">
+    <input type="hidden" name="game_id" value="{{ data.game_id }}">
     <input type="hidden" name="date" value="{{ 'now'|date('Y-m-d H:i:s') }}">
     <input type="hidden" name="parent_id" value="{{ data.id }}">
     <input type="hidden" name="currentPage" value="text-iterate.php">

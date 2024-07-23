@@ -11,7 +11,6 @@ export class VoteManager {
         const modalBtns = document.querySelector('.modal-btns');
         const dataStories = document.querySelector('[data-stories]');
 
-
         if (modalBtns) {
             modalBtns.addEventListener('click', this.handleVoteButtonClick.bind(this));
         }
@@ -21,49 +20,63 @@ export class VoteManager {
         }
     }
 
+
     async handleVoteButtonClick(event) {
         const button = event.target.closest('[data-vote]');
         if (button) {
             const textId = button.getAttribute('data-vote');
             try {
-                const result = await this.voteUnvote(textId);
-                console.log(result);
-                this.updateVoteButton(button, result.voted);
+                let result = await this.voteUnvote(textId, false);
+                console.log("get confirmation", result)
+                if (result.confirmationRequired) {
+                    if (confirm("This vote will end the game. Are you sure?")) {
+                        result = await this.voteUnvote(textId, true);
+                        console.log("confirmed", result)
+                        this.updateVoteButton(button, result);
+                    }else{
+                        // cancelled vote (upon confirmation)
+                        return;
+                    }
+                }else{
+                    // confirmation not required
+                    this.updateVoteButton(button, result);
+                }
             } catch (error) {
                 console.error('Error toggling vote:', error);
             }
         }
     }
 
-    async voteUnvote(id) {
-        const url = `${this.path}vote/voteToggle/${id}`;
+    async voteUnvote(id, isConfirmed) {
+        const url = `${this.path}vote/voteToggle/${id}/${isConfirmed}`;
         const response = await fetch(url);
+        
         if (!response.ok) {
             throw new Error(`Error toggling vote: ${response.status}`);
         }
+
         return await response.json();
     }
 
-    updateVoteButton(button, voted) {
-        console.log(button);
+    updateVoteButton(button, data) {
+        if (!data || typeof data.voteCount === 'undefined' || typeof data.playerCountMinusOne === 'undefined') {
+            console.error('Invalid data received:', data);
+            return;
+        }
+
         const resultsSpan = button.closest(".node").querySelector('[data-vote-count]');
-        const numberOfVotes = resultsSpan.getAttribute('data-vote-count');
-        const numberOfPlayers = resultsSpan.getAttribute('data-player-count');
-        let newVoteCount;
-      
-        if (voted) {
+        const numberOfVotes = data.voteCount;
+        const numberOfPlayers = data.playerCountMinusOne;
+
+        if (data.voted == true) {
             button.classList.add('voted');
-            newVoteCount = parseInt(numberOfVotes, 10) + 1;
-            //button.textContent = 'Unvote'; // Change the button text to indicate unvoting
         } else {
             button.classList.remove('voted');
-            newVoteCount = parseInt(numberOfVotes, 10) - 1;
-            //button.textContent = 'Vote'; // Change the button text to indicate voting
         }
-    
-        // Update the vote count
-        resultsSpan.innerHTML = `${newVoteCount} / ${numberOfPlayers}`;
-        resultsSpan.setAttribute('data-vote-count', newVoteCount);
+
+        resultsSpan.innerHTML = `${numberOfVotes} / ${numberOfPlayers}`;
+        resultsSpan.setAttribute('data-vote-count', numberOfVotes);
     }
-    
 }
+
+   

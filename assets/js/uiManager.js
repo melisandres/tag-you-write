@@ -15,7 +15,6 @@ export class UIManager {
   initSvgs(){
     const svgContainers = document.querySelectorAll('[data-svg]');
     svgContainers.forEach(element => {
-/*       requestAnimationFrame(() => { */
         const svgType = element.getAttribute('data-svg');
         if(SVGManager[svgType + 'SVG']) {
           element.innerHTML = SVGManager[svgType + 'SVG'];
@@ -23,8 +22,6 @@ export class UIManager {
           console.error(`Method ${svgType}SVG not found on SVGManager.`);
         }
       });
-/*     }); */
-
   }
 
   initEventListeners() {

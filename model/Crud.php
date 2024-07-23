@@ -51,12 +51,22 @@ abstract class Crud extends PDO{
             $stmt->bindValue(":$key", $value);
         }
 
-        if($stmt->execute()){
+/*         if($stmt->execute()){
             return $this->lastInsertId();
         }else{
             return $stmt->errorInfo();
         }
-        return $this->lastInsertId();
+        return $this->lastInsertId(); */
+
+        if ($stmt->execute()) {
+            $lastInsertId = $this->lastInsertId();
+            error_log("Insert successful, last insert ID: " . $lastInsertId);
+            return $lastInsertId;
+        } else {
+            $errorInfo = $stmt->errorInfo();
+            error_log("Insert failed: " . print_r($errorInfo, true));
+            return $errorInfo;
+        }
     }
 
 
