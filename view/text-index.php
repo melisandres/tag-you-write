@@ -4,7 +4,7 @@
 <!-- an area to show all the starting stories that might be contributed to -->
 <div data-stories class="stories">
 {% for text in texts %}
-    <div class="story">
+    <div class="story {{ text.openForChanges ? '' : 'closed' }}" data-game-id="{{ text.game_id }}" data-text-id="{{ text.id }}">
         <div class="story-title">
             <h2 class="{{ text.hasContributed ? 'contributed' : '' }}">
                 <!-- <a href="{{ path }}text/show/{{ text.id }}">{{ text.title }}</a> -->

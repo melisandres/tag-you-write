@@ -21,6 +21,7 @@ export class TreeVisualizer {
         // Clear any existing content
         this.container.innerHTML = ''; 
         this.container.classList.add("with-tree");
+        this.container.dataset.showcase = 'tree';
 
         // Remove the class .story-has-showcase
         const previousStory = document.querySelector('.story-has-showcase')

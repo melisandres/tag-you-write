@@ -5,8 +5,6 @@ abstract class Crud extends PDO{
     public function __construct(){
         parent::__construct('mysql:host=localhost; dbname=tag; port=8889; charset=utf8', 'root', '');
     }
-
-
     
     //this is only being called by writer, at the moment, but it's so general I hesitate to put it in the writer model
     public function select($order = null){
@@ -14,8 +12,6 @@ abstract class Crud extends PDO{
         $stmt = $this->query($sql);
         return $stmt->fetchAll();
     }
-
-
 
     public function selectId($value, $id = null){
         if($id == null) $id = $this->primaryKey;
@@ -33,7 +29,6 @@ abstract class Crud extends PDO{
             return false;
         }   
     }
-
 
     public function insert($data, $keyWordInsert = false){
         $fieldName = implode(', ', array_keys($data));
@@ -69,8 +64,6 @@ abstract class Crud extends PDO{
         }
     }
 
-
-
     public function update($data){
         $fieldName = null;
 
@@ -95,8 +88,6 @@ abstract class Crud extends PDO{
 
     }
 
-
-
     //returns an array where the keys are keyword.id and the values are keyword.word. These values are only the ones associated to the text.id sent to the function
     public function selectKeyword($idValue){
         $sql = "SELECT word, id 
@@ -118,8 +109,6 @@ abstract class Crud extends PDO{
         return $result;
     }
 
-
-
     public function delete($value){
         $sql = "DELETE FROM $this->table WHERE $this->primaryKey = :$this->primaryKey;";
         $stmt = $this->prepare($sql); 
@@ -130,7 +119,6 @@ abstract class Crud extends PDO{
             return false;
         }
     }
-
 
     // Select a row based on composite primary key
     public function selectCompositeId($values) {

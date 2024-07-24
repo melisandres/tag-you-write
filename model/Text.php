@@ -23,8 +23,10 @@ class Text extends Crud{
                        writer.firstName AS firstName, 
                        writer.lastName AS lastName,
                        game.prompt AS prompt,
+                       game.open_for_changes AS openForChanges,
                        IFNULL(voteCounts.voteCount, 0) AS voteCount,
-                       IFNULL(playerCounts.playerCount, 0) AS playerCount";
+                       IFNULL(playerCounts.playerCount, 0) AS playerCount,
+                       CASE WHEN game.winner = text.id THEN TRUE ELSE FALSE END AS isWinner";
                            
         // Check if current_writer is provided or not
         if ($current_writer) {

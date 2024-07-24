@@ -105,6 +105,10 @@
     transition: height 8s ease-in-out;
 }
 
+.with-shelf .isWinner.writing {
+    border-left: 3px solid hotpink;
+}
+
 .with-shelf .hidden{
     height: 0px;
     overflow: hidden;

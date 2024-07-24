@@ -3,6 +3,7 @@ import { StoryManager } from './storyManager.js';
 import { UIManager } from './uiManager.js';
 import { VoteManager } from './voteManager.js'; 
 import { GameManager } from './gameManager.js';
+import { RefreshManager } from './refreshManager.js';
 
 document.addEventListener("DOMContentLoaded", () => {
   const path = window.location.origin + "/tag-you-write-repo/tag-you-write/";
@@ -16,11 +17,23 @@ document.addEventListener("DOMContentLoaded", () => {
   const storyManager = new StoryManager(path, modal);
 
   // Initialize UIManager with the storyManager and modal instances
-  new UIManager(storyManager, modal);
-
-  // Initialize VoteManager
-  new VoteManager(path);
+  const uiManager = new UIManager(storyManager, modal);
 
   // Initialize GameManager
   new GameManager(path);
+
+  // Initialize RefreshManager
+  const refreshManager = new RefreshManager(uiManager);
+
+  // Initialize VoteManager
+  new VoteManager(path, refreshManager);
+
+  // Restore state on initial load
+  refreshManager.restoreState();
+  window.refreshManager = refreshManager;
+
+  // Handle browser refresh by saving state before unload
+  window.addEventListener('beforeunload', () => {
+      refreshManager.saveState();
+  });
 });

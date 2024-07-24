@@ -10,6 +10,7 @@ export class ShelfVisualizer {
     // Clear any existing content
     this.container.innerHTML = '';
     this.container.classList.add("with-shelf");
+    this.container.dataset.showcase = 'shelf';
 
     // Remove the class .story-has-showcase
     const previousStory = document.querySelector('.story-has-showcase')
@@ -28,14 +29,15 @@ export class ShelfVisualizer {
   }
 
   drawDrawer(node, depth) {
-    let author = node.permissions.isMyText ? 
+    const author = node.permissions.isMyText ? 
     `<span class="author">by you</span>` : 
     `<span class="author">by ${node.firstName} ${node.lastName}</span>`;
-    console.log(node);
+    //console.log(node);
+    const isWinner = node.isWinner ? "isWinner" : "";
 
     let drawerHTML = `
-      <li class="node" style="--node-depth: ${depth}">
-        <div class="node-title">
+      <li class="node" data-story-id="${node.id}"style="--node-depth: ${depth}">
+        <div class="node-title ${isWinner}">
           <h2>
             <span class="arrow">▶</span>
             <span class="title">${node.title}</span>
@@ -43,7 +45,7 @@ export class ShelfVisualizer {
             <span>${this.getNumberOfVotes(node)}</span>
           </h2>
         </div>
-        <div class="writing hidden">
+        <div class="writing hidden ${isWinner}">
           <div class="node-buttons">
             ${node.permissions.canIterate ? this.getIterateForm(node) : ''}
             ${node.permissions.canEdit ? this.getEditForm(node) : ''}
@@ -104,18 +106,6 @@ export class ShelfVisualizer {
     `;
   }
 
-/*   getVoteForm(node) {
-    return `
-      <form action="${this.path}vote/voteToggle" method="POST">
-        <input type="hidden" name="id" value="${node.id}">
-        <input type="hidden" name="parent_id" value="${node.parent_id}">
-        <button type="submit" class="vote" value="Vote" data-vote=${node.id}>
-          ${SVGManager.voteSVG}
-        </button>
-      </form>
-    `;
-  } */  
-
   getVoteButton(node) {
       return `
         <button class="vote ${node.hasVoted == 1? 'voted' : ''}" data-vote=${node.id}>
@@ -135,7 +125,6 @@ export class ShelfVisualizer {
     `;
   }
   
-
   addEventListeners() {
     const titles = this.container.querySelectorAll('.node-title');
     titles.forEach(title => {
@@ -144,9 +133,11 @@ export class ShelfVisualizer {
         const arrow = title.querySelector('.arrow');
         if (writingDiv.classList.contains('hidden')) {
           writingDiv.classList.remove('hidden');
+          writingDiv.classList.add('visible');
           arrow.textContent = '▼';
         } else {
           writingDiv.classList.add('hidden');
+          writingDiv.classList.remove('visible');
           arrow.textContent = '▶';
         }
       });
@@ -154,9 +145,4 @@ export class ShelfVisualizer {
   }
 }
 
-
-
-
 /*  ${node.permissions.canDelete ? this.getDeleteForm(node) : ''}  */
-
-

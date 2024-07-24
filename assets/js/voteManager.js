@@ -1,9 +1,10 @@
 import { ShelfVisualizer } from './shelfVisualizer.js';
 
 export class VoteManager {
-    constructor(path) {
+    constructor(path, refreshManager) {
         this.path = path;
         this.init();
+        this.refreshManager = refreshManager;
     }
 
     init() {
@@ -32,7 +33,8 @@ export class VoteManager {
                     if (confirm("This vote will end the game. Are you sure?")) {
                         result = await this.voteUnvote(textId, true);
                         console.log("confirmed", result)
-                        this.updateVoteButton(button, result);
+                        //this.updateVoteButton(button, result);
+                        await this.refreshManager.fetchDataAndRefresh()
                     }else{
                         // cancelled vote (upon confirmation)
                         return;

@@ -126,17 +126,20 @@ class ControllerText extends Controller{
     // Recursive function to add permissions to each node
     private function addPermissions(&$node, $currentUserId, $hierarchy, $hasContributed) {
         $isParent = !empty($node['children']);
-
+        
         // TODO: You can reuse this logic in every method, to ensure that we enforce these permissions.
+        $gameOpen = $node['openForChanges'] == 1 ? true : false;
+        $nodeWriter = $node['writer_id'];
         $node['permissions'] = [
-            'canEdit' => $currentUserId === $node['writer_id'],
-            'canDelete' => !$isParent && $currentUserId === $node['writer_id'],
-            'canIterate' => $currentUserId !== null && $currentUserId !== $node['writer_id'],
-            'isMyText' => $currentUserId === $node['writer_id'],
-            'canVote' => $currentUserId !== $node['writer_id'] && $hasContributed 
+            'canEdit' => $currentUserId === $nodeWriter && $gameOpen,
+            'canDelete' => !$isParent && $currentUserId === $nodeWriter && $gameOpen,
+            'canIterate' => $currentUserId !== null && $currentUserId !== $nodeWriter && $gameOpen,
+            'isMyText' => $currentUserId === $nodeWriter,
+            'canVote' => $currentUserId !== $nodeWriter && $hasContributed && $gameOpen
         ];
 
         $node['hasContributed'] = $hasContributed;
+        $node['isWinner'] = $node['isWinner'] == 1 ? true : false;
 
         if (!empty($node['children'])) {
             foreach ($node['children'] as &$child) {

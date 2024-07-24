@@ -8,6 +8,10 @@
     background-color: white;
 }
 
+.story.closed{
+    background-color: rgba(247, 244, 232, 0.325);
+}
+
 .story-btns{
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;    
