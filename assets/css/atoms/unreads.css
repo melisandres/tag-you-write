@@ -1,4 +1,43 @@
-.unreads{
-    /* https://getcssscan.com/css-box-shadow-examples by Aligator */
+/* on the left */
+.unread{
     box-shadow: rgb(244, 218, 90, 1) -1px 0px, white -6px 0px, rgb(244, 218, 90, 0.7) -7px 0px, white -12px 0px, rgb(244, 218, 90, 0.4) -13px 0px, white -18px 0px, rgb(244, 218, 90, 0.1) -19px 0px;
 }
+
+
+/* bottom and right */
+/* .unread {
+    margin-right:20px;
+    box-shadow: 
+        rgb(244, 218, 90, 1) 1px 1px, 
+        white 6px 6px, 
+        rgb(244, 218, 90, 0.7) 7px 7px, 
+        white 12px 12px, 
+        rgb(244, 218, 90, 0.4) 13px 13px, 
+        white 18px 18px, 
+        rgb(244, 218, 90, 0.1) 19px 19px;
+} */
+
+
+/* .unread-bottom-left {
+    box-shadow: 
+        rgb(244, 218, 90, 1) -1px 1px, 
+        white -6px 6px, 
+        rgb(244, 218, 90, 0.7) -7px 7px, 
+        white -12px 12px, 
+        rgb(244, 218, 90, 0.4) -13px 13px, 
+        white -18px 18px, 
+        rgb(244, 218, 90, 0.1) -19px 19px;
+} */
+
+
+/* on the bottom */
+/* .unread {
+    box-shadow: rgb(244, 218, 90, 1) 0px 1px, white 0px 6px, rgb(244, 218, 90, 0.7) 0px 7px, white 0px 12px, rgb(244, 218, 90, 0.4) 0px 13px, white 0px 18px, rgb(244, 218, 90, 0.1) 0px 19px;
+} */
+
+
+/* on the right */
+/* .unread {
+    margin: 20px;
+    box-shadow: rgb(244, 218, 90, 1) 1px 0px, white 6px 0px, rgb(244, 218, 90, 0.7) 7px 0px, white 12px 0px, rgb(244, 218, 90, 0.4) 13px 0px, white 18px 0px, rgb(244, 218, 90, 0.1) 19px 0px;
+} */

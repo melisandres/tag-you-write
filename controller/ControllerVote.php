@@ -38,10 +38,10 @@ class ControllerVote extends Controller {
         // Or that if it is a winning vote, that it has been confirmed
         if(!$isWinningVote || ($isWinningVote && $isConfirmed == "true")){
             if ($alreadyVoted) {
-                $vote->deleteVote($data);
+                $vote->deleteComposite($data);
                 $voted = false;
             } else {
-                $vote->saveVote($data);
+                $vote->saveComposite($data);
                 $voted = true;
             }
         }

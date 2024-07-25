@@ -31,7 +31,13 @@ class Text extends Crud{
         // Check if current_writer is provided or not
         if ($current_writer) {
             // When a writer is logged in
-            $sql .= ", CASE WHEN vote.writer_id IS NOT NULL THEN 1 ELSE 0 END AS hasVoted
+            $sql .= ", CASE WHEN vote.writer_id IS NOT NULL THEN 1 ELSE 0 END AS hasVoted,
+                       CASE 
+                          WHEN seen.text_id IS NULL THEN 0
+                          WHEN text.note_date IS NULL THEN 1
+                          WHEN seen.read_at > text.note_date THEN 1
+                          ELSE 0
+                      END AS text_seen
                       FROM text
                       INNER JOIN writer ON text.writer_id = writer.id
                       LEFT JOIN game ON text.game_id = game.id
@@ -46,6 +52,7 @@ class Text extends Crud{
                           GROUP BY game_id
                       ) AS playerCounts ON text.game_id = playerCounts.game_id
                       LEFT JOIN vote ON text.id = vote.text_id AND vote.writer_id = :currentUserId
+                      LEFT JOIN seen ON text.id = seen.text_id AND seen.writer_id = :currentUserId
                       GROUP BY text.id";
         } else {
             // When no writer is logged in

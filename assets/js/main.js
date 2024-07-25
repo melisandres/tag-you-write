@@ -4,6 +4,7 @@ import { UIManager } from './uiManager.js';
 import { VoteManager } from './voteManager.js'; 
 import { GameManager } from './gameManager.js';
 import { RefreshManager } from './refreshManager.js';
+import { SeenManager } from './seenManager.js';
 
 document.addEventListener("DOMContentLoaded", () => {
   const path = window.location.origin + "/tag-you-write-repo/tag-you-write/";
@@ -21,6 +22,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initialize GameManager
   new GameManager(path);
+
+  // Initialize SeenManager
+  new SeenManager(path);
 
   // Initialize RefreshManager
   const refreshManager = new RefreshManager(uiManager);

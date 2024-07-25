@@ -1,9 +1,11 @@
 import { SVGManager } from './svgManager.js';
+import { SeenManager } from './seenManager.js';
 
 export class ShelfVisualizer {
   constructor(container, path) {
     this.path = path;
     this.container = container;
+    this.SeenManager = new SeenManager(path);
   }
 
   drawShelf(data) {
@@ -32,14 +34,16 @@ export class ShelfVisualizer {
     const author = node.permissions.isMyText ? 
     `<span class="author">by you</span>` : 
     `<span class="author">by ${node.firstName} ${node.lastName}</span>`;
-    //console.log(node);
+    console.log(node);
     const isWinner = node.isWinner ? "isWinner" : "";
+    const unread = node.text_seen == "0" ? "unread" : "";
+
 
     let drawerHTML = `
       <li class="node" data-story-id="${node.id}"style="--node-depth: ${depth}">
         <div class="node-title ${isWinner}">
           <h2>
-            <span class="arrow">▶</span>
+            <span class="arrow ${unread}">▶</span>
             <span class="title">${node.title}</span>
             ${author}
             <span>${this.getNumberOfVotes(node)}</span>
@@ -129,12 +133,16 @@ export class ShelfVisualizer {
     const titles = this.container.querySelectorAll('.node-title');
     titles.forEach(title => {
       title.addEventListener('click', () => {
+        const text_id = title.closest('[data-story-id]').dataset.storyId;
         const writingDiv = title.nextElementSibling;
         const arrow = title.querySelector('.arrow');
         if (writingDiv.classList.contains('hidden')) {
           writingDiv.classList.remove('hidden');
           writingDiv.classList.add('visible');
           arrow.textContent = '▼';
+          //handle marking as "read"
+          arrow.classList.remove('unread');
+          this.SeenManager.markAsSeen(text_id);
         } else {
           writingDiv.classList.add('hidden');
           writingDiv.classList.remove('visible');

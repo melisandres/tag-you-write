@@ -21,7 +21,6 @@ export class VoteManager {
         }
     }
 
-
     async handleVoteButtonClick(event) {
         const button = event.target.closest('[data-vote]');
         if (button) {
