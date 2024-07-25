@@ -35,6 +35,20 @@ export class UIManager {
     const shelfTarget = event.target.closest("[data-refresh-shelf]");
     const modalTarget = event.target.closest("[data-refresh-modal]");
 
+    // a variable to hold keyword shelf if shelfTarget, modal if modalTarget, and tree if treeTarget
+    let targetType;
+
+    if (shelfTarget) {
+        targetType = 'shelf';
+    } else if (modalTarget) {
+        targetType = 'modal';
+    } else if (treeTarget) {
+        targetType = 'tree';
+    } else {
+        targetType = 'none';  // Or any other default value
+    }
+    console.log("targetType : ", targetType)
+
     // if modalTarget
     if(modalTarget){
       this.handleModalRefresh(event);
@@ -42,15 +56,32 @@ export class UIManager {
     }
 
     // don't continue if you clicked neither button
-    if (!treeTarget && !shelfTarget){
+    if (targetType === 'none'){
       return;
     }
 
     let container = document.querySelector('#showcase');
     const story = event.target.closest(".story");
 
+    // grab the textId from the button clicked
+    const targetElement = { tree: treeTarget, shelf: shelfTarget, modal: modalTarget }[targetType];
+    const textId = targetElement ? targetElement.dataset.textId : null;
+
+    // grab the textId from the showcase on screen, if there is one
+    let previousTextId = null;
+    container ? previousTextId = container.closest(".story").dataset.textId : "";
+
+    // grab the type of view now onscreen
+    let previousViewType = "none";
+    container ? previousViewType = container.dataset.showcase : "";   
+
     // if you've opened the showcase area elsewhere, close it
     container ? container.remove() : "";
+
+    // is this action to toggle off the view, or to get a new view
+    if(previousViewType == targetType && textId == previousTextId){
+      return;
+    }
 
     // now create showcase container and append to the current story
     story.innerHTML += '<div id="showcase"></div>';
@@ -58,12 +89,12 @@ export class UIManager {
 
     // now fill it depending on the button (tree or shelf)
     if (treeTarget) {
-      const textId = treeTarget.dataset.textId;
+      //const textId = treeTarget.dataset.textId;
       this.drawTree(textId, container);
     }
 
     if (shelfTarget) {
-      const textId = shelfTarget.dataset.textId;
+      //const textId = shelfTarget.dataset.textId;
       this.drawShelf(textId, container);
     }
   }
