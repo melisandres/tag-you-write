@@ -27,7 +27,7 @@ export class VoteManager {
             const textId = button.getAttribute('data-vote');
             try {
                 let result = await this.voteUnvote(textId, false);
-                console.log("get confirmation", result)
+                //console.log("get confirmation", result)
                 if (result.confirmationRequired) {
                     if (confirm("This vote will end the game. Are you sure?")) {
                         result = await this.voteUnvote(textId, true);

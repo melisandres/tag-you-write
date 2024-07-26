@@ -1,7 +1,8 @@
 export class SeenManager {
     constructor(path) {
         this.path = path;
-        this.userId = sessionStorage.getItem('currentUserId');
+/*         this.userId = sessionStorage.getItem('currentUserId');
+        console.log("I can get session storage here? ?", this.userId); */
         this.initEventListeners();
     }
 
@@ -24,6 +25,7 @@ export class SeenManager {
             throw new Error(`Error marking as seen: ${response.status}`);
         }
         return await response.json();
+        //this.updateReadStatus(id);
     }
 
     async markAsUnseen(id) {
@@ -33,6 +35,12 @@ export class SeenManager {
           throw new Error(`Error marking as unseen: ${response.status}`);
         }
         return await response.json();
+    }
+
+    updateReadStatus(id) {
+        const element = document.querySelector(`[data-story-id="${id}"]`);
+        element.classList.remove('unread');
+
     }
 
     /* async checkReadStatus(textId) {

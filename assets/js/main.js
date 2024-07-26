@@ -14,18 +14,18 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize Modal
   const modal = new Modal(treeModal, path);
 
-  // Initialize StoryManager with the modal instance
-  const storyManager = new StoryManager(path, modal);
-  window.storyManager = storyManager;
+  // Initialize SeenManager
+  const seenManager= new SeenManager(path);
 
-  // Initialize UIManager with the storyManager and modal instances
-  const uiManager = new UIManager(storyManager, modal);
+  // Initialize StoryManager with the modal instance
+  const storyManager = new StoryManager(path, modal, seenManager);
+  //window.storyManager = storyManager;
 
   // Initialize GameManager
   new GameManager(path);
 
-  // Initialize SeenManager
-  new SeenManager(path);
+  // Initialize UIManager with the storyManager and modal instances
+  const uiManager = new UIManager(storyManager, modal);
 
   // Initialize RefreshManager
   const refreshManager = new RefreshManager(uiManager, storyManager);
