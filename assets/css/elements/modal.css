@@ -44,6 +44,7 @@
     display: flex;
     flex-direction: column;
     margin-bottom: 50%;
+    gap: 25px;
 }
 
 /* the buttons are currently all in forms, so you don't need to do fetches */
@@ -63,6 +64,21 @@
     height: 43px;
     border: none;
     cursor: pointer;
+}
+
+.modal-btns .vote{
+    border: none;
+    cursor: pointer;
+}
+
+.modal-btns .vote svg{
+    width: 39px;
+    height: 39px;
+    transform: rotate(145deg);
+}
+
+.modal-btns .vote.voted svg{
+    transform: rotate(-30deg);
 }
 
 .edit svg {

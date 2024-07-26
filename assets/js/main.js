@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initialize StoryManager with the modal instance
   const storyManager = new StoryManager(path, modal);
+  window.storyManager = storyManager;
 
   // Initialize UIManager with the storyManager and modal instances
   const uiManager = new UIManager(storyManager, modal);
@@ -27,14 +28,14 @@ document.addEventListener("DOMContentLoaded", () => {
   new SeenManager(path);
 
   // Initialize RefreshManager
-  const refreshManager = new RefreshManager(uiManager);
+  const refreshManager = new RefreshManager(uiManager, storyManager);
 
   // Initialize VoteManager
   new VoteManager(path, refreshManager);
 
   // Restore state on initial load
   refreshManager.restoreState();
-  window.refreshManager = refreshManager;
+  //window.refreshManager = refreshManager;
 
   // Handle browser refresh by saving state before unload
   window.addEventListener('beforeunload', () => {

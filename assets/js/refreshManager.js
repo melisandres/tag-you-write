@@ -1,7 +1,9 @@
 import { StoryManager } from './storyManager.js';
+import { Modal } from './modal.js' ;
 
 export class RefreshManager {
-    constructor(uiManager) {
+    constructor(uiManager, storyManager) {
+        this.storyManager = storyManager;
         this.state = {};
         this.storiesEl = document.querySelector("[data-stories]")
         this.uiManager = uiManager;
@@ -11,11 +13,15 @@ export class RefreshManager {
         // Where you can keep drawer data
         this.state.drawers = [];
         this.state.showcase = "none";
-        this.state.modal = "none";
         this.state.rootStoryId = null;
+        this.state.modal = false;
+        this.state.modalTextId = null;
 
         // The showcase element
         const showcaseEl = this.storiesEl.querySelector("#showcase");
+
+        // The modal element if visible
+        const treeModalEl = document.querySelector("[data-tree-modal='visible']");
 
         if(showcaseEl){
             // Save state of open drawers
@@ -31,7 +37,15 @@ export class RefreshManager {
             // Save story id
             this.state.rootStoryId = showcaseEl.closest('[data-text-id]').dataset.textId;
         }
-        console.log(this.state);
+
+        if(treeModalEl){
+            // TODO: add a dataset to a parent element for the textID
+            const currentTextId = treeModalEl.dataset.textId;
+            this.state.modalTextId = currentTextId;
+            this.state.modal = true;
+        }else{
+            this.state.modal = false;
+        }
 
         localStorage.setItem('pageState', JSON.stringify(this.state));
     }
@@ -52,7 +66,13 @@ export class RefreshManager {
             });
         } else if (savedState.showcase === 'tree') {
             this.uiManager.drawTree(savedState.rootStoryId, container)
+        } 
+        
+        //check if there's a modal id saved
+        if (savedState.modal){
+            this.storyManager.showStoryInModal(savedState.modalTextId);
         }
+
         // Restore drawer states
         /* if(showcaseEl && savedState.showcase === "shelf"){
             savedState.drawers.forEach(storyId => {

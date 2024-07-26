@@ -35,7 +35,7 @@
 
 
     <!-- a modal for the showcase area (selected text) -->
-    <div class="modal-background display-none">
+    <div class="modal-background display-none" data-tree-modal="hidden" data-text-id="">
         <div class="modal-with-btns">
             <div class="modal-btns">
                 <button class="close-modal">×</button> 

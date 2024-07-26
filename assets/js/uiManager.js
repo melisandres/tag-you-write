@@ -47,7 +47,7 @@ export class UIManager {
     } else {
         targetType = 'none';  // Or any other default value
     }
-    console.log("targetType : ", targetType)
+
 
     // if modalTarget
     if(modalTarget){
@@ -109,12 +109,20 @@ export class UIManager {
     await this.storyManager.drawShelf(textId, container);
   }
 
-  // Handle the showing of the story modal
+  // Handle the showing of the story modal 
+  // by getting the id via the click even
   handleModalRefresh(event){
     const modalTarget = event.target.closest("[data-refresh-modal]");
     const textId = modalTarget.dataset.textId;
     this.storyManager.showStoryInModal(textId)
   }
+
+    // Handle the showing of the story modal
+    // by being send the id directly. 
+/*     drawTreeModal(textId){
+      this.storyManager.showStoryInModal(textId)
+    }
+ */
 
   // To be accessed while doing automatic refreshes
   createShowcaseContainer(storyId) {

@@ -17,7 +17,88 @@ class Text extends Crud{
                         'game_id'
                         ];
 
-    public function selectTexts($current_writer = null) {
+    public function selectTexts($current_writer = null, $idValue = null) {
+        // Base SQL part
+        $sql = "SELECT text.*, 
+                        writer.firstName AS firstName, 
+                        writer.lastName AS lastName,
+                        game.prompt AS prompt,
+                        game.open_for_changes AS openForChanges,
+                        IFNULL(voteCounts.voteCount, 0) AS voteCount,
+                        IFNULL(playerCounts.playerCount, 0) AS playerCount,
+                        CASE WHEN game.winner = text.id THEN TRUE ELSE FALSE END AS isWinner";
+    
+        // Check if current_writer is provided or not
+        if ($current_writer) {
+            // When a writer is logged in
+            $sql .= ", CASE WHEN vote.writer_id IS NOT NULL THEN 1 ELSE 0 END AS hasVoted,
+                        CASE 
+                            WHEN seen.text_id IS NULL THEN 0
+                            WHEN text.note_date IS NULL THEN 1
+                            WHEN seen.read_at > text.note_date THEN 1
+                            ELSE 0
+                        END AS text_seen,
+                        CASE WHEN game_has_player.player_id IS NOT NULL THEN 1 ELSE 0 END AS hasContributed";
+        } else {
+            // When no writer is logged in
+            $sql .= ", 0 AS hasContributed";
+        }
+    
+        $sql .= " FROM text
+                    INNER JOIN writer ON text.writer_id = writer.id
+                    LEFT JOIN game ON text.game_id = game.id
+                    LEFT JOIN (
+                        SELECT text_id, COUNT(*) AS voteCount
+                        FROM vote
+                        GROUP BY text_id
+                    ) AS voteCounts ON text.id = voteCounts.text_id
+                    LEFT JOIN (
+                        SELECT game_id, COUNT(*) AS playerCount
+                        FROM game_has_player
+                        GROUP BY game_id
+                    ) AS playerCounts ON text.game_id = playerCounts.game_id";
+    
+        if ($current_writer) {
+            $sql .= " LEFT JOIN game_has_player ON text.game_id = game_has_player.game_id AND game_has_player.player_id = :currentUserId
+                      LEFT JOIN vote ON text.id = vote.text_id AND vote.writer_id = :currentUserId
+                      LEFT JOIN seen ON text.id = seen.text_id AND seen.writer_id = :currentUserId";
+        } else {
+            $sql .= " LEFT JOIN vote ON text.id = vote.text_id";
+        }
+    
+        // Add WHERE clause if idValue is provided
+        if ($idValue !== null) {
+            $sql .= " WHERE text.id = :idValue";
+        }
+    
+        // Group it by text.id
+        $sql .= " GROUP BY text.id";
+    
+        $stmt = $this->prepare($sql);
+    
+        // Bind the current writer ID if it's provided
+        if ($current_writer) {
+            $stmt->bindValue(':currentUserId', $current_writer);
+        }
+    
+        // Bind the idValue if it's provided
+        if ($idValue !== null) {
+            $stmt->bindValue(':idValue', $idValue);
+        }
+    
+        $stmt->execute();
+        
+        // Return single row if idValue is provided, else return all rows
+        if ($idValue !== null) {
+            return $stmt->fetch();
+        } else {
+            return $stmt->fetchAll();
+        }
+    }
+                        
+                        
+
+    public function oldSelectTexts($current_writer = null) {
         // Base SQL part
         $sql = "SELECT text.*, 
                        writer.firstName AS firstName, 
@@ -83,25 +164,6 @@ class Text extends Crud{
         $stmt->execute();
         return $stmt->fetchAll();
     }
-    
-    
-    
-    
-    
-/*     public function selectTexts(){
-        $sql = "SELECT text.*, 
-                writer.firstName AS firstName, 
-                writer.lastName AS lastName
-                FROM text
-                INNER JOIN writer 
-                ON text.writer_id = writer.id;";
-
-        $stmt = $this->query($sql);
-        $stmt->execute();
-
-        return $stmt->fetchAll();
-    } */
-
 
     //returns the text as well as the first and last name of the writer
     //by id I'm not using the variables I'm passing--this is a little confusing 
@@ -111,9 +173,13 @@ class Text extends Crud{
         $primaryKey = $this->primaryKey;
         $sql = "SELECT text.*, 
                 writer.firstName AS firstName, 
-                writer.lastName AS lastName 
-                FROM $table INNER JOIN writer 
+                writer.lastName AS lastName, 
+                game.prompt AS prompt
+                FROM $table 
+                INNER JOIN writer 
                 ON text.writer_id = writer.id 
+                INNER JOIN game
+                ON text.game_id = game.id
                 WHERE $table.$primaryKey = :$primaryKey;";
         
         $stmt = $this->prepare($sql);

@@ -11,6 +11,9 @@ class ControllerSeen extends Controller {
     }
 
     public function markAsSeen($text_id) {
+        if(!$_SESSION['writer_id']){
+            return;
+        }
         try {
             $seen = new Seen;
             $data = [
@@ -58,6 +61,9 @@ class ControllerSeen extends Controller {
     } */
 
     public function markAsUnseen($text_id) {
+        if(!$_SESSION['writer_id']){
+            return;
+        }
         $seen = new Seen;
         $data = [
             'writer_id' => $_SESSION['writer_id'],
@@ -76,6 +82,9 @@ class ControllerSeen extends Controller {
     }
 
     public function seenToggle($text_id) {
+        if(!$_SESSION['writer_id']){
+            return;
+        }
         $seen = new Seen;
         $data = [
             'writer_id' => $_SESSION['writer_id'],

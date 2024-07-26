@@ -1,9 +1,10 @@
 //import * as d3 from 'https://d3js.org/d3.v7.min.js';
 
 export class TreeVisualizer {
-    constructor(container, modal) {
+    constructor(container, modal, storyManager) {
         this.container = container;
         this.modal = modal;
+        this.storyManager = storyManager;
 
         // Constraints for the zoom 
         this.minScale = 0.25;
@@ -105,7 +106,7 @@ export class TreeVisualizer {
             .enter().append("g")
             .attr("class", d => `node${d.children ? " node--internal" : " node--leaf"}`)
             .attr("transform", d => `translate(${d.y},${d.x})`)
-            .on("click", (event, d) => this.modal.showModal(d.data));
+            .on("click", (event, d) => this.storyManager.showStoryInModal(d.data.id));
   
         node.append("circle").attr("r", 10);
   

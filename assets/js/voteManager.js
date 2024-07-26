@@ -41,6 +41,7 @@ export class VoteManager {
                 }else{
                     // confirmation not required
                     this.updateVoteButton(button, result);
+                    //await this.refreshManager.fetchDataAndRefresh()
                 }
             } catch (error) {
                 console.error('Error toggling vote:', error);
@@ -64,8 +65,64 @@ export class VoteManager {
             console.error('Invalid data received:', data);
             return;
         }
+    
+        let resultsSpan;
+        if (button.closest(".node")) {
+            // Case for shelf visualization
+            resultsSpan = button.closest(".node").querySelector('[data-vote-count]');
+        } else {
+            // Case for modal visualization
+            resultsSpan = button.closest(".modal-with-btns").querySelector('.vote-info .small');
 
-        const resultsSpan = button.closest(".node").querySelector('[data-vote-count]');
+            // Update the shelf view underneath if applicable
+            // TODO: I may need a similar logic to handle D3 tree visualization, around votes.
+            if (data.textId) {
+                const shelfNode = document.querySelector(`.node[data-story-id="${data.textId}"]`);
+                if (shelfNode) {
+                    const shelfResultsSpan = shelfNode.querySelector('[data-vote-count]');
+                    const shelfVoteButton = shelfNode.querySelector(`.vote[data-vote="${data.textId}"]`);
+    
+                    // Update the vote count and button appearance for the shelf view
+                    shelfResultsSpan.innerHTML = `${data.voteCount} / ${data.playerCountMinusOne}`;
+                    shelfResultsSpan.setAttribute('data-vote-count', data.voteCount);
+    
+                    if (data.voted) {
+                        shelfVoteButton.classList.add('voted');
+                    } else {
+                        shelfVoteButton.classList.remove('voted');
+                    }
+                }
+            }
+        }
+    
+        const numberOfVotes = data.voteCount;
+        const numberOfPlayers = data.playerCountMinusOne;
+    
+        if (data.voted) {
+            button.classList.add('voted');
+        } else {
+            button.classList.remove('voted');
+        }
+    
+        resultsSpan.innerHTML = `${numberOfVotes} / ${numberOfPlayers}`;
+        resultsSpan.setAttribute('data-vote-count', numberOfVotes);
+    }
+    
+
+   /*  updateVoteButton(button, data) {
+        if (!data || typeof data.voteCount === 'undefined' || typeof data.playerCountMinusOne === 'undefined') {
+            console.error('Invalid data received:', data);
+            return;
+        }
+
+        let resultsSpan;
+        if (button.closest(".node")) {
+            // Case for shelf visualization
+            resultsSpan = button.closest(".node").querySelector('[data-vote-count]');
+        } else {
+            // Case for modal visualization
+            resultsSpan = button.closest(".modal-with-btns").querySelector('.vote-info .small');
+        }
         const numberOfVotes = data.voteCount;
         const numberOfPlayers = data.playerCountMinusOne;
 
@@ -77,7 +134,9 @@ export class VoteManager {
 
         resultsSpan.innerHTML = `${numberOfVotes} / ${numberOfPlayers}`;
         resultsSpan.setAttribute('data-vote-count', numberOfVotes);
-    }
+    } */
+
+    
 }
 
    

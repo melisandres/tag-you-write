@@ -28,16 +28,16 @@ class ControllerText extends Controller{
             }
         }
 
-        // Get the current user ID from the session
+/*         // Get the current user ID from the session
         $currentUserId = $_SESSION['writer_id'] ?? null;
 
         // Build the full hierarchy
-        $hierarchy = $this->buildHierarchy($select, 'parent_id');
+        $hierarchy = $this->buildHierarchy($select, 'parent_id'); */
 
         // Check contributions and flag root texts
-        foreach ($texts as &$rootText) {
+/*         foreach ($texts as &$rootText) {
             $rootText['hasContributed'] = $this->hasContributed($rootText['id'], $hierarchy, $currentUserId);
-        }
+        } */
         
         // Send the JSON data to the front end
         Twig::render('text-index.php', ['texts' => $texts]);
@@ -55,9 +55,9 @@ class ControllerText extends Controller{
         }
     }
 
-    private function hasContributed($textId, $hierarchy, $currentUserId) {
+/*     private function hasContributed($textId, $hierarchy, $currentUserId) {
         // Helper function to recursively check contributions
-        $stack = [$this->findTextById($textId, $hierarchy)];
+         $stack = [$this->findTextById($textId, $hierarchy)];
         while (!empty($stack)) {
             $node = array_pop($stack);
             if ($node['writer_id'] == $currentUserId) {
@@ -69,8 +69,8 @@ class ControllerText extends Controller{
                 }
             }
         }
-        return false;
-    }
+        return false; 
+    } */
 
     private function findTextById($textId, $hierarchy) {
         foreach ($hierarchy as $node) {
@@ -102,20 +102,17 @@ class ControllerText extends Controller{
     }
 
     // An end point from which you can receive a single tree from the db
-    public function getTree($id = null){
+    public function getTree($rootId = null){
         $text = new Text;
         // Get the current user Id
         $currentUserId = $_SESSION['writer_id'] ?? null;
         $select = $text->selectTexts($currentUserId);
 
         // Get the requested tree
-        $tree = $this->buildHierarchy($select, 'id', $id);
-
-        //Check if the current user has contributed to this tree
-        $hasContributed = $this->hasContributed($id, $tree, $currentUserId);
+        $tree = $this->buildHierarchy($select, 'id', $rootId);
 
         // Add permissions to each node iteratively
-        $this->addPermissions($tree[0], $currentUserId, $tree, $hasContributed);
+        $this->addPermissions($tree[0], $currentUserId, $tree);
 
         // Convert the hierarchical array to JSON format
         $jsonData = json_encode($tree);
@@ -123,12 +120,38 @@ class ControllerText extends Controller{
         return $jsonData;
     }
 
+    // An end point from which to get the data for just one node
+    public function getStoryNode($textId){
+        // The model
+        $text = new Text;
+        // The user
+        $currentUserId = $_SESSION['writer_id'] ?? null;
+        // The query with an extra argument for the textId
+        $select = $text->selectTexts($currentUserId, $textId);
+        // Add permissions recursively, but for only one line... no not
+        $this->addPermissions($select, $currentUserId, $select);
+        // Encode it
+        $jsonData = json_encode($select);
+        // Send it
+        return $jsonData;
+    }
+
     // Recursive function to add permissions to each node
-    private function addPermissions(&$node, $currentUserId, $hierarchy, $hasContributed) {
+    private function addPermissions(&$node, $currentUserId, $hierarchy /*, $hasContributed */) {
         $isParent = !empty($node['children']);
+        /* die(var_dump($node)); */
+
+        // Set 1s and 0s to trues and falses
+        $node['hasContributed'] = $node['hasContributed'] == 1 ? true : false;
+        $node['isWinner'] = $node['isWinner'] == 1 ? true : false;
+        $node['openForChanges'] = $node['openForChanges'] == 1 ? true : false;
+
+        //rename some vars to make the following a little clearer
+        $gameOpen = $node['openForChanges'];
+        $hasContributed = $node['hasContributed'];
+
         
         // TODO: You can reuse this logic in every method, to ensure that we enforce these permissions.
-        $gameOpen = $node['openForChanges'] == 1 ? true : false;
         $nodeWriter = $node['writer_id'];
         $node['permissions'] = [
             'canEdit' => $currentUserId === $nodeWriter && $gameOpen,
@@ -138,12 +161,9 @@ class ControllerText extends Controller{
             'canVote' => $currentUserId !== $nodeWriter && $hasContributed && $gameOpen
         ];
 
-        $node['hasContributed'] = $hasContributed;
-        $node['isWinner'] = $node['isWinner'] == 1 ? true : false;
-
         if (!empty($node['children'])) {
             foreach ($node['children'] as &$child) {
-                $this->addPermissions($child, $currentUserId, $hierarchy, $hasContributed);
+                $this->addPermissions($child, $currentUserId, $hierarchy, /* $hasContributed */);
             }
         }
     }

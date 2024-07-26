@@ -58,6 +58,7 @@ class ControllerVote extends Controller {
     
         // Build the response data
         $response = [
+            'textId' => $text_id,
             'alreadyVoted' => $alreadyVoted,
             'voted' => $voted,
             'voteCount' => $voteCount,

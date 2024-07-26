@@ -12,8 +12,16 @@ export class Modal {
   
     showModal(data) {
       this.modalElement.classList.remove('display-none');
+      this.modalElement.dataset.treeModal = "visible";
+      this.modalElement.dataset.textId = data.id;
       this.modalContent.innerHTML = `
         <div class="modal-text">
+            <div class="vote-info">
+              ${SVGManager.votesSVG}
+              <span class="small">
+                ${data.voteCount}/${data.playerCount - 1}
+              </span>
+            </div>
             <h2 class="headline">${data.title}</h2>
             <h3 class="author"> -&nbsp${data.firstName} ${data.lastName}&nbsp- </h3>
             <p>${data.writing}</p>
@@ -29,6 +37,7 @@ export class Modal {
           </button>
         </form>
       ` : ''}
+
       ${data.permissions.canEdit ? `
         <form action="${this.path}text/edit" method="POST" class="edit-form">
           <input type="hidden" name="id" value="${data.id}">
@@ -37,12 +46,19 @@ export class Modal {
           </button>
         </form>
       ` : ''}
+
+      ${data.permissions.canVote ? `
+        <button class="vote ${data.hasVoted == 1 ? 'voted' : ''}" data-vote=${data.id}>
+          ${SVGManager.voteSVG}
+        </button>
+      ` : ''}
     `;
 
     }
   
     hideModal() {
       this.modalElement.classList.add('display-none');
+      this.modalElement.dataset.treeModal = "hidden";
     }
   }
   
