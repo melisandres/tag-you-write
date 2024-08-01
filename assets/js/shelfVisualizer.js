@@ -34,19 +34,21 @@ export class ShelfVisualizer {
     const author = node.permissions.isMyText ? 
     `<span class="author">by you</span>` : 
     `<span class="author">by ${node.firstName} ${node.lastName}</span>`;
-    //console.log(node);
+    console.log(node);
     const isWinner = node.isWinner ? "isWinner" : "";
     const unread = node.text_seen == "0" ? "unread" : "";
+    const note = node.note ? `<p class="note">P.S... ${node.note}</p>` : '';
+    const noteDate = node.note_date ?  `<span class="date"> ${node.note_date}</span>` : '';
 
 
     let drawerHTML = `
-      <li class="node ${unread}" data-story-id="${node.id}"style="--node-depth: ${depth}">
+      <li class="node ${unread} ${node.text_status}" data-story-id="${node.id}"style="--node-depth: ${depth}">
         <div class="node-title ${isWinner}">
           <h2>
             <span class="arrow">▶</span>
             <span class="title">${node.title}</span>
             ${author}
-            <span>${this.getNumberOfVotes(node)}</span>
+            ${this.getStatus(node)}
           </h2>
         </div>
         <div class="writing hidden ${isWinner}">
@@ -59,6 +61,8 @@ export class ShelfVisualizer {
             ${node.writing}
           </p>
           <span class="date"> ${node.date}</span>
+          ${note}
+          ${noteDate}
         </div>
     `;
 
@@ -120,13 +124,26 @@ export class ShelfVisualizer {
 
   getNumberOfVotes(node) {
     return `
-        <i>
-          ${SVGManager.votesSVG}
-        </i>
-        <span class="small"  data-vote-count=${node.voteCount} data-player-count=${node.playerCount - 1}>
-          ${node.voteCount}/${node.playerCount - 1}
-        </span>
-    `;
+    <span>
+      <i>
+        ${SVGManager.votesSVG}
+      </i>
+      <span class="small"  data-vote-count=${node.voteCount} data-player-count=${node.playerCount - 1}>
+        ${node.voteCount}/${node.playerCount - 1}
+      </span>
+    </span>
+`   ;
+  }
+
+  getStatus(node){
+    if(node.text_status !== "draft"){
+      return this.getNumberOfVotes(node); 
+    }else{
+      return `
+      <span class="status">
+        ${node.text_status}
+      </span>`;
+    }
   }
   
   addEventListeners() {
@@ -140,9 +157,9 @@ export class ShelfVisualizer {
           writingDiv.classList.remove('hidden');
           writingDiv.classList.add('visible');
           arrow.textContent = '▼';
-          //handle marking as "read"
-          //arrow.classList.remove('unread');
+          // Handle marking as "read"
           this.SeenManager.markAsSeen(text_id);
+          this.SeenManager.updateReadStatus(text_id);
         } else {
           writingDiv.classList.add('hidden');
           writingDiv.classList.remove('visible');

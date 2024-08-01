@@ -28,8 +28,20 @@
     <input type="hidden" name="writer_id" value="{{ session.writer_id }}">
     <input type="hidden" name="date" value="{{ 'now'|date('Y-m-d H:i:s') }}">
     <input type="hidden" name="currentPage" value="text-create.php">
+    <input type="hidden" name="text_status" data-text-status value="">
 
-    <input type="submit" value="save">
+<!--     <input type="submit" value="save"> -->
+    <div class="form-btns">
+        <input type="submit" value="Publish" onclick="setStatus('published')">
+        <input type="submit" value="Save Draft" onclick="setStatus('draft')">
+        <button type="button" onclick="window.location.href='{{ path }}text';">Cancel</button>
+    </div>
 </form>
 
 {{include('footer.php')}}
+
+<script>
+    function setStatus(status) {
+        document.querySelector('[data-text-status]').value = status;
+    }
+</script>

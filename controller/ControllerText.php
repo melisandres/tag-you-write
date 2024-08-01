@@ -7,40 +7,19 @@ RequirePage::model('TextHasKeyword');
 RequirePage::model('Prep');
 RequirePage::model('Game');
 RequirePage::model('GameHasPlayer');
+RequirePage::model('TextStatus');
 RequirePage::controller('ControllerGame');
 
 class ControllerText extends Controller{
 
     //show the page with all the texts
     public function index(){
-        $text = new Text;
-        $current_writer = null;
-        if(isset($_SESSION['writer_id'])){
-            $current_writer = $_SESSION['writer_id'];
-        }
-        $select = $text->selectTexts($current_writer);
+        // Getting the games
+        $game = new Game;
+        $allGames = $game->getGames();
 
-        // Get only the parent texts
-        $texts = [];
-        foreach ($select as $textNode){
-            if ($textNode['parent_id'] == null){
-                $texts[] = $textNode;
-            }
-        }
-
-/*         // Get the current user ID from the session
-        $currentUserId = $_SESSION['writer_id'] ?? null;
-
-        // Build the full hierarchy
-        $hierarchy = $this->buildHierarchy($select, 'parent_id'); */
-
-        // Check contributions and flag root texts
-/*         foreach ($texts as &$rootText) {
-            $rootText['hasContributed'] = $this->hasContributed($rootText['id'], $hierarchy, $currentUserId);
-        } */
-        
         // Send the JSON data to the front end
-        Twig::render('text-index.php', ['texts' => $texts]);
+        Twig::render('text-index.php', ['texts' => $allGames]);
     }
 
     private function getRootParent($textId){
@@ -138,27 +117,30 @@ class ControllerText extends Controller{
 
     // Recursive function to add permissions to each node
     private function addPermissions(&$node, $currentUserId, $hierarchy /*, $hasContributed */) {
-        $isParent = !empty($node['children']);
-        /* die(var_dump($node)); */
-
         // Set 1s and 0s to trues and falses
         $node['hasContributed'] = $node['hasContributed'] == 1 ? true : false;
         $node['isWinner'] = $node['isWinner'] == 1 ? true : false;
         $node['openForChanges'] = $node['openForChanges'] == 1 ? true : false;
 
-        //rename some vars to make the following a little clearer
+        // Create some vars to make the permissions clearer
+        $isAParentText = !empty($node['children']);
         $gameOpen = $node['openForChanges'];
         $hasContributed = $node['hasContributed'];
-
+        $isDraft = $node['text_status'] == "draft" ? true : false;
+        $nodeWriter = $node['writer_id'];
+        $isMyText = $currentUserId === $nodeWriter;
+        $isLoggedIn = $currentUserId !== null;
         
         // TODO: You can reuse this logic in every method, to ensure that we enforce these permissions.
-        $nodeWriter = $node['writer_id'];
+
+        //TODO: you might want to treat "can edit" differently than "can add note"
+
         $node['permissions'] = [
-            'canEdit' => $currentUserId === $nodeWriter && $gameOpen,
-            'canDelete' => !$isParent && $currentUserId === $nodeWriter && $gameOpen,
-            'canIterate' => $currentUserId !== null && $currentUserId !== $nodeWriter && $gameOpen,
-            'isMyText' => $currentUserId === $nodeWriter,
-            'canVote' => $currentUserId !== $nodeWriter && $hasContributed && $gameOpen
+            'canEdit' => $isLoggedIn && $isMyText && $gameOpen,
+            'canDelete' => !$isAParentText && $isMyText && $gameOpen && $isDraft,
+            'canIterate' => $isLoggedIn && !$isMyText && $gameOpen && !$isDraft,
+            'isMyText' => $isMyText,
+            'canVote' => !$isMyText && $hasContributed && $gameOpen
         ];
 
         if (!empty($node['children'])) {
@@ -176,6 +158,8 @@ class ControllerText extends Controller{
         //available only to those logged in (ie: writers)
         CheckSession::sessionAuth();
 
+        // TODO: it is a good idea to have access to all the writers... for when writers can choose who to play with.
+        // a select, however, may not always work. eventually, you'll want to combine with a search. 
         $writer = new Writer;
         $select = $writer->select();
         Twig::render('text-create.php', ['writers'=>$select]);
@@ -197,6 +181,7 @@ class ControllerText extends Controller{
 
         $text = new Text;
         $keyWord = new Keyword;
+        $textStatus = new TextStatus;
 
         // Check if this is a root text
         $isRootText = !isset($_POST['game_id']) && !isset($_POST['parent_id']);
@@ -236,7 +221,14 @@ class ControllerText extends Controller{
         unset($_POST['previous_title']);
         unset($_POST['prompt']);
 
-        //send what's left of the POST (text info) to CRUD
+        // you need the text-status-id in order to save the text
+        $status = $_POST['text_status'];
+        unset($_POST['text_status']);
+        $_POST['status_id'] = $textStatus->selectStatus($status);
+
+  
+
+        // send what's left of the POST (text info) to CRUD
         $textIdFromInsert = $text->insert($_POST);
 
         //send the writer_id and the game_id to game_has_player
@@ -310,20 +302,28 @@ class ControllerText extends Controller{
     }
 
 
-    //edit creates the page from which the writer can edit a text
+    // edit creates the page from which the writer can edit a text
+    // it checks if the text being edited is a draft or published
     public function edit(){
         //no access if you are not logged in
         CheckSession::sessionAuth();
 
         $text = new Text;
+        $textStatus = new TextStatus;
         $selectId = $text->selectIdText($_POST['id']);
         $keywords = $text->selectKeyword($_POST['id']);
+
 
         //block the page if the writer logged in is not this text's writer
         if($selectId['writer_id'] != $_SESSION['writer_id']){
             Twig::render('home-error.php', ['message'=> "You can't edit another writer's text. Try iterating instead."]);
             return;
         }
+
+        $statusId = $selectId['status_id'];
+        $statusData = $textStatus->selectId($statusId);
+        $status = $statusData['status'];
+        //die(var_dump($selectId));
 
         //in prior logic, the user could not edit their text if it had children... but
         //I'm changing the logic of editing, for now... so that a user can ALWAYS edit--
@@ -334,7 +334,6 @@ class ControllerText extends Controller{
             Twig::render('home-error.php', ['message'=> "Another writer has iterated on this text, and therefore it can no longer be deleted. Sorry."]);
             return;
         } */
-
 
         //prepare the keywords
         $keywordString = "";
@@ -349,13 +348,21 @@ class ControllerText extends Controller{
         $data["keywords"] = $cleanKeywordString;
         $data["lastKeywords"] = $cleanKeywordString;
 
-        //send it to the form
-        Twig::render('text-edit.php', ['data' => $data]);
+        if ($status == 'published') {
+            // Render the view for adding notes to published texts
+            Twig::render('text-note-edit.php', ['data' => $selectId, 'keywords' => $keywords]);
+        }else{
+            //send it to the form
+            Twig::render('text-draft-edit.php', ['data' => $data]);
+        }
     }
 
 
     //update send an edited text to the database
     public function update(){
+        //TODO: you need to check if this is an update on a published
+        //or on a draft... and accept values accordingly. And redirect accordingly.
+
         //no access if you are not logged in
         CheckSession::sessionAuth();
 
@@ -372,23 +379,43 @@ class ControllerText extends Controller{
             return;
         }
 
-        $text = new Text;
+        // I'm taking out the parent_id check... because I want "notes"
+        // to be able to be published. 
+         /*
         //check if the text is a parent, it should not be
         //able to be be updated
         $select = $text->selectId($_POST["id"], 'parent_id');
         if($select){
             RequirePage::redirect('text');
             exit();
-        }
+        } */
 
-
+        $text = new Text;
         $writer = new Writer;
         $keyword = new Keyword;
         $textHasKeyword = new TextHasKeyword;
         $prep = new Prep;
 
         //validate the $_POST
-        $this->validateNote($_POST);
+        $currentPage = $_POST['currentPage'];
+
+        // you need the text-status-id in order to save the text
+        $textStatus = new TextStatus;
+        $status = $_POST['text_status'];
+        unset($_POST['text_status']);
+        $_POST['status_id'] = $textStatus->selectStatus($status);
+
+        if($currentPage == "text-note-edit.php"){
+            $this->validateNote($_POST);
+            //but for now, you are only allowing a user to edit the NOTE:
+            $updateNote['note'] = $_POST['note'];
+            $updateNote['note_date'] = $_POST['note_date'];
+            $updateNote['id'] = $_POST['id'];
+            $update = $text->update($updateNote);
+
+            RequirePage::redirect('text');
+            exit;
+        }
 
 
         //although I am not keeping the functionality of editing keywords,
@@ -407,14 +434,7 @@ class ControllerText extends Controller{
 
         //send what's left of the POST (text info) to CRUD
         //if you want to allow a user to edit EVERYTHING:
-
-        //$update = $text->update($_POST);
-
-        //but for now, you are only allowing a user to edit the NOTE:
-        $updateNote['note'] = $_POST['note'];
-        $updateNote['note_date'] = $_POST['note_date'];
-        $updateNote['id'] = $_POST['id'];
-        $update = $text->update($updateNote);
+        $update = $text->update($_POST);
 
         //using class Prep to prepare keywords arrays... 
         //words come in as strings, come out a clean arrays

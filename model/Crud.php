@@ -8,7 +8,9 @@ abstract class Crud extends PDO{
     
     //this is only being called by writer, at the moment, but it's so general I hesitate to put it in the writer model
     public function select($order = null){
-        $sql = "SELECT * FROM $this->table ORDER BY $this->primaryKey $order";
+        $sql = "SELECT * 
+                FROM $this->table 
+                ORDER BY $this->primaryKey $order";
         $stmt = $this->query($sql);
         return $stmt->fetchAll();
     }
@@ -16,7 +18,9 @@ abstract class Crud extends PDO{
     public function selectId($value, $id = null){
         if($id == null) $id = $this->primaryKey;
 
-        $sql = "SELECT * FROM $this->table WHERE $id = :$id";
+        $sql = "SELECT * 
+                FROM $this->table 
+                WHERE $id = :$id";
 
         $stmt = $this->prepare($sql);
         $stmt->bindValue(":$id", $value);
@@ -28,6 +32,17 @@ abstract class Crud extends PDO{
         }else{
             return false;
         }   
+    }
+
+    public function selectStatus($status) {
+        $sql = "SELECT $this->table.id 
+                FROM $this->table 
+                WHERE status = :status";
+        $stmt = $this->prepare($sql);
+        $stmt->bindValue(':status', $status);
+        $stmt->execute();
+    
+        return $stmt->fetchColumn();
     }
 
     public function insert($data, $keyWordInsert = false){
@@ -206,6 +221,44 @@ abstract class Crud extends PDO{
         
         return $stmt->execute();
     }
+
+    public function updateCompositeID($values) {
+        // Ensure values contain all primary key fields
+        foreach ($this->primaryKey as $key) {
+            if (!isset($values[$key])) {
+                throw new Exception("Missing value for primary key $key.");
+            }
+        }
+    
+        // Build the WHERE clause with the composite key
+        $whereClause = [];
+        foreach ($this->primaryKey as $key) {
+            $whereClause[] = "$key = :$key";
+        }
+        $whereClause = implode(" AND ", $whereClause);
+    
+        // Build the SET clause for updating columns
+        $setClause = [];
+        foreach ($values as $key => $value) {
+            if (!in_array($key, $this->primaryKey)) {
+                $setClause[] = "$key = :$key";
+            }
+        }
+        $setClause = implode(", ", $setClause);
+    
+        $sql = "UPDATE $this->table SET $setClause WHERE $whereClause";
+    
+        $stmt = $this->prepare($sql);
+    
+        // Bind values
+        foreach ($values as $key => $value) {
+            $stmt->bindValue(":$key", $value);
+        }
+    
+        return $stmt->execute();
+    }
+    
+    
 
 }
 

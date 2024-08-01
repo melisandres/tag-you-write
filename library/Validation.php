@@ -95,14 +95,16 @@
             if($name == 'array'){
 
                 if(!is_array($this->value)){
-                    $this->errors[] = 'Le format du champ '.$this->name.' n\'est pas valide.';
+                    $this->errors[] = 'The format of the '.$this->name.' field is not valid.';
+                    //$this->errors[] = 'Le format du champ '.$this->name.' n\'est pas valide.';
                 }
 
             }else{
 
                 $regex = '/^('.$this->patterns[$name].')$/u';
                 if($this->value != '' && !preg_match($regex, $this->value)){
-                    $this->errors[] = 'Le format du champ '.$this->name.' n\'est pas valide.';
+                    $this->errors[] = 'The format of the '.$this->name.' field is not valid.';
+                    //$this->errors[] = 'Le format du champ '.$this->name.' n\'est pas valide.';
                 }
 
             }
@@ -120,7 +122,8 @@
 
             $regex = '/^('.$pattern.')$/u';
             if($this->value != '' && !preg_match($regex, $this->value)){
-                $this->errors[] = 'Le format du champ '.$this->name.' n\'est pas valide.';
+                $this->errors[] = 'The format of the '.$this->name.' field is not valid.';
+                //$this->errors[] = 'Le format du champ '.$this->name.' n\'est pas valide.';
             }
             return $this;
 
@@ -134,7 +137,8 @@
         public function required(){
 
             if((isset($this->file) && $this->file['error'] == 4) || ($this->value == '' || $this->value == null)){
-                $this->errors[] = 'Le champ '.$this->name.' est obligatoire.';
+                $this->errors[] = 'The '.$this->name.' field is required.';
+                //$this->errors[] = 'Le champ '.$this->name.' est obligatoire.';
             }
             return $this;
 
@@ -152,13 +156,15 @@
             if(is_string($this->value)){
 
                 if(strlen($this->value) < $length){
-                    $this->errors[] = 'La valeur du champ '.$this->name.' est inférieur à la valeur minimale';
+                    $this->errors[] = 'La value of the '.$this->name.' field is bellow its minimal value.';
+                    //$this->errors[] = 'La valeur du champ '.$this->name.' est inférieur à la valeur minimale';
                 }
 
             }else{
 
                 if($this->value < $length){
-                    $this->errors[] = 'La valeur du champ '.$this->name.' est inférieur à la valeur minimale';
+                    $this->errors[] = 'La value of the '.$this->name.' field is bellow its minimal value.';
+                    //$this->errors[] = 'La valeur du champ '.$this->name.' est inférieur à la valeur minimale';
                 }
 
             }
@@ -178,13 +184,15 @@
             if(is_string($this->value)){
 
                 if(strlen($this->value) > $length){
-                    $this->errors[] = 'La valeur du champ '.$this->name.' est supérieur à la valeur maximale';
+                    $this->errors[] = 'La value of the '.$this->name.' field is above its max value.';
+                    //$this->errors[] = 'La valeur du champ '.$this->name.' est supérieur à la valeur maximale';
                 }
 
             }else{
 
                 if($this->value > $length){
-                    $this->errors[] = 'La valeur du champ '.$this->name.' est supérieur à la valeur maximale';
+                    $this->errors[] = 'La value of the '.$this->name.' field is above its max value.';
+                    //$this->errors[] = 'La valeur du champ '.$this->name.' est supérieur à la valeur maximale';
                 }
 
             }
@@ -202,7 +210,8 @@
         public function equal($value){
 
             if($this->value != $value){
-                $this->errors[] = 'La valeur du champ '.$this->name.' ne correspond pas.';
+                $this->errors[] = 'La value of the '.$this->name.' does not match.';
+                //$this->errors[] = 'La valeur du champ '.$this->name.' ne correspond pas.';
             }
             return $this;
 
@@ -217,7 +226,8 @@
         public function maxSize($size){
 
             if($this->file['error'] != 4 && $this->file['size'] > $size){
-                $this->errors[] = 'Le fichier'.$this->name.' dépasse la taille maximale de '.number_format($size / 1048576, 2).' MB.';
+                $this->errors[] = 'The file '.$this->name.' is larger than the max size of '.number_format($size / 1048576, 2).' MB.';
+                //$this->errors[] = 'Le fichier'.$this->name.' dépasse la taille maximale de '.number_format($size / 1048576, 2).' MB.';
             }
             return $this;
 
@@ -232,7 +242,8 @@
         public function ext($extension){
 
             if($this->file['error'] != 4 && pathinfo($this->file['name'], PATHINFO_EXTENSION) != $extension && strtoupper(pathinfo($this->file['name'], PATHINFO_EXTENSION)) != $extension){
-                $this->errors[] = 'Il file '.$this->name.' non è un '.$extension.'.';
+                $this->errors[] = 'The file '.$this->name.' is not a '.$extension.' file.';
+                //$this->errors[] = 'Il file '.$this->name.' non è un '.$extension.'.';
             }
             return $this;
 

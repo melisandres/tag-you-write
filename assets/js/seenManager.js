@@ -18,15 +18,31 @@ export class SeenManager {
 
     async markAsSeen(id) {
         const url = `${this.path}seen/markAsSeen/${id}`;
-        const response = await fetch(url);
-        if (!response.ok) {
-            const errorText = await response.text(); // Read the response body
-            console.error(`Error marking as seen: ${response.status}`, errorText);
-            throw new Error(`Error marking as seen: ${response.status}`);
+        try {
+            const response = await fetch(url);
+    
+            // Check if the response status is 401 before attempting to parse the JSON
+            if (response.status === 401) {
+                console.info('User not logged in. Skipping mark as seen.');
+                return; // Exit gracefully
+            }
+    
+            // Attempt to parse the JSON response
+            const data = await response.json();
+    
+            if (!response.ok) {
+                console.error(`Error marking as seen: ${response.status}`, data);
+                throw new Error(`Error marking as seen: ${response.status} - ${data.error}`);
+            }
+    
+            return data;
+        } catch (error) {
+            console.error('Uncaught error:', error.message);
+            throw error; // Re-throw the error for further handling if needed
         }
-        return await response.json();
-        //this.updateReadStatus(id);
     }
+    
+    
 
     async markAsUnseen(id) {
         const url = `${this.path}seen/markAsUnseen/${id}`;
@@ -39,8 +55,21 @@ export class SeenManager {
 
     updateReadStatus(id) {
         const element = document.querySelector(`[data-story-id="${id}"]`);
-        element.classList.remove('unread');
+        const gameDrawer = element.closest(".story");
+        const unreadSVGDiv = gameDrawer.querySelector(".unreads");
 
+        // update the drawer clicked on locally, as the user browses 
+        if (element && element.classList.contains('unread')) {
+            element.classList.remove('unread');
+        }
+
+        // update the top drawer locally, as the user browses 
+        const unreads = gameDrawer.querySelectorAll(".unread");
+        if(unreads.length == 0){
+            if(unreadSVGDiv){
+                unreadSVGDiv.innerHTML = "";
+            }
+        }
     }
 
     /* async checkReadStatus(textId) {

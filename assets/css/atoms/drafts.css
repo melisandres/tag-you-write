@@ -1,0 +1,9 @@
+.draft{
+    opacity: 65%;
+}
+
+.draft .status{
+    font-size: 22px;
+    opacity: 40%;
+    font-variant: small-caps;
+}

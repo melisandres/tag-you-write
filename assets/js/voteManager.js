@@ -1,10 +1,12 @@
 import { ShelfVisualizer } from './shelfVisualizer.js';
+import { WarningManager } from './warningManager.js';
 
 export class VoteManager {
     constructor(path, refreshManager) {
         this.path = path;
         this.init();
         this.refreshManager = refreshManager;
+        //this.warningManager = new WarningManager;
     }
 
     init() {
@@ -21,7 +23,7 @@ export class VoteManager {
         }
     }
 
-    async handleVoteButtonClick(event) {
+/*     async handleVoteButtonClick(event) {
         const button = event.target.closest('[data-vote]');
         if (button) {
             const textId = button.getAttribute('data-vote');
@@ -47,7 +49,36 @@ export class VoteManager {
                 console.error('Error toggling vote:', error);
             }
         }
-    }
+    } */
+
+    async handleVoteButtonClick(event) {
+        const button = event.target.closest('[data-vote]');
+        if (button) {
+            const textId = button.getAttribute('data-vote');
+            try {
+            let result = await this.voteUnvote(textId, false);
+            if (result.confirmationRequired) {
+                this.warningManager = new WarningManager;
+                this.warningManager.createWarningModal(
+                "This vote will end the game. Are you sure?",
+                async () => {
+                    result = await this.voteUnvote(textId, true);
+                    await this.refreshManager.fetchDataAndRefresh();
+                },
+                () => {
+                    // Cancelled vote (upon confirmation)
+                    return;
+                }
+                );
+            } else {
+                this.updateVoteButton(button, result);
+            }
+            } catch (error) {
+            console.error('Error toggling vote:', error);
+            }
+        }
+        }
+          
 
     async voteUnvote(id, isConfirmed) {
         const url = `${this.path}vote/voteToggle/${id}/${isConfirmed}`;

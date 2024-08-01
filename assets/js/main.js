@@ -5,6 +5,7 @@ import { VoteManager } from './voteManager.js';
 import { GameManager } from './gameManager.js';
 import { RefreshManager } from './refreshManager.js';
 import { SeenManager } from './seenManager.js';
+import { WarningManager } from './warningManager.js';
 
 document.addEventListener("DOMContentLoaded", () => {
   const path = window.location.origin + "/tag-you-write-repo/tag-you-write/";
@@ -36,6 +37,12 @@ document.addEventListener("DOMContentLoaded", () => {
   // Restore state on initial load
   refreshManager.restoreState();
   //window.refreshManager = refreshManager;
+
+
+
+  // Initialize in UIManager or globally
+  // const warningManager = new WarningManager();
+
 
   // Handle browser refresh by saving state before unload
   window.addEventListener('beforeunload', () => {

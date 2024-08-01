@@ -14,6 +14,7 @@ export class Modal {
       this.modalElement.classList.remove('display-none');
       this.modalElement.dataset.treeModal = "visible";
       this.modalElement.dataset.textId = data.id;
+      let noteHtml = data.note ? `<p class="ps">P.S... ${data.note}</p>` : '';
       this.modalContent.innerHTML = `
         <div class="modal-text">
             <div class="vote-info">
@@ -25,6 +26,7 @@ export class Modal {
             <h2 class="headline">${data.title}</h2>
             <h3 class="author"> -&nbsp${data.firstName} ${data.lastName}&nbsp- </h3>
             <p>${data.writing}</p>
+            ${noteHtml}
         </div>
       `;
 
