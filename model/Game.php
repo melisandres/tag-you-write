@@ -56,6 +56,17 @@
       }
    
       return $games;
-   }              
+   }
 
+   public function getPlayers($game_id) {
+      // Fetch all players involved in the game
+      $sql = "SELECT writer_id 
+               FROM text 
+               WHERE game_id = :game_id";
+      $stmt = $this->prepare($sql);
+      $stmt->bindValue(':game_id', $game_id);
+      $stmt->execute();
+      return $stmt->fetchAll();
+  }
+ 
 }

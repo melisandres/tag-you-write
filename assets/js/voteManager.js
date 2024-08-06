@@ -60,7 +60,7 @@ export class VoteManager {
             if (result.confirmationRequired) {
                 this.warningManager = new WarningManager;
                 this.warningManager.createWarningModal(
-                "This vote will end the game. Are you sure?",
+                "This vote confirms the grand winner and ends the game. Are you sure?",
                 async () => {
                     result = await this.voteUnvote(textId, true);
                     await this.refreshManager.fetchDataAndRefresh();

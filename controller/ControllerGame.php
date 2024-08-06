@@ -1,6 +1,7 @@
 <?php
 RequirePage::model('Text');
 RequirePage::model('Game');
+RequirePage::controller('ControllerNotification');
 
 class ControllerGame extends Controller {
 
@@ -19,16 +20,23 @@ class ControllerGame extends Controller {
         return $gameId;
     }
 
-    public function closeGame($id){
+    public function closeGame($textId){
         $text = new Text;
         $game = new Game;
-        $gameId = $text->selectGameId($id);
-        $gameData = [
+        $gameId = $text->selectGameId($textId);         $gameData = [
                     'id' => $gameId,
-                    'winner' => $id,
+                    'winner' => $textId,
                     'open_for_changes' => 0
                     ];
         $game->update($gameData);
+        $players = $game->getPlayers($gameId);
+
+        // Create notifications for each player
+        $notification = new ControllerNotification;
+        foreach ($players as $player) {
+            $notification->create($player['writer_id'], $gameId, 'game_won');
+        }
+        
         return;
     }
 
@@ -42,5 +50,4 @@ class ControllerGame extends Controller {
     }
     
 }
-
 ?>

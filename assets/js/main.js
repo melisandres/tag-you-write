@@ -6,6 +6,7 @@ import { GameManager } from './gameManager.js';
 import { RefreshManager } from './refreshManager.js';
 import { SeenManager } from './seenManager.js';
 import { WarningManager } from './warningManager.js';
+import { NotificationManager } from './notificationManager.js';
 
 document.addEventListener("DOMContentLoaded", () => {
   const path = window.location.origin + "/tag-you-write-repo/tag-you-write/";
@@ -38,7 +39,8 @@ document.addEventListener("DOMContentLoaded", () => {
   refreshManager.restoreState();
   //window.refreshManager = refreshManager;
 
-
+  // Start Long Polling Manager
+  new NotificationManager(path);
 
   // Initialize in UIManager or globally
   // const warningManager = new WarningManager();
