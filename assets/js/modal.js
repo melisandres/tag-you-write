@@ -15,13 +15,17 @@ export class Modal {
       this.modalElement.dataset.treeModal = "visible";
       this.modalElement.dataset.textId = data.id;
       let noteHtml = data.note ? `<p class="ps">P.S... ${data.note}</p>` : '';
+/*       this.modalContent.closest('.modal-with-btns').classList.add(data.text_status); */
       this.modalContent.innerHTML = `
-        <div class="modal-text">
-            <div class="vote-info">
-              ${SVGManager.votesSVG}
-              <span class="small">
-                ${data.voteCount}/${data.playerCount - 1}
-              </span>
+        <div class="modal-text ">
+            <div class="top-info ${data.text_status}">
+              <div class="vote-info">
+                ${SVGManager.votesSVG}
+                <span class="small">
+                  ${data.voteCount}/${data.playerCount - 1}
+                </span>
+              </div>
+              ${data.text_status=='draft'? '<span class="status">DRAFT</span>' : ''}
             </div>
             <h2 class="headline">${data.title}</h2>
             <h3 class="author"> -&nbsp${data.firstName} ${data.lastName}&nbsp- </h3>
@@ -45,6 +49,33 @@ export class Modal {
           <input type="hidden" name="id" value="${data.id}">
           <button type="submit" class="edit">
             ${SVGManager.editSVG}
+          </button>
+        </form>
+      ` : ''}
+
+      ${data.permissions.canAddNote ? `
+        <form action="${this.path}text/edit" method="POST" class="note-form">
+          <input type="hidden" name="id" value="${data.id}">
+          <button type="submit" class="note">
+            ${SVGManager.addNoteSVG}
+          </button>
+        </form>
+      ` : ''}
+
+       ${data.permissions.canPublish ? `
+        <form action="${this.path}text/instaPublish" method="POST" class="publish-form">
+          <input type="hidden" name="id" value="${data.id}">
+          <button type="submit" class="publish">
+            ${SVGManager.publishSVG}
+          </button>
+        </form>
+      ` : ''}
+
+      ${data.permissions.canDelete ? `
+        <form action="${this.path}text/delete" method="POST" class="delete-form">
+          <input type="hidden" name="id" value="${data.id}">
+          <button type="submit" class="delete">
+            ${SVGManager.deleteSVG}         
           </button>
         </form>
       ` : ''}

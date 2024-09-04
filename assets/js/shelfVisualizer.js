@@ -55,7 +55,10 @@ export class ShelfVisualizer {
           <div class="node-buttons">
             ${node.permissions.canIterate ? this.getIterateForm(node) : ''}
             ${node.permissions.canEdit ? this.getEditForm(node) : ''}
+            ${node.permissions.canAddNote ? this.getNoteForm(node) : ''}
             ${node.permissions.canVote ? this.getVoteButton(node) : ''}
+            ${node.permissions.canPublish ? this.getPublishForm(node) : ''}
+            ${node.permissions.canDelete ? this.getDeleteForm(node) : ''}
           </div>
           <p>
             ${node.writing}
@@ -114,11 +117,44 @@ export class ShelfVisualizer {
     `;
   }
 
+  getNoteForm(node) {
+    return `
+      <form action="${this.path}text/edit" method="POST">
+        <input type="hidden" name="id" value="${node.id}">
+        <button type="submit" class="note" value="Edit">
+          ${SVGManager.addNoteSVG}
+        </button>
+      </form>
+    `;
+  }
+
   getVoteButton(node) {
       return `
         <button class="vote ${node.hasVoted == 1? 'voted' : ''}" data-vote=${node.id}>
           ${SVGManager.voteSVG}
         </button>
+    `;
+  }
+
+  getPublishForm(node) {
+    return `
+      <form action="${this.path}text/instaPublish" method="POST">
+        <input type="hidden" name="id" value="${node.id}">
+        <button type="submit" class="publish" value="publish">
+          ${SVGManager.publishSVG}
+        </button>
+      </form>
+    `;
+  }
+
+  getDeleteForm(node) {
+    return `
+      <form action="${this.path}text/delete" method="POST">
+        <input type="hidden" name="id" value="${node.id}">
+        <button type="submit" class="delete" value="delete">
+          ${SVGManager.deleteSVG}
+        </button>
+      </form>
     `;
   }
 

@@ -112,6 +112,60 @@
 
         }
 
+
+        /**
+         * Validate word count
+         *
+         * @param int $maxWords Maximum additional words allowed
+         * @param string $parentText The parent text passed down to the user
+         * @return $this
+         */
+        public function wordCount($maxWords, $parentText = '') {
+            $parentWordCount = str_word_count($parentText);
+            $userWordCount = str_word_count($this->value);
+            $newWordsCount = $userWordCount - $parentWordCount;
+
+            $parentWordCount > 0 ? $additional = ' additional' : $additional = '';
+
+            if ($newWordsCount > $maxWords) {
+                $this->errors[] = 'The '.$this->name.' field exceeds the maximum allowed word count of '.$maxWords.$additional.' words.';
+            }
+
+            return $this;
+        }
+
+        /**
+         * Validate keyword count
+         *
+         * @param int $maxWords Maximum additional words allowed
+         * @return $this
+         */
+        public function keywordCount($maxWords) {
+            // Split keywords by comma, then count words in each keyword
+            $keywords = explode(',', $this->value);
+            $keyWordCount = 0;
+            $keyWordsCount = count($keywords);
+
+            foreach ($keywords as $keyword) {
+                // Trim and count words in each keyword
+                $wordCount = str_word_count(trim($keyword));
+                if($wordCount > 2){
+                    $keyWordCount = $wordCount;
+                }
+            }
+
+            if ($keyWordCount > 2) {
+                $this->errors[] = 'A key word any longer than 2 words is just too long.';
+            }
+
+            if ($keyWordsCount > $maxWords){
+                $this->errors[] = 'The '.$this->name.' field exceeds the maximum allowed word count of '.$maxWords.' words.';
+            }
+
+            return $this;
+        }
+
+
         /**
          * Pattern personalizzata
          *

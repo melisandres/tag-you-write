@@ -12,6 +12,10 @@
     color: black;
 }
 
+.with-shelf .note{
+    margin-top: 30px;
+}
+
 .with-shelf .node{
     list-style-type: none;
     margin-left: var(--indent-size);
@@ -41,11 +45,23 @@
 }
 
 .with-shelf button.edit{
-    background-color: rgba(238, 108, 108, 0.886);
+    background: #99ededea;
 }
 
 .with-shelf button.vote{
     background-color: rgba(243, 119, 225, 0.951);
+}
+
+.with-shelf button.note{
+    background: #99ededea;
+}
+
+.with-shelf button.publish{
+    background-color: rgba(174, 242, 149, 0.886);
+}
+
+.with-shelf button.delete{
+    background-color: rgba(238, 108, 108, 0.886);
 }
 
 .with-shelf button.edit svg{

@@ -6,5 +6,12 @@ class TextStatus extends Crud{
     public $table = 'text_status';
     public $primaryKey = 'id';
     public $fillable = ['status'];
- 
+
+    public function selectStatusByName($statusName) {
+        $sql = "SELECT id FROM $this->table WHERE status = :name";
+        $stmt = $this->prepare($sql);
+        $stmt->bindValue(':name', $statusName);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 }

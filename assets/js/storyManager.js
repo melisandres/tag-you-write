@@ -54,7 +54,6 @@ export class StoryManager {
   async fetchStoryNode(id){
     const url = `${this.path}text/getStoryNode/${id}`;
     const response = await fetch(url);
-    console.log(response);
     if (!response.ok) {
       throw new Error(`Error fetching story node data: ${response.status}`);
     }

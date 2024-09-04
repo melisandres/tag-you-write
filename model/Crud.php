@@ -34,6 +34,32 @@ abstract class Crud extends PDO{
         }   
     }
 
+    public function selectAllById($id, $nameOfId = 'text_id') {
+        $sql = "SELECT * 
+                FROM $this->table 
+                WHERE text_id = :text_id";
+    
+        $stmt = $this->prepare($sql);
+        $stmt->bindValue(":text_id", $nameOfId);
+        $stmt->execute();
+    
+        return $stmt->fetchAll(); // Return all matching entries
+    }
+
+    public function deleteById($id, $nameOfId = 'text_id') {
+        $sql = "DELETE FROM $this->table WHERE $nameOfId = :id";
+        $stmt = $this->prepare($sql);
+        $stmt->bindValue(":id", $id);
+        
+        if ($stmt->execute()) {
+            return true;
+        } else {
+            $errorInfo = $stmt->errorInfo();
+            error_log("SQL Error: " . print_r($errorInfo, true));
+            return false;
+        }
+    }
+
     public function selectStatus($status) {
         $sql = "SELECT $this->table.id 
                 FROM $this->table 
@@ -124,7 +150,7 @@ abstract class Crud extends PDO{
         return $result;
     }
 
-    public function delete($value){
+/*     public function delete($value){
         $sql = "DELETE FROM $this->table WHERE $this->primaryKey = :$this->primaryKey;";
         $stmt = $this->prepare($sql); 
         $stmt->bindValue(":$this->primaryKey", $value);
@@ -133,7 +159,28 @@ abstract class Crud extends PDO{
         }else{
             return false;
         }
+    } */
+
+    public function delete($value) {
+        try {
+            $sql = "DELETE FROM $this->table WHERE $this->primaryKey = :$this->primaryKey;";
+            $stmt = $this->prepare($sql);
+            $stmt->bindValue(":$this->primaryKey", $value);
+    
+            if ($stmt->execute()) {
+                return true;
+            } else {
+                // Capture and log error information
+                $errorInfo = $stmt->errorInfo();
+                error_log("SQL Error: " . print_r($errorInfo, true)); // Log the error details
+                return $errorInfo; // Return error details to the controller
+            }
+        } catch (PDOException $e) {
+            error_log("PDOException: " . $e->getMessage()); // Log the exception message
+            return ["error" => $e->getMessage()]; // Return exception message as error
+        }
     }
+
 
     // Select a row based on composite primary key
     public function selectCompositeId($values) {

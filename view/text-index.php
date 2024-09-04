@@ -7,7 +7,6 @@
     <div class="story {{ text.openForChanges ? '' : 'closed' }}" data-game-id="{{ text.game_id }}" data-unseen-count="{{ text.unseen_count }}" data-seen-count="{{ text.seen_count }}" data-text-count="{{ text.text_count }}" data-text-id="{{ text.id }}">
         <div class="story-title">
             <h2 class="{{ text.hasContributed ? 'contributed' : '' }}">
-                <!-- <a href="{{ path }}text/show/{{ text.id }}">{{ text.title }}</a> -->
                 <a data-refresh-modal data-text-id="{{ text.id }}">{{ text.title }}</a>
             </h2>
         </div>
@@ -36,38 +35,3 @@
 {% endfor %}
 </div>
 {{ include('footer.php') }}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<!-- <table  data-stories>
-    <tr>
-        <th>title</th>
-        <th>date</th>
-        <th>author</th>
-    </tr>
-    
-    {% for text in texts %}
-
-            <tr>
-                <td><button data-refresh-tree data-text-id="{{ text.id }}" class="refresh-tree">t</button><a href="{{path}}text/show/{{text.id}}">{{ text.title }}</a><button data-refresh-shelf data-text-id="{{ text.id }}" class="refresh-shelf">s</button></td>
-                <td>{{ text.date }}</td>
-                <td>{{ text.firstName }} {{ text.lastName }} </td> 
-            </tr>
-
-    {% endfor %}
-
-</table>  -->

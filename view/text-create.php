@@ -11,8 +11,9 @@
     </label>
     <label>
         <span class="headline">kickoff the text</span>
-        <span class="additional-info"> (max 50 words):</span>
+        <div class="very-small" data-wordCountDisplay></div>
         <textarea name="writing" rows="10" cols="50" placeholder="When you climb out the window, don't forget your rainboots.">{% if data is defined %}{{data.writing}}{% endif %}</textarea>
+
     </label>
     <label>
         <span class="headline">create a prompt</span> 

@@ -8,7 +8,9 @@ RequirePage::model('Prep');
 RequirePage::model('Game');
 RequirePage::model('GameHasPlayer');
 RequirePage::model('TextStatus');
+RequirePage::model('Seen');
 RequirePage::controller('ControllerGame');
+
 
 class ControllerText extends Controller{
 
@@ -116,7 +118,7 @@ class ControllerText extends Controller{
     }
 
     // Recursive function to add permissions to each node
-    private function addPermissions(&$node, $currentUserId, $hierarchy /*, $hasContributed */) {
+    /* private function addPermissions(&$node, $currentUserId, $hierarchy) {
         // Set 1s and 0s to trues and falses
         $node['hasContributed'] = $node['hasContributed'] == 1 ? true : false;
         $node['isWinner'] = $node['isWinner'] == 1 ? true : false;
@@ -145,36 +147,48 @@ class ControllerText extends Controller{
 
         if (!empty($node['children'])) {
             foreach ($node['children'] as &$child) {
-                $this->addPermissions($child, $currentUserId, $hierarchy, /* $hasContributed */);
+                $this->addPermissions($child, $currentUserId, $hierarchy);
+            }
+        }
+    } */
+
+    private function addPermissions(&$node, $currentUserId, $hierarchy = []) {
+        // selectTexts adds hasContributed, isWinner, and openForChanges, but 
+        // the front end works better if these are just true/false instead of 0/1
+        $node['hasContributed'] = $node['hasContributed'] == 1 ? true : false;
+        $node['isWinner'] = $node['isWinner'] == 1 ? true : false;
+        $node['openForChanges'] = $node['openForChanges'] == 1 ? true : false;
+
+        RequirePage::library('Permissions');
+        $node = Permissions::aggregatePermissions($node, $currentUserId);
+        if (!empty($node['children'])) {
+            foreach ($node['children'] as &$child) {
+                $this->addPermissions($child, $currentUserId, $hierarchy);
             }
         }
     }
 
     //show the page from which someone can write a new text
-    //it will be important to get the writer id here, so 
-    //they do not have to select their name, but have it 
-    //already entered.
     public function create(){
         //available only to those logged in (ie: writers)
         CheckSession::sessionAuth();
 
-        // TODO: it is a good idea to have access to all the writers... for when writers can choose who to play with.
-        // a select, however, may not always work. eventually, you'll want to combine with a search. 
+        // TODO: it's ok to have access to all the writers... for when writers can choose who to play with.
         $writer = new Writer;
         $select = $writer->select();
         Twig::render('text-create.php', ['writers'=>$select]);
     }
 
+
     //this is where we save the text entered, and its 
     //associated keywords, etc. be it a new text or an iteration
     //IF its a new text, we create a new game.
     public function store(){
-        //make sure the page is being accessed with a post...
+        // Check if the writer is logged in
+        CheckSession::sessionAuth();
+
+        // Make sure the page is being accessed with a post...
         if($_SERVER["REQUEST_METHOD"] !== "POST"){
-            // Just to make uniform, check if the writer is logged in
-            CheckSession::sessionAuth();
-            // TODO: this seems off. You can rework the logic later.
-            // If logged in, direct to texts..
             RequirePage::redirect('text');
             exit();
         }
@@ -182,17 +196,29 @@ class ControllerText extends Controller{
         $text = new Text;
         $keyWord = new Keyword;
         $textStatus = new TextStatus;
+        $isRootText = !isset($_POST['game_id']) && !isset($_POST['parent_text_id']);
+        $currentWriterId = $_SESSION['writer_id'];
 
-        // Check if this is a root text
-        $isRootText = !isset($_POST['game_id']) && !isset($_POST['parent_id']);
+        // Check if this is an iteration
+        if (!$isRootText) {
+            // If so, get the latest data for this text/game
+            $parentTextId = $_POST['parent_text_id'];
+            $data = $text->selectTexts($currentWriterId, $parentTextId);
+    
+            // Add permissions to the retrieved data
+            $this->addPermissions($data, $currentWriterId);
+    
+            // Check if the user does NOT have permission to iterate
+            if (!Permissions::canIterate($data, $currentWriterId)) {
+                Twig::render($_POST["currentPage"], ['data' => $_POST, 'errors' => 'Permission denied to iterate or publish']);
+                exit();
+            }
+        }else{
+            // No special permissions... other than being logged in... 
+        }
         
         // Validate the $_POST 
         $this->validateText($_POST, $isRootText);
-
-        //TODO: i wonder if this is the best way to check... as 
-        //a person could toy with the hidden fields and mess with the 
-        //database but if they add both a parent_id and a game_id... 
-        //then they are NOT saving a new game...
 
         // Create a new game via the ControllerGame 
         // IF we receive neither a game_id NOR a parent_id
@@ -218,15 +244,18 @@ class ControllerText extends Controller{
         //remove the other extra values from POST so that you can send off your POST to insert
         unset($_POST['firstName']);
         unset($_POST['lastName']);
-        unset($_POST['previous_title']);
+        unset($_POST['parentTitle']);
+        unset($_POST['parentWriting']);
         unset($_POST['prompt']);
+
+        //set your parent_id
+        $_POST['parent_id'] = $_POST['parent_text_id'];
+        unset($_POST['parent_text_id']);
 
         // you need the text-status-id in order to save the text
         $status = $_POST['text_status'];
         unset($_POST['text_status']);
         $_POST['status_id'] = $textStatus->selectStatus($status);
-
-  
 
         // send what's left of the POST (text info) to CRUD
         $textIdFromInsert = $text->insert($_POST);
@@ -268,21 +297,19 @@ class ControllerText extends Controller{
     }
 
 
-    //this will show a specific text, based on the
-    //text's id: options available from this page are
-    //edit (if this is your text), iterate (if this is
-    //another person's text OR if it has already been 
-    //iterated on), and delete(if this is your text 
-    //and it has never been iterated on)
-    public function show($id = null){
-        //TODO: if id = null or if it doesn't exist
-        //in the database, you need to... 
+    //this will show a specific text on its own page
+    //It is not currently being used. Text are currently loaded along with all the 
+    //texts associated to a game, and 
+    public function show($id = null){ 
         $text = new Text;
         $selectId = $text->selectIdText($id);
 
+        //TODO: since this exists, you need to block it off to users who are
+        //not the writer if its a draft
+
         //here, you check if the id doesn't exist, or if it's null
         if($id == null || !$selectId){
-            Twig::render('home-error.php', ['message'=> "Something went wrong. Sorry."]);
+            Twig::render('home-error.php', ['message'=> "Something went wrong. Sorry.The requested text does not exist."]);
             exit;
         }
 
@@ -304,64 +331,117 @@ class ControllerText extends Controller{
 
     // edit creates the page from which the writer can edit a text
     // it checks if the text being edited is a draft or published
+    // for a draft: all fields can be altered. the draft-edit view is sent. 
+    // a published text: only the note/note_date can be altered. the note-edit view is sent.
     public function edit(){
         //no access if you are not logged in
         CheckSession::sessionAuth();
 
+        //models
         $text = new Text;
-        $textStatus = new TextStatus;
-        $selectId = $text->selectIdText($_POST['id']);
-        $keywords = $text->selectKeyword($_POST['id']);
 
+        //variables 
+        $currentWriterId = $_SESSION['writer_id'];
+        $textId = $_POST['id'];
 
-        //block the page if the writer logged in is not this text's writer
-        if($selectId['writer_id'] != $_SESSION['writer_id']){
-            Twig::render('home-error.php', ['message'=> "You can't edit another writer's text. Try iterating instead."]);
-            return;
+        //get the latest info about text and game
+        $textData = $text->selectTexts($currentWriterId, $textId);
+        $status = $textData['text_status'];
+
+        // Add permissions to the retrieved data
+        $this->addPermissions($textData, $currentWriterId);
+
+        // Check user's permission to edit (myText && openForChanges draft) AND to add a note (myText && openForChanges !draft)
+        if (!Permissions::canEdit($textData, $currentWriterId) && !Permissions::canAddNote($textData, $currentWriterId)) {
+            Twig::render('home-error.php', ['message'=> "Sorry! This game is closed, or the text isn't yours. Either way, we can't let you edit this text."]);
+            exit();
         }
 
-        $statusId = $selectId['status_id'];
-        $statusData = $textStatus->selectId($statusId);
-        $status = $statusData['status'];
-        //die(var_dump($selectId));
+        // All is good, lets save some keywords.
+        $keywords = $text->selectKeyword($_POST['id']);
 
-        //in prior logic, the user could not edit their text if it had children... but
-        //I'm changing the logic of editing, for now... so that a user can ALWAYS edit--
-        //but in editing, ALL a user can do is leave a note, or edit the note. 
-
-/*         $select = $text->selectId($_POST['id'], 'parent_id');
-        if($select){
-            Twig::render('home-error.php', ['message'=> "Another writer has iterated on this text, and therefore it can no longer be deleted. Sorry."]);
-            return;
-        } */
-
-        //prepare the keywords
+        // Prepare the keywords
         $keywordString = "";
         foreach ($keywords as $key => $value) {
             $keywordString .= $value.", ";
         }
         $cleanKeywordString= trim($keywordString, ", ");
 
-        //create a data array that will send the values
-        //to the page legibly...
-        $data = $selectId;
-        $data["keywords"] = $cleanKeywordString;
-        $data["lastKeywords"] = $cleanKeywordString;
+        // Create a data array that will send the values
+        // to the page legibly...
+        $textData["keywords"] = $cleanKeywordString;
+        $textData["lastKeywords"] = $cleanKeywordString;
 
         if ($status == 'published') {
             // Render the view for adding notes to published texts
-            Twig::render('text-note-edit.php', ['data' => $selectId, 'keywords' => $keywords]);
-        }else{
-            //send it to the form
-            Twig::render('text-draft-edit.php', ['data' => $data]);
+            Twig::render('text-note-edit.php', ['data' => $textData, 'keywords' => $keywords]);
+        }elseif($status == 'draft'){
+            // Get the parent text: author firstName, lastName, title, and text
+            $parentData = $text->selectTexts($currentWriterId, $textData['parent_id']);
+
+            $textData['parentFirstName'] = $parentData['firstName'];
+            $textData['parentLastName'] = $parentData['lastName'];
+            $textData['parentTitle'] = $parentData['title'];
+            $textData['parentWriting'] = $parentData['writing'];
+            // Send it to the form
+            Twig::render('text-draft-edit.php', ['data' => $textData]);
         }
     }
 
+    //a function to publish instantly
+    public function instaPublish(){
+        //no access if you are not logged in
+        CheckSession::sessionAuth();
+        
+        //make sure the page is being accessed with a post...
+        if($_SERVER["REQUEST_METHOD"] !== "POST"){
+            RequirePage::redirect('text');
+            exit();
+        }
+
+        // Validate and sanitize the text ID
+        $textId = filter_var($_POST['id'], FILTER_VALIDATE_INT);
+        if (!$textId) {
+            Twig::render('home-error.php', ['message' => "Invalid text ID."]);
+        exit();
+        }
+
+        //check permissions
+        $text = new Text;
+        $currentWriterId = $_SESSION['writer_id'];
+        $textId = $_POST['id'];
+        $textData = $text->selectTexts($currentWriterId, $textId);
+
+        $this->addPermissions($textData, $currentWriterId);
+
+        // Check user's permission to edit (myText && openForChanges)
+        if (!Permissions::canEdit($textData, $currentWriterId)) {
+            Twig::render('home-error.php', ['message'=> "Sorry! This game is closed, or the text you're trying to edit isn't yours. Either way, this action is not permitted."]);
+            exit();
+        }
+
+        // Get the 'published' status_id dynamically
+        $textStatus = new TextStatus;
+        $statusData = $textStatus->selectStatusByName('published');
+        if (!$statusData) {
+            Twig::render('home-error.php', ['message' => "Failed to retrieve the status ID for 'published'."]);
+            exit();
+        }
+        $statusId = $statusData['id'];
+
+
+        // Prepare the data for update
+        $data = [
+            'id' => $textId,
+            'status_id' => $statusId // Dynamically retrieved 'published' status_id
+        ];
+
+        $text->update($data);
+        RequirePage::redirect('text');
+    }
 
     //update send an edited text to the database
     public function update(){
-        //TODO: you need to check if this is an update on a published
-        //or on a draft... and accept values accordingly. And redirect accordingly.
 
         //no access if you are not logged in
         CheckSession::sessionAuth();
@@ -372,29 +452,24 @@ class ControllerText extends Controller{
             exit();
         }
 
-        //block the functionality if the writer 
-        //logged in is not this text's writer
-        if($_POST['writer_id'] != $_SESSION['writer_id']){
-            Twig::render('home-error.php', ['message'=> "You can't edit another writer's text. Try iterating instead."]);
-            return;
-        }
-
-        // I'm taking out the parent_id check... because I want "notes"
-        // to be able to be published. 
-         /*
-        //check if the text is a parent, it should not be
-        //able to be be updated
-        $select = $text->selectId($_POST["id"], 'parent_id');
-        if($select){
-            RequirePage::redirect('text');
-            exit();
-        } */
-
         $text = new Text;
-        $writer = new Writer;
+        //$writer = new Writer;
         $keyword = new Keyword;
         $textHasKeyword = new TextHasKeyword;
         $prep = new Prep;
+
+        $currentWriterId = $_SESSION['writer_id'];
+        $textId = $_POST['id'];
+        $textData = $text->selectTexts($currentWriterId, $textId);
+
+        $this->addPermissions($textData, $currentWriterId);
+
+        // Check user's permission to edit (myText && openForChanges)
+        if (!Permissions::canEdit($textData, $currentWriterId)) {
+            Twig::render('home-error.php', ['message'=> "Sorry! This game is closed, or the text you're trying to edit isn't yours. Either way, this action is not permitted."]);
+            exit();
+        }
+
 
         //validate the $_POST
         $currentPage = $_POST['currentPage'];
@@ -407,7 +482,7 @@ class ControllerText extends Controller{
 
         if($currentPage == "text-note-edit.php"){
             $this->validateNote($_POST);
-            //but for now, you are only allowing a user to edit the NOTE:
+            // Here, you are only allowing a user to edit the NOTE:
             $updateNote['note'] = $_POST['note'];
             $updateNote['note_date'] = $_POST['note_date'];
             $updateNote['id'] = $_POST['id'];
@@ -415,6 +490,8 @@ class ControllerText extends Controller{
 
             RequirePage::redirect('text');
             exit;
+        }else{
+            $this->validateText($_POST, false);
         }
 
 
@@ -427,6 +504,10 @@ class ControllerText extends Controller{
         $keywords = $_POST['keywords'];
         unset($_POST['keywords']);
         unset($_POST['currentPage']);
+        unset($_POST['parentFirstName']);
+        unset($_POST['parentLastName']);
+        unset($_POST['parentTitle']);
+        unset($_POST['parentWriting']);
 
         //get the previous keywords from POST, also remove
         $lastKeywords = $_POST['lastKeywords'];
@@ -481,99 +562,124 @@ class ControllerText extends Controller{
     }
 
 
-    //deletes a text from the database
+    // Deletes a text from the database
     public function delete(){
-        //no access if you are not logged in
+        // No access if you are not logged in
         CheckSession::sessionAuth();
 
-        $id = $_POST['id']; 
+        $currentWriterId = $_SESSION['writer_id'];
+        $textId = $_POST['id']; 
         $text = new Text;
         $keyword = new Keyword;
         $textHasKeyword = new TextHasKeyword;
 
-        //first check to see if this text has any children. 
-        //we should not be able to delete it if it has children
-        $select = $text->selectId($id, 'parent_id');
+
+        $textData = $text->selectTexts($currentWriterId, $textId);
+        $this->addPermissions($textData, $currentWriterId);
+
+        // Check user's permission to edit (myText && openForChanges)
+        if (!Permissions::canDelete($textData, $currentWriterId)) {
+            Twig::render('home-error.php', ['message'=> "Sorry! This game is closed, or the text you're trying to edit isn't yours. Either way, this action is not permitted."]);
+            exit();
+        }
+
+        /* // $select will be false if 'id' is not found in the column 'parent_id' for any other text
+        $select = $text->selectId($textId, 'parent_id');
         if($select){
             Twig::render('home-error.php', ['message'=> "Another writer has iterated on this text, and therefore it can no longer be deleted. Sorry."]);
             return;
         }
 
-        //block the functionality if the writer 
-        //logged in is not this text's writer
-        if($_POST['writer_id'] != $_SESSION['writer_id']){
+        // Block if the writer logged in is not this text's writer
+        if($textData['writer_id'] != $_SESSION['writer_id']){
 
             Twig::render('home-error.php', ['message'=> "You can't delete another writer's text."]);
             return;
-        }
+        } */
 
-        //$keyWordIds is given an associative array where all keys are "keyword_id"
-        //it is empty if there are no keywords in the given text.
-        $keyWordIds = $keyword->selectKeywordIds($id);
+        // $keyWordIds is given an associative array where all keys are "keyword_id"
+        // it is empty if there are no keywords in the given text.
+        $keyWordIds = $keyword->selectKeywordIds($textId);
 
-        //check if there are any keywords... and if so
+        // Check if there are any keywords... and if so
         if(isset($keyWordIds)){
-            //delete ALL text_has_keyword entries
-            $textHasKeyword->delete($id);
+            // Delete ALL text_has_keyword entries
+            $textHasKeyword->delete($textId);
 
-            //delete the keywords, if they aren't being used by other text_has_keyword
+            // Delete the keywords, if they aren't being used by other text_has_keyword
             foreach ($keyWordIds as $key => $value) {
                 $keyword->deleteUnusedKeywords($value["keyword_id"]);
             }
         }
 
-        //delete the text entry
-        $response = $text->delete($id);
-        if(!$response){
-            Twig::render('home-error.php', ['message'=> "We were not able to delete. Sorry."]);
-        }else{
+        // in order to be able to delete, you need to delete the "seens" that reference this id
+        $seen = new Seen;
+        // Directly delete all entries in the `seen` table that reference this text
+        $seen->deleteById($textId);
+
+        $response = $text->delete($textId);
+        if ($response !== true) {
+            //die(var_dump($response));
+            // If $response is an array, it contains error information
+            Twig::render('home-error.php', [
+                'message'=> "We were not able to delete. Sorry.",
+            ]);
+        } else {
             RequirePage::redirect('text');
-        }   
+        }
     }
 
 
-    //like show and edit, it presents a filled-out form
-    //with the text to be iterated, but with a "writer select" field
+    // Like show and edit, it presents a filled-out form with the text to be iterated
     public function iterate(){
-        //no access if you are not logged in
+        // No access if you are not logged in
         CheckSession::sessionAuth();
 
+        // Recuperate the text, and the keywords associated to it
         $text = new Text;
-        $writer = new Writer;
-        //first prepare the list of writers for the select field
-        $selectWriter = $writer->select();
-        //recuperate the text, and the keywords associated to it
-        $selectId = $text->selectIdText($_POST['id']);
+        $currentWriterId = $_SESSION['writer_id'];
+        $textData = $text->selectTexts($currentWriterId, $_POST['id']);
+
+
+        // Add permissions to the retrieved data
+        $this->addPermissions($textData, $currentWriterId);
+
+        // Check user's permission to iterate (myText && openForChange && !isDraft)
+        if (!Permissions::canIterate($textData, $currentWriterId)) {
+            Twig::render('home-error.php', ['message'=> "Sorry! This action is not permitted, for one of many reasons."]);
+            exit();
+        }
+
         $keywords = $text->selectKeyword($_POST['id']);
 
-        //prepare the keywords string
+        // Prepare the keywords string
         $keywordString = "";
         foreach ($keywords as $key => $value) {
             $keywordString .= $value.", ";
         }
         $cleanKeywordString= trim($keywordString, ", ");
 
-        //create a data array that will send the values
-        //to the page legibly...
-        $data = $selectId;
-        $data["keywords"] = $cleanKeywordString;
-        //to deal with the previous title and the title of the iteration separately
-        $data["previous_title"] = $data["title"];
-        $data["title"] = "";
+        // Create a data array that will send the values to the page legibly...
+        $textData["keywords"] = $cleanKeywordString;
+        // To deal with the parent title, parent writing and the title and writing of the iteration separately
+        $textData["parentTitle"] = $textData["title"];
+        $textData["parentWriting"] = $textData["writing"];
+        $textData["title"] = "";
 
-        //send it all to the form
-        Twig::render('text-iterate.php', ['data' => $data]);
+        // Send it all to the form
+        Twig::render('text-iterate.php', ['data' => $textData]);
     }
 
 
     public function validateText($data, $isRoot){
         RequirePage::library('Validation');
         $val = new Validation;
+        var_dump($data);
 
-        $val->name('writing')->value($data["writing"])->required()->max(65000);
-        $val->name('title')->value($data["title"])->required()->max(75);
-        $val->name('keywords')->value($data["keywords"])->pattern('keywords')->max(75);
-        // validate the prompt, but only if this is a root text
+        $val->name('writing')->value($data["writing"])->required()->max(65000)->wordCount(50, $data['parentWriting']);
+        $val->name('title')->value($data["title"])->required()->max(75)->wordCount(3);
+        $val->name('keywords')->value($data["keywords"])->pattern('keywords')->max(75)->keywordCount(3);
+        // Validate the prompt, but only if this is a root text
         if($isRoot){
             $val->name('prompt')->value($data["prompt"])->required()->max(200);
         }
@@ -600,14 +706,13 @@ class ControllerText extends Controller{
     public function validateNote($data){
         RequirePage::library('Validation');
         $val = new Validation;
-        $val->name('note')->value($data["note"])->max(500);
+        $val->name('note')->value($data["note"])->max(500)->wordCount(50);
 
         if($val->isSuccess()){
-            //if this is successful, continue the code
-            //so... do nothing
+            // If this is successful, continue the code, so... do nothing
         }else{
             $errors = $val->displayErrors();
-            //send it to the form
+            // Send it to the form
             Twig::render($data["currentPage"], ['data' => $data, 'errors' => $errors]);
             exit();
         };

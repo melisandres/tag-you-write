@@ -1,7 +1,7 @@
 export class SeenManager {
     constructor(path) {
         this.path = path;
-/*         this.userId = sessionStorage.getItem('currentUserId');
+/*      this.userId = sessionStorage.getItem('currentUserId');
         console.log("I can get session storage here? ?", this.userId); */
         this.initEventListeners();
     }
@@ -42,8 +42,6 @@ export class SeenManager {
         }
     }
     
-    
-
     async markAsUnseen(id) {
         const url = `${this.path}seen/markAsUnseen/${id}`;
         const response = await fetch(url);
@@ -55,21 +53,27 @@ export class SeenManager {
 
     updateReadStatus(id) {
         const element = document.querySelector(`[data-story-id="${id}"]`);
-        const gameDrawer = element.closest(".story");
-        const unreadSVGDiv = gameDrawer.querySelector(".unreads");
+        let gameDrawer = null;
+        let unreadSVGDiv = null;
+        let unreads = null;
 
         // update the drawer clicked on locally, as the user browses 
         if (element && element.classList.contains('unread')) {
+            gameDrawer = element.closest(".story");
+            unreadSVGDiv = gameDrawer.querySelector(".unreads");
             element.classList.remove('unread');
         }
 
         // update the top drawer locally, as the user browses 
-        const unreads = gameDrawer.querySelectorAll(".unread");
-        if(unreads.length == 0){
-            if(unreadSVGDiv){
-                unreadSVGDiv.innerHTML = "";
+        if(gameDrawer){
+            unreads = gameDrawer.querySelectorAll(".unread");
+            if(unreads.length == 0){
+                if(unreadSVGDiv){
+                    unreadSVGDiv.innerHTML = "";
+                }
             }
         }
+
     }
 
     /* async checkReadStatus(textId) {

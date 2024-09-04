@@ -17,6 +17,12 @@
     display:flex;
 }
 
+.modal .top-info{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
 /* this is the buttons area -- the close button is always there */
 
 .modal-btns{
@@ -43,12 +49,14 @@
 .modal-dynamic-btns{
     display: flex;
     flex-direction: column;
-    margin-bottom: 50%;
+    margin-bottom: 15px;
+    margin-top: 10px;
     gap: 25px;
+    align-items: flex-end;
 }
 
 /* the buttons are currently all in forms, so you don't need to do fetches */
-.iterate-form, .edit-form{
+.iterate-form, .edit-form, .delete-form, .publish-form, .note-form{
     padding: 0;
 }
 
@@ -56,6 +64,14 @@
     fill: currentColor;
     width: 37px; /* Adjust size as needed */
     height: 37px; /* Adjust size as needed */
+}
+
+.modal-btns .vote{
+    background: #ff9df5eb;
+    width: 49px;
+    height: 43px;
+    border: none;
+    cursor: pointer;
 }
 
 .modal-btns .iterate{
@@ -66,7 +82,31 @@
     cursor: pointer;
 }
 
-.modal-btns .vote{
+.modal-btns .note{
+    background: #99ededea;
+    padding: 3px 5px 0px 5px;
+    border: none;
+    cursor: pointer;
+}
+
+.modal-btns .edit{
+    background: #99ededea;
+    padding: 3px 5px 0px 5px;
+    border: none;
+    cursor: pointer;
+}
+
+.modal-btns .publish{
+    border: none;
+    cursor: pointer;
+    background-color: rgba(174, 242, 149, 0.886);
+    padding: 4px 11px 5px 6px;
+}
+
+.modal-btns .delete{
+    background-color: rgba(238, 108, 108, 0.886);
+    width: 47px;
+    height: 42px;
     border: none;
     cursor: pointer;
 }
@@ -83,23 +123,37 @@
 
 .edit svg {
     fill: currentColor;
+    width: 36px;
+    height: 36px;
+    transform: rotate(40deg);
+}
+
+.note svg {
+    fill: currentColor;
+    width: 36px;
+    height: 36px;
+}
+
+.publish svg {
+    fill: currentColor; 
+    width: 30px;
+    height: 30px;
+}
+
+.delete svg {
+    fill: currentColor;
+    width: 30px;
+    height: 30px;
+    transform: translateX(-2px);
+}
+
+.vote-info svg {
+    fill: red;
     width: 35px;
-    height: 55px;
+    height: 35px;
+    stroke: red;
 }
 
-.modal-btns .edit{
-    background-color: rgba(238, 108, 108, 0.886);
-    padding: 8px 15px 1px 7px;
-    border: none;
-    cursor: pointer;
-}
-
-
-.modal-btns .vote{
-    background: #ff9df5eb;
-    width: 49px;
-    height: 43px;
-}
 
 /* this is the "paper" area */
 .modal{

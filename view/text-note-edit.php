@@ -6,13 +6,15 @@
 <form action="{{path}}text/update" method="post">
 
     <label>{{ data.note ? 'Oops! You can change your note:' : 'Oops! You can leave a note for other writers:' }} 
+        <div class="very-small" data-wordCountDisplay></div>
         <textarea name="note" placeholder="oh dear! I meant to write 'warm' not 'worm' so embarassing..." rows="10" cols="50">{{data.note}}</textarea>
     </label>
 
     <input type="hidden" name="note_date" value="{{ 'now'|date('Y-m-d H:i:s') }}">
     <input type="hidden" name="id" value="{{ data.id }}">
     <input type="hidden" name="writer_id" value="{{ data.writer_id }}">
-<!--     <input type="hidden" name="lastKeywords" value="{{ data.lastKeywords }}"> -->
+    <input type="hidden" name="title" value="{{ data.title }}">
+    <input type="hidden" name="writing" value="{{ data.writing }}">
     <input type="hidden" name="currentPage" value="text-note-edit.php">
     <input type="hidden" name="text_status" data-text-status value="">
 

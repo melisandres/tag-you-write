@@ -5,7 +5,6 @@ export class RefreshManager {
     constructor(uiManager, storyManager) {
         this.storyManager = storyManager;
         this.state = {};
-        this.storiesEl = document.querySelector("[data-stories]")
         this.uiManager = uiManager;
     }
 
@@ -17,8 +16,10 @@ export class RefreshManager {
         this.state.modal = false;
         this.state.modalTextId = null;
 
+        const storiesEl = document.querySelector("[data-stories]")
+
         // The showcase element
-        const showcaseEl = this.storiesEl.querySelector("#showcase");
+        const showcaseEl = storiesEl.querySelector("#showcase");
 
         // The modal element if visible
         const treeModalEl = document.querySelector("[data-tree-modal='visible']");
