@@ -5,7 +5,8 @@ input,textarea{
 }
 
 textarea, input{
-    width: 90%;
+    max-width: 100%;
+    min-width: 100%;
 }
 
 label{

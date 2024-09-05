@@ -3,7 +3,7 @@
 {% if errors is defined %}
     <span class='error'>{{ errors|raw}}</span>
 {% endif %}
-<form action="{{path}}text/update" method="post">
+<form id="main-form" action="{{path}}text/update" method="post">
 
     <label>{{ data.note ? 'Oops! You can change your note:' : 'Oops! You can leave a note for other writers:' }} 
         <div class="very-small" data-wordCountDisplay></div>
@@ -19,8 +19,14 @@
     <input type="hidden" name="text_status" data-text-status value="">
 
     <div class="form-btns">
-        <input type="submit" value="{{ data.note ? 'Change Note' : 'Add Note' }}">
-        <button type="button" onclick="window.location.href='{{ path }}text';">Cancel</button>
+        <button class="publish" type="button" data-status="published">
+            <span class="icon"></span>
+            <span class="title">{{ data.note ? 'Change Note' : 'Add Note' }}</span>
+        </button>
+        <button class="cancel" type="button" data-status= "cancel">
+            <span class="icon"></span>
+            <span class="title">Cancel</span>
+        </button>
     </div>
     
 </form>
@@ -29,9 +35,3 @@
 <p>{{ data.writing }}</p>
 
 {{include('footer.php')}}
-
-<script>
-    function setStatus(status) {
-        document.querySelector('[data-text-status]').value = status;
-    }
-</script>

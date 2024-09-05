@@ -8,6 +8,7 @@ import { SeenManager } from './seenManager.js';
 import { WarningManager } from './warningManager.js';
 import { NotificationManager } from './notificationManager.js';
 import { WordCountManager } from './wordcountManager.js';
+import { FormManager } from './formManager.js';
 
 document.addEventListener("DOMContentLoaded", () => {
   const path = window.location.origin + "/tag-you-write-repo/tag-you-write/";
@@ -48,6 +49,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initialize in UIManager or globally
   // const warningManager = new WarningManager();
+
+  //And your forms need managing (!)
+  new FormManager(path);
 
 
   // Handle browser refresh by saving state before unload

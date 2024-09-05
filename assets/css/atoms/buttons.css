@@ -29,3 +29,68 @@
     width: 50px;
     height: 50px;
 }
+
+.form-btns {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.form-btns button {
+    display: flex;
+    flex-direction: column; /* Align SVG above text */
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    background-color: transparent;
+    width: 100%; /* Full width */
+}
+
+.form-btns .title {
+    color: grey;
+}
+
+.form-btns .icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.form-btns svg {
+    width: 30px;
+    height: 30px;
+}
+
+.form-btns button.publish .icon { background-color: rgba(127, 227, 127, 0.866); }
+.form-btns button.save .icon { background-color: rgba(122, 122, 229, 0.897); }
+.form-btns button.delete .icon { background-color: rgba(225, 128, 128, 0.848); }
+.form-btns button.cancel .icon { background-color: gray; }
+
+/* 
+.form-btns {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px; 
+}
+
+.form-btns button, .form-btns input[type="submit"], .form-btns input[type="button"] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    border: none;
+    color: white;
+    width: 100%; 
+}
+
+input.publish { background-color: green; }
+input.draft { background-color: blue; }
+input.delete { background-color: red; }
+button.cancel { background-color: gray; }
+ */

@@ -4,7 +4,7 @@
     <span class='error'>{{ errors|raw}}</span>
 {% endif %}
 
-<form action="{{path}}text/store" method="post">
+<form id="main-form" action="{{path}}text/store" method="post">
     
     <label>title
         <input type="text" name="title" placeholder="Elsewhere" value="{{ data.title|default('') }}">
@@ -31,18 +31,20 @@
     <input type="hidden" name="currentPage" value="text-create.php">
     <input type="hidden" name="text_status" data-text-status value="">
 
-<!--     <input type="submit" value="save"> -->
     <div class="form-btns">
-        <input type="submit" value="Publish" onclick="setStatus('published')">
-        <input type="submit" value="Save Draft" onclick="setStatus('draft')">
-        <button type="button" onclick="window.location.href='{{ path }}text';">Cancel</button>
+    <button class="publish" type="button" data-status="published">
+                <span class="icon"></span>
+                <span class="title">Publish</span>
+            </button>
+            <button class="save" type="button" data-status="draft">
+                <span class="icon"></span>
+                <span class="title">Save Draft</span>
+            </button>
+            <button class="cancel" type="button" data-status= "cancel">
+                <span class="icon"></span>
+                <span class="title">Cancel</span>
+            </button>
     </div>
 </form>
 
 {{include('footer.php')}}
-
-<script>
-    function setStatus(status) {
-        document.querySelector('[data-text-status]').value = status;
-    }
-</script>
