@@ -9,6 +9,7 @@ import { WarningManager } from './warningManager.js';
 import { NotificationManager } from './notificationManager.js';
 import { WordCountManager } from './wordcountManager.js';
 import { FormManager } from './formManager.js';
+import { TreeVisualizer } from './treeVisualizer.js';
 
 document.addEventListener("DOMContentLoaded", () => {
   const path = window.location.origin + "/tag-you-write-repo/tag-you-write/";

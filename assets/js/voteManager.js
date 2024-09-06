@@ -1,4 +1,3 @@
-import { ShelfVisualizer } from './shelfVisualizer.js';
 import { WarningManager } from './warningManager.js';
 
 export class VoteManager {
@@ -6,7 +5,8 @@ export class VoteManager {
         this.path = path;
         this.init();
         this.refreshManager = refreshManager;
-        //this.warningManager = new WarningManager;
+
+        //this.TreeVisualizer = new TreeVisualizer();
     }
 
     init() {
@@ -22,34 +22,6 @@ export class VoteManager {
             dataStories.addEventListener('click', this.handleVoteButtonClick.bind(this));
         }
     }
-
-/*     async handleVoteButtonClick(event) {
-        const button = event.target.closest('[data-vote]');
-        if (button) {
-            const textId = button.getAttribute('data-vote');
-            try {
-                let result = await this.voteUnvote(textId, false);
-                //console.log("get confirmation", result)
-                if (result.confirmationRequired) {
-                    if (confirm("This vote will end the game. Are you sure?")) {
-                        result = await this.voteUnvote(textId, true);
-                        console.log("confirmed", result)
-                        //this.updateVoteButton(button, result);
-                        await this.refreshManager.fetchDataAndRefresh()
-                    }else{
-                        // cancelled vote (upon confirmation)
-                        return;
-                    }
-                }else{
-                    // confirmation not required
-                    this.updateVoteButton(button, result);
-                    //await this.refreshManager.fetchDataAndRefresh()
-                }
-            } catch (error) {
-                console.error('Error toggling vote:', error);
-            }
-        }
-    } */
 
     async handleVoteButtonClick(event) {
         const button = event.target.closest('[data-vote]');
@@ -77,7 +49,7 @@ export class VoteManager {
             console.error('Error toggling vote:', error);
             }
         }
-        }
+    }
           
 
     async voteUnvote(id, isConfirmed) {
@@ -106,7 +78,6 @@ export class VoteManager {
             resultsSpan = button.closest(".modal-with-btns").querySelector('.vote-info .small');
 
             // Update the shelf view underneath if applicable
-            // TODO: I may need a similar logic to handle D3 tree visualization, around votes.
             if (data.textId) {
                 const shelfNode = document.querySelector(`.node[data-story-id="${data.textId}"]`);
                 if (shelfNode) {
@@ -124,6 +95,9 @@ export class VoteManager {
                     }
                 }
             }
+
+            // Update the D3 visualisation
+            this.updateNodeVote(data.textId, data.voteCount, data.playerCountMinusOne)
         }
     
         const numberOfVotes = data.voteCount;
@@ -140,32 +114,38 @@ export class VoteManager {
     }
     
 
-   /*  updateVoteButton(button, data) {
-        if (!data || typeof data.voteCount === 'undefined' || typeof data.playerCountMinusOne === 'undefined') {
-            console.error('Invalid data received:', data);
+    updateNodeVote(nodeId, newVoteCount, maxVoteCount) {
+        const container = document.querySelector('#showcase')
+        const svg = container.querySelector('svg');
+        const colorScale = this.createColorScale(maxVoteCount)
+
+        if (!svg) {
+            console.error('SVG element not found in the container.');
             return;
         }
 
-        let resultsSpan;
-        if (button.closest(".node")) {
-            // Case for shelf visualization
-            resultsSpan = button.closest(".node").querySelector('[data-vote-count]');
-        } else {
-            // Case for modal visualization
-            resultsSpan = button.closest(".modal-with-btns").querySelector('.vote-info .small');
-        }
-        const numberOfVotes = data.voteCount;
-        const numberOfPlayers = data.playerCountMinusOne;
+        const node = svg.querySelector(`circle[data-id="${nodeId}"]`);
+        console.log("node to update", node)
 
-        if (data.voted == true) {
-            button.classList.add('voted');
-        } else {
-            button.classList.remove('voted');
+        if (!node) {
+            console.error(`Node with id ${nodeId} not found.`);
+            return;
         }
 
-        resultsSpan.innerHTML = `${numberOfVotes} / ${numberOfPlayers}`;
-        resultsSpan.setAttribute('data-vote-count', numberOfVotes);
-    } */
+        if (!colorScale) {
+            console.error('Color scale is not initialized.');
+            return;
+        }
+
+        node.setAttribute('fill', colorScale(newVoteCount));
+    }
+
+    createColorScale(maxVotes) {
+        return d3.scaleLinear()
+            .domain([0, maxVotes])
+            .range(['white', '#ff009b'])
+            .interpolate(d3.interpolateRgb);
+    }
 
     
 }

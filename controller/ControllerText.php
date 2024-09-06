@@ -465,7 +465,7 @@ class ControllerText extends Controller{
         $this->addPermissions($textData, $currentWriterId);
 
         // Check user's permission to edit (myText && openForChanges)
-        if (!Permissions::canEdit($textData, $currentWriterId)) {
+        if (!Permissions::canEdit($textData, $currentWriterId) && !Permissions::canAddNote($textData, $currentWriterId)) {
             Twig::render('home-error.php', ['message'=> "Sorry! This game is closed, or the text you're trying to edit isn't yours. Either way, this action is not permitted."]);
             exit();
         }

@@ -57,14 +57,14 @@ export class SeenManager {
         let unreadSVGDiv = null;
         let unreads = null;
 
-        // update the drawer clicked on locally, as the user browses 
+        // Update the drawer clicked on locally, as the user browses 
         if (element && element.classList.contains('unread')) {
             gameDrawer = element.closest(".story");
             unreadSVGDiv = gameDrawer.querySelector(".unreads");
             element.classList.remove('unread');
         }
 
-        // update the top drawer locally, as the user browses 
+        // Update the top drawer locally, as the user browses 
         if(gameDrawer){
             unreads = gameDrawer.querySelectorAll(".unread");
             if(unreads.length == 0){
@@ -72,6 +72,13 @@ export class SeenManager {
                     unreadSVGDiv.innerHTML = "";
                 }
             }
+        }
+
+        // Update the D3 circle for this story, removing the 'unread' class
+        const circle = d3.select(`[data-id='${id}']`);
+        console.log("circle", circle);
+        if (circle.classed('unread')) {
+            circle.classed('unread', false).classed('read', true);  // Remove 'unread', add 'read'
         }
 
     }

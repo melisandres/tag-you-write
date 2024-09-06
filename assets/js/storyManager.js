@@ -78,6 +78,7 @@ export class StoryManager {
   /**TODO: I must have stopped coding before getting here, because I wrote: "review here... just starting to write this... must test and add the right code to the text-index page" don't know what it means but  */
   async showStoryInModal(id){
     const data = await this.fetchStoryNode(id);
+    console.log(data);
     this.modal.showModal(data);
     this.seenManager.markAsSeen(id);
     this.seenManager.updateReadStatus(id);

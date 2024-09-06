@@ -40,44 +40,7 @@
     height: 37px;
 }
 
-.with-shelf button.iterate{
-    background: #99ededea;
-}
 
-.with-shelf button.edit{
-    background: #99ededea;
-}
-
-.with-shelf button.vote{
-    background-color: rgba(243, 119, 225, 0.951);
-}
-
-.with-shelf button.note{
-    background: #99ededea;
-}
-
-.with-shelf button.publish{
-    background-color: rgba(174, 242, 149, 0.886);
-}
-
-.with-shelf button.delete{
-    background-color: rgba(238, 108, 108, 0.886);
-}
-
-.with-shelf button.edit svg{
-    width: 35px;
-    height: 40px;
-}
-
-.with-shelf button.vote svg{
-    width: 25px;
-    height: 45px;
-    transform: rotate(145deg);
-}
-
-.with-shelf button.vote.voted svg{
-    transform: rotate(-30deg);
-}
 
 .node-title h2 {
     margin: 0; /* Remove all margins */
@@ -85,7 +48,7 @@
     margin-bottom: 0; /* Fine-tune spacing below the title */
   }
   
-  .node-title p {
+.node-title p {
     margin: 0; 
     padding: 0; 
     line-height: 1;

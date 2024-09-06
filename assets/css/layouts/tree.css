@@ -4,8 +4,8 @@
 }
 
 .node circle {
-    fill: pink;
-    stroke: palevioletred;
+    /* fill: pink; */
+    stroke: rgb(238, 167, 2);
     stroke-width: 1px;
     cursor: pointer; 
 }
@@ -26,4 +26,22 @@
     fill: none;
     stroke: #ccc;
     stroke-width: 1px;
+}
+
+.text-by.author{
+    fill: pink;
+}
+
+.star{
+    cursor: pointer;
+}
+
+.tree-title-draft{
+    opacity: 30%;
+}
+
+.tree-node-draft{
+    fill: lightgrey;
+    stroke: lightpink;
+    opacity: 50%;
 }

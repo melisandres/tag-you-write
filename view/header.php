@@ -15,17 +15,16 @@
 <body>
     <nav>   
         <a class="nav-link home" href="{{path}}">?</a>    
-        <a class="nav-link texts" href="{{path}}text">see all the texts</a>     
+        <a class="nav-link texts" href="{{path}}text">all games</a>     
     {% if guest %}
-        <a class="nav-link writers" href="{{path}}writer/create">join our community</a>
-        <a class="nav-link writers" href="{{path}}login">Login</a>
+        <a class="nav-link writers" href="{{path}}login">login</a>
     {% else %}
-        <a class="nav-link writers" href="{{path}}writer">show all writers</a>
-        <a class="nav-link texts" href="{{path}}text/create">write something</a>
+        <!-- <a class="nav-link writers" href="{{path}}writer">show all writers</a> -->
+        <a class="nav-link texts" href="{{path}}text/create">new game</a>
         {% if session.privilege == 1 %}
             <a class="nav-link writers" href="{{path}}journal">journal</a>
         {% endif %}
-        <a class="nav-link writers" href="{{path}}login/logout">Log out</a>
+        <a class="nav-link writers" href="{{path}}login/logout">logout</a>
     {% endif %}
 <!--     {% if session.privilege == 1 or session.privilege == 2 %}
         <a href="{{path}}produit/create">Produits</a>
