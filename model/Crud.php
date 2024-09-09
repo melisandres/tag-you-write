@@ -121,10 +121,19 @@ abstract class Crud extends PDO{
             $stmt->bindValue(":$key", $value);
         }
 
-        if($stmt->execute()){
+       /*  if($stmt->execute()){
             return;
         }else{
             Twig::render('home-error.php', ['message'=> "Sorry, there was an error updating."]);
+        } */
+
+        try {
+            $result = $stmt->execute();
+            return $result;
+        } catch (PDOException $e) {
+            // Log the error
+            error_log("Database update error: " . $e->getMessage());
+            return false;
         }
 
     }

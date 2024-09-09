@@ -15,14 +15,11 @@ export class RefreshManager {
         this.state.rootStoryId = null;
         this.state.modal = false;
         this.state.modalTextId = null;
+        this.state.zoomTransform = null;
 
         const storiesEl = document.querySelector("[data-stories]")
-
-        // The showcase element
-        const showcaseEl = storiesEl.querySelector("#showcase");
-
-        // The modal element if visible
-        const treeModalEl = document.querySelector("[data-tree-modal='visible']");
+        const showcaseEl = storiesEl.querySelector("#showcase"); // The showcase element
+        const treeModalEl = document.querySelector("[data-tree-modal='visible']"); // The modal element if visible
 
         if(showcaseEl){
             // Save state of open drawers
@@ -37,6 +34,9 @@ export class RefreshManager {
 
             // Save story id
             this.state.rootStoryId = showcaseEl.closest('[data-text-id]').dataset.textId;
+
+            // Save zoom transform
+            this.captureD3Transform();
         }
 
         if(treeModalEl){
@@ -49,6 +49,19 @@ export class RefreshManager {
         }
 
         localStorage.setItem('pageState', JSON.stringify(this.state));
+    }
+
+    captureD3Transform() {
+        const svg = d3.select('#showcase svg');
+
+        if (!svg.empty()) {
+            const transform = d3.zoomTransform(svg.node());
+            this.state.zoomTransform = {
+                x: transform.x,
+                y: transform.y,
+                k: transform.k
+            };
+        }
     }
 
     restoreState() {
@@ -66,7 +79,9 @@ export class RefreshManager {
                 this.restoreDrawers(savedState);
             });
         } else if (savedState.showcase === 'tree') {
-            this.uiManager.drawTree(savedState.rootStoryId, container)
+            this.uiManager.drawTree(savedState.rootStoryId, container).then(() => {
+                this.applyD3Transform(savedState.zoomTransform);
+            });
         } 
         
         //check if there's a modal id saved
@@ -98,6 +113,18 @@ export class RefreshManager {
                 arrow.textContent = '▼';
             }
         });
+    }
+
+    applyD3Transform(transform) {
+        if (transform) {
+            const svg = d3.select('#showcase svg');
+            const g = svg.select('g');
+            const zoom = d3.zoom().on('zoom', (event) => {
+                g.attr('transform', event.transform);
+            });
+            svg.call(zoom);
+            svg.call(zoom.transform, d3.zoomIdentity.translate(transform.x, transform.y).scale(transform.k));
+        }
     }
 
     async fetchDataAndRefresh() {

@@ -10,6 +10,7 @@ export class StoryManager {
     this.seenManager = seenManager;
     this.modal = modal;
     this.storyTreeData = [];
+    
     this.UIManager = UIManager;
   }
 

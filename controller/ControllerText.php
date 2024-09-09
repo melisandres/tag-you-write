@@ -400,11 +400,11 @@ class ControllerText extends Controller{
         }
 
         // Validate and sanitize the text ID
-        $textId = filter_var($_POST['id'], FILTER_VALIDATE_INT);
+/*         $textId = filter_var($_POST['id'], FILTER_VALIDATE_INT);
         if (!$textId) {
             Twig::render('home-error.php', ['message' => "Invalid text ID."]);
         exit();
-        }
+        } */
 
         //check permissions
         $text = new Text;
@@ -436,8 +436,20 @@ class ControllerText extends Controller{
             'status_id' => $statusId // Dynamically retrieved 'published' status_id
         ];
 
-        $text->update($data);
-        RequirePage::redirect('text');
+        $success = $text->update($data);
+        //RequirePage::redirect('text');
+
+        error_log("InstaPublish result: " . ($success ? "true" : "false"));
+    
+        $this->sendJsonResponse($success, $success ? 'Published successfully' : 'Failed to publish');
+    }
+
+    private function sendJsonResponse($success, $message) {
+        $response = json_encode(['success' => $success, 'message' => $message]);
+        error_log("Sending JSON response: " . $response);
+        header('Content-Type: application/json');
+        echo $response;
+        exit;
     }
 
     //update send an edited text to the database

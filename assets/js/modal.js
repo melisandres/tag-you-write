@@ -63,12 +63,9 @@ export class Modal {
       ` : ''}
 
        ${data.permissions.canPublish ? `
-        <form action="${this.path}text/instaPublish" method="POST" class="publish-form">
-          <input type="hidden" name="id" value="${data.id}">
-          <button type="submit" class="publish">
-            ${SVGManager.publishSVG}
-          </button>
-        </form>
+        <button id="instaPublishButton" data-text-id="${data.id}" class="publish">
+          ${SVGManager.publishSVG}
+        </button>
       ` : ''}
 
       ${data.permissions.canDelete ? `
@@ -94,4 +91,3 @@ export class Modal {
       this.modalElement.dataset.treeModal = "hidden";
     }
   }
-  

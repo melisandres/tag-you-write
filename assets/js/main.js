@@ -10,6 +10,8 @@ import { NotificationManager } from './notificationManager.js';
 import { WordCountManager } from './wordcountManager.js';
 import { FormManager } from './formManager.js';
 import { TreeVisualizer } from './treeVisualizer.js';
+import { InstaPublishManager } from './instaPublishManager.js';
+
 
 document.addEventListener("DOMContentLoaded", () => {
   const path = window.location.origin + "/tag-you-write-repo/tag-you-write/";
@@ -53,6 +55,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   //And your forms need managing (!)
   new FormManager(path);
+
+  // Initialize InstaPublishManager
+  new InstaPublishManager(path);
 
 
   // Handle browser refresh by saving state before unload

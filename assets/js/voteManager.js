@@ -1,4 +1,5 @@
 import { WarningManager } from './warningManager.js';
+import { TreeUpdateManager } from './treeUpdateManager.js';
 
 export class VoteManager {
     constructor(path, refreshManager) {
