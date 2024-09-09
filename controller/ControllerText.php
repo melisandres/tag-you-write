@@ -686,7 +686,7 @@ class ControllerText extends Controller{
     public function validateText($data, $isRoot){
         RequirePage::library('Validation');
         $val = new Validation;
-        var_dump($data);
+        //var_dump($data);
 
         $val->name('writing')->value($data["writing"])->required()->max(65000)->wordCount(50, $data['parentWriting']);
         $val->name('title')->value($data["title"])->required()->max(75)->wordCount(3);

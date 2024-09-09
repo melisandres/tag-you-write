@@ -11,6 +11,7 @@ import { WordCountManager } from './wordcountManager.js';
 import { FormManager } from './formManager.js';
 import { TreeVisualizer } from './treeVisualizer.js';
 import { InstaPublishManager } from './instaPublishManager.js';
+import { ShelfVisualizer } from './shelfVisualizer.js';
 
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -57,7 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
   new FormManager(path);
 
   // Initialize InstaPublishManager
-  new InstaPublishManager(path);
+  new InstaPublishManager(path, storyManager, refreshManager);
 
 
   // Handle browser refresh by saving state before unload

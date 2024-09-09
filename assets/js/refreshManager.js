@@ -17,6 +17,11 @@ export class RefreshManager {
         this.state.modalTextId = null;
         this.state.zoomTransform = null;
 
+        this.state.scrollPosition = {
+            x: window.scrollX,
+            y: window.scrollY
+        };
+
         const storiesEl = document.querySelector("[data-stories]")
         const showcaseEl = storiesEl.querySelector("#showcase"); // The showcase element
         const treeModalEl = document.querySelector("[data-tree-modal='visible']"); // The modal element if visible
@@ -101,6 +106,13 @@ export class RefreshManager {
         } */
 
         // Restore modal state if needed (additional logic can be added here)
+
+        // Restore scroll position
+        if (savedState.scrollPosition) {
+            setTimeout(() => {
+                window.scrollTo(savedState.scrollPosition.x, savedState.scrollPosition.y);
+            }, 100); // Adjust the delay as needed
+        }
     }
 
     restoreDrawers(savedState) {

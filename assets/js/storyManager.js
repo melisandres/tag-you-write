@@ -10,7 +10,7 @@ export class StoryManager {
     this.seenManager = seenManager;
     this.modal = modal;
     this.storyTreeData = [];
-    
+
     this.UIManager = UIManager;
   }
 
@@ -84,4 +84,13 @@ export class StoryManager {
     this.seenManager.markAsSeen(id);
     this.seenManager.updateReadStatus(id);
   }
+
+  async updateDrawer(id){
+    const data = await this.fetchStoryNode(id);
+    const container = document.querySelector("#showcase.with-shelf");
+    console.log(data);
+    const shelfVisualizer = new ShelfVisualizer(container, this.path);
+    shelfVisualizer.updateOneDrawer(data);
+  }
+  
 }

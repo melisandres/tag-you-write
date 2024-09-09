@@ -1,8 +1,10 @@
 export class InstaPublishManager {
-    constructor(path) {
+    constructor(path, storyManager, refreshManager) {
       this.path = path;
       this.container = document.querySelector('#showcase');
-      console.log("container", this.container);
+      this.storyManager = storyManager;
+      this.refreshManager = refreshManager;
+
       this.initEventListeners();
     }
   
@@ -38,7 +40,7 @@ export class InstaPublishManager {
           try {
             const result = JSON.parse(rawText); // Try to parse it as JSON
             if (result.success) {
-                console.log("success textId: ", textId);
+              this.refreshManager.saveState();
               this.updateViews(textId, 'published');
               this.updateModal(textId, 'published');
             } else {
@@ -108,21 +110,17 @@ export class InstaPublishManager {
     
     }
   
-    updateShelfView(textId, newStatus) {
+    updateShelfView(textId) {
+        // only update the auto-updated element
         if (this.container.classList.contains('with-shelf')) {
-            // TODO: update shelf view
-
+            this.storyManager.updateDrawer(textId);
         }
-/*       if (this.shelfVisualizer) {
-        this.shelfVisualizer.updateTextStatus(textId, newStatus);
-      } */
     }
   
-    updateModal(textId, newStatus) {
+    updateModal(textId) {
       const modal = document.querySelector('.modal-background[data-text-id="' + textId + '"]');
       if (modal) {
-        // Update modal content as needed
-        // For example, update the status display, change button text, etc.
+        this.storyManager.showStoryInModal(textId);
       }
     }
   }

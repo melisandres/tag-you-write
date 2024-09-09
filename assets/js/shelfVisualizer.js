@@ -31,18 +31,31 @@ export class ShelfVisualizer {
   }
 
   drawDrawer(node, depth) {
+    let drawerHTML = this.drawSingleNode(node, depth);
+
+    if (node.children && node.children.length > 0) {
+      drawerHTML += '<ol>';
+      node.children.forEach(child => {
+        drawerHTML += this.drawDrawer(child, depth + 1);
+      });
+      drawerHTML += '</ol>';
+    }
+
+    drawerHTML += '</li>';
+    return drawerHTML;
+  }
+
+  drawSingleNode(node, depth) {
     const author = node.permissions.isMyText ? 
     `<span class="author">by you</span>` : 
     `<span class="author">by ${node.firstName} ${node.lastName}</span>`;
-    console.log(node);
     const isWinner = node.isWinner ? "isWinner" : "";
     const unread = node.text_seen == "0" ? "unread" : "";
     const note = node.note ? `<p class="note">P.S... ${node.note}</p>` : '';
     const noteDate = node.note_date ?  `<span class="date"> ${node.note_date}</span>` : '';
 
-
-    let drawerHTML = `
-      <li class="node ${unread} ${node.text_status}" data-story-id="${node.id}"style="--node-depth: ${depth}">
+    return `
+      <li class="node ${unread} ${node.text_status}" data-story-id="${node.id}" style="--node-depth: ${depth}">
         <div class="node-title ${isWinner}">
           <h2>
             <span class="arrow">▶</span>
@@ -68,17 +81,29 @@ export class ShelfVisualizer {
           ${noteDate}
         </div>
     `;
+  }
 
-    if (node.children && node.children.length > 0) {
-      drawerHTML += '<ol>';
-      node.children.forEach(child => {
-        drawerHTML += this.drawDrawer(child, depth + 1);
-      });
-      drawerHTML += '</ol>';
+  updateOneDrawer(data){
+    const drawer = this.container.querySelector(`[data-story-id="${data.id}"]`);
+    if (drawer) {
+      const depth = parseInt(drawer.style.getPropertyValue('--node-depth'));
+      drawer.outerHTML = this.drawSingleNode(data, depth);
+      
+      // Find the newly rendered node
+      const updatedDrawer = this.container.querySelector(`[data-story-id="${data.id}"]`);
+      if (updatedDrawer) {
+        const writingDiv = updatedDrawer.querySelector('.writing');
+        const arrow = updatedDrawer.querySelector('.arrow');
+        
+        // Open the node
+        writingDiv.classList.remove('hidden');
+        writingDiv.classList.add('visible');
+        arrow.textContent = '▼';
+
+      }
+      
+      this.addEventListeners(); // Re-add event listeners for the updated node
     }
-
-    drawerHTML += '</li>';
-    return drawerHTML;
   }
 
   /*
@@ -138,12 +163,9 @@ export class ShelfVisualizer {
 
   getPublishForm(node) {
     return `
-      <form action="${this.path}text/instaPublish" method="POST">
-        <input type="hidden" name="id" value="${node.id}">
-        <button type="submit" class="publish" value="publish">
+        <button id="instaPublishButton" data-text-id="${node.id}" class="publish">
           ${SVGManager.publishSVG}
         </button>
-      </form>
     `;
   }
 
@@ -205,5 +227,8 @@ export class ShelfVisualizer {
     });
   }
 }
+
+
+
 
 /*  ${node.permissions.canDelete ? this.getDeleteForm(node) : ''}  */
