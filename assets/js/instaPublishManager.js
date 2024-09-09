@@ -40,7 +40,7 @@ export class InstaPublishManager {
           try {
             const result = JSON.parse(rawText); // Try to parse it as JSON
             if (result.success) {
-              this.refreshManager.saveState();
+              //this.refreshManager.saveState();
               this.updateViews(textId, 'published');
               this.updateModal(textId, 'published');
             } else {

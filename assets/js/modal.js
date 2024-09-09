@@ -69,12 +69,9 @@ export class Modal {
       ` : ''}
 
       ${data.permissions.canDelete ? `
-        <form action="${this.path}text/delete" method="POST" class="delete-form">
-          <input type="hidden" name="id" value="${data.id}">
-          <button type="submit" class="delete">
-            ${SVGManager.deleteSVG}         
-          </button>
-        </form>
+        <button id="instaDeleteButton" data-text-id="${data.id}" class="delete">
+          ${SVGManager.deleteSVG}
+        </button>
       ` : ''}
 
       ${data.permissions.canVote ? `

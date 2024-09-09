@@ -445,12 +445,18 @@ class ControllerText extends Controller{
     }
 
     private function sendJsonResponse($success, $message) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => $success, 'message' => $message]);
+        exit;
+    }
+
+    /* private function sendJsonResponse($success, $message) {
         $response = json_encode(['success' => $success, 'message' => $message]);
         error_log("Sending JSON response: " . $response);
         header('Content-Type: application/json');
         echo $response;
         exit;
-    }
+    } */
 
     //update send an edited text to the database
     public function update(){
@@ -581,6 +587,7 @@ class ControllerText extends Controller{
 
         $currentWriterId = $_SESSION['writer_id'];
         $textId = $_POST['id']; 
+        $insta = isset($_POST['insta']) && $_POST['insta'] === '1';
         $text = new Text;
         $keyword = new Keyword;
         $textHasKeyword = new TextHasKeyword;
@@ -630,14 +637,22 @@ class ControllerText extends Controller{
         $seen->deleteById($textId);
 
         $response = $text->delete($textId);
+
+
         if ($response !== true) {
-            //die(var_dump($response));
-            // If $response is an array, it contains error information
-            Twig::render('home-error.php', [
-                'message'=> "We were not able to delete. Sorry.",
-            ]);
+            if (!$insta) {
+                Twig::render('home-error.php', [
+                    'message'=> "We were not able to delete. Sorry.",
+                ]);
+            } else {
+                $this->sendJsonResponse(false, 'Failed to delete');
+            }
         } else {
-            RequirePage::redirect('text');
+            if (!$insta) {
+                RequirePage::redirect('text');
+            } else {
+                $this->sendJsonResponse(true, 'Deleted successfully');
+            }
         }
     }
 

@@ -171,12 +171,9 @@ export class ShelfVisualizer {
 
   getDeleteForm(node) {
     return `
-      <form action="${this.path}text/delete" method="POST">
-        <input type="hidden" name="id" value="${node.id}">
-        <button type="submit" class="delete" value="delete">
-          ${SVGManager.deleteSVG}
-        </button>
-      </form>
+      <button id="instaDeleteButton" data-text-id="${node.id}" class="delete">
+        ${SVGManager.deleteSVG}
+      </button>
     `;
   }
 
