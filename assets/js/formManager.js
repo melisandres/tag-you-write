@@ -1,4 +1,5 @@
 import { SVGManager } from './svgManager.js';
+import { WarningManager } from './warningManager.js';
 
 export class FormManager {
     constructor(path) {
@@ -32,12 +33,14 @@ export class FormManager {
 
         switch(status) {
             case 'published':
+                this.showPublishWarning();
+                break;
             case 'draft':
                 this.statusField.value = status;
                 this.form.submit();
                 break;
             case 'delete': 
-                this.submitDelete(`${this.path}text/delete`)
+            this.showDeleteWarning();
                 break;
             case 'cancel':
                 window.location.href=`${this.path}text`;
@@ -47,7 +50,29 @@ export class FormManager {
           }
     }
 
+    showPublishWarning() {
+        const warningManager = new WarningManager();
+        warningManager.createWarningModal(
+            "Are you sure you want to publish this text? This action cannot be undone.",
+            () => {
+                this.statusField.value = 'published';
+                this.form.submit();
+            },
+            () => console.log("Publish cancelled")
+        );
+    }
+
+    showDeleteWarning() {
+        const warningManager = new WarningManager();
+        warningManager.createWarningModal(
+            "Are you sure you want to delete this text? This action cannot be undone.",
+            () => this.submitDelete(`${this.path}text/delete`),
+            () => console.log("Delete cancelled")
+        );
+    }
+
     // Method to handle form deletion
+    // I think this is because the delete is handled by a different form, so we need to set the action to the delete endpoint--this is in order to have the form buttons all coexist in one div. I think.
     submitDelete(deleteUrl) {
         this.form.action = deleteUrl;  // Set the action to the delete endpoint
         this.form.submit();  // Submit the form

@@ -1,9 +1,12 @@
+import { WarningManager } from './warningManager.js';
+
 export class InstaPublishManager {
     constructor(path, storyManager, refreshManager) {
       this.path = path;
       this.container = document.querySelector('#showcase');
       this.storyManager = storyManager;
       this.refreshManager = refreshManager;
+      this.warningManager = new WarningManager();
 
       this.initEventListeners();
     }
@@ -16,8 +19,17 @@ export class InstaPublishManager {
       const button = event.target.closest('#instaPublishButton');
       if (button) {
         const textId = button.getAttribute('data-text-id');
-        this.instaPublish(textId);
+        this.showPublishWarning(textId);
+        //this.instaPublish(textId);
       }
+    }
+
+    showPublishWarning(textId) {
+        this.warningManager.createWarningModal(
+            "Are you sure you want to publish this text? This action cannot be undone.",
+            () => this.instaPublish(textId),
+            () => console.log("Publish cancelled")
+        );
     }
   
     async instaPublish(textId) {

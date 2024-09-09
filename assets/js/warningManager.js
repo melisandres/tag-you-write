@@ -2,10 +2,11 @@ export class WarningManager {
     constructor() {
       this.modalsContainer = document.createElement('div');
       this.modalsContainer.classList.add('warnings-modals-container');
-      document.body.appendChild(this.modalsContainer);
     }
   
     createWarningModal(message, onConfirm, onCancel) {
+      document.body.appendChild(this.modalsContainer);
+      
       const modal = document.createElement('div');
       modal.classList.add('warning-modal');
       modal.innerHTML = `

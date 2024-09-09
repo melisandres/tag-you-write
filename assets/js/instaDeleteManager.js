@@ -1,9 +1,12 @@
+import { WarningManager } from './warningManager.js';
+
 export class InstaDeleteManager {
     constructor(path, storyManager, refreshManager) {
         this.path = path;
         this.container = document.querySelector('#showcase');
         this.storyManager = storyManager;
         this.refreshManager = refreshManager;
+        this.warningManager = new WarningManager();
 
         this.initEventListeners();
     }
@@ -16,8 +19,16 @@ export class InstaDeleteManager {
         const button = event.target.closest('#instaDeleteButton');
         if (button) {
             const textId = button.getAttribute('data-text-id');
-            this.instaDelete(textId);
+            this.showDeleteWarning(textId);
         }
+    }
+
+    showDeleteWarning(textId) {
+        this.warningManager.createWarningModal(
+            "Are you sure you want to delete this text? This action cannot be undone.",
+            () => this.instaDelete(textId),
+            () => console.log("Delete cancelled")
+        );
     }
 
     async instaDelete(textId) {
