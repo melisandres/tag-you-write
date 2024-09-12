@@ -1,14 +1,7 @@
 //import * as d3 from 'https://d3js.org/d3.v7.min.js';
 
 export class TreeVisualizer {
-    constructor(container, modal, storyManager) {
-        this.container = container;
-        this.modal = modal;
-        this.storyManager = storyManager;
-
-        //this.modal = new Modal();
-        //this.storyManager = new StoryManager;
-
+    constructor() {
         this.svg = null;
 
         // Constraints for the zoom 
@@ -30,6 +23,12 @@ export class TreeVisualizer {
         // Colors to represent the number of votes
         this.baseColor = '#ff009b';
         this.colorScale = null;
+
+        // Handle the lengend position on browser resize
+        this.legend = null;
+        this.updateLegendPosition = this.updateLegendPosition.bind(this);
+        window.addEventListener('resize', this.updateLegendPosition);
+        console.log('TreeVisualizer created, resize listener added');
     }
 
     createColorScale(maxVotes) {
@@ -48,12 +47,15 @@ export class TreeVisualizer {
             .attr('fill', this.colorScale(voteCount));
     }
   
-    drawTree(data) {
+    drawTree(data, container) {
         // Check if D3 is available
         if (typeof d3 === 'undefined') {
             this.showD3UnavailableMessage();
             return;
         }
+
+        //get the container
+        this.container = container;
 
         // Clear any existing content
         this.container.innerHTML = ''; 
@@ -146,7 +148,12 @@ export class TreeVisualizer {
             .enter().append("g")
             .attr("class", d => `node${d.children ? " node--internal" : " node--leaf"}`)
             .attr("transform", d => `translate(${d.y},${d.x})`)
-            .on("click", (event, d) => this.storyManager.showStoryInModal(d.data.id));
+            .on("click", (event, d) => {
+                const customEvent = new CustomEvent('showStoryInModalRequest', {
+                    detail: { id: d.data.id }
+                });
+                document.dispatchEvent(customEvent);
+            });
   
             const colorScale = this.colorScale;
             const baseColor = this.baseColor;
@@ -311,7 +318,21 @@ export class TreeVisualizer {
 
             }
         });
+         // Handle the legend position on browser resize
+         this.legend = legend;
+         //this.updateLegendPosition();
     }
+
+    updateLegendPosition() {
+        console.log('Resize event triggered');
+        if (this.legend) {
+            const newX = this.container.clientWidth - 112;
+            const newY = this.container.clientHeight - 137;
+            this.legend.attr("transform", `translate(${newX}, ${newY})`);
+        }
+    }
+
+        
     showD3UnavailableMessage() {
         this.container.innerHTML = `
             <div style="text-align: center; padding: 20px;">

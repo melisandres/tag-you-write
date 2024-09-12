@@ -6,8 +6,6 @@ export class VoteManager {
         this.path = path;
         this.init();
         this.refreshManager = refreshManager;
-
-        //this.TreeVisualizer = new TreeVisualizer();
     }
 
     init() {

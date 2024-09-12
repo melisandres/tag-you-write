@@ -4,6 +4,7 @@
 @import url(./atoms/links.css);
 @import url(./atoms/unreads.css);
 @import url(./atoms/drafts.css);
+@import url(./atoms/toast.css);
 
 /* cards: repeated structures */
 @import url(./cards/story.css);

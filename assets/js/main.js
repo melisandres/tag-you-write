@@ -13,6 +13,7 @@ import { TreeVisualizer } from './treeVisualizer.js';
 import { InstaPublishManager } from './instaPublishManager.js';
 import { InstaDeleteManager } from './instaDeleteManager.js';
 import { ShelfVisualizer } from './shelfVisualizer.js';
+import { ToastManager } from './toastManager.js';
 
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -26,9 +27,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize SeenManager
   const seenManager= new SeenManager(path);
 
-  // Initialize StoryManager with the modal instance
+  // TreeVisualizer is initialized sends a custom event to StoryManager when a node is clicked (to show the story in the modal)
+  const treeVisualizer = new TreeVisualizer();
+
+  // StoryManager is initialized with the modal and seenManager instances
   const storyManager = new StoryManager(path, modal, seenManager);
-  //window.storyManager = storyManager;
 
   // Initialize GameManager
   new GameManager(path);
@@ -61,6 +64,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize InstaPublishManager and InstaDeleteManager
   new InstaPublishManager(path, storyManager, refreshManager);
   new InstaDeleteManager(path, storyManager, refreshManager);
+
+  // Initialize ToastManager
+  new ToastManager();
 
 
   // Handle browser refresh by saving state before unload

@@ -72,7 +72,7 @@ export class FormManager {
     }
 
     // Method to handle form deletion
-    // I think this is because the delete is handled by a different form, so we need to set the action to the delete endpoint--this is in order to have the form buttons all coexist in one div. I think.
+    // This is because the forms have an action that applies to all the buttons, except for the delete button, whose action is handled by the delete endpoint
     submitDelete(deleteUrl) {
         this.form.action = deleteUrl;  // Set the action to the delete endpoint
         this.form.submit();  // Submit the form
