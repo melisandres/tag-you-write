@@ -28,9 +28,10 @@ class Keyword extends Crud{
         $stmt = $this->prepare($sql); 
         $stmt->bindValue(":$this->primaryKey", $value);
         if ($stmt->execute()){
-            echo "success";
+            return true;
         }else{
-            echo "meow: ".$stmt->errorInfo();
+            error_log("Error deleting unused keywords: " . json_encode($stmt->errorInfo()));
+            return false;
         }
     }
 

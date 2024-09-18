@@ -5,11 +5,11 @@ import { UIManager } from './uiManager.js';
 /* this may create some issues... to require the modal the constructor. I'm going to initialize it as an empty string... there are pages where I will surely call the story manager where the modal will be innaccessible? or I should put the modal in the header? */
 
 export class StoryManager {
-  constructor(path, modal, seenManager) {
+  constructor(path, modal, seenManager, treeVisualizer) {
     this.path = path;
     this.seenManager = seenManager;
     this.modal = modal;
-    this.treeVisualizer = new TreeVisualizer(this.path);
+    //this.treeVisualizer = treeVisualizer;
     this.storyTreeData = [];
 
      // Add event listener for the custom event
@@ -47,7 +47,8 @@ export class StoryManager {
   async drawTree(id, container) {
     const datas = await this.fetchTree(id);
     this.storyTreeData = datas[0];
-    this.treeVisualizer.drawTree(this.storyTreeData, container);
+    const treeVisualizer = new TreeVisualizer(container);
+    treeVisualizer.drawTree(this.storyTreeData, container);
 }
 
   async drawShelf(id, container) {

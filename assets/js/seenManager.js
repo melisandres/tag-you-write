@@ -75,12 +75,12 @@ export class SeenManager {
         }
 
         // Update the D3 circle for this story, removing the 'unread' class
-        const circle = d3.select(`[data-id='${id}']`);
-        console.log("circle", circle);
-        if (circle.classed('unread')) {
-            circle.classed('unread', false).classed('read', true);  // Remove 'unread', add 'read'
+        const container = document.querySelector('#showcase');
+        const circle = container.querySelector(`circle[data-id='${id}']`);
+        if (circle &&circle.classList.contains('unread')) {
+            circle.classList.remove('unread');
+            circle.classList.add('read');
         }
-
     }
 
     /* async checkReadStatus(textId) {

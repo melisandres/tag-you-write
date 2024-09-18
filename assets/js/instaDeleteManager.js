@@ -3,7 +3,7 @@ import { WarningManager } from './warningManager.js';
 export class InstaDeleteManager {
     constructor(path, storyManager, refreshManager) {
         this.path = path;
-        this.container = document.querySelector('#showcase');
+        //this.container = document.querySelector('#showcase');
         this.storyManager = storyManager;
         this.refreshManager = refreshManager;
         this.warningManager = new WarningManager();
@@ -55,15 +55,17 @@ export class InstaDeleteManager {
                         // Handle error
                     }
                 } catch (jsonError) {
+                    console.log('Problematic JSON string:', rawText); 
                     console.log('JSON parsing error:', jsonError);
                     // Handle JSON parsing error
+
                 }
             } else {
                 console.log('Server error:', response.statusText);
                 // Handle server error
             }
         } catch (error) {
-            console.log('Network error:', error);
+            console.log('Network error:', error); 
             // Handle network error
         }
     }
@@ -86,17 +88,27 @@ export class InstaDeleteManager {
     }
 
     removeFromTreeView(textId) {
-        if (this.container.classList.contains('with-tree')) {
-            const nodeGroup = this.container.querySelector(`g[data-id="${textId}"]`);
+        let container = document.querySelector('#showcase');
+        if (container && container.classList.contains('with-tree')) {
+
+            const node = container.querySelector(`circle[data-id="${textId}"]`);
+            const nodeGroup = node.closest('g');
             if (nodeGroup) {
-                nodeGroup.remove();
+                d3.select(nodeGroup)
+                .classed('display-none', true);
+            } 
+            const link = container.querySelector(`path[data-id="${textId}"]`);
+            if (link) {
+                d3.select(link)
+                .classed('display-none', true);
             }
         }
     }
-
+    //removeFromShelfView   
     removeFromShelfView(textId) {
-        if (this.container.classList.contains('with-shelf')) {
-            const drawer = this.container.querySelector(`li[data-story-id="${textId}"]`);
+        let container = document.querySelector('#showcase');
+        if (container && container.classList.contains('with-shelf')) {
+            const drawer = container.querySelector(`li[data-story-id="${textId}"]`);
             drawer.remove();
         }
     }
@@ -104,7 +116,7 @@ export class InstaDeleteManager {
     closeModal(textId) {
         const modal = document.querySelector(`.modal-background[data-text-id="${textId}"]`);
         if (modal) {
-            modal.remove();
+            modal.classList.add('display-none');
         }
     }
 }

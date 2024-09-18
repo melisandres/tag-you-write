@@ -112,6 +112,7 @@ export class UIManager {
   // Handle the showing of the story modal 
   // by getting the id via the click event
   handleModalRefresh(event){
+    console.log('handleModalRefresh called');
     const modalTarget = event.target.closest("[data-refresh-modal]");
     const textId = modalTarget.dataset.textId;
     this.storyManager.showStoryInModal(textId);

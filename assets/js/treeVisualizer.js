@@ -1,8 +1,11 @@
 //import * as d3 from 'https://d3js.org/d3.v7.min.js';
 
 export class TreeVisualizer {
-    constructor() {
+    constructor(container) {
         this.svg = null;
+
+        //get the container
+        this.container = container;
 
         // Constraints for the zoom 
         this.minScale = 0.25;
@@ -28,7 +31,6 @@ export class TreeVisualizer {
         this.legend = null;
         this.updateLegendPosition = this.updateLegendPosition.bind(this);
         window.addEventListener('resize', this.updateLegendPosition);
-        console.log('TreeVisualizer created, resize listener added');
     }
 
     createColorScale(maxVotes) {
@@ -47,15 +49,12 @@ export class TreeVisualizer {
             .attr('fill', this.colorScale(voteCount));
     }
   
-    drawTree(data, container) {
+    drawTree(data) {
         // Check if D3 is available
         if (typeof d3 === 'undefined') {
             this.showD3UnavailableMessage();
             return;
         }
-
-        //get the container
-        this.container = container;
 
         // Clear any existing content
         this.container.innerHTML = ''; 
@@ -135,6 +134,7 @@ export class TreeVisualizer {
             .data(root.descendants().slice(1))
             .enter().append("path")
             .attr("class", "link")
+            .attr("data-id", d => d.data.id)
             .attr("d", d => {
                 return `M${d.y},${d.x}
                     C${(d.y + d.parent.y) / 2},${d.x}
@@ -341,5 +341,59 @@ export class TreeVisualizer {
             </div>
         `;
     }
+
+
+
+    updateNodeStatus(nodeId, newStatus) {
+        console.log(`Updating node ${nodeId} to status ${newStatus}`);
+        console.log('Current container:', this.container);
+    
+        const circle = this.container.querySelector(`[data-id="${nodeId}"]`);
+        console.log('Found circle:', circle);
+    
+        if (!circle) {
+          console.log('Circle not found, aborting update');
+          return;
+        }
+    
+        const nodeGroup = circle.closest('g');
+        console.log('Found node group:', nodeGroup);
+    
+        if (nodeGroup) {
+          // Update circle
+          console.log('Updating circle classes');
+          d3.select(circle)
+            .classed('tree-node-draft', newStatus === 'draft')
+            .classed('tree-node-published', newStatus === 'published');
+    
+          // Update title
+          const titleText = nodeGroup.querySelector('text:not(.text-by)');
+          console.log('Updating title text:', titleText);
+          d3.select(titleText)
+            .classed('tree-title-draft', newStatus === 'draft')
+            .classed('tree-title-published', newStatus === 'published');
+    
+          // Update author text
+          const authorText = nodeGroup.querySelector('text.text-by');
+          console.log('Updating author text:', authorText);
+          d3.select(authorText)
+            .classed('tree-author-draft', newStatus === 'draft')
+            .classed('tree-author-published', newStatus === 'published');
+    
+          // Update the "DRAFT" text in the author line if necessary
+          if (authorText) {
+            let authorContent = authorText.textContent;
+            console.log('Current author content:', authorContent);
+            if (newStatus === 'draft' && !authorContent.startsWith('DRAFT')) {
+              authorText.textContent = 'DRAFT ' + authorContent;
+            } else if (newStatus === 'published' && authorContent.startsWith('DRAFT')) {
+              authorText.textContent = authorContent.replace('DRAFT ', '');
+            }
+            console.log('Updated author content:', authorText.textContent);
+          }
+        } else {
+          console.log('Node group not found');
+        }
+      }
 }
   

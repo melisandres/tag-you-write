@@ -627,7 +627,10 @@ class ControllerText extends Controller{
 
             // Delete the keywords, if they aren't being used by other text_has_keyword
             foreach ($keyWordIds as $key => $value) {
-                $keyword->deleteUnusedKeywords($value["keyword_id"]);
+                if (!$keyword->deleteUnusedKeywords($value["keyword_id"])) {
+                    // Handle the error, maybe log it or set a flag
+                    error_log("Failed to delete unused keyword: " . $value["keyword_id"]);
+                }
             }
         }
 

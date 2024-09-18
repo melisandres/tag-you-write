@@ -1,11 +1,23 @@
+import { eventBus } from './eventBus.js';
+
 export class TreeUpdateManager {
-  constructor(container) {
-    this.container = container;
+  constructor() {
+    this.initEventListeners();
   }
 
-  updateNodeStatus(nodeId, newStatus) {
-    const circle = this.container.querySelector(`circle[data-id="${nodeId}"]`);
-    const nodeGroup = node.closest('g');
+  initEventListeners() {
+    eventBus.on('instaPublish', this.handleInstaPublish.bind(this));
+  }
+
+  handleInstaPublish({ textId, newStatus }) {
+    const circle = document.querySelector(`circle[data-id="${textId}"]`);
+
+    if (!circle) {
+      return;
+    }
+
+    const nodeGroup = circle.closest('g');
+
     if (nodeGroup) {
       // Update circle
       d3.select(circle)
@@ -33,30 +45,32 @@ export class TreeUpdateManager {
           authorText.textContent = authorContent.replace('DRAFT ', '');
         }
       }
+    } else {
+      console.log('Node group not found');
     }
   }
 
-  updateNodeVoteCount(nodeId, newVoteCount, maxVoteCount) {
+/*   updateNodeVoteCount(nodeId, newVoteCount, maxVoteCount) {
     const node = this.container.querySelector(`circle[data-id="${nodeId}"]`);
     if (node) {
       const colorScale = this.createColorScale(maxVoteCount);
       d3.select(node).attr('fill', colorScale(newVoteCount));
     }
-  }
+  } */
 
-  markNodeAsRead(nodeId) {
+/*   markNodeAsRead(nodeId) {
     const node = this.container.querySelector(`[data-id="${nodeId}"]`);
     if (node) {
       d3.select(node)
         .classed('unread', false)
         .classed('read', true);
     }
-  }
+  } */
 
-  createColorScale(maxVotes) {
+/*   createColorScale(maxVotes) {
     return d3.scaleLinear()
       .domain([0, maxVotes])
       .range(['white', '#ff009b'])
       .interpolate(d3.interpolateRgb);
-  }
-}
+  }*/
+} 

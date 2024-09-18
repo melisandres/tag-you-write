@@ -14,12 +14,21 @@ import { InstaPublishManager } from './instaPublishManager.js';
 import { InstaDeleteManager } from './instaDeleteManager.js';
 import { ShelfVisualizer } from './shelfVisualizer.js';
 import { ToastManager } from './toastManager.js';
+import { TreeUpdateManager } from './treeUpdateManager.js';
+import { SSEManager } from './sseManager.js';
+import { ShelfUpdateManager } from './shelfUpdateManager.js';
+import { ModalUpdateManager } from './modalUpdateManager.js';
+import { IndexUpdateManager } from './indexUpdateManager.js';
+
+
+
 
 
 document.addEventListener("DOMContentLoaded", () => {
   const path = window.location.origin + "/tag-you-write-repo/tag-you-write/";
 /*   const controllerPath = window.location.origin + "/tag-you-write-repo/tag-you-write/controller/"; */
   const treeModal = document.querySelector('.modal-background');
+  const warningManager = new WarningManager();
 
   // Initialize Modal
   const modal = new Modal(treeModal, path);
@@ -28,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const seenManager= new SeenManager(path);
 
   // TreeVisualizer is initialized sends a custom event to StoryManager when a node is clicked (to show the story in the modal)
-  const treeVisualizer = new TreeVisualizer();
+  //const treeVisualizer = new TreeVisualizer();
 
   // StoryManager is initialized with the modal and seenManager instances
   const storyManager = new StoryManager(path, modal, seenManager);
@@ -62,11 +71,17 @@ document.addEventListener("DOMContentLoaded", () => {
   new FormManager(path);
 
   // Initialize InstaPublishManager and InstaDeleteManager
-  new InstaPublishManager(path, storyManager, refreshManager);
+  new InstaPublishManager(path, warningManager);
   new InstaDeleteManager(path, storyManager, refreshManager);
 
   // Initialize ToastManager
   new ToastManager();
+
+  // Initialize UpdateManagers
+  new ShelfUpdateManager(path);
+  new TreeUpdateManager();
+  new ModalUpdateManager(path);
+  new IndexUpdateManager();
 
 
   // Handle browser refresh by saving state before unload

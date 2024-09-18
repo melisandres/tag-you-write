@@ -8,6 +8,10 @@ export class FormManager {
         this.statusField = this.form ? this.form.querySelector('[data-text-status]') : null;
         this.buttons = this.form ? this.form.querySelectorAll('[data-status]') : null;
 
+        this.lastSavedContent = '';
+        this.autoSaveInterval = null;
+        this.saveTimeout = null;
+
         this.init();
     }
 
@@ -15,6 +19,10 @@ export class FormManager {
     init() {
         this.addButtonEventListeners();
         this.injectSVGIcons();
+        // TODO: must test the following methods.
+        //this.setupAutoSave();
+        //this.setupExitWarning();
+        //this.setupSaveOnInput();
     }
 
     // Add button event listeners
@@ -91,5 +99,44 @@ export class FormManager {
         if (saveBtn) saveBtn.innerHTML = SVGManager.saveSVG;
         if (deleteBtn) deleteBtn.innerHTML = SVGManager.deleteSVG;
         if (cancelBtn) cancelBtn.innerHTML = SVGManager.cancelSVG;
+    }
+
+    // TODO: check code below. needs to be tested.
+    setupAutoSave() {
+        this.autoSaveInterval = setInterval(() => this.autoSave(), 60000); // Auto-save every minute
+    }
+
+    setupExitWarning() {
+        window.addEventListener('beforeunload', (e) => {
+            if (this.hasUnsavedChanges()) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+    }
+
+    setupSaveOnInput() {
+        const textArea = this.form.querySelector('textarea');
+        if (textArea) {
+            textArea.addEventListener('input', () => {
+                clearTimeout(this.saveTimeout);
+                this.saveTimeout = setTimeout(() => this.autoSave(), 3000); // Save 3 seconds after last input
+            });
+        }
+    }
+
+    hasUnsavedChanges() {
+        const textArea = this.form.querySelector('textarea');
+        return textArea && textArea.value !== this.lastSavedContent;
+    }
+
+    autoSave() {
+        if (this.hasUnsavedChanges()) {
+            // Implement your auto-save logic here
+            // This could be an AJAX request to save the draft
+            console.log('Auto-saving draft...');
+            // After successful save:
+            // this.lastSavedContent = this.form.querySelector('textarea').value;
+        }
     }
 }
