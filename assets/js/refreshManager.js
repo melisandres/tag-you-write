@@ -139,6 +139,7 @@ export class RefreshManager {
         }
     }
 
+    //TODO: I think this is not working, and is basically done better by just forcing a refresh. 
     async fetchDataAndRefresh() {
         this.saveState();
         this.restoreState();

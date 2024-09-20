@@ -1,18 +1,16 @@
 import { ShelfVisualizer } from './shelfVisualizer.js';
-import { Modal } from './modal.js';
 import { TreeVisualizer } from './treeVisualizer.js';
-import { UIManager } from './uiManager.js';
 /* this may create some issues... to require the modal the constructor. I'm going to initialize it as an empty string... there are pages where I will surely call the story manager where the modal will be innaccessible? or I should put the modal in the header? */
 
 export class StoryManager {
-  constructor(path, modal, seenManager, treeVisualizer) {
+  constructor(path, modal, seenManager) {
     this.path = path;
     this.seenManager = seenManager;
     this.modal = modal;
-    //this.treeVisualizer = treeVisualizer;
     this.storyTreeData = [];
 
      // Add event listener for the custom event
+     // TODO: Add this event to the eventBus? 
      document.addEventListener('showStoryInModalRequest', this.handleShowStoryInModalRequest.bind(this));
   }
 
@@ -58,20 +56,20 @@ export class StoryManager {
     shelfVisualizer.drawShelf(this.storyTreeData);
   }
 
-
-  /**TODO: I must have stopped coding before getting here, because I wrote: "review here... just starting to write this... must test and add the right code to the text-index page" don't know what it means but  */
-  async showStoryInModal(id){
-    const data = await this.fetchStoryNode(id);
-    //console.log(data);
-    this.modal.showModal(data);
-    this.seenManager.markAsSeen(id);
-    this.seenManager.updateReadStatus(id);
+  async showStoryInModal(id) {
+    try {
+      const data = await this.fetchStoryNode(id);
+      this.modal.showModal(data);
+      this.seenManager.markAsSeen(id);
+      this.seenManager.updateReadStatus(id);
+    } catch (error) {
+      console.error('Error in showStoryInModal:', error);
+    }
   }
 
   async updateDrawer(id){
     const data = await this.fetchStoryNode(id);
     const container = document.querySelector("#showcase.with-shelf");
-    //console.log(data);
     const shelfVisualizer = new ShelfVisualizer(container, this.path);
     shelfVisualizer.updateOneDrawer(data);
   }

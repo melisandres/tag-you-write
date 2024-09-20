@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const refreshManager = new RefreshManager(uiManager, storyManager);
 
   // Initialize VoteManager
-  new VoteManager(path, refreshManager);
+  new VoteManager(path, warningManager);
 
   // Restore state on initial load
   refreshManager.restoreState();

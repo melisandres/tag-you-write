@@ -110,7 +110,6 @@ export class FormManager {
         window.addEventListener('beforeunload', (e) => {
             if (this.hasUnsavedChanges()) {
                 e.preventDefault();
-                e.returnValue = '';
             }
         });
     }

@@ -97,8 +97,8 @@ export class UIManager {
   }
 
   handleGlobalClick(event) {
-    const instaPublishButton = event.target.closest('#instaPublishButton');
-    const instaDeleteButton = event.target.closest('#instaDeleteButton');
+    const instaPublishButton = event.target.closest('[data-insta-publish-button]');
+    const instaDeleteButton = event.target.closest('[data-insta-delete-button]');
     const voteButton = event.target.closest('[data-vote]');
 
     if (instaPublishButton) {

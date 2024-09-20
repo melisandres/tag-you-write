@@ -217,8 +217,10 @@ class ControllerText extends Controller{
             // No special permissions... other than being logged in... 
         }
         
-        // Validate the $_POST 
-        $this->validateText($_POST, $isRootText);
+
+        // Validate the $_POST
+        $status = $_POST['text_status'];
+        $this->validateText($_POST, $isRootText, $status);
 
         // Create a new game via the ControllerGame 
         // IF we receive neither a game_id NOR a parent_id
@@ -252,8 +254,7 @@ class ControllerText extends Controller{
         $_POST['parent_id'] = $_POST['parent_text_id'];
         unset($_POST['parent_text_id']);
 
-        // you need the text-status-id in order to save the text
-        $status = $_POST['text_status'];
+        // you need to translate the $POST['text_status'] into its 'id' in order to save it with the text
         unset($_POST['text_status']);
         $_POST['status_id'] = $textStatus->selectStatus($status);
 
@@ -261,13 +262,15 @@ class ControllerText extends Controller{
         $textIdFromInsert = $text->insert($_POST);
 
         //send the writer_id and the game_id to game_has_player
-        $gameHasPlayer = new GameHasPlayer;
-        $gameHasPlayerData = [
-            'player_id' => $_POST['writer_id'],
-            'game_id' => $_POST['game_id'],
-            'active' => 1
-        ];
-        $gameHasPlayer->insert($gameHasPlayerData);
+        if ($status == 'published') {
+            $gameHasPlayer = new GameHasPlayer;
+            $gameHasPlayerData = [
+                'player_id' => $_POST['writer_id'],
+                'game_id' => $_POST['game_id'],
+                'active' => 1
+            ];
+            $gameHasPlayer->insert($gameHasPlayerData);
+        }
 
         //prepare keywords array... to send to CRUD
         //$keywords = explode(',', $keywords);
@@ -351,6 +354,7 @@ class ControllerText extends Controller{
         // Add permissions to the retrieved data
         $this->addPermissions($textData, $currentWriterId);
 
+        // TODO: if you add the status incomplete_draft, you may need to also check for it here (and have a permission for it)
         // Check user's permission to edit (myText && openForChanges draft) AND to add a note (myText && openForChanges !draft)
         if (!Permissions::canEdit($textData, $currentWriterId) && !Permissions::canAddNote($textData, $currentWriterId)) {
             Twig::render('home-error.php', ['message'=> "Sorry! This game is closed, or the text isn't yours. Either way, we can't let you edit this text."]);
@@ -414,6 +418,11 @@ class ControllerText extends Controller{
 
         $this->addPermissions($textData, $currentWriterId);
 
+
+        //TODO: you may want to revisit the inability to edit if the game is closed... just for writers who are writing at the moment the game closes... especially if what is out there is public, like a note! you wouldn't want to stop the writer from making their public note legible. I feel it should be possible to edit a note, even if the game is closed. In this case... permission to publish would be reliant of the game being open for changes, and the text being neither an incomplete draft, nor a published text. 
+
+        // TODO: the permission you would check for here would therefor be canInstaPublish... I think. or IsCompleteDraft
+
         // Check user's permission to edit (myText && openForChanges)
         if (!Permissions::canEdit($textData, $currentWriterId)) {
             Twig::render('home-error.php', ['message'=> "Sorry! This game is closed, or the text you're trying to edit isn't yours. Either way, this action is not permitted."]);
@@ -438,6 +447,27 @@ class ControllerText extends Controller{
 
         $success = $text->update($data);
         //RequirePage::redirect('text');
+
+    
+        //if the publish was a success, add the player to the game
+        //BUT only if they are not already in it? 
+        if ($success) { 
+            $gameId = $text->selectGameId($textId);
+
+            // Check if the player is already in the game
+            $gameHasPlayer = new GameHasPlayer;
+            $existingPlayer = $gameHasPlayer->selectCompositeId(['game_id' => $gameId, 'player_id' => $currentWriterId]);
+
+            // Insert only if the player is not already in the game
+            if (!$existingPlayer) {
+                $gameHasPlayerData = [
+                    'player_id' => $currentWriterId,
+                    'game_id' => $gameId,
+                    'active' => 1
+                ];
+                $gameHasPlayer->insert($gameHasPlayerData);
+            }          
+        }
 
         error_log("InstaPublish result: " . ($success ? "true" : "false"));
     
@@ -509,7 +539,7 @@ class ControllerText extends Controller{
             RequirePage::redirect('text');
             exit;
         }else{
-            $this->validateText($_POST, false);
+            $this->validateText($_POST, false, $status);
         }
 
 
@@ -534,6 +564,27 @@ class ControllerText extends Controller{
         //send what's left of the POST (text info) to CRUD
         //if you want to allow a user to edit EVERYTHING:
         $update = $text->update($_POST);
+
+
+
+        // If the publish was a success, add the player to the game
+        // BUT only if they are not already in it
+        if ($update && $status == 'published') { 
+            // Check if the player is already in the game
+            $gameId = $text->selectGameId($textId);
+            $gameHasPlayer = new GameHasPlayer;
+            $existingPlayer = $gameHasPlayer->selectCompositeId(['game_id' => $gameId, 'player_id' => $currentWriterId]);
+
+            // Insert only if the player is not already in the game
+            if (!$existingPlayer) {
+                $gameHasPlayerData = [
+                    'player_id' => $currentWriterId,
+                    'game_id' => $gameId,
+                    'active' => 1
+                ];
+                $gameHasPlayer->insert($gameHasPlayerData);
+            }          
+        }
 
         //using class Prep to prepare keywords arrays... 
         //words come in as strings, come out a clean arrays
@@ -700,27 +751,20 @@ class ControllerText extends Controller{
         Twig::render('text-iterate.php', ['data' => $textData]);
     }
 
-
-    public function validateText($data, $isRoot){
+    // Validate the text data
+    public function validateText($data, $isRoot, $status){
         RequirePage::library('Validation');
         $val = new Validation;
         //var_dump($data);
 
+        //TODO: send the status of the text here, so that we can allow the saving of a draft that doesn't follow all the rules... and therefor can implement autosaves for drafts. 
         $val->name('writing')->value($data["writing"])->required()->max(65000)->wordCount(50, $data['parentWriting']);
         $val->name('title')->value($data["title"])->required()->max(75)->wordCount(3);
         $val->name('keywords')->value($data["keywords"])->pattern('keywords')->max(75)->keywordCount(3);
         // Validate the prompt, but only if this is a root text
         if($isRoot){
             $val->name('prompt')->value($data["prompt"])->required()->max(200);
-        }
-
-        // Verify for prompt only if this is a 
-        // TODO: eventually, add the logic of word-count... this will count
-        //and store the previous word count (or start at zero), and send that amount to 
-        //the front end. I don't want to prevent people from going OVER... but I'd 
-        //want to have something happen front-end... I think its important to be 
-        //as flexible as possible in terms of allowing rule-breaking... but perhaps in
-        //reminding users of rules on the front end.  
+        } 
 
         if($val->isSuccess()){
             //if this is successful, continue the code

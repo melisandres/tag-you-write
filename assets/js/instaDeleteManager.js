@@ -1,13 +1,10 @@
 import { WarningManager } from './warningManager.js';
+import { eventBus } from './eventBus.js';
 
 export class InstaDeleteManager {
-    constructor(path, storyManager, refreshManager) {
+    constructor(path) {
         this.path = path;
-        //this.container = document.querySelector('#showcase');
-        this.storyManager = storyManager;
-        this.refreshManager = refreshManager;
         this.warningManager = new WarningManager();
-
         this.initEventListeners();
     }
 
@@ -16,7 +13,7 @@ export class InstaDeleteManager {
     }
 
     handleButtonClick(event) {
-        const button = event.target.closest('#instaDeleteButton');
+        const button = event.target.closest('[data-insta-delete-button]');
         if (button) {
             const textId = button.getAttribute('data-text-id');
             this.showDeleteWarning(textId);
@@ -48,8 +45,8 @@ export class InstaDeleteManager {
                 try {
                     const result = JSON.parse(rawText);
                     if (result.success) {
-                        //this.refreshManager.saveState();
-                        this.removeViews(textId);
+                        // Update the tree, shelf and modal views
+                        eventBus.emit('instaDelete', { textId });
                     } else {
                         console.log('Error:', result.message);
                         // Handle error
@@ -67,56 +64,6 @@ export class InstaDeleteManager {
         } catch (error) {
             console.log('Network error:', error); 
             // Handle network error
-        }
-    }
-
-    removeViews(textId) {
-        // Remove from tree view
-        this.removeFromTreeView(textId);
-
-        // Remove from shelf view
-        this.removeFromShelfView(textId);
-
-        // Close modal if open
-        this.closeModal(textId);
-
-        // Dispatch event for any other parts of the application that need to know
-        const event = new CustomEvent('textDeleted', {
-            detail: { textId }
-        });
-        document.dispatchEvent(event);
-    }
-
-    removeFromTreeView(textId) {
-        let container = document.querySelector('#showcase');
-        if (container && container.classList.contains('with-tree')) {
-
-            const node = container.querySelector(`circle[data-id="${textId}"]`);
-            const nodeGroup = node.closest('g');
-            if (nodeGroup) {
-                d3.select(nodeGroup)
-                .classed('display-none', true);
-            } 
-            const link = container.querySelector(`path[data-id="${textId}"]`);
-            if (link) {
-                d3.select(link)
-                .classed('display-none', true);
-            }
-        }
-    }
-    //removeFromShelfView   
-    removeFromShelfView(textId) {
-        let container = document.querySelector('#showcase');
-        if (container && container.classList.contains('with-shelf')) {
-            const drawer = container.querySelector(`li[data-story-id="${textId}"]`);
-            drawer.remove();
-        }
-    }
-
-    closeModal(textId) {
-        const modal = document.querySelector(`.modal-background[data-text-id="${textId}"]`);
-        if (modal) {
-            modal.classList.add('display-none');
         }
     }
 }

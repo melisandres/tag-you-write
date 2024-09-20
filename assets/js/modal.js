@@ -63,13 +63,13 @@ export class Modal {
       ` : ''}
 
        ${data.permissions.canPublish ? `
-        <button id="instaPublishButton" data-text-id="${data.id}" class="publish">
+        <button data-text-id="${data.id}" data-insta-publish-button class="publish">
           ${SVGManager.publishSVG}
         </button>
       ` : ''}
 
       ${data.permissions.canDelete ? `
-        <button id="instaDeleteButton" data-text-id="${data.id}" class="delete">
+        <button data-insta-delete-button data-text-id="${data.id}" class="delete">
           ${SVGManager.deleteSVG}
         </button>
       ` : ''}

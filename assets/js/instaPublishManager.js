@@ -12,7 +12,7 @@ export class InstaPublishManager {
     }
   
     handleButtonClick(event) {
-      const button = event.target.closest('#instaPublishButton');
+      const button = event.target.closest('[data-insta-publish-button]');
       if (button) {
         const textId = button.getAttribute('data-text-id');
         this.showPublishWarning(textId);
@@ -39,7 +39,6 @@ export class InstaPublishManager {
         
         if (response.ok) {
           const rawText = await response.text(); // Get the raw response text
-          //console.log('Raw server response:', rawText); // Log the raw response
 
           try {
             const result = JSON.parse(rawText); // Try to parse it as JSON
@@ -47,17 +46,16 @@ export class InstaPublishManager {
               // create an event that will update the views and the modal
               eventBus.emit('instaPublish', { textId, newStatus: 'published' });
             } else {
-              //console.error('Insta-publish failed:', result.message);
+              console.error('Insta-publish failed:', result.message);
             }
           } catch (jsonError) {
-            //console.error('Error parsing JSON:', jsonError);
-            //console.error('Raw response was:', rawText);
+            console.error('Error parsing JSON:', jsonError, 'Raw response:', rawText);
           }
         } else {
-          //console.error('Server responded with an error:', response.status);
+          console.error('Server responded with an error:', response.status);
         }
       } catch (error) {
-        //console.error('Error publishing text:', error);
+        console.error('Error publishing text:', error);
       }
     }
   }

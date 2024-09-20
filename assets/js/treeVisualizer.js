@@ -34,8 +34,9 @@ export class TreeVisualizer {
     }
 
     createColorScale(maxVotes) {
+        const domain = maxVotes > 0 ? [0, maxVotes] : [0, 1];
         return d3.scaleLinear()
-            .domain([0, maxVotes])
+            .domain(domain)
             .range(['white', this.baseColor])
             .interpolate(d3.interpolateRgb);
     }

@@ -163,7 +163,8 @@ export class ShelfVisualizer {
 
   getPublishForm(node) {
     return `
-        <button id="instaPublishButton" data-text-id="${node.id}" class="publish">
+        <button data-text-id="${node.id}" 
+        data-insta-publish-button class="publish">
           ${SVGManager.publishSVG}
         </button>
     `;
@@ -171,7 +172,8 @@ export class ShelfVisualizer {
 
   getDeleteForm(node) {
     return `
-      <button id="instaDeleteButton" data-text-id="${node.id}" class="delete">
+      <button
+      data-insta-delete-button data-text-id="${node.id}" class="delete">
         ${SVGManager.deleteSVG}
       </button>
     `;

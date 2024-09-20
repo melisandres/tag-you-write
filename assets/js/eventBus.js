@@ -25,16 +25,13 @@ eventBus.on('instaPublish', ({ textId, textStatus }) => {
 });
 
 eventBus.on('instaDelete', ({ textId }) => {
-    console.log(`Text ${textId} has been insta-deleted`);
     // Update relevant UI components
 });
 
 eventBus.on('chooseWinner', ({ textId }) => {
-    console.log(`Text ${textId} has been chosen as the winner`);
     // Update relevant UI components
 });
 
-// Example of how to emit these events (to be used in other parts of your application)
-// eventBus.emit('instaPublish', { textId: 123 });
-// eventBus.emit('instaDelete', { textId: 456 });
-// eventBus.emit('chooseWinner', { textId: 789 });
+eventBus.on('voteToggle', ({ result }) => {
+    // Update relevant UI components
+});
