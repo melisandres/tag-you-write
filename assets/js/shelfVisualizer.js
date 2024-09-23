@@ -55,11 +55,11 @@ export class ShelfVisualizer {
     const noteDate = node.note_date ?  `<span class="date"> ${node.note_date}</span>` : '';
 
     return `
-      <li class="node ${unread} ${node.text_status}" data-story-id="${node.id}" style="--node-depth: ${depth}">
+      <li class="node ${unread} ${node.text_status === "published" ? "published" : "draft"}" data-story-id="${node.id}" style="--node-depth: ${depth}">
         <div class="node-title ${isWinner}">
           <h2>
             <span class="arrow">▶</span>
-            <span class="title">${node.title}</span>
+            <span class="title">${node.title || "Untitled"}</span>
             ${author}
             ${this.getStatus(node)}
           </h2>
@@ -193,12 +193,12 @@ export class ShelfVisualizer {
   }
 
   getStatus(node){
-    if(node.text_status !== "draft"){
+    if(node.text_status === "published"){
       return this.getNumberOfVotes(node); 
     }else{
       return `
-      <span class="status">
-        ${node.text_status}
+      <span class="status ${node.text_status === "draft" || node.text_status === "incomplete_draft" ? "draft" : "published" }">
+        ${node.text_status === "published" ? "published" : "draft"}
       </span>`;
     }
   }

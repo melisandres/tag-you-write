@@ -25,24 +25,27 @@ export class TreeUpdateManager {
       // Update circle
       d3.select(circle)
         .classed('tree-node-draft', newStatus === 'draft')
+        .classed('tree-node-draft', newStatus === 'incomplete_draft')
         .classed('tree-node-published', newStatus === 'published');
 
       // Update title
       const titleText = nodeGroup.querySelector('text:not(.text-by)');
       d3.select(titleText)
         .classed('tree-title-draft', newStatus === 'draft')
+        .classed('tree-title-draft', newStatus === 'incomplete_draft')
         .classed('tree-title-published', newStatus === 'published');
 
       // Update author text
       const authorText = nodeGroup.querySelector('text.text-by');
       d3.select(authorText)
         .classed('tree-author-draft', newStatus === 'draft')
+        .classed('tree-author-draft', newStatus === 'incomplete_draft')
         .classed('tree-author-published', newStatus === 'published');
 
       // Update the "DRAFT" text in the author line if necessary
       if (authorText) {
         let authorContent = authorText.textContent;
-        if (newStatus === 'draft' && !authorContent.startsWith('DRAFT')) {
+        if ((newStatus === 'draft' || newStatus === 'incomplete_draft') && !authorContent.startsWith('DRAFT')) {
           authorText.textContent = 'DRAFT ' + authorContent;
         } else if (newStatus === 'published' && authorContent.startsWith('DRAFT')) {
           authorText.textContent = authorContent.replace('DRAFT ', '');

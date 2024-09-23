@@ -45,6 +45,10 @@ export class InstaPublishManager {
             if (result.success) {
               // create an event that will update the views and the modal
               eventBus.emit('instaPublish', { textId, newStatus: 'published' });
+              eventBus.emit('showToast', { 
+                message: result.toastMessage, 
+                type: result.toastType 
+            });
             } else {
               console.error('Insta-publish failed:', result.message);
             }

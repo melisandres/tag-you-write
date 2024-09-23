@@ -29,6 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
 /*   const controllerPath = window.location.origin + "/tag-you-write-repo/tag-you-write/controller/"; */
   const treeModal = document.querySelector('.modal-background');
   const warningManager = new WarningManager();
+  new ToastManager();
 
   // Initialize Modal
   const modal = new Modal(treeModal, path);
@@ -74,8 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
   new InstaPublishManager(path, warningManager);
   new InstaDeleteManager(path, storyManager, refreshManager);
 
-  // Initialize ToastManager
-  new ToastManager();
+
 
   // Initialize UpdateManagers
   new ShelfUpdateManager(path);

@@ -4,15 +4,27 @@
     <span class='error'>{{ errors|raw}}</span>
 {% endif %}
 
-<p><strong>you are iterating on:</strong><span class="very-small"> {{ data.parentFirstName }} {{ data.parentLastName }}'s</span> <span>"{{ data.parentTitle }}"</span></p>
-<p><strong>text before your changes: </strong>{{ data.parentWriting }}</p>
+{% if not data.parent_id == ''  %}
+    <p><strong>you are iterating on:</strong><span class="very-small"> {{ data.parentFirstName }} {{ data.parentLastName }}'s</span> <span>"{{ data.parentTitle }}"</span></p>
+    <p><strong>text before your changes: </strong>{{ data.parentWriting }}</p>
+{% else%}
+    <p>Hit publish, and your title and prompt will be carved in STONE.<br>
+    Alteratively, your text will be open to edits, disfugations, and flights of fancy.<br>
+    Be forewarned. And may the best iteration win!</p>
+{% endif %}
 
 <div class="form-container">
     <form id="main-form" action="{{path}}text/update" method="post">
         <div class="form-content">
             <label>title
-                <input type="text" name="title" value="{{data.title}}">
+                <input type="text" name="title" value="{{ data.title}}">
             </label>
+            {% if data.parent_id == '' %}
+                <!-- Content to display when parent_id is empty or not defined -->
+                <label>prompt
+                    <input type="text" name="prompt" value="{{ data.prompt }}">
+                </label>
+            {% endif %}
             <label>
                 <div class="very-small" data-wordCountDisplay></div>
                 <textarea name="writing" value=""rows="10" cols="50">{{data.writing}}</textarea>
@@ -20,6 +32,7 @@
             <label>keywords (max 3, seperated by commas please)
                 <input type="text" name="keywords" value="{{ data.keywords }}"> 
             </label>
+            <input type="hidden" name="parent_id" value="{{ data.parent_id }}">
             <input type="hidden" name="parentFirstName" value="{{ data.parentFirstName }}">
             <input type="hidden" name="parentLastName" value="{{ data.parentLastName }}">
             <input type="hidden" name="parentTitle" value="{{ data.parentTitle }}">

@@ -6,42 +6,55 @@ class Permissions {
         $isMyText = $data['writer_id'] == $currentUserId;
         $openForChanges = $data['openForChanges'];
         $isDraft = $data['text_status'] == "draft";
+        $isIncompleteDraft = $data['text_status'] == "incomplete_draft";
 
         return  $currentUserId !== null 
                 && $isMyText
-                && $openForChanges
-                && $isDraft;
+                //&& $openForChanges
+                && ($isDraft || $isIncompleteDraft);
     }
 
     public static function canAddNote($data, $currentUserId){
         $isMyText = $data['writer_id'] == $currentUserId;
         $openForChanges = $data['openForChanges'];
-        $isDraft = $data['text_status'] == "draft";
+        $isPublished = $data['text_status'] == "published";
 
         return  $currentUserId !== null 
                 && $isMyText
                 && $openForChanges
-                && !$isDraft;
+                && $isPublished;
+    }
+
+    // TODO: not sure if this is needed. I may need a little logic to allow a writer to save a note after a game is closed, but only if they started writing it before the game closed.
+    public static function canFinishNote($data, $currentUserId){
+        $isMyText = $data['writer_id'] == $currentUserId;
+        $isPublished = $data['text_status'] == "published";
+        // TODO: anything else? 
+
+        return  $currentUserId !== null 
+                && $isMyText
+                && $isPublished;
     }
 
     public static function canDelete($data, $currentUserId) {
         $isMyText = $data['writer_id'] == $currentUserId;
         $isDraft = $data['text_status'] == "draft";
+        $isIncompleteDraft = $data['text_status'] == "incomplete_draft";
 
         return  $currentUserId !== null 
                 && $isMyText 
-                && $isDraft;
+                && ($isDraft || $isIncompleteDraft);
     }
 
     public static function canIterate($data, $currentUserId) {
         $isMyText = $data['writer_id'] == $currentUserId;
         $openForChanges = $data['openForChanges'];
-        $isDraft = $data['text_status'] == "draft";
+        $isPublished = $data['text_status'] == "published";
 
         return  $currentUserId !== null 
                 && !$isMyText 
                 && $openForChanges
-                && !$isDraft;
+                && $isPublished;
     }
 
     public static function canVote($data, $currentUserId) {
@@ -59,8 +72,7 @@ class Permissions {
         $isMyText = $data['writer_id'] == $currentUserId;
         $openForChanges = $data['openForChanges'];
         $isDraft = $data['text_status'] == "draft";
-
-
+ 
         return  $currentUserId !== null 
                 && $isMyText 
                 && $openForChanges

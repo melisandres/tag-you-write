@@ -22,12 +22,12 @@ export class Modal {
               <div class="vote-info">
                 ${SVGManager.votesSVG}
                 <span class="small">
-                  ${data.voteCount}/${data.playerCount - 1}
+                  ${data.voteCount}/${data.playerCount - 1 >= 0 ? data.playerCount - 1 : 0}
                 </span>
               </div>
-              ${data.text_status=='draft'? '<span class="status">DRAFT</span>' : ''}
+              ${data.text_status=='draft' || data.text_status=='incomplete_draft' ? '<span class="status draft">DRAFT</span>' : ''}
             </div>
-            <h2 class="headline">${data.title}</h2>
+            <h2 class="headline">${data.title || "Untitled"}</h2>
             <h3 class="author"> -&nbsp${data.firstName} ${data.lastName}&nbsp- </h3>
             <p>${data.writing}</p>
             ${noteHtml}

@@ -77,8 +77,6 @@ export class ModalUpdateManager {
         return;
     }
 
-    //TODO: should I really be sending the button? I can probably get .vote-info .small without it.
-    //const resultsSpan = button.closest(".modal-with-btns").querySelector('.vote-info .small');
     const resultsSpan = container.querySelector('.vote-info .small');
     const numberOfVotes = data.voteCount;
     const numberOfPlayers = data.playerCountMinusOne;

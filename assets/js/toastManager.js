@@ -1,3 +1,5 @@
+import { eventBus } from './eventBus.js';
+
 export class ToastManager {
     constructor() {
         this.container = this.createContainer();
@@ -14,8 +16,7 @@ export class ToastManager {
     }
 
     initEventListener() {
-        document.addEventListener('showToast', (event) => {
-            const { message, type } = event.detail;
+        eventBus.on('showToast', ({ message, type }) => {
             this.show(message, type);
         });
     }

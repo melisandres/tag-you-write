@@ -179,6 +179,24 @@ class ControllerText extends Controller{
         Twig::render('text-create.php', ['writers'=>$select]);
     }
 
+    // Api endpoint for autosaving texts
+    public function autosave() {
+        // Get the current user Id
+        $currentUserId = $_SESSION['writer_id'] ?? null;
+ 
+        // Get the text data from the POST request
+        $textData = $_POST['text'];
+
+        // Create a new Text object
+        $text = new Text;
+
+        // Insert the text data into the database
+        $textId = $text->insert($textData);
+        
+
+    }
+
+
 
     //this is where we save the text entered, and its 
     //associated keywords, etc. be it a new text or an iteration
@@ -220,7 +238,7 @@ class ControllerText extends Controller{
 
         // Validate the $_POST
         $status = $_POST['text_status'];
-        $this->validateText($_POST, $isRootText, $status);
+        $status =$this->validateText($_POST, $isRootText, $status);
 
         // Create a new game via the ControllerGame 
         // IF we receive neither a game_id NOR a parent_id
@@ -354,10 +372,10 @@ class ControllerText extends Controller{
         // Add permissions to the retrieved data
         $this->addPermissions($textData, $currentWriterId);
 
-        // TODO: if you add the status incomplete_draft, you may need to also check for it here (and have a permission for it)
-        // Check user's permission to edit (myText && openForChanges draft) AND to add a note (myText && openForChanges !draft)
+
+        // Check user's permission to edit (myText && openForChanges && (draft || incomplete_draft)) 
         if (!Permissions::canEdit($textData, $currentWriterId) && !Permissions::canAddNote($textData, $currentWriterId)) {
-            Twig::render('home-error.php', ['message'=> "Sorry! This game is closed, or the text isn't yours. Either way, we can't let you edit this text."]);
+            Twig::render('home-error.php', ['message'=> "Sorry! You don't have permission to edit this text."]);
             exit();
         }
 
@@ -379,15 +397,18 @@ class ControllerText extends Controller{
         if ($status == 'published') {
             // Render the view for adding notes to published texts
             Twig::render('text-note-edit.php', ['data' => $textData, 'keywords' => $keywords]);
-        }elseif($status == 'draft'){
-            // Get the parent text: author firstName, lastName, title, and text
-            $parentData = $text->selectTexts($currentWriterId, $textData['parent_id']);
 
-            $textData['parentFirstName'] = $parentData['firstName'];
-            $textData['parentLastName'] = $parentData['lastName'];
-            $textData['parentTitle'] = $parentData['title'];
-            $textData['parentWriting'] = $parentData['writing'];
-            // Send it to the form
+        }elseif($status == 'draft' || $status == 'incomplete_draft'){
+            // Get the some parent data, IF this is not a root text
+            if ($textData['parent_id']) {
+                $parentData = $text->selectTexts($currentWriterId, $textData['parent_id']);
+                $textData['parentFirstName'] = $parentData['firstName'];
+                $textData['parentLastName'] = $parentData['lastName'];
+                $textData['parentTitle'] = $parentData['title'];
+                $textData['parentWriting'] = $parentData['writing'];
+            }
+
+            // Send it all to the form
             Twig::render('text-draft-edit.php', ['data' => $textData]);
         }
     }
@@ -403,13 +424,6 @@ class ControllerText extends Controller{
             exit();
         }
 
-        // Validate and sanitize the text ID
-/*         $textId = filter_var($_POST['id'], FILTER_VALIDATE_INT);
-        if (!$textId) {
-            Twig::render('home-error.php', ['message' => "Invalid text ID."]);
-        exit();
-        } */
-
         //check permissions
         $text = new Text;
         $currentWriterId = $_SESSION['writer_id'];
@@ -421,10 +435,8 @@ class ControllerText extends Controller{
 
         //TODO: you may want to revisit the inability to edit if the game is closed... just for writers who are writing at the moment the game closes... especially if what is out there is public, like a note! you wouldn't want to stop the writer from making their public note legible. I feel it should be possible to edit a note, even if the game is closed. In this case... permission to publish would be reliant of the game being open for changes, and the text being neither an incomplete draft, nor a published text. 
 
-        // TODO: the permission you would check for here would therefor be canInstaPublish... I think. or IsCompleteDraft
-
-        // Check user's permission to edit (myText && openForChanges)
-        if (!Permissions::canEdit($textData, $currentWriterId)) {
+        // Check user's permission to edit (myText && openForChanges && isDraft -- a validated draft)
+        if (!Permissions::canPublish($textData, $currentWriterId)) {
             Twig::render('home-error.php', ['message'=> "Sorry! This game is closed, or the text you're trying to edit isn't yours. Either way, this action is not permitted."]);
             exit();
         }
@@ -432,10 +444,6 @@ class ControllerText extends Controller{
         // Get the 'published' status_id dynamically
         $textStatus = new TextStatus;
         $statusData = $textStatus->selectStatusByName('published');
-        if (!$statusData) {
-            Twig::render('home-error.php', ['message' => "Failed to retrieve the status ID for 'published'."]);
-            exit();
-        }
         $statusId = $statusData['id'];
 
 
@@ -446,8 +454,6 @@ class ControllerText extends Controller{
         ];
 
         $success = $text->update($data);
-        //RequirePage::redirect('text');
-
     
         //if the publish was a success, add the player to the game
         //BUT only if they are not already in it? 
@@ -474,20 +480,6 @@ class ControllerText extends Controller{
         $this->sendJsonResponse($success, $success ? 'Published successfully' : 'Failed to publish');
     }
 
-    private function sendJsonResponse($success, $message) {
-        header('Content-Type: application/json');
-        echo json_encode(['success' => $success, 'message' => $message]);
-        exit;
-    }
-
-    /* private function sendJsonResponse($success, $message) {
-        $response = json_encode(['success' => $success, 'message' => $message]);
-        error_log("Sending JSON response: " . $response);
-        header('Content-Type: application/json');
-        echo $response;
-        exit;
-    } */
-
     //update send an edited text to the database
     public function update(){
 
@@ -509,6 +501,7 @@ class ControllerText extends Controller{
         $currentWriterId = $_SESSION['writer_id'];
         $textId = $_POST['id'];
         $textData = $text->selectTexts($currentWriterId, $textId);
+        $isRoot = $textData['parent_id'] == '' ? true : false;
 
         $this->addPermissions($textData, $currentWriterId);
 
@@ -522,12 +515,14 @@ class ControllerText extends Controller{
         //validate the $_POST
         $currentPage = $_POST['currentPage'];
 
-        // you need the text-status-id in order to save the text
+        // get the intended status from the form data
         $textStatus = new TextStatus;
         $status = $_POST['text_status'];
         unset($_POST['text_status']);
-        $_POST['status_id'] = $textStatus->selectStatus($status);
 
+        // Choose the validation method 
+        // For a note, validate, update, and exit.
+        // For other texts, validate, and continue below.
         if($currentPage == "text-note-edit.php"){
             $this->validateNote($_POST);
             // Here, you are only allowing a user to edit the NOTE:
@@ -536,12 +531,26 @@ class ControllerText extends Controller{
             $updateNote['id'] = $_POST['id'];
             $update = $text->update($updateNote);
 
+            // TODO: you'll probably want to send a little message :)
             RequirePage::redirect('text');
             exit;
         }else{
-            $this->validateText($_POST, false, $status);
+            // Your validation may change the status, if the text isnt instaPublish ready
+            $status = $this->validateText($_POST, $isRoot, $status);
         }
 
+        // Root texts need to update the game prompt
+        if ($isRoot) {
+            $gameId = $text->selectGameId($textId);
+            $game = new Game;
+            $game->update(['id' => $gameId, 'prompt' => $_POST['prompt']]);
+            unset($_POST['prompt']);
+            unset($_POST['parent_id']);
+            unset($_POST['writer_id']);
+        }
+
+        // you'll need the text-status-id in order to save the text
+        $_POST['status_id'] = $textStatus->selectStatus($status);
 
         //although I am not keeping the functionality of editing keywords,
         //I'm keeping the code here, because I remember it was a little 
@@ -564,8 +573,6 @@ class ControllerText extends Controller{
         //send what's left of the POST (text info) to CRUD
         //if you want to allow a user to edit EVERYTHING:
         $update = $text->update($_POST);
-
-
 
         // If the publish was a success, add the player to the game
         // BUT only if they are not already in it
@@ -643,9 +650,10 @@ class ControllerText extends Controller{
         $keyword = new Keyword;
         $textHasKeyword = new TextHasKeyword;
 
-
+        //TODO: I think I'm going a little crazy. a bunch of things I need for my checks will be in $textData--like the parent_id, which I don't need to send via the form--oh, but I do, because it helps decide the view.
         $textData = $text->selectTexts($currentWriterId, $textId);
         $this->addPermissions($textData, $currentWriterId);
+        $isRoot = $textData['parent_id'] == '' ? true : false;
 
         // Check user's permission to edit (myText && openForChanges)
         if (!Permissions::canDelete($textData, $currentWriterId)) {
@@ -691,6 +699,13 @@ class ControllerText extends Controller{
         $seen->deleteById($textId);
 
         $response = $text->delete($textId);
+
+        // If the text deleted is a root, delete the game
+        if($response && $isRoot){
+            $gameId = $textData['game_id'];
+            $game = new Game;
+            $game->delete($gameId);
+        }
 
 
         if ($response !== true) {
@@ -751,30 +766,69 @@ class ControllerText extends Controller{
         Twig::render('text-iterate.php', ['data' => $textData]);
     }
 
-    // Validate the text data
-    public function validateText($data, $isRoot, $status){
+    // Validate the text data 
+    // The $autosave parameter is to check if the data is being sent via an api fetch or if it's a form submission
+    public function validateText($data, $isRoot, $intended_status, $autoSave = false){
         RequirePage::library('Validation');
         $val = new Validation;
-        //var_dump($data);
+    
+        // Basic validation for all texts (including incomplete drafts)
+        $val->name('writing')->value($data["writing"])->max(16777215); // MEDIUMTEXT max length
+        $val->name('title')->value($data["title"])->max(45); // Currently a varchar 45 could increase to 100
+        $val->name('keywords')->value($data["keywords"])->max(255); // Allow for multiple keywords
 
-        //TODO: send the status of the text here, so that we can allow the saving of a draft that doesn't follow all the rules... and therefor can implement autosaves for drafts. 
-        $val->name('writing')->value($data["writing"])->required()->max(65000)->wordCount(50, $data['parentWriting']);
-        $val->name('title')->value($data["title"])->required()->max(75)->wordCount(3);
-        $val->name('keywords')->value($data["keywords"])->pattern('keywords')->max(75)->keywordCount(3);
-        // Validate the prompt, but only if this is a root text
-        if($isRoot){
+        if ($isRoot) {
+            $val->name('prompt')->value($data["prompt"])->max(200);
+        }
+
+        // Check if basic validation passes
+        if (!$val->isSuccess()) {
+            if ($autoSave) {
+                // TODO: send the errors in a good structure... so that the front end can display it nicely. 
+                 // Convert the errors to JSON format
+                $jsonData = json_encode($val->displayErrors());
+                return $jsonData;
+            }
+            else{
+                $errors = $val->displayErrors();
+                Twig::render($data["currentPage"], ['data' => $data, 'errors' => $errors]);
+                exit();
+            }
+        }
+    
+        // Stricter validation for publication AND/OR for autoPublish-ready drafts
+        $val->name('keywords')->value($data["keywords"])->pattern('keywords')->keywordCount(3);
+
+        if (!$isRoot) {
+            // Iterations use a short title to describe changes to the parent text 
+            $val->name('title')->value($data["title"])->required()->wordCount(3);
+            $val->name('writing')->value($data["writing"])->required()->wordCount(50, $data['parentWriting']);
+        }else{
+            // Root texts set up the game and prompt
+            $val->name('title')->value($data["title"])->required();
+            $val->name('writing')->value($data["writing"])->required()->wordCount(50, "");
             $val->name('prompt')->value($data["prompt"])->required()->max(200);
         } 
-
-        if($val->isSuccess()){
-            //if this is successful, continue the code
-            //so... do nothing
-        }else{
-            $errors = $val->displayErrors();
-            //send it to the form
-            Twig::render($data["currentPage"], ['data' => $data, 'errors' => $errors]);
-            exit();
-        };
+        
+        if ($val->isSuccess()) {
+            return $intended_status; // Keep the intended status
+        } else {
+            if ($intended_status == 'draft') {
+                return 'incomplete_draft';
+            } else {
+                if ($autoSave) {
+                    // TODO: send the errors in a workable structure... so that the front end can display it nicely. 
+                     // Convert the errors to JSON format
+                    $jsonData = json_encode($val->displayErrors());
+                    return $jsonData;
+                }
+                else{
+                    $errors = $val->displayErrors();
+                    Twig::render($data["currentPage"], ['data' => $data, 'errors' => $errors]);
+                    exit();
+                }
+            }
+        }
     }
 
     public function validateNote($data){
@@ -790,6 +844,16 @@ class ControllerText extends Controller{
             Twig::render($data["currentPage"], ['data' => $data, 'errors' => $errors]);
             exit();
         };
+    }
+
+    private function sendJsonResponse($success, $message) {
+        header('Content-Type: application/json');
+        echo json_encode([
+            'success' => $success,
+            'toastMessage' => $message,
+            'toastType' => $success ? 'success' : 'error'
+        ]);
+        exit;
     }
 }
 

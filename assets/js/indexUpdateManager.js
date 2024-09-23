@@ -7,10 +7,11 @@ export class IndexUpdateManager {
   }
 
   initEventListeners() {
-    eventBus.on('instaPublish', this.handleInstaPublish.bind(this));
+    eventBus.on('instaDelete', this.handleInstaDelete.bind(this));
   }
 
-  handleInstaPublish({ textId, newStatus }) {
-    // TODO: You'll eventually have a style for drafts of root stories, and you'll update the style of the root story/game on the index level here
+  handleInstaDelete({ textId, status}) {
+    const gameContainer = document.querySelector(`[data-stories]>[data-text-id="${textId}"]`);
+    if (gameContainer) gameContainer.innerHTML = '';
   }
 }

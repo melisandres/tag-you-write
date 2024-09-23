@@ -173,7 +173,7 @@ export class TreeVisualizer {
                         .attr('class', d => {
                             // Concatenate multiple classes based on conditions
                             let classes = `${d.data.text_seen == 1 ? 'read' : 'unread'}`;
-                            classes += ` ${d.data.text_status == 'draft' ? 'tree-node-draft' : ''}`; // Add class for draft status
+                            classes += ` ${d.data.text_status == 'draft' || d.data.text_status == 'incomplete_draft'  ? 'tree-node-draft' : ''}`; // Add class for draft status
                             return classes.trim();  // Remove any extra spaces
                         })
                         .attr('data-id', d => d.data.id)  // Add data-set for text id
@@ -187,8 +187,8 @@ export class TreeVisualizer {
             .attr("dy", "-0.35em")
             .attr("x", d => d.children ? -13 : 13)
             .style("text-anchor", d => d.children ? "end" : "start")
-            .attr("class", d => d.data.text_status == 'draft' ? "tree-title-draft" : "")
-            .text(d => d.data.title);
+            .attr("class", d => d.data.text_status == 'draft' || d.data.text_status == 'incomplete_draft' ? "tree-title-draft" : "")
+            .text(d => d.data.title || "Untitled");
   
         // Add additional text line below the title
         node.append("text")
@@ -196,7 +196,7 @@ export class TreeVisualizer {
             .attr("x", d => d.children ? -13 : 13)
             .style("text-anchor", d => d.children ? "end" : "start")
             .attr("class", d => d.data.permissions.isMyText ? "text-by author" : "text-by")
-            .text(d => d.data.permissions.isMyText ? `${d.data.text_status == 'draft' ? 'DRAFT ' : ''} by you` : `by ${d.data.firstName} ${d.data.lastName}`);
+            .text(d => d.data.permissions.isMyText ? `${d.data.text_status == 'draft' || d.data.text_status == 'incomplete_draft' ? 'DRAFT ' : ''} by you` : `by ${d.data.firstName} ${d.data.lastName}`);
   
         // Constraints on zooming
         const zoom = d3.zoom()
@@ -345,7 +345,7 @@ export class TreeVisualizer {
 
 
 
-    updateNodeStatus(nodeId, newStatus) {
+    /* updateNodeStatus(nodeId, newStatus) {
         console.log(`Updating node ${nodeId} to status ${newStatus}`);
         console.log('Current container:', this.container);
     
@@ -395,6 +395,6 @@ export class TreeVisualizer {
         } else {
           console.log('Node group not found');
         }
-      }
+      } */
 }
   
