@@ -19,12 +19,13 @@ import { SSEManager } from './sseManager.js';
 import { ShelfUpdateManager } from './shelfUpdateManager.js';
 import { ModalUpdateManager } from './modalUpdateManager.js';
 import { IndexUpdateManager } from './indexUpdateManager.js';
+import { eventBus } from './eventBus.js';
 
-
-
-
+// Make eventBus globally available immediately
+window.eventBus = eventBus;
 
 document.addEventListener("DOMContentLoaded", () => {
+
   const path = window.location.origin + "/tag-you-write-repo/tag-you-write/";
 /*   const controllerPath = window.location.origin + "/tag-you-write-repo/tag-you-write/controller/"; */
   const treeModal = document.querySelector('.modal-background');
@@ -75,14 +76,19 @@ document.addEventListener("DOMContentLoaded", () => {
   new InstaPublishManager(path, warningManager);
   new InstaDeleteManager(path, storyManager, refreshManager);
 
-
-
   // Initialize UpdateManagers
   new ShelfUpdateManager(path);
   new TreeUpdateManager();
   new ModalUpdateManager(path);
   new IndexUpdateManager();
 
+   // Check for pending toasts
+   const pendingToast = localStorage.getItem('pendingToast');
+   if (pendingToast) {
+       const { message, type } = JSON.parse(pendingToast);
+       eventBus.emit('showToast', { message, type });
+       localStorage.removeItem('pendingToast');
+   }
 
   // Handle browser refresh by saving state before unload
   window.addEventListener('beforeunload', () => {

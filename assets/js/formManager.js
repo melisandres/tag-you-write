@@ -1,5 +1,6 @@
 import { SVGManager } from './svgManager.js';
 import { WarningManager } from './warningManager.js';
+import { eventBus } from './eventBus.js';
 
 export class FormManager {
     constructor(path) {
@@ -31,9 +32,13 @@ export class FormManager {
 
         this.buttons.forEach(element => {
             const myStatus = element.dataset.status;
-            element.addEventListener('click', () => this.setStatusAndSubmit(myStatus));
+            element.addEventListener('click', (event) => {
+                event.preventDefault();
+                this.setStatusAndSubmit(myStatus);
+            });
         });
     }
+
 
     // Method to set the status and submit the form
     setStatusAndSubmit(status) {
@@ -45,17 +50,17 @@ export class FormManager {
                 break;
             case 'draft':
                 this.statusField.value = status;
-                this.form.submit();
+                this.submitForm();
                 break;
             case 'delete': 
-            this.showDeleteWarning();
+                this.showDeleteWarning();
                 break;
             case 'cancel':
                 window.location.href=`${this.path}text`;
                 break;
             default:
                 console.log("button has not been given a purpose!");
-          }
+        }
     }
 
     showPublishWarning() {
@@ -64,7 +69,7 @@ export class FormManager {
             "Are you sure you want to publish this text? This action cannot be undone.",
             () => {
                 this.statusField.value = 'published';
-                this.form.submit();
+                this.submitForm();
             },
             () => console.log("Publish cancelled")
         );
@@ -137,5 +142,50 @@ export class FormManager {
             // After successful save:
             // this.lastSavedContent = this.form.querySelector('textarea').value;
         }
+    }
+
+    // Method to submit the form via AJAX
+    submitForm() {
+        const formData = new FormData(this.form);
+        const action = this.form.getAttribute('action'); // This gets the action URL
+
+        // Convert FormData to a plain object
+        const data = {};
+        formData.forEach((value, key) => {
+            data[key] = value;
+        });
+
+        console.log('Form Data:', data); // Debugging: Check the collected form data
+
+        fetch(action, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.redirectUrl) {
+                // Store toast data in localStorage before redirecting
+                localStorage.setItem('pendingToast', JSON.stringify({
+                    message: data.toastMessage,
+                    type: data.toastType
+                }));
+                window.location.href = `${this.path}${data.redirectUrl}`;
+            } else {
+                eventBus.emit('showToast', { 
+                    message: data.toastMessage, 
+                    type: data.toastType 
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            eventBus.emit('showToast', { 
+                message: 'An error occurred', 
+                type: 'error'
+            });
+        });
     }
 }

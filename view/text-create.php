@@ -30,20 +30,22 @@
     <input type="hidden" name="date" value="{{ 'now'|date('Y-m-d H:i:s') }}">
     <input type="hidden" name="currentPage" value="text-create.php">
     <input type="hidden" name="text_status" data-text-status value="">
+    <input type="hidden" name="game_id" value="{{ data.game_id }}">
+    <input type="hidden" name="parent_text_id" value="{{ data.parent_text_id }}">
 
     <div class="form-btns">
-    <button class="publish" type="button" data-status="published">
-                <span class="icon"></span>
-                <span class="title">Publish</span>
-            </button>
-            <button class="save" type="button" data-status="draft">
-                <span class="icon"></span>
-                <span class="title">Save Draft</span>
-            </button>
-            <button class="cancel" type="button" data-status= "cancel">
-                <span class="icon"></span>
-                <span class="title">Cancel</span>
-            </button>
+        <button class="publish" type="button" data-status="published">
+            <span class="icon"></span>
+            <span class="title">Publish</span>
+        </button>
+        <button class="save" type="button" data-status="draft">
+            <span class="icon"></span>
+            <span class="title">Save Draft</span>
+        </button>
+        <button class="cancel" type="button" data-status="cancel">
+            <span class="icon"></span>
+            <span class="title">Cancel</span>
+        </button>
     </div>
 </form>
 
