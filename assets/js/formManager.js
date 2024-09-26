@@ -28,7 +28,7 @@ export class FormManager {
         // methods related to auto-saving, and handling buttons in the context of autosave
         if (this.form && this.formType == 'writing'){
             this.addButtonEventListeners();
-            this.setupAutoSave();
+            //this.setupAutoSave();
             this.setupExitWarning();
             this.setupCheckForInput();
         }
@@ -126,11 +126,12 @@ export class FormManager {
             const timeSinceLastType = now - this.lastTypedTime;
             const timeSinceLastAutoSave = now - (this.lastAutoSaveTime || 0);
 
-            if (timeSinceLastType >= this.typingPauseDuration && timeSinceLastAutoSave >= this.typingPauseDuration) {
-                this.autoSave();
-                clearInterval(this.autoSaveTimer);
-                this.continuouslyTyping = false;
-                this.continuousTypingStartTime = null;
+            if (timeSinceLastType >= this.typingPauseDuration) { 
+                if(timeSinceLastAutoSave >= this.typingPauseDuration){
+                    this.continuouslyTyping = false;
+                    this.autoSave();
+                }
+                clearInterval(this.autoSaveTimer); // Clear the timer regardless of whether autoSave was called
             }
         }, 1000);
     }
@@ -163,17 +164,17 @@ export class FormManager {
         clearInterval(this.continuousTypingTimer);
         this.continuouslyTyping = true;
         this.continuousTypingStartTime = Date.now();
+        //let timerCleared = false; // Flag to ensure the timer is only cleared once
+
         this.continuousTypingTimer = setInterval(() => {
             const now = Date.now();
-            if (now - this.continuousTypingStartTime >= this.continuousTypingDuration) {
+            if (now - this.continuousTypingStartTime > this.continuousTypingDuration) {
                 this.autoSave();
-                clearInterval(this.continuousTypingTimer);
                 this.continuouslyTyping = false;
-                this.continuousTypingStartTime = null;
-                this.lastAutoSaveTime = now;
             }
-            if (!this.continuouslyTyping) {
+            if (!this.continuouslyTyping /* && !timerCleared */) {
                 clearInterval(this.continuousTypingTimer);
+                //timerCleared = true;
             }
         }, 1000);
     }
