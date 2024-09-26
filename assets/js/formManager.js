@@ -164,7 +164,7 @@ export class FormManager {
         clearInterval(this.continuousTypingTimer);
         this.continuouslyTyping = true;
         this.continuousTypingStartTime = Date.now();
-        //let timerCleared = false; // Flag to ensure the timer is only cleared once
+
 
         this.continuousTypingTimer = setInterval(() => {
             const now = Date.now();
@@ -172,9 +172,8 @@ export class FormManager {
                 this.autoSave();
                 this.continuouslyTyping = false;
             }
-            if (!this.continuouslyTyping /* && !timerCleared */) {
+            if (!this.continuouslyTyping) {
                 clearInterval(this.continuousTypingTimer);
-                //timerCleared = true;
             }
         }, 1000);
     }
@@ -293,6 +292,9 @@ export class FormManager {
                 if (lastKeywordsInput) {
                     lastKeywordsInput.value = formData.get('keywords');
                 }
+                // Reset the lastAutoSaveTime and stop continuous typing
+                this.lastAutoSaveTime = Date.now();
+                this.continuouslyTyping = false;
             }
 
             if (data.redirectUrl) {
