@@ -23,7 +23,7 @@ export class RefreshManager {
         };
 
         const storiesEl = document.querySelector("[data-stories]")
-        const showcaseEl = storiesEl.querySelector("#showcase"); // The showcase element
+        const showcaseEl = storiesEl ? storiesEl.querySelector("#showcase") : null; // The showcase element
         const treeModalEl = document.querySelector("[data-tree-modal='visible']"); // The modal element if visible
 
         if(showcaseEl){

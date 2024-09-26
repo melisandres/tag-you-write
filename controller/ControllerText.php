@@ -172,41 +172,64 @@ class ControllerText extends Controller{
     public function create(){
         //available only to those logged in (ie: writers)
         CheckSession::sessionAuth();
+        Twig::render('text-create.php', ['data' => []]);
 
         // TODO: it's ok to have access to all the writers... for when writers can choose who to play with.
-        $writer = new Writer;
-        $select = $writer->select();
-        Twig::render('text-create.php', ['writers'=>$select]);
-    }
-
-    // Api endpoint for autosaving texts
-    public function autosave() {
-        // Get the current user Id
-        $currentUserId = $_SESSION['writer_id'] ?? null;
- 
-        // Get the text data from the POST request
-        $textData = $_POST['text'];
-
-        // Create a new Text object
-        $text = new Text;
-
-        // Insert the text data into the database
-        $textId = $text->insert($textData);
-        
+/*         $writer = new Writer;
+        $select = $writer->select(); */
 
     }
 
+
+    // We need a method that handles autosaves--making the decision whether to insert or update
+    public function autoSave() {
+        error_log("PASSING THROUGH Autosave: line 186");
+        // Get JSON input   
+        $input = json_decode(file_get_contents('php://input'), true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $this->sendJsonResponse(false, 'Invalid JSON data');
+        }
+    
+        if (empty($input)) {
+            $this->sendJsonResponse(false, 'No input data received');
+        }
+    
+        // Get the textId from the input
+        $textId = $input['id'] ?? null;
+        //error_log("Autosave: textId: " . $textId);
+    
+        // update or store, depending on whether the text has an id
+        if ($textId) {
+            //error_log("Autosave: update called");
+            // Call the update method
+            $this->update($input);
+        } else {
+            //error_log("Autosave: store called");
+            // Call the store method
+            $textId = $this->store($input);
+        }
+        // Return the new text ID in the response
+        //error_log("Autosave: textId: " . $textId);
+        $this->sendJsonResponse(true, 'Auto-save successful', ['textId' => $textId]);
+    }
 
 
     //this is where we save the text entered, and its 
     //associated keywords, etc. be it a new text or an iteration
     //IF its a new text, we create a new game.
-    public function store() {
+    public function store($autoSaveInput = null) {
+        error_log("PASSING THROUGH store: line 200");
         // Check if the writer is logged in
         CheckSession::sessionAuth();
 
         // Get JSON input
-        $input = json_decode(file_get_contents('php://input'), true);
+        if ($autoSaveInput == null) {
+            $input = json_decode(file_get_contents('php://input'), true);
+        }else{
+            $input = $autoSaveInput;
+        }
+
+        // Check if the input is valid JSON
         if (json_last_error() !== JSON_ERROR_NONE) {
             $this->sendJsonResponse(false, 'Invalid JSON data');
         }
@@ -220,9 +243,15 @@ class ControllerText extends Controller{
         $text = new Text;
         $keyWord = new Keyword;
         $textStatus = new TextStatus;
-        $parentId = $input['parent_text_id'] ?: null;
+        $parentId = $input['parent_id'] == '' ? null : $input['parent_id'];
+        error_log("HERE!!line 245 parentId: " . $parentId);
         $isRootText = !$input['game_id'] && !$parentId;
         $currentWriterId = $_SESSION['writer_id'];
+        // an empty field created in create form to catch the textId returned by the autoSave
+/*         unset($input['id']);
+        unset($input['lastKeywords']);
+        unset($input['parentWriting']); */
+
 
         // Check if this is an iteration, if so, check permissions
         if (!$isRootText) {
@@ -238,12 +267,13 @@ class ControllerText extends Controller{
         $status = $input['text_status'];
         $input['parent_id'] = $parentId;
         $status = $this->validateText($input, $isRootText, $status);
-
+        //error_log("line 614 status: " . $status);
         // Create a new game if this is a root text (no game_id && no parent_id
          if ($isRootText) {
+            //error_log("line 616 isRootText: " . $isRootText);
             $gameController = new ControllerGame;
             $gameId = $gameController->createGame($input);
-
+            //error_log("line 618 gameId: " . $gameId);
             if ($gameId === false) {
                 $this->sendJsonResponse(false, 'Failed to create a new game');
             }
@@ -255,7 +285,7 @@ class ControllerText extends Controller{
         $keywords = $input['keywords'];
 
         // Remove the keywords and redirectPage reference from POST
-        unset($input['keywords']);
+/*         unset($input['keywords']);
         unset($input['currentPage']);
 
         // Remove the other extra values from POST so that you can send off your POST to insert
@@ -265,13 +295,23 @@ class ControllerText extends Controller{
         unset($input['parentWriting']);
         unset($input['prompt']);
         unset($input['parent_text_id']);
-
+ */
         // Translate ['text_status'] into its 'id' in order to save it with the text
-        unset($input['text_status']);
+/*         unset($input['text_status']); */
         $input['status_id'] = $textStatus->selectStatus($status);
 
         // Send what's left of the input (text info) to CRUD
-        $textIdFromInsert = $text->insert($input);
+        $textToSave = [
+            'title' => $input['title'],
+            'writing' => $input['writing'],
+            'parent_id' => $parentId,
+            'game_id' => $input['game_id'],
+            'status_id' => $input['status_id'],
+            'writer_id' => $currentWriterId,
+            'date' => date('Y-m-d H:i:s')
+        ];
+        //error_log("line 625 textToSave: " . json_encode($textToSave));
+        $textIdFromInsert = $text->insert($textToSave);
 
         //send the writer_id and the game_id to game_has_player
         if ($status == 'published') {
@@ -308,8 +348,12 @@ class ControllerText extends Controller{
                 $textHasKeyword->insert($textHasKeywordArray);
             }
         }
-
-        $this->sendJsonResponse(true, 'Text saved successfully', 'text');
+        if ($autoSaveInput == null) {
+            $this->sendJsonResponse(true, 'Text saved successfully', 'text');
+        }else{
+            // Return the new text ID
+            return $textIdFromInsert;
+        }
     }
 
 
@@ -367,7 +411,6 @@ class ControllerText extends Controller{
         // Add permissions to the retrieved data
         $this->addPermissions($textData, $currentWriterId);
 
-
         // Check user's permission to edit (myText && openForChanges && (draft || incomplete_draft)) 
         if (!Permissions::canEdit($textData, $currentWriterId) && !Permissions::canAddNote($textData, $currentWriterId)) {
             Twig::render('home-error.php', ['message'=> "Sorry! You don't have permission to edit this text."]);
@@ -404,7 +447,7 @@ class ControllerText extends Controller{
             }
 
             // Send it all to the form
-            Twig::render('text-draft-edit.php', ['data' => $textData]);
+            Twig::render('text-create.php', ['data' => $textData]);
         }
     }
 
@@ -469,25 +512,25 @@ class ControllerText extends Controller{
             }          
         }
 
-        error_log("InstaPublish result: " . ($success ? "true" : "false"));
+        //error_log("InstaPublish result: " . ($success ? "true" : "false"));
     
         $this->sendJsonResponse($success, $success ? 'Published successfully' : 'Failed to publish');
     }
 
     //update send an edited text to the database
-    public function update(){
+    public function update($autoSaveInput = null){
+        error_log("PASSING THROUGH update: line 221");
         //no access if you are not logged in
         CheckSession::sessionAuth();
 
-        //make sure the page is being accessed with a post...
-        if($_SERVER["REQUEST_METHOD"] !== "POST"){
-            RequirePage::redirect('text');
-            exit();
-        }
-
         // Get JSON input
-        $input = json_decode(file_get_contents('php://input'), true);
+        if ($autoSaveInput == null) {
+            $input = json_decode(file_get_contents('php://input'), true);
+        }else{
+            $input = $autoSaveInput;
+        }
         if (json_last_error() !== JSON_ERROR_NONE) {
+            //error_log("Update: Invalid JSON data");
             $this->sendJsonResponse(false, 'Invalid JSON data');
         }
 
@@ -496,6 +539,8 @@ class ControllerText extends Controller{
             // TODO: with autosave, this could happen... so message should be clean
             $this->sendJsonResponse(false, 'No input data received');
         }
+
+        //error_log("line507 input: " . json_encode($input));
 
         $text = new Text;
         $keyword = new Keyword;
@@ -518,9 +563,9 @@ class ControllerText extends Controller{
         $currentPage = $input['currentPage'];
 
         // get the intended status from the form data
-        $textStatus = new TextStatus;
+/*         $textStatus = new TextStatus; */
         $status = $input['text_status'];
-        unset($input['text_status']);
+/*         unset($input['text_status']); */
 
         // Choose the validation method 
         // For a note, validate, update, and exit.
@@ -528,9 +573,14 @@ class ControllerText extends Controller{
         if($currentPage == "text-note-edit.php"){
             $this->validateNote($input);
             // Here, you are only allowing a user to edit the NOTE:
-            $updateNote['note'] = $input['note'];
+            $updateNote = [
+                'note' => $input['note'],
+                'note_date' => $input['note_date'],
+                'id' => $input['id']
+            ];
+/*             $updateNote['note'] = $input['note'];
             $updateNote['note_date'] = $input['note_date'];
-            $updateNote['id'] = $input['id'];
+            $updateNote['id'] = $input['id']; */
             $update = $text->update($updateNote);
 
             // TODO: you'll probably want to access this async too with a little message :)
@@ -545,13 +595,15 @@ class ControllerText extends Controller{
         if ($isRoot) {
             $gameId = $text->selectGameId($textId);
             $game = new Game;
-            $game->update(['id' => $gameId, 'prompt' => $input['prompt']]);
-            unset($input['prompt']);
+            $game->update(  ['id' => $gameId, 
+                            'prompt' => $input['prompt']]);
+/*             unset($input['prompt']);
             unset($input['parent_id']);
-            unset($input['writer_id']);
+            unset($input['writer_id']); */
         }
 
         // you'll need the text-status-id in order to save the text
+        $textStatus = new TextStatus;
         $input['status_id'] = $textStatus->selectStatus($status);
 
         //although I am not keeping the functionality of editing keywords,
@@ -561,20 +613,29 @@ class ControllerText extends Controller{
 
         //get the new keywords from POST, copy, and remove
         $keywords = $input['keywords'];
-        unset($input['keywords']);
+/*         unset($input['keywords']);
         unset($input['currentPage']);
         unset($input['parentFirstName']);
         unset($input['parentLastName']);
         unset($input['parentTitle']);
-        unset($input['parentWriting']);
+        unset($input['parentWriting']); */
 
         //get the previous keywords from POST, also remove
         $lastKeywords = $input['lastKeywords'];
-        unset($input['lastKeywords']); 
+/*         unset($input['lastKeywords']);  */
 
-        //send what's left of the POST (text info) to CRUD
-        //if you want to allow a user to edit EVERYTHING:
-        $update = $text->update($input);
+        //send the text info to CRUD
+        $newText = [
+            'id' => $textId,
+            'status_id' => $input['status_id'],
+            'writing' => $input['writing'],
+            'title' => $input['title'],
+            'date' => date('Y-m-d H:i:s')
+        ];
+        //error_log("line615 Saving newText: " . json_encode($newText));
+        $update = $text->update($newText);
+        //error_log("line616 update: " . json_encode($update));
+
 
         // If the publish was a success, add the player to the game
         // BUT only if they are not already in it
@@ -632,10 +693,12 @@ class ControllerText extends Controller{
 
                 //with the id, check if the key is being used elsewhere, if not, delete from keywords
                 $keyword->deleteUnusedKeywords($keywordInfos['id']);
-            }
-            $this->sendJsonResponse(true, 'Operation successful', 'text');
+            }   
+        }
+        if ($status == "published"){
+            $this->sendJsonResponse(true, 'published', 'text');
         }else{
-            $this->sendJsonResponse(true, 'Operation successful', 'text');
+            $this->sendJsonResponse(true, 'saved');
         }
     }
 
@@ -690,7 +753,7 @@ class ControllerText extends Controller{
             foreach ($keyWordIds as $key => $value) {
                 if (!$keyword->deleteUnusedKeywords($value["keyword_id"])) {
                     // Handle the error, maybe log it or set a flag
-                    error_log("Failed to delete unused keyword: " . $value["keyword_id"]);
+                    //error_log("Failed to delete unused keyword: " . $value["keyword_id"]);
                 }
             }
         }
@@ -736,19 +799,22 @@ class ControllerText extends Controller{
         // Recuperate the text, and the keywords associated to it
         $text = new Text;
         $currentWriterId = $_SESSION['writer_id'];
-        $textData = $text->selectTexts($currentWriterId, $_POST['id']);
 
+        // TODO: made these changes. check if it works.
+        //$textData = $text->selectTexts($currentWriterId, $_POST['id']);
+        $parentId = $_POST['id'];
+        $parentData = $text->selectTexts($currentWriterId, $parentId);
 
         // Add permissions to the retrieved data
-        $this->addPermissions($textData, $currentWriterId);
+        $this->addPermissions($parentData, $currentWriterId);
 
         // Check user's permission to iterate (myText && openForChange && !isDraft)
-        if (!Permissions::canIterate($textData, $currentWriterId)) {
+        if (!Permissions::canIterate($parentData, $currentWriterId)) {
             Twig::render('home-error.php', ['message'=> "Sorry! This action is not permitted, for one of many reasons."]);
             exit();
         }
 
-        $keywords = $text->selectKeyword($_POST['id']);
+        $keywords = $text->selectKeyword($parentId);
 
         // Prepare the keywords string
         $keywordString = "";
@@ -760,12 +826,28 @@ class ControllerText extends Controller{
         // Create a data array that will send the values to the page legibly...
         $textData["keywords"] = $cleanKeywordString;
         // To deal with the parent title, parent writing and the title and writing of the iteration separately
-        $textData["parentTitle"] = $textData["title"];
-        $textData["parentWriting"] = $textData["writing"];
+        $textData["parentTitle"] = $parentData["title"];
+        $textData["parentWriting"] = $parentData["writing"];
         $textData["title"] = "";
 
+        //adding the following might make things clearer
+        $textData["parent_id"] = $parentData["id"];
+
+        $data = [
+            'parent_id' => $parentId,
+            'parentFirstName' => $parentData['firstName'],
+            'parentLastName' => $parentData['lastName'],
+            'parentTitle' => $parentData['title'],
+            'parentWriting' => $parentData['writing'],
+            'game_id' => $parentData['game_id'],
+            'title' => '',
+            'writing' => $parentData['writing'],
+            'keywords' => $cleanKeywordString,
+            'prompt' => $parentData['prompt']
+        ];
+
         // Send it all to the form
-        Twig::render('text-iterate.php', ['data' => $textData]);
+        Twig::render('text-create.php', ['data' => $data]);
     }
 
     // Validate the text data 
@@ -834,14 +916,23 @@ class ControllerText extends Controller{
         };
     }
 
-    private function sendJsonResponse($success, $message, $redirectUrl = null) {
-        header('Content-Type: application/json');
-        echo json_encode([
+    private function sendJsonResponse($success, $message, $additionalData = null) {
+            // Clear any output that might have been sent before
+    if (ob_get_length()) ob_clean();
+        $response = [
             'success' => $success,
             'toastMessage' => $message,
-            'toastType' => $success ? 'success' : 'error',
-            'redirectUrl' => $redirectUrl
-        ]);
+            'toastType' => $success ? 'success' : 'error'
+        ];
+
+        if (is_array($additionalData)) {
+            $response = array_merge($response, $additionalData);
+        } elseif ($additionalData !== null) {
+            $response['redirectUrl'] = $additionalData;
+        }
+
+        header('Content-Type: application/json');
+        echo json_encode($response);
         exit;
     }
 }
