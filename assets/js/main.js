@@ -73,8 +73,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // const warningManager = new WarningManager();
 
   //And your forms need managing (!)
-  new FormManager(path);
-  new AutoSaveManager(path);
+  const autoSaveManager = new AutoSaveManager(path);
+  new FormManager(autoSaveManager, path);
+
   //new ValidationManager(formManager);
 
   // Initialize InstaPublishManager and InstaDeleteManager

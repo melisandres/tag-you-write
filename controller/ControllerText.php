@@ -774,6 +774,7 @@ class ControllerText extends Controller{
             $game->delete($gameId);
         }
 
+        // TODO: It's possible that I may no longer need to check for $insta, as everything might be instant... so... in that case, eliminate the $instas, and the checks, and just have the whole method function for async calls. 
         // From the text page $insta is true, from the form it is false.
         if ($response !== true) {
             if (!$insta) {

@@ -45,12 +45,18 @@ export class InstaPublishManager {
             if (result.success) {
               // create an event that will update the views and the modal
               eventBus.emit('instaPublish', { textId, newStatus: 'published' });
+              // an event to show a toast
               eventBus.emit('showToast', { 
                 message: result.toastMessage, 
                 type: result.toastType 
-            });
+              });
             } else {
               console.error('Insta-publish failed:', result.message);
+              // an event to show a toast for failure
+              eventBus.emit('showToast', { 
+                message: result.message, 
+                type: 'error' // or any type you want for failure
+              });
             }
           } catch (jsonError) {
             console.error('Error parsing JSON:', jsonError, 'Raw response:', rawText);

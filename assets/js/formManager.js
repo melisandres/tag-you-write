@@ -3,7 +3,8 @@ import { WarningManager } from './warningManager.js';
 import { eventBus } from './eventBus.js';
 
 export class FormManager {
-    constructor(path) {
+    constructor(autoSaveManager, path) {
+        this.autoSaveManager = autoSaveManager;
         this.path = path;
         this.form = document.querySelector('#main-form');
         this.formType = this.form ? this.form.getAttribute('data-form-type') : null;
@@ -51,7 +52,7 @@ export class FormManager {
                 break;
             case 'draft':
                 this.statusField.value = status;
-                this.submitForm();
+                this.handleManualSave();
                 break;
             case 'delete': 
                 this.showDeleteWarning();
@@ -62,6 +63,20 @@ export class FormManager {
             default:
                 console.log("button has not been given a purpose!");
         }
+    }
+
+    // Check if the autoSaveManager has unsaved changes
+    handleManualSave() {
+       // Check if there are unsaved changes
+       if (!this.autoSaveManager.hasUnsavedChanges()) {
+           eventBus.emit('showToast', { 
+               message: 'Already up to date!', 
+               type: 'info' 
+           });
+       } else {
+           // Proceed with manual save logic if there are unsaved changes
+           this.submitForm();
+       }
     }
 
     // New method to handle publishing logic
@@ -190,8 +205,7 @@ export class FormManager {
     }
 
     
-    // Method to submit the form via AJAX
-    // This is similar to autoSave, but it is for when the user clicks the save or publish button--publishing will close the form, so we need to redirect.
+    // Submits the form to store OR update.
     submitForm() {
         const formData = new FormData(this.form);
         const action = this.form.getAttribute('action'); // This gets the action URL
