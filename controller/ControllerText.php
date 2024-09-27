@@ -516,7 +516,7 @@ class ControllerText extends Controller{
 
         //error_log("InstaPublish result: " . ($success ? "true" : "false"));
     
-        $this->sendJsonResponse($success, $success ? 'Published successfully' : 'Failed to publish');
+        $this->sendJsonResponse($success, $success ? 'Published!' : 'Failed to publish');
     }
 
     //update send an edited text to the database
@@ -774,12 +774,10 @@ class ControllerText extends Controller{
             $game->delete($gameId);
         }
 
-
+        // From the text page $insta is true, from the form it is false.
         if ($response !== true) {
             if (!$insta) {
-                Twig::render('home-error.php', [
-                    'message'=> "We were not able to delete. Sorry.",
-                ]);
+                RequirePage::redirect('text');
             } else {
                 $this->sendJsonResponse(false, 'Failed to delete');
             }
@@ -787,9 +785,9 @@ class ControllerText extends Controller{
             if (!$insta) {
                 RequirePage::redirect('text');
             } else {
-                $this->sendJsonResponse(true, 'Deleted successfully');
+                $this->sendJsonResponse(true, 'Deleted!');
             }
-        }
+        } 
     }
 
 

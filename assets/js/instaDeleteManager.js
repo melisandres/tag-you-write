@@ -45,6 +45,11 @@ export class InstaDeleteManager {
                 try {
                     const result = JSON.parse(rawText);
                     if (result.success) {
+                        // Show toast message
+                        eventBus.emit('showToast', { 
+                            message: result.toastMessage, 
+                            type: result.toastType 
+            });
                         // Update the tree, shelf and modal views
                         eventBus.emit('instaDelete', { textId });
                     } else {

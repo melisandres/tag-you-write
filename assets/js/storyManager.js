@@ -59,11 +59,13 @@ export class StoryManager {
   async showStoryInModal(id) {
     try {
       const data = await this.fetchStoryNode(id);
-      this.modal.showModal(data);
-      this.seenManager.markAsSeen(id);
-      this.seenManager.updateReadStatus(id);
+      if (data){
+        this.modal.showModal(data);
+        this.seenManager.markAsSeen(id);
+        this.seenManager.updateReadStatus(id);
+      }
     } catch (error) {
-      console.error('Error in showStoryInModal:', error);
+      //console.error('Error in showStoryInModal:', error);
     }
   }
 

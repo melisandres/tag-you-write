@@ -88,9 +88,50 @@ export class FormManager {
 
     // Method to handle form deletion
     // This is because the forms have an action that applies to all the buttons, except for the delete button, whose action is handled by the delete endpoint
-    submitDelete(deleteUrl) {
-        this.form.action = deleteUrl;  // Set the action to the delete endpoint
-        this.form.submit();  // Submit the form
+    async submitDelete(deleteUrl) {
+/*      this.form.action = deleteUrl;  // Set the action to the delete endpoint
+        this.form.submit();  // Submit the form */
+        if (!this.form) return;
+
+        const formData = new FormData(this.form);
+        const data = {};
+        formData.forEach((value, key) => {
+            data[key] = value;
+        });
+
+        try {
+            const response = await fetch(deleteUrl, {
+                method: 'DELETE', // Use DELETE method
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data) // Send the form data as JSON
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                // Handle success (e.g., show toast message)
+                eventBus.emit('showToast', { 
+                    message: result.toastMessage, 
+                    type: result.toastType 
+                });
+                // Optionally, redirect or update the UI
+                window.location.href = `${this.path}text`; // Redirect after deletion
+            } else {
+                // Handle error
+                console.error('Delete failed:', result.message);
+                eventBus.emit('showToast', { 
+                    message: result.message, 
+                    type: 'error' 
+                });
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            eventBus.emit('showToast', { 
+                message: 'An error occurred while deleting.', 
+                type: 'error' 
+            });
+        }
     }
 
     // Method to inject SVGs into form buttons
