@@ -41,14 +41,13 @@ export class FormManager {
         });
     }
 
-
     // Method to set the status and submit the form
     setStatusAndSubmit(status) {
         if (!this.form || !this.statusField) return;  
 
         switch(status) {
             case 'published':
-                this.showPublishWarning();
+                this.handlePublish();
                 break;
             case 'draft':
                 this.statusField.value = status;
@@ -63,6 +62,29 @@ export class FormManager {
             default:
                 console.log("button has not been given a purpose!");
         }
+    }
+
+    // New method to handle publishing logic
+    handlePublish() {
+        const addNote = this.form.querySelector('input[name="currentPage"]').value === 'text-note-edit.php';
+
+        if (addNote) {
+            this.showAddNote();
+        } else {
+            this.showPublishWarning();
+        }
+    }
+
+    showAddNote() {
+        const warningManager = new WarningManager();
+        warningManager.createWarningModal(
+            "Your note will be public, but you can edit it any time.",
+            () => {
+                this.statusField.value = 'published';
+                this.submitForm();
+            },
+            () => console.log("Note cancelled")
+        );
     }
 
     showPublishWarning() {
