@@ -348,8 +348,10 @@ class ControllerText extends Controller{
                 $textHasKeyword->insert($textHasKeywordArray);
             }
         }
+
+        // Same action in both cases. Not an autosave, doing it here, Yes an autosave, doing it in the autosave method.
         if ($autoSaveInput == null) {
-            $this->sendJsonResponse(true, 'Text saved successfully', 'text');
+            $this->sendJsonResponse(true, 'Auto-save successful', ['textId' => $textIdFromInsert]);
         }else{
             // Return the new text ID
             return $textIdFromInsert;
@@ -584,7 +586,7 @@ class ControllerText extends Controller{
             $update = $text->update($updateNote);
 
             // TODO: you'll probably want to access this async too with a little message :)
-            RequirePage::redirect('text');
+            $this->sendJsonResponse($update, $update ? 'Note updated' : 'Failed to update note', 'text');  
             exit;
         }else{
             // Your validation may change the status, if the text isnt instaPublish ready
@@ -922,7 +924,7 @@ class ControllerText extends Controller{
         $response = [
             'success' => $success,
             'toastMessage' => $message,
-            'toastType' => $success ? 'success' : 'error'
+            'toastType' => $success ? 'success' : 'error',
         ];
 
         if (is_array($additionalData)) {

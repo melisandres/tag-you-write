@@ -2,13 +2,20 @@ import { StoryManager } from './storyManager.js';
 import { Modal } from './modal.js' ;
 
 export class RefreshManager {
-    constructor(uiManager, storyManager) {
+    constructor(path, uiManager, storyManager) {
+        this.path = path;
+        this.textPagePath = `${path}text/`;
         this.storyManager = storyManager;
         this.state = {};
         this.uiManager = uiManager;
     }
 
     saveState() {
+        const currentPath = window.location.pathname + '/';
+        if (!this.textPagePath.endsWith(currentPath)) {
+            return;
+        }
+
         // Where you can keep drawer data
         this.state.drawers = [];
         this.state.showcase = "none";
@@ -70,6 +77,12 @@ export class RefreshManager {
     }
 
     restoreState() {
+        const currentPath = window.location.pathname + '/';
+        if (!this.textPagePath.endsWith(currentPath)) {
+            return;
+        }
+
+
         // Check if you've saved a page state
         const savedState = JSON.parse(localStorage.getItem('pageState'));
         if (!savedState) return;

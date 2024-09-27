@@ -10,15 +10,6 @@ export class FormManager {
         this.statusField = this.form ? this.form.querySelector('[data-text-status]') : null;
         this.buttons = this.form ? this.form.querySelectorAll('[data-status]') : null;
 
-        this.lastSavedContent = this.form ? JSON.stringify(Object.fromEntries(new FormData(this.form))) : null;
-        this.autoSaveTimer = null;
-        this.lastTypedTime = Date.now();
-        this.continuousTypingDuration = 30000; // 30 seconds
-        this.typingPauseDuration = 4000; // 4 seconds
-        this.continuouslyTyping = false;
-        this.continuousTypingStartTime = null;
-        this.lastAutoSaveTime = null;
-
         this.init();
     }
 
@@ -26,21 +17,24 @@ export class FormManager {
     init() {
         this.injectSVGIcons();
         // methods related to auto-saving, and handling buttons in the context of autosave
-        if (this.form && this.formType == 'writing'){
+        if (this.form){
             this.addButtonEventListeners();
-            //this.setupAutoSave();
             this.setupExitWarning();
-            this.setupCheckForInput();
+            if (this.formType == 'writing'){
+                this.setupCheckForInput();
+            }
         }
     }
 
     // Ensure that all the buttons on the form trigger asyncronous actions
     addButtonEventListeners() {
+        console.log('adding button event listeners');
         if (!this.form || !this.buttons) return; 
 
         this.buttons.forEach(element => {
             const myStatus = element.dataset.status;
             element.addEventListener('click', (event) => {
+                console.log('button clicked');
                 event.preventDefault();
                 this.setStatusAndSubmit(myStatus);
             });
@@ -114,28 +108,7 @@ export class FormManager {
         if (cancelBtn) cancelBtn.innerHTML = SVGManager.cancelSVG;
     }
 
-    // TODO: check code below. needs to be tested.
-    setupAutoSave() {
-        this.startAutoSaveTimer();
-    }
-
-    startAutoSaveTimer() {
-        clearInterval(this.autoSaveTimer);
-        this.autoSaveTimer = setInterval(() => {
-            const now = Date.now();
-            const timeSinceLastType = now - this.lastTypedTime;
-            const timeSinceLastAutoSave = now - (this.lastAutoSaveTime || 0);
-
-            if (timeSinceLastType >= this.typingPauseDuration) { 
-                if(timeSinceLastAutoSave >= this.typingPauseDuration){
-                    this.continuouslyTyping = false;
-                    this.autoSave();
-                }
-                clearInterval(this.autoSaveTimer); // Clear the timer regardless of whether autoSave was called
-            }
-        }, 1000);
-    }
-
+    // TODO: I'm keeping this, but it may be better in autoSaveManager
     setupExitWarning() {
         window.addEventListener('beforeunload', (e) => {
             if (this.hasUnsavedChanges()) {
@@ -148,121 +121,12 @@ export class FormManager {
         this.form.addEventListener('input', (event) => {
             const target = event.target;
             if (target.matches('textarea, input:not([type="hidden"])')) {
-                // Update last typed time and start timers
-                this.lastTypedTime = Date.now();
-                this.startAutoSaveTimer();
-    
-                // Start continuous typing timer if not already active
-                if (!this.continuouslyTyping) {
-                    this.startContinuousTypingTimer();
-                }
+                eventBus.emit('inputChanged');
             }
         });
     }
 
-    startContinuousTypingTimer() {
-        clearInterval(this.continuousTypingTimer);
-        this.continuouslyTyping = true;
-        this.continuousTypingStartTime = Date.now();
-
-
-        this.continuousTypingTimer = setInterval(() => {
-            const now = Date.now();
-            if (now - this.continuousTypingStartTime > this.continuousTypingDuration) {
-                this.autoSave();
-                this.continuouslyTyping = false;
-            }
-            if (!this.continuouslyTyping) {
-                clearInterval(this.continuousTypingTimer);
-            }
-        }, 1000);
-    }
-
-    hasUnsavedChanges() {
-        const formData = new FormData(this.form);
-        const dataObj = Object.fromEntries(formData.entries());
-        dataObj.text_status = 'draft'; // Ensure text_status is set to 'draft'
-        const currentData = JSON.stringify(dataObj);
-
-
-        if (currentData !== this.lastSavedContent) {
-            console.log('Differences:', this.getDifferences(this.lastSavedContent, currentData));
-            return true;
-        }
-        console.log('No differences');
-        return false;
-    }
-
-    getDifferences(lastData, currentData) {
-        const lastObj = JSON.parse(lastData);
-        const currentObj = JSON.parse(currentData);
-        currentObj.text_status = 'draft';
     
-        return Object.entries(currentObj).reduce((acc, [key, newValue]) => {
-            const oldValue = lastObj[key];
-            if (newValue !== oldValue) {
-                acc[key] = { old: oldValue, new: newValue };
-            }
-            return acc;
-        }, {});
-    }
-
-    autoSave() {
-        if (this.hasUnsavedChanges()) {
-            const formData = new FormData(this.form);
-            const data = Object.fromEntries(formData.entries());
-            data.text_status = 'draft';
-            //console.log('this is the Data being sent:', data);
-
-            fetch(`${this.path}text/autoSave`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.text().then(text => {
-                        throw new Error(`HTTP error! status: ${response.status}, body: ${text}`);
-                    });
-                }
-                return response.json();
-            })
-            .then(result => {
-                if (result.success) {
-                    console.log('Auto-save successful');
-                    // Update lastSavedContent with the current form data
-                    this.lastSavedContent = JSON.stringify(data);
-                    this.lastAutoSaveTime = Date.now();
-
-                    // Update the lastKeywords hidden input
-                    const lastKeywordsInput = this.form.querySelector('[name="lastKeywords"]');
-                    if (lastKeywordsInput) {
-                        lastKeywordsInput.value = data.keywords;
-                    }
-
-                    // Only update the ID if it's not already set
-                    let idInput = this.form.querySelector('[data-id]');
-                    if (idInput && !idInput.value && result.textId) {
-                        console.log('Updating ID:', result.textId);
-                        idInput.value = result.textId;
-                    }
-                } else {
-                    console.error('Auto-save failed:', result.message);
-                }
-                eventBus.emit('showToast', { 
-                    message: result.toastMessage, 
-                    type: result.toastType 
-                });
-            })
-            .catch(error => {
-                console.error('Auto-save error:', error);
-                console.error('Full response:', error.message);
-            });
-        }
-    }
-
     // Method to submit the form via AJAX
     // This is similar to autoSave, but it is for when the user clicks the save or publish button--publishing will close the form, so we need to redirect.
     submitForm() {
@@ -292,11 +156,17 @@ export class FormManager {
                 if (lastKeywordsInput) {
                     lastKeywordsInput.value = formData.get('keywords');
                 }
-                // Reset the lastAutoSaveTime and stop continuous typing
-                this.lastAutoSaveTime = Date.now();
-                this.continuouslyTyping = false;
+                // Only update the Id if it's not already set
+                let idInput = this.form.querySelector('[data-id]');
+                if (idInput && !idInput.value && data.textId) {
+                    console.log('setting textId:', data.textId);
+                    idInput.value = data.textId;
+                }
+                // AutoSaveManager will reset the timers
+                if (this.formType == 'writing'){  
+                    eventBus.emit('manualSave');
+                }
             }
-
             if (data.redirectUrl) {
                 // Store toast data in localStorage before redirecting
                 localStorage.setItem('pendingToast', JSON.stringify({

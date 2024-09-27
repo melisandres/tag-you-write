@@ -19,10 +19,12 @@ import { SSEManager } from './sseManager.js';
 import { ShelfUpdateManager } from './shelfUpdateManager.js';
 import { ModalUpdateManager } from './modalUpdateManager.js';
 import { IndexUpdateManager } from './indexUpdateManager.js';
+import { AutoSaveManager } from './autoSaveManager.js';
 import { eventBus } from './eventBus.js';
 
 // Make eventBus globally available immediately
 window.eventBus = eventBus;
+
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -51,7 +53,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const uiManager = new UIManager(storyManager, modal);
 
   // Initialize RefreshManager
-  const refreshManager = new RefreshManager(uiManager, storyManager);
+  const refreshManager = new RefreshManager(path, uiManager, storyManager);
+  window.refreshManager = refreshManager;
 
   // Initialize VoteManager
   new VoteManager(path, warningManager);
@@ -71,6 +74,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   //And your forms need managing (!)
   new FormManager(path);
+  new AutoSaveManager(path);
+  //new ValidationManager(formManager);
 
   // Initialize InstaPublishManager and InstaDeleteManager
   new InstaPublishManager(path, warningManager);

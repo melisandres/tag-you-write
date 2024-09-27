@@ -3,7 +3,11 @@
 {% if errors is defined %}
     <span class='error'>{{ errors|raw}}</span>
 {% endif %}
-<form id="main-form" action="{{path}}text/update" method="post">
+<p>Here's what you wrote: </p>
+<h3>{{ data.title }}</h3>
+<p>{{ data.writing }}</p>
+
+<form id="main-form" data-form-type="addNote" action="{{path}}text/update" method="post">
 
     <label>{{ data.note ? 'Oops! You can change your note:' : 'Oops! You can leave a note for other writers:' }} 
         <div class="very-small" data-wordCountDisplay></div>
@@ -30,8 +34,6 @@
     </div>
     
 </form>
-<p>Here's what you wrote: </p>
-<h3>{{ data.title }}</h3>
-<p>{{ data.writing }}</p>
+
 
 {{include('footer.php')}}
