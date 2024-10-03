@@ -12,8 +12,9 @@
     Alternatively, your text will be open to edits, disfigurations, and flights of fancy.<br>
     Be forewarned. And may the best iteration win!</p>
 {% endif %}
+<!-- action="{{ path }}text/{{ data.id ? 'update' : 'store' }}" -->
 
-<form id="main-form" data-form-type="writing" action="{{ path }}text/{{ data.id ? 'update' : 'store' }}" method="post">
+<form id="main-form" data-form-type="{{ data.id ? 'iterating' : 'writing' }}" method="post">
     <label>title
         <input type="text" name="title" placeholder="Elsewhere" value="{{ data.title|default('') }}">
     </label>
@@ -54,21 +55,19 @@
     {% endif %}
 
     <div class="form-btns">
-        <button class="publish" type="button" data-status="published">
+        <button class="publish" type="button" data-status="published" data-button-type="publish">
             <span class="icon"></span>
             <span class="title">Publish</span>
         </button>
-        <button class="save" type="button" data-status="draft">
+        <button class="save" type="button" data-status="draft" data-button-type="save">
             <span class="icon"></span>
             <span class="title">Save Draft</span>
         </button>
-        {% if data.id %}
-            <button class="delete" type="button" data-status="delete">
-                <span class="icon"></span>
-                <span class="title">Delete Draft</span>
-            </button>
-        {% endif %}
-        <button class="cancel" type="button" data-status="cancel">
+        <button class="delete" type="button" data-status="delete" data-button-type="delete">
+            <span class="icon"></span>
+            <span class="title">Delete Draft</span>
+        </button>
+        <button class="cancel" type="button" data-status="cancel" data-button-type="exit">
             <span class="icon"></span>
             <span class="title">Cancel</span>
         </button>

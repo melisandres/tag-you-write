@@ -7,7 +7,7 @@
 <h3>Login</h3>
 
 
-<form id="main-form" action="{{path}}login/auth" method="post">
+<form id="main-form" data-form-type="login" action="{{path}}login/auth" method="post">
 
     <label>username
         <input type="email" name="email" value={{data.email}}>
@@ -17,7 +17,7 @@
     </label>
 
     <div class="form-btns">
-        <button data-status="login" type="submit" value="Login">    
+        <button type="submit" value="Login">    
             <div class="icon"></div>
             <div class="title">login</div>
         </button>    

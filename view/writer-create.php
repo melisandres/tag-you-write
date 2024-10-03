@@ -4,7 +4,7 @@
     <span class='error'>{{ errors|raw}}</span>
 {% endif %}
 
-<form action="{{path}}writer/store" method="post">
+<form action="{{path}}writer/store" data-form-type="writer-create" method="post">
         <label> first name
             <input type="text" name="firstName" value="{{ data.firstName }}">
         </label>

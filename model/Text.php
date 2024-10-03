@@ -75,9 +75,9 @@ class Text extends Crud{
         
         // Add condition for filtering out the drafts, only if they don't belong to the currentUser
         if ($current_writer) {
-            $conditions[] = "(text_status.status != 'draft' OR text.writer_id = :currentUserId)";
+            $conditions[] = "(text_status.status != 'draft' AND text_status.status != 'incomplete_draft' OR text.writer_id = :currentUserId)";
         } else {
-            $conditions[] = "text_status.status != 'draft'";
+            $conditions[] = "text_status.status != 'draft' AND text_status.status != 'incomplete_draft'";
         }
         
         // Add condition if idValue is provided

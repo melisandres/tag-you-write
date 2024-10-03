@@ -5,7 +5,6 @@ export class WordCountManager {
         this.parentTextElement = null;
         this.wordCountDisplayElement = null;
         this.maxWords = 50;
-
         // Call init to set up the manager
         this.init();
     }
@@ -13,7 +12,7 @@ export class WordCountManager {
     // Initialize the manager and set up event listeners
     init() {
         // If there's no text element, exit early
-        if (!this.textElement) return;
+        if (!this.textElement ) return;
 
         // Assign the other elements only if textElement is present
         this.wordCountDisplayElement = document.querySelector('[data-wordCountDisplay]');
@@ -21,6 +20,7 @@ export class WordCountManager {
 
         // Set up event listeners only if elements exist
         if (this.textElement) {
+            // TODO: this next line may be what you replace... calling it from the validation manager  
             this.textElement.addEventListener('input', () => this.updateWordCount());
             this.updateWordCount(); // Initial call to set up the initial count
         }
@@ -33,6 +33,7 @@ export class WordCountManager {
 
     // Update the word count and UI
     updateWordCount() {
+        if(!this.textElement) return;
         const parentText = this.parentTextElement ? this.parentTextElement.value : '';
         const userText = this.textElement.value;
 

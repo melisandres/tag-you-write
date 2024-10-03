@@ -3,8 +3,9 @@ import { WarningManager } from './warningManager.js';
 import { eventBus } from './eventBus.js';
 
 export class FormManager {
-    constructor(autoSaveManager, path) {
+    constructor(autoSaveManager, validationManager, path) {
         this.autoSaveManager = autoSaveManager;
+        this.validationManager = validationManager;
         this.path = path;
         this.form = document.querySelector('#main-form');
         this.formType = this.form ? this.form.getAttribute('data-form-type') : null;
@@ -21,21 +22,21 @@ export class FormManager {
         if (this.form){
             this.addButtonEventListeners();
             this.setupExitWarning();
-            if (this.formType == 'writing'){
-                this.setupCheckForInput();
-            }
+            // SetupCheckForInput is used for autosave AND for validation --so you always need it
+            this.setupCheckForInput();
+
         }
     }
 
     // Ensure that all the buttons on the form trigger asyncronous actions
     addButtonEventListeners() {
         console.log('adding button event listeners');
+        // On the writer-create and login form, you exit this because your buttons don't have a data-status
         if (!this.form || !this.buttons) return; 
 
         this.buttons.forEach(element => {
             const myStatus = element.dataset.status;
             element.addEventListener('click', (event) => {
-                console.log('button clicked');
                 event.preventDefault();
                 this.setStatusAndSubmit(myStatus);
             });
@@ -43,6 +44,8 @@ export class FormManager {
     }
 
     // Method to set the status and submit the form
+    // Setting the status is only relevent for "draft" and "published"
+    // TODO: But since I'm also using this to submit to form, I created a data-status attribute for all the buttons, that help determine the action... I should probably rename it though, so that it's not confused with the status of the text... 
     setStatusAndSubmit(status) {
         if (!this.form || !this.statusField) return;  
 
@@ -55,7 +58,7 @@ export class FormManager {
                 this.handleManualSave();
                 break;
             case 'delete': 
-                this.showDeleteWarning();
+                this.handleDelete();
                 break;
             case 'cancel':
                 window.location.href=`${this.path}text`;
@@ -74,8 +77,10 @@ export class FormManager {
                type: 'info' 
            });
        } else {
-           // Proceed with manual save logic if there are unsaved changes
-           this.submitForm();
+           // We need to check if this is a store or an update
+           const idValue = this.form.querySelector('input[name="id"]').value;
+           const actionUrl = idValue === '' ? `${this.path}text/store` : `${this.path}text/update`;
+           this.submitForm(actionUrl);
        }
     }
 
@@ -84,19 +89,37 @@ export class FormManager {
         const addNote = this.form.querySelector('input[name="currentPage"]').value === 'text-note-edit.php';
 
         if (addNote) {
-            this.showAddNote();
+            this.showAddNoteWarning();
         } else {
             this.showPublishWarning();
         }
     }
 
-    showAddNote() {
+    handleLogin() {
+        const urlAction = this.form.getAttribute('action');
+        this.submitForm(urlAction);
+    }
+
+    handleDelete() {
+        const idInput = this.form.querySelector('[data-id]');
+        if (!idInput || !idInput.value) {
+            window.location.href = `${this.path}text`;
+            localStorage.setItem('pendingToast', JSON.stringify({
+                message: 'Creation aborted',
+                type: 'success'
+            }));
+        } else {
+            this.showDeleteWarning();
+        }
+    }
+
+    showAddNoteWarning() {
         const warningManager = new WarningManager();
         warningManager.createWarningModal(
             "Your note will be public, but you can edit it any time.",
             () => {
                 this.statusField.value = 'published';
-                this.submitForm();
+                this.submitForm(`${this.path}text/update`);
             },
             () => console.log("Note cancelled")
         );
@@ -108,7 +131,7 @@ export class FormManager {
             "Are you sure you want to publish this text? This action cannot be undone.",
             () => {
                 this.statusField.value = 'published';
-                this.submitForm();
+                this.submitForm(`${this.path}text/update`);
             },
             () => console.log("Publish cancelled")
         );
@@ -123,11 +146,119 @@ export class FormManager {
         );
     }
 
-    // Method to handle form deletion
+   
+
+    // Method to inject SVGs into form buttons
+    injectSVGIcons() {
+        if (!this.form) return;
+
+        const publishBtn = this.form.querySelector('.publish .icon');
+        const saveBtn = this.form.querySelector('.save .icon');
+        const deleteBtn = this.form.querySelector('.delete .icon');
+        const cancelBtn = this.form.querySelector('.cancel .icon');
+
+        if (publishBtn) publishBtn.innerHTML = SVGManager.publishSVG;
+        if (saveBtn) saveBtn.innerHTML = SVGManager.saveSVG;
+        if (deleteBtn) deleteBtn.innerHTML = SVGManager.deleteSVG;
+        if (cancelBtn) cancelBtn.innerHTML = SVGManager.cancelSVG;
+    }
+
+    // TODO: I'm keeping this, but it may be better in autoSaveManager
+    setupExitWarning() {
+        if (this.formType == 'login' || this.formType == 'writer-create') return;
+        window.addEventListener('beforeunload', (event) => {
+            if (this.autoSaveManager.hasUnsavedChanges()) {
+                // If the lastSavedContent will be null on refresh
+                if (this.autoSaveManager.lastSavedContent !== null) {
+                    console.log('lastSavedContent is not null');
+                    console.log('lastSavedContent:', this.autoSaveManager.lastSavedContent);
+                    event.preventDefault();
+                }
+            }
+        });
+    }
+
+    // This emits "inputChanged" which is listened for by autoSaveManager and validationManager
+    setupCheckForInput() {
+        this.form.addEventListener('input', (event) => {
+            const target = event.target;
+            if (target.matches('textarea, input:not([type="hidden"])')) {
+                eventBus.emit('inputChanged', {
+                    formType: this.formType,
+                    fieldName: target.name,
+                    fieldValue: target.value
+                });
+            }
+        });
+    }
+
+    
+    // Submits the form to store OR update.
+    submitForm(actionUrl) {
+        const formData = new FormData(this.form);
+        const action = actionUrl; 
+        // || this.form.getAttribute('action'); // This gets the action URL
+
+        // Convert FormData to a plain object
+        const data = {};
+        formData.forEach((value, key) => {
+            data[key] = value;
+        });
+
+        console.log('Form Data:', data); // Debugging: Check the collected form data
+
+        fetch(action, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update the lastKeywords hidden input
+                const lastKeywordsInput = this.form.querySelector('[name="lastKeywords"]');
+                if (lastKeywordsInput) {
+                    lastKeywordsInput.value = formData.get('keywords');
+                }
+                // Only update the Id if it's not already set
+                let idInput = this.form.querySelector('[data-id]');
+                if (idInput && !idInput.value && data.textId) {
+                    idInput.value = data.textId;
+                }
+                // AutoSaveManager will reset the timers and lasSavedContent
+                if (this.formType == 'writing' || this.formType == 'iterating'){  
+                    // Send the latest form data to AutoSaveManager
+                    eventBus.emit('manualSave');
+                }
+            }
+            if (data.redirectUrl) {
+                // Store toast data in localStorage before redirecting
+                localStorage.setItem('pendingToast', JSON.stringify({
+                    message: data.toastMessage,
+                    type: data.toastType
+                }));
+                window.location.href = `${this.path}${data.redirectUrl}`;
+            } else {
+                eventBus.emit('showToast', { 
+                    message: data.toastMessage, 
+                    type: data.toastType 
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            eventBus.emit('showToast', { 
+                message: 'An error occurred', 
+                type: 'error'
+            });
+        });
+    }
+
+     // Method to handle form deletion
     // This is because the forms have an action that applies to all the buttons, except for the delete button, whose action is handled by the delete endpoint
     async submitDelete(deleteUrl) {
-/*      this.form.action = deleteUrl;  // Set the action to the delete endpoint
-        this.form.submit();  // Submit the form */
         if (!this.form) return;
 
         const formData = new FormData(this.form);
@@ -169,101 +300,5 @@ export class FormManager {
                 type: 'error' 
             });
         }
-    }
-
-    // Method to inject SVGs into form buttons
-    injectSVGIcons() {
-        if (!this.form) return;
-
-        const publishBtn = this.form.querySelector('.publish .icon');
-        const saveBtn = this.form.querySelector('.save .icon');
-        const deleteBtn = this.form.querySelector('.delete .icon');
-        const cancelBtn = this.form.querySelector('.cancel .icon');
-
-        if (publishBtn) publishBtn.innerHTML = SVGManager.publishSVG;
-        if (saveBtn) saveBtn.innerHTML = SVGManager.saveSVG;
-        if (deleteBtn) deleteBtn.innerHTML = SVGManager.deleteSVG;
-        if (cancelBtn) cancelBtn.innerHTML = SVGManager.cancelSVG;
-    }
-
-    // TODO: I'm keeping this, but it may be better in autoSaveManager
-    setupExitWarning() {
-        window.addEventListener('beforeunload', (e) => {
-            if (this.hasUnsavedChanges()) {
-                e.preventDefault();
-            }
-        });
-    }
-
-    setupCheckForInput() {
-        this.form.addEventListener('input', (event) => {
-            const target = event.target;
-            if (target.matches('textarea, input:not([type="hidden"])')) {
-                eventBus.emit('inputChanged');
-            }
-        });
-    }
-
-    
-    // Submits the form to store OR update.
-    submitForm() {
-        const formData = new FormData(this.form);
-        const action = this.form.getAttribute('action'); // This gets the action URL
-
-        // Convert FormData to a plain object
-        const data = {};
-        formData.forEach((value, key) => {
-            data[key] = value;
-        });
-
-        console.log('Form Data:', data); // Debugging: Check the collected form data
-
-        fetch(action, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Update the lastKeywords hidden input
-                const lastKeywordsInput = this.form.querySelector('[name="lastKeywords"]');
-                if (lastKeywordsInput) {
-                    lastKeywordsInput.value = formData.get('keywords');
-                }
-                // Only update the Id if it's not already set
-                let idInput = this.form.querySelector('[data-id]');
-                if (idInput && !idInput.value && data.textId) {
-                    console.log('setting textId:', data.textId);
-                    idInput.value = data.textId;
-                }
-                // AutoSaveManager will reset the timers
-                if (this.formType == 'writing'){  
-                    eventBus.emit('manualSave');
-                }
-            }
-            if (data.redirectUrl) {
-                // Store toast data in localStorage before redirecting
-                localStorage.setItem('pendingToast', JSON.stringify({
-                    message: data.toastMessage,
-                    type: data.toastType
-                }));
-                window.location.href = `${this.path}${data.redirectUrl}`;
-            } else {
-                eventBus.emit('showToast', { 
-                    message: data.toastMessage, 
-                    type: data.toastType 
-                });
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            eventBus.emit('showToast', { 
-                message: 'An error occurred', 
-                type: 'error'
-            });
-        });
     }
 }

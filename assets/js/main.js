@@ -21,6 +21,8 @@ import { ModalUpdateManager } from './modalUpdateManager.js';
 import { IndexUpdateManager } from './indexUpdateManager.js';
 import { AutoSaveManager } from './autoSaveManager.js';
 import { eventBus } from './eventBus.js';
+import { ValidationManager } from './validationManager.js';
+import { ButtonUpdateManager } from './formButtonsUpdateManager.js';
 
 // Make eventBus globally available immediately
 window.eventBus = eventBus;
@@ -53,8 +55,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const uiManager = new UIManager(storyManager, modal);
 
   // Initialize RefreshManager
-  const refreshManager = new RefreshManager(path, uiManager, storyManager);
-  window.refreshManager = refreshManager;
+  const autoSaveManager = new AutoSaveManager(path);
+  // Initialize RefreshManager
+  if (!window.refreshManager) {
+      window.refreshManager = new RefreshManager(path, uiManager, storyManager, autoSaveManager);
+  } else {
+      console.warn('RefreshManager already exists. Using existing instance.');
+  }
 
   // Initialize VoteManager
   new VoteManager(path, warningManager);
@@ -67,14 +74,14 @@ document.addEventListener("DOMContentLoaded", () => {
   new NotificationManager(path);
 
   // Activate word count if writing
-  new WordCountManager;
+/*   new WordCountManager; */
 
   // Initialize in UIManager or globally
   // const warningManager = new WarningManager();
 
   //And your forms need managing (!)
-  const autoSaveManager = new AutoSaveManager(path);
-  new FormManager(autoSaveManager, path);
+  const validationManager = new ValidationManager();
+  new FormManager(autoSaveManager, validationManager, path);
 
   //new ValidationManager(formManager);
 
@@ -87,6 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
   new TreeUpdateManager();
   new ModalUpdateManager(path);
   new IndexUpdateManager();
+  new ButtonUpdateManager(autoSaveManager);
 
    // Check for pending toasts
    const pendingToast = localStorage.getItem('pendingToast');
@@ -97,7 +105,16 @@ document.addEventListener("DOMContentLoaded", () => {
    }
 
   // Handle browser refresh by saving state before unload
-  window.addEventListener('beforeunload', () => {
+  window.addEventListener('beforeunload', (event) => {
+      console.log('beforeunload event triggered');
       refreshManager.saveState();
+      // Only show the warning if there are unsaved changes
   });
+
+  // Handle browser refresh by saving state before unload
+/*   document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+        refreshManager.saveState();
+    }
+  }); */
 });

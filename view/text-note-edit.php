@@ -7,7 +7,7 @@
 <h3>{{ data.title }}</h3>
 <p>{{ data.writing }}</p>
 
-<form id="main-form" data-form-type="addNote" action="{{path}}text/update" method="post">
+<form id="main-form" data-form-type="addingNote" action="{{path}}text/update" method="post">
 
     <label>{{ data.note ? 'Oops! You can change your note:' : 'Oops! You can leave a note for other writers:' }} 
         <div class="very-small" data-wordCountDisplay></div>

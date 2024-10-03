@@ -3,7 +3,8 @@ import { eventBus } from './eventBus.js';
 export class AutoSaveManager {
     constructor(path) {
         this.path = path;
-        this.form = document.querySelector('[data-form-type="writing"]');
+        this.form = document.querySelector('[data-form-type="writing"], [data-form-type="iterating"]');
+        this.formType = this.form ? this.form.getAttribute('data-form-type') : null;
         this.lastSavedContent = this.form ? JSON.stringify(Object.fromEntries(new FormData(this.form))) : null;
         this.autoSaveTimer = null;
         this.lastTypedTime = Date.now();
@@ -18,19 +19,31 @@ export class AutoSaveManager {
         eventBus.on('manualSave', this.handleManualSave.bind(this));
     }
 
-    handleInputChange() {
-        console.log('handleInputChange');
-        this.lastTypedTime = Date.now();
-        this.startAutoSaveTimer();
+    setLastSavedContent(content) {
+        console.log('line 23 content:', content);
+        let savedState = JSON.parse(localStorage.getItem('pageState'));
+        console.log('line 25 savedState:', savedState);
+        this.lastSavedContent = JSON.parse(savedState.formData);
+        //if(this.lastSavedContent)this.lastSavedContent.text_status = 'draft';
+    }
 
-        if (!this.continuouslyTyping) {
-            this.startContinuousTypingTimer();
+    handleInputChange() {
+        // You don't want this for adding notes, because it would autoPublish
+        if (this.formType == 'writing' || this.formType == 'iterating'){
+            this.lastTypedTime = Date.now();
+            this.startAutoSaveTimer();
+
+            if (!this.continuouslyTyping) {
+                this.startContinuousTypingTimer();
+            }
         }
     }
 
     handleManualSave() {
         this.lastAutoSaveTime = Date.now();
         this.continuouslyTyping = false;
+        this.lastSavedContent = JSON.stringify(Object.fromEntries(new FormData(this.form)));
+        eventBus.emit('formUpdated');
     }
 
     startAutoSaveTimer() {
@@ -69,27 +82,44 @@ export class AutoSaveManager {
 
     // Check for unsaved changes
     hasUnsavedChanges() {
-        const formData = new FormData(this.form);
+        const formData = this.form ? new FormData(this.form) : new FormData();
         const dataObj = Object.fromEntries(formData.entries());
-        dataObj.text_status = 'draft'; // Ensure text_status is set to 'draft'
         const currentData = JSON.stringify(dataObj);
+        //currentData.text_status = 'draft'; // Ensure text_status is always set to 'draft'
 
+        // if there is a lastSavedContent...
+        if (this.lastSavedContent && currentData) {
+            const differences = this.getDifferences(this.lastSavedContent, currentData);
+            console.log('line 89 differences:', differences);
+            
+            // Check if the only difference is the 'id' key
+            // The id is set to shift the form from a store to an update
+            const hasOnlyIdDifference = Object.keys(differences).length === 1 && differences.hasOwnProperty('id');
+            
+            if (hasOnlyIdDifference) {
+                return false; // Treat as no unsaved changes
+            }
 
-        if (currentData !== this.lastSavedContent) {
-            console.log('Differences:', this.getDifferences(this.lastSavedContent, currentData));
+            const hasDifferences = Object.keys(differences).length > 0;
+            return hasDifferences;
+        }else if(this.lastSavedContent == null){
+            // When the page is refreshed the lastSavedContent is null, so we should assume that there are unsaved changes after either timer runs out, and get a new "lastSavedContent"
             return true;
         }
-        console.log('No differences');
         return false;
-        // When you feel ready, you can replace the 5 lines above with this:
-        // return currentData !== this.lastSavedContent;
     }
 
     // This is just for debugging
     getDifferences(lastData, currentData) {
+        if (!lastData || !currentData) return {};
+        // Convert lastData to JSON string if it's an object
+        if (typeof lastData === 'object' && lastData !== null) {
+            lastData = JSON.stringify(lastData);
+        }
+
         const lastObj = JSON.parse(lastData);
         const currentObj = JSON.parse(currentData);
-        currentObj.text_status = 'draft';
+        //currentObj.text_status = 'draft';
     
         return Object.entries(currentObj).reduce((acc, [key, newValue]) => {
             const oldValue = lastObj[key];
@@ -124,16 +154,14 @@ export class AutoSaveManager {
             })
             .then(result => {
                 if (result.success) {
-                    console.log('Auto-save successful');
-
                     // Update lastSavedContent with the current form data
                     this.lastSavedContent = JSON.stringify(data);
                     this.lastAutoSaveTime = Date.now();
+                    eventBus.emit('formUpdated');
 
                     // Only update the Id if it's not already set
                     let idInput = this.form.querySelector('[data-id]');
                     if (idInput && !idInput.value && result.textId) {
-                        console.log('setting textId:', result.textId);
                         idInput.value = result.textId;
                     }
                 } else {

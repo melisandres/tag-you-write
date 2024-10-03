@@ -1,5 +1,4 @@
 import { eventBus } from './eventBus.js';
-import { SVGManager } from './svgManager.js';
 
 export class IndexUpdateManager {
   constructor() {
