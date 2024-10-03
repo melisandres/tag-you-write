@@ -3,7 +3,7 @@ import { eventBus } from './eventBus.js';
 export class AutoSaveManager {
     constructor(path) {
         this.path = path;
-        this.form = document.querySelector('[data-form-type="writing"], [data-form-type="iterating"]');
+        this.form = document.querySelector('[data-form-type="root"], [data-form-type="iteration"]');
         this.formType = this.form ? this.form.getAttribute('data-form-type') : null;
         this.lastSavedContent = this.form ? JSON.stringify(Object.fromEntries(new FormData(this.form))) : null;
         this.autoSaveTimer = null;
@@ -29,7 +29,7 @@ export class AutoSaveManager {
 
     handleInputChange() {
         // You don't want this for adding notes, because it would autoPublish
-        if (this.formType == 'writing' || this.formType == 'iterating'){
+        if (this.formType == 'root' || this.formType == 'iteration'){
             this.lastTypedTime = Date.now();
             this.startAutoSaveTimer();
 

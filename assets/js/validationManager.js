@@ -52,7 +52,7 @@ export class ValidationManager {
         // const titleArray = ['existing title 1', 'existing title 2'];
         
         const validators = {
-            writing: {
+            root: {
                 title: [
                     this.validateRequired('Give it a name it can grow into'),
                     this.validateMaxWordCount(3, 'Title must be 3 words or less', 'Title is close to max word count', 2),
@@ -69,7 +69,7 @@ export class ValidationManager {
                     this.validateMaxWordCount(5, 'No more than 5 keywords'),
                 ]
             },
-            iterating: {
+            iteration: {
                 title: [
                     this.validateRequired('Give it a name it can grow into'),
                     this.validateMaxWordCount(3, 'Title must be 3 words or less', 'Title is close to max word count', 2),
@@ -82,10 +82,12 @@ export class ValidationManager {
                     this.validateMaxWordCount(5, 'No more than 5 keywords'),
                 ]
             },
+            addingNote: {
                 writing: [
                     this.validateRequired('You can\'t leave this empty.'),
                     this.validateMaxWordCount(50, 'Add 50 words', 'You\'re getting close to the max word count!', 45),
-                ], 
+                ]
+            },
             login: {
                 email: [
                     this.validateRequired('Enter your username/email'),

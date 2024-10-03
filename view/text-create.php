@@ -14,7 +14,7 @@
 {% endif %}
 <!-- action="{{ path }}text/{{ data.id ? 'update' : 'store' }}" -->
 
-<form id="main-form" data-form-type="{{ data.id ? 'iterating' : 'writing' }}" method="post">
+<form id="main-form" data-form-type="{{ data.parent_id ? 'iteration' : 'root' }}" data-form-activity="{{ data.id ? 'editing' : 'creating' }}" method="post">
     <label>title
         <input type="text" name="title" placeholder="Elsewhere" value="{{ data.title|default('') }}">
     </label>

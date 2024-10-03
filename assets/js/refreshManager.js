@@ -43,7 +43,7 @@ export class RefreshManager {
 
     // Check if the page is a form page
     isFormPage() {
-        return document.querySelector('[data-form-type="writing"], [data-form-type="iterating"], [data-form-type="editing"], [data-form-type="addingNote"]') !== null;
+        return document.querySelector('[data-form-type="root"], [data-form-type="iteration"], [data-form-type="addingNote"]') !== null;
     }
 
     // Save the current page URL
@@ -60,7 +60,7 @@ export class RefreshManager {
     // Restore the form state
     restoreFormState(savedState) {
         if (savedState.formData) {
-            const form = document.querySelector('[data-form-type="writing"], [data-form-type="iterating"], [data-form-type="editing"], [data-form-type="addingNote"]');
+            const form = document.querySelector('[data-form-type="root"], [data-form-type="iteration"], [data-form-type="addingNote"]');
             if (form) {
                 Object.entries(savedState.formData).forEach(([key, value]) => {
                     const input = form.elements[key];
@@ -77,7 +77,7 @@ export class RefreshManager {
     }
 
     saveFormData() {
-        const form = document.querySelector('[data-form-type="writing"], [data-form-type="iterating"], [data-form-type="editing"], [data-form-type="addingNote"]');
+        const form = document.querySelector('[data-form-type="root"], [data-form-type="iteration"], [data-form-type="addingNote"]');
         if (form) {
             const formData = new FormData(form);
             const formDataJSON = JSON.stringify(Object.fromEntries(formData));

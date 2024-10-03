@@ -3,7 +3,7 @@ import { eventBus } from './eventBus.js';
 export class ButtonUpdateManager {
     constructor(autoSaveManager) {
         this.autoSaveManager = autoSaveManager;
-        this.form = document.querySelector('[data-form-type="writing"], [data-form-type="iterating"]');
+        this.form = document.querySelector('[data-form-type="root"], [data-form-type="iteration"]');
         this.hasUnsavedChanges = false;
 
         this.init();
@@ -40,10 +40,11 @@ export class ButtonUpdateManager {
     handleValidationChanged() {
         // There will be two tiers of validation
 
+        // TODO: create validationChanged event... figure out the logic
         // Tier 1: (more strict) Publish validation
         this.updatePublishButton();
 
-        // Tier 2: (super lax) Save validation
+        // TODO: Tier 2: (super lax) Save validation
         //this.updateSaveButton();
         //this.updatePublishButton();... 
     }

@@ -228,7 +228,7 @@ export class FormManager {
                     idInput.value = data.textId;
                 }
                 // AutoSaveManager will reset the timers and lasSavedContent
-                if (this.formType == 'writing' || this.formType == 'iterating'){  
+                if (this.formType == 'root' || this.formType == 'iteration'){  
                     // Send the latest form data to AutoSaveManager
                     eventBus.emit('manualSave');
                 }
