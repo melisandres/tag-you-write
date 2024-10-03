@@ -28,7 +28,7 @@
     {% endif %}
     
     <label>
-        <span class="headline">{{ data.id ? '' : 'kickoff the ' }}text</span>
+        <span class="headline">{{ data.parent_id ? '' : 'kickoff the ' }}text</span>
         <div class="very-small" data-wordCountDisplay></div>
         <textarea name="writing" rows="10" cols="50" placeholder="When you climb out the window, don't forget your rainboots.">{{ data.writing|default('') }}</textarea>
     </label>

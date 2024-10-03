@@ -5,20 +5,43 @@ export class ValidationManager {
         eventBus.on('inputChanged', (data) => this.handleInputChanged(data));
         this.wordCountDisplayElement = document.querySelector('[data-wordCountDisplay]');
         this.maxWords = 50;
-        this.textElement = document.querySelector('textarea[name="writing"]');
+        this.textElement = document.querySelector('textarea[name="writing"] , textarea[name="note"]');
         this.parentTextElement = document.querySelector('input[name="parentWriting"]');
+        this.formValidity = {};
+        this.isFormValid = false;
+        this.init();
+        this.defaultValidationLevel = "strict";
+    }
+
+    init() {
+        const editingForm = document.querySelector('form[data-form-activity="editing"]');
+        if (editingForm) {
+            this.formValidity = {};
+            const visibleFields = editingForm.querySelectorAll('input:not([type="hidden"]), textarea:not([type="hidden"])');
+            visibleFields.forEach(field => {
+                this.formValidity[field.name] = false;
+                this.validateField({
+                    fieldName: field.name,
+                    fieldValue: field.value,
+                    formType: editingForm.dataset.formType,
+                    init: true
+                });
+            });
+            this.updateWordCount(this.textElement.value);
+            this.checkOverallValidity();
+        }
     }
 
     handleInputChanged(data) {
         this.validateField(data);
-        if (data.fieldName === 'writing') {
+        if (data.fieldName === 'writing' || data.fieldName === 'note') {
             this.updateWordCount(data.fieldValue);
         }
     }
 
-    validateField({ fieldName, fieldValue, formType }) {
-        console.log('validateField', fieldName, fieldValue, formType);
-        const validators = this.getValidatorsForForm(formType);
+    validateField({ fieldName, fieldValue, formType, init = false, validationLevel = this.defaultValidationLevel }) {
+        console.log('validateField', fieldName, fieldValue, formType, validationLevel);
+        const validators = this.getValidatorsForForm(formType, validationLevel);
         
         if (validators[fieldName]) {
             const validationResults = validators[fieldName].map((validator) => validator(fieldValue));
@@ -27,9 +50,16 @@ export class ValidationManager {
             validationResults.forEach((result) => {
                 this.showValidationResult(fieldName, result);
             });
+            
+            const isFieldValid = validationResults.every(result => result.isValid);
+            this.formValidity[fieldName] = isFieldValid;
+
+            if (!init) {
+                this.checkOverallValidity();
+            }
         }
         
-        if (fieldName === 'writing') {
+        if (fieldName === 'writing' || fieldName === 'note') {
             const parentText = this.parentTextElement ? this.parentTextElement.value : '';
             const parentWordCount = this.countWords(parentText);
             const userWordCount = this.countWords(fieldValue);
@@ -47,32 +77,30 @@ export class ValidationManager {
         }
     }
 
-    getValidatorsForForm(formType) {
-        // A title array for checking uniquness...
-        // const titleArray = ['existing title 1', 'existing title 2'];
-        
-        const validators = {
+    getValidatorsForForm(formType, validationLevel = 'strict') {
+        const strictValidators = {
             root: {
                 title: [
                     this.validateRequired('Give it a name it can grow into'),
-                    this.validateMaxWordCount(3, 'Title must be 3 words or less', 'Title is close to max word count', 2),
-                    //this.validateUniqueTitle(titleArray, 'Title must be unique')
+                    this.validateMaxWordCount(3, 'Title must be 3 words or less'),
                 ],
                 writing: [
                     this.validateRequired('You can\'t leave this empty.'),
-                    this.validateMaxWordCount(50, 'Add 50 words', 'You\'re getting close to the max word count!', 45),
+                    this.validateMaxWordCount(50, 'Add 50 words', 'You\'re getting close to your max word count!', 45),
                 ], 
                 prompt: [
                     this.validateRequired('You can\'t leave this empty!'),
                 ], 
                 keywords: [
+                    // TODO: the logic for checking commas
                     this.validateMaxWordCount(5, 'No more than 5 keywords'),
                 ]
             },
             iteration: {
                 title: [
-                    this.validateRequired('Give it a name it can grow into'),
-                    this.validateMaxWordCount(3, 'Title must be 3 words or less', 'Title is close to max word count', 2),
+                    this.validateRequired('Describe your changes'),
+                    this.validateMaxWordCount(3, '3 words or less'),
+                    //this.validateUniqueTitle(titleArray, 'Title must be unique')
                 ],
                 writing: [
                     this.validateRequired('You can\'t leave this empty.'),
@@ -83,9 +111,9 @@ export class ValidationManager {
                 ]
             },
             addingNote: {
-                writing: [
+                note: [
                     this.validateRequired('You can\'t leave this empty.'),
-                    this.validateMaxWordCount(50, 'Add 50 words', 'You\'re getting close to the max word count!', 45),
+                    this.validateMaxWordCount(50, '50 words max', 'You can\'t possibly have that much to say!', 45),
                 ]
             },
             login: {
@@ -96,8 +124,87 @@ export class ValidationManager {
                 password: [
                     this.validateRequired('Enter your password')
                 ]
+            },
+            writerCreate: {
+                firstName: [
+                    this.validateRequired('Enter your first name'),
+                ],
+                lastName: [
+                    this.validateRequired('Enter your last name'),
+                ],
+                email: [
+                    this.validateRequired('Enter your email'),
+                ],
+                birthday: [
+                    this.validateRequired('Enter your birthday'),
+                    this.validateDate('Your birthday must be a valid date'),
+                ],
+                password: [
+                    this.validateRequired('Enter your password'),
+                    this.validateCharacterCount(300, 8, 'Password must be between 8 and 300 characters long'),
+                ]
             }
         };
+
+        const looseValidators = {
+            root: {
+                title: [
+                    this.validateCharacterCount(300, 0, 'title must be less than 300 characters'),
+                ],
+                writing: [
+                    this.validateCharacterCount(300, 0, 'title must be less than 300 characters'),
+                ], 
+                prompt: [
+                    this.validateCharacterCount(300, 0, 'title must be less than 300 characters'),
+                ], 
+                keywords: [
+                    this.validateCharacterCount(300, 0, 'title must be less than 300 characters'),
+                ]
+            },
+            iteration: {
+                title: [
+                    this.validateCharacterCount(300, 0, 'title must be less than 300 characters'),
+                ],
+                writing: [
+                    this.validateCharacterCount(300, 0, 'title must be less than 300 characters'),
+                    ], 
+                keywords: [
+                    this.validateCharacterCount(300, 0, 'title must be less than 300 characters'),
+                ]
+            },
+            addingNote: {
+                note: [
+                    this.validateCharacterCount(300, 0, 'title must be less than 300 characters'),
+                ]
+            },
+            login: {
+                email: [
+                    this.validateCharacterCount(300, 0, 'title must be less than 300 characters'),
+                ],
+                password: [
+                    this.validateCharacterCount(300, 0, 'title must be less than 300 characters'),
+                ]
+            },
+            writerCreate: {
+                firstName: [
+                    this.validateCharacterCount(300, 0, 'title must be less than 300 characters'),
+                ],
+                lastName: [
+                    this.validateCharacterCount(300, 0, 'title must be less than 300 characters'),
+                ],
+                email: [
+                    this.validateCharacterCount(300, 0, 'title must be less than 300 characters'),
+                ],
+                birthday: [
+
+                ],
+                password: [
+                    this.validateCharacterCount(300, 0, 'title must be less than 300 characters'),
+                ]
+            }
+        };
+
+        const validators = validationLevel === 'strict' ? strictValidators : looseValidators;
         return validators[formType] || {};
     }
 
@@ -107,6 +214,17 @@ export class ValidationManager {
             return {
                 isValid: value.trim().length > 0,
                 message: value.trim().length > 0 ? '' : errorMessage,
+                type: 'error'
+            };
+        };
+    }
+
+    validateDate(errorMessage) {
+        return function (value) {
+            const datePattern = /^\d{2}\/\d{2}\/\d{4}$/;
+            return {
+                isValid: datePattern.test(value),
+                message: datePattern.test(value) ? '' : errorMessage,
                 type: 'error'
             };
         };
@@ -152,15 +270,17 @@ export class ValidationManager {
     }
 
     //validate character count
-    validateCharacterCount(maxCount, errorMessage) {
+    validateCharacterCount(maxCount, minCount, errorMessage) {
         return function (value) {
             return {
-                isValid: value.trim().length <= maxCount,
-                message: value.trim().length <= maxCount ? '' : errorMessage,
+                isValid: value.trim().length >= minCount && value.trim().length <= maxCount,
+                message: value.trim().length >= minCount && value.trim().length <= maxCount ? '' : errorMessage,
                 type: 'error'
             };
         };
-    }
+    }   
+
+
 
     // Handle displaying the validation results
     showValidationResult(fieldName, result) {
@@ -211,5 +331,15 @@ export class ValidationManager {
     // Count the number of words in a given text
     countWords(text) {
         return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+    }
+
+    checkOverallValidity() {
+        const test = Object.values(this.formValidity);
+        console.log(test);
+        const newValidity = Object.values(this.formValidity).every(isValid => isValid);
+        if (newValidity !== this.isFormValid) {
+            this.isFormValid = newValidity;
+            eventBus.emit('validationChanged', this.isFormValid);
+        }
     }
 }

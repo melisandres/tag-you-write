@@ -19,10 +19,9 @@ export class AutoSaveManager {
         eventBus.on('manualSave', this.handleManualSave.bind(this));
     }
 
+    // When the page is refreshed, the lastSavedContent is set from localStorage
     setLastSavedContent(content) {
-        console.log('line 23 content:', content);
         let savedState = JSON.parse(localStorage.getItem('pageState'));
-        console.log('line 25 savedState:', savedState);
         this.lastSavedContent = JSON.parse(savedState.formData);
         //if(this.lastSavedContent)this.lastSavedContent.text_status = 'draft';
     }
@@ -154,16 +153,28 @@ export class AutoSaveManager {
             })
             .then(result => {
                 if (result.success) {
-                    // Update lastSavedContent with the current form data
-                    this.lastSavedContent = JSON.stringify(data);
-                    this.lastAutoSaveTime = Date.now();
-                    eventBus.emit('formUpdated');
+                    // Change the data-form-activity attribute
+                    this.form.setAttribute('data-form-activity', 'editing');
+
+                    //TODO: formUpdated could handle some of the logic below... however, manualSave does some extra stuff, and it emits formUpdated... so it might just be fine to keep the logic here and in manualsave. 
+
+                    // Update the lastKeywords hidden input
+                    const lastKeywordsInput = this.form.querySelector('[name="lastKeywords"]');
+                    if (lastKeywordsInput) {
+                        lastKeywordsInput.value = formData.get('keywords');
+                        //this.lastSavedContent.keywords = formData.get('keywords');
+                    }
 
                     // Only update the Id if it's not already set
                     let idInput = this.form.querySelector('[data-id]');
                     if (idInput && !idInput.value && result.textId) {
                         idInput.value = result.textId;
+                        //this.lastSavedContent.id = result.textId;
                     }
+                    // Update lastSavedContent with the current form data
+                    this.lastSavedContent = JSON.stringify(data);
+                    this.lastAutoSaveTime = Date.now();
+                    eventBus.emit('formUpdated', result);
                 } else {
                     console.error('Auto-save failed:', result.message);
                 }

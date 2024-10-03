@@ -141,7 +141,7 @@ export class FormManager {
         const warningManager = new WarningManager();
         warningManager.createWarningModal(
             "Are you sure you want to delete this text? This action cannot be undone.",
-            () => this.submitDelete(`${this.path}text/delete`),
+            () => this.submitDelete(),
             () => console.log("Delete cancelled")
         );
     }
@@ -221,12 +221,18 @@ export class FormManager {
                 const lastKeywordsInput = this.form.querySelector('[name="lastKeywords"]');
                 if (lastKeywordsInput) {
                     lastKeywordsInput.value = formData.get('keywords');
+                    //TODO: just trying to save the lastKeywords and id to the lastSavedContent...
+                    //this.autoSaveManager.lastSavedContent.keywords = formData.get('keywords');
                 }
                 // Only update the Id if it's not already set
                 let idInput = this.form.querySelector('[data-id]');
                 if (idInput && !idInput.value && data.textId) {
                     idInput.value = data.textId;
+                    //this.autoSaveManager.lastSavedContent.id = data.textId;
                 }
+                // Changge the data-form-activity attribute
+                this.form.setAttribute('data-form-activity', 'editing');
+
                 // AutoSaveManager will reset the timers and lasSavedContent
                 if (this.formType == 'root' || this.formType == 'iteration'){  
                     // Send the latest form data to AutoSaveManager
@@ -258,33 +264,25 @@ export class FormManager {
 
      // Method to handle form deletion
     // This is because the forms have an action that applies to all the buttons, except for the delete button, whose action is handled by the delete endpoint
-    async submitDelete(deleteUrl) {
+    async submitDelete() {
         if (!this.form) return;
-
-        const formData = new FormData(this.form);
-        const data = {};
-        formData.forEach((value, key) => {
-            data[key] = value;
-        });
-
         try {
-            const response = await fetch(deleteUrl, {
-                method: 'DELETE', // Use DELETE method
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data) // Send the form data as JSON
+            const formData = new FormData(this.form);
+
+            const response = await fetch(`${this.path}text/delete`, {
+                method: 'POST', // Use DELETE method
+                body: formData // Send the form data as JSON
             });
 
             const result = await response.json();
             if (result.success) {
                 // Handle success (e.g., show toast message)
-                eventBus.emit('showToast', { 
-                    message: result.toastMessage, 
-                    type: result.toastType 
-                });
-                // Optionally, redirect or update the UI
-                window.location.href = `${this.path}text`; // Redirect after deletion
+
+                localStorage.setItem('pendingToast', JSON.stringify({
+                    message: result.toastMessage,
+                    type: result.toastType
+                }));
+                window.location.href = `${this.path}text`;
             } else {
                 // Handle error
                 console.error('Delete failed:', result.message);

@@ -37,7 +37,7 @@ export class ButtonUpdateManager {
         this.updateExitButton();    
     }
 
-    handleValidationChanged() {
+    handleValidationChanged(isValid) {
         // There will be two tiers of validation
 
         // TODO: create validationChanged event... figure out the logic
@@ -66,9 +66,8 @@ export class ButtonUpdateManager {
         }
     }
     
-    updatePublishButton() {
-        const isFormValid = this.form.checkValidity(); // Assuming HTML5 validation
-        this.publishButton.disabled = !isFormValid;
+    updatePublishButton(isFormValid) {
+        this.publishButton.classList.toggle('disabled', !isFormValid);
     }
 
     updateSaveButton() {
@@ -82,7 +81,7 @@ export class ButtonUpdateManager {
     }
 
     updateExitButton() {
-        const isIdEmpty = !this.idInput.value;
+        // If you haven't written anything, it's "Cancel" otherwise it's "Exit"
         this.cancelButton.querySelector('span.title').textContent = this.hasAnId ? 'Exit' : 'Cancel';
     }
 }

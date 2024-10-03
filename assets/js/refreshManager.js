@@ -170,6 +170,7 @@ export class RefreshManager {
 
         if (savedState.formData && savedState.formType && this.isAPageRefresh) {
             const form = document.querySelector(`[data-form-type="${savedState.formType}"]`);
+
             if (form) {
                 const formData = JSON.parse(savedState.formData);
                 Object.keys(formData).forEach(key => {
@@ -181,6 +182,8 @@ export class RefreshManager {
                         input.dispatchEvent(event);
                     }
                 });
+                console.log(formData.id);
+                if(formData.id !== '') form.setAttribute('data-form-activity', 'editing');
             }
         }
 

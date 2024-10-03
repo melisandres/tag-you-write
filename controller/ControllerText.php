@@ -712,7 +712,7 @@ class ControllerText extends Controller{
 
         $currentWriterId = $_SESSION['writer_id'];
         $textId = $_POST['id']; 
-        $insta = isset($_POST['insta']) && $_POST['insta'] === '1';
+        //$insta = isset($_POST['insta']) && $_POST['insta'] === '1';
         $text = new Text;
         $keyword = new Keyword;
         $textHasKeyword = new TextHasKeyword;
@@ -724,7 +724,7 @@ class ControllerText extends Controller{
 
         // Check user's permission to edit (myText && openForChanges)
         if (!Permissions::canDelete($textData, $currentWriterId)) {
-            Twig::render('home-error.php', ['message'=> "Sorry! This game is closed, or the text you're trying to edit isn't yours. Either way, this action is not permitted."]);
+            $this->sendJsonResponse(false, 'Permission to delete denied');
             exit();
         }
 
@@ -774,9 +774,15 @@ class ControllerText extends Controller{
             $game->delete($gameId);
         }
 
+        if ($response !== true) {
+            $this->sendJsonResponse(false, 'Failed to delete');
+        } else {
+            $this->sendJsonResponse(true, 'deleted!', 'text');
+        } 
+
         // TODO: It's possible that I may no longer need to check for $insta, as everything might be instant... so... in that case, eliminate the $instas, and the checks, and just have the whole method function for async calls. 
         // From the text page $insta is true, from the form it is false.
-        if ($response !== true) {
+/*         if ($response !== true) {
             if (!$insta) {
                 RequirePage::redirect('text');
             } else {
@@ -788,7 +794,7 @@ class ControllerText extends Controller{
             } else {
                 $this->sendJsonResponse(true, 'Deleted!');
             }
-        } 
+        }  */
     }
 
 
