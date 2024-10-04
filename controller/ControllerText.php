@@ -865,11 +865,11 @@ class ControllerText extends Controller{
     
         // Basic validation for all texts (including incomplete drafts)
         $val->name('writing')->value($data["writing"])->max(16777215); // MEDIUMTEXT max length
-        $val->name('title')->value($data["title"])->max(45); // Currently a varchar 45 could increase to 100
+        $val->name('title')->value($data["title"])->max(100);
         $val->name('keywords')->value($data["keywords"])->max(255); // Allow for multiple keywords
 
         if ($isRoot) {
-            $val->name('prompt')->value($data["prompt"])->max(200);
+            $val->name('prompt')->value($data["prompt"])->max(500);
         }
 
         // Check if basic validation passes
@@ -889,9 +889,9 @@ class ControllerText extends Controller{
             $val->name('writing')->value($data["writing"])->required()->wordCount(50, $data['parentWriting']);
         }else{
             // Root texts set up the game and prompt
-            $val->name('title')->value($data["title"])->required();
+            $val->name('title')->value($data["title"])->required()->max(100);
             $val->name('writing')->value($data["writing"])->required()->wordCount(50, "");
-            $val->name('prompt')->value($data["prompt"])->required()->max(200);
+            $val->name('prompt')->value($data["prompt"])->required()->max(500);
         } 
         
         if ($val->isSuccess()) {

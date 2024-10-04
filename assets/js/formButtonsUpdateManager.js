@@ -32,21 +32,15 @@ export class ButtonUpdateManager {
 
     updateButtons() {
         this.updatePublishButton();
-        this.updateSaveButton();
+        this.updateSaveButton( this.hasUnsavedChanges );
         this.updateDeleteButton();
         this.updateExitButton();    
     }
 
-    handleValidationChanged(isValid) {
-        // There will be two tiers of validation
-
-        // TODO: create validationChanged event... figure out the logic
-        // Tier 1: (more strict) Publish validation
-        this.updatePublishButton();
-
-        // TODO: Tier 2: (super lax) Save validation
-        //this.updateSaveButton();
-        //this.updatePublishButton();... 
+    handleValidationChanged(results) {    
+        // Update buttons based on validation results
+        this.updatePublishButton(results.canPublish);
+        this.updateSaveButton(results.canAutosave);
     }
 
     handleFormUpdated() {
@@ -56,23 +50,29 @@ export class ButtonUpdateManager {
             this.updateDeleteButton();
             this.updateExitButton();
         } 
-        this.updateSaveButton(); 
+        this.updateSaveButton(this.hasUnsavedChanges); 
     }
     
     handleInputChanged() {
         if(!this.hasUnsavedChanges){
             this.hasUnsavedChanges = true;
-            this.updateSaveButton(); 
+            this.updateSaveButton(this.hasUnsavedChanges); 
         }
     }
     
-    updatePublishButton(isFormValid) {
-        this.publishButton.classList.toggle('disabled', !isFormValid);
+    updatePublishButton(canPublish) {
+        if (this.publishButton) {
+            this.publishButton.classList.toggle('disabled', !canPublish);
+        }
     }
 
-    updateSaveButton() {
-        // My save button is already checkin for unsaved changes, so I just need to style it
-        this.saveButton.classList.toggle('disabled', !this.hasUnsavedChanges);
+    updateSaveButton(stateChange) {
+        // This may receive a stateChange = hasUnsavedChanges or canAutosave
+        // hasUnsavedChanges is connected to a listener on form inputs
+        // canAutosave is connected to a listener on validation
+        if (this.saveButton) {
+            this.saveButton.classList.toggle('disabled', !stateChange);
+        }
     }
 
     updateDeleteButton() {

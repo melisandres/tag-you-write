@@ -13,10 +13,61 @@ export class AutoSaveManager {
         this.continuouslyTyping = false;
         this.continuousTypingStartTime = null;
         this.lastAutoSaveTime = null;
+        this.canAutosave = false; 
 
         // Listen for input changes and manual saves
         eventBus.on('inputChanged', this.handleInputChange.bind(this));
         eventBus.on('manualSave', this.handleManualSave.bind(this));
+        eventBus.on('validationChanged', this.handleValidationChanged.bind(this));
+    }
+
+    // Must check if validation fails for autosave
+    handleValidationChanged(results) {
+        this.canAutosave = results.canAutosave;
+        
+        if (!this.canAutosave) {
+            const failedFields = Object.entries(results.fields)
+                .filter(([_, fieldStatus]) => !fieldStatus.canAutosave)
+                .map(([fieldName, _]) => fieldName);
+            
+            this.showFormWarning(failedFields);
+        } else {
+            this.removeFormWarning();
+        }
+    }
+
+    showFormWarning(failedFields) {
+        if (!this.warningElement) {
+            this.warningElement = document.createElement('div');
+            this.warningElement.className = 'form-warning';
+        }
+        
+        let message = 'Please fix ';
+        if (failedFields.length === 1) {
+            message += `the <span class="field-name">${failedFields[0]}</span> field`;
+        } else if (failedFields.length === 2) {
+            message += `the <span class="field-name">${failedFields[0]}</span> and <span class="field-name">${failedFields[1]}</span> fields`;
+        } else {
+            const lastField = failedFields.pop();
+            message += `the ${failedFields.map(field => `<span class="field-name">${field}</span>`).join(', ')}, and <span class="field-name">${lastField}</span> fields`;
+        }
+        message += ' to enable autosaving.';
+        
+        this.warningElement.innerHTML = message;
+        
+        if (!this.form.contains(this.warningElement)) {
+            this.form.insertBefore(this.warningElement, this.form.firstChild);
+        }
+        
+        this.form.classList.add('has-validation-errors');
+    }
+
+    removeFormWarning() {
+        if (this.warningElement) {
+            this.warningElement.remove();
+            this.warningElement = null;
+        }
+        this.form.classList.remove('has-validation-errors');
     }
 
     // When the page is refreshed, the lastSavedContent is set from localStorage
@@ -131,7 +182,7 @@ export class AutoSaveManager {
 
     // this is where the autoSave happens
     autoSave() {
-        if (this.hasUnsavedChanges()) {
+        if (this.hasUnsavedChanges() && this.canAutosave) {
             const formData = new FormData(this.form);
             const data = Object.fromEntries(formData.entries());
             data.text_status = 'draft';
