@@ -11,6 +11,7 @@ export class ValidationManager {
         this.parentWordCount = this.parentText ? this.countWords(this.parentText) : 0;
 
         this.isFormValid = false;
+        this.formValidity = {};
 
         this.lastValidationStatus = {};
 
@@ -18,8 +19,12 @@ export class ValidationManager {
     }
 
     init() {
-        const editingForm = document.querySelector('form[data-form-activity="editing"]');
-        if (editingForm) {
+        // if there's no form, don't do anything
+        if (!this.form) return;
+        const form = document.querySelector('#main-form');
+        const activity = form.dataset.formActivity;
+        // if you are initializing in editing mode, validate all the fields
+        if (activity === 'editing') {
             this.formValidity = {};
             const visibleFields = editingForm.querySelectorAll('input:not([type="hidden"]), textarea:not([type="hidden"])');
             visibleFields.forEach(field => {
@@ -33,6 +38,20 @@ export class ValidationManager {
             });
             this.updateWordCount(this.textElement.value);
             this.checkOverallValidity();
+        } else if (activity === 'creating') {
+            // if you are initializing in creating mode (a new form), autosave is allowed, publish is not-- but don't validate the fields, because they are still being filled out
+            const visibleFields = form.querySelectorAll('input:not([type="hidden"]), textarea:not([type="hidden"])');
+            visibleFields.forEach(field => {
+                this.formValidity[field.name] = { canAutosave: true, canPublish: false };
+            });
+
+        }
+        else {
+            // there are other forms... like the signup form... 
+            const visibleFields = form.querySelectorAll('input:not([type="hidden"]), textarea:not([type="hidden"])');
+            visibleFields.forEach(field => {
+                this.formValidity[field.name] = { canAutosave: false, canPublish: false };
+            });
         }
     }
 

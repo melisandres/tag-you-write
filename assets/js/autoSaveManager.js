@@ -4,6 +4,13 @@ export class AutoSaveManager {
     constructor(path) {
         this.path = path;
         this.form = document.querySelector('[data-form-type="root"], [data-form-type="iteration"]');
+        console.log('form', this.form);
+        // Initialize if you have a form that needs autosaving
+        if (this.form) this.init();
+    }
+
+    //init
+    init() {
         this.formType = this.form ? this.form.getAttribute('data-form-type') : null;
         this.lastSavedContent = this.form ? JSON.stringify(Object.fromEntries(new FormData(this.form))) : null;
         this.autoSaveTimer = null;
@@ -19,6 +26,7 @@ export class AutoSaveManager {
         eventBus.on('inputChanged', this.handleInputChange.bind(this));
         eventBus.on('manualSave', this.handleManualSave.bind(this));
         eventBus.on('validationChanged', this.handleValidationChanged.bind(this));
+
     }
 
     // Must check if validation fails for autosave
@@ -55,7 +63,7 @@ export class AutoSaveManager {
         
         this.warningElement.innerHTML = message;
         
-        if (!this.form.contains(this.warningElement)) {
+        if (!this.form && this.form.contains(this.warningElement)) {
             this.form.insertBefore(this.warningElement, this.form.firstChild);
         }
         
@@ -67,7 +75,9 @@ export class AutoSaveManager {
             this.warningElement.remove();
             this.warningElement = null;
         }
-        this.form.classList.remove('has-validation-errors');
+        if (this.form && this.form.classList.contains('has-validation-errors')) {
+            this.form.classList.remove('has-validation-errors');
+        }
     }
 
     // When the page is refreshed, the lastSavedContent is set from localStorage
@@ -182,6 +192,7 @@ export class AutoSaveManager {
 
     // this is where the autoSave happens
     autoSave() {
+        console.log("can autosave:", this.canAutosave);
         if (this.hasUnsavedChanges() && this.canAutosave) {
             const formData = new FormData(this.form);
             const data = Object.fromEntries(formData.entries());
