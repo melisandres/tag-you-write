@@ -233,11 +233,17 @@ export class RefreshManager {
     applyD3Transform(transform) {
         if (transform) {
             const svg = d3.select('#showcase svg');
-            const g = svg.select('g');
+            const outerG = svg.select('g');
+            const innerG = outerG.select('g');
             const zoom = d3.zoom().on('zoom', (event) => {
-                g.attr('transform', event.transform);
+                innerG.attr('transform', event.transform);
             });
             svg.call(zoom);
+            
+            // Apply the stored transform to the inner g element
+            innerG.attr('transform', `translate(${transform.x},${transform.y}) scale(${transform.k})`);
+            
+            // Update the zoom behavior's internal state
             svg.call(zoom.transform, d3.zoomIdentity.translate(transform.x, transform.y).scale(transform.k));
         }
     }
