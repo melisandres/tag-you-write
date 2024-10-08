@@ -146,7 +146,6 @@ export class ValidationManager {
                     this.validateMaxCharacterCount(500, 'Prompt must be 500 characters max.', 'critical')
                 ], 
                 keywords: [
-                    // TODO: the logic for checking commas
                     this.validateMaxKeywords(5, 'No more than 5 keywords--keywords are comma separated'),
                     this.validateMaxCharacterCount(255, 'Keywords must be 255 characters max'),
                     this.validateKeywordWordCount(2, 'Each keyword should be no more than 2 words.'),
@@ -275,7 +274,7 @@ export class ValidationManager {
 
     validateDate(errorMessage, severity = 'error') {
         return function (value) {
-            const datePattern = /^\d{2}\/\d{2}\/\d{4}$/;
+            const datePattern = /^\d{4}-\d{2}-\d{2}$/; 
             return {
                 isValid: datePattern.test(value),
                 message: datePattern.test(value) ? '' : errorMessage,
@@ -336,10 +335,9 @@ export class ValidationManager {
     
     validateMinCharacterCount(minCount, errorMessage, severity = 'error') {
         return function (value) {
-            const wordCount = value.trim().split(/\s+/).length;
             return {
-                isValid: wordCount >= minCount,
-                message: wordCount >= minCount ? '' : errorMessage,
+                isValid: value.length >= minCount,
+                message: value.length >= minCount ? '' : errorMessage,
                 severity: severity
             };
         };
