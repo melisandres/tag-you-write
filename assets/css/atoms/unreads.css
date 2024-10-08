@@ -1,6 +1,12 @@
 /* on the left */
 .unread{
-    box-shadow: rgb(244, 218, 90, 1) -1px 0px, white -6px 0px, rgb(244, 218, 90, 0.7) -7px 0px, white -12px 0px, rgb(244, 218, 90, 0.4) -13px 0px, white -18px 0px, rgb(244, 218, 90, 0.1) -19px 0px;
+    box-shadow: rgb(244, 218, 90, 1) -2px 0px, 
+    white -6px 0px, 
+    rgb(244, 218, 90, 0.7) -8px 0px, 
+    white -12px 0px, 
+    rgb(244, 218, 90, 0.4) -14px 0px, 
+    white -18px 0px, 
+    rgb(244, 218, 90, 0.1) -20px 0px;
 }
 
 .node circle.unread, circle.unread, .star.unread{
@@ -16,6 +22,18 @@
 
         /* shadow */
         drop-shadow(0 0 5px rgba(247, 173, 0, 1));
+}
+
+.unreads{
+/*     box-shadow: rgb(244, 218, 90, 1) -1px 0px, white -6px 0px, rgb(244, 218, 90, 0.7) -7px 0px, white -12px 0px, rgb(244, 218, 90, 0.4) -13px 0px, white -18px 0px, rgb(244, 218, 90, 0.1) -19px 0px; */
+    /* Updated the thickness of the orange lines */
+    box-shadow: rgb(244, 218, 90, 1) -2px 0px, 
+                white -6px 0px, 
+                rgb(244, 218, 90, 0.7) -8px 0px, 
+                white -12px 0px, 
+                rgb(244, 218, 90, 0.4) -14px 0px, 
+                white -18px 0px, 
+                rgb(244, 218, 90, 0.1) -20px 0px;
 }
 
 .legend circle.unread{

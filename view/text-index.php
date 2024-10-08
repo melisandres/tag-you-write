@@ -5,7 +5,7 @@
 <div data-stories class="stories">
 {% for text in texts %}
     <div class="story {{ text.openForChanges ? '' : 'closed' }}" data-game-id="{{ text.game_id }}" data-unseen-count="{{ text.unseen_count }}" data-seen-count="{{ text.seen_count }}" data-text-count="{{ text.text_count }}" data-text-id="{{ text.id }}">
-        <div class="story-title">
+        <div class="story-title {% if session.writer_id and text.unseen_count %}unreads{% endif %}">
             <h2 class="{{ text.hasContributed ? 'contributed' : '' }}">
                 <a data-refresh-modal data-text-id="{{ text.id }}">{{ text.title ? text.title : 'Untitled' }}</a>
             </h2>
@@ -21,10 +21,6 @@
             <button data-refresh-shelf data-text-id="{{ text.id }}" class="story-btn" data-svg="shelf">
                 <img class="refresh-shelf" src="{{ path }}assets/imgs/icons/shelf.svg" alt="view shelf"> 
             </button>
-            {% if session.writer_id and text.unseen_count %}
-                <i data-unreads data-text-id="{{ text.id }}" class="story-btn unreads" data-svg="unreads">
-                </i>
-            {% endif %}
         </div>
         <div class="story-writing">
             {% if text.prompt %}

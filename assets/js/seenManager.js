@@ -24,7 +24,7 @@ export class SeenManager {
             // Check if the response status is 401 before attempting to parse the JSON
             if (response.status === 401) {
                 console.info('User not logged in. Skipping mark as seen.');
-                return; // Exit gracefully
+                return;
             }
     
             // Attempt to parse the JSON response
@@ -53,35 +53,42 @@ export class SeenManager {
 
     updateReadStatus(id) {
         const element = document.querySelector(`[data-story-id="${id}"]`);
-        let gameDrawer = null;
-        let unreadSVGDiv = null;
-        let unreads = null;
+        let topLevelElement = document.querySelector('#showcase').closest('.story');
 
         // Update the drawer clicked on locally, as the user browses 
         if (element && element.classList.contains('unread')) {
-            gameDrawer = element.closest(".story");
-            unreadSVGDiv = gameDrawer.querySelector(".unreads");
             element.classList.remove('unread');
-        }
-
-        // Update the top drawer locally, as the user browses 
-        if(gameDrawer){
-            unreads = gameDrawer.querySelectorAll(".unread");
-            if(unreads.length == 0){
-                if(unreadSVGDiv){
-                    unreadSVGDiv.innerHTML = "";
-                }
-            }
+            element.classList.add('read');
+            this.updateTopLevelUnseenCount(topLevelElement);
         }
 
         // Update the D3 circle for this story, removing the 'unread' class
         const container = document.querySelector('#showcase');
         const circle = container.querySelector(`circle[data-id='${id}']`);
-        if (circle &&circle.classList.contains('unread')) {
+        const star = container.querySelector(`.star[data-id='${id}']`);
+
+        if (circle && circle.classList.contains('unread')) {
             circle.classList.remove('unread');
             circle.classList.add('read');
+            this.updateTopLevelUnseenCount(topLevelElement);
+        }else if(star && star.classList.contains('unread')){
+            star.classList.remove('unread');
+            star.classList.add('read');
+            this.updateTopLevelUnseenCount(topLevelElement);
         }
     }
+
+    updateTopLevelUnseenCount(element){
+        const unreads = document.querySelector('#showcase').querySelectorAll(".unread:not(.legend-item .unread)");
+        
+        if(unreads.length <= 0){
+            element.querySelector('.unreads').classList.remove('unreads');
+        }
+        element.setAttribute('data-unseen-count', element.getAttribute('data-unseen-count') - 1);
+        element.setAttribute('data-seen-count', element.getAttribute('data-seen-count') + 1 );
+    }
+
+
 
     /* async checkReadStatus(textId) {
         const response = await fetch(`/read/getReadStatus?text_id=${textId}`);

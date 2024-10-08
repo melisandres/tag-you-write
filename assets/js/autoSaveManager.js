@@ -32,7 +32,8 @@ export class AutoSaveManager {
     // Must check if validation fails for autosave
     handleValidationChanged(results) {
         this.canAutosave = results.canAutosave;
-        
+        console.log("can autosave:", this.canAutosave);
+
         if (!this.canAutosave) {
             const failedFields = Object.entries(results.fields)
                 .filter(([_, fieldStatus]) => !fieldStatus.canAutosave)
@@ -60,14 +61,14 @@ export class AutoSaveManager {
             message += `the ${failedFields.map(field => `<span class="field-name">${field}</span>`).join(', ')}, and <span class="field-name">${lastField}</span> fields`;
         }
         message += ' to enable autosaving.';
-        
         this.warningElement.innerHTML = message;
         
-        if (!this.form && this.form.contains(this.warningElement)) {
-            this.form.insertBefore(this.warningElement, this.form.firstChild);
-        }
-        
-        this.form.classList.add('has-validation-errors');
+        if (this.form) {
+            if (!this.form.contains(this.warningElement)) {
+                this.form.insertBefore(this.warningElement, this.form.firstChild);
+            }
+            this.form.classList.add('has-validation-errors');
+        } 
     }
 
     removeFormWarning() {
@@ -192,7 +193,6 @@ export class AutoSaveManager {
 
     // this is where the autoSave happens
     autoSave() {
-        console.log("can autosave:", this.canAutosave);
         if (this.hasUnsavedChanges() && this.canAutosave) {
             const formData = new FormData(this.form);
             const data = Object.fromEntries(formData.entries());

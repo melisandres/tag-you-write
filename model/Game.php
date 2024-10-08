@@ -20,6 +20,7 @@
    
       $sql =   "SELECT g.id AS game_id, 
                         g.prompt,
+                        g.open_for_changes AS openForChanges,
                         rt.id AS id,
                         rt.title AS title,
                         SUM(CASE WHEN t.status_id != 1 AND t.writer_id != :loggedInWriterId THEN 1 ELSE 0 END) AS text_count,
