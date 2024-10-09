@@ -1,10 +1,10 @@
 a {
     text-decoration: none;
-    font-family: 'Livvic', Courier, monospace;
-    color: grey;
+    font-family: var(--font-family-primary);   
+    color: var(--color-grey-dark);
     font-weight: 100;
 }
 
 a:visited{
-    color: rgba(191, 145, 191, 0.401);
+    color: var(--color-secondary-light);
 }

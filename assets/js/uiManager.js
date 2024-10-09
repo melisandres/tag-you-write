@@ -25,7 +25,7 @@ export class UIManager {
   }
 
   initEventListeners() {
-    // checking for any UI changes comming from the ".stories" div 
+    // Checking for any UI changes comming from the ".stories" div 
     const storiesContainer = document.querySelector('[data-stories]');
     storiesContainer ? storiesContainer.addEventListener('click', (event) => this.handleStoriesRefresh(event)) : "";
   }
@@ -35,7 +35,7 @@ export class UIManager {
     const shelfTarget = event.target.closest("[data-refresh-shelf]");
     const modalTarget = event.target.closest("[data-refresh-modal]");
 
-    // a variable to hold keyword shelf if shelfTarget, modal if modalTarget, and tree if treeTarget
+    // A variable to hold keyword shelf if shelfTarget, modal if modalTarget, and tree if treeTarget
     let targetType;
 
     if (shelfTarget) {
@@ -49,13 +49,13 @@ export class UIManager {
     }
 
 
-    // if modalTarget
+    // If modalTarget
     if(modalTarget){
       this.handleModalRefresh(event);
       return;
     }
 
-    // don't continue if you clicked neither button
+    // Don't continue if you clicked neither button
     if (targetType === 'none'){
       return;
     }
@@ -63,23 +63,24 @@ export class UIManager {
     let container = document.querySelector('#showcase');
     const story = event.target.closest(".story");
 
-    // grab the textId from the button clicked
+    // Grab the textId from the button clicked
     const targetElement = { tree: treeTarget, shelf: shelfTarget, modal: modalTarget }[targetType];
     const textId = targetElement ? targetElement.dataset.textId : null;
 
-    // grab the textId from the showcase on screen, if there is one
+    // Grab the textId from the showcase on screen, if there is one
     let previousTextId = null;
     container ? previousTextId = container.closest(".story").dataset.textId : "";
 
-    // grab the type of view now onscreen
+    // Grab the type of view now onscreen
     let previousViewType = "none";
     container ? previousViewType = container.dataset.showcase : "";   
 
-    // if you've opened the showcase area elsewhere, close it
+    // If you've opened the showcase area elsewhere, close it
     container ? container.remove() : "";
 
-    // is this action to toggle off the view, or to get a new view
+    // check if the action to toggle off the view, or to get a new view
     if(previousViewType == targetType && textId == previousTextId){
+      story.classList.remove('story-has-showcase');
       return;
     }
 
@@ -112,7 +113,6 @@ export class UIManager {
   // Handle the showing of the story modal 
   // by getting the id via the click event
   handleModalRefresh(event){
-    console.log('handleModalRefresh called');
     const modalTarget = event.target.closest("[data-refresh-modal]");
     const textId = modalTarget.dataset.textId;
     this.storyManager.showStoryInModal(textId);

@@ -1,0 +1,33 @@
+/* inner-shelf buttons */
+.with-shelf button.iterate,
+.with-shelf button.edit,
+.with-shelf button.note {
+    background: var(--color-write);
+}
+
+.with-shelf button.vote {
+    background-color: var(--color-love);
+}
+
+.with-shelf button.publish {
+    background-color: var(--color-success);
+}
+
+.with-shelf button.delete {
+    background-color: var(--color-error);
+}
+
+.with-shelf button.edit svg{
+    width: 35px;
+    height: var(--button-height);
+}
+
+.with-shelf button.vote svg{
+    width: 25px;
+    height: 45px;
+    transform: rotate(145deg);
+}
+
+.with-shelf button.vote.voted svg{
+    transform: rotate(-30deg);
+}

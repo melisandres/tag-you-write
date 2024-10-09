@@ -1,0 +1,8 @@
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+nav {
+    border: 1px solid var(--border-color);
+}

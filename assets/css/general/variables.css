@@ -1,3 +1,143 @@
 :root {
+    /* Indentation */
     --indent-size: 20px;
+
+    /* Spacing */
+    --spacing-extra-small: 2px;
+    --spacing-small: 6px;
+    --spacing-medium: 10px;
+    --spacing-large: 15px;
+    --spacing-extra-large: 20px;
+
+    /* Icons*/
+    --icon-size: 44px;
+
+    /* Colors */
+
+    /* light mode */
+    --background-color-light: var(--color-greyscale-lightest); 
+    --text-color-light: var(--color-greyscale-darkest);
+
+    /* dark mode */
+    --background-color-dark: var(--color-greyscale-darkest); 
+    --text-color-dark: var(--color-greyscale-lightest);
+
+    /* colors -- whites */
+    --color-white-light: rgba(247, 246, 242, 0.943);
+    --color-white:  rgba(245, 238, 214, 0.943);
+    --color-white-dark: rgba(255, 238, 151, 0.40);
+
+    /* grey colors -- grays */
+    --color-grey-light: rgb(214, 211, 211);
+    --color-grey: rgb(161, 161, 161);
+    --color-grey-dark: rgb(89, 88, 88);
+
+    /* colors -- blacks */
+    --color-black-light: rgb(47, 30, 4);
+    --color-black: rgb(34, 22, 3);
+    --color-black-dark: rgb(18, 13, 2);    
+
+    /* Primary color -- icons and nodes*/
+    --color-primary-lightest: rgb(255, 255, 204); 
+    --color-primary-light: rgb(255, 215, 77); 
+    --color-primary: rgb(243, 171, 2); 
+    --color-primary-dark: rgb(200, 140, 0); 
+    --color-primary-darkest: rgb(150, 100, 0); 
+
+    /* Secondary color -- text and background*/
+    --color-secondary-lightest: rgb(255, 100, 150); 
+    --color-secondary-light:rgba(191, 145, 191, 0.401); 
+    --color-secondary: rgb(139, 7, 47); 
+    --color-secondary-dark: rgb(100, 5, 35); 
+    --color-secondary-darkest: rgb(80, 3, 25); 
+
+    --color-write: #99ededea; 
+    --color-accent: #f2f47be6; 
+    --color-save: rgba(122, 122, 229, 0.897);
+    --color-love: rgba(243, 119, 225, 0.951); 
+    --color-success: rgba(127, 227, 127, 0.866); 
+    --color-error: rgba(238, 108, 108, 0.886);
+    --color-critical: rgba(150, 30, 30, 1); 
+
+    --color-warning: var(--color-secondary); 
+    --color-info: var(--color-primary);
+
+    --color-hotpink: hotpink;
+    --color-tomato: tomato;
+    --color-grey: grey;
+
+    /* Font Sizes */
+    --font-size-xsmall: 10px;
+    --font-size-small: 12px;
+    --font-size-medium: 16px;
+    --font-size-large: 20px;
+    --font-size-xlarge: 25px;
+
+    /* Font Families */
+    --font-family-primary: 'Livvic', sans-serif;
+    --font-family-secondary: 'Courier New', Courier, monospace;
+    --font-family-sans: sans-serif;
+
+
+    /* Other */
+    --border-radius: 4px;
+    --box-shadow: 1px 1px 30px 3px rgba(255, 238, 151, 0.40);
+
+    /* Transitions */
+    --transition-duration-short: 0.4s;
+    --transition-delay: 8s;
+    --transition-duration-long: 1s;
+
+
+    /* Border Colors */
+    --border-color-light: var(--color-black-light);
+    --border-color-dark: var(--color-white-dark);
+
+    /* Text Colors */
+    --text-color-primary: var(--color-black);
+    --text-color-secondary: var(--color-grey);
+    --text-color-muted: rgba(0, 0, 0, 0.5);
+
+    /* Hover and Active States */
+    --hover-color: var(--color-secondary-lightest);
+    --active-color: var(--color-secondary-light);
+
+    /* Contributed styles */
+    --contributed-star: "☆ ";
+    --contributed-tooltip-text: "☆ contributor";
+    --contributed-tooltip-left: var(--spacing-extra-large);
+    --contributed-tooltip-top: 0;
+    --contributed-tooltip-padding: 2px 6px;
+
+    /* Button styles */
+    --button-width: 40px;
+    --button-height: 40px;
+    --button-hover-gradient: radial-gradient(circle, rgba(255, 253, 132, 0.501) 0%, rgba(244, 218, 90, 0) 70%);
+
+    /* Form buttons */
+    --form-button-font-size: 16px;
+    --form-button-icon-size: 40px;
+    --form-button-svg-size: 30px;
+
+    /* Modal buttons */
+    --modal-button-width: 49px;
+    --modal-button-height: 43px;
+    --modal-button-padding: 3px 5px 0px 5px;
+    --modal-button-publish-padding: 4px 11px 5px 6px;
+    --modal-button-delete-width: 47px;
+    --modal-button-delete-height: 42px;
+
+    /* General styles */
+    --body-min-height: 100vh;
+    --main-min-height: 100%;
+    --general-padding: 20px;
+    --very-small-font-size: 15px;
+    --very-small-max-width: 40ch;
+    --small-font-size: 17px;
+    --keyword-padding: 10px 20px 10px 10px;
+    --keyword-font-size: 15px;
+    --muted-text-font-size: 10px;
+
+    /* Colors */
+
 }

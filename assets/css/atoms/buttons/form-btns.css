@@ -1,0 +1,43 @@
+/* form buttons */
+.form-btns {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.form-btns button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--form-button-font-size);
+    border: none;
+    background-color: transparent;
+    width: 100%;
+}
+
+.form-btns .title {
+    color: var(--color-grey);
+}
+
+.form-btns .icon {
+    width: var(--form-button-icon-size);
+    height: var(--form-button-icon-size);
+    border-radius: 50%;
+}
+
+.form-btns svg {
+    width: var(--form-button-svg-size);
+    height: var(--form-button-svg-size);
+}
+
+.form-btns button.publish .icon { background-color: var(--color-success); }
+.form-btns button.save .icon { background-color: var(--color-save); }
+.form-btns button.delete .icon { background-color: var(--color-error); }
+.form-btns button.cancel .icon { background-color: var(--color-grey); }
+
+/* the buttons are currently all in forms */
+/* these button styles are for the buttons in the tree modal */
+.iterate-form, .edit-form, .delete-form, .publish-form, .note-form{
+    padding: 0;
+}

@@ -1,7 +1,7 @@
 .contributed::before {
-    content: "☆ ";
+    content: var(--contributed-star);
     font-weight: 100;
-    color: purple;
+    color: var(--color-secondary-dark);
 }
 
 .contributed {
@@ -9,23 +9,23 @@
 }
 
 .contributed::after {
-    content: "☆ contributor"; /* Tooltip content */
+    content: var(--contributed-tooltip-text); /* Tooltip content */
     position: absolute;
-    left: 20px; /* Adjust position as needed */
-    top: 0;
-    background-color: rgba(0, 0, 0, 0.75);
-    font-size: 12px;
+    left: var(--contributed-tooltip-left);
+    top: var(--contributed-tooltip-top);
+    background-color: var(--color-black-light);
+    font-size: var(--font-size-small);
     font-weight: 100;
-    color: white;
-    padding: 2px 6px;
+    color: var(--color-white);
+    padding: var(--contributed-tooltip-padding);
     white-space: nowrap;
     opacity: 0; /* Hide the tooltip initially */
-    transition: opacity 0.3s ease-in-out; /* Smooth transition */
+    transition: opacity var(--transition-duration) ease-in-out; /* Smooth transition */
     pointer-events: none; /* Prevent the tooltip from capturing pointer events */
 }
 
 .contributed:hover::after {
     opacity: 1; /* Show the tooltip on hover */
-    transition-delay: 8s; 
-    transition: opacity 3s ease-in-out; /* Smooth transition */
+    transition-delay: var(--transition-delay); 
+    transition: opacity var(--transition-duration) ease-in-out; /* Smooth transition */
 }

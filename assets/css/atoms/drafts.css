@@ -3,9 +3,9 @@
 }
 
 .draft .status{
-    font-size: 22px;
+    font-size: var(--font-size-medium);
     opacity: 40%;
     font-variant: small-caps;
-    font-family: livvic;
+    font-family: var(--font-family-livvic);
     font-weight: 500;
 }

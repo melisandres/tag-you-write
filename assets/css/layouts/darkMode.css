@@ -1,0 +1,8 @@
+
+[data-theme='dark'] {
+    /* Dark Mode Variables */
+    --background-color: var(--background-color-dark);
+    --text-color: var(--color-white);
+    --border-color: var(--border-color-dark);
+    /* ... other dark mode variables ... */
+}

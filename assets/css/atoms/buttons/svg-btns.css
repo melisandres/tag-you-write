@@ -1,0 +1,50 @@
+/* svg styles */
+
+.iterate svg {
+    fill: currentColor;
+    width: 37px; 
+    height: 37px; 
+}
+
+.edit svg {
+    fill: currentColor;
+    width: 36px;
+    height: 36px;
+    transform: rotate(40deg);
+}
+
+.note svg {
+    fill: currentColor;
+    width: 36px;
+    height: 36px;
+}
+
+.publish svg {
+    fill: currentColor; 
+    width: 30px;
+    height: 30px;
+}
+
+.delete svg {
+    fill: currentColor;
+    width: 37px;
+    height: 37px;
+    transform: translateX(-2px);
+}
+
+.vote-info svg {
+    fill: var(--love-color-dark);
+    width: 35px;
+    height: 35px;
+    stroke: var(--love-color-dark);
+}
+
+.modal-btns .vote svg{
+    width: 37px;
+    height: 37px;
+    transform: rotate(145deg);
+}
+
+.modal-btns .vote.voted svg{
+    transform: rotate(-30deg);
+}

@@ -2,7 +2,11 @@
     position: fixed;
     top: 20px;
     right: 20px;
-    z-index: 9999;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
 }
 
 .toast {
@@ -10,19 +14,24 @@
     border-radius: 4px;
     margin-bottom: 10px;
     opacity: 0;
-    transition: opacity 0.3s;
+    transition: opacity var(--transition-duration-short);
 }
 
 .toast.show {
-    opacity: 1;
+    opacity: 0.98;
 }
 
 .toast-success {
-    background-color: #4CAF50;
-    color: white;
+    background-color: var(--color-success);
+    color: var(--color-white);
+}
+
+.toast-info {
+    background-color: var(--color-info);
+    color: var(--color-white);
 }
 
 .toast-error {
-    background-color: #F44336;
-    color: white;
+    background-color: var(--color-error);
+    color: var(--color-white);
 }

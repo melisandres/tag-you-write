@@ -1,0 +1,25 @@
+/* top shelf button/icons */
+.story-btn:hover {
+    background-image: var(--button-hover-gradient);
+    cursor: pointer;
+}
+
+.story-btn{
+    align-self: center;
+    background-color: transparent;
+    width: var(--button-width);
+    height: var(--button-height);
+    border: none;
+}
+
+.bookmark-btn svg path {
+    fill: var(--color-primary);
+}
+
+.bookmark-btn {
+    /* align-self: auto;  */
+}
+
+.unreads {
+    fill: var(--color-primary);
+}
