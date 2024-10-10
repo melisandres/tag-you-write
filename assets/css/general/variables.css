@@ -8,9 +8,19 @@
     --spacing-medium: 10px;
     --spacing-large: 15px;
     --spacing-extra-large: 20px;
+    --spacing-extra-extra-large: 30px;
 
     /* Icons*/
     --icon-size: 44px;
+
+    /* Font Sizes */
+    --font-size-xsmall: clamp(14px, 1vw + 10px, 16px);
+    --font-size-small: clamp(16px, 1.2vw + 12px, 20px);
+    --font-size-medium-small: clamp(18px, 1.3vw + 14px, 22px);
+    --font-size-medium: clamp(20px, 1.5vw + 16px, 26px);
+    --font-size-large: clamp(24px, 2vw + 18px, 32px);
+    --font-size-xlarge: clamp(30px, 2.5vw + 20px, 40px);
+    --font-size-xxlarge: clamp(36px, 3vw + 24px, 48px);
 
     /* Colors */
 
@@ -23,9 +33,10 @@
     --text-color-dark: var(--color-greyscale-lightest);
 
     /* colors -- whites */
-    --color-white-light: rgba(247, 246, 242, 0.943);
-    --color-white:  rgba(245, 238, 214, 0.943);
-    --color-white-dark: rgba(255, 238, 151, 0.40);
+    --color-white-lightest: rgb(252, 251, 250);
+    --color-white-light: floralwhite;
+    --color-white:  rgb(255, 252, 243);
+    --color-white-dark: rgb(245, 239, 212);
 
     /* grey colors -- grays */
     --color-grey-light: rgb(214, 211, 211);
@@ -39,25 +50,25 @@
 
     /* Primary color -- icons and nodes*/
     --color-primary-lightest: rgb(255, 255, 204); 
-    --color-primary-light: rgb(255, 215, 77); 
+    --color-primary-light: rgb(255, 215, 69); 
     --color-primary: rgb(243, 171, 2); 
-    --color-primary-dark: rgb(200, 140, 0); 
-    --color-primary-darkest: rgb(150, 100, 0); 
+    --color-primary-dark: rgb(228, 162, 8); 
+    --color-primary-darkest: rgb(222, 154, 20); 
 
     /* Secondary color -- text and background*/
-    --color-secondary-lightest: rgb(255, 100, 150); 
-    --color-secondary-light:rgba(191, 145, 191, 0.401); 
+    --color-secondary-lightest: rgb(255, 241, 246); 
+    --color-secondary-light:rgb(138, 104, 138); 
     --color-secondary: rgb(139, 7, 47); 
     --color-secondary-dark: rgb(100, 5, 35); 
     --color-secondary-darkest: rgb(80, 3, 25); 
 
     --color-write: #99ededea; 
     --color-accent: #f2f47be6; 
-    --color-save: rgba(122, 122, 229, 0.897);
-    --color-love: rgba(243, 119, 225, 0.951); 
-    --color-success: rgba(127, 227, 127, 0.866); 
-    --color-error: rgba(238, 108, 108, 0.886);
-    --color-critical: rgba(150, 30, 30, 1); 
+    --color-save: rgba(122, 122, 229);
+    --color-love: rgba(243, 119, 225); 
+    --color-success: rgba(127, 227, 127); 
+    --color-error: rgba(238, 108, 108);
+    --color-critical: rgba(150, 30, 30); 
 
     --color-warning: var(--color-secondary); 
     --color-info: var(--color-primary);
@@ -66,12 +77,7 @@
     --color-tomato: tomato;
     --color-grey: grey;
 
-    /* Font Sizes */
-    --font-size-xsmall: 10px;
-    --font-size-small: 12px;
-    --font-size-medium: 16px;
-    --font-size-large: 20px;
-    --font-size-xlarge: 25px;
+
 
     /* Font Families */
     --font-family-primary: 'Livvic', sans-serif;
@@ -115,11 +121,12 @@
     --button-hover-gradient: radial-gradient(circle, rgba(255, 253, 132, 0.501) 0%, rgba(244, 218, 90, 0) 70%);
 
     /* Form buttons */
-    --form-button-font-size: 16px;
+    --form-button-font-size: var(--font-size-small);
     --form-button-icon-size: 40px;
     --form-button-svg-size: 30px;
 
     /* Modal buttons */
+    --modal-button-opacity: 0.95;
     --modal-button-width: 49px;
     --modal-button-height: 43px;
     --modal-button-padding: 3px 5px 0px 5px;
@@ -138,6 +145,43 @@
     --keyword-font-size: 15px;
     --muted-text-font-size: 10px;
 
-    /* Colors */
+    /* DRAFTS */
+    --draft-opacity: 0.65;
 
+    /* Z-indexes */
+    --z-index-toast: 3;
+
+    /* Story styles */
+    --story-box-shadow: 0.5px 0.5px 30px 1px var(--color-primary-light);
+    --story-margin-bottom: var(--spacing-extra-extra-large);
+    --story-title-margin-left: 20px;
+    --story-title-padding: 20px 10px;
+    --story-title-font-size-min: 0.8rem;
+    --story-title-font-size-max: 2rem;
+    --story-writing-margin: 20px 10px 30px 10px;
+    --story-writing-font-size: var(--font-size-medium-small);
+    --game-status-font-size: 12px;
+    --story-hover-gradient: radial-gradient(circle, rgba(255, 253, 132, 0.20) 0%, rgba(244, 218, 90, 0) 90%);
+    --game-status-closed-gradient: radial-gradient(circle, rgba(253, 175, 191, 0.2) 0%, rgba(244, 218, 90, 0) 90%);
+    --game-status-open-gradient: radial-gradient(circle, rgba(132, 255, 167, 0.2) 0%, rgba(244, 218, 90, 0) 90%);
+
+     /* Toast styles */
+     --toast-container-top: var(--spacing-extra-large);
+     --toast-container-right: var(--spacing-extra-large);
+     --toast-padding: var(--spacing-medium);
+     --toast-border-radius: var(--border-radius);
+     --toast-margin-bottom: 10px;
+     --toast-opacity: 0.92;
+     --toast-transition-duration: var(--transition-duration-short);
+     --toast-z-index: var(--z-index-toast);
+
+      /* Word count display */
+    --word-count-margin-left: var(--spacing-small);
+    --word-count-opacity: 0.93;
+    --word-count-number-width: 2em;
+    --word-count-number-height: 2em;
+    --word-count-tooltip-font-size: var(--font-size-xsmall);
+    --word-count-tooltip-padding: 0.75em 1em;
+    --word-count-tooltip-border-radius: 0.25em;
+    --word-count-number-padding: 1.15em 1em;
 }

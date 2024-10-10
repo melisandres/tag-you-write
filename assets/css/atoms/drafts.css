@@ -1,10 +1,10 @@
 .draft{
-    opacity: 65%;
+    opacity: var(--draft-opacity);
 }
 
 .draft .status{
     font-size: var(--font-size-medium);
-    opacity: 40%;
+    opacity: var(--draft-opacity);
     font-variant: small-caps;
     font-family: var(--font-family-livvic);
     font-weight: 500;

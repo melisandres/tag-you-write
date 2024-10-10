@@ -3,80 +3,93 @@
     display: grid;
     grid-template-columns: 45% auto;
     grid-template-rows: auto auto;
-    box-shadow: 1px 1px 30px 3px rgba(255, 238, 151, 0.40);
-    /* box-shadow: #ffee977e 0px 0.1px 39px; */
-    background-color: white;
+    box-shadow: var(--story-box-shadow);
+    background-color: var(--color-white-lightest);
+    margin: 0 0 var(--story-margin-bottom) 0;
 }
 
-.story.closed{
-    background-color: rgba(247, 244, 232, 0.325);
+.story.closed {
+    color: var(--color-secondary-dark);  
 }
 
-.story-btns{
+.story-btns {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;    
+    grid-template-columns: 1fr 1fr 1fr;    
 }
 
-.story-has-showcase .story-btns{
+.story-has-showcase .story-btns {
     grid-column-start: span 2;
 }
 
-.story-title{
+.story-title {
     display: flex;
-    margin-left: 20px;
+    margin-left: var(--story-title-margin-left);
     align-items: center;
     height: 98%;
 }
 
 .story-title h2 {
-    padding: 20px 10px 20px 10px;
-    font-size: clamp(0.8rem, 2vw, 2rem); 
+    padding: var(--story-title-padding);
+    font-size: clamp(var(--story-title-font-size-min), 2vw, var(--story-title-font-size-max)); 
 }
 
-.story-title:hover{
-    background-image: radial-gradient(circle, rgba(255, 253, 132, 0.20) 0%, rgba(244, 218, 90, 0) 90%);
+.story-title:hover {
+    background-image: var(--story-hover-gradient);
     cursor: pointer;
 }
 
-.story-writing{
-    margin: 20px 10px 30px 10px;
+.story-writing {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin: var(--story-writing-margin);
     overflow: hidden;
     grid-column-start: span 2;
 }
 
-.story-writing>p{
-    padding:0;
-    font-size: 12px;
-    /* max-height: 30px; */
-    overflow: hidden; /* Hide overflowing content */
-    text-overflow: ellipsis; /* Show ellipsis for overflow */
+.story-writing > p {
+    padding: 0;
+    font-size: var(--story-writing-font-size);
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.game-status {
+    font-size: var(--game-status-font-size);
+}
+
+.game-status.closed {
+    background-image: var(--game-status-closed-gradient);
+}
+
+.game-status.open {
+    background-image: var(--game-status-open-gradient);
 }
 
 @media screen and (min-width: 600px) {
-    .story{
+    .story {
         grid-template-rows: auto;
         grid-template-columns: 20% 20% auto;
         gap: 5px;
         width: 100%;
     }
 
-    .story-writing{
+    .story-writing {
         margin-top: auto;
         margin-bottom: auto;
-        margin-right: 20px;
+        margin-right: var(--story-title-margin-left);
         overflow: hidden;
         grid-column-start: span 1;
     }
     
-    .story-writing>p{
-        padding:0;
-        font-size: 12px;
-        /* max-height: 30px; */
-        overflow: hidden; /* Hide overflowing content */
-        text-overflow: ellipsis; /* Show ellipsis for overflow */
+    .story-writing > p {
+        padding: 0;
+        font-size: var(--story-writing-font-size);
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
-    .story-has-showcase .story-btns{
+    .story-has-showcase .story-btns {
         grid-column-start: span 1;
     }
 }

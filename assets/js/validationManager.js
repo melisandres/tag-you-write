@@ -3,7 +3,7 @@ import { eventBus } from './eventBus.js';
 export class ValidationManager {
     constructor() {
         eventBus.on('inputChanged', (data) => this.handleInputChanged(data));
-        this.wordCountDisplayElement = document.querySelector('[data-wordCountDisplay]');
+        this.wordCountDisplayElement = document.querySelector('[data-word-count-display]');
         this.maxWords = 50;
         this.textElement = document.querySelector('textarea[name="writing"] , textarea[name="note"]');
         this.parentTextElement = document.querySelector('input[name="parentWriting"]');
@@ -14,6 +14,7 @@ export class ValidationManager {
         this.formValidity = {};
 
         this.lastValidationStatus = {};
+        this.form = document.querySelector('#main-form');
 
         this.init();
     }
@@ -23,20 +24,21 @@ export class ValidationManager {
         if (!this.form) return;
         const form = document.querySelector('#main-form');
         const activity = form.dataset.formActivity;
+        if (this.textElement) this.updateWordCount(this.textElement.value);
+
         // if you are initializing in editing mode, validate all the fields
         if (activity === 'editing') {
             this.formValidity = {};
-            const visibleFields = editingForm.querySelectorAll('input:not([type="hidden"]), textarea:not([type="hidden"])');
+            const visibleFields = this.form.querySelectorAll('input:not([type="hidden"]), textarea:not([type="hidden"])');
             visibleFields.forEach(field => {
                 this.formValidity[field.name] = false;
                 this.validateField({
                     fieldName: field.name,
                     fieldValue: field.value,
-                    formType: editingForm.dataset.formType,
+                    formType: this.form.dataset.formType,
                     init: true
                 });
             });
-            this.updateWordCount(this.textElement.value);
             this.checkOverallValidity();
         } else if (activity === 'creating') {
             // if you are initializing in creating mode (a new form), autosave is allowed, publish is not-- but don't validate the fields, because they are still being filled out
@@ -363,49 +365,64 @@ export class ValidationManager {
     // Handle displaying the validation results
     showValidationResult(fieldName, criticalErrors, errors, warnings, infos, successes) {
         const field = document.querySelector(`[name="${fieldName}"]`);
-        let feedback = field.nextElementSibling; // Assuming feedback is next to the field
+        let feedback = field.nextElementSibling;
+
         // Create feedback element if it doesn't exist
         if (!feedback || feedback.className !== 'feedback') {
             feedback = document.createElement('div');
-            feedback.className = 'feedback'; // Assign a class for styling
-            field.parentNode.insertBefore(feedback, field.nextSibling); // Insert feedback after the field
+            feedback.className = 'feedback';
+            field.parentNode.insertBefore(feedback, field.nextSibling);
         }
 
         if (criticalErrors.length > 0) {
             feedback.textContent = criticalErrors[0].message;
-            feedback.style.color = 'red';
+            feedback.classList.add = 'critical';
         } else if (errors.length > 0) {
             feedback.textContent = errors[0].message;
-            feedback.style.color = 'darkred';
+            feedback.classList.add = 'error';
         } else if (warnings.length > 0) {
             feedback.textContent = warnings[0].message;
-            feedback.style.color = 'hotpink';
+            feedback.classList.add = 'warning';
         } else if (infos.length > 0) {
             feedback.textContent = infos[0].message;
-            feedback.style.color = 'blue';
+            feedback.classList.add = 'info';
         } else if (successes.length > 0) {
             feedback.textContent = successes[0].message;
-            feedback.style.color = 'green';
+            feedback.classList.add = 'success';
         } else {
             feedback.textContent = '';
+        }
+
+        if (feedback.textContent.length > 0) {
+            field.classList.add('has-feedback');
+            feedback.style.display = 'block';
+            console.log(`Added has-feedback to ${fieldName}`, field); // Add this line
+        } else {
+            field.classList.remove('has-feedback');
+            feedback.style.display = 'none';
+            console.log(`Removed has-feedback from ${fieldName}`, field); // Add this line
         }
     }
 
     // Update word count and display
     updateWordCount(userText) {
         if (!this.wordCountDisplayElement) return;
-/* 
-        const parentWordCount = this.countWords(this.parentText); */
-        //console.log('parentWordCount', parentWordCount);
-        const userWordCount = this.countWords(userText);
-        //console.log('userWordCount', userWordCount);
+        const numberElement = this.wordCountDisplayElement.querySelector('.word-count-number');
+        const tooltipElement = this.wordCountDisplayElement.querySelector('.word-count-tooltip');
 
+        const userWordCount = this.countWords(userText);
         const remainingWords = this.maxWords - (userWordCount - this.parentWordCount);
-        console.log('remainingWords', remainingWords);
+
+        numberElement.textContent = remainingWords;
+        numberElement.classList.toggle('positive', remainingWords > 0);
+        numberElement.classList.toggle('negative', remainingWords < 0);
+        
         if (remainingWords >= 0) {
-            this.wordCountDisplayElement.textContent = `(add max ${remainingWords} word${remainingWords !== 1 ? 's' : ''})`;
+            tooltipElement.textContent = `
+                you can add ${remainingWords} more word${remainingWords !== 1 ? 's' : ''}`;
         } else {
-            this.wordCountDisplayElement.textContent = `(you are ${-remainingWords} word${remainingWords !== -1 ? 's' : ''} over the limit)`;
+            tooltipElement.textContent = `
+                you are ${-remainingWords} word${remainingWords !== -1 ? 's' : ''} over the limit`;
         }
 
         this.wordCountDisplayElement.classList.toggle('warning', remainingWords < 0);

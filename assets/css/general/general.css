@@ -2,6 +2,8 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-medium);
 }
 
 body{
@@ -15,7 +17,7 @@ main{
     flex-grow: 1;
 }
 
-td, th, tr, form, input, textarea, h3, h2, h1, p, ul{
+td, th, tr, form, input, textarea, h3, h2, h1, u, p {
     padding: var(--general-padding);
 }
 

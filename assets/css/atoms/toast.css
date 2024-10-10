@@ -1,24 +1,24 @@
 .toast-container {
     position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 3;
+    top: var(--toast-container-top);
+    right: var(--toast-container-right);
+    z-index: var(--toast-z-index);
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    align-items: flex-start;
+    align-items: flex-end;
 }
 
 .toast {
-    padding: 16px;
-    border-radius: 4px;
-    margin-bottom: 10px;
+    padding: var(--toast-padding);
+    margin-bottom: var(--toast-margin-bottom);
+    font-size: var(--font-size-medium-small);
     opacity: 0;
-    transition: opacity var(--transition-duration-short);
+    transition: opacity var(--toast-transition-duration);
 }
 
 .toast.show {
-    opacity: 0.98;
+    opacity: var(--toast-opacity);
 }
 
 .toast-success {

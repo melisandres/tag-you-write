@@ -1,22 +1,33 @@
 {{ include('header.php', {title: data.id ? 'Edit Text' : (data.parent_id ? 'Iterate Text' : 'Create Text')})}}
+<section class="form-page">
+    <div class="form-info">
+    {% if errors is defined %}
+        <span class='error'>{{ errors|raw }}</span>
+    {% endif %}
 
-{% if errors is defined %}
-    <span class='error'>{{ errors|raw }}</span>
-{% endif %}
-
-{% if data.parent_id %}
-    <p><strong>you are iterating on:</strong><span class="very-small"> {{ data.parentFirstName }} {{ data.parentLastName }}'s</span> <span>"{{ data.parentTitle }}"</span></p>
-    <p><strong>text before your changes: </strong>{{ data.parentWriting }}</p>
-{% elseif not data.id %}
-    <p>Hit publish, and your title and prompt will be carved in STONE.<br>
-    Alternatively, your text will be open to edits, disfigurations, and flights of fancy.<br>
-    Be forewarned. And may the best iteration win!</p>
-{% endif %}
-<!-- action="{{ path }}text/{{ data.id ? 'update' : 'store' }}" -->
-
+    {% if data.parent_id %}
+        <p><strong>you are iterating on:</strong><span class="very-small"> {{ data.parentFirstName }} {{ data.parentLastName }}'s</span> <span>"{{ data.parentTitle }}"</span></p>
+        <p><strong>text before your changes: </strong>{{ data.parentWriting }}</p>
+    {% elseif not data.id %}
+        <p>Hit publish, and your title and prompt will be carved in STONE.<br>
+        Alternatively, your text will be open to edits, disfigurations, and flights of fancy.<br>
+        Be forewarned. And may the best iteration win!</p>
+    {% endif %}
+    <!-- action="{{ path }}text/{{ data.id ? 'update' : 'store' }}" -->
+    </div>
+</section>
 <form id="main-form" data-form-type="{{ data.parent_id ? 'iteration' : 'root' }}" data-form-activity="{{ data.id ? 'editing' : 'creating' }}" method="post">
-    <label>title
+    <label>
+    {% if not data.parent_id %}
+        <span class="headline">title</span>
+    {% else %}
+        <span class="headline">describe your changes</span>
+    {% endif %}
+    {% if not data.parent_id %}
         <input type="text" name="title" placeholder="Elsewhere" value="{{ data.title|default('') }}">
+    {% else %}
+        <input type="text" name="title" placeholder="Added a panda" value="{{ data.title|default('') }}">
+    {% endif %}
     </label>
     
     {% if not data.parent_id %}
@@ -28,9 +39,18 @@
     {% endif %}
     
     <label>
-        <span class="headline">{{ data.parent_id ? '' : 'kickoff the ' }}text</span>
-        <div class="very-small" data-wordCountDisplay></div>
-        <textarea name="writing" rows="10" cols="50" placeholder="When you climb out the window, don't forget your rainboots.">{{ data.writing|default('') }}</textarea>
+        <div class="title-and-word-count">
+            <span class="headline">{{ data.parent_id ? '' : 'kickoff the ' }}text</span>
+            <div class="word-count-display" data-word-count-display>
+                <span class="word-count-number"></span>
+                <span class="word-count-tooltip"></span>
+            </div>
+        </div>
+        {% if data.parent_id %}
+            <textarea name="writing" rows="10" cols="50" placeholder="{{ data.parentWriting }}">{{ data.writing|default('') }}</textarea>
+        {% else %}
+            <textarea name="writing" rows="10" cols="50" placeholder="When you climb out the window, don't forget your rainboots.">{{ data.writing|default('') }}</textarea>
+        {% endif %}
     </label>
     
     <label>

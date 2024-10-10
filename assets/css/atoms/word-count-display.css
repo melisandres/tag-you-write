@@ -1,0 +1,53 @@
+.word-count-display {
+    position: relative;
+    display: inline-block;
+    margin-left: var(--word-count-margin-left);
+    opacity: var(--word-count-opacity);
+}
+
+.title-and-word-count {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.word-count-number {
+    font-family: var(--font-family-primary);
+    padding: var(--word-count-number-padding);
+    font-weight: 300;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: var(--word-count-number-width);
+    height: var(--word-count-number-height);
+    color: var(--color-black);
+}
+
+.word-count-number.positive {
+    background-color: var(--color-love);
+}
+
+.word-count-number.negative {
+    background-color: var(--color-error);
+}
+
+.word-count-tooltip {
+    position: absolute;
+    font-size: var(--word-count-tooltip-font-size);
+    top: 50%;
+    right: 100%;
+    transform: translateY(-50%);
+    background-color: var(--color-black-light);
+    color: var(--color-white);
+    padding: var(--word-count-tooltip-padding);
+    border-radius: var(--word-count-tooltip-border-radius);
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity var(--transition-duration-long) ease-in-out;
+    pointer-events: none;
+}
+
+.word-count-display:hover .word-count-tooltip {
+    opacity: 1;
+    transition-delay: var(--transition-duration-short);
+}

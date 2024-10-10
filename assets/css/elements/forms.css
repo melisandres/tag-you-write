@@ -1,16 +1,30 @@
-input,textarea{
+input, textarea{
     display: block;
-    margin-top: 5px;
-    margin-bottom: 35px;
 }
 
 textarea, input{
     max-width: 100%;
     min-width: 100%;
 }
+label span.headline{
+    display: block;
+    font-family: var(--font-family-secondary);
+    margin-top: var(--spacing-extra-extra-large);
+}
+
+.feedback{
+    font-family: var(--font-family-secondary);
+    background-color: transparent;
+}
 
 label{
     display: block;
+}
+
+input::placeholder, textarea::placeholder {
+    color: var(--color-primary-dark);
+    opacity: 0.6;
+    font-family: var(--font-family-secondary);
 }
 
 select{
@@ -20,4 +34,15 @@ select{
 input[type="submit"]{
     padding: 10px;
     margin: 0;
+}
+
+#main-form input:focus, #main-form textarea:focus{
+    outline: var(--color-accent) solid 3px;
+    outline-offset: -4px;
+    background-color: var(--color-white-lightest);
+}
+
+#main-form input.has-feedback:focus,
+#main-form textarea.has-feedback:focus {
+    box-shadow: 0px 20px 7px 9px var(--color-primary-lightest);
 }

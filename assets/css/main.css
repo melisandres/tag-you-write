@@ -5,6 +5,7 @@
 @import url(./atoms/unreads.css);
 @import url(./atoms/drafts.css);
 @import url(./atoms/toast.css);
+@import url(./atoms/word-count-display.css);
 
 /* atoms/buttons */
 @import url(./atoms/buttons/btns.css);

@@ -1,36 +1,32 @@
+.modal-btns{
+    border: none;
+    cursor: pointer;
+    opacity: var(--modal-button-opacity);
+}
+
 .modal-btns .vote{
     background: var(--color-love);
     width: 49px;
     height: 43px;
-    border: none;
-    cursor: pointer;
 }
 
 .modal-btns .iterate{
     background: var(--color-write);
     width: 49px;
     height: 43px;
-    border: none;
-    cursor: pointer;
 }
 
 .modal-btns .note{
     background: var(--write-color);
     padding: var(--modal-button-padding);
-    border: none;
-    cursor: pointer;
 }
 
 .modal-btns .edit{
     background: var(--color-write);
     padding: var(--modal-button-padding);
-    border: none;
-    cursor: pointer;
 }
 
 .modal-btns .publish{
-    border: none;
-    cursor: pointer;
     background-color: var(--color-success);
     padding: 4px 11px 5px 6px;
 }
@@ -39,6 +35,4 @@
     background-color: var(--color-error);
     width: 47px;
     height: 42px;
-    border: none;
-    cursor: pointer;
 }

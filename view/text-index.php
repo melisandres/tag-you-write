@@ -23,6 +23,13 @@
             </button>
         </div>
         <div class="story-writing">
+            <div class="game-status-indicator">
+                {% if text.openForChanges %}
+                    <p class="game-status open">GAME<br>OPEN</p>
+                {% else %}
+                    <p class="game-status closed">GAME<br>CLOSED</p>
+                {% endif %}
+            </div>
             {% if text.prompt %}
             <p><span class="very-small">prompt:</span> {{ text.prompt }}</p>
             {% endif %}
