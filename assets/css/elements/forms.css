@@ -1,11 +1,13 @@
 input, textarea{
     display: block;
+    border: 1px solid var(--color-grey-light);
 }
 
 textarea, input{
     max-width: 100%;
     min-width: 100%;
 }
+
 label span.headline{
     display: block;
     font-family: var(--font-family-secondary);
@@ -36,13 +38,49 @@ input[type="submit"]{
     margin: 0;
 }
 
+#main-form input, #main-form textarea{
+    background-color: var(--color-white-lightest);
+}
+
 #main-form input:focus, #main-form textarea:focus{
     outline: var(--color-accent) solid 3px;
     outline-offset: -4px;
-    background-color: var(--color-white-lightest);
+    background-color: white;
 }
 
 #main-form input.has-feedback:focus,
 #main-form textarea.has-feedback:focus {
     box-shadow: 0px 20px 7px 9px var(--color-primary-lightest);
+}
+
+.form-page{
+    background-color: var(--color-white);
+}
+
+.form-page .feedback.error, .form-page .feedback.error{
+    color: var(--color-error);
+}
+
+.form-page .feedback.critical, .form-page .feedback.critical{
+    color: var(--color-critical);
+}
+
+.form-page .feedback.info, .form-page .feedback.info{
+    color: var(--color-info);
+}
+
+.form-page span.additional-info{
+    font-family: var(--font-family-secondary);
+}
+
+@media screen and (max-width: 700px) {
+    .form-btns .draft-text {
+        display: block;
+    }
+}
+
+@media screen and (max-width: 475px) {
+    .form-btns span {
+        font-size: var(--font-size-small);    
+    }
 }

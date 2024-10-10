@@ -3,12 +3,14 @@
     --indent-size: 20px;
 
     /* Spacing */
-    --spacing-extra-small: 2px;
+    --spacing-extra-small: 4px;
     --spacing-small: 6px;
-    --spacing-medium: 10px;
-    --spacing-large: 15px;
-    --spacing-extra-large: 20px;
-    --spacing-extra-extra-large: 30px;
+    --spacing-small-medium: 12px;
+    --spacing-medium: 20px;
+    --spacing-large: 26px;
+    --spacing-extra-large: 32px;
+    --spacing-extra-extra-large: 60px;
+    --spacing-giant: 90px;
 
     /* Icons*/
     --icon-size: 44px;
@@ -124,6 +126,7 @@
     --form-button-font-size: var(--font-size-small);
     --form-button-icon-size: 40px;
     --form-button-svg-size: 30px;
+    --form-btns-padding-top: var(--spacing-giant);
 
     /* Modal buttons */
     --modal-button-opacity: 0.95;

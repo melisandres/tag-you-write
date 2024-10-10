@@ -17,7 +17,7 @@
 }
 
 .modal-btns .note{
-    background: var(--write-color);
+    background: var(--color-write);
     padding: var(--modal-button-padding);
 }
 

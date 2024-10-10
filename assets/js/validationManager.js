@@ -134,83 +134,85 @@ export class ValidationManager {
         const validators = {
             root: {
                 title: [
-                    this.validateRequired('Give it a name it will grow into'),
-                    this.validateMaxCharacterCount(100, 'Titles must be 100 characters max', 'critical'),
+                    this.validateRequired('*a name to grow into'),
+                    this.validateMaxCharacterCount(100, '*100 characters max', 'critical'),
                 ],
                 writing: [
-                    this.validateRequired('You can\'t leave this empty--writing something is the whole point.'),
-                    this.validateMaxWordCount(0, 50, 'Max 50 words', 'You\'re getting close to your max word count!', 45),
-                    this.validateMaxCharacterCount(2500, 'Writing must be 2500 characters max', 'critical')
+                    this.validateRequired('*required'),
+                    this.validateMaxWordCount(0, 50, '*add 50 words max', '* nearing 50 words...', 45),
+                    this.validateMaxCharacterCount(2500, '*2500 characters max', 'critical')
                 ], 
                 prompt: [
-                    this.validateRequired('You can\'t leave this empty!'),
-                    this.validateMaxWordCount(0, 100, 'Prompt must be 100 words max.'),
-                    this.validateMaxCharacterCount(500, 'Prompt must be 500 characters max.', 'critical')
+                    this.validateRequired('*required'),
+                    this.validateMaxWordCount(0, 100, '*100 words max.'),
+                    this.validateMaxCharacterCount(500, '*500 characters max.', 'critical')
                 ], 
                 keywords: [
-                    this.validateMaxKeywords(5, 'No more than 5 keywords--keywords are comma separated'),
-                    this.validateMaxCharacterCount(255, 'Keywords must be 255 characters max'),
-                    this.validateKeywordWordCount(2, 'Each keyword should be no more than 2 words.'),
+                    this.validateMaxCharacterCount(0, 'max 3 keywords, separated by commas please', 'info'),
+                    this.validateMaxKeywords(5, '*5 keywords max--comma separated'),
+                    this.validateMaxCharacterCount(255, '*255 characters max'),
+                    this.validateKeywordWordCount(2, '*a keyword can be 2 words, but no more.'),
                 ]
             },
             iteration: {
                 title: [
-                    this.validateRequired('Describe your changes'),
-                    this.validateMaxWordCount(0, 3, '3 words or less'),
-                    this.validateMaxCharacterCount(100, 'Titles must be 100 characters max', 'critical'),
+                    this.validateRequired('*required'),
+                    this.validateMaxWordCount(0, 3, '*3 words or less'),
+                    this.validateMaxCharacterCount(100, '*100 characters max', 'critical'),
                     //this.validateUniqueTitle(titleArray, 'Title must be unique')
                 ],
                 writing: [
-                    this.validateRequired('You can\'t leave this empty.'),
-                    this.validateMaxWordCount(this.parentWordCount, 50, 'Max 50 words', 'You\'re getting close to the max word count!', 45),
-                    this.validateWritingChanges(this.parentText, 'You haven\'t made any changes')
+                    this.validateRequired('*required'),
+                    this.validateMaxWordCount(this.parentWordCount, 50, '*add 50 words max', '* nearing 50 words...', 45),
+                    this.validateWritingChanges(this.parentText, '*changes required')
                     ], 
                 keywords: [
-                    this.validateMaxKeywords(5, 'No more than 5 keywords--keywords are comma separated'),
-                    this.validateMaxCharacterCount(255, 'Keywords must be 255 characters max'),
-                    this.validateKeywordWordCount(2, 'Each keyword should be no more than 2 words.'),
+                    this.validateMaxCharacterCount(0, 'max 3 keywords, separated by commas please', 'info'),
+                    this.validateMaxKeywords(5, '*5 keywords max--comma separated'),
+                    this.validateMaxCharacterCount(255, '*255 characters max'),
+                    this.validateKeywordWordCount(2, '*a keyword can be 2 words, but no more.'),
                 ]
             },
             addingNote: {
                 note: [
-                    this.validateRequired('You can\'t leave this empty.'),
-                    this.validateMaxWordCount(0, 50, '50 words max', 'Keep it short and sweet!', 45),
+                    this.validateRequired('*required'),
+                    this.validateMaxWordCount(0, 50, '*50 words max', '*nearing 50 words...', 45),
                 ]
             },
             login: {
                 email: [
-                    this.validateRequired('Enter your username/email'),
-                    this.validateEmail('Your username must be a valid email address')
+                    this.validateRequired('*required'),
+                    this.validateEmail('*must be a valid email address')
                 ],
                 password: [
-                    this.validateRequired('Enter your password')
+                    this.validateRequired('*required')
                 ]
             },
             writerCreate: {
                 firstName: [
-                    this.validateRequired('Enter your first name'),
-                    this.validateMaxCharacterCount(45, 'First name must be 45 characters max'),
-                    this.validatePattern('words', 'First name can only contain letters'),
+                    this.validateRequired('*required'),
+                    this.validateMaxCharacterCount(45, '*45 characters max'),
+                    this.validatePattern('words', '*only letters allowed'),
                 ],
                 lastName: [
-                    this.validateRequired('Enter your last name'),
-                    this.validateMaxCharacterCount(45, 'Last name must be 45 characters max'),
-                    this.validatePattern('words', 'Last name can only contain letters'),
+                    this.validateRequired('*required'),
+                    this.validateMaxCharacterCount(45, '*45 characters max'),
+                    this.validatePattern('words', '*only letters allowed'),
                 ],
                 email: [
-                    this.validateRequired('Enter your email'),
-                    this.validateMaxCharacterCount(50, 'Email must be 50 characters max'),
-                    this.validateEmail('Enter a valid email address'),
+                    this.validateRequired('*required'),
+                    this.validateMaxCharacterCount(50, '*50 characters max'),
+                    this.validateEmail('*must be a valid email address'),
                 ],
                 birthday: [
-                    this.validateDate('Your birthday must be a valid date'),
-                    this.validateRequired('Enter your birthday')
+                    this.validateDate('*must be a valid date'),
+                    this.validateRequired('*required')
                 ],
                 password: [
-                    this.validateRequired('Enter your password'),
-                    this.validateMaxCharacterCount(20, 'Password must be 20 characters max'),
-                    this.validateMinCharacterCount(6, 'Password must be 6 characters min'),
-                    this.validatePattern('alphanum', 'Password can only contain letters and numbers'),
+                    this.validateRequired('*required'),
+                    this.validateMaxCharacterCount(20, '*20 characters max'),
+                    this.validateMinCharacterCount(6, '*6 characters min'),
+                    this.validatePattern('alphanum', '*only letters and numbers allowed'),
                 ]
             }
         };
@@ -368,27 +370,30 @@ export class ValidationManager {
         let feedback = field.nextElementSibling;
 
         // Create feedback element if it doesn't exist
-        if (!feedback || feedback.className !== 'feedback') {
+        if (!feedback || !feedback.classList.contains('feedback')) {
             feedback = document.createElement('div');
             feedback.className = 'feedback';
             field.parentNode.insertBefore(feedback, field.nextSibling);
         }
 
+        // Remove all existing status classes
+        feedback.classList.remove('critical', 'error', 'warning', 'info', 'success');
+
         if (criticalErrors.length > 0) {
             feedback.textContent = criticalErrors[0].message;
-            feedback.classList.add = 'critical';
+            feedback.classList.add('critical');
         } else if (errors.length > 0) {
             feedback.textContent = errors[0].message;
-            feedback.classList.add = 'error';
+            feedback.classList.add('error');
         } else if (warnings.length > 0) {
             feedback.textContent = warnings[0].message;
-            feedback.classList.add = 'warning';
+            feedback.classList.add('warning');
         } else if (infos.length > 0) {
             feedback.textContent = infos[0].message;
-            feedback.classList.add = 'info';
+            feedback.classList.add('info');
         } else if (successes.length > 0) {
             feedback.textContent = successes[0].message;
-            feedback.classList.add = 'success';
+            feedback.classList.add('success');
         } else {
             feedback.textContent = '';
         }
@@ -396,11 +401,11 @@ export class ValidationManager {
         if (feedback.textContent.length > 0) {
             field.classList.add('has-feedback');
             feedback.style.display = 'block';
-            console.log(`Added has-feedback to ${fieldName}`, field); // Add this line
+            console.log(`Added has-feedback to ${fieldName}`, field);
         } else {
             field.classList.remove('has-feedback');
             feedback.style.display = 'none';
-            console.log(`Removed has-feedback from ${fieldName}`, field); // Add this line
+            console.log(`Removed has-feedback from ${fieldName}`, field);
         }
     }
 

@@ -1,10 +1,10 @@
 {{ include('header.php', {title: 'Join our community'})}}
+<section class="form-page">
+    {% if errors is defined %}
+        <span class='error'>{{ errors|raw}}</span>
+    {% endif %}
 
-{% if errors is defined %}
-    <span class='error'>{{ errors|raw}}</span>
-{% endif %}
-
-<form action="{{path}}user/store" method="post">
+    <form action="{{path}}user/store" method="post">
         <label> first name
             <input type="text" name="firstName">
         </label>
@@ -34,5 +34,5 @@
         <input type="hidden" name="privilege_id" value="2">
         <input type="submit" value="Save">
     </form>
-</body>
-</html>
+</section>
+{{ include('footer.php')}}
