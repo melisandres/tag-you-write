@@ -5,6 +5,10 @@
         <span class='error'>{{ errors|raw }}</span>
     {% endif %}
 
+    {% if data.game_title %}
+        <p><strong>{{ data.game_title }}</strong></p>
+    {% endif %}
+
     {% if data.parent_id %}
         <p><strong>you are iterating on:</strong><span class="very-small"> {{ data.parentFirstName }} {{ data.parentLastName }}'s</span> <span>"{{ data.parentTitle }}"</span></p>
         <p><strong>text before your changes: </strong>{{ data.parentWriting }}</p>

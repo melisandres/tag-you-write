@@ -26,6 +26,7 @@ class Text extends Crud{
                         game.prompt AS prompt,
                         game.open_for_changes AS openForChanges,
                         text_status.status AS text_status,
+                        root_text.title AS game_title,
                         IFNULL(voteCounts.voteCount, 0) AS voteCount,
                         IFNULL(playerCounts.playerCount, 0) AS playerCount,
                         CASE WHEN game.winner = text.id THEN TRUE ELSE FALSE END AS isWinner";
@@ -51,6 +52,7 @@ class Text extends Crud{
                     INNER JOIN writer ON text.writer_id = writer.id
                     INNER JOIN text_status ON text.status_id = text_status.id
                     LEFT JOIN game ON text.game_id = game.id
+                    LEFT JOIN text AS root_text ON game.root_text_id = root_text.id
                     LEFT JOIN (
                         SELECT text_id, COUNT(*) AS voteCount
                         FROM vote

@@ -183,7 +183,6 @@ class ControllerText extends Controller{
 
     // We need a method that handles autosaves--making the decision whether to insert or update
     public function autoSave() {
-        error_log("PASSING THROUGH Autosave: line 186");
         // Get JSON input   
         $input = json_decode(file_get_contents('php://input'), true);
         if (json_last_error() !== JSON_ERROR_NONE) {
@@ -196,20 +195,16 @@ class ControllerText extends Controller{
     
         // Get the textId from the input
         $textId = $input['id'] ?? null;
-        //error_log("Autosave: textId: " . $textId);
     
         // update or store, depending on whether the text has an id
         if ($textId) {
-            //error_log("Autosave: update called");
             // Call the update method
             $this->update($input);
         } else {
-            //error_log("Autosave: store called");
             // Call the store method
             $textId = $this->store($input);
         }
         // Return the new text ID in the response
-        //error_log("Autosave: textId: " . $textId);
         $this->sendJsonResponse(true, 'Auto-save successful', ['textId' => $textId]);
     }
 
@@ -218,7 +213,6 @@ class ControllerText extends Controller{
     //associated keywords, etc. be it a new text or an iteration
     //IF its a new text, we create a new game.
     public function store($autoSaveInput = null) {
-        error_log("PASSING THROUGH store: line 200");
         // Check if the writer is logged in
         CheckSession::sessionAuth();
 
@@ -244,7 +238,6 @@ class ControllerText extends Controller{
         $keyWord = new Keyword;
         $textStatus = new TextStatus;
         $parentId = $input['parent_id'] == '' ? null : $input['parent_id'];
-        error_log("HERE!!line 245 parentId: " . $parentId);
         $isRootText = !$input['game_id'] && !$parentId;
         $currentWriterId = $_SESSION['writer_id'];
         // an empty field created in create form to catch the textId returned by the autoSave
@@ -267,7 +260,7 @@ class ControllerText extends Controller{
         $status = $input['text_status'];
         $input['parent_id'] = $parentId;
         $status = $this->validateText($input, $isRootText, $status);
-        //error_log("line 614 status: " . $status);
+
         // Create a new game if this is a root text (no game_id && no parent_id
          if ($isRootText) {
             //error_log("line 616 isRootText: " . $isRootText);
@@ -446,6 +439,7 @@ class ControllerText extends Controller{
                 $textData['parentLastName'] = $parentData['lastName'];
                 $textData['parentTitle'] = $parentData['title'];
                 $textData['parentWriting'] = $parentData['writing'];
+                $textData['game_title'] = $parentData['game_title'];
             }
 
             // Send it all to the form
@@ -850,7 +844,8 @@ class ControllerText extends Controller{
             'title' => '',
             'writing' => $parentData['writing'],
             'keywords' => $cleanKeywordString,
-            'prompt' => $parentData['prompt']
+            'prompt' => $parentData['prompt'],
+            'game_title' => $parentData['game_title']
         ];
 
         // Send it all to the form
