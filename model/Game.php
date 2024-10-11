@@ -23,6 +23,7 @@
                         g.open_for_changes AS openForChanges,
                         rt.id AS id,
                         rt.title AS title,
+                        ts.status AS root_text_status,
                         SUM(CASE WHEN t.status_id = 2 AND t.writer_id != :loggedInWriterId THEN 1 ELSE 0 END) AS text_count,
                         SUM(CASE WHEN s.text_id IS NOT NULL AND t.status_id = 2 AND t.writer_id != :loggedInWriterId AND (t.note_date IS NULL OR s.read_at > t.note_date) THEN 1 ELSE 0 END) AS seen_count,
                         SUM(CASE WHEN s.text_id IS NULL AND t.status_id = 2 AND t.writer_id != :loggedInWriterId THEN 1 ELSE 0 END) AS unseen_count,
@@ -54,6 +55,7 @@
       // Add logic to determine if there are any unseen texts
       foreach ($games as &$game) {
             $game['hasUnseenTexts'] = ($game['unseen_count'] > 0) ? true : false;
+            $game['pending'] = ($game['root_text_status'] == 'draft' || $game['root_text_status'] == 'incomplete_draft') ? true : false;
       }
    
       return $games;

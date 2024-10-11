@@ -156,17 +156,22 @@
 
     /* Story styles */
     --story-box-shadow: 0.5px 0.5px 30px 1px var(--color-primary-light);
-    --story-margin-bottom: var(--spacing-extra-extra-large);
+    --story-margin-bottom: var(--spacing-extra-large);
     --story-title-margin-left: 20px;
     --story-title-padding: 20px 10px;
     --story-title-font-size-min: 0.8rem;
     --story-title-font-size-max: 2rem;
     --story-writing-margin: 20px 10px 30px 10px;
+    --story-writing-padding-left: 20px;
     --story-writing-font-size: var(--font-size-medium-small);
+    --story-prompt-padding-top: 10px;
+    --story-prompt-padding-bottom: 20px;
+    --story-prompt-font-size: var(--font-size-small);
     --game-status-font-size: 12px;
     --story-hover-gradient: radial-gradient(circle, rgba(255, 253, 132, 0.20) 0%, rgba(244, 218, 90, 0) 90%);
     --game-status-closed-gradient: radial-gradient(circle, rgba(253, 175, 191, 0.2) 0%, rgba(244, 218, 90, 0) 90%);
     --game-status-open-gradient: radial-gradient(circle, rgba(132, 255, 167, 0.2) 0%, rgba(244, 218, 90, 0) 90%);
+    --game-status-pending-gradient: radial-gradient(circle, rgba(255, 255, 132, 0.2) 0%, rgba(244, 218, 90, 0) 90%);
 
      /* Toast styles */
      --toast-container-top: var(--spacing-extra-large);

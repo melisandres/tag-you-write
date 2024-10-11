@@ -8,6 +8,9 @@
     {% if data.game_title %}
         <p><strong>{{ data.game_title }}</strong></p>
     {% endif %}
+<!--     {% for key, value in data %}
+        <pre>{{ key }}: {{ value }}</pre>
+    {% endfor %} -->
 
     {% if data.parent_id %}
         <p><strong>you are iterating on:</strong><span class="very-small"> {{ data.parentFirstName }} {{ data.parentLastName }}'s</span> <span>"{{ data.parentTitle }}"</span></p>

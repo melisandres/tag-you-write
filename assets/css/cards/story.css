@@ -1,11 +1,38 @@
 /* this is used in the text-index page where all the stories are listed... these are the styles for each individual story */
 .story {
     display: grid;
-    grid-template-columns: 45% auto;
+    grid-template-columns: 55% auto;
     grid-template-rows: auto auto;
     box-shadow: var(--story-box-shadow);
     background-color: var(--color-white-lightest);
     margin: 0 0 var(--story-margin-bottom) 0;
+}
+
+.story.story-has-showcase {
+    display: grid;
+    grid-template-columns: 1fr 1fr 45%;
+    grid-template-areas:
+        "title title buttons"
+        "writing writing writing"
+        "showcase showcase showcase";
+}
+
+.story.story-has-showcase .story-title {
+    grid-area: title;
+}
+
+.story.story-has-showcase .story-btns {
+    grid-area: buttons;
+}
+
+@media screen and (max-width: 600px) {
+    .story.story-has-showcase .story-writing {
+        grid-area: writing;
+    }
+}
+
+#show-case{
+    grid-area: showcase;
 }
 
 .story.closed {
@@ -14,11 +41,7 @@
 
 .story-btns {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;    
-}
-
-.story-has-showcase .story-btns {
-    grid-column-start: span 2;
+    grid-template-columns: 1fr 1fr 1fr;   
 }
 
 .story-title {
@@ -26,11 +49,19 @@
     margin-left: var(--story-title-margin-left);
     align-items: center;
     height: 98%;
+    max-height: 250px;
+    align-self: center;
+    height: 100%;
 }
 
 .story-title h2 {
     padding: var(--story-title-padding);
     font-size: clamp(var(--story-title-font-size-min), 2vw, var(--story-title-font-size-max)); 
+    font-weight: 400;
+    max-width: none;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
 }
 
 .story-title:hover {
@@ -40,56 +71,145 @@
 
 .story-writing {
     display: flex;
-    flex-direction: row;
-    align-items: center;
+    /* width: 100%; */
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
     margin: var(--story-writing-margin);
     overflow: hidden;
     grid-column-start: span 2;
+    margin-top: -25px;
 }
 
 .story-writing > p {
     padding: 0;
+    padding-left: var(--story-writing-padding-left);
     font-size: var(--story-writing-font-size);
-    overflow: hidden;
     text-overflow: ellipsis;
 }
 
-.game-status {
-    font-size: var(--game-status-font-size);
+.story-prompt {
+    margin-top: -40px;
+    padding-top: 0;
+    padding-left: var(--story-writing-padding-left);
+
+     /* Scrollbar styling for WebKit browsers (Chrome, Safari, newer versions of Edge) */
+    &::-webkit-scrollbar {
+        width: 8px; /* Width of the scrollbar */
+    } 
+
+   &::-webkit-scrollbar-track {
+        background: var(--color-primary-lightest);
+   }
+
+     /* Scrollbar styling for Firefox */
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-primary-dark) var(--color-white-lightest); /* thumb and track color */
 }
 
-.game-status.closed {
+/* the "prompt:" text/title */
+.story-prompt > h3 {
+    padding: 0;
+    padding-bottom: 6px;
+    font-weight: 300;
+}
+
+.story-prompt > p {
+    padding: 0;
+    overflow-y: auto;
+    max-height: 100px;
+    font-size: var(--story-prompt-font-size);
+} 
+
+.game-status > span{
+    font-size: var(--game-status-font-size);
+    padding: 0;
+    display: block;
+}
+
+.game-status-indicator {
+    align-self: flex-end;
+}
+
+.game-status-indicator.closed {
     background-image: var(--game-status-closed-gradient);
 }
 
-.game-status.open {
+.game-status-indicator.open {
     background-image: var(--game-status-open-gradient);
+}
+
+.game-status-indicator.pending {
+    background-image: var(--game-status-pending-gradient);
 }
 
 @media screen and (min-width: 600px) {
     .story {
-        grid-template-rows: auto;
-        grid-template-columns: 20% 20% auto;
-        gap: 5px;
+        display: grid;
+        grid-template-rows: auto auto;
+        grid-template-columns: 35% 15% auto;
         width: 100%;
     }
 
     .story-writing {
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        height: 100%;
         margin-top: auto;
-        margin-bottom: auto;
+        margin-bottom: auto; 
         margin-right: var(--story-title-margin-left);
         overflow: hidden;
         grid-column-start: span 1;
     }
+
+    .game-status-indicator {
+        align-self: center;
+    }
     
     .story-writing > p {
         padding: 0;
+        padding-left: var(--story-writing-padding-left);
         font-size: var(--story-writing-font-size);
-        overflow: hidden;
+        overflow: hidden;   
         text-overflow: ellipsis;
     }
 
-    .story-has-showcase .story-btns {
-        grid-column-start: span 1;
+    div.story-prompt {
+        overflow-y: auto;
+        max-height: 150px;
+        margin: 0;
+        padding-top: 10px;
+        padding-bottom: 10px;
     }
+
+/*     .story-has-showcase .story-btns {
+        grid-column-start: span 1;
+    } */
+
+    .story.story-has-showcase {
+        display: grid;
+        grid-template-columns: 35% auto auto;
+        grid-template-areas:
+            "title buttons writitng"
+            "showcase showcase showcase";
+    }
+    
+    .story.story-has-showcase .story-title {
+        grid-area: title;
+    }
+    
+    .story.story-has-showcase .story-btns {
+        grid-area: buttons;
+    }
+    
+    .story.story-has-showcase div.story-writing {
+        /* grid-area: writing; */
+    }
+    
+    #showcase {
+        grid-area: showcase;
+        grid-column: 1 / -1; /* Spans all columns */
+      }
+    
 }

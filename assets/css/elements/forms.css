@@ -19,6 +19,10 @@ label span.headline{
     background-color: transparent;
 }
 
+.form-warning {
+    background-color: var(--color-primary-light);
+}
+
 label{
     display: block;
 }

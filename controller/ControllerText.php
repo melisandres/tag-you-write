@@ -262,7 +262,7 @@ class ControllerText extends Controller{
         $status = $this->validateText($input, $isRootText, $status);
 
         // Create a new game if this is a root text (no game_id && no parent_id
-         if ($isRootText) {
+        if ($isRootText) {
             //error_log("line 616 isRootText: " . $isRootText);
             $gameController = new ControllerGame;
             $gameId = $gameController->createGame($input);
@@ -303,8 +303,20 @@ class ControllerText extends Controller{
             'writer_id' => $currentWriterId,
             'date' => date('Y-m-d H:i:s')
         ];
-        //error_log("line 625 textToSave: " . json_encode($textToSave));
+        //save the text
         $textIdFromInsert = $text->insert($textToSave);
+
+        //if this is a root text, save the root text id in the game
+        if ($isRootText) {
+            $data = [
+                'id' => $input['game_id'],
+                'root_text_id' => $textIdFromInsert
+            ];
+            $game = new Game;
+            $game->update($data);
+        }
+
+
 
         //send the writer_id and the game_id to game_has_player
         if ($status == 'published') {
@@ -920,7 +932,7 @@ class ControllerText extends Controller{
 
     private function sendJsonResponse($success, $message, $additionalData = null) {
             // Clear any output that might have been sent before
-    if (ob_get_length()) ob_clean();
+        if (ob_get_length()) ob_clean();
         $response = [
             'success' => $success,
             'toastMessage' => $message,
