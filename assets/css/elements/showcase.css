@@ -6,3 +6,15 @@
     width: 90%;
     margin-bottom: 40px;
 }
+
+.legend.hidden .legend-box {
+    height: 0px;
+}
+
+.legend.hidden .legend-item {
+    display: none;
+}
+
+.legend-toggle {
+    display: block; /* Ensure toggle is always visible */
+}

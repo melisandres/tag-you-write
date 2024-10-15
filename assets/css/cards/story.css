@@ -15,6 +15,11 @@
         "title title buttons"
         "writing writing writing"
         "showcase showcase showcase";
+    border: 10px solid var(--color-black);
+}
+
+.story.story-has-showcase #showcase {
+    background-color: var(--color-white-lightest);
 }
 
 .story.story-has-showcase .story-title {
@@ -25,9 +30,11 @@
     grid-area: buttons;
 }
 
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 800px) {
     .story.story-has-showcase .story-writing {
+        flex-direction: column;
         grid-area: writing;
+        /* background-color: var(--color-primary-lightest); */
     }
 }
 
@@ -143,12 +150,13 @@
     background-image: var(--game-status-pending-gradient);
 }
 
-@media screen and (min-width: 600px) {
+@media screen and (min-width: 800px) {
     .story {
         display: grid;
-        grid-template-rows: auto auto;
-        grid-template-columns: 35% 15% auto;
-        width: 100%;
+        grid-template-columns: 35% 15% 1fr;
+       /*  width: 100%; */
+        grid-template-areas:
+        "title buttons writing";
     }
 
     .story-writing {
@@ -160,7 +168,7 @@
         margin-bottom: auto; 
         margin-right: var(--story-title-margin-left);
         overflow: hidden;
-        grid-column-start: span 1;
+        /* grid-column-start: span 1; */
     }
 
     .game-status-indicator {
@@ -189,27 +197,27 @@
 
     .story.story-has-showcase {
         display: grid;
-        grid-template-columns: 35% auto auto;
+        grid-template-columns: 35% 15% auto;
         grid-template-areas:
-            "title buttons writitng"
+            "title buttons writing"
             "showcase showcase showcase";
     }
     
-    .story.story-has-showcase .story-title {
+   /*  .story.story-has-showcase */ .story-title {
         grid-area: title;
     }
     
-    .story.story-has-showcase .story-btns {
+/*     .story.story-has-showcase  */.story-btns {
         grid-area: buttons;
     }
     
-    .story.story-has-showcase div.story-writing {
-        /* grid-area: writing; */
+   /*  .story.story-has-showcase div */.story-writing {
+        grid-area: writing;
     }
     
     #showcase {
         grid-area: showcase;
-        grid-column: 1 / -1; /* Spans all columns */
+       /*  grid-column: 1 / -1; */ /* Spans all columns */
       }
     
 }

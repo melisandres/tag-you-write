@@ -30,6 +30,7 @@ export class TreeVisualizer {
         // Handle the lengend position on browser resize
         this.legend = null;
         this.updateLegendPosition = this.updateLegendPosition.bind(this);
+        this.toggleLegend = this.toggleLegend.bind(this);
         window.addEventListener('resize', this.updateLegendPosition);
     }
 
@@ -209,6 +210,27 @@ export class TreeVisualizer {
         // The Legend
         this.createLegend(data);
         
+        // Add toggle button for legend
+       /*  const toggleButton = this.svg.append("g")
+            .attr("class", "legend-toggle")
+            .attr("transform", `translate(${this.containerWidth - 80}, 20)`)
+            .style("cursor", "pointer")
+            .on("click", () => this.toggleLegend());
+
+        toggleButton.append("rect")
+            .attr("width", 65)
+            .attr("height", 20)
+            .attr("fill", "lightgray");
+
+        toggleButton.append("text")
+            .attr("x", 10)
+            .attr("y", 15)
+            .attr("text-anchor", "center")
+            .text("Legend")
+            .style("font-size", "14px")
+            .style("fill", "black"); */
+
+
     }
 
     createLegend(d) {
@@ -223,9 +245,14 @@ export class TreeVisualizer {
         ];
     
         const legend = self.svg.append("g")
-        .attr("class", "legend")
-/*         .attr("transform", `translate(${self.containerWidth - 646}, ${self.containerHeight - 276})`); */
-        .attr("transform", `translate(${self.containerWidth - 112}, ${self.containerHeight - 137})`);
+            .attr("class", "legend")
+            .classed("hidden", false)
+            .attr("transform", `translate(${self.containerWidth - 112}, ${self.containerHeight - 137})`)
+            .style("cursor", "pointer")
+            .on("click", () => {
+                console.log('Legend clicked');
+                self.toggleLegend();
+            });
 
 
         // Add a background box to the legend
@@ -316,20 +343,74 @@ export class TreeVisualizer {
                     .attr("y", 5)
                     .text(d.label)
                     .style("font-size", "15px");
-
-            }
+            }  
         });
+
+         // Add toggle button under the legend
+         const toggleButton = self.svg.append("g")
+            .attr("class", "legend-toggle")
+            .attr("transform", `translate(${self.containerWidth  - 95}, ${self.containerHeight - 30})`)
+            .style("cursor", "pointer")
+            .style("display", "none") 
+            .on("click", () => this.toggleLegend());
+
+        toggleButton.append("rect")
+            .attr("width", 90)
+            .attr("height", 25)
+            .attr("fill", "floralwhite")
+            .attr("stroke", "black")
+            .attr("rx", 5)
+            .attr("ry", 5);
+
+        toggleButton.append("text")
+            .attr("x", 45)
+            .attr("y", 17)
+            .attr("text-anchor", "middle")
+            .text("Hide Legend")
+            .style("font-size", "14px")
+            .style("fill", "black");
+
+        // clicking on the legend will toggle it off
+        const toggleLegend = legend.append("g")
+            .attr("class", "legend-toggle")
+            .attr("transform", `translate(0, ${legendData.length * 45 + legendBoxPadding})`)
+            .style("cursor", "pointer")
+            .on("click", () => this.toggleLegend());
+
+        toggleLegend.append("rect")
+            .attr("width", 90)
+            .attr("height", 25)
+            .attr("fill", "lightgray");
+
+        toggleLegend.append("text")
+            .attr("x", 45)
+            .attr("y", 17)
+            .attr("text-anchor", "middle")
+            .text("Hide Legend")
+            .style("font-size", "14px")
+            .style("fill", "black");
+
+       
+
+        this.legend = legend;
+        this.legendToggle = toggleButton;
+
+        
+
          // Handle the legend position on browser resize
-         this.legend = legend;
+         //this.legend = legend;
          //this.updateLegendPosition();
     }
 
     updateLegendPosition() {
-        console.log('Resize event triggered');
         if (this.legend) {
             const newX = this.container.clientWidth - 112;
             const newY = this.container.clientHeight - 137;
             this.legend.attr("transform", `translate(${newX}, ${newY})`);
+            
+            // Update toggle button position
+            const toggleX = this.container.clientWidth - 95;
+            this.legendToggle.attr("transform", `translate(${toggleX}, ${this.container.clientHeight - 30})`);
         }
     }
 
@@ -343,7 +424,20 @@ export class TreeVisualizer {
         `;
     }
 
+    toggleLegend() {
+        console.log('toggleLegend');
+        const legend = this.svg.select(".legend");
+        const isVisible = !legend.classed("hidden");
+        legend.classed("hidden", isVisible);
+    
+        const toggleText = this.legendToggle.select("text");
+        toggleText.text(isVisible ? "Show Legend" : "Hide Legend");
 
+        // Hide the toggle button when the legend is visible
+        this.legendToggle.style("display", isVisible ? "block" : "none");
+    
+        this.updateLegendPosition();
+    }
 
     /* updateNodeStatus(nodeId, newStatus) {
         console.log(`Updating node ${nodeId} to status ${newStatus}`);
