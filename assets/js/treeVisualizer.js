@@ -29,7 +29,9 @@ export class TreeVisualizer {
 
         // Handle the lengend position on browser resize
         this.legend = null;
+        this.userToggledLegend = false;
         this.updateLegendPosition = this.updateLegendPosition.bind(this);
+        this.updateLegendVisibility = this.updateLegendVisibility.bind(this);
         this.toggleLegend = this.toggleLegend.bind(this);
         window.addEventListener('resize', this.updateLegendPosition);
     }
@@ -157,32 +159,31 @@ export class TreeVisualizer {
                 document.dispatchEvent(customEvent);
             });
   
-            const colorScale = this.colorScale;
-            const baseColor = this.baseColor;
+        const colorScale = this.colorScale;
+        const baseColor = this.baseColor;
 
-            node.each(function(d) {
-                const item = d3.select(this);
-                if (d.data.isWinner) {
-                    item.append("path")
-                        .attr("d", d3.symbol().type(d3.symbolStar).size(200))  // Use star for winner
-                        .attr('class', d => d.data.text_seen == 1 ? 'star read' : 'star unread')  // Add class based on condition
-                        .attr('data-id', d => d.data.id)  // Add data-set for text id
-                        .attr("fill", baseColor);  // Star color for winner
-                } else {
-                    item.append("circle")
-                        .attr("r", 10)
-                        .attr('class', d => {
-                            // Concatenate multiple classes based on conditions
-                            let classes = `${d.data.text_seen == 1 ? 'read' : 'unread'}`;
-                            classes += ` ${d.data.text_status == 'draft' || d.data.text_status == 'incomplete_draft'  ? 'tree-node-draft' : ''}`; // Add class for draft status
-                            return classes.trim();  // Remove any extra spaces
-                        })
-                        .attr('data-id', d => d.data.id)  // Add data-set for text id
-                        .attr('fill', d => colorScale(d.data.voteCount)); // Add a fill with color based on votes
-                }
-            });
+        node.each(function(d) {
+            const item = d3.select(this);
+            if (d.data.isWinner) {
+                item.append("path")
+                    .attr("d", d3.symbol().type(d3.symbolStar).size(200))  // Use star for winner
+                    .attr('class', d => d.data.text_seen == 1 ? 'star read' : 'star unread')  // Add class based on condition
+                    .attr('data-id', d => d.data.id)  // Add data-set for text id
+                    .attr("fill", baseColor);  // Star color for winner
+            } else {
+                item.append("circle")
+                    .attr("r", 10)
+                    .attr('class', d => {
+                        // Concatenate multiple classes based on conditions
+                        let classes = `${d.data.text_seen == 1 ? 'read' : 'unread'}`;
+                        classes += ` ${d.data.text_status == 'draft' || d.data.text_status == 'incomplete_draft'  ? 'tree-node-draft' : ''}`; // Add class for draft status
+                        return classes.trim();  // Remove any extra spaces
+                    })
+                    .attr('data-id', d => d.data.id)  // Add data-set for text id
+                    .attr('fill', d => colorScale(d.data.voteCount)); // Add a fill with color based on votes
+            }
+        });
             
-  
         // Add the title
         node.append("text")
             .attr("dy", "-0.35em")
@@ -208,33 +209,12 @@ export class TreeVisualizer {
         this.svg.call(zoom);
 
         // The Legend
-        this.createLegend(data);
-        
-        // Add toggle button for legend
-       /*  const toggleButton = this.svg.append("g")
-            .attr("class", "legend-toggle")
-            .attr("transform", `translate(${this.containerWidth - 80}, 20)`)
-            .style("cursor", "pointer")
-            .on("click", () => this.toggleLegend());
-
-        toggleButton.append("rect")
-            .attr("width", 65)
-            .attr("height", 20)
-            .attr("fill", "lightgray");
-
-        toggleButton.append("text")
-            .attr("x", 10)
-            .attr("y", 15)
-            .attr("text-anchor", "center")
-            .text("Legend")
-            .style("font-size", "14px")
-            .style("fill", "black"); */
-
-
+        this.createLegend(data);   
     }
 
     createLegend(d) {
         const self = this;
+        
         //console.log(d);
         //const gameTitle = data.title;
         const maxVotes = d.playerCount -1;
@@ -346,8 +326,8 @@ export class TreeVisualizer {
             }  
         });
 
-         // Add toggle button under the legend
-         const toggleButton = self.svg.append("g")
+        // Add toggle button under the legend
+        const toggleButton = self.svg.append("g")
             .attr("class", "legend-toggle")
             .attr("transform", `translate(${self.containerWidth  - 95}, ${self.containerHeight - 30})`)
             .style("cursor", "pointer")
@@ -366,7 +346,7 @@ export class TreeVisualizer {
             .attr("x", 45)
             .attr("y", 17)
             .attr("text-anchor", "middle")
-            .text("Hide Legend")
+            .text("Show Legend")
             .style("font-size", "14px")
             .style("fill", "black");
 
@@ -381,25 +361,12 @@ export class TreeVisualizer {
             .attr("width", 90)
             .attr("height", 25)
             .attr("fill", "lightgray");
-
-        toggleLegend.append("text")
-            .attr("x", 45)
-            .attr("y", 17)
-            .attr("text-anchor", "middle")
-            .text("Hide Legend")
-            .style("font-size", "14px")
-            .style("fill", "black");
-
        
-
         this.legend = legend;
         this.legendToggle = toggleButton;
 
-        
-
-         // Handle the legend position on browser resize
-         //this.legend = legend;
-         //this.updateLegendPosition();
+        // Set initial state
+        this.updateLegendVisibility();
     }
 
     updateLegendPosition() {
@@ -411,9 +378,21 @@ export class TreeVisualizer {
             // Update toggle button position
             const toggleX = this.container.clientWidth - 95;
             this.legendToggle.attr("transform", `translate(${toggleX}, ${this.container.clientHeight - 30})`);
+
+            // Update visibility based on screen size
+            this.updateLegendVisibility();
         }
     }
 
+    updateLegendVisibility() {
+        const isSmallScreen = this.isSmallScreen();
+
+        if (!this.userToggledLegend) {
+            // Only update if the user hasn't manually toggled
+            this.legend.classed("hidden", isSmallScreen);
+            this.legendToggle.style("display", isSmallScreen ? "block" : "none");
+        }
+    }
         
     showD3UnavailableMessage() {
         this.container.innerHTML = `
@@ -425,18 +404,16 @@ export class TreeVisualizer {
     }
 
     toggleLegend() {
-        console.log('toggleLegend');
-        const legend = this.svg.select(".legend");
-        const isVisible = !legend.classed("hidden");
-        legend.classed("hidden", isVisible);
-    
-        const toggleText = this.legendToggle.select("text");
-        toggleText.text(isVisible ? "Show Legend" : "Hide Legend");
+        const isVisible = !this.legend.classed("hidden");
+        this.legend.classed("hidden", isVisible);
 
         // Hide the toggle button when the legend is visible
         this.legendToggle.style("display", isVisible ? "block" : "none");
-    
-        this.updateLegendPosition();
+        this.userToggledLegend = true;
+    }
+
+    isSmallScreen() {
+        return this.container.clientWidth < 550;
     }
 
     /* updateNodeStatus(nodeId, newStatus) {
