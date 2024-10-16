@@ -25,6 +25,18 @@
     height: 30px;
 }
 
+.login svg {
+    fill: currentColor;
+    width: 29px;
+    height: 29px;
+}
+
+.logout svg {
+    fill: currentColor;
+    width: 29px;
+    height: 29px;
+}
+
 .delete svg {
     fill: currentColor;
     width: 37px;

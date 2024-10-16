@@ -80,8 +80,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // const warningManager = new WarningManager();
 
   //And your forms need managing (!)
+  // Buttons listen for validation emitions... 
+  new ButtonUpdateManager(autoSaveManager);
   const validationManager = new ValidationManager();
   new FormManager(autoSaveManager, validationManager, path);
+
 
   //new ValidationManager(formManager);
 
@@ -94,7 +97,7 @@ document.addEventListener("DOMContentLoaded", () => {
   new TreeUpdateManager();
   new ModalUpdateManager(path);
   new IndexUpdateManager();
-  new ButtonUpdateManager(autoSaveManager);
+
 
    // Check for pending toasts
    const pendingToast = localStorage.getItem('pendingToast');

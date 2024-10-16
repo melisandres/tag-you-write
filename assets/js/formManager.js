@@ -11,6 +11,7 @@ export class FormManager {
         this.formType = this.form ? this.form.getAttribute('data-form-type') : null;
         this.statusField = this.form ? this.form.querySelector('[data-text-status]') : null;
         this.buttons = this.form ? this.form.querySelectorAll('[data-status]') : null;
+        this.canPublish = false;
 
         this.init();
     }
@@ -24,8 +25,12 @@ export class FormManager {
             this.setupExitWarning();
             // SetupCheckForInput is used for autosave AND for validation --so you always need it
             this.setupCheckForInput();
-
+            eventBus.on('validationChanged', this.handleValidationChanged.bind(this));
         }
+    }
+
+    handleValidationChanged(results) {
+        this.canPublish = results.canPublish;
     }
 
     // Ensure that all the buttons on the form trigger asyncronous actions
@@ -86,12 +91,25 @@ export class FormManager {
 
     // New method to handle publishing logic
     handlePublish() {
-        const addNote = this.form.querySelector('input[name="currentPage"]').value === 'text-note-edit.php';
-
-        if (addNote) {
-            this.showAddNoteWarning();
-        } else {
-            this.showPublishWarning();
+        if (!this.canPublish){
+            eventBus.emit('showToast', { 
+                message: 'validation failed', 
+                type: 'error' 
+            });
+            return;
+        }
+        switch (this.formType) {
+            case 'root':
+                this.showNewGameWarning();
+                break;
+            case 'addingNote':
+                this.showAddNoteWarning();
+                break;
+            case 'iteration':
+                this.showPublishWarning();
+                break;
+            default:
+                this.showPublishWarning();
         }
     }
 
@@ -137,6 +155,18 @@ export class FormManager {
         );
     }
 
+    showNewGameWarning() {
+        const warningManager = new WarningManager();
+        warningManager.createWarningModal(
+            `Ready to start a new game? This action cannot be undone.`,
+            () => {
+                this.statusField.value = 'published';
+                this.submitForm(`${this.path}text/update`);
+            },
+            () => console.log("New game cancelled") 
+        );
+    }
+
     showDeleteWarning() {
         const warningManager = new WarningManager();
         warningManager.createWarningModal(
@@ -146,8 +176,6 @@ export class FormManager {
         );
     }
 
-   
-
     // Method to inject SVGs into form buttons
     injectSVGIcons() {
         if (!this.form) return;
@@ -156,11 +184,13 @@ export class FormManager {
         const saveBtn = this.form.querySelector('.save .icon');
         const deleteBtn = this.form.querySelector('.delete .icon');
         const cancelBtn = this.form.querySelector('.cancel .icon');
+        const loginBtn = this.form.querySelector('.login .icon');
 
         if (publishBtn) publishBtn.innerHTML = SVGManager.publishSVG;
         if (saveBtn) saveBtn.innerHTML = SVGManager.saveSVG;
         if (deleteBtn) deleteBtn.innerHTML = SVGManager.deleteSVG;
         if (cancelBtn) cancelBtn.innerHTML = SVGManager.cancelSVG;
+        if (loginBtn) loginBtn.innerHTML = SVGManager.logInSVG;
     }
 
     // TODO: I'm keeping this, but it may be better in autoSaveManager

@@ -8,6 +8,7 @@ export class UIManager {
     this.modal = modal;
     this.SVGManager = SVGManager;
     this.initSvgs();
+    this.insertLoginLogoutSVGs(); // Add this line
     this.initEventListeners();
     this.stories = document.querySelector(".stories");
   }
@@ -140,5 +141,20 @@ export class UIManager {
     }
 
     return container;
+  }
+
+  insertLoginLogoutSVGs() {
+    const loginLink = document.querySelector('.nav-link.writers[href*="login"]:not([href*="logout"])');
+    const logoutLink = document.querySelector('.nav-link.writers[href*="logout"]');
+
+    if (loginLink) {
+      loginLink.innerHTML = this.SVGManager.logInSVG;
+      loginLink.setAttribute('title', 'Login');
+    }
+
+    if (logoutLink) {
+      logoutLink.innerHTML = this.SVGManager.logOutSVG;
+      logoutLink.setAttribute('title', 'Logout');
+    }
   }
 }

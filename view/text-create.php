@@ -8,17 +8,23 @@
     {% if data.game_title %}
         <p><strong>{{ data.game_title }}</strong></p>
     {% endif %}
+
 <!--     {% for key, value in data %}
         <pre>{{ key }}: {{ value }}</pre>
     {% endfor %} -->
 
     {% if data.parent_id %}
-        <p><strong>you are iterating on:</strong><span class="very-small"> {{ data.parentFirstName }} {{ data.parentLastName }}'s</span> <span>"{{ data.parentTitle }}"</span></p>
-        <p><strong>text before your changes: </strong>{{ data.parentWriting }}</p>
+        <div class="iteration-info">
+            <p><strong>you are iterating on:</strong><span> {{ data.parentFirstName }} {{ data.parentLastName }}'s</span> <span> "{{ data.parentTitle }}"</span></p>
+            <p>{{ data.parentWriting }}</p>
+        </div>
+        <div class="prompt-info">
+            <p><strong>prompt:</strong> {{ data.prompt }}</p>
+        </div>
     {% elseif not data.id %}
-        <p>Hit publish, and your title and prompt will be carved in STONE.<br>
-        Alternatively, your text will be open to edits, disfigurations, and flights of fancy.<br>
-        Be forewarned. And may the best iteration win!</p>
+        <p>While your title and prompt will be carved in STONE,
+        your text will be rehashed by all who join the game.<br>
+        May the best iteration win!</p>
     {% endif %}
     <!-- action="{{ path }}text/{{ data.id ? 'update' : 'store' }}" -->
     </div>
@@ -26,7 +32,7 @@
     <form id="main-form" data-form-type="{{ data.parent_id ? 'iteration' : 'root' }}" data-form-activity="{{ data.id ? 'editing' : 'creating' }}" method="post">
         <label>
         {% if not data.parent_id %}
-            <span class="headline">title</span>
+            <span class="headline">choose a title</span>
         {% else %}
             <span class="headline">describe your changes</span>
         {% endif %}
@@ -40,14 +46,13 @@
         {% if not data.parent_id %}
             <label>
                 <span class="headline">create a prompt</span> 
-                <span class="additional-info">(a goal to guide future iterations):</span>
                 <textarea name="prompt" rows="2" cols="50" placeholder="Instructions: how to run away from yourself, when you are also chasing yourself...">{{ data.prompt|default('') }}</textarea>
             </label>
         {% endif %}
         
         <label>
             <div class="title-and-word-count">
-                <span class="headline">{{ data.parent_id ? '' : 'kickoff the ' }}text</span>
+                <span class="headline">{{ data.parent_id ? 'change the text' : 'kickoff the text' }}</span>
                 <div class="word-count-display" data-word-count-display>
                     <span class="word-count-number"></span>
                     <span class="word-count-tooltip"></span>

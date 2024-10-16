@@ -17,10 +17,10 @@
         </label>
 
         <div class="form-btns">
-            <button type="submit" value="Login">    
-                <div class="icon"></div>
-                <div class="title">login</div>
-            </button>    
+            <button class="login" type="submit" value="login" data-button-type="login">
+                <span class="icon"></span>
+                <span class="title">login</span>
+            </button>
         </div>
     </form>
     <p>

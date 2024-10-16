@@ -27,11 +27,13 @@ export class ButtonUpdateManager {
         eventBus.on('formUpdated', this.handleFormUpdated.bind(this));
         eventBus.on('inputChanged', this.handleInputChanged.bind(this));
 
+        // Initial button state update
         this.updateButtons();
     }
 
     updateButtons() {
         this.updatePublishButton();
+
         this.updateSaveButton( this.hasUnsavedChanges );
         this.updateDeleteButton();
         this.updateExitButton();    
@@ -43,6 +45,7 @@ export class ButtonUpdateManager {
         this.updateSaveButton(results.canAutosave);
     }
 
+    // TODO: when you load a draft... canAutosave is... either through formUpdate or InputChanged... calling updateSaveButton on load, and sending it hasUnsavedChanges = true... which is making the button available when it shouldn't be... not a big deal, but a little annoying.. 
     handleFormUpdated() {
         this.hasUnsavedChanges = false;
         if (!this.hasAnId){
@@ -70,6 +73,7 @@ export class ButtonUpdateManager {
         // This may receive a stateChange = hasUnsavedChanges or canAutosave
         // hasUnsavedChanges is connected to a listener on form inputs
         // canAutosave is connected to a listener on validation
+        console.log('updateSaveButton', stateChange);
         if (this.saveButton) {
             this.saveButton.classList.toggle('disabled', !stateChange);
         }

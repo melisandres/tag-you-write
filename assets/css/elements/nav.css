@@ -8,7 +8,7 @@ nav{
 
 a.nav-link{
     font-family: 'Courier New', Courier, monospace;
-    font-size: 20px;
+    font-size: var(--font-size-small);
     padding:15px;
     color: white;
     text-decoration: none;
@@ -20,3 +20,14 @@ a.nav-link:hover{
     border-bottom: hotpink solid 3px;
     color: pink;
 }
+
+a.nav-link svg {
+    width: 20px;
+    height: 20px;
+    fill: white; /* This makes the SVG icon white when in the nav */
+}
+
+a.nav-link:hover svg {
+    fill: pink; /* This changes the SVG color to pink on hover, matching the text color */
+}
+

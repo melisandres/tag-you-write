@@ -134,18 +134,21 @@ export class ValidationManager {
         const validators = {
             root: {
                 title: [
-                    this.validateRequired('*a name to grow into'),
+                    this.validateRequired('*a name for the text to grow into'),
                     this.validateMaxCharacterCount(100, '*100 characters max', 'critical'),
+                    this.validateMaxCharacterCount(0, '*the title you choose will be carved in stone', 'info')
                 ],
                 writing: [
-                    this.validateRequired('*required'),
+                    this.validateRequired('*don\'t be too precious...'),
+                    this.validateMaxCharacterCount(0, '*whatever you write will be subject to iteration', 'info'),
                     this.validateMaxWordCount(0, 50, '*add 50 words max', '* nearing 50 words...', 45),
-                    this.validateMaxCharacterCount(2500, '*2500 characters max', 'critical')
                 ], 
                 prompt: [
-                    this.validateRequired('*required'),
+                    this.validateMaxCharacterCount(0, '*your prompt will be the yardstick for all iterations', 'info'),
+                    this.validateRequired('*a prompt to steer all iterations'),
+                    this.validateMaxCharacterCount(0, '*the prompt you choose will be carved in stone', 'info'),
                     this.validateMaxWordCount(0, 100, '*100 words max.'),
-                    this.validateMaxCharacterCount(500, '*500 characters max.', 'critical')
+                    this.validateMaxCharacterCount(500, '*500 characters max.', 'critical'),
                 ], 
                 keywords: [
                     this.validateMaxCharacterCount(0, 'max 3 keywords, separated by commas please', 'info'),
@@ -398,14 +401,10 @@ export class ValidationManager {
             feedback.textContent = '';
         }
 
-        if (feedback.textContent.length > 0) {
+        if (feedback.textContent.length > 0 && (feedback.classList.contains('critical') || feedback.classList.contains('error') || feedback.classList.contains('warning'))) {
             field.classList.add('has-feedback');
-            feedback.style.display = 'block';
-            console.log(`Added has-feedback to ${fieldName}`, field);
         } else {
             field.classList.remove('has-feedback');
-            feedback.style.display = 'none';
-            console.log(`Removed has-feedback from ${fieldName}`, field);
         }
     }
 
@@ -437,17 +436,6 @@ export class ValidationManager {
     countWords(text) {
         return text.trim().split(/\s+/).filter(word => word.length > 0).length;
     }
-
-    /* checkOverallValidity() {
-        const canAutosave = Object.values(this.formValidity).every(field => 
-            field.canAutosave
-        );
-        const canPublish = Object.values(this.formValidity).every(field => 
-            field.canPublish
-        );
-    
-        eventBus.emit('validationChanged', { canAutosave, canPublish });
-    } */
    
     checkOverallValidity() {
         const canAutosave = Object.values(this.formValidity).every(field => 
@@ -463,7 +451,6 @@ export class ValidationManager {
             fields: this.formValidity
         };
 
-        // Only emit if there's a change in canAutosave or canPublish
         // Only emit if there's a change in canAutosave or canPublish
         if (this.lastValidationStatus?.canAutosave !== canAutosave || 
             this.lastValidationStatus?.canPublish !== canPublish) {

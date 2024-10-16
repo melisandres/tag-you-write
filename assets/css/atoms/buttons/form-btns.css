@@ -21,6 +21,11 @@
     color: var(--color-grey);
 }
 
+.form-btns button.disabled {
+    cursor: auto;
+    opacity: 0.3;
+}
+
 .form-btns .icon {
     width: var(--form-button-icon-size);
     height: var(--form-button-icon-size);
@@ -32,10 +37,14 @@
     height: var(--form-button-svg-size);
 }
 
+
+
 .form-btns button.publish .icon { background-color: var(--color-success); }
 .form-btns button.save .icon { background-color: var(--color-save); }
 .form-btns button.delete .icon { background-color: var(--color-error); }
 .form-btns button.cancel .icon { background-color: var(--color-grey); }
+.form-btns button.login .icon { background-color: var(--color-success); }
+.form-btns button.logout .icon { background-color: var(--color-error); }
 
 /* the buttons are currently all in forms */
 /* these button styles are for the buttons in the tree modal */
