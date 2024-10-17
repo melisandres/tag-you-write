@@ -716,8 +716,14 @@ class ControllerText extends Controller{
         // No access if you are not logged in
         CheckSession::sessionAuth();
 
+        error_log("LOOK HERE LOOK HERE LOOK HERE");
+
         $currentWriterId = $_SESSION['writer_id'];
         $textId = $_POST['id']; 
+
+        error_log("textId: " . $textId);
+
+
         //$insta = isset($_POST['insta']) && $_POST['insta'] === '1';
         $text = new Text;
         $keyword = new Keyword;
@@ -725,6 +731,9 @@ class ControllerText extends Controller{
 
         //TODO: I think I'm going a little crazy. a bunch of things I need for my checks will be in $textData--like the parent_id, which I don't need to send via the form--oh, but I do, because it helps decide the view.
         $textData = $text->selectTexts($currentWriterId, $textId);
+
+        error_log("textData: " . json_encode($textData));
+
         $this->addPermissions($textData, $currentWriterId);
         $isRoot = $textData['parent_id'] == '' ? true : false;
 
@@ -771,13 +780,22 @@ class ControllerText extends Controller{
         // Directly delete all entries in the `seen` table that reference this text
         $seen->deleteById($textId);
 
+        // If the text deleted is a root, remove the reference to it in the game
+        if($isRoot){
+            $game = new Game;
+            // Update the game to remove the reference to this text
+            $game->update(['id' => $textData['game_id'], 'root_text_id' => null]);
+        }
+
+        // Now that the game (if this is a root) doesn't reference this text, delete it
         $response = $text->delete($textId);
 
-        // If the text deleted is a root, delete the game
-        if($response && $isRoot){
-            $gameId = $textData['game_id'];
-            $game = new Game;
-            $game->delete($gameId);
+        if ($response && $isRoot) {
+            // If delete text worked now we can safely delete the game
+            $game->delete($textData['game_id']);
+        }elseif(!$response && $isRoot){
+            // If it failed, update the game to re-add the reference to this text
+            $game->update(['id' => $textData['game_id'], 'root_text_id' => $textId]);
         }
 
         if ($response !== true) {

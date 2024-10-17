@@ -15,15 +15,15 @@ class Email {
             $mail = new PHPMailer(true); // Enable exceptions
             $mail->isSMTP();
             $mail->SMTPDebug = SMTP::DEBUG_SERVER;
-            $mail->Host = 'mail.la-fin.org';
-            $mail->Port = 465;
+            $mail->Host = $_ENV['SMTP_HOST'];
+            $mail->Port = $_ENV['SMTP_PORT'];
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
             $mail->SMTPAuth = true;
-            $mail->Username = 'administration@la-fin.org';
-            $mail->Password = 'mc454na#2'; // Make sure this is correct
+            $mail->Username = $_ENV['SMTP_USERNAME'];
+            $mail->Password = $_ENV['SMTP_PASSWORD'];
 
-            $mail->setFrom('administration@la-fin.org', 'M. Schofield');
-            $mail->addReplyTo('melisandre.schofield@gmail.com', 'M. Schofield');
+            $mail->setFrom($_ENV['SMTP_FROM_EMAIL'], $_ENV['SMTP_FROM_NAME']);
+            $mail->addReplyTo($_ENV['SMTP_REPLY_TO_EMAIL'], $_ENV['SMTP_REPLY_TO_NAME']);
             $mail->addAddress($email, $name);
             $mail->Subject = $subject;
             $mail->msgHTML($message);
@@ -48,4 +48,3 @@ class Email {
 // $emailInstance = new Email();
 // $emailInstance->welcome('melisandreschofield@gmail.com');
 ?>
-

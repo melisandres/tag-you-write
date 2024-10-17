@@ -1,6 +1,7 @@
 <?php
 session_start();
 define('PATH_DIR', __DIR__.'/');
+require_once (__DIR__.'/config/load_env.php');
 require_once (__DIR__.'/controller/Controller.php');
 require_once (__DIR__.'/library/RequirePage.php');
 require_once (__DIR__.'/vendor/autoload.php');
