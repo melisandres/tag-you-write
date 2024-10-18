@@ -175,8 +175,8 @@
 
      /* Toast styles */
      --toast-container-top: var(--spacing-extra-large);
-     --toast-container-right: var(--spacing-extra-large);
-     --toast-padding: var(--spacing-medium);
+     --toast-container-right: 0;
+     --toast-padding: var(--spacing-small) var(--spacing-medium);
      --toast-border-radius: var(--border-radius);
      --toast-margin-bottom: 10px;
      --toast-opacity: 0.92;

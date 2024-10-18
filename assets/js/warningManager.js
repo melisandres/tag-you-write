@@ -1,3 +1,5 @@
+import { SVGManager } from './svgManager.js';
+
 export class WarningManager {
     constructor() {
       this.modalsContainer = document.createElement('div');
@@ -8,12 +10,22 @@ export class WarningManager {
       document.body.appendChild(this.modalsContainer);
       
       const modal = document.createElement('div');
-      modal.classList.add('warning-modal');
+      modal.classList.add('warning-modal-wrapper');
       modal.innerHTML = `
-        <div class="warning-content">
-          <p>${message}</p>
-          <button class="confirm-button">Confirm</button>
-          <button class="cancel-button">Cancel</button>
+        <div class="warning-modal">
+          <div class="warning-content">
+            <p>${message}</p>
+            <div class="warning-buttons">
+              <button class="confirm-button">
+                <span class="button-svg confirm-svg">${SVGManager.checkmarkSVG}</span>
+                Confirm
+              </button>
+              <button class="cancel-button">
+                <span class="button-svg cancel-svg">${SVGManager.xSVG}</span>
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
       `;
   
@@ -35,4 +47,3 @@ export class WarningManager {
       this.modalsContainer.remove();
     }
   }
-  

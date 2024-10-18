@@ -3,16 +3,18 @@ import { WarningManager } from './warningManager.js';
 import { eventBus } from './eventBus.js';
 
 export class FormManager {
-    constructor(autoSaveManager, validationManager, path) {
+    constructor(autoSaveManager, path) {
         this.autoSaveManager = autoSaveManager;
-        this.validationManager = validationManager;
+        //this.validationManager = validationManager;
         this.path = path;
         this.form = document.querySelector('#main-form');
         this.formType = this.form ? this.form.getAttribute('data-form-type') : null;
         this.statusField = this.form ? this.form.querySelector('[data-text-status]') : null;
         this.buttons = this.form ? this.form.querySelectorAll('[data-status]') : null;
         this.canPublish = false;
-
+        this.canAutosave = false;
+        // A flag to prevent the beforeunload event from triggering
+        this.isIntentionalNavigation = false;
         this.init();
     }
 
@@ -30,7 +32,9 @@ export class FormManager {
     }
 
     handleValidationChanged(results) {
+        console.log('in form: validation changed', results);
         this.canPublish = results.canPublish;
+        this.canAutosave = results.canAutosave;
     }
 
     // Ensure that all the buttons on the form trigger asyncronous actions
@@ -193,15 +197,17 @@ export class FormManager {
         if (loginBtn) loginBtn.innerHTML = SVGManager.logInSVG;
     }
 
-    // TODO: I'm keeping this, but it may be better in autoSaveManager
+    // TODO: I don't know if this is better in autoSaveManager
+    // TODO: Not sure this is the right approach... 
+    // Although the most recent changes are saved in local Storage, this checks if the last database save is up to date with what is in the form now. 
     setupExitWarning() {
-        if (this.formType == 'login' || this.formType == 'writer-create') return;
+        if (this.formType == 'login' || this.formType == 'writer-create' || this.formType == 'addingNote') return;
         window.addEventListener('beforeunload', (event) => {
+            // If the navigation is intentional, don't trigger the warning
+            if (this.isIntentionalNavigation) return;
             if (this.autoSaveManager.hasUnsavedChanges()) {
                 // If the lastSavedContent will be null on refresh
                 if (this.autoSaveManager.lastSavedContent !== null) {
-                    console.log('lastSavedContent is not null');
-                    console.log('lastSavedContent:', this.autoSaveManager.lastSavedContent);
                     event.preventDefault();
                 }
             }
@@ -296,6 +302,8 @@ export class FormManager {
     // This is because the forms have an action that applies to all the buttons, except for the delete button, whose action is handled by the delete endpoint
     async submitDelete() {
         if (!this.form) return;
+        // A flag to prevent the beforeunload event from triggering
+        this.isIntentionalNavigation = true;
         try {
             const formData = new FormData(this.form);
 
@@ -328,5 +336,7 @@ export class FormManager {
                 type: 'error' 
             });
         }
+        // A flag to prevent the beforeunload event from triggering
+        this.isIntentionalNavigation = false;
     }
 }

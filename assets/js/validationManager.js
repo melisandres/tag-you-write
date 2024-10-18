@@ -67,6 +67,7 @@ export class ValidationManager {
     }
 
     validateField({ fieldName, fieldValue, formType, init = false }) {
+
         const validators = this.getValidatorsForForm(formType);
         
         if (validators[fieldName]) {
@@ -76,7 +77,7 @@ export class ValidationManager {
             const errors = validationResults.filter(result => !result.isValid && result.severity === 'error');
             const warnings = validationResults.filter(result => result.severity === 'warning');
             const infos = validationResults.filter(result => result.severity === 'info');
-            const successes = validationResults.filter(result => result.isValid && result.severity !== 'warning' && result.severity !== 'info');
+            const successes = validationResults.filter(result => result.isValid && result.severity == 'warning' || result.severity == 'info');
     
             this.showValidationResult(fieldName, criticalErrors, errors, warnings, infos, successes);
 
@@ -450,6 +451,7 @@ export class ValidationManager {
             canPublish,
             fields: this.formValidity
         };
+        console.log('newValidationStatus', newValidationStatus);
 
         // Only emit if there's a change in canAutosave or canPublish
         if (this.lastValidationStatus?.canAutosave !== canAutosave || 

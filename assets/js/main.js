@@ -80,10 +80,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // const warningManager = new WarningManager();
 
   //And your forms need managing (!)
-  // Buttons listen for validation emitions... 
+  // Buttons and forms listen for validation emitions... 
   new ButtonUpdateManager(autoSaveManager);
+  new FormManager(autoSaveManager, path);
   const validationManager = new ValidationManager();
-  new FormManager(autoSaveManager, validationManager, path);
+
 
 
   //new ValidationManager(formManager);

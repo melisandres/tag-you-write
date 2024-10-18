@@ -17,7 +17,7 @@ export class RefreshManager {
         this.isAPageRefresh = false;
         
         this.handlePageLoad();
-        eventBus.on('formUpdated', this.handleFormUpdate.bind(this));
+        eventBus.on('inputChanged', this.handleInputChanged.bind(this));
         
         window.refreshManagerInstance = this;
     }
@@ -72,7 +72,7 @@ export class RefreshManager {
         }
     }
 
-    handleFormUpdate() {
+    handleInputChanged() {
         this.saveFormData();
     }
 

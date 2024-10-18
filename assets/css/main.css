@@ -13,7 +13,7 @@
 @import url(./atoms/buttons/shelf-btns.css); 
 @import url(./atoms/buttons/top-shelf-btns.css);
 @import url(./atoms/buttons/svg-btns.css);
-
+@import url(./atoms/buttons/warning-btns.css);
 /* cards: repeated structures */
 @import url(./cards/story.css);
 

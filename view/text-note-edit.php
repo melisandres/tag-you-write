@@ -14,10 +14,10 @@
         <label>
             <div class="title-and-word-count">
                 <span class="headline">{{ data.note ? 'Oops! You can change your note:' : 'Oops! You can leave a note for other writers:' }}</span> 
-                <div class="word-count-display" data-word-count-display>
+<!--                 <div class="word-count-display" data-word-count-display>
                     <span class="word-count-number"></span>
                     <span class="word-count-tooltip"></span>
-                </div>
+                </div> -->
             </div>
             <textarea name="note" placeholder="oh dear! I meant to write 'warm' not 'worm' so embarassing..." rows="10" cols="50">{{data.note}}</textarea>
         </label>
