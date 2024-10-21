@@ -221,3 +221,10 @@
       }
     
 }
+
+@media screen and (min-width: 1500px) {
+    .story {
+        max-width: 1800px; /* Optionally increase max-width for very large screens */
+        margin: 0 auto;
+    }
+}

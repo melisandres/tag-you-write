@@ -15,13 +15,19 @@ export class TreeVisualizer {
         this.minSpacing = 150;
 
         // Margins
-        this.leftMargin = 200;
+/*         this.leftMargin = 200;
         this.rightMargin = 75;
+        this.topMargin = 0; */
+        this.leftMargin = 15;
+        this.rightMargin = 15;
+        this.topMargin = 15;
+        this.bottomMargin = 15;
 
         // Some variables to define in drawTree
         this.containerHeight = null;
         this.containerWidth = null;
         this.margin = null;
+        this.zoomMargin = 70;
 
         // Colors to represent the number of votes
         this.baseColor = '#ff009b';
@@ -33,7 +39,14 @@ export class TreeVisualizer {
         this.updateLegendPosition = this.updateLegendPosition.bind(this);
         this.updateLegendVisibility = this.updateLegendVisibility.bind(this);
         this.toggleLegend = this.toggleLegend.bind(this);
+        /* this.initializeZoom = this.initializeZoom.bind(this); */
         window.addEventListener('resize', this.updateLegendPosition);
+
+        this.handleResize = this.handleResize.bind(this);
+        window.addEventListener('resize', this.handleResize);
+
+        // Define a buffer (in pixels) for how far we allow dragging beyond the container
+        this.buffer = 75;  // Adjust this value as needed
     }
 
     createColorScale(maxVotes) {
@@ -80,7 +93,7 @@ export class TreeVisualizer {
         // Set width, height, and margins
         this.containerWidth = this.container.clientWidth;
         this.containerHeight = this.container.clientHeight
-        this.margin = { top: 0, right: this.rightMargin, bottom: 0, left: this.leftMargin };
+        this.margin = { top: this.topMargin, right: this.rightMargin, bottom: this.bottomMargin, left: this.leftMargin };
         const width = this.containerWidth - this.margin.left - this.margin.right;
         const height = this.containerHeight - this.margin.top - this.margin.bottom;
 
@@ -95,7 +108,6 @@ export class TreeVisualizer {
             .style("overflow", "visible");
   
         const g = this.svg.append("g")
-            .attr("transform", `translate(${this.margin.left},${this.margin.top})`);
   
         // To correct the stutter of the tree when it is zoomed out and dragged, append a "g" to the original "g".
         const child = g.append("g");
@@ -200,17 +212,133 @@ export class TreeVisualizer {
             .attr("class", d => d.data.permissions.isMyText ? "text-by author" : "text-by")
             .text(d => d.data.permissions.isMyText ? `${d.data.text_status == 'draft' || d.data.text_status == 'incomplete_draft' ? 'DRAFT ' : ''} by you` : `by ${d.data.firstName} ${d.data.lastName}`);
   
-        // Constraints on zooming
+
+        // Get the bounding box of the drawn tree
+        const bounds = child.node().getBBox();
+
+        // Calculate the scale needed to fit the tree in the container
+        // this scale basically just adds zoomMargin to the margins
+        const scaleToFit = Math.min(
+            (this.containerWidth - this.margin.left - this.margin.right - this.zoomMargin * 2) / bounds.width,
+            (this.containerHeight - this.margin.top - this.margin.bottom - this.zoomMargin * 2) / bounds.height
+        );
+
+        // Set the minimum scale to ensure the tree fits with margins, but not larger than 1
+        const minScale = Math.min(scaleToFit, 1);
+
+        // Define zoom behavior with dynamic minScale
         const zoom = d3.zoom()
-            .scaleExtent([this.minScale, this.maxScale])
+            .scaleExtent([minScale, this.maxScale])
             .extent([[0, 0], [this.containerWidth, this.containerHeight]])
-            .on("zoom", event => child.attr("transform", event.transform));
-  
-        this.svg.call(zoom);
+/*             .translateExtent([
+                [bounds.x - this.buffer, bounds.y - this.buffer], 
+                [bounds.x + bounds.width + this.buffer, bounds.y + bounds.height + this.buffer]
+            ]) */
+            .on("zoom", event => {
+                /* child.attr("transform", event.transform); */
+                const transform = event.transform;
+            
+                // Calculate the size of the tree at the current zoom level
+                const zoomedWidth = bounds.width * transform.k;
+                const zoomedHeight = bounds.height * transform.k;
+                
+                // Calculate the center of the zoomed tree
+                const treeCenterX = bounds.x * transform.k + zoomedWidth / 2;
+                const treeCenterY = bounds.y * transform.k + zoomedHeight / 2;
+                
+                // Calculate the allowed range of movement
+                const rangeX = Math.max(0, (zoomedWidth - this.containerWidth) / 2);
+                const rangeY = Math.max(0, (zoomedHeight - this.containerHeight) / 2);
+                
+                // Add a buffer to allow some dragging even when zoomed out
+     
+                const widthBuffer = this.containerWidth/2;
+                const heightBuffer = this.containerHeight/2;
+                
+                // Constrain the translation
+                transform.x = Math.min(Math.max(transform.x, this.containerWidth / 2 - treeCenterX - rangeX - widthBuffer), 
+                                    this.containerWidth / 2 - treeCenterX + rangeX + widthBuffer);
+                transform.y = Math.min(Math.max(transform.y, this.containerHeight / 2 - treeCenterY - rangeY - heightBuffer), 
+                                    this.containerHeight / 2 - treeCenterY + rangeY + heightBuffer);
+                
+                child.attr("transform", transform);
+            });
+
+        // Store the zoom behavior
+        this.zoom = zoom;
+
+        // Apply zoom to SVG
+        this.svg.call(this.zoom);
+
+
+        // Apply zoom to SVG
+        //this.svg.call(zoom);
+
+        // Calculate the initial scale, ensuring it's not smaller than minScale
+        const initialScale = Math.max(minScale, Math.min(
+            (this.containerWidth - this.margin.left - this.margin.right * 2) / bounds.width,
+            (this.containerHeight - this.margin.top - this.margin.bottom * 2) / bounds.height,
+            1
+        ));
+
+        // Calculate the initial transform to center the tree
+        const initialTransform = d3.zoomIdentity
+            .translate(
+                (this.containerWidth - bounds.width * initialScale) / 2 - bounds.x * initialScale,
+                (this.containerHeight - bounds.height * initialScale) / 2 - bounds.y * initialScale
+            )
+            .scale(initialScale);
+
+
+        // Apply the initial transform
+        this.svg.call(zoom.transform, initialTransform);
+
+        console.log('this margin', this.margin);
+        console.log('this container', this.containerWidth, this.containerHeight);
+        console.log('bounds', bounds);
+        this.margin = { top: 0, right: 0, bottom: 0, left: 0 };
 
         // The Legend
         this.createLegend(data);   
     }
+
+/*     initializeZoom(child) {
+        const self = this;
+    
+        // Calculate the bounds of the tree after it's been rendered
+        const bounds = child.node().getBBox();
+        const width = this.containerWidth;
+        const height = this.containerHeight;
+    
+        // Calculate the necessary translation limits
+        const minX = bounds.width > width 
+            ? width - bounds.width - this.margin.left 
+            : (width - bounds.width) / 2 - this.margin.left;
+    
+        const minY = bounds.height > height 
+            ? height - bounds.height - this.margin.top 
+            : (height - bounds.height) / 2 - this.margin.top;
+    
+        const translateExtent = [
+            [minX, minY],
+            [0, 0]
+        ];
+    
+        // Define the zoom behavior with constrained translateExtent
+        this.zoom = d3.zoom()
+            .scaleExtent([self.minScale, self.maxScale])
+            .translateExtent(translateExtent)
+            .extent([[0, 0], [width, height]])
+            .on("zoom", (event) => {
+                child.attr("transform", event.transform);
+            });
+    
+        // Apply the zoom behavior to the SVG
+        self.svg.call(this.zoom);
+    
+        // Optional: Remove double-click zoom
+        self.svg.on("dblclick.zoom", null);
+    } */
 
     createLegend(d) {
         const self = this;
@@ -416,56 +544,60 @@ export class TreeVisualizer {
         return this.container.clientWidth < 550;
     }
 
-    /* updateNodeStatus(nodeId, newStatus) {
-        console.log(`Updating node ${nodeId} to status ${newStatus}`);
-        console.log('Current container:', this.container);
+    handleResize() {
+        if (this.svg && this.zoom) {
+            const oldWidth = this.containerWidth;
+            const oldHeight = this.containerHeight;
     
-        const circle = this.container.querySelector(`[data-id="${nodeId}"]`);
-        console.log('Found circle:', circle);
+            // Update container dimensions
+            this.containerWidth = this.container.clientWidth;
+            this.containerHeight = this.container.clientHeight;
     
-        if (!circle) {
-          console.log('Circle not found, aborting update');
-          return;
+            // Update SVG dimensions
+            this.svg
+                .attr("width", this.containerWidth)
+                .attr("height", this.containerHeight);
+    
+            // Get the current transform
+            const transform = d3.zoomTransform(this.svg.node());
+    
+            // Calculate the scale factor for the resize
+            const scaleX = this.containerWidth / oldWidth;
+            const scaleY = this.containerHeight / oldHeight;
+    
+            // Update the transform to keep the center point fixed
+            const newTransform = d3.zoomIdentity
+                .translate(transform.x * scaleX, transform.y * scaleY)
+                .scale(transform.k);
+    
+            // Apply the new transform
+            this.svg.call(this.zoom.transform, newTransform);
+    
+            // Update the zoom extent
+            this.zoom.extent([[0, 0], [this.containerWidth, this.containerHeight]]);
+    
+            // Update legend position
+            this.updateLegendPosition();
         }
-    
-        const nodeGroup = circle.closest('g');
-        console.log('Found node group:', nodeGroup);
-    
-        if (nodeGroup) {
-          // Update circle
-          console.log('Updating circle classes');
-          d3.select(circle)
-            .classed('tree-node-draft', newStatus === 'draft')
-            .classed('tree-node-published', newStatus === 'published');
-    
-          // Update title
-          const titleText = nodeGroup.querySelector('text:not(.text-by)');
-          console.log('Updating title text:', titleText);
-          d3.select(titleText)
-            .classed('tree-title-draft', newStatus === 'draft')
-            .classed('tree-title-published', newStatus === 'published');
-    
-          // Update author text
-          const authorText = nodeGroup.querySelector('text.text-by');
-          console.log('Updating author text:', authorText);
-          d3.select(authorText)
-            .classed('tree-author-draft', newStatus === 'draft')
-            .classed('tree-author-published', newStatus === 'published');
-    
-          // Update the "DRAFT" text in the author line if necessary
-          if (authorText) {
-            let authorContent = authorText.textContent;
-            console.log('Current author content:', authorContent);
-            if (newStatus === 'draft' && !authorContent.startsWith('DRAFT')) {
-              authorText.textContent = 'DRAFT ' + authorContent;
-            } else if (newStatus === 'published' && authorContent.startsWith('DRAFT')) {
-              authorText.textContent = authorContent.replace('DRAFT ', '');
-            }
-            console.log('Updated author content:', authorText.textContent);
-          }
-        } else {
-          console.log('Node group not found');
-        }
-      } */
+    }
+
+    cleanup() {
+        window.removeEventListener('resize', this.handleResize);
+    }
 }
   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

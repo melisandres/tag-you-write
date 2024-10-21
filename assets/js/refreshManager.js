@@ -1,5 +1,6 @@
 import { StoryManager } from './storyManager.js';
 import { Modal } from './modal.js' ;
+import { TreeVisualizer } from './treeVisualizer.js';
 
 export class RefreshManager {
     constructor(path, uiManager, storyManager, autoSaveManager) {
@@ -158,6 +159,15 @@ export class RefreshManager {
                 y: transform.y,
                 k: transform.k
             };
+
+            const treeVisualizer = new TreeVisualizer();
+            if (treeVisualizer) {
+                this.state.constraints = {
+                    minScale: treeVisualizer.minScale,
+                    maxScale: treeVisualizer.maxScale,
+                    buffer: treeVisualizer.buffer
+                };
+            }
         }
     }
 
@@ -198,7 +208,7 @@ export class RefreshManager {
             });
         } else if (savedState.showcase === 'tree') {
             this.uiManager.drawTree(savedState.rootStoryId, container).then(() => {
-                this.applyD3Transform(savedState.zoomTransform);
+                this.applyD3Transform(savedState.zoomTransform, savedState.constraints);
             });
         } 
         
@@ -230,14 +240,42 @@ export class RefreshManager {
         });
     }
 
-    applyD3Transform(transform) {
+    applyD3Transform(transform, constraints) {
         if (transform) {
             const svg = d3.select('#showcase svg');
             const outerG = svg.select('g');
             const innerG = outerG.select('g');
-            const zoom = d3.zoom().on('zoom', (event) => {
+/*             const zoom = d3.zoom().on('zoom', (event) => {
                 innerG.attr('transform', event.transform);
+            }); */
+
+            const zoom = d3.zoom()
+            .scaleExtent([constraints.minScale, constraints.maxScale])
+            .on('zoom', (event) => {
+                const newTransform = event.transform;
+                
+                // Apply constraints
+                const bounds = innerG.node().getBBox();
+                const containerWidth = svg.node().clientWidth;
+                const containerHeight = svg.node().clientHeight;
+                
+                const zoomedWidth = bounds.width * newTransform.k;
+                const zoomedHeight = bounds.height * newTransform.k;
+                
+                const treeCenterX = bounds.x * newTransform.k + zoomedWidth / 2;
+                const treeCenterY = bounds.y * newTransform.k + zoomedHeight / 2;
+                
+                const rangeX = Math.max(0, (zoomedWidth - containerWidth) / 2);
+                const rangeY = Math.max(0, (zoomedHeight - containerHeight) / 2);
+                
+                newTransform.x = Math.min(Math.max(newTransform.x, containerWidth / 2 - treeCenterX - rangeX - constraints.buffer), 
+                                          containerWidth / 2 - treeCenterX + rangeX + constraints.buffer);
+                newTransform.y = Math.min(Math.max(newTransform.y, containerHeight / 2 - treeCenterY - rangeY - constraints.buffer), 
+                                          containerHeight / 2 - treeCenterY + rangeY + constraints.buffer);
+                
+                innerG.attr('transform', newTransform);
             });
+
             svg.call(zoom);
             
             // Apply the stored transform to the inner g element
