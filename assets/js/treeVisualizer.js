@@ -15,9 +15,6 @@ export class TreeVisualizer {
         this.minSpacing = 150;
 
         // Margins
-/*         this.leftMargin = 200;
-        this.rightMargin = 75;
-        this.topMargin = 0; */
         this.leftMargin = 15;
         this.rightMargin = 15;
         this.topMargin = 15;
@@ -230,12 +227,7 @@ export class TreeVisualizer {
         const zoom = d3.zoom()
             .scaleExtent([minScale, this.maxScale])
             .extent([[0, 0], [this.containerWidth, this.containerHeight]])
-/*             .translateExtent([
-                [bounds.x - this.buffer, bounds.y - this.buffer], 
-                [bounds.x + bounds.width + this.buffer, bounds.y + bounds.height + this.buffer]
-            ]) */
             .on("zoom", event => {
-                /* child.attr("transform", event.transform); */
                 const transform = event.transform;
             
                 // Calculate the size of the tree at the current zoom level
@@ -270,10 +262,6 @@ export class TreeVisualizer {
         // Apply zoom to SVG
         this.svg.call(this.zoom);
 
-
-        // Apply zoom to SVG
-        //this.svg.call(zoom);
-
         // Calculate the initial scale, ensuring it's not smaller than minScale
         const initialScale = Math.max(minScale, Math.min(
             (this.containerWidth - this.margin.left - this.margin.right * 2) / bounds.width,
@@ -289,7 +277,6 @@ export class TreeVisualizer {
             )
             .scale(initialScale);
 
-
         // Apply the initial transform
         this.svg.call(zoom.transform, initialTransform);
 
@@ -302,43 +289,7 @@ export class TreeVisualizer {
         this.createLegend(data);   
     }
 
-/*     initializeZoom(child) {
-        const self = this;
-    
-        // Calculate the bounds of the tree after it's been rendered
-        const bounds = child.node().getBBox();
-        const width = this.containerWidth;
-        const height = this.containerHeight;
-    
-        // Calculate the necessary translation limits
-        const minX = bounds.width > width 
-            ? width - bounds.width - this.margin.left 
-            : (width - bounds.width) / 2 - this.margin.left;
-    
-        const minY = bounds.height > height 
-            ? height - bounds.height - this.margin.top 
-            : (height - bounds.height) / 2 - this.margin.top;
-    
-        const translateExtent = [
-            [minX, minY],
-            [0, 0]
-        ];
-    
-        // Define the zoom behavior with constrained translateExtent
-        this.zoom = d3.zoom()
-            .scaleExtent([self.minScale, self.maxScale])
-            .translateExtent(translateExtent)
-            .extent([[0, 0], [width, height]])
-            .on("zoom", (event) => {
-                child.attr("transform", event.transform);
-            });
-    
-        // Apply the zoom behavior to the SVG
-        self.svg.call(this.zoom);
-    
-        // Optional: Remove double-click zoom
-        self.svg.on("dblclick.zoom", null);
-    } */
+
 
     createLegend(d) {
         const self = this;
@@ -593,21 +544,4 @@ export class TreeVisualizer {
         window.removeEventListener('resize', this.handleResize);
     }
 }
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+ 
