@@ -548,44 +548,54 @@ export class TreeVisualizer {
         if (this.svg && this.zoom) {
             const oldWidth = this.containerWidth;
             const oldHeight = this.containerHeight;
-    
+
             // Update container dimensions
             this.containerWidth = this.container.clientWidth;
             this.containerHeight = this.container.clientHeight;
-    
+
             // Update SVG dimensions
             this.svg
                 .attr("width", this.containerWidth)
                 .attr("height", this.containerHeight);
-    
+
             // Get the current transform
             const transform = d3.zoomTransform(this.svg.node());
-    
-            // Calculate the scale factor for the resize
-            const scaleX = this.containerWidth / oldWidth;
-            const scaleY = this.containerHeight / oldHeight;
-    
-            // Update the transform to keep the center point fixed
+
+            // Calculate the center point of the old view
+            const oldCenterX = oldWidth / 2;
+            const oldCenterY = oldHeight / 2;
+
+            // Calculate the new center point
+            const newCenterX = this.containerWidth / 2;
+            const newCenterY = this.containerHeight / 2;
+
+            // Calculate the difference in center points
+            const dx = newCenterX - oldCenterX;
+            const dy = newCenterY - oldCenterY;
+
+            // Create a new transform that maintains the center point
             const newTransform = d3.zoomIdentity
-                .translate(transform.x * scaleX, transform.y * scaleY)
+                .translate(transform.x + dx, transform.y + dy)
                 .scale(transform.k);
-    
+
             // Apply the new transform
             this.svg.call(this.zoom.transform, newTransform);
-    
+
             // Update the zoom extent
             this.zoom.extent([[0, 0], [this.containerWidth, this.containerHeight]]);
-    
+
             // Update legend position
             this.updateLegendPosition();
         }
     }
-
+    //TODO: when do you call this?
     cleanup() {
         window.removeEventListener('resize', this.handleResize);
     }
 }
   
+
+
 
 
 

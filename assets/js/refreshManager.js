@@ -267,11 +267,14 @@ export class RefreshManager {
                 
                 const rangeX = Math.max(0, (zoomedWidth - containerWidth) / 2);
                 const rangeY = Math.max(0, (zoomedHeight - containerHeight) / 2);
+
+                const widthBuffer = containerWidth/2;
+                const heightBuffer = containerHeight/2;
                 
-                newTransform.x = Math.min(Math.max(newTransform.x, containerWidth / 2 - treeCenterX - rangeX - constraints.buffer), 
-                                          containerWidth / 2 - treeCenterX + rangeX + constraints.buffer);
-                newTransform.y = Math.min(Math.max(newTransform.y, containerHeight / 2 - treeCenterY - rangeY - constraints.buffer), 
-                                          containerHeight / 2 - treeCenterY + rangeY + constraints.buffer);
+                newTransform.x = Math.min(Math.max(newTransform.x, containerWidth / 2 - treeCenterX - rangeX - widthBuffer), 
+                                          containerWidth / 2 - treeCenterX + rangeX + widthBuffer);
+                newTransform.y = Math.min(Math.max(newTransform.y, containerHeight / 2 - treeCenterY - rangeY - heightBuffer), 
+                                          containerHeight / 2 - treeCenterY + rangeY + heightBuffer);
                 
                 innerG.attr('transform', newTransform);
             });
