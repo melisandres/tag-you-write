@@ -4,7 +4,7 @@ export class AutoSaveManager {
     constructor(path) {
         this.path = path;
         this.form = document.querySelector('[data-form-type="root"], [data-form-type="iteration"]');
-        console.log('form', this.form);
+
         // Initialize if you have a form that needs autosaving
         if (this.form) this.init();
     }

@@ -17,21 +17,18 @@ export class RefreshManager {
         this.previousUrl = sessionStorage.getItem('previousUrl');
         this.isAPageRefresh = false;
         
-        this.handlePageLoad();
         eventBus.on('inputChanged', this.handleInputChanged.bind(this));
         
         window.refreshManagerInstance = this;
 
-        // Add event listener for restoringState
+        // Add event listener for restoringState         
         document.addEventListener('restoringState', this.handleRestoringState.bind(this));
     }
 
+    // This is called when the restoringState event is emitted from the main.js file
+    // It is async to enable removing the saved state after it is restored
+    // But the localStorage is not being removed for now, because the state is being kept in order to handle returns to the story page from other pages. When the system becomes more complex, this may need to be revisited. 
     async handleRestoringState() {
-        await this.restoreState();
-        localStorage.removeItem('pageState');
-    }
-
-    handlePageLoad() {
         this.isAPageRefresh = this.isPageRefresh(); 
 
         if (this.isAPageRefresh) {
@@ -39,10 +36,15 @@ export class RefreshManager {
             if (savedState && this.isFormPage()) {
                 this.restoreFormState(savedState);
                 this.autoSaveManager.setLastSavedContent(savedState.formData);
+            }else if(savedState && !this.isFormPage()){
+                await this.restoreState();
+                //localStorage.removeItem('pageState');
             }
+        }else if(this.isStoriesPage() && savedState){
+            await this.restoreState();
+            //localStorage.removeItem('pageState');
         }
         
-        this.saveCurrentPageUrl();
     }
 
     // Check if the page is a refresh
@@ -53,6 +55,11 @@ export class RefreshManager {
     // Check if the page is a form page
     isFormPage() {
         return document.querySelector('[data-form-type="root"], [data-form-type="iteration"], [data-form-type="addingNote"]') !== null;
+    }
+
+    isStoriesPage() {
+        // this is the container for stories
+        return document.querySelector('[data-stories]') !== null;
     }
 
     // Save the current page URL
@@ -167,15 +174,6 @@ export class RefreshManager {
                 y: transform.y,
                 k: transform.k
             };
-
-/*             const treeVisualizer = new TreeVisualizer();
-            if (treeVisualizer) {
-                this.state.constraints = {
-                    minScale: treeVisualizer.minScale,
-                    maxScale: treeVisualizer.maxScale,
-                    buffer: treeVisualizer.buffer
-                };
-            } */
         }
     }
 
@@ -215,9 +213,6 @@ export class RefreshManager {
                 this.restoreDrawers(savedState);
             });
         } else if (savedState.showcase === 'tree') {
-/*             this.uiManager.drawTree(savedState.rootStoryId, container).then(() => {
-                this.applyD3Transform(savedState.zoomTransform, savedState.constraints);
-            }); */
             await this.uiManager.drawTree(savedState.rootStoryId, container);
         } 
         
@@ -232,12 +227,6 @@ export class RefreshManager {
                 window.scrollTo(savedState.scrollPosition.x, savedState.scrollPosition.y);
             }, 100); // Adjust the delay as needed
         }
-
-/*         // Clear the saved state after restoring
-        setTimeout(() => {
-            console.log('Removing saved state');
-            localStorage.removeItem('pageState');
-        }, 100); */
     }
 
     restoreDrawers(savedState) {
@@ -251,50 +240,4 @@ export class RefreshManager {
             }
         });
     }
-
-    /* applyD3Transform(transform, constraints) {
-        if (transform) {
-            const svg = d3.select('#showcase svg');
-            const outerG = svg.select('g');
-            const innerG = outerG.select('g');
-
-            const zoom = d3.zoom()
-            .scaleExtent([constraints.minScale, constraints.maxScale])
-            .on('zoom', (event) => {
-                const newTransform = event.transform;
-                
-                // Apply constraints
-                const bounds = innerG.node().getBBox();
-                const containerWidth = svg.node().clientWidth;
-                const containerHeight = svg.node().clientHeight;
-                
-                const zoomedWidth = bounds.width * newTransform.k;
-                const zoomedHeight = bounds.height * newTransform.k;
-                
-                const treeCenterX = bounds.x * newTransform.k + zoomedWidth / 2;
-                const treeCenterY = bounds.y * newTransform.k + zoomedHeight / 2;
-                
-                const rangeX = Math.max(0, (zoomedWidth - containerWidth) / 2);
-                const rangeY = Math.max(0, (zoomedHeight - containerHeight) / 2);
-
-                const widthBuffer = containerWidth/2;
-                const heightBuffer = containerHeight/2;
-                
-                newTransform.x = Math.min(Math.max(newTransform.x, containerWidth / 2 - treeCenterX - rangeX - widthBuffer), 
-                                          containerWidth / 2 - treeCenterX + rangeX + widthBuffer);
-                newTransform.y = Math.min(Math.max(newTransform.y, containerHeight / 2 - treeCenterY - rangeY - heightBuffer), 
-                                          containerHeight / 2 - treeCenterY + rangeY + heightBuffer);
-                
-                innerG.attr('transform', newTransform);
-            });
-
-            svg.call(zoom);
-            
-            // Apply the stored transform to the inner g element
-            innerG.attr('transform', `translate(${transform.x},${transform.y}) scale(${transform.k})`);
-            
-            // Update the zoom behavior's internal state
-            svg.call(zoom.transform, d3.zoomIdentity.translate(transform.x, transform.y).scale(transform.k));
-        }
-    } */
 }
