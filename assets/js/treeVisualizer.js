@@ -1,18 +1,18 @@
 //import * as d3 from 'https://d3js.org/d3.v7.min.js';
 
 export class TreeVisualizer {
-    constructor(container) {
+    constructor() {
         this.svg = null;
 
         //get the container
-        this.container = container;
+        //this.container = container;
 
         // Constraints for the zoom 
         this.minScale = 0.25;
         this.maxScale = 2;
 
         // Minimum spacing between the nodes
-        this.minSpacing = 150;
+        this.minSpacing = 200;
 
         // Margins
         this.leftMargin = 15;
@@ -44,6 +44,16 @@ export class TreeVisualizer {
 
         // Define a buffer (in pixels) for how far we allow dragging beyond the container
         this.buffer = 75;  // Adjust this value as needed
+
+        this.pageJustLoaded = true;
+
+       // Listen for the drawTree event
+        eventBus.on('drawTree', this.handleDrawTree.bind(this));
+    }
+    
+    handleDrawTree({ container, data }) {
+        this.container = container;
+        this.drawTree(data);
     }
 
     createColorScale(maxVotes) {
@@ -199,7 +209,7 @@ export class TreeVisualizer {
             .attr("x", d => d.children ? -13 : 13)
             .style("text-anchor", d => d.children ? "end" : "start")
             .attr("class", d => d.data.text_status == 'draft' || d.data.text_status == 'incomplete_draft' ? "tree-title-draft" : "")
-            .text(d => d.data.title || "Untitled");
+            .text(d => this.truncateText(d.data.title || "Untitled", 20, 200));
   
         // Add additional text line below the title
         node.append("text")
@@ -254,6 +264,9 @@ export class TreeVisualizer {
                                     this.containerHeight / 2 - treeCenterY + rangeY + heightBuffer);
                 
                 child.attr("transform", transform);
+
+                // Update styles based on zoom level
+                this.updateStyles(child, transform.k);
             });
 
         // Store the zoom behavior
@@ -261,28 +274,11 @@ export class TreeVisualizer {
 
         // Apply zoom to SVG
         this.svg.call(this.zoom);
-
-       /*  // Calculate the initial scale, ensuring it's not smaller than minScale
-        const initialScale = Math.max(minScale, Math.min(
-            (this.containerWidth - this.margin.left - this.margin.right * 2) / bounds.width,
-            (this.containerHeight - this.margin.top - this.margin.bottom * 2) / bounds.height,
-            1
-        ));
-
-        // Calculate the initial transform to center the tree
-        const initialTransform = d3.zoomIdentity
-            .translate(
-                (this.containerWidth - bounds.width * initialScale) / 2 - bounds.x * initialScale,
-                (this.containerHeight - bounds.height * initialScale) / 2 - bounds.y * initialScale
-            )
-            .scale(initialScale); */
-
         
         // Check for saved state
         const savedState = JSON.parse(localStorage.getItem('pageState'));
         
-        if (savedState && savedState.showcase === 'tree' && savedState.zoomTransform) {
-            console.log('HAS A savedState', savedState);
+        if (savedState && savedState.showcase === 'tree' && savedState.zoomTransform && this.pageJustLoaded) {
             // Apply saved transform
             const transform = savedState.zoomTransform;
             const initialTransform = d3.zoomIdentity
@@ -291,7 +287,6 @@ export class TreeVisualizer {
             
             this.svg.call(this.zoom.transform, initialTransform);
         } else {
-            console.log('NO savedState');
             // Calculate and apply initial transform as before
             const initialScale = Math.max(minScale, Math.min(
                 (this.containerWidth - this.margin.left - this.margin.right * 2) / bounds.width,
@@ -309,19 +304,14 @@ export class TreeVisualizer {
             this.svg.call(this.zoom.transform, initialTransform);
         }
 
-        // Apply the initial transform
-        /* this.svg.call(zoom.transform, initialTransform); */
-
-        console.log('this margin', this.margin);
-        console.log('this container', this.containerWidth, this.containerHeight);
-        console.log('bounds', bounds);
-        //this.margin = { top: 0, right: 0, bottom: 0, left: 0 };
-
         // The Legend
         this.createLegend(data);   
+
+        if (this.pageJustLoaded) {
+            console.log('pageJustLoaded is getting set to false');
+            this.pageJustLoaded = false;
+        }
     }
-
-
 
     createLegend(d) {
         const self = this;
@@ -571,9 +561,73 @@ export class TreeVisualizer {
             this.updateLegendPosition();
         }
     }
-    //TODO: when do you call this?
+    //TODO: when should I call this? 
     cleanup() {
         window.removeEventListener('resize', this.handleResize);
+    }
+
+    updateStyles(container, scale) {
+        container.selectAll(".node").each((d, i, nodes) => {
+            const node = d3.select(nodes[i]);
+            const title = node.select("text");
+            const author = node.select(".text-by");
+    
+            const fontSize = this.calculateFontSize(scale);
+            const authorVisibility = this.calculateAuthorVisibility(scale);
+    
+            title
+                .style("font-size", `${fontSize}px`)
+                .text(d => this.truncateText(d.data.title || "Untitled", fontSize));
+    
+            author
+                .style("font-size", `${fontSize * 0.8}px`)
+                .style("opacity", authorVisibility);
+        });
+    }
+    
+    calculateFontSize(scale) {
+        // Adjust these values as needed
+        const minFontSize = 12;
+        const maxFontSize = 30;
+        return Math.max(minFontSize, Math.min(maxFontSize, 30 / scale));
+    }
+    
+    calculateAuthorVisibility(scale) {
+        // Adjust these values as needed
+        const fadeOutStart = 0.7;
+        const fadeOutEnd = 0.5;
+        return Math.min(1, Math.max(0, (scale - fadeOutEnd) / (fadeOutStart - fadeOutEnd)));
+    }
+    
+    truncateText(text, fontSize, maxWidth) {
+        const charWidth = fontSize * 0.6; // Approximate width of a character
+        const maxChars = Math.floor(maxWidth / charWidth);
+        
+        if (text.length > maxChars) {
+            return text.slice(0, maxChars - 3) + '...';
+        }
+        return text;
+    }
+    
+    formatAuthorName(data) {
+        if (data.permissions.isMyText) {
+            return `${data.text_status == 'draft' || data.text_status == 'incomplete_draft' ? 'DRAFT ' : ''} by you`;
+        }
+    
+        const names = `${data.firstName} ${data.lastName}`.split(' ');
+        let formattedName = '';
+    
+        if (names.length > 1) {
+            // Keep the last name, initialize others
+            for (let i = 0; i < names.length - 1; i++) {
+                formattedName += names[i][0] + '. ';
+            }
+            formattedName += this.truncateText(names[names.length - 1], 14, 50); // Truncate last name if too long
+        } else {
+            formattedName = this.truncateText(names[0], 14, 50);
+        }
+    
+        return `by ${formattedName}`;
     }
 }
  

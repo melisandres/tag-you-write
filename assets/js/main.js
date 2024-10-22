@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const seenManager= new SeenManager(path);
 
   // TreeVisualizer is initialized sends a custom event to StoryManager when a node is clicked (to show the story in the modal)
-  //const treeVisualizer = new TreeVisualizer();
+  new TreeVisualizer();
 
   // StoryManager is initialized with the modal and seenManager instances
   const storyManager = new StoryManager(path, modal, seenManager);

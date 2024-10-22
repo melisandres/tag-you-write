@@ -1,6 +1,5 @@
 import { StoryManager } from './storyManager.js';
 import { Modal } from './modal.js' ;
-import { TreeVisualizer } from './treeVisualizer.js';
 
 export class RefreshManager {
     constructor(path, uiManager, storyManager, autoSaveManager) {

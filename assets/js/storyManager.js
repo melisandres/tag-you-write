@@ -1,5 +1,4 @@
 import { ShelfVisualizer } from './shelfVisualizer.js';
-import { TreeVisualizer } from './treeVisualizer.js';
 /* this may create some issues... to require the modal the constructor. I'm going to initialize it as an empty string... there are pages where I will surely call the story manager where the modal will be innaccessible? or I should put the modal in the header? */
 
 export class StoryManager {
@@ -8,7 +7,6 @@ export class StoryManager {
     this.seenManager = seenManager;
     this.modal = modal;
     this.storyTreeData = [];
-
      // Add event listener for the custom event
      // TODO: Add this event to the eventBus? 
      document.addEventListener('showStoryInModalRequest', this.handleShowStoryInModalRequest.bind(this));
@@ -45,8 +43,7 @@ export class StoryManager {
   async drawTree(id, container) {
     const datas = await this.fetchTree(id);
     this.storyTreeData = datas[0];
-    const treeVisualizer = new TreeVisualizer(container);
-    treeVisualizer.drawTree(this.storyTreeData, container);
+    eventBus.emit('drawTree', { container, data: this.storyTreeData });
 }
 
   async drawShelf(id, container) {
