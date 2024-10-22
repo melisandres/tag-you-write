@@ -262,7 +262,7 @@ export class TreeVisualizer {
         // Apply zoom to SVG
         this.svg.call(this.zoom);
 
-        // Calculate the initial scale, ensuring it's not smaller than minScale
+       /*  // Calculate the initial scale, ensuring it's not smaller than minScale
         const initialScale = Math.max(minScale, Math.min(
             (this.containerWidth - this.margin.left - this.margin.right * 2) / bounds.width,
             (this.containerHeight - this.margin.top - this.margin.bottom * 2) / bounds.height,
@@ -275,15 +275,47 @@ export class TreeVisualizer {
                 (this.containerWidth - bounds.width * initialScale) / 2 - bounds.x * initialScale,
                 (this.containerHeight - bounds.height * initialScale) / 2 - bounds.y * initialScale
             )
-            .scale(initialScale);
+            .scale(initialScale); */
+
+        
+        // Check for saved state
+        const savedState = JSON.parse(localStorage.getItem('pageState'));
+        
+        if (savedState && savedState.showcase === 'tree' && savedState.zoomTransform) {
+            console.log('HAS A savedState', savedState);
+            // Apply saved transform
+            const transform = savedState.zoomTransform;
+            const initialTransform = d3.zoomIdentity
+                .translate(transform.x, transform.y)
+                .scale(transform.k);
+            
+            this.svg.call(this.zoom.transform, initialTransform);
+        } else {
+            console.log('NO savedState');
+            // Calculate and apply initial transform as before
+            const initialScale = Math.max(minScale, Math.min(
+                (this.containerWidth - this.margin.left - this.margin.right * 2) / bounds.width,
+                (this.containerHeight - this.margin.top - this.margin.bottom * 2) / bounds.height,
+                1
+            ));
+
+            const initialTransform = d3.zoomIdentity
+                .translate(
+                    (this.containerWidth - bounds.width * initialScale) / 2 - bounds.x * initialScale,
+                    (this.containerHeight - bounds.height * initialScale) / 2 - bounds.y * initialScale
+                )
+                .scale(initialScale);
+
+            this.svg.call(this.zoom.transform, initialTransform);
+        }
 
         // Apply the initial transform
-        this.svg.call(zoom.transform, initialTransform);
+        /* this.svg.call(zoom.transform, initialTransform); */
 
         console.log('this margin', this.margin);
         console.log('this container', this.containerWidth, this.containerHeight);
         console.log('bounds', bounds);
-        this.margin = { top: 0, right: 0, bottom: 0, left: 0 };
+        //this.margin = { top: 0, right: 0, bottom: 0, left: 0 };
 
         // The Legend
         this.createLegend(data);   

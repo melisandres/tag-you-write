@@ -31,7 +31,7 @@ window.eventBus = eventBus;
 document.addEventListener("DOMContentLoaded", () => {
 
   const path = window.location.origin + "/tag-you-write-repo/tag-you-write/";
-/*   const controllerPath = window.location.origin + "/tag-you-write-repo/tag-you-write/controller/"; */
+
   const treeModal = document.querySelector('.modal-background');
   const warningManager = new WarningManager();
   new ToastManager();
@@ -63,18 +63,16 @@ document.addEventListener("DOMContentLoaded", () => {
       console.warn('RefreshManager already exists. Using existing instance.');
   }
 
+
   // Initialize VoteManager
   new VoteManager(path, warningManager);
 
-  // Restore state on initial load
-  refreshManager.restoreState();
-  //window.refreshManager = refreshManager;
+  // Emit the restoringState event -- to restore the state on initial load
+  const event = new CustomEvent('restoringState');
+  document.dispatchEvent(event);
 
   // Start Long Polling Manager
   new NotificationManager(path);
-
-  // Activate word count if writing
-/*   new WordCountManager; */
 
   // Initialize in UIManager or globally
   // const warningManager = new WarningManager();
@@ -84,8 +82,6 @@ document.addEventListener("DOMContentLoaded", () => {
   new ButtonUpdateManager(autoSaveManager);
   new FormManager(autoSaveManager, path);
   const validationManager = new ValidationManager();
-
-
 
   //new ValidationManager(formManager);
 

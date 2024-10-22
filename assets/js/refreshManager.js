@@ -21,6 +21,14 @@ export class RefreshManager {
         eventBus.on('inputChanged', this.handleInputChanged.bind(this));
         
         window.refreshManagerInstance = this;
+
+        // Add event listener for restoringState
+        document.addEventListener('restoringState', this.handleRestoringState.bind(this));
+    }
+
+    async handleRestoringState() {
+        await this.restoreState();
+        localStorage.removeItem('pageState');
     }
 
     handlePageLoad() {
@@ -160,18 +168,18 @@ export class RefreshManager {
                 k: transform.k
             };
 
-            const treeVisualizer = new TreeVisualizer();
+/*             const treeVisualizer = new TreeVisualizer();
             if (treeVisualizer) {
                 this.state.constraints = {
                     minScale: treeVisualizer.minScale,
                     maxScale: treeVisualizer.maxScale,
                     buffer: treeVisualizer.buffer
                 };
-            }
+            } */
         }
     }
 
-    restoreState() {
+    async restoreState() {
         console.log('Restoring state...');
         const savedState = JSON.parse(localStorage.getItem('pageState'));
         if (!savedState) {
@@ -203,13 +211,14 @@ export class RefreshManager {
 
 
         if (savedState.showcase === 'shelf') {
-            this.uiManager.drawShelf(savedState.rootStoryId, container).then(() => {
+            await this.uiManager.drawShelf(savedState.rootStoryId, container).then(() => {
                 this.restoreDrawers(savedState);
             });
         } else if (savedState.showcase === 'tree') {
-            this.uiManager.drawTree(savedState.rootStoryId, container).then(() => {
+/*             this.uiManager.drawTree(savedState.rootStoryId, container).then(() => {
                 this.applyD3Transform(savedState.zoomTransform, savedState.constraints);
-            });
+            }); */
+            await this.uiManager.drawTree(savedState.rootStoryId, container);
         } 
         
         //check if there's a modal id saved
@@ -224,8 +233,11 @@ export class RefreshManager {
             }, 100); // Adjust the delay as needed
         }
 
-        // Clear the saved state after restoring
-        localStorage.removeItem('pageState');
+/*         // Clear the saved state after restoring
+        setTimeout(() => {
+            console.log('Removing saved state');
+            localStorage.removeItem('pageState');
+        }, 100); */
     }
 
     restoreDrawers(savedState) {
@@ -240,14 +252,11 @@ export class RefreshManager {
         });
     }
 
-    applyD3Transform(transform, constraints) {
+    /* applyD3Transform(transform, constraints) {
         if (transform) {
             const svg = d3.select('#showcase svg');
             const outerG = svg.select('g');
             const innerG = outerG.select('g');
-/*             const zoom = d3.zoom().on('zoom', (event) => {
-                innerG.attr('transform', event.transform);
-            }); */
 
             const zoom = d3.zoom()
             .scaleExtent([constraints.minScale, constraints.maxScale])
@@ -287,5 +296,5 @@ export class RefreshManager {
             // Update the zoom behavior's internal state
             svg.call(zoom.transform, d3.zoomIdentity.translate(transform.x, transform.y).scale(transform.k));
         }
-    }
+    } */
 }
