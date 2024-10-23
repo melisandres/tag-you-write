@@ -33,12 +33,10 @@ export class TreeVisualizer {
         // Handle the lengend position on browser resize
         this.legend = null;
         this.userToggledLegend = false;
-        this.updateLegendPosition = this.updateLegendPosition.bind(this);
         this.updateLegendVisibility = this.updateLegendVisibility.bind(this);
         this.toggleLegend = this.toggleLegend.bind(this);
-        /* this.initializeZoom = this.initializeZoom.bind(this); */
+        this.updateLegendPosition = this.updateLegendPosition.bind(this);
         window.addEventListener('resize', this.updateLegendPosition);
-
         this.handleResize = this.handleResize.bind(this);
         window.addEventListener('resize', this.handleResize);
 
