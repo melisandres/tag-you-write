@@ -49,6 +49,31 @@ export class TreeVisualizer {
 
        // Listen for the drawTree event
         eventBus.on('drawTree', this.handleDrawTree.bind(this));
+
+        // Configuration for text sizing and visibility
+        this.config = {
+            fontSize: {
+                title: {
+                    // you have to account for the fact that the font size is scaled by the zoom level. A large number at min scale will look smaller than a small number at max scale.
+                    min: 37,  // font size at min scale
+                    max: 7,  // font size at max scale
+                },
+                author: {
+                    min: 25,  // font size at min scale
+                    max: 5,  // font size at max scale
+                },
+                zoomThreshold: 2.3  // Adjust this value to change when font size starts changing
+            },
+            authorVisibility: {
+                fadeOutStart: 1,
+                fadeOutEnd: 0.3
+            },
+            titleMaxWidth: this.minSpacing + (this.minSpacing * 0.1),
+            titleMaxLines: 2,
+            authorMaxWidth: this.minSpacing * 0.75,
+            titleLineHeight: 1.2,  // Line height factor for title
+            titleAuthorSpacing: 2  // Spacing between title and author in pixels
+        };
     }
     
     handleDrawTree({ container, data }) {
@@ -204,20 +229,19 @@ export class TreeVisualizer {
         });
             
         // Add the title
+        const titleGroup = node.append("g")
+            .attr("class", "title-group")
+            .attr("transform", "translate(0, -10)");  // Adjust vertical position as needed
+
+        const titleBottomPosition = this.updateTitle(titleGroup, d => d.data.title || "Untitled", this.config.fontSize.title.max);
+
+        // Add the author name, positioned below the title
         node.append("text")
-            .attr("dy", "-0.35em")
-            .attr("x", d => d.children ? -13 : 13)
-            .style("text-anchor", d => d.children ? "end" : "start")
-            .attr("class", d => d.data.text_status == 'draft' || d.data.text_status == 'incomplete_draft' ? "tree-title-draft" : "")
-            .text(d => this.truncateText(d.data.title || "Untitled", 20, 200));
-  
-        // Add additional text line below the title
-        node.append("text")
-            .attr("dy", "1.25em")
+            .attr("dy", `${titleBottomPosition + this.config.titleAuthorSpacing}px`)
             .attr("x", d => d.children ? -13 : 13)
             .style("text-anchor", d => d.children ? "end" : "start")
             .attr("class", d => d.data.permissions.isMyText ? "text-by author" : "text-by")
-            .text(d => d.data.permissions.isMyText ? `${d.data.text_status == 'draft' || d.data.text_status == 'incomplete_draft' ? 'DRAFT ' : ''} by you` : `by ${d.data.firstName} ${d.data.lastName}`);
+            .text(d => this.formatAuthorName(d.data));
   
 
         // Get the bounding box of the drawn tree
@@ -239,6 +263,9 @@ export class TreeVisualizer {
             .extent([[0, 0], [this.containerWidth, this.containerHeight]])
             .on("zoom", event => {
                 const transform = event.transform;
+            
+                // Log the zoom scale
+                console.log(`Zoom scale: ${transform.k}`);
             
                 // Calculate the size of the tree at the current zoom level
                 const zoomedWidth = bounds.width * transform.k;
@@ -569,33 +596,39 @@ export class TreeVisualizer {
     updateStyles(container, scale) {
         container.selectAll(".node").each((d, i, nodes) => {
             const node = d3.select(nodes[i]);
-            const title = node.select("text");
+            const titleGroup = node.select(".title-group");
             const author = node.select(".text-by");
-    
-            const fontSize = this.calculateFontSize(scale);
+
+            const titleFontSize = this.calculateFontSize(scale, 'title');
+            const authorFontSize = this.calculateFontSize(scale, 'author');
             const authorVisibility = this.calculateAuthorVisibility(scale);
-    
-            title
-                .style("font-size", `${fontSize}px`)
-                .text(d => this.truncateText(d.data.title || "Untitled", fontSize));
-    
+            console.log(`Scale: ${scale}, Title size: ${titleFontSize}, Author size: ${authorFontSize}`);
+
+            const titleBottomPosition = this.updateTitle(titleGroup, d.data.title || "Untitled", titleFontSize);
+
             author
-                .style("font-size", `${fontSize * 0.8}px`)
-                .style("opacity", authorVisibility);
+                .attr("dy", `${titleBottomPosition + this.config.titleAuthorSpacing}px`)
+                .style("font-size", `${authorFontSize}px`)
+                .style("opacity", authorVisibility)
+                .text(d => this.formatAuthorName(d.data, authorFontSize));
         });
     }
     
-    calculateFontSize(scale) {
-        // Adjust these values as needed
-        const minFontSize = 12;
-        const maxFontSize = 30;
-        return Math.max(minFontSize, Math.min(maxFontSize, 30 / scale));
+    calculateFontSize(scale, type) {
+        const { min, max } = this.config.fontSize[type];
+        const { zoomThreshold } = this.config.fontSize;
+        
+        if (scale >= zoomThreshold) {
+            return min + (max - min) * ((scale - zoomThreshold) / (1 - zoomThreshold));
+        } else {
+            // Inverse scaling for zooming out
+            return max - (max - min) * ((zoomThreshold - scale) / zoomThreshold);
+        }
     }
     
     calculateAuthorVisibility(scale) {
         // Adjust these values as needed
-        const fadeOutStart = 0.7;
-        const fadeOutEnd = 0.5;
+        const { fadeOutStart, fadeOutEnd } = this.config.authorVisibility;
         return Math.min(1, Math.max(0, (scale - fadeOutEnd) / (fadeOutStart - fadeOutEnd)));
     }
     
@@ -609,7 +642,7 @@ export class TreeVisualizer {
         return text;
     }
     
-    formatAuthorName(data) {
+    formatAuthorName(data, fontSize) {
         if (data.permissions.isMyText) {
             return `${data.text_status == 'draft' || data.text_status == 'incomplete_draft' ? 'DRAFT ' : ''} by you`;
         }
@@ -622,12 +655,64 @@ export class TreeVisualizer {
             for (let i = 0; i < names.length - 1; i++) {
                 formattedName += names[i][0] + '. ';
             }
-            formattedName += this.truncateText(names[names.length - 1], 14, 50); // Truncate last name if too long
+            formattedName += this.truncateText(names[names.length - 1], fontSize, this.config.authorMaxWidth); // Truncate last name if too long
         } else {
-            formattedName = this.truncateText(names[0], 14, 50);
+            formattedName = this.truncateText(names[0], fontSize, this.config.authorMaxWidth);
         }
     
         return `by ${formattedName}`;
     }
+
+    updateTitle(titleGroup, titleOrAccessor, fontSize) {
+        titleGroup.selectAll("*").remove();  // Clear existing title
+
+        const title = typeof titleOrAccessor === 'function' 
+            ? titleOrAccessor(titleGroup.datum()) 
+            : titleOrAccessor;
+
+        const words = title.split(/\s+/);
+        let lines = [""];
+        let lineNumber = 0;
+        const lineHeight = fontSize * this.config.titleLineHeight;
+        
+        words.forEach(word => {
+            let testLine = lines[lineNumber] + (lines[lineNumber] ? " " : "") + word;
+            let testWidth = this.getTextWidth(testLine, fontSize);
+            
+            if (testWidth > this.config.titleMaxWidth && lines[lineNumber].length > 0) {
+                if (lineNumber < this.config.titleMaxLines - 1) {
+                    lineNumber++;
+                    lines[lineNumber] = word;
+                } else {
+                    // Truncate the line and add ellipsis
+                    while (testWidth > this.config.titleMaxWidth && testLine.length > 3) {
+                        testLine = testLine.slice(0, -1);
+                        testWidth = this.getTextWidth(testLine + "...", fontSize);
+                    }
+                    lines[lineNumber] = testLine + "...";
+                    return;  // Break the loop if we've reached max lines
+                }
+            } else {
+                lines[lineNumber] = testLine;
+            }
+        });
+
+        lines.forEach((line, i) => {
+            titleGroup.append("text")
+                .attr("dy", `${i * lineHeight}px`)
+                .attr("x", d => d.children ? -13 : 13)
+                .style("text-anchor", d => d.children ? "end" : "start")
+                .style("font-size", `${fontSize}px`)
+                .text(line);
+        });
+
+        // Return the bottom position of the last line
+        return (lines.length * lineHeight);
+    }
+
+    getTextWidth(text, fontSize) {
+        // This is an approximation. For more accuracy, you might want to use canvas or SVG to measure text width
+        return text.length * fontSize * 0.6;
+    }
 }
- 
+
