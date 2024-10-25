@@ -52,40 +52,42 @@ export class SeenManager {
     }
 
     updateReadStatus(id) {
-        const element = document.querySelector(`[data-story-id="${id}"]`).querySelector('.shelf-heart');
+        // Try to find the shelf heart first
+        let element = document.querySelector(`[data-story-id="${id}"]`)?.querySelector('.shelf-heart');
+        
+        // If shelf heart is not found, look for the tree heart or star
+        if (!element) {
+            element = document.querySelector(`path[data-id="${id}"].unread`);
+        }
+        
+        console.log("element", element);
         let topLevelElement = document.querySelector('#showcase').closest('.story');
 
-        // Update the drawer clicked on locally, as the user browses 
+        // Update the element clicked on locally, as the user browses 
         if (element && element.classList.contains('unread')) {
             element.classList.remove('unread');
             element.classList.add('read');
             this.updateTopLevelUnseenCount(topLevelElement);
         }
 
-        // Update the D3 circle for this story, removing the 'unread' class
-        const container = document.querySelector('#showcase');
-        const circle = container.querySelector(`circle[data-id='${id}']`);
-        const star = container.querySelector(`.star[data-id='${id}']`);
-
-        if (circle && circle.classList.contains('unread')) {
-            circle.classList.remove('unread');
-            circle.classList.add('read');
-            this.updateTopLevelUnseenCount(topLevelElement);
-        }else if(star && star.classList.contains('unread')){
-            star.classList.remove('unread');
-            star.classList.add('read');
-            this.updateTopLevelUnseenCount(topLevelElement);
-        }
+        // No need to update D3 circle separately, as we're now using the same element for both shelf and tree
     }
 
-    updateTopLevelUnseenCount(element){
+    updateTopLevelUnseenCount(element) {
         const unreads = document.querySelector('#showcase').querySelectorAll(".unread:not(.legend-item .unread)");
         
-        if(unreads.length <= 0){
-            element.querySelector('.unreads').classList.remove('unreads');
+        if (unreads.length <= 0) {
+            const unreadsElement = element.querySelector('.unreads');
+            if (unreadsElement) {
+                unreadsElement.classList.remove('unreads');
+            }
         }
-        element.setAttribute('data-unseen-count', element.getAttribute('data-unseen-count') - 1);
-        element.setAttribute('data-seen-count', element.getAttribute('data-seen-count') + 1 );
+        
+        const unseenCount = parseInt(element.getAttribute('data-unseen-count') || '0');
+        const seenCount = parseInt(element.getAttribute('data-seen-count') || '0');
+        
+        element.setAttribute('data-unseen-count', Math.max(0, unseenCount - 1));
+        element.setAttribute('data-seen-count', seenCount + 1);
     }
 
 
