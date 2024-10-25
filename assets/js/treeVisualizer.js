@@ -70,7 +70,7 @@ export class TreeVisualizer {
             titleMaxLines: 2,
             authorMaxWidth: this.minSpacing * 0.75,
             titleLineHeight: 1.2,  // Line height factor for title
-            titleAuthorSpacing: 2  // Spacing between title and author in pixels
+            titleAuthorSpacing: -7,  // Adjust the vertical position on the author
         };
     }
     
@@ -213,16 +213,20 @@ export class TreeVisualizer {
                     .attr('data-id', d => d.data.id)  // Add data-set for text id
                     .attr("fill", baseColor);  // Star color for winner
             } else {
-                item.append("circle")
-                    .attr("r", 10)
+                // Replace circle with heart
+                const heartPath = "m -10,-9 c -6.57,-7.05 -17.14,-7.05 -23.71,0 -6.56,7.05 -6.56,18.39 0,25.45 l 29.06,31.27 29.09,-31.23 c 6.57,-7.05 6.57,-18.4 0,-25.45 -6.57,-7.05 -17.14,-7.05 -23.71,0 l -5.35,5.75 -5.39,-5.78 z";
+                
+                item.append("path")
+                    .attr("d", heartPath)
+                    .attr("transform", "scale(0.4) translate(0, -15)")  // Adjusted translation to center the heart
                     .attr('class', d => {
                         // Concatenate multiple classes based on conditions
                         let classes = `${d.data.text_seen == 1 ? 'read' : 'unread'}`;
-                        classes += ` ${d.data.text_status == 'draft' || d.data.text_status == 'incomplete_draft'  ? 'tree-node-draft' : ''}`; // Add class for draft status
-                        return classes.trim();  // Remove any extra spaces
+                        classes += ` ${d.data.text_status == 'draft' || d.data.text_status == 'incomplete_draft' ? 'tree-node-draft' : ''}`; 
+                        return classes.trim();
                     })
-                    .attr('data-id', d => d.data.id)  // Add data-set for text id
-                    .attr('fill', d => colorScale(d.data.voteCount)); // Add a fill with color based on votes
+                    .attr('data-id', d => d.data.id)
+                    .attr('fill', d => colorScale(d.data.voteCount));
             }
         });
             
@@ -346,7 +350,7 @@ export class TreeVisualizer {
         const maxVotes = d.playerCount -1;
         const legendData = [
             { label: "Winner", type: "star"},
-            { label: "Unread", type: "unread-circle" },
+            { label: "Unread", type: "unread-heart" },
             { label: "# of votes", type: "vote-gradient", maxVotes: maxVotes }
         ];
     
@@ -384,12 +388,17 @@ export class TreeVisualizer {
 
         legendItems.each(function(d) {
             const item = d3.select(this);
-            if (d.type === "unread-circle") {
-                item.append("circle")
-                    .attr("r", 6)
+            if (d.type === "unread-heart") {  // Changed from "unread-circle"
+                // Add heart path
+                const heartPath = "m -10,-9 c -6.57,-7.05 -17.14,-7.05 -23.71,0 -6.56,7.05 -6.56,18.39 0,25.45 l 29.06,31.27 29.09,-31.23 c 6.57,-7.05 6.57,-18.4 0,-25.45 -6.57,-7.05 -17.14,-7.05 -23.71,0 l -5.35,5.75 -5.39,-5.78 z";
+                
+                item.append("path")
+                    .attr("d", heartPath)
+                    .attr("transform", "scale(0.3) translate(10, -20)")  // Adjust position as needed
                     .attr("class", "unread");
+                    
                 item.append("text")
-                    .attr("x", 15)
+                    .attr("x", 20)  // Adjusted x position
                     .attr("y", 5)
                     .text(d.label)
                     .style("font-size", "15px");

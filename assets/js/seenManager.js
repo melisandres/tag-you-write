@@ -52,7 +52,7 @@ export class SeenManager {
     }
 
     updateReadStatus(id) {
-        const element = document.querySelector(`[data-story-id="${id}"]`);
+        const element = document.querySelector(`[data-story-id="${id}"]`).querySelector('.shelf-heart');
         let topLevelElement = document.querySelector('#showcase').closest('.story');
 
         // Update the drawer clicked on locally, as the user browses 

@@ -1,5 +1,6 @@
 import { eventBus } from './eventBus.js';
 import { SVGManager } from './svgManager.js';
+import { createColorScale } from './createColorScale.js';
 
 export class ShelfUpdateManager {
   constructor(path) {
@@ -23,10 +24,29 @@ export class ShelfUpdateManager {
         drawer.classList.remove('draft');
         drawer.classList.add(newStatus);
 
-        // Remove "draft" text and add vote count
-        const statusSpan = drawer.querySelector('.status');
+        // Update vote count display - needs to match new getNumberOfVotes structure
+        const votesDiv = drawer.querySelector('.votes');
+        if (votesDiv) {
+          votesDiv.innerHTML = `
+            <i>${SVGManager.votesSVG}</i>
+            <span class="small vote-count" data-vote-count="0" data-player-count="0">
+              0/0
+            </span>
+          `;
+          // Need to add data-fill-color attribute and apply SVG colors
+          votesDiv.setAttribute('data-fill-color', '');
+        }
+
+        // Remove "draft" text
+        const statusSpan = drawer.querySelector('[data-status]');
         if (statusSpan) {
-          statusSpan.innerHTML = `
+          statusSpan.innerHTML = '';
+        }
+
+        //Add the vote count to the node
+        const voteCountSpan = drawer.querySelector('[data-vote-count]');
+        if (voteCountSpan) {
+          voteCountSpan.innerHTML = `
             <span>
               <i>${SVGManager.votesSVG}</i>
               <span class="small" data-vote-count="0" data-player-count="0">
@@ -82,7 +102,7 @@ export class ShelfUpdateManager {
               }
             }
             if (drawer.dataset.storyId === textId) {
-                drawer.querySelector('.node-title').classList.add('isWinner');
+                drawer.querySelector('.node-headline').classList.add('isWinner');
                 drawer.querySelector('.writing').classList.add('isWinner');
             }
         });
@@ -95,12 +115,28 @@ export class ShelfUpdateManager {
     if (data.textId) {
         const shelfNode = document.querySelector(`.node[data-story-id="${data.textId}"]`);
         if (shelfNode) {
+            // Need to update vote count display to match new structure
+            const votesDiv = shelfNode.querySelector('.votes');
+            if (votesDiv) {
+                const voteCountSpan = votesDiv.querySelector('.vote-count');
+                voteCountSpan.textContent = `${data.voteCount}/${data.playerCountMinusOne} votes`;
+                voteCountSpan.setAttribute('data-vote-count', data.voteCount);
+                
+                // Need to update color scale
+                const maxVotes = data.playerCountMinusOne;
+                const colorScale = createColorScale(maxVotes);
+                const fillColor = colorScale(data.voteCount);
+                votesDiv.setAttribute('data-fill-color', fillColor);
+                
+                // Apply the new color
+                const svgPath = votesDiv.querySelector('svg path');
+                if (svgPath) {
+                    svgPath.setAttribute('fill', fillColor);
+                }
+            }
+            // Update the vote count and button appearance for the shelf view
             const shelfResultsSpan = shelfNode.querySelector('[data-vote-count]');
             const shelfVoteButton = shelfNode.querySelector(`.vote[data-vote="${data.textId}"]`);
-
-            // Update the vote count and button appearance for the shelf view
-            shelfResultsSpan.innerHTML = `${data.voteCount} / ${data.playerCountMinusOne}`;
-            shelfResultsSpan.setAttribute('data-vote-count', data.voteCount);
 
             if (data.voted) {
                 shelfVoteButton.classList.add('voted');

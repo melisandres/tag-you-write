@@ -93,8 +93,8 @@
 
     /* Transitions */
     --transition-duration-short: 0.4s;
-    --transition-delay: 8s;
-    --transition-duration-long: 1s;
+    --transition-delay: 0.8s;
+    --transition-duration-long: 1.5s;
 
 
     /* Border Colors */

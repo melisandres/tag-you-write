@@ -3,10 +3,10 @@
     height: 300px;
 }
 
-.node circle {
-    /* fill: pink; */
-    stroke: rgb(238, 167, 2);
-    stroke-width: 1px;
+
+.with-tree .node path {
+    stroke: var(--color-black);
+    stroke-width: 1.5px;
     cursor: pointer; 
 }
 
@@ -19,7 +19,12 @@
     cursor: pointer; 
 }
 .node .text-by{
-    font: 10px sans-serif;
+    font: 10px var(--font-secondary);
+    text-shadow: 0 10px 10px var(--color-white);
+}
+
+.node .title-group{
+    font: (--font-primary);
 }
 
 .link {
@@ -40,8 +45,9 @@
     opacity: 30%;
 }
 
-.tree-node-draft{
-    fill: lightgrey;
-    stroke: lightpink;
-    opacity: 50%;
+path.tree-node-draft {
+    fill: var(--color-grey) !important;
+    stroke: var(--color-love) !important;
+    stroke-width: 1px !important;
+    opacity: 50% !important;
 }

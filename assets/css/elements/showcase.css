@@ -4,7 +4,7 @@
     border:#ccc solid 1px;
     overflow: hidden;
     width: 90%;
-    margin-bottom: 40px;
+    padding-bottom: 40px;
 }
 
 .legend.hidden .legend-box {

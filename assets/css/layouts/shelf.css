@@ -1,11 +1,17 @@
 /* some code to go over for the shelf/drawer visualization */
 
 #showcase.with-shelf{
-    width: 100%;
+    min-width: 100%;
+    overflow-x: auto;
     border: none;
     border-top: 1px lightgrey dotted;
+    padding-top: 40px;
 
 }
+div.writing.visible{
+    width: clamp(250px, 50vw, 800px); 
+}
+
 .with-shelf .title, .arrow{
     font-size: 15px;
     font-weight: 500;
@@ -36,19 +42,26 @@
 
 .with-shelf i svg{
     border: none;
-    width: 37px;
-    height: 37px;
+    width: 20px;
+    height: 20px;
 }
 
-
-
-.node-title h2 {
-    margin: 0; /* Remove all margins */
-    padding: 0; /* Remove all padding */
-    margin-bottom: 0; /* Fine-tune spacing below the title */
-  }
+.node-headline {
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+    align-items: center;
+    gap: 10px;
+    align-items: center;
+    padding-bottom: 10px; 
+    margin-bottom: 0; 
+    cursor: pointer;
+}
   
-.node-title p {
+.headline-content p.info {
+    display: flex;
+    flex-direction: row;
+    gap: 0px;
     margin: 0; 
     padding: 0; 
     line-height: 1;
@@ -95,3 +108,43 @@
     padding: 0;
     transition: height 8s ease-in-out;
 }
+
+.node.draft .votes path{
+    fill: var(--color-grey);
+    stroke: var(--color-love);
+    opacity: 50%;
+}
+
+.with-shelf .votes {
+    position: relative;
+}
+
+.with-shelf .vote-count {
+    position: absolute;
+    top: -50%;
+    left: 50%; 
+    transform: translateX(-50%) translateY(-60%);
+    font-size: 16px;
+    padding: 5px;
+    background-color: var(--color-black);
+    color: white;
+    text-shadow: 1px 1px 2px black;
+    opacity: 0;
+    pointer-events: none;
+    white-space: nowrap;
+    transition: opacity var(--transition-duration-short) ease-in-out; /* Explicit transition timing */
+}
+
+.with-shelf .votes:hover .vote-count {
+    opacity: 1;
+    transition-delay: var(--transition-delay); /* Explicit delay */
+}
+
+/* Remove or update this rule if you still need it */
+.with-shelf .votes:hover .vote-count.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+
+

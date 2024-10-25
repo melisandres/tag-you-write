@@ -780,6 +780,78 @@ export class SVGManager{
 
   static get votesSVG (){
    return `
+         <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+         <svg
+            version="1.1"
+            x="0px"
+            y="0px"
+            viewBox="-1 0 70 64"
+            id="svg2"
+            sodipodi:docname="noun-heart-1822346.svg"
+            width="68"
+            height="62.000034"
+            inkscape:version="1.3.2 (091e20e, 2023-11-25)"
+            xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+            xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+            xmlns="http://www.w3.org/2000/svg"
+            xmlns:svg="http://www.w3.org/2000/svg">
+         <defs
+            id="defs2" />
+         <sodipodi:namedview
+            id="namedview2"
+            pagecolor="#ffffff"
+            bordercolor="#000000"
+            borderopacity="0.25"
+            inkscape:showpageshadow="2"
+            inkscape:pageopacity="0.0"
+            inkscape:pagecheckerboard="0"
+            inkscape:deskcolor="#d1d1d1"
+            inkscape:zoom="1.888"
+            inkscape:cx="34.163136"
+            inkscape:cy="43.432203"
+            inkscape:window-width="1312"
+            inkscape:window-height="449"
+            inkscape:window-x="0"
+            inkscape:window-y="37"
+            inkscape:window-maximized="0"
+            inkscape:current-layer="svg2" />
+         <g
+            transform="translate(-15.999999,-971.36216)"
+            id="g1">
+            <path
+               d="m 20.922437,976.64881 c -6.56642,7.04858 -6.56008,18.39119 0,25.44679 l 29.0595,31.2666 c 9.69775,-10.4102 19.39551,-20.8201 29.09325,-31.2306 6.566419,-7.0486 6.566419,-18.3978 0,-25.44673 -6.56642,-7.04896 -17.13908,-7.0491 -23.70559,0 l -5.35398,5.74725 -5.38756,-5.78331 c -6.56653,-7.04886 -17.13918,-7.04886 -23.70562,0 z"
+               style="color:#000000;enable-background:accumulate"
+               fill="#000000"
+               stroke="black"
+               stroke-width="2"
+               marker="none"
+               visibility="visible"
+               display="inline"
+               overflow="visible"
+               id="path1" />
+         </g>
+         <text
+            x="-15.999999"
+            y="96.000015"
+            fill="#000000"
+            font-size="5px"
+            font-weight="bold"
+            font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif"
+            id="text1">Created by Three Six Five</text>
+         <text
+            x="-15.999999"
+            y="101.00002"
+            fill="#000000"
+            font-size="5px"
+            font-weight="bold"
+            font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif"
+            id="text2">from the Noun Project</text>
+         </svg>
+      `
+  }
+
+  static get previous_votesSVG (){
+   return `
          <svg
          version="1.1"
          x="0px"

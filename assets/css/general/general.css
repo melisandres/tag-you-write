@@ -4,6 +4,16 @@
     box-sizing: border-box;
     font-family: var(--font-family-primary);
     font-size: var(--font-size-medium);
+
+    /* Scrollbar styling for WebKit browsers (Chrome, Safari, newer versions of Edge) */
+    &::-webkit-scrollbar {
+        width: 8px; /* Width of the scrollbar */
+    } 
+    &::-webkit-scrollbar-track {
+        background: var(--color-primary-lightest);
+    }
+    scrollbar-width: thin; /* Scrollbar styling for Firefox */
+    scrollbar-color: var(--color-primary-dark) var(--color-white-lightest); /* thumb and track color */
 }
 
 body{

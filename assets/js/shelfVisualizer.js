@@ -1,5 +1,6 @@
 import { SVGManager } from './svgManager.js';
 import { SeenManager } from './seenManager.js';
+import { createColorScale } from './createColorScale.js'; // Import the utility function
 
 export class ShelfVisualizer {
   constructor(container, path) {
@@ -28,6 +29,7 @@ export class ShelfVisualizer {
 
     this.container.innerHTML += `<ol>${this.drawDrawer(data, 0)}</ol>`;
     this.addEventListeners();
+    this.applySVGColors(this.container);
   }
 
   drawDrawer(node, depth) {
@@ -55,14 +57,19 @@ export class ShelfVisualizer {
     const noteDate = node.note_date ?  `<span class="date"> ${node.note_date}</span>` : '';
 
     return `
-      <li class="node ${unread} ${node.text_status === "published" ? "published" : "draft"}" data-story-id="${node.id}" style="--node-depth: ${depth}">
-        <div class="node-title ${isWinner}">
-          <h2>
-            <span class="arrow">▶</span>
-            <span class="title">${node.title || "Untitled"}</span>
-            ${author}
-            ${this.getStatus(node)}
-          </h2>
+      <li class="node ${node.text_status === "published" ? "published" : "draft"}" data-story-id="${node.id}" style="--node-depth: ${depth}">
+        <div class="node-headline ${isWinner}">
+          <div class="arrow">▶</div>
+          <div class="shelf-heart ${unread}"> ${this.getNumberOfVotes(node)}</div>
+          <div class="headline-content">
+            <h2 class="title">
+              ${node.title || "Untitled"}
+            </h2>
+            <p class="author">
+              ${author}
+            </p>
+          </div>
+          <span class="status">${this.getStatus(node)? this.getStatus(node) : ''}</span>
         </div>
         <div class="writing hidden ${isWinner}">
           <div class="node-buttons">
@@ -99,25 +106,11 @@ export class ShelfVisualizer {
         writingDiv.classList.remove('hidden');
         writingDiv.classList.add('visible');
         arrow.textContent = '▼';
-
       }
       
       this.addEventListeners(); // Re-add event listeners for the updated node
     }
   }
-
-  /*
-  getDeleteForm(node) {
-    const disabled = node.permissions.isParent || node.permissions.canIterate;
-    return `
-      <form action="${this.path}text/delete" method="POST">
-        <input type="hidden" name="id" value="${node.id}">
-        <input type="hidden" name="parent_id" value="${node.parent_id}">
-        <input type="hidden" name="writer_id" value="${node.writer_id}">
-        <input type="submit" value="Delete" ${disabled ? 'disabled title="Cannot be deleted. Other texts iterate on it."' : ''}>
-      </form>
-    `;
-  } */
 
   getIterateForm(node) {
     return `
@@ -180,35 +173,70 @@ export class ShelfVisualizer {
   }
 
   getNumberOfVotes(node) {
-    return `
-    <span>
-      <i>
-        ${SVGManager.votesSVG}
-      </i>
-      <span class="small"  data-vote-count=${node.voteCount} data-player-count=${node.playerCount - 1}>
-        ${node.voteCount}/${node.playerCount - 1}
-      </span>
-    </span>
-`   ;
+    if (node.text_status === "published") {
+      const maxVotes = node.playerCount - 1; 
+      const colorScale = createColorScale(maxVotes); 
+      const fillColor = colorScale(node.voteCount);
+
+      return `
+      <div class="votes" data-fill-color="${fillColor}">
+        <i>
+          ${SVGManager.votesSVG}
+        </i>
+        <span class="small vote-count" data-vote-count=${node.voteCount} data-player-count=${node.playerCount - 1}>
+          ${node.voteCount}/${node.playerCount - 1} votes
+        </span>
+      </div>
+    `;
+    } else {
+      // if the story isn't published, you need a placeholder for the heart icon.
+      return `
+        <div class="votes" data-fill-color="">
+          <i>
+            ${SVGManager.votesSVG}
+          </i>
+          <span class="small vote-count hidden" data-vote-count=${node.voteCount} data-player-count=${node.playerCount - 1}>
+          </span>
+        </div>
+      
+      `;
+    }
+  }
+
+  applySVGColors(container) {
+    const voteElements = container.querySelectorAll('.votes');
+    voteElements.forEach(voteElement => {
+      const fillColor = voteElement.dataset.fillColor;
+      const svgPath = voteElement.querySelector('svg path');
+      if (svgPath) {
+        svgPath.setAttribute('fill', fillColor);
+      }
+      if (fillColor == ""){
+        svgPath.setAttribute('stroke', 'none');
+        svgPath.setAttribute('fill', 'none');
+      }
+    });
   }
 
   getStatus(node){
-    if(node.text_status === "published"){
-      return this.getNumberOfVotes(node); 
-    }else{
+    if(node.text_status !== "published"){
+      console.log(node.text_status);
       return `
-      <span class="status ${node.text_status === "draft" || node.text_status === "incomplete_draft" ? "draft" : "published" }">
+      <span data-status class="status ${node.text_status === "draft" || node.text_status === "incomplete_draft" ? "draft" : "published" }">
         ${node.text_status === "published" ? "published" : "draft"}
       </span>`;
+    }else{
+      return '';
     }
   }
   
   addEventListeners() {
-    const titles = this.container.querySelectorAll('.node-title');
+    const titles = this.container.querySelectorAll('.node-headline');
     titles.forEach(title => {
       title.addEventListener('click', () => {
-        const text_id = title.closest('[data-story-id]').dataset.storyId;
-        const writingDiv = title.nextElementSibling;
+        const text_id = title.closest('[data-story-id]').dataset.storyId; 
+        console.log("text_id", text_id);
+        const writingDiv = title.closest('.node').querySelector('.writing'); 
         const arrow = title.querySelector('.arrow');
         if (writingDiv.classList.contains('hidden')) {
           writingDiv.classList.remove('hidden');
@@ -226,6 +254,8 @@ export class ShelfVisualizer {
     });
   }
 }
+
+
 
 
 

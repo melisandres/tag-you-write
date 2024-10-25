@@ -99,19 +99,7 @@
     margin-top: -40px;
     padding-top: 0;
     padding-left: var(--story-writing-padding-left);
-
-     /* Scrollbar styling for WebKit browsers (Chrome, Safari, newer versions of Edge) */
-    &::-webkit-scrollbar {
-        width: 8px; /* Width of the scrollbar */
-    } 
-
-   &::-webkit-scrollbar-track {
-        background: var(--color-primary-lightest);
-   }
-
-     /* Scrollbar styling for Firefox */
-    scrollbar-width: thin;
-    scrollbar-color: var(--color-primary-dark) var(--color-white-lightest); /* thumb and track color */
+    /* there is a scrollbar here, if need be, I'm styling it in general.css */
 }
 
 /* the "prompt:" text/title */

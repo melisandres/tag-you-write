@@ -59,15 +59,16 @@ export class TreeUpdateManager {
   handleInstaDelete({ textId }) {
     const container = document.querySelector('#showcase[data-showcase="tree"]');
     if (container) {
-      const node = container.querySelector(`circle[data-id="${textId}"]`);
-      const nodeGroup = node.closest('g');
+      // Update selector to find path instead of circle
+      const node = container.querySelector(`path[data-id="${textId}"]`);
+      const nodeGroup = node?.closest('g');
       if (nodeGroup) {
-          d3.select(nodeGroup)
+        d3.select(nodeGroup)
           .classed('display-none', true);
       } 
       const link = container.querySelector(`path[data-id="${textId}"]`);
       if (link) {
-          d3.select(link)
+        d3.select(link)
           .classed('display-none', true);
       }
     }
@@ -76,14 +77,12 @@ export class TreeUpdateManager {
   handleChooseWinner({ textId }) {
     const container = document.querySelector('#showcase[data-showcase="tree"]');
     if (container) {
-      const circle = container.querySelector(`circle[data-id="${textId}"]`);
-      console.log("circle", circle)
-      if (circle) {
-        const nodeGroup = circle.closest('g');
-        console.log("nodeGroup", nodeGroup)
+      // Update selector to find path instead of circle
+      const heart = container.querySelector(`path[data-id="${textId}"]`);
+      if (heart) {
+        const nodeGroup = heart.closest('g');
         if (nodeGroup) {
-          // Remove the existing circle
-          circle.remove();
+          heart.remove();
 
 
           // Create and add the star
@@ -96,7 +95,7 @@ export class TreeUpdateManager {
           // Insert the star as the first child of the nodeGroup
           nodeGroup.insertBefore(star, nodeGroup.firstChild);
 
-          // Update classes if needed
+          // Update class
           d3.select(nodeGroup)
             .classed('winner', true);
         }
@@ -116,7 +115,7 @@ export class TreeUpdateManager {
     const newVoteCount = data.voteCount 
     const maxVoteCount = data.playerCountMinusOne
     const colorScale = this.createColorScale(maxVoteCount)
-    const node = container.querySelector(`circle[data-id="${nodeId}"]`);
+    const node = container.querySelector(`path[data-id="${nodeId}"]`);
 
     if (!node || !colorScale) {
         return;

@@ -1,19 +1,6 @@
 /* on the left */
 .unread{
-    box-shadow: rgb(244, 218, 90, 1) -2px 0px, 
-    white -6px 0px, 
-    rgb(244, 218, 90, 0.7) -8px 0px, 
-    white -12px 0px, 
-    rgb(244, 218, 90, 0.4) -14px 0px, 
-    white -18px 0px, 
-    rgb(244, 218, 90, 0.1) -20px 0px;
-}
 
-.node circle.unread, circle.unread, .star.unread{
-    /* fill: rgb(255, 202, 78); */
-    /* stroke: rgb(238, 167, 2); */
-/*     stroke-width: 1px; */
-    /* white gap */
     filter: 
         drop-shadow( 1.2px  0px 0px white) 
         drop-shadow(-1.2px  0px 0px  white)
@@ -22,6 +9,22 @@
 
         /* shadow */
         drop-shadow(0 0 5px rgba(247, 173, 0, 1));
+}
+
+.with-tree .node path.unread, .with-tree path.unread, .with-tree .star.unread{
+    /* fill: rgb(255, 202, 78); */
+    /* stroke: rgb(238, 167, 2); */
+/*     stroke-width: 1px; */
+    /* white gap */
+    filter: 
+        drop-shadow( 1.2px  0px 0px white) 
+        drop-shadow(-1.2px  0px 0px white)
+        drop-shadow( 0px  1.2px 0px white) 
+        drop-shadow( 0px -1.2px 0px white)
+
+        /* shadow */
+        drop-shadow(0 0 20px rgba(247, 173, 0, 1))
+        drop-shadow(0 0 35px rgba(247, 173, 0, 0.8));
 }
 
 .unreads{
@@ -36,7 +39,7 @@
                 rgb(244, 218, 90, 0.1) -20px 0px;
 }
 
-.legend circle.unread{
+.legend path.unread{
     fill: white;
     stroke: white;
 }
