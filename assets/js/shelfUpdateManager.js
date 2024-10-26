@@ -102,8 +102,13 @@ export class ShelfUpdateManager {
               }
             }
             if (drawer.dataset.storyId === textId) {
-                drawer.querySelector('.node-headline').classList.add('isWinner');
-                drawer.querySelector('.writing').classList.add('isWinner');
+              drawer.querySelector('.node-headline').classList.add('isWinner');
+              drawer.querySelector('.writing').classList.add('isWinner');
+                const shelfHeart = drawer.querySelector('.shelf-heart');
+                
+              if (shelfHeart) {
+                shelfHeart.innerHTML = SVGManager.starSVG;
+              }
             }
         });
         

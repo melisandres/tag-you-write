@@ -108,3 +108,7 @@
     overflow-y: auto;
 }
 
+.modal .votes svg {
+    width: 25px;
+    height: 25px;
+}

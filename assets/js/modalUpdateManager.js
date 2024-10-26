@@ -1,5 +1,6 @@
 import { eventBus } from './eventBus.js';
 import { SVGManager } from './svgManager.js';
+import { createColorScale } from './createColorScale.js';
 
 export class ModalUpdateManager {
   constructor(path) {
@@ -64,9 +65,21 @@ export class ModalUpdateManager {
       if (topInfo) {
         topInfo.classList.add('winner');
         const statusSpan = topInfo.querySelector('.status') || document.createElement('span');
-        statusSpan.className = 'status';
-        statusSpan.textContent = 'Winner';
+        statusSpan.className = 'status winner';
+        statusSpan.textContent = 'WINNER';
         topInfo.appendChild(statusSpan);
+
+        // Replace the votes SVG with the star SVG
+        const votesIcon = topInfo.querySelector('.votes i');
+        if (votesIcon) {
+          votesIcon.innerHTML = SVGManager.starSVG;
+        }
+      }
+
+      // Add 'isWinner' class to modal-text
+      const modalText = modal.querySelector('.modal-text');
+      if (modalText) {
+        modalText.classList.add('isWinner');
       }
     }
   }

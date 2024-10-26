@@ -181,7 +181,7 @@ export class ShelfVisualizer {
       return `
       <div class="votes" data-fill-color="${fillColor}">
         <i>
-          ${SVGManager.votesSVG}
+          ${node.isWinner ? SVGManager.starSVG : SVGManager.votesSVG}
         </i>
         <span class="small vote-count" data-vote-count=${node.voteCount} data-player-count=${node.playerCount - 1}>
           ${node.voteCount}/${node.playerCount - 1} votes

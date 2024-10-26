@@ -6,8 +6,17 @@
 
 .with-tree .node path {
     stroke: var(--color-black);
-    stroke-width: 1.5px;
+    stroke-width: 2px;
     cursor: pointer; 
+}
+
+.with-tree .node path.star{
+    stroke-width: 0.8px;
+}
+
+.legend-item .star {
+    stroke-width: 0.8px;
+    stroke: var(--color-black);
 }
 
 .node-title {

@@ -452,7 +452,8 @@ export class TreeVisualizer {
             }else if(d.type === "star"){
                 item.append("path")
                     .attr("d", d3.symbol().type(d3.symbolStar).size(100))  // Star with a size of 100
-                    .attr("fill", self.baseColor);  // Use gold color for the winner
+                    .attr("fill", self.baseColor)
+                    .classed("star", true);  // Use gold color for the winner
                 item.append("text")
                     .attr("x", 20)
                     .attr("y", 5)
