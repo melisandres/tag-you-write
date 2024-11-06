@@ -11,8 +11,10 @@ export class AutoSaveManager {
 
     //init
     init() {
-        this.formType = this.form ? this.form.getAttribute('data-form-type') : null;
-        this.lastSavedContent = this.form ? JSON.stringify(Object.fromEntries(new FormData(this.form))) : null;
+        if (!this.form) return;
+        
+        this.formType = this.form.getAttribute('data-form-type');
+        this.lastSavedContent = null;
         this.autoSaveTimer = null;
         this.lastTypedTime = Date.now();
         this.continuousTypingDuration = 30000; // 30 seconds
@@ -22,11 +24,20 @@ export class AutoSaveManager {
         this.lastAutoSaveTime = null;
         this.canAutosave = false; 
 
-        // Listen for input changes and manual saves
+        // Listen for events
         eventBus.on('inputChanged', this.handleInputChange.bind(this));
         eventBus.on('manualSave', this.handleManualSave.bind(this));
         eventBus.on('validationChanged', this.handleValidationChanged.bind(this));
+        eventBus.on('formRestored', this.handleFormRestored.bind(this));
+    }
 
+    handleFormRestored() {
+        // Now check for changes and start timers if needed
+        const hasChanges = this.hasUnsavedChanges();
+        if (hasChanges) {
+            this.startAutoSaveTimer();
+            this.startContinuousTypingTimer();
+        }
     }
 
     // Must check if validation fails for autosave
@@ -51,24 +62,29 @@ export class AutoSaveManager {
             this.warningElement.className = 'form-warning';
         }
         
+        const fieldSpans = failedFields.map(field => 
+            `<span class="field-name">${field.replace(/[<>]/g, '')}</span>`
+        );
+        
         let message = 'Please fix ';
-        if (failedFields.length === 1) {
-            message += `the <span class="field-name">${failedFields[0]}</span> field`;
-        } else if (failedFields.length === 2) {
-            message += `the <span class="field-name">${failedFields[0]}</span> and <span class="field-name">${failedFields[1]}</span> fields`;
+        if (fieldSpans.length === 1) {
+            message += `the ${fieldSpans[0]} field`;
+        } else if (fieldSpans.length === 2) {
+            message += `the ${fieldSpans[0]} and ${fieldSpans[1]} fields`;
         } else {
-            const lastField = failedFields.pop();
-            message += `the ${failedFields.map(field => `<span class="field-name">${field}</span>`).join(', ')}, and <span class="field-name">${lastField}</span> fields`;
+            const lastField = fieldSpans.pop();
+            message += `the ${fieldSpans.join(', ')}, and ${lastField} fields`;
         }
         message += ' to enable autosaving.';
-        this.warningElement.innerHTML = message;
         
-        if (this.form) {
-            if (!this.form.contains(this.warningElement)) {
-                this.form.insertBefore(this.warningElement, this.form.firstChild);
-            }
-            this.form.classList.add('has-validation-errors');
-        } 
+        this.warningElement.textContent = ''; // Clear existing content
+        const messageContainer = document.createElement('span');
+        messageContainer.innerHTML = message;
+        this.warningElement.appendChild(messageContainer);
+        
+        if (this.form && !this.form.contains(this.warningElement)) {
+            this.form.insertBefore(this.warningElement, this.form.firstChild);
+        }
     }
 
     removeFormWarning() {
@@ -83,9 +99,16 @@ export class AutoSaveManager {
 
     // When the page is refreshed, the lastSavedContent is set from localStorage
     setLastSavedContent(content) {
-        let savedState = JSON.parse(localStorage.getItem('pageState'));
-        this.lastSavedContent = JSON.parse(savedState.formData);
-        //if(this.lastSavedContent)this.lastSavedContent.text_status = 'draft';
+        this.lastSavedContent = typeof content === 'string' 
+        ? JSON.parse(content) 
+        : content;
+        
+        console.log('setLastSavedContent', this.lastSavedContent);
+/*         // Check for unsaved changes immediately after setting last saved content
+        if (this.form) {
+            const hasChanges = this.hasUnsavedChanges();
+            eventBus.emit('hasUnsavedChanges', hasChanges);
+        } */
     }
 
     handleInputChange() {
@@ -97,6 +120,9 @@ export class AutoSaveManager {
             if (!this.continuouslyTyping) {
                 this.startContinuousTypingTimer();
             }
+            
+            // Check for changes immediately
+            this.hasUnsavedChanges();
         }
     }
 
@@ -105,6 +131,8 @@ export class AutoSaveManager {
         this.continuouslyTyping = false;
         this.lastSavedContent = JSON.stringify(Object.fromEntries(new FormData(this.form)));
         eventBus.emit('formUpdated');
+        // Let the formButtonsUpdateManager know that there are no unsaved changes
+        this.hasUnsavedChanges();
     }
 
     startAutoSaveTimer() {
@@ -140,32 +168,54 @@ export class AutoSaveManager {
             }
         }, 1000);
     }
-
-    // Check for unsaved changes
+   
     hasUnsavedChanges() {
         const formData = this.form ? new FormData(this.form) : new FormData();
         const dataObj = Object.fromEntries(formData.entries());
         const currentData = JSON.stringify(dataObj);
-        //currentData.text_status = 'draft'; // Ensure text_status is always set to 'draft'
-
-        // if there is a lastSavedContent...
-        if (this.lastSavedContent && currentData) {
-            const differences = this.getDifferences(this.lastSavedContent, currentData);
-            console.log('line 89 differences:', differences);
-            
-            // Check if the only difference is the 'id' key
-            // The id is set to shift the form from a store to an update
+    
+        // Handle null lastSavedContent case
+        if (this.lastSavedContent === null) {
+            if (this.previousHasChangesState !== true) {
+                this.previousHasChangesState = true;
+                eventBus.emit('hasUnsavedChanges', true);
+            }
+            return true;
+        }
+    
+        if (this.lastSavedContent) {
+            const lastSavedString = typeof this.lastSavedContent === 'string' 
+                ? this.lastSavedContent 
+                : JSON.stringify(this.lastSavedContent);
+                
+            // Quick equality check first
+            if (currentData === lastSavedString) {
+                if (this.previousHasChangesState !== false) {
+                    this.previousHasChangesState = false;
+                    eventBus.emit('hasUnsavedChanges', false);
+                }
+                return false;
+            }
+                
+            const differences = this.getDifferences(lastSavedString, currentData);
             const hasOnlyIdDifference = Object.keys(differences).length === 1 && differences.hasOwnProperty('id');
             
-            if (hasOnlyIdDifference) {
-                return false; // Treat as no unsaved changes
+            const hasDifferences = Object.keys(differences).length > 0 
+                && !hasOnlyIdDifference;
+    
+            // Only emit if the state has changed
+            if (this.previousHasChangesState !== hasDifferences) {
+                this.previousHasChangesState = hasDifferences;
+                eventBus.emit('hasUnsavedChanges', hasDifferences);
             }
-
-            const hasDifferences = Object.keys(differences).length > 0;
+            
             return hasDifferences;
-        }else if(this.lastSavedContent == null){
-            // When the page is refreshed the lastSavedContent is null, so we should assume that there are unsaved changes after either timer runs out, and get a new "lastSavedContent"
-            return true;
+        }
+        
+        // Default case
+        if (this.previousHasChangesState !== false) {
+            this.previousHasChangesState = false;
+            eventBus.emit('hasUnsavedChanges', false);
         }
         return false;
     }

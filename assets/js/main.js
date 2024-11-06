@@ -56,6 +56,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initialize RefreshManager
   const autoSaveManager = new AutoSaveManager(path);
+
+
   // Initialize RefreshManager
   if (!window.refreshManager) {
       window.refreshManager = new RefreshManager(path, uiManager, storyManager, autoSaveManager);
@@ -67,9 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize VoteManager
   new VoteManager(path, warningManager);
 
-  // Emit the restoringState event -- to restore the state on initial load
-  const event = new CustomEvent('restoringState');
-  document.dispatchEvent(event);
+
 
   // Start Long Polling Manager
   new NotificationManager(path);
@@ -81,7 +81,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // Buttons and forms listen for validation emitions... 
   new ButtonUpdateManager(autoSaveManager);
   new FormManager(autoSaveManager, path);
-  const validationManager = new ValidationManager();
+  new ValidationManager();
+
+  // Emit the restoringState event -- to restore the state on initial load
+  eventBus.emit('restoringState');
 
   //new ValidationManager(formManager);
 
@@ -107,7 +110,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // Handle browser refresh by saving state before unload
   window.addEventListener('beforeunload', (event) => {
       console.log('beforeunload event triggered');
-      refreshManager.saveState();
+      refreshManager.saveState(); /* I'm also calling this while input is happening */
+      refreshManager.saveCurrentPageUrl(); /* I only want to call when refreshing the page */
       // Only show the warning if there are unsaved changes
   });
 

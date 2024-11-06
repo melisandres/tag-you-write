@@ -9,6 +9,7 @@ export class IndexUpdateManager {
   init() {
     eventBus.on('instaDelete', this.handleInstaDelete.bind(this));
     eventBus.on('instaPublish', this.handleInstaPublish.bind(this));
+    eventBus.on('chooseWinner', this.handleChooseWinner.bind(this));
     this.makeTitlesShorter();
   }
 
@@ -45,6 +46,26 @@ export class IndexUpdateManager {
         <p class="game-status">    
           <span>GAME</span>
           <span>OPEN</span>  
+        </p>`;
+    }
+  }
+
+  handleChooseWinner({ textId }) {
+    console.log("textId", textId);
+    const textContainer = document.querySelector(`[data-id='${textId}']`) || document.querySelector(`[data-story-id='${textId}']`);
+
+    console.log("textContainer", textContainer);
+    const gameContainer = textContainer.closest(`[data-game-id]`);
+    console.log("gameContainer", gameContainer);
+    const statusIndicator = gameContainer.querySelector('.game-status-indicator');
+    console.log("statusIndicator", statusIndicator);
+    if (statusIndicator && statusIndicator.classList.contains('open')) {
+      statusIndicator.classList.remove('open');
+      statusIndicator.classList.add('closed');
+      statusIndicator.innerHTML = `
+        <p class="game-status">    
+          <span>GAME</span>
+          <span>CLOSED</span>  
         </p>`;
     }
   }

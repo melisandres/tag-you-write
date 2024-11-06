@@ -104,10 +104,24 @@ export class ShelfUpdateManager {
             if (drawer.dataset.storyId === textId) {
               drawer.querySelector('.node-headline').classList.add('isWinner');
               drawer.querySelector('.writing').classList.add('isWinner');
-                const shelfHeart = drawer.querySelector('.shelf-heart');
-                
+
+              // Add the winner status span
+              const statusSpan = document.createElement('span');
+              statusSpan.className = 'status';
+              statusSpan.innerHTML = `
+                <span data-status="" class="status winner">
+                  WINNER
+                </span>
+              `;
+              drawer.querySelector('.node-headline').appendChild(statusSpan);
+
+              // Update the shelf heart to a star, and color it
+              const shelfHeart = drawer.querySelector('.shelf-heart');
               if (shelfHeart) {
                 shelfHeart.innerHTML = SVGManager.starSVG;
+                const colorScale = createColorScale(1);
+                const fillColor = colorScale(1);
+                shelfHeart.querySelector('path').setAttribute('fill', fillColor);
               }
             }
         });

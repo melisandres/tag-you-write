@@ -22,7 +22,7 @@ export class ValidationManager {
     init() {
         // if there's no form, don't do anything
         if (!this.form) return;
-        const form = document.querySelector('#main-form');
+        const form = this.form;
         const activity = form.dataset.formActivity;
         if (this.textElement) this.updateWordCount(this.textElement.value);
 
@@ -44,7 +44,12 @@ export class ValidationManager {
             // if you are initializing in creating mode (a new form), autosave is allowed, publish is not-- but don't validate the fields, because they are still being filled out
             const visibleFields = form.querySelectorAll('input:not([type="hidden"]), textarea:not([type="hidden"])');
             visibleFields.forEach(field => {
-                this.formValidity[field.name] = { canAutosave: true, canPublish: false };
+                // keywords is a special case, because you should be able to publish without adding anything there. 
+                if(field.name === 'keywords') {
+                    this.formValidity[field.name] = { canAutosave: true, canPublish: true };
+                }else{
+                    this.formValidity[field.name] = { canAutosave: true, canPublish: false };
+                }
             });
 
         }
@@ -59,7 +64,7 @@ export class ValidationManager {
 
     // inputChange is being fired by the formManager
     handleInputChanged(data) {
-        console.log('handleInputChanged', data);
+        //console.log('handleInputChanged', data);
         this.validateField(data);
         if (data.fieldName === 'writing' || data.fieldName === 'note') {
             this.updateWordCount(data.fieldValue);
@@ -67,7 +72,6 @@ export class ValidationManager {
     }
 
     validateField({ fieldName, fieldValue, formType, init = false }) {
-
         const validators = this.getValidatorsForForm(formType);
         
         if (validators[fieldName]) {
@@ -75,17 +79,20 @@ export class ValidationManager {
 
             const criticalErrors = validationResults.filter(result => !result.isValid && result.severity === 'critical');
             const errors = validationResults.filter(result => !result.isValid && result.severity === 'error');
-            const warnings = validationResults.filter(result => result.severity === 'warning');
+            const warnings = validationResults.filter(result => !result.isValid && result.severity === 'warning');
             const infos = validationResults.filter(result => result.severity === 'info');
-            const successes = validationResults.filter(result => result.isValid && result.severity == 'warning' || result.severity == 'info');
-    
+            const successes = validationResults.filter(result => result.isValid && (result.severity === 'warning' || result.severity === 'info' || result.severity === 'success'));
+
             this.showValidationResult(fieldName, criticalErrors, errors, warnings, infos, successes);
 
             const canAutosave = criticalErrors.length === 0;
             const canPublish = criticalErrors.length === 0 && errors.length === 0;
-    
+
+            // Debug: Log final validity state
+            console.log(`${fieldName} final validity:`, { canAutosave, canPublish });
+
             this.formValidity[fieldName] = { canAutosave, canPublish };
-    
+
             // Always call checkOverallValidity, even during initialization
             if (!init) this.checkOverallValidity();
             
@@ -114,7 +121,8 @@ export class ValidationManager {
             } else {
                 result = { isValid: true, message: '', severity: 'success' };
             }
-    
+            
+            // TODO: this is not right: I need to further study this... but a result is not necessarily an "error"... this is sending every result as an error... I think. 
             this.showValidationResult(fieldName, [], [result], [], [], []);
             
             const canAutosave = result.severity !== 'critical';
@@ -152,7 +160,7 @@ export class ValidationManager {
                     this.validateMaxCharacterCount(500, '*500 characters max.', 'critical'),
                 ], 
                 keywords: [
-                    this.validateMaxCharacterCount(0, 'max 3 keywords, separated by commas please', 'info'),
+                    this.validateMaxCharacterCount(0, '*max 3 keywords, separated by commas please', 'info'),
                     this.validateMaxKeywords(5, '*5 keywords max--comma separated'),
                     this.validateMaxCharacterCount(255, '*255 characters max'),
                     this.validateKeywordWordCount(2, '*a keyword can be 2 words, but no more.'),
@@ -171,7 +179,7 @@ export class ValidationManager {
                     this.validateWritingChanges(this.parentText, '*changes required')
                     ], 
                 keywords: [
-                    this.validateMaxCharacterCount(0, 'max 3 keywords, separated by commas please', 'info'),
+                    this.validateMaxCharacterCount(0, '*max 3 keywords, separated by commas please', 'info'),
                     this.validateMaxKeywords(5, '*5 keywords max--comma separated'),
                     this.validateMaxCharacterCount(255, '*255 characters max'),
                     this.validateKeywordWordCount(2, '*a keyword can be 2 words, but no more.'),
@@ -227,18 +235,34 @@ export class ValidationManager {
     // Required field validation
     validateRequired(errorMessage, severity = 'error') {
         return function (value) {
+            const isValid = value && value.trim().length > 0;
             return {
-                isValid: value.trim().length > 0,
-                message: value.trim().length > 0 ? '' : errorMessage,
+                isValid: isValid,
+                message: isValid ? '' : errorMessage,
                 severity: severity
             };
         };
     }
 
+/*     validateRequired(errorMessage, severity = 'error') {
+        return function (value) {
+            // Strip HTML before checking length
+            const stripHtml = (text) => {
+                const doc = new DOMParser().parseFromString(text, 'text/html');
+                return doc.body.textContent || doc.body.innerText || '';
+            };
+            const strippedValue = stripHtml(value).trim();
+            return {
+                isValid: strippedValue.length > 0,
+                message: strippedValue.length > 0 ? '' : errorMessage,
+                severity: severity
+            };
+        };
+    } */
+
     // Use arrow function to preserve 'this' context
     validateWritingChanges (parentText, errorMessage, severity = 'error') {
         return function (value) {
-            console.log("this.parentText in validateWritingChanges", parentText);
             return {
                 isValid: value !== parentText,
                 message: value !== parentText ? '' : errorMessage,
@@ -371,41 +395,59 @@ export class ValidationManager {
     // Handle displaying the validation results
     showValidationResult(fieldName, criticalErrors, errors, warnings, infos, successes) {
         const field = document.querySelector(`[name="${fieldName}"]`);
-        let feedback = field.nextElementSibling;
+        if (!field) return;
 
-        // Create feedback element if it doesn't exist
-        if (!feedback || !feedback.classList.contains('feedback')) {
-            feedback = document.createElement('div');
-            feedback.className = 'feedback';
-            field.parentNode.insertBefore(feedback, field.nextSibling);
+        // Get the parent label
+        const labelElement = field.closest('label');
+        
+        // Remove any existing feedback elements
+        const existingFeedbacks = labelElement.querySelectorAll('.feedback');
+        existingFeedbacks.forEach(feedback => feedback.remove());
+
+        // Create feedback element
+        const feedback = document.createElement('div');
+        feedback.className = 'feedback';
+
+        // Set message and class based on validation results
+        if (criticalErrors.length > 0 || errors.length > 0 || warnings.length > 0) {
+            // Add has-feedback class to the label
+            labelElement.classList.add('has-feedback');
+            
+            if (criticalErrors.length > 0) {
+                feedback.textContent = criticalErrors[0].message;
+                feedback.classList.add('critical');
+            } else if (errors.length > 0) {
+                feedback.textContent = errors[0].message;
+                feedback.classList.add('error');
+            } else {
+                feedback.textContent = warnings[0].message;
+                feedback.classList.add('warning');
+            }
+        } else {
+            // Remove has-feedback class when there are no errors
+            labelElement.classList.remove('has-feedback');
+            
+            if (infos.length > 0) {
+                feedback.textContent = infos[0].message;
+                feedback.classList.add('info');
+            } else if (successes.length > 0) {
+                feedback.textContent = successes[0].message;
+                feedback.classList.add('success');
+            }
         }
 
-        // Remove all existing status classes
-        feedback.classList.remove('critical', 'error', 'warning', 'info', 'success');
-
-        if (criticalErrors.length > 0) {
-            feedback.textContent = criticalErrors[0].message;
-            feedback.classList.add('critical');
-        } else if (errors.length > 0) {
-            feedback.textContent = errors[0].message;
-            feedback.classList.add('error');
-        } else if (warnings.length > 0) {
-            feedback.textContent = warnings[0].message;
-            feedback.classList.add('warning');
-        } else if (infos.length > 0) {
-            feedback.textContent = infos[0].message;
-            feedback.classList.add('info');
-        } else if (successes.length > 0) {
-            feedback.textContent = successes[0].message;
-            feedback.classList.add('success');
-        } else {
-            feedback.textContent = '';
+        // Find the target element for feedback insertion
+        let targetElement = field;
+        if (field.tagName === 'TEXTAREA' && field.style.display === 'none') {
+            const editorElement = labelElement.querySelector('.ck-editor__editable');
+            if (editorElement) {
+                targetElement = editorElement;
+            }
         }
 
-        if (feedback.textContent.length > 0 && (feedback.classList.contains('critical') || feedback.classList.contains('error') || feedback.classList.contains('warning'))) {
-            field.classList.add('has-feedback');
-        } else {
-            field.classList.remove('has-feedback');
+        // Only insert feedback if there's a message
+        if (feedback.textContent) {
+            targetElement.parentNode.insertBefore(feedback, targetElement.nextSibling);
         }
     }
 
@@ -451,16 +493,16 @@ export class ValidationManager {
             canPublish,
             fields: this.formValidity
         };
-        console.log('newValidationStatus', newValidationStatus);
+        /* console.log('newValidationStatus', newValidationStatus); */
 
         // Only emit if there's a change in canAutosave or canPublish
         if (this.lastValidationStatus?.canAutosave !== canAutosave || 
             this.lastValidationStatus?.canPublish !== canPublish) {
             eventBus.emit('validationChanged', newValidationStatus);
             this.lastValidationStatus = newValidationStatus;
-            console.log('newValidationStatus', newValidationStatus);
+            //console.log('newValidationStatus', newValidationStatus);
         } else {
-            console.log('ValidationManager: No change in validation status, not emitting');
+            //console.log('ValidationManager: No change in validation status, not emitting');
         }
     }
 

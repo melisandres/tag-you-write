@@ -69,7 +69,7 @@ export class ShelfVisualizer {
               ${author}
             </p>
           </div>
-          <span class="status">${this.getStatus(node)? this.getStatus(node) : ''}</span>
+          <span class="status">${node.isWinner ? 'WINNER' : (this.getStatus(node) || '')}</span>
         </div>
         <div class="writing hidden ${isWinner}">
           <div class="node-buttons">

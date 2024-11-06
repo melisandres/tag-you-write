@@ -1,4 +1,5 @@
 import { eventBus } from './eventBus.js';
+import { createColorScale } from './createColorScale.js';
 
 export class TreeUpdateManager {
   constructor() {
@@ -113,9 +114,8 @@ export class TreeUpdateManager {
 
     const nodeId = data.textId
     const newVoteCount = data.voteCount 
-    const maxVoteCount = data.playerCountMinusOne
-    const colorScale = this.createColorScale(maxVoteCount)
-    const node = container.querySelector(`path[data-id="${nodeId}"]`);
+    const colorScale = createColorScale(data.playerCountMinusOne);
+    const node = container.querySelector(`.node path[data-id="${nodeId}"]`);
 
     if (!node || !colorScale) {
         return;
@@ -125,13 +125,13 @@ export class TreeUpdateManager {
   }
 
   //
-  createColorScale(maxVotes) {
+/*   createColorScale(maxVotes) {
     const domain = maxVotes > 0 ? [0, maxVotes] : [0, 1];
     return d3.scaleLinear()
         .domain(domain)
         .range(['white', '#ff009b'])
         .interpolate(d3.interpolateRgb);
-  }
+  } */
 
 /*   updateNodeVoteCount(nodeId, newVoteCount, maxVoteCount) {
     const node = this.container.querySelector(`circle[data-id="${nodeId}"]`);

@@ -3,7 +3,6 @@
     padding: 0;
     box-sizing: border-box;
     font-family: var(--font-family-primary);
-    font-size: var(--font-size-medium);
 
     /* Scrollbar styling for WebKit browsers (Chrome, Safari, newer versions of Edge) */
     &::-webkit-scrollbar {
@@ -20,6 +19,11 @@ body{
     display: flex;
     flex-direction: column;
     min-height: var(--body-min-height);
+    font-size: var(--font-size-medium);
+}
+
+strong, i {
+    font-size: inherit;
 }
 
 main{

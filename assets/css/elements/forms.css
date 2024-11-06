@@ -1,6 +1,11 @@
 input, textarea{
     display: block;
+    font-size: var(--font-size-medium);
     border: 1px solid var(--color-grey-light);
+}
+
+label input{
+    padding: var(--spacing-medium);
 }
 
 textarea, input{
@@ -15,6 +20,7 @@ label span.headline{
 }
 
 .feedback{
+    margin-top: 0.5em;
     font-family: var(--font-family-secondary);
     background-color: transparent;
     font-size: var(--font-size-small);
@@ -28,10 +34,18 @@ label{
     display: block;
 }
 
-input::placeholder, textarea::placeholder {
-    color: var(--color-primary-dark);
+/* style the placeholder text */
+input::placeholder, 
+textarea::placeholder,
+.ck-placeholder::before {
+    color: var(--color-primary-dark) !important;
     opacity: 0.6;
     font-family: var(--font-family-secondary);
+}
+
+/* So that the typing area matches the placeholder text*/
+p.ck-placeholder {
+    padding-left: 0 !important;
 }
 
 select{
@@ -47,15 +61,28 @@ input[type="submit"]{
     background-color: var(--color-white-lightest);
 }
 
-#main-form input:focus, #main-form textarea:focus{
-    outline: var(--color-accent) solid 3px;
-    outline-offset: -4px;
+/* focus styles */
+#main-form label:not(.has-feedback) input:focus,
+#main-form label:not(.has-feedback) textarea:focus,
+#main-form label:not(.has-feedback) .ck.ck-content.ck-editor__editable.ck-focused {
+    outline: var(--color-accent) solid 1px;
+    outline-offset: -1px;
     background-color: white;
 }
 
-#main-form input.has-feedback:focus,
-#main-form textarea.has-feedback:focus {
-    box-shadow: 0px 20px 7px 9px var(--color-primary-lightest);
+#main-form label.has-feedback input:focus,
+#main-form label.has-feedback textarea:focus, 
+#main-form label.has-feedback .ck.ck-content.ck-editor__editable.ck-focused {
+    box-shadow: 0px 20px 7px 9px var(--color-primary-lightest) !important;
+    outline: var(--color-white) solid 3px;
+    outline-offset: 1px;
+    background-color: white;
+    border-color: var(--color-white);
+}
+
+
+label .ck.ck-content.ck-editor__editable {
+    border-top: 3px solid var(--color-pink);
 }
 
 .form-page{
@@ -88,4 +115,56 @@ input[type="submit"]{
     .form-btns span {
         font-size: var(--font-size-small);    
     }
+}
+
+
+/* CKEditor */
+
+.ck-editor__editable {
+    min-height: 150px;
+    background: var(--color-white-lightest) !important;
+}
+
+.ck-editor__editable:focus {
+    background-color: white !important;
+}
+
+.ck-toolbar {
+    background: var(--color-white-lightest) !important;
+    border-color: var(--color-grey-light) !important;
+}
+
+.ck.ck-editor__editable:not(.ck-editor__nested-editable).ck-focused {
+    border-color: var(--color-accent) !important;
+    box-shadow: 0 0 0 0px var(--color-accent) !important;
+}
+
+/* CK buttons and other */
+.ck.ck-button.ck-on:not(.ck-disabled):hover, a.ck.ck-button.ck-on:not(.ck-disabled):hover {
+    color: var(--color-secondary-dark);
+    background: var(--color-secondary-light);
+}
+
+/* .ck.ck-button.ck-on, a.ck.ck-button.ck-on {
+    color: var(--color-secondary-light);
+    background: var(--color-secondary-lightest);
+}
+
+.ck.ck-button.ck-on:not(.ck-disabled):hover, a.ck.ck-button.ck-on:not(.ck-disabled):hover {
+    background: var(--color-secondary-light);
+}
+
+button.ck.ck-button.ck-on {
+    background: var(--color-secondary-lightest);
+    color: var(--color-secondary-light);
+}
+
+button.ck.ck-button.ck-on:not(.ck-disabled):hover {
+    background: var(--color-secondary-lighter);
+    color: var(--color-secondary-dark);
+} */
+
+/* the feedback is otherwise hidden by the editor */
+.feedback{
+    position: absolute;
 }

@@ -28,7 +28,43 @@ export class FormManager {
             // SetupCheckForInput is used for autosave AND for validation --so you always need it
             this.setupCheckForInput();
             eventBus.on('validationChanged', this.handleValidationChanged.bind(this));
+            
+            // Check if the form has a textarea
+            if (this.form.querySelector('textarea')) {
+                this.initializeWysiwygEditors();
+            }
         }
+    }
+
+    initializeWysiwygEditors() {
+        const textareas = document.querySelectorAll('textarea');
+        textareas.forEach(textarea => {
+            const container = document.createElement('div');
+            container.className = textarea.className + ' editor-wrapper';
+            textarea.parentNode.insertBefore(container, textarea);
+            
+            ClassicEditor
+                .create(textarea, {
+                    toolbar: ['undo', 'redo', 'bold', 'italic'],
+                    placeholder: textarea.placeholder
+                })
+                .then(editor => {
+                    // Set initial content
+                    if (textarea.value) {
+                        editor.setData(textarea.value);
+                    }
+
+                    // Update textarea on change
+                    editor.model.document.on('change:data', () => {
+                        textarea.value = editor.getData();
+                        const event = new Event('input', { bubbles: true });
+                        textarea.dispatchEvent(event);
+                    });
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+        });
     }
 
     handleValidationChanged(results) {
@@ -70,6 +106,7 @@ export class FormManager {
                 this.handleDelete();
                 break;
             case 'cancel':
+                // TODO: you may want this to redirect to the last page... when things get more complex
                 window.location.href=`${this.path}text`;
                 break;
             default:
@@ -218,7 +255,8 @@ export class FormManager {
     setupCheckForInput() {
         this.form.addEventListener('input', (event) => {
             const target = event.target;
-            if (target.matches('textarea, input:not([type="hidden"])')) {
+            if (target.matches('textarea, input:not([type="hidden"]), input[type="hidden"][name="id"]')) {
+                console.log('input changed', target.name, target.value);
                 eventBus.emit('inputChanged', {
                     formType: this.formType,
                     fieldName: target.name,

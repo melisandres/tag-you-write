@@ -8,7 +8,8 @@
                         'writer_id', 
                         'notification_type', 
                         'is_seen',
-                        'created_at'
+                        'created_at',
+                        'message'
                         ];
 
     public function getUnseenNotifications($writer_id, $game_id = NULL) {

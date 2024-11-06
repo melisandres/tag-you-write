@@ -59,7 +59,7 @@
 
     /* Secondary color -- text and background*/
     --color-secondary-lightest: rgb(255, 241, 246); 
-    --color-secondary-light:rgb(138, 104, 138); 
+    --color-secondary-light:rgb(215, 175, 215); 
     --color-secondary: rgb(139, 7, 47); 
     --color-secondary-dark: rgb(100, 5, 35); 
     --color-secondary-darkest: rgb(80, 3, 25); 
@@ -140,7 +140,7 @@
     /* General styles */
     --body-min-height: 100vh;
     --main-min-height: 100%;
-    --general-padding: 20px;
+    --general-padding: 10px;
     --very-small-font-size: 15px;
     --very-small-max-width: 40ch;
     --small-font-size: 17px;
@@ -192,4 +192,12 @@
     --word-count-tooltip-padding: 0.75em 1em;
     --word-count-tooltip-border-radius: 0.25em;
     --word-count-number-padding: 1.15em 1em;
+
+    /* CKEditor */
+    --ck-color-button-on-background: var(--color-secondary-light);
+    --ck-color-button-on-color: var(--color-secondary-lighter);
+    --ck-color-focus-border: var(--color-secondary-light);
+    --ck-color-button-on-active-background: var(--color-secondary-lightest);
+    --ck-color-focus-disabled-shadow: var(--color-accent);
+    --ck-color-focus-outer-shadow: var(--color-accent);
 }
