@@ -287,6 +287,8 @@ export class AutoSaveManager {
                     this.lastSavedContent = JSON.stringify(data);
                     this.lastAutoSaveTime = Date.now();
                     eventBus.emit('formUpdated', result);
+                    // make sure the formButtonsUpdateManager knows there are unsaved changes
+                    this.hasUnsavedChanges();
                 } else {
                     console.error('Auto-save failed:', result.message);
                 }
