@@ -7,7 +7,6 @@ require_once (__DIR__.'/library/RequirePage.php');
 require_once (__DIR__.'/vendor/autoload.php');
 require_once (__DIR__.'/library/Twig.php');
 require_once (__DIR__.'/library/CheckSession.php');
-//require 'vendor/autoload.php';
 
 //try to get your journal running
 $controllerJournal =__DIR__.'/controller/ControllerJournal.php';

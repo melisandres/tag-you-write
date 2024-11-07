@@ -3,6 +3,9 @@
 {% if errors is defined %}
     <span class='error'>{{ errors|raw}}</span>
 {% endif %}
+{% if message is defined %}
+    <span class='message'>{{ message|raw}}</span>
+{% endif %}
 <section class="form-page">
     <h3>Login</h3>
 
@@ -24,7 +27,7 @@
         </div>
     </form>
     <p>
-        <a href="">forgot password</a>
+        <a href="{{path}}login/forgotPassword">forgot password</a>
     </p>
     <p>
         <a class="" href="{{path}}writer/create">create an account</a>

@@ -10,7 +10,42 @@ use PHPMailer\PHPMailer\SMTP;
 require 'vendor/autoload.php';
 
 class Email {
-    public function welcome($email, $name, $subject, $message) {
+
+    private $mail;
+    
+    public function __construct() {
+        $this->mail = new PHPMailer(true);
+        
+        // Server settings
+        $this->mail->isSMTP();
+        $this->mail->Host = $_ENV['SMTP_HOST'];
+        $this->mail->SMTPAuth = true;
+        $this->mail->Username = $_ENV['SMTP_USERNAME'];
+        $this->mail->Password = $_ENV['SMTP_PASSWORD'];
+        $this->mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        $this->mail->Port = $_ENV['SMTP_PORT'];
+        
+        // Set sender
+        $this->mail->setFrom($_ENV['SMTP_USERNAME'], 'Tag You Write'); // Use the authenticated email as sender
+    }
+    
+    public function welcome($to, $name, $subject, $message) {
+        try {
+            $this->mail->clearAddresses(); // Clear any previously set addresses
+            $this->mail->addAddress($to, $name);
+            $this->mail->isHTML(true);
+            $this->mail->Subject = $subject;
+            $this->mail->Body = $message;
+            $this->mail->AltBody = strip_tags($message);
+            
+            return $this->mail->send();
+        } catch (Exception $e) {
+            error_log("Email error: " . $e->getMessage());
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    /* public function welcome($email, $name, $subject, $message) {
         try {
             $mail = new PHPMailer(true); // Enable exceptions
             $mail->isSMTP();
@@ -36,8 +71,8 @@ class Email {
             }
         } catch (Exception $e) {
             $this->logError('An exception occurred: ' . $e->getMessage());
-        }
-    }
+        } 
+    } */
 
     private function logError($error) {
         file_put_contents('email_error.log', date("Y-m-d h:i:sa") . " - " . $error . "\n", FILE_APPEND);

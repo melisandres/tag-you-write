@@ -17,6 +17,10 @@ class RequirePage{
         header('location:http://localhost:8888/tag-you-write-repo/tag-you-write/'.$page);
 
     }
+
+    static public function getBaseUrl(){
+        return $_ENV['BASE_URL'];
+    }
 }
 
 
