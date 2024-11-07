@@ -4,6 +4,10 @@ input, textarea{
     border: 1px solid var(--color-grey-light);
 }
 
+label{
+    margin-bottom: var(--spacing-extra-extra-large);
+}
+
 label input{
     padding: var(--spacing-medium);
 }
@@ -18,6 +22,13 @@ label span.headline{
     font-family: var(--font-family-secondary);
     margin-top: var(--spacing-extra-extra-large);
 }
+
+span.error,
+span.error li, 
+span.message{
+    margin: var(--spacing-medium) 10px var(--spacing-medium) 10px;
+}
+
 
 .feedback{
     margin-top: 0.5em;
@@ -85,9 +96,9 @@ label .ck.ck-content.ck-editor__editable {
     border-top: 3px solid var(--color-pink);
 }
 
-.form-page{
+/* .form-page{
     background-color: var(--color-white);
-}
+} */
 
 .form-page .feedback.error, .form-page .feedback.error{
     color: var(--color-error);

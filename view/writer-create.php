@@ -1,4 +1,4 @@
-{{ include('header.php', {title: 'Add a Writer'})}}
+{{ include('header.php', {title: 'Join our community'})}}
 
 {% if errors is defined %}
     <span class='error'>{{ errors|raw}}</span>
@@ -32,6 +32,11 @@
         {% endif %} -->
         <input type="hidden" name="privilege_id" value=2>
         <input type="hidden" name="currentPage" value="writer-create.php">
-        <input type="submit" value="Save">
+        <div class="form-btns">
+            <button class="save" type="submit" data-button-type="save">
+                <span class="icon"></span>
+                <span class="title">Save</span>
+            </button>
+        </div>
     </form>
 {{include('footer.php')}}

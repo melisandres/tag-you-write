@@ -20,6 +20,7 @@ body{
     flex-direction: column;
     min-height: var(--body-min-height);
     font-size: var(--font-size-medium);
+    background-color: var(--color-white);
 }
 
 strong, i {

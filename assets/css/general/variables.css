@@ -156,7 +156,8 @@
 
     /* Story styles */
     --story-box-shadow: 0.5px 0.5px 30px 1px var(--color-primary-light);
-    --story-margin-bottom: var(--spacing-extra-large);
+  /*   --story-margin-bottom: var(--spacing-extra-large); */
+  --story-margin-bottom: var(--spacing-medium);
     --story-title-margin-left: 20px;
     --story-title-padding: 20px 10px;
     --story-title-font-size-min: 0.8rem;
