@@ -75,13 +75,12 @@ export class FormManager {
 
     // Ensure that all the buttons on the form trigger asyncronous actions
     addButtonEventListeners() {
-        console.log('adding button event listeners');
-        // On the writer-create and login form, you exit this because your buttons don't have a data-status
         if (!this.form || !this.buttons) return; 
 
         this.buttons.forEach(element => {
             const myStatus = element.dataset.status;
             element.addEventListener('click', (event) => {
+                console.log('button clicked', myStatus);
                 event.preventDefault();
                 this.setStatusAndSubmit(myStatus);
             });
@@ -92,9 +91,14 @@ export class FormManager {
     // Setting the status is only relevent for "draft" and "published"
     // TODO: But since I'm also using this to submit to form, I created a data-status attribute for all the buttons, that help determine the action... I should probably rename it though, so that it's not confused with the status of the text... 
     setStatusAndSubmit(status) {
-        if (!this.form || !this.statusField) return;  
+        //console.log(this.statusField)
+        if (!this.form) return;  
 
         switch(status) {
+            case 'writerSave':
+                console.log('writerSave');
+               this.handleWriterSave();
+               break;
             case 'published':
                 this.handlePublish();
                 break;
@@ -128,6 +132,19 @@ export class FormManager {
            const actionUrl = idValue === '' ? `${this.path}text/store` : `${this.path}text/update`;
            this.submitForm(actionUrl);
        }
+    }
+
+    handleWriterSave() {
+        console.log('handleWriterSave', this.canPublish);
+        if (this.canPublish) {  
+            const actionUrl = this.form.getAttribute('action');
+            this.submitNewAccountInfo(actionUrl);
+        } else {
+            eventBus.emit('showToast', { 
+                message: 'Please fill all required fields correctly', 
+                type: 'error' 
+            });
+        }
     }
 
     // New method to handle publishing logic
@@ -336,7 +353,42 @@ export class FormManager {
         });
     }
 
-     // Method to handle form deletion
+    // Submit Writer information--new account
+    submitNewAccountInfo(actionUrl) {
+        const formData = new FormData(this.form);
+
+        fetch(actionUrl, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Store toast data in localStorage before redirecting
+                localStorage.setItem('pendingToast', JSON.stringify({
+                    message: 'Account created successfully! Welcome!',
+                    type: 'success'
+                }));
+                // Redirect to the text page
+                window.location.href = `${this.path}text`;
+            } else {
+                // Handle validation errors or other issues
+                eventBus.emit('showToast', { 
+                    message: data.message || 'An error occurred', 
+                    type: 'error'
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            eventBus.emit('showToast', { 
+                message: 'An error occurred', 
+                type: 'error'
+            });
+        });
+    }
+
+    // Method to handle form deletion
     // This is because the forms have an action that applies to all the buttons, except for the delete button, whose action is handled by the delete endpoint
     async submitDelete() {
         if (!this.form) return;

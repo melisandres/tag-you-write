@@ -33,7 +33,7 @@
         <input type="hidden" name="privilege_id" value=2>
         <input type="hidden" name="currentPage" value="writer-create.php">
         <div class="form-btns">
-            <button class="save" type="submit" data-button-type="save">
+            <button class="save" type="button" data-status="writerSave" data-button-type="save">
                 <span class="icon"></span>
                 <span class="title">Save</span>
             </button>

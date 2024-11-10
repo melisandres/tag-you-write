@@ -22,7 +22,7 @@ class ControllerWriter extends Controller{
         //you could build another CheckSession::sessionAuth, that
         //basically does the opposite... it would live better there.
         if(isSet($_SESSION['fingerPrint'])){
-            Twig::render('home-error.php', ['message'=> "You already seem to have an account ;P"]);
+            Twig::render('home-error.php', ['message'=> "You are already logged into an account ;P"]);
             return;
         }
 
@@ -37,22 +37,30 @@ class ControllerWriter extends Controller{
         $privileges = '';
         $errors = "";
 
+        $response = [
+            'success' => false,
+            'message' => '',
+        ];
+
         //block access without a post... 
         if($_SERVER["REQUEST_METHOD"] !== "POST"){
-            RequirePage::redirect('user/create');
+            $response['message'] = 'Invalid request method';
+            echo json_encode($response);
             exit();
         }
 
         //this should not be available if you 
         //are logged in already
         if(isSet($_SESSION['fingerPrint'])){
-            Twig::render('home-error.php', ['message'=> "You already have an account ;P"]);
-            return;
+            $response['message'] = "You're already logged into an account";
+            echo json_encode($response);
+            exit();
         }
 
-        $this->validateWriter($_POST);
-        extract($_POST);
-        unset($_POST['currentPage']);
+        try{
+            $this->validateWriter($_POST);
+            extract($_POST);
+            unset($_POST['currentPage']);
 
         //check if the user exists already
         $writer = new Writer;
@@ -60,8 +68,8 @@ class ControllerWriter extends Controller{
 
         //I'm confused... maybe this was the begining of a solution that was not well implemented? 
         if($answer){
-            $errors = "We already have a user registered with that email address.";
-            Twig::render("writer-create.php", ['privilege' => $privileges, 'errors' => $errors, 'data' => $_POST]);
+            $response['message'] = "We already have a user registered with that email address.";
+            echo json_encode($response);
             exit();
         }
 
@@ -69,19 +77,41 @@ class ControllerWriter extends Controller{
         $options =[
             'cost'=>10,
         ];
-
         $passwordHash = password_hash($password, PASSWORD_BCRYPT, $options);
         $_POST['password']= $passwordHash;
+
         $insert = $writer->insert($_POST);
 
         //it's easier to put it here
         //for now
-        $email = new Email;
-        $name = $firstName . " " .$lastName;
-        $subject = 'Welcome to the Tag You Write family';
-        $message = 'Welcome ' . $name . '! Welcome! Tag you write is an experiment. I\'m hoping it will be a fun way to write small pieces collaboratively. If you have any issues with your account, or any feedback, just hit "reply". Thanks for participating!';
-        $email->welcome($_POST['email'], $name, $subject, $message);
-        RequirePage::redirect('writer');
+        if($insert) {
+            $_SESSION['writer_id'] = $insert;
+            $_SESSION['privilege'] = 2;
+            $_SESSION['fingerPrint'] = md5($_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR']);
+            $_SESSION['writer_firstName'] = $firstName;
+            $_SESSION['writer_lastName'] = $lastName;
+            $_SESSION['writer_userName'] = $email;
+        
+            // Write and close session immediately
+            session_write_close();
+
+            $response['success'] = true;
+            $response['message'] = 'Account created successfully! Welcome!';
+            echo json_encode($response);
+
+            // Send email after response is sent
+            $email = new Email;
+            $name = $firstName . " " .$lastName;
+            $subject = 'Welcome to the Tag You Write family';
+            $message = 'Welcome ' . $name . '! Welcome! Tag you write is an experiment. I\'m hoping it will be a fun way to write small pieces collaboratively. If you have any issues with your account, or any feedback, just hit "reply". Thanks for participating!';
+            $email->welcome($_POST['email'], $name, $subject, $message);
+            exit();
+        }
+        } catch (Exception $e) {    
+            $response['message'] = $e->getMessage();
+        }
+        echo json_encode($response);
+        exit();
     }
 
     public function show($id = null){
@@ -180,14 +210,15 @@ class ControllerWriter extends Controller{
         $val->name('birthday')->value($birthday)->required();
 
         if($val->isSuccess()){
-            //continue
+            return true;
         }else{
-            $errors = $val->displayErrors();
-            //why are privilges being accessed here?
-            $privilege = new Privilege;
-            $privileges = $privilege->select();
-            Twig::render($currentPage, ['privilege' => $privileges, 'errors' => $errors, 'data' => $_POST]);
-            exit();
+            throw new Exception($val->displayErrors());
+            // $errors = $val->displayErrors();
+            // //why are privilges being accessed here?
+            // $privilege = new Privilege;
+            // $privileges = $privilege->select();
+            // Twig::render($currentPage, ['privilege' => $privileges, 'errors' => $errors, 'data' => $_POST]);
+            // exit();
         };
     }
 

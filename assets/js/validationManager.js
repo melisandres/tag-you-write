@@ -3,6 +3,7 @@ import { eventBus } from './eventBus.js';
 export class ValidationManager {
     constructor() {
         eventBus.on('inputChanged', (data) => this.handleInputChanged(data));
+        eventBus.on('formRestored', (formData) => this.handleFormRestored(formData));
         this.wordCountDisplayElement = document.querySelector('[data-word-count-display]');
         this.maxWords = 50;
         this.textElement = document.querySelector('textarea[name="writing"] , textarea[name="note"]');
@@ -25,6 +26,7 @@ export class ValidationManager {
         const form = this.form;
         const activity = form.dataset.formActivity;
         if (this.textElement) this.updateWordCount(this.textElement.value);
+        const formType = this.form.dataset.formType;
 
         // if you are initializing in editing mode, validate all the fields
         if (activity === 'editing') {
@@ -52,14 +54,35 @@ export class ValidationManager {
                 }
             });
 
-        }
-        else {
+        } else {
+            console.log('doing this thing')
             // there are other forms... like the signup form... 
             const visibleFields = form.querySelectorAll('input:not([type="hidden"]), textarea:not([type="hidden"])');
             visibleFields.forEach(field => {
                 this.formValidity[field.name] = { canAutosave: false, canPublish: false };
             });
         }
+    }
+
+    // Add this new method
+    handleFormRestored(formData) {
+        console.log('Form restored, validating fields');
+        if (!this.form) return;
+        
+        // Get all visible fields in the form
+        const visibleFields = this.form.querySelectorAll('input:not([type="hidden"]), textarea:not([type="hidden"])');
+        
+        visibleFields.forEach(field => {
+            this.validateField({
+                fieldName: field.name,
+                fieldValue: field.value,
+                formType: this.form.dataset.formType,
+                init: true
+            });
+        });
+        
+        // Check overall form validity after all fields are validated
+        this.checkOverallValidity();
     }
 
     // inputChange is being fired by the formManager
@@ -202,29 +225,29 @@ export class ValidationManager {
             },
             writerCreate: {
                 firstName: [
-                    this.validateRequired('*required'),
-                    this.validateMaxCharacterCount(45, '*45 characters max'),
-                    this.validatePattern('words', '*only letters allowed'),
+                    this.validateRequired('*required', 'critical'),
+                    this.validateMaxCharacterCount(45, '*45 characters max', 'critical'),
+                    this.validatePattern('words', '*only letters allowed', 'critical'),
                 ],
                 lastName: [
-                    this.validateRequired('*required'),
-                    this.validateMaxCharacterCount(45, '*45 characters max'),
-                    this.validatePattern('words', '*only letters allowed'),
+                    this.validateRequired('*required', 'critical'),
+                    this.validateMaxCharacterCount(45, '*45 characters max', 'critical'),
+                    this.validatePattern('words', '*only letters allowed', 'critical'),
                 ],
                 email: [
-                    this.validateRequired('*required'),
-                    this.validateMaxCharacterCount(50, '*50 characters max'),
-                    this.validateEmail('*must be a valid email address'),
+                    this.validateRequired('*required', 'critical'),
+                    this.validateMaxCharacterCount(50, '*50 characters max', 'critical'),
+                    this.validateEmail('*must be a valid email address', 'critical'),
                 ],
                 birthday: [
-                    this.validateDate('*must be a valid date'),
-                    this.validateRequired('*required')
+                    this.validateDate('*must be a valid date', 'critical'),
+                    this.validateRequired('*required', 'critical')
                 ],
                 password: [
-                    this.validateRequired('*required'),
-                    this.validateMaxCharacterCount(20, '*20 characters max'),
-                    this.validateMinCharacterCount(6, '*6 characters min'),
-                    this.validatePattern('alphanum', '*only letters and numbers allowed'),
+                    this.validateRequired('*required', 'critical'),
+                    this.validateMaxCharacterCount(20, '*20 characters max', 'critical'),
+                    this.validateMinCharacterCount(6, '*6 characters min', 'critical'),
+                    this.validatePattern('alphanum', '*only letters and numbers allowed', 'critical'),
                 ]
             }
         };

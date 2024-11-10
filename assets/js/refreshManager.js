@@ -83,7 +83,12 @@ export class RefreshManager {
 
     // Check if the page is a form page
     isFormPage() {
-        return document.querySelector('[data-form-type="root"], [data-form-type="iteration"], [data-form-type="addingNote"]') !== null;
+        return document.querySelector('[data-form-type="root"], [data-form-type="iteration"], [data-form-type="addingNote"], [data-form-type="writerCreate"], [data-form-type="login"]') !== null;
+    }
+
+        // New method to check if the form includes a password field
+    isPasswordForm() {
+        return document.querySelector('[data-form-type="login"], [data-form-type="writerCreate"]') !== null;
     }
 
     isStoriesPage() {
@@ -111,7 +116,7 @@ export class RefreshManager {
                 ? JSON.parse(savedState.formData) 
                 : savedState.formData;
 
-            const form = document.querySelector('[data-form-type="root"], [data-form-type="iteration"], [data-form-type="addingNote"]');
+            const form = document.querySelector('[data-form-type="root"], [data-form-type="iteration"], [data-form-type="addingNote"], [data-form-type="writerCreate"], [data-form-type="login"]');
             if (form) {
                 Object.entries(formData).forEach(([key, value]) => {
                     const input = form.elements[key];
@@ -139,17 +144,23 @@ export class RefreshManager {
 
     //TODO:  Check if this is saving all the fields of all the forms on input... it's called by inputChanged... but is inputChanged called for EVERY input? on every field? 
     saveFormData() {
-        const form = document.querySelector('[data-form-type="root"], [data-form-type="iteration"], [data-form-type="addingNote"]');
-        // TODO: you may want this to work with other forms.
-        if(!form) return;
+        const form = document.querySelector('[data-form-type="root"], [data-form-type="iteration"], [data-form-type="addingNote"], [data-form-type="writerCreate"], [data-form-type="login"]');
+        if (!form) return;
 
         const formData = new FormData(form);
         const formDataObj = Object.fromEntries(formData);
+
+        // Remove password fields from the saved data
+        if (this.isPasswordForm()) {
+            delete formDataObj.password; // Exclude password field
+        }
+
         const formType = form.getAttribute('data-form-type');
 
         // Save to this.state
         this.state.formData = formDataObj;
         this.state.formType = formType;
+
         // Save the last database state
         if (this.autoSaveManager && this.autoSaveManager.lastSavedContent) {
             this.state.lastDatabaseState = this.autoSaveManager.lastSavedContent;

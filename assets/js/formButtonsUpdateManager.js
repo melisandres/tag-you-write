@@ -3,7 +3,7 @@ import { eventBus } from './eventBus.js';
 export class ButtonUpdateManager {
     constructor(autoSaveManager) {
         this.autoSaveManager = autoSaveManager;
-        this.form = document.querySelector('[data-form-type="root"], [data-form-type="iteration"]');
+        this.form = document.querySelector('[data-form-type="root"], [data-form-type="iteration"], [data-form-type="writerCreate"]');
         this.hasUnsavedChanges = false;
 
         this.init();
@@ -18,7 +18,11 @@ export class ButtonUpdateManager {
         this.deleteButton = this.form.querySelector('[data-button-type="delete"]');
         this.cancelButton = this.form.querySelector('[data-button-type="exit"]');
         this.idInput = this.form.querySelector('input[name="id"]');
-        this.hasAnId = this.idInput.value ? true : false;
+        if (this.idInput){
+            this.hasAnId = this.idInput.value ? true : false;
+        }else{
+            this.hasAnId = false;
+        }
         this.formType = this.form.getAttribute('data-form-type');
 
         // Listen for validation changes
@@ -29,39 +33,33 @@ export class ButtonUpdateManager {
 
         //Listen for a form that has no unsaved changes--called from autoSaveManager
         eventBus.on('hasUnsavedChanges', this.handleHasUnsavedChanges.bind(this));
-
-        // Listen for form restore
-        /* eventBus.on('formRestored', this.handleFormRestored.bind(this)); */
-
-        // Initial button state update
-        // handleValidationChanged will always be called on load... maybe... check
-        /* this.updateButtons(); */
     }
 
-/*     handleFormRestored(formData) {
-        console.log('handleFormRestored', formData);
-        if (this.autoSaveManager) {
-            this.hasUnsavedChanges = this.autoSaveManager.hasUnsavedChanges();
-            this.handleHasUnsavedChanges(this.hasUnsavedChanges);
-        }
-    }
- */
     updateButtons() {
-        console.log('updateSaveButton called from updateButtons()');
         // Called on load, validation is also called on load, and updates some buttons
-        this.updateDeleteButton();
-        this.updateExitButton();  
-        if (this.formType = 'root'){
-            this.updateSaveButton(this.hasUnsavedChanges);
-            this.updatePublishButton();
-        }  
+        if (this.formType === 'writerCreate') {
+            this.saveButton = this.form.querySelector('[data-button-type="save"]');
+            // Initially disable the button until validation passes
+            this.updateSaveButton(false);
+        } else {
+            // Your existing logic for other form types
+            this.updateDeleteButton();
+            this.updateExitButton();  
+            if (this.formType === 'root'){
+                this.updateSaveButton(this.hasUnsavedChanges);
+                this.updatePublishButton();
+            }  
+        }
     }
 
     handleValidationChanged(results) {    
         console.log('updateSaveButton called from handleValidationChanged()', results);
-        // Update buttons based on validation results
-        this.updatePublishButton(results.canPublish);
-        this.updateSaveButton(this.hasUnsavedChanges);
+        if (this.formType === 'writerCreate') {
+            this.updateSaveButton(results.canPublish);
+        } else {
+            this.updatePublishButton(results.canPublish);
+            this.updateSaveButton(this.hasUnsavedChanges);
+        }
     }
 
     // This listens for an event emitted by autoSaveManager, at every input change, looking for unsaved changes. 
@@ -71,7 +69,6 @@ export class ButtonUpdateManager {
         this.updateSaveButton(this.hasUnsavedChanges);
     }
 
-    // TODO: when you load a draft... canAutosave is... either through formUpdate or InputChanged... calling updateSaveButton on load, and sending it hasUnsavedChanges = true... which is making the button available when it shouldn't be... not a big deal, but a little annoying.. 
     handleFormUpdated() {
         console.log('updateSaveButton called from handleFormUpdated()');
         if (!this.hasAnId){

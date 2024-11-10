@@ -12,7 +12,9 @@ class Writer extends Crud{
                         'email',
                         'birthday',
                         'password',
-                        'privilege_id'
+                        'privilege_id', 
+                        'reset_token',
+                        'reset_expiry'
                         ];
 
 
