@@ -13,12 +13,12 @@ export class ModalUpdateManager {
     eventBus.on('instaDelete', this.handleInstaDelete.bind(this));
     eventBus.on('chooseWinner', this.handleChooseWinner.bind(this));
     eventBus.on('voteToggle', this.handleVoteToggle.bind(this));
+    eventBus.on('gamePlayerCountUpdate', this.handleGamePlayerCountUpdate.bind(this));
   }
 
   handleInstaPublish({ textId, newStatus }) {
     const modal = document.querySelector(`.modal-background[data-text-id='${textId}'][data-tree-modal="visible"]`);
     if (modal) {
-      
       // Update status
       const topInfo = modal.querySelector('.top-info');
       if (topInfo) {
@@ -26,6 +26,30 @@ export class ModalUpdateManager {
         topInfo.classList.add('published');
         const statusSpan = topInfo.querySelector('.status');
         if (statusSpan) statusSpan.remove();
+
+        // Update the votes section instead of replacing it
+        const votesDiv = topInfo.querySelector('.votes');
+        if (votesDiv) {
+          // Keep existing player count
+          const playerCount = votesDiv.querySelector('.vote-count').dataset.playerCount;
+          
+          // Just update visibility and initial vote count
+          votesDiv.classList.remove('hidden');
+          votesDiv.setAttribute('data-fill-color', 'rgb(255, 255, 255)');
+          
+          const voteCountSpan = votesDiv.querySelector('.vote-count');
+          voteCountSpan.classList.remove('hidden');
+          voteCountSpan.textContent = `0/${playerCount} votes`;
+          voteCountSpan.setAttribute('data-vote-count', '0');
+          
+          // Set the SVG colors
+          const svgPath = votesDiv.querySelector('svg path');
+          if (svgPath) {
+            svgPath.setAttribute('fill', 'rgb(255, 255, 255)');
+            svgPath.setAttribute('stroke', 'black');
+            svgPath.setAttribute('stroke-width', '2');
+          }
+        }
       }
 
       // Update buttons
@@ -46,8 +70,15 @@ export class ModalUpdateManager {
   handleInstaDelete({ textId }) {
     const modal = document.querySelector(`.modal-background[data-text-id='${textId}'][data-tree-modal="visible"]`);
     if (modal) {
+      modal.dataset.textId = '';
       modal.dataset.treeModal = "hidden";
       modal.classList.add('display-none');
+      
+      // Clear content
+      const modalContent = modal.querySelector('.modal-dynamic-content');
+      const modalBtns = modal.querySelector('.modal-dynamic-btns');
+      if (modalContent) modalContent.innerHTML = '';
+      if (modalBtns) modalBtns.innerHTML = '';
     }
   }
 
@@ -132,5 +163,23 @@ export class ModalUpdateManager {
     if (votesDiv) {
         votesDiv.setAttribute('data-fill-color', fillColor);
     }
+  }
+
+  handleGamePlayerCountUpdate({ gameId, newPlayerCount }) {
+    const modal = document.querySelector('.modal-background[data-tree-modal="visible"]');
+    if (!modal) return;
+
+    const votesDiv = modal.querySelector('.votes');
+    if (!votesDiv) return;
+
+    const voteCountSpan = votesDiv.querySelector('.vote-count');
+    if (!voteCountSpan) return;
+
+    // Get current vote count
+    const currentVotes = parseInt(voteCountSpan.dataset.voteCount || '0');
+    
+    // Update the display with new player count
+    voteCountSpan.textContent = `${currentVotes}/${newPlayerCount - 1} votes`;
+    voteCountSpan.dataset.playerCount = (newPlayerCount - 1).toString();
   }
 }

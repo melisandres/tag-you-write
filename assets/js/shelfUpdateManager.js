@@ -13,6 +13,7 @@ export class ShelfUpdateManager {
     eventBus.on('instaDelete', this.handleInstaDelete.bind(this));
     eventBus.on('chooseWinner', this.handleChooseWinner.bind(this));
     eventBus.on('voteToggle', this.handleVoteToggle.bind(this));
+    eventBus.on('gamePlayerCountUpdate', this.handleGamePlayerCountUpdate.bind(this));
   }
 
   handleInstaPublish({ textId, newStatus }) {
@@ -24,36 +25,32 @@ export class ShelfUpdateManager {
         drawer.classList.remove('draft');
         drawer.classList.add(newStatus);
 
-        // Update vote count display - needs to match new getNumberOfVotes structure
+        // Update vote count display using existing data attributes
         const votesDiv = drawer.querySelector('.votes');
         if (votesDiv) {
-          votesDiv.innerHTML = `
-            <i>${SVGManager.votesSVG}</i>
-            <span class="small vote-count" data-vote-count="0" data-player-count="0">
-              0/0
-            </span>
-          `;
-          // Need to add data-fill-color attribute and apply SVG colors
-          votesDiv.setAttribute('data-fill-color', '');
+          const voteCountSpan = votesDiv.querySelector('.vote-count');
+          const playerCount = voteCountSpan.dataset.playerCount;
+          
+          // Update visibility and colors
+          voteCountSpan.classList.remove('hidden');
+          
+          // Use same color logic as ShelfVisualizer
+          const colorScale = createColorScale(playerCount);
+          const fillColor = colorScale(0);  // Start with 0 votes
+          
+          votesDiv.setAttribute('data-fill-color', fillColor);
+          const svgPath = votesDiv.querySelector('svg path');
+          if (svgPath) {
+            svgPath.setAttribute('fill', fillColor);
+            svgPath.setAttribute('stroke', 'black');
+            svgPath.setAttribute('stroke-width', '2');
+          }
         }
 
         // Remove "draft" text
         const statusSpan = drawer.querySelector('[data-status]');
         if (statusSpan) {
           statusSpan.innerHTML = '';
-        }
-
-        //Add the vote count to the node
-        const voteCountSpan = drawer.querySelector('[data-vote-count]');
-        if (voteCountSpan) {
-          voteCountSpan.innerHTML = `
-            <span>
-              <i>${SVGManager.votesSVG}</i>
-              <span class="small" data-vote-count="0" data-player-count="0">
-                0/0
-              </span>
-            </span>
-          `;
         }
 
         // Update available actions
@@ -166,5 +163,65 @@ export class ShelfUpdateManager {
     }
   }
 
+  handleGamePlayerCountUpdate({ gameId, newPlayerCount }) {
+    const container = document.querySelector('#showcase[data-showcase="shelf"]');
+    if (!container) return;
+    
+    // Update all vote displays in the shelf
+    const voteDisplays = container.querySelectorAll('.votes');
+    voteDisplays.forEach(votesDiv => {
+      const voteCountSpan = votesDiv.querySelector('.vote-count');
+      if (voteCountSpan) {
+        const currentVotes = parseInt(voteCountSpan.dataset.voteCount);
+        const maxVotes = newPlayerCount - 1;
+        
+        // Update the display
+        voteCountSpan.textContent = `${currentVotes}/${maxVotes} votes`;
+        voteCountSpan.dataset.playerCount = maxVotes;
+        
+        // Update colors
+        const colorScale = createColorScale(maxVotes);
+        const fillColor = colorScale(currentVotes);
+        votesDiv.setAttribute('data-fill-color', fillColor);
+        
+        const svgPath = votesDiv.querySelector('svg path');
+        if (svgPath) {
+          svgPath.setAttribute('fill', fillColor);
+        }
+      }
+    });
+    // Add vote buttons to all published nodes
+    const nodeGroups = container.querySelectorAll('li.node');
+    nodeGroups.forEach(nodeGroup => {
+        // Check if published
+        if (!nodeGroup.classList.contains('published')) return;
+        
+        // TODO: replace with user id check
+        // Check if not user's own text
+        const authorSpan = nodeGroup.querySelector('span.author');
+        console.log("authorSpan", authorSpan)
+        if (authorSpan?.textContent === 'by you') return;
+        
+        const nodeButtons = nodeGroup.querySelector('.node-buttons');
+        if (!nodeButtons) return;
+
+        const existingVoteButton = nodeButtons.querySelector('.vote');
+        if (existingVoteButton) return;
+
+        // Find the iterate form
+        const iterateForm = nodeButtons.querySelector('form');
+        if (!iterateForm) return;
+
+        const textId = nodeGroup.dataset.storyId;
+        if (!textId) return;
+
+        const voteButton = document.createElement('button');
+        voteButton.className = 'vote';
+        voteButton.setAttribute('data-vote', textId);
+        voteButton.innerHTML = SVGManager.voteSVG;
+        
+        iterateForm.parentNode.insertBefore(voteButton, iterateForm.nextSibling);
+    });
+  }
 
 }

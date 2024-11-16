@@ -73,7 +73,47 @@
       return $stmt->fetchAll();
   }
 
-  public function getModifiedSince($lastCheck) {
+   public function getModifiedSince($lastCheck) {
+      $sql = "SELECT g.id AS game_id, 
+                     g.prompt,
+                     g.modified_at,
+                     g.open_for_changes AS openForChanges,
+                     rt.id AS id,
+                     rt.title AS title,
+                     ts.status AS root_text_status,
+                     SUM(CASE WHEN t.status_id = 2 AND t.writer_id != :loggedInWriterId THEN 1 ELSE 0 END) AS text_count,
+                     SUM(CASE WHEN s.text_id IS NOT NULL AND t.status_id = 2 AND t.writer_id != :loggedInWriterId AND (t.note_date IS NULL OR s.read_at > t.note_date) THEN 1 ELSE 0 END) AS seen_count,
+                     SUM(CASE WHEN s.text_id IS NULL AND t.status_id = 2 AND t.writer_id != :loggedInWriterId THEN 1 ELSE 0 END) AS unseen_count,
+                     (CASE WHEN EXISTS (
+                        SELECT 1
+                        FROM text t2
+                        WHERE t2.game_id = g.id AND t2.writer_id = :loggedInWriterId
+                     ) THEN 1 ELSE 0 END) AS hasContributed
+            FROM game g
+            INNER JOIN text rt ON g.id = rt.game_id AND rt.parent_id IS NULL
+            INNER JOIN text_status ts ON rt.status_id = ts.id AND 
+                  (ts.status = 'published' OR (ts.status = 'draft' AND rt.writer_id = :loggedInWriterId) OR (ts.status = 'incomplete_draft' AND rt.writer_id = :loggedInWriterId)) 
+            INNER JOIN text t ON g.id = t.game_id
+            LEFT JOIN seen s ON t.id = s.text_id AND s.writer_id = :loggedInWriterId
+            WHERE CAST(g.modified_at AS DATETIME) > CAST(:lastCheck AS DATETIME)
+            GROUP BY g.id, g.prompt, rt.id, rt.title";
+
+      $stmt = $this->prepare($sql);
+      $stmt->bindValue(':lastCheck', $lastCheck);
+      $stmt->bindValue(':loggedInWriterId', $_SESSION['writer_id'] ?? 0);
+      $stmt->execute();
+
+      $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+      foreach ($results as &$game) {
+         $game['hasUnseenTexts'] = ($game['unseen_count'] > 0) ? true : false;
+         $game['pending'] = ($game['root_text_status'] == 'draft' || $game['root_text_status'] == 'incomplete_draft') ? true : false;
+      }
+
+      return $results;
+   }
+
+  /* public function getModifiedSince($lastCheck) {
    // Debug timestamp comparison
    $debugSql = "SELECT g.id, 
           g.modified_at,
@@ -149,7 +189,7 @@
    }
    error_log("Final results: " . print_r($results, true));
    return $results;
-}
+} */
 
 
    public function getRootText($game_id) {

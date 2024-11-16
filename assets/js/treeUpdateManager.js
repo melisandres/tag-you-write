@@ -11,22 +11,24 @@ export class TreeUpdateManager {
     eventBus.on('instaDelete', this.handleInstaDelete.bind(this));
     eventBus.on('chooseWinner', this.handleChooseWinner.bind(this));
     eventBus.on('voteToggle', this.handleVoteToggle.bind(this));
+    eventBus.on('gamePlayerCountUpdate', this.handleGamePlayerCountUpdate.bind(this));
   }
 
   handleInstaPublish({ textId, newStatus }) {
-    const circle = document.querySelector(`circle[data-id="${textId}"]`);
+    const heart = document.querySelector(`path[data-id="${textId}"]:not(.link)`);
+    console.log("heart", heart);
 
-    if (!circle) {
+    if (!heart) {
       return;
     }
 
-    const nodeGroup = circle.closest('g');
+    const nodeGroup = heart.closest('g');
+    console.log("nodeGroup", nodeGroup);
 
     if (nodeGroup) {
-      // Update circle
-      d3.select(circle)
-        .classed('tree-node-draft', newStatus === 'draft')
-        .classed('tree-node-draft', newStatus === 'incomplete_draft')
+      // Update heart path - fixed duplicate class and added proper class toggling
+      d3.select(heart)
+        .classed('tree-node-draft', newStatus === 'draft' || newStatus === 'incomplete_draft')
         .classed('tree-node-published', newStatus === 'published');
 
       // Update title
@@ -60,9 +62,9 @@ export class TreeUpdateManager {
   handleInstaDelete({ textId }) {
     const container = document.querySelector('#showcase[data-showcase="tree"]');
     if (container) {
-      // Update selector to find path instead of circle
-      const node = container.querySelector(`path[data-id="${textId}"]`);
-      const nodeGroup = node?.closest('g');
+      // Update s heart
+      const heart = document.querySelector(`path[data-id="${textId}"]:not(.link)`);
+      const nodeGroup = heart.closest('g');
       if (nodeGroup) {
         d3.select(nodeGroup)
           .classed('display-none', true);
@@ -124,36 +126,61 @@ export class TreeUpdateManager {
     node.setAttribute('fill', colorScale(newVoteCount));
   }
 
-  //
-/*   createColorScale(maxVotes) {
-    const domain = maxVotes > 0 ? [0, maxVotes] : [0, 1];
-    return d3.scaleLinear()
-        .domain(domain)
-        .range(['white', '#ff009b'])
-        .interpolate(d3.interpolateRgb);
-  } */
+  handleGamePlayerCountUpdate({ gameId, newPlayerCount }) {
+    const container = document.querySelector('#showcase[data-showcase="tree"]');
+    if (!container) return;
+    
+    const maxVotes = newPlayerCount - 1;
+    const colorScale = createColorScale(maxVotes);
+    
+    // Update node colors
+    const nodes = container.querySelectorAll('.node path[data-id]:not(.link)');
+    nodes.forEach(node => {
+      const voteCount = parseInt(node.dataset.voteCount || '0');
+      node.setAttribute('fill', colorScale(voteCount));
+    });
 
-/*   updateNodeVoteCount(nodeId, newVoteCount, maxVoteCount) {
-    const node = this.container.querySelector(`circle[data-id="${nodeId}"]`);
-    if (node) {
-      const colorScale = this.createColorScale(maxVoteCount);
-      d3.select(node).attr('fill', colorScale(newVoteCount));
+    // Update legend
+    const legend = container.querySelector('.legend');
+    console.log("legend", legend);
+    if (legend) {
+      // Find the votes group (the one with the gradient rect)
+      const votesGroup = legend.querySelector('.legend-item rect[fill="url(#vote-gradient)"]').closest('.legend-item');
+      console.log("votesGroup", votesGroup);
+      if (!votesGroup) return;
+
+      // Get previous maxVotes from the last tick label
+      const tickLabels = votesGroup.querySelectorAll('[data-tick-value]');
+      console.log("tickLabels", tickLabels);
+      const previousMaxVotes = tickLabels.length ? parseInt(tickLabels[tickLabels.length - 1].textContent) : 0;
+      console.log("previousMaxVotes", previousMaxVotes);
+
+      // Only recreate gradient if we're coming from maxVotes of 0
+      if (previousMaxVotes === 0) {
+        const oldGradient = container.querySelector('#vote-gradient');
+        if (oldGradient) oldGradient.remove();
+
+        const svg = d3.select(container).select('svg');
+        const gradient = svg.append("defs")
+          .append("linearGradient")
+          .attr("id", "vote-gradient")
+          .attr("x1", "0%")
+          .attr("x2", "100%");
+
+        gradient.append("stop")
+          .attr("offset", "0%")
+          .attr("stop-color", colorScale(0));
+
+        gradient.append("stop")
+          .attr("offset", "100%")
+          .attr("stop-color", colorScale(maxVotes));
+      }
+
+      // Update tick labels
+      const tickValues = [0, Math.floor(maxVotes / 2), maxVotes];
+      tickLabels.forEach((label, index) => {
+        label.textContent = tickValues[index];
+      });
     }
-  } */
-
-/*   markNodeAsRead(nodeId) {
-    const node = this.container.querySelector(`[data-id="${nodeId}"]`);
-    if (node) {
-      d3.select(node)
-        .classed('unread', false)
-        .classed('read', true);
-    }
-  } */
-
-/*   createColorScale(maxVotes) {
-    return d3.scaleLinear()
-      .domain([0, maxVotes])
-      .range(['white', '#ff009b'])
-      .interpolate(d3.interpolateRgb);
-  }*/
+  }
 } 

@@ -174,6 +174,7 @@ export class AutoSaveManager {
         const dataObj = Object.fromEntries(formData.entries());
         const currentData = JSON.stringify(dataObj);
     
+        
         // Handle null lastSavedContent case
         if (this.lastSavedContent === null) {
             if (this.previousHasChangesState !== true) {
@@ -265,30 +266,21 @@ export class AutoSaveManager {
             })
             .then(result => {
                 if (result.success) {
+                    // First update the form inputs
+                    this.updateFormInputs(formData, result);
                     // Change the data-form-activity attribute
                     this.form.setAttribute('data-form-activity', 'editing');
 
-                    //TODO: formUpdated could handle some of the logic below... however, manualSave does some extra stuff, and it emits formUpdated... so it might just be fine to keep the logic here and in manualsave. 
-
-                    // Update the lastKeywords hidden input
-                    const lastKeywordsInput = this.form.querySelector('[name="lastKeywords"]');
-                    if (lastKeywordsInput) {
-                        lastKeywordsInput.value = formData.get('keywords');
-                        //this.lastSavedContent.keywords = formData.get('keywords');
-                    }
-
-                    // Only update the Id if it's not already set
-                    let idInput = this.form.querySelector('[data-id]');
-                    if (idInput && !idInput.value && result.textId) {
-                        idInput.value = result.textId;
-                        //this.lastSavedContent.id = result.textId;
-                    }
                     // Update lastSavedContent with the current form data
-                    this.lastSavedContent = JSON.stringify(data);
+                    const currentFormData = new FormData(this.form);
+                    this.lastSavedContent = JSON.stringify(Object.fromEntries(currentFormData));
                     this.lastAutoSaveTime = Date.now();
+
+                    // Force a check for unsaved changes before emitting formUpdated
+                    const hasChanges = this.hasUnsavedChanges();
+
                     eventBus.emit('formUpdated', result);
-                    // make sure the formButtonsUpdateManager knows there are unsaved changes
-                    this.hasUnsavedChanges();
+
                 } else {
                     console.error('Auto-save failed:', result.message);
                 }
@@ -301,6 +293,20 @@ export class AutoSaveManager {
                 console.error('Auto-save error:', error);
                 console.error('Full response:', error.message);
             });
+        }
+    }
+
+    // Helper method to update form inputs
+    updateFormInputs(formData, result) {
+        const lastKeywordsInput = this.form.querySelector('[name="lastKeywords"]');
+        if (lastKeywordsInput) {
+            lastKeywordsInput.value = formData.get('keywords');
+        }
+
+        let idInput = this.form.querySelector('[data-id]');
+        if (idInput && !idInput.value && result.textId) {
+            idInput.value = result.textId;
+            //this.lastSavedContent.id = result.textId;
         }
     }
 }

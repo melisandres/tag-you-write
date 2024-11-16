@@ -43,17 +43,25 @@ export class StoryManager {
   }
 
   async drawTree(id, container) {
-    // Check cache first
-    let treeData = this.dataManager.getTree(id);
+    let treeData/*  = this.dataManager.getTree(id) */;
+   /* let needsUpdate = true;
 
-    if (!treeData) {
+    if (treeData) {
+        // Check if cached tree needs updating
+        needsUpdate = await this.dataManager.shouldRefreshTree(id);
+        console.log("needsUpdate", needsUpdate);
+    } */
+
+    if (!treeData /* || needsUpdate */) {
         const datas = await this.fetchTree(id);
         treeData = datas[0];
-        this.dataManager.setTree(id, treeData);
+        //this.dataManager.setTree(id, treeData);
+        //this.dataManager.setTreeLastCheck(id);
     } else {
         // Unwrap the cached data
         treeData = treeData.data;
     }
+
     
     eventBus.emit('drawTree', { container, data: treeData });
 }

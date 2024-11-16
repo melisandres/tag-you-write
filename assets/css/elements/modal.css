@@ -112,3 +112,8 @@
     width: 25px;
     height: 25px;
 }
+
+.modal .votes.hidden {
+    opacity: 0;
+    visibility: hidden;
+}

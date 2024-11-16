@@ -43,9 +43,21 @@ export class InstaPublishManager {
           try {
             const result = JSON.parse(rawText); // Try to parse it as JSON
             if (result.success) {
-              // create an event that will update the views and the modal
-              eventBus.emit('instaPublish', { textId, newStatus: 'published' });
-              // an event to show a toast
+              // Emit multiple events for different aspects of the update
+              eventBus.emit('instaPublish', { 
+                textId, 
+                newStatus: 'published',
+                gameData: result.gameData
+              });
+              
+              // Update player counts if this was a new player
+              if (result.gameData.isNewPlayer) {
+                eventBus.emit('gamePlayerCountUpdate', {
+                  gameId: result.gameData.gameId,
+                  newPlayerCount: result.gameData.playerCount
+                });
+              }
+              
               eventBus.emit('showToast', { 
                 message: result.toastMessage, 
                 type: result.toastType 

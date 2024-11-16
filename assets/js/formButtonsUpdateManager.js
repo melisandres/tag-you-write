@@ -18,12 +18,37 @@ export class ButtonUpdateManager {
         this.deleteButton = this.form.querySelector('[data-button-type="delete"]');
         this.cancelButton = this.form.querySelector('[data-button-type="exit"]');
         this.idInput = this.form.querySelector('input[name="id"]');
-        if (this.idInput){
-            this.hasAnId = this.idInput.value ? true : false;
-        }else{
-            this.hasAnId = false;
-        }
+        
+        // Check initial ID state
+        this.hasAnId = !!(this.idInput && this.idInput.value);
+        
         this.formType = this.form.getAttribute('data-form-type');
+
+        // Initial button states
+        if (this.formType === 'writerCreate') {
+            this.updateSaveButton(false);
+        } else {
+            // For other forms, set initial states based on current form data
+            this.updatePublishButton(false);
+            this.updateSaveButton(false);
+            this.updateDeleteButton();
+            this.updateExitButton();
+        }
+
+        // Add a MutationObserver to watch for changes to the id input value
+        if (this.idInput) {
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
+                        this.hasAnId = !!this.idInput.value;
+                        this.updateDeleteButton();
+                        this.updateExitButton();
+                    }
+                });
+            });
+
+            observer.observe(this.idInput, { attributes: true });
+        }
 
         // Listen for validation changes
         eventBus.on('validationChanged', this.handleValidationChanged.bind(this));
@@ -33,6 +58,7 @@ export class ButtonUpdateManager {
 
         //Listen for a form that has no unsaved changes--called from autoSaveManager
         eventBus.on('hasUnsavedChanges', this.handleHasUnsavedChanges.bind(this));
+
     }
 
     updateButtons() {
@@ -46,25 +72,28 @@ export class ButtonUpdateManager {
             this.updateDeleteButton();
             this.updateExitButton();  
             if (this.formType === 'root'){
-                this.updateSaveButton(this.hasUnsavedChanges);
-                this.updatePublishButton();
+/*                 this.updateSaveButton(this.hasUnsavedChanges);
+                this.updatePublishButton(); */
             }  
         }
     }
 
     handleValidationChanged(results) {    
-        console.log('updateSaveButton called from handleValidationChanged()', results);
+        console.log('handleValidationChanged called with results:', results);
         if (this.formType === 'writerCreate') {
             this.updateSaveButton(results.canPublish);
         } else {
             this.updatePublishButton(results.canPublish);
-            this.updateSaveButton(this.hasUnsavedChanges);
+            // Only update save button if there are unsaved changes
+            if (this.hasUnsavedChanges) {
+                this.updateSaveButton(results.canAutosave);
+            }
         }
     }
 
     // This listens for an event emitted by autoSaveManager, at every input change, looking for unsaved changes. 
     handleHasUnsavedChanges(hasUnsavedChanges) {
-        console.log('updateSaveButton called from handleHasUnsavedChanges()', hasUnsavedChanges);
+        console.log('handleHasUnsavedChanges called with:', hasUnsavedChanges);
         this.hasUnsavedChanges = hasUnsavedChanges;
         this.updateSaveButton(this.hasUnsavedChanges);
     }

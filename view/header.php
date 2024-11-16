@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="user" data-user-id="{{ session.writer_id ? session.writer_id : 'null' }}" data-guest="{{ guest ? 'true' : 'false' }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title }}</title>
     <script src="https://cdn.ckeditor.com/ckeditor5/40.2.0/classic/ckeditor.js"></script>
@@ -24,7 +25,7 @@
         <a class="nav-link writers" href="{{path}}login"></a>
     {% else %}
         <!-- <a class="nav-link writers" href="{{path}}writer">show all writers</a> -->
-        <a class="nav-link texts" href="{{path}}text/create">new game</a>
+        <a class="nav-link texts" href="{{path}}text/create?new=true">new game</a>
         {% if session.privilege == 1 %}
             <a class="nav-link writers" href="{{path}}journal">journal</a>
         {% endif %}

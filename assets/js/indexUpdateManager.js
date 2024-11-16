@@ -10,6 +10,8 @@ export class IndexUpdateManager {
     eventBus.on('instaDelete', this.handleInstaDelete.bind(this));
     eventBus.on('instaPublish', this.handleInstaPublish.bind(this));
     eventBus.on('chooseWinner', this.handleChooseWinner.bind(this));
+    eventBus.on('gamesUpdated', this.handleGamesUpdated.bind(this));
+    eventBus.on('gameDataResponse', this.handleGameDataResponse.bind(this));
     this.makeTitlesShorter();
   }
 
@@ -33,14 +35,13 @@ export class IndexUpdateManager {
     if (gameContainers.length > 0) gameContainers.forEach(container => container.remove());
   }
 
-  // TODO: test this
+
   handleInstaPublish({ textId, status}) {
     const textContainer = document.querySelector(`[data-story-id='${textId}']`);
 
     const gameContainer = textContainer ? textContainer.closest(`[data-game-id]`): document.querySelector(`.story.story-has-showcase`);
     console.log("gameContainer", gameContainer);
     const statusIndicator = gameContainer.querySelector('.game-status-indicator');
-    console.log("statusIndicator", statusIndicator);
     if (statusIndicator && statusIndicator.classList.contains('pending')) {
       statusIndicator.classList.remove('pending');
       statusIndicator.classList.add('open');
@@ -71,4 +72,48 @@ export class IndexUpdateManager {
         </p>`;
     }
   }
+
+  handleGamesUpdated(gameIds) {
+    console.log("gameIds", gameIds);
+    // Request the data for each updated game
+    gameIds.forEach(gameId => {
+        eventBus.emit('requestGameData', gameId);
+    });
+  }
+
+ // TODO: handle game updates.
+ handleGameDataResponse({gameId, data: gameData}) {
+  const gameElement = document.querySelector(`[data-game-id="${gameId}"]`);
+  if (gameElement && gameData) {
+      const statusIndicator = gameElement.querySelector('.game-status-indicator');
+      if (statusIndicator) {
+          statusIndicator.className = `game-status-indicator ${
+              gameData.pending ? 'pending' : 
+              (gameData.openForChanges ? 'open' : 'closed')
+          }`;
+      }
+    }
+  }
+ /*  // TODO: handle game updates. 
+  handleGameDataResponse(gameId, gameData) {
+    console.log("gameIds", gameIds);
+    gameIds.forEach(gameId => {
+      const gameElement = document.querySelector(`[data-game-id="${gameId}"]`);
+      if (gameElement) {
+        // Get updated game data from cache
+        const gameData = window.dataManager.cache.games.get(gameId)?.data;
+        if (gameData) {
+          // Update status indicator
+          const statusIndicator = gameElement.querySelector('.game-status-indicator');
+          console.log("statusIndicator", statusIndicator);
+          if (statusIndicator) {
+            statusIndicator.className = `game-status-indicator ${gameData.pending ? 'pending' : (gameData.openForChanges ? 'open' : 'closed')}`;
+            // Update status text...
+          }
+          
+          // Update other UI elements as needed...
+        }
+      }
+    });
+  } */
 }

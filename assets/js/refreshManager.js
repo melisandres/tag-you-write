@@ -15,17 +15,40 @@ export class RefreshManager {
         this.uiManager = uiManager;        
         this.previousUrl = sessionStorage.getItem('previousUrl');
         this.isAPageRefresh = this.isPageRefresh();
-        
-        eventBus.on('inputChanged', this.handleInputChanged.bind(this));
 
-        // Listen for any saves on the form, to keep a record of the last saved content
+        window.refreshManagerInstance = this;
+        
+        this.initCustomEvents();
+        this.init();
+    }
+
+    initCustomEvents() {
+        // Listen for any changes to the form
+        eventBus.on('inputChanged', this.handleInputChanged.bind(this));
         eventBus.on('formUpdated', this.handleFormUpdated.bind(this));
         eventBus.on('manualSave', this.handleManualSave.bind(this));
-        
-        window.refreshManagerInstance = this;
-
-        // Add event listener for restoringState         
+        // Add event listener for restoringState for story page and forms   
         eventBus.on('restoringState', this.handleRestoringState.bind(this));
+    }
+
+    init() {    
+        // Prevent default refresh for games page
+        window.addEventListener('load', () => {
+            if (this.isStoriesPage() && this.isPageRefresh()) {
+                // Prevent the default refresh behavior
+                window.stop();
+                
+                // Use our update mechanism instead
+                window.dataManager.checkForUpdates().then(hasUpdates => {
+                    if (hasUpdates) {
+                        const modifiedGames = window.dataManager.getRecentlyModifiedGames();
+                        modifiedGames.forEach(game => {
+                            eventBus.emit('updateGame', game);
+                        });
+                    }
+                });
+            }
+        });
     }
 
     handleFormUpdated() {
@@ -78,7 +101,18 @@ export class RefreshManager {
 
     // Check if the page is a refresh
     isPageRefresh() {
-        return this.previousUrl === window.location.href;
+        const isRefresh = this.previousUrl === window.location.href;
+        
+        // If URL has ?new=true, it's not a refresh (it's a new game)
+        if (window.location.search.includes('new=true')) {
+            console.log('isPageRefresh: NOT CAUSE new=true');
+            return false;
+        }
+        if (isRefresh) {
+            this.isAPageRefresh = true;
+            return this.handlePageRefresh();
+        }
+        return true;
     }
 
     // Check if the page is a form page
@@ -86,13 +120,13 @@ export class RefreshManager {
         return document.querySelector('[data-form-type="root"], [data-form-type="iteration"], [data-form-type="addingNote"], [data-form-type="writerCreate"], [data-form-type="login"]') !== null;
     }
 
-        // New method to check if the form includes a password field
+        // Method to check if the form includes a password field
     isPasswordForm() {
         return document.querySelector('[data-form-type="login"], [data-form-type="writerCreate"]') !== null;
     }
 
     isStoriesPage() {
-        // this is the container for stories
+        // This is the container for stories
         return document.querySelector('[data-stories]') !== null;
     }
 
@@ -268,7 +302,11 @@ export class RefreshManager {
                     }
                 });
                 /* console.log(formData.id); */
-                if(formData.id !== '') form.setAttribute('data-form-activity', 'editing');
+                if(formData.id !== '') {
+                    form.setAttribute('data-form-activity', 'editing');
+                    // Emit formUpdated to ensure buttons are properly updated
+                    eventBus.emit('formUpdated');
+                }
             }
         }
 
@@ -308,5 +346,14 @@ export class RefreshManager {
                 arrow.textContent = '▼';
             }
         });
+    }
+
+    // Handle page refresh Written for games
+    handlePageRefresh() {
+        if (this.isStoriesPage()) {    
+            // Prevent default refresh behavior
+            return false;
+        }
+        return true; // Allow refresh for other pages
     }
 }

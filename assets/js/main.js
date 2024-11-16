@@ -25,6 +25,7 @@ import { ValidationManager } from './validationManager.js';
 import { ButtonUpdateManager } from './formButtonsUpdateManager.js';
 import { PaginationManager } from './paginationManager.js';
 import { GameListManager } from './gameListManager.js';
+import { DataManager } from './dataManager.js';
 
 // Make eventBus globally available immediately
 window.eventBus = eventBus;
@@ -33,6 +34,10 @@ window.eventBus = eventBus;
 document.addEventListener("DOMContentLoaded", () => {
 
   const path = window.location.origin + "/tag-you-write-repo/tag-you-write/";
+  
+  // Initialize singleton DataManager
+  const dataManager = DataManager.getInstance(path);
+  window.dataManager = dataManager; 
 
   const treeModal = document.querySelector('.modal-background');
   const warningManager = new WarningManager();
@@ -43,6 +48,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initialize SeenManager
   const seenManager= new SeenManager(path);
+
+
 
   // TreeVisualizer is initialized sends a custom event to StoryManager when a node is clicked (to show the story in the modal)
   new TreeVisualizer();

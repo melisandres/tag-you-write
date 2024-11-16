@@ -1,12 +1,17 @@
 export function createColorScale(maxVotes) {
     return function(voteCount) {
-        // Ensure maxVotes is at least 1 to avoid division by zero
+        // Handle edge cases where maxVotes is 0 or undefined
+        if (!maxVotes || maxVotes <= 0) {
+            return 'rgb(255, 255, 255)'; // Return white for 0 max votes
+        }
+
+        // Ensure vote count is within bounds
         const normalizedVoteCount = Math.max(0, Math.min(voteCount, maxVotes));
         const ratio = normalizedVoteCount / maxVotes;
 
         // Define the start and end colors
         const startColor = { r: 255, g: 255, b: 255 }; // White
-        const endColor = { r: 255, g: 0, b:155 }; // Pink
+        const endColor = { r: 255, g: 0, b: 155 }; // Pink
 
         // Interpolate between the start and end colors
         const r = Math.round(startColor.r + (endColor.r - startColor.r) * ratio);

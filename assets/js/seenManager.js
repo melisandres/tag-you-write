@@ -51,6 +51,7 @@ export class SeenManager {
         return await response.json();
     }
 
+    // TODO: you may want to update the dataManager with read status
     updateReadStatus(id) {
         // Try to find the shelf heart first
         let element = document.querySelector(`[data-story-id="${id}"]`)?.querySelector('.shelf-heart');
@@ -60,7 +61,7 @@ export class SeenManager {
             element = document.querySelector(`path[data-id="${id}"].unread`);
         }
         
-        console.log("element", element);
+        // You need to update the story node AND the top level game element
         let topLevelElement = document.querySelector('#showcase').closest('.story');
 
         // Update the element clicked on locally, as the user browses 

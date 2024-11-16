@@ -173,34 +173,22 @@ export class ShelfVisualizer {
   }
 
   getNumberOfVotes(node) {
-    if (node.text_status === "published") {
+/*     if (node.text_status === "published") { */
       const maxVotes = node.playerCount - 1; 
       const colorScale = createColorScale(maxVotes); 
       const fillColor = colorScale(node.voteCount);
+      const published = node.text_status == 'published';
 
       return `
-      <div class="votes" data-fill-color="${fillColor}">
+      <div class="votes" data-fill-color="${published ? fillColor : ''}">
         <i>
           ${node.isWinner ? SVGManager.starSVG : SVGManager.votesSVG}
         </i>
-        <span class="small vote-count" data-vote-count=${node.voteCount} data-player-count=${node.playerCount - 1}>
+        <span class="small vote-count ${published ? '' : 'hidden'}" data-vote-count=${node.voteCount} data-player-count=${node.playerCount - 1}>
           ${node.voteCount}/${node.playerCount - 1} votes
         </span>
       </div>
     `;
-    } else {
-      // if the story isn't published, you need a placeholder for the heart icon.
-      return `
-        <div class="votes" data-fill-color="">
-          <i>
-            ${SVGManager.votesSVG}
-          </i>
-          <span class="small vote-count hidden" data-vote-count=${node.voteCount} data-player-count=${node.playerCount - 1}>
-          </span>
-        </div>
-      
-      `;
-    }
   }
 
   applySVGColors(container) {

@@ -1,5 +1,17 @@
 export class DataManager {
+    static instance = null;
+    
+    static getInstance(path) {
+        if (!DataManager.instance) {
+            DataManager.instance = new DataManager(path);
+        }
+        return DataManager.instance;
+    }
     constructor(path) {
+        if (DataManager.instance) {
+            return DataManager.instance;
+        }
+
         this.path = path;
         this.cache = this.loadCache() || {
             games: new Map(),
@@ -14,6 +26,23 @@ export class DataManager {
             }
         };
         this.currentUserId = null; // Track current user
+        this.recentlyModifiedGames = new Set(); // Track modified game IDs
+        this.treeChecks = new Map(); // Store last check time for each tree
+
+        // Subscribe to relevant events
+        // Subscribe to relevant events
+        eventBus.on('requestGameData', (gameId) => {
+            const gameData = this.cache.games.get(gameId)?.data;
+            eventBus.emit('gameDataResponse', { gameId, data: gameData });
+        });
+
+        eventBus.on('updateGame', (gameData) => {
+            this.updateGamesData([gameData]);
+        });
+        
+        this.saveCache();
+        DataManager.instance = this;
+        //this.clearCache();
     }
 
     getInitialCache() {
@@ -44,26 +73,54 @@ export class DataManager {
     updateGamesData(games) {
         if (!Array.isArray(games)) {
             console.error('Expected array of games, got:', games);
-            return;
+            return [];
         }
 
-        // Update existing games
+        const updatedGameIds = [];
         games.forEach(game => {
-            this.cache.games.set(game.game_id, {
-                data: game,
-                timestamp: Date.now()
-            });
+            const existingGame = this.cache.games.get(game.id);
+            const gameChanged = !existingGame || 
+                existingGame.data.open_for_changes !== game.open_for_changes ||
+                existingGame.data.text_count !== game.text_count ||
+                existingGame.data.seen_count !== game.seen_count ||
+                existingGame.data.unseen_count !== game.unseen_count ||
+                existingGame.data.title !== game.title;
+                
+            if (gameChanged) {
+                this.cache.games.set(game.id, {
+                    data: {
+                        ...game,
+                        text_id: game.id || null,
+                        open_for_changes: game.openForChanges === '1' || game.open_for_changes === true,
+                        hasContributed: game.hasContributed === '1' || game.has_contributed === true,
+                        text_count: parseInt(game.text_count) || 0,
+                        seen_count: parseInt(game.seen_count) || 0,
+                        unseen_count: parseInt(game.unseen_count) || 0
+                    },
+                    timestamp: Date.now()
+                });
+                updatedGameIds.push(game.id);
+            }
         });
 
-        this.saveCache();
+        if (updatedGameIds.length > 0) {
+            this.saveCache();
+            console.log('Emitting gamesUpdated for:', updatedGameIds);
+            eventBus.emit('gamesUpdated', updatedGameIds);
+        }
+
+        return updatedGameIds;
     }
 
     // Add method to check if games need refresh
     async checkForUpdates() {
-        try {
-            console.log('Sending request to:', `${this.path}game/modifiedSince`); // Debug URL
-            console.log('With data:', { lastCheck: this.cache.lastGamesCheck }); // Debug payload
+        if (this.cache.lastGamesCheck === null) {
+            this.cache.lastGamesCheck = Date.now();
+            this.saveCache();
+            return false;
+        }
 
+        try {
             const response = await fetch(`${this.path}game/modifiedSince`, {
                 method: 'POST',
                 headers: {
@@ -74,30 +131,32 @@ export class DataManager {
                 })
             });
 
-            // Log the raw response first
             const rawText = await response.text();
             console.log('Raw server response:', rawText);
 
-            let hasUpdates = false;
-
-            // Try to parse as JSON only if it looks like JSON
             if (rawText.trim().startsWith('{') || rawText.trim().startsWith('[')) {
                 const modifiedGames = JSON.parse(rawText);
                 if (modifiedGames.length > 0) {
-                    await this.updateGamesData(modifiedGames);
-                    hasUpdates = true;
+                    // Clear previous modifications
+                    this.recentlyModifiedGames.clear();
+                    
+                    // Update cache and track modified games
+                    modifiedGames.forEach(game => {
+                        this.cache.games.set(game.id, {
+                            data: game,
+                            timestamp: Date.now()
+                        });
+                        this.recentlyModifiedGames.add(game.id);
+                    });
+
+                    this.cache.lastGamesCheck = Date.now();
+                    this.saveCache();
+                    return true;
                 }
-            } else {
-                console.error('Received non-JSON response:', rawText);
             }
             
-            // Always update the last check time
-            console.log('Updating lastGamesCheck from:', this.cache.lastGamesCheck);
             this.cache.lastGamesCheck = Date.now();
-            console.log('Updated lastGamesCheck to:', this.cache.lastGamesCheck);
-            this.saveCache();
-            
-            return hasUpdates;
+            return false;
         } catch (error) {
             console.error('Error checking for updates:', error);
             return false;
@@ -161,12 +220,19 @@ export class DataManager {
         const rootNodes = Array.from(this.cache.games.values())
             .map(item => item.data)
             .filter(data => !data.parent_id);
-
+            
+        // TODO: to test front end rendering
         return {
+            items: rootNodes, // Return all items instead of slicing
+            totalPages: 1,    // Temporarily set to 1
+            currentPage: 1    // Temporarily set to 1
+        };
+
+/*         return {
             items: rootNodes.slice(start, end),
             totalPages: Math.ceil(rootNodes.length / this.cache.pagination.itemsPerPage),
             currentPage: this.cache.pagination.currentPage
-        };
+        }; */
     }
 
     setPage(pageNumber) {
@@ -190,12 +256,65 @@ export class DataManager {
         };
     }
 
-    updateGame(gameData) {
-        const index = this.gamesData.findIndex(game => game.id === gameData.id);
-        if (index !== -1) {
-            this.gamesData[index] = gameData;
-        } else {
-            this.gamesData.push(gameData);
+    // A meta has been added in the header to track user id and logged in status
+    isUserLoggedIn() {
+        return this.currentUserId !== 'null';
+    }
+
+    getCurrentUserId() {
+        return this.currentUserId;
+    }
+
+    getRecentlyModifiedGames() {
+        return Array.from(this.recentlyModifiedGames)
+            .map(id => this.cache.games.get(id)?.data)
+            .filter(game => game !== undefined);
+    }
+
+    // New method for initial data load
+    initializeGamesData(games) {
+        if (!Array.isArray(games)) {
+            console.error('Expected array of games, got:', games);
+            return;
         }
+
+        games.forEach(game => {
+            this.cache.games.set(game.id, {
+                data: {
+                    ...game,
+                    text_id: game.id || null,
+                    open_for_changes: game.openForChanges === '1' || game.open_for_changes === true,
+                    hasContributed: game.hasContributed === '1' || game.has_contributed === true,
+                    text_count: parseInt(game.text_count) || 0,
+                    seen_count: parseInt(game.seen_count) || 0,
+                    unseen_count: parseInt(game.unseen_count) || 0
+                },
+                timestamp: Date.now()
+            });
+        });
+
+        this.saveCache();
+    }
+
+    async shouldRefreshTree(rootId) {
+        const lastCheck = this.treeChecks.get(rootId) || 0;
+        const response = await fetch(`${this.path}text/checkTreeUpdates`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                rootId,
+                lastCheck
+            })
+        });
+        
+        const result = await response.json();
+        return result.needsUpdate;
+    }
+
+    setTreeLastCheck(rootId) {
+        this.treeChecks.set(rootId, Date.now());
+        this.saveCache();
     }
 }

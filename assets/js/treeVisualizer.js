@@ -93,7 +93,8 @@ export class TreeVisualizer {
         }
         //console.log("colorScale",this.colorScale)
         d3.select(node).select('circle')
-            .attr('fill', this.colorScale(voteCount));
+            .attr('fill', this.colorScale(voteCount))
+            .attr('data-vote-count', d => d.data.voteCount);
     }
   
     drawTree(data) {
@@ -227,6 +228,7 @@ export class TreeVisualizer {
                         return classes.trim();
                     })
                     .attr('data-id', d => d.data.id)
+                    .attr('data-vote-count', d => d.data.voteCount)
                     .attr('fill', d => colorScale(d.data.voteCount));
             }
         });
@@ -439,7 +441,9 @@ export class TreeVisualizer {
                         .attr("y", 35)
                         .attr("text-anchor", "middle")
                         .text(value)
-                        .style("font-size", "12px");
+                        .style("font-size", "12px")
+                        .attr('data-tick-value', value);
+                        
                 });
 
 

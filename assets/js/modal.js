@@ -81,32 +81,22 @@ export class Modal {
   }
 
   getNumberOfVotes(data) {
-    if (data.text_status === "published") {
-      const maxVotes = data.playerCount - 1;
-      const colorScale = createColorScale(maxVotes);
-      const fillColor = colorScale(data.voteCount);
-  
-      return `
-      <div class="votes" data-fill-color="${fillColor}">
-        <i>
-          ${data.isWinner ? SVGManager.starSVG : SVGManager.votesSVG}
-        </i>
-        <span class="small vote-count" data-vote-count=${data.voteCount} data-player-count=${data.playerCount - 1}>
-          ${data.voteCount}/${data.playerCount - 1} votes
-        </span>
-      </div>
-      `;
-    } else {
-      return `
-        <div class="votes" data-fill-color="">
-          <i>
-            ${SVGManager.votesSVG}
-          </i>
-          <span class="small vote-count hidden" data-vote-count=${data.voteCount} data-player-count=${data.playerCount - 1}>
-          </span>
-        </div>
-      `;
-    }
+    const maxVotes = (data.playerCount || 1) - 1;
+    const voteCount = parseInt(data.voteCount || 0);
+    const colorScale = createColorScale(maxVotes);
+    const fillColor = colorScale(voteCount);
+    const published = data.text_status == 'published';
+
+    return `
+    <div class="votes ${published ? '' : 'hidden'}" data-fill-color="${fillColor}">
+      <i>
+        ${data.isWinner ? SVGManager.starSVG : SVGManager.votesSVG}
+      </i>
+      <span class="small vote-count" data-vote-count=${voteCount} data-player-count=${maxVotes}>
+        ${voteCount}/${maxVotes} votes
+      </span>
+    </div>
+    `;
   }
 
   applySVGColors() {
@@ -127,5 +117,8 @@ export class Modal {
   hideModal() {
     this.modalElement.classList.add('display-none');
     this.modalElement.dataset.treeModal = "hidden";
+    this.modalElement.dataset.textId = '';
+    this.modalContent.innerHTML = '';
+    this.modalBtns.innerHTML = '';
   }
 }

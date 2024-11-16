@@ -104,6 +104,31 @@ class ControllerText extends Controller{
         return $jsonData;
     }
 
+    public function checkTreeUpdates() {
+        $input = json_decode(file_get_contents('php://input'), true);
+        $rootId = $input['rootId'];
+        $lastCheck = $input['lastCheck'];
+        
+        $text = new Text;
+        $gameId = $text->selectGameId($rootId);
+        
+        // Check if any nodes in this tree have been modified
+        $sql = "SELECT COUNT(*) as count 
+                FROM text 
+                WHERE game_id = :gameId 
+                AND (modified_at > FROM_UNIXTIME(:lastCheck/1000) 
+                     OR note_date > FROM_UNIXTIME(:lastCheck/1000))";
+        
+        $stmt = $text->prepare($sql);
+        $stmt->bindValue(':gameId', $gameId);
+        $stmt->bindValue(':lastCheck', $lastCheck);
+        $stmt->execute();
+        
+        $result = $stmt->fetch();
+        
+        return json_encode(['needsUpdate' => $result['count'] > 0]);
+    }
+
     // An end point from which to get the data for just one node
     public function getStoryNode($textId){
         // The model
@@ -329,14 +354,16 @@ class ControllerText extends Controller{
             ]);
         }
 
-        // Update the game's modified_at--but only if the text is a root text.
-        if ($isRootText && $status == 'published') {
+        // Update the game's modified_at--if this store is for a published text
+        // Which should basically never happen, but it's here if it does.
+        if ($status == 'published') {
             $game = new Game;
             $game->update(['id' => $input['game_id'], 'modified_at' => date('Y-m-d H:i:s')]);
         }
 
         // Handle keywords
         $prep = new Prep;
+
         // Since this is not an update, we can bypass keyword logic if none are provided.
         if (isset($input['keywords'])) {    
             $keywords = $prep->keywords($input['keywords']);
@@ -530,20 +557,27 @@ class ControllerText extends Controller{
                 $gameHasPlayer->insert($gameHasPlayerData);
             }  
             
-            // Update the game's modified_at--but only if the text is a root text.--because publishing a root text opens the game.
+            // Update the game's modified_at--because any new game will change the "seen" count.
             $game = new Game;
-            $rootText = $game->getRootText($gameId);
-            error_log("gameId: " . $gameId);
-            error_log("rootText: " . $rootText);
-            error_log("textId: " . $textId);
-            if ($rootText == $textId) {
-                $game->update(['id' => $gameId, 'modified_at' => date('Y-m-d H:i:s')]);
-            }
-        }
-
-        //error_log("InstaPublish result: " . ($success ? "true" : "false"));
+            $game->update([
+                'id' => $gameId, 
+                'modified_at' => date('Y-m-d H:i:s')
+            ]);
     
-        $this->sendJsonResponse($success, $success ? 'Published!' : 'Failed to publish');
+        }
+    
+        $this->sendJsonResponse(
+            $success, 
+            $success ? 'Published!' : 'Failed to publish',
+            [
+                'gameData' => [
+                    'playerCount' => $gameHasPlayer->selectPlayerCount($gameId),
+                    'gameId' => $gameId,
+                    'textId' => $textId,
+                    'isNewPlayer' => !$existingPlayer // This will be true if the player wasn't already in the game
+                ]
+            ]
+        );
     }
 
     //update send an edited text to the database
@@ -621,8 +655,10 @@ class ControllerText extends Controller{
         if ($isRoot) {
             $gameId = $text->selectGameId($textId);
             $game = new Game;
-            $game->update(  ['id' => $gameId, 
-                            'prompt' => $input['prompt']]);
+            $game->update([
+                'id' => $gameId, 
+                'prompt' => $input['prompt']
+            ]);
 /*             unset($input['prompt']);
             unset($input['parent_id']);
             unset($input['writer_id']); */
@@ -687,9 +723,12 @@ class ControllerText extends Controller{
         // TODO: I need to check if "published" catches adding a note...
         // TODO: I need to update modified_at in function of "seen"
         // TODO: this code, in slightly modified forms, needs to be in instaPublish and in store... it IS... but it needs to be handling the previous notes. 
-        if ($update && $status == 'published' && $isRoot) {
+        if ($update && $status == 'published') {
             $game = new Game;
-            $game->update(['id' => $gameId, 'modified_at' => date('Y-m-d H:i:s')]);
+            $game->update([
+                'id' => $gameId, 
+                'modified_at' => date('Y-m-d H:i:s')
+            ]);
         }
 
         //using class Prep to prepare keywords arrays... 
@@ -915,14 +954,21 @@ class ControllerText extends Controller{
     public function validateText($data, $isRoot, $intended_status, $autoSave = false){
         RequirePage::library('Validation');
         $val = new Validation;
-    
+
+        // Create clean versions of rich text fields for validation
+        $cleanWriting = strip_tags($data["writing"]);
+        $cleanParentWriting = isset($data['parentWriting']) ? strip_tags($data['parentWriting']) : '';
+        if ($isRoot) {
+            $cleanPrompt = strip_tags($data["prompt"]);
+        }
+
         // Basic validation for all texts (including incomplete drafts)
         $val->name('writing')->value($data["writing"])->max(16777215); // MEDIUMTEXT max length
         $val->name('title')->value($data["title"])->max(100);
         $val->name('keywords')->value($data["keywords"])->max(255); // Allow for multiple keywords
 
         if ($isRoot) {
-            $val->name('prompt')->value($data["prompt"])->max(500);
+            $val->name('prompt')->value($cleanPrompt)->max(500);
         }
 
         // Check if basic validation passes
@@ -932,20 +978,19 @@ class ControllerText extends Controller{
                 $jsonData = json_encode($val->displayErrors());
                 return $jsonData;
         }
-    
+
         // Stricter validation for publication AND/OR for autoPublish-ready drafts
         $val->name('keywords')->value($data["keywords"])->pattern('keywords')->keywordCount(3);
 
         if (!$isRoot) {
             // Iterations use a short title to describe changes to the parent text 
             $val->name('title')->value($data["title"])->required()->wordCount(3);
-            $val->name('writing')->value($data["writing"])->required()->wordCount(50, $data['parentWriting']);
-        }else{
-            // Root texts set up the game and prompt
+            $val->name('writing')->value($cleanWriting)->required()->wordCount(50, $cleanParentWriting);
+        } else {
             $val->name('title')->value($data["title"])->required()->max(100);
-            $val->name('writing')->value($data["writing"])->required()->wordCount(50, "");
-            $val->name('prompt')->value($data["prompt"])->required()->max(500);
-        } 
+            $val->name('writing')->value($cleanWriting)->required()->wordCount(50, "");
+            $val->name('prompt')->value($cleanPrompt)->required()->max(500);
+        }
         
         if ($val->isSuccess()) {
             return $intended_status; // Keep the intended status
@@ -964,7 +1009,8 @@ class ControllerText extends Controller{
     public function validateNote($data){
         RequirePage::library('Validation');
         $val = new Validation;
-        $val->name('note')->value($data["note"])->max(500)->wordCount(50);
+        $cleanNote = strip_tags($data["note"]);
+        $val->name('note')->value($cleanNote)->max(500)->wordCount(50);
 
         if($val->isSuccess()){
             // If this is successful, continue the code, so... do nothing
