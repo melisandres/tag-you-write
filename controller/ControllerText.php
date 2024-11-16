@@ -20,8 +20,11 @@ class ControllerText extends Controller{
         $game = new Game;
         $allGames = $game->getGames();
 
-        // Send the JSON data to the front end
-        Twig::render('text-index.php', ['texts' => $allGames]);
+        // Send both the rendered data and the complete dataset
+        Twig::render('text-index.php', [
+            'texts' => $allGames,
+            'gamesData' => json_encode($allGames) // This will be used by our frontend JS
+        ]);
     }
 
     private function getRootParent($textId){
@@ -316,8 +319,6 @@ class ControllerText extends Controller{
             $game->update($data);
         }
 
-
-
         //send the writer_id and the game_id to game_has_player
         if ($status == 'published') {
             $gameHasPlayer = new GameHasPlayer;
@@ -326,6 +327,12 @@ class ControllerText extends Controller{
                 'game_id' => $input['game_id'],
                 'active' => 1
             ]);
+        }
+
+        // Update the game's modified_at--but only if the text is a root text.
+        if ($isRootText && $status == 'published') {
+            $game = new Game;
+            $game->update(['id' => $input['game_id'], 'modified_at' => date('Y-m-d H:i:s')]);
         }
 
         // Handle keywords
@@ -500,14 +507,18 @@ class ControllerText extends Controller{
 
         $success = $text->update($data);
     
-        //if the publish was a success, add the player to the game
-        //BUT only if they are not already in it? 
+        // If the publish was a success, make modifications to the game
+        // Add the player BUT only if they are not already in it.
+        // Update the game's modified_at--but only if the text is a root text.
         if ($success) { 
             $gameId = $text->selectGameId($textId);
 
             // Check if the player is already in the game
             $gameHasPlayer = new GameHasPlayer;
-            $existingPlayer = $gameHasPlayer->selectCompositeId(['game_id' => $gameId, 'player_id' => $currentWriterId]);
+            $existingPlayer = $gameHasPlayer->selectCompositeId([
+                'game_id' => $gameId, 
+                'player_id' => $currentWriterId
+            ]);
 
             // Insert only if the player is not already in the game
             if (!$existingPlayer) {
@@ -517,7 +528,17 @@ class ControllerText extends Controller{
                     'active' => 1
                 ];
                 $gameHasPlayer->insert($gameHasPlayerData);
-            }          
+            }  
+            
+            // Update the game's modified_at--but only if the text is a root text.--because publishing a root text opens the game.
+            $game = new Game;
+            $rootText = $game->getRootText($gameId);
+            error_log("gameId: " . $gameId);
+            error_log("rootText: " . $rootText);
+            error_log("textId: " . $textId);
+            if ($rootText == $textId) {
+                $game->update(['id' => $gameId, 'modified_at' => date('Y-m-d H:i:s')]);
+            }
         }
 
         //error_log("InstaPublish result: " . ($success ? "true" : "false"));
@@ -527,7 +548,6 @@ class ControllerText extends Controller{
 
     //update send an edited text to the database
     public function update($autoSaveInput = null){
-        error_log("PASSING THROUGH update: line 221");
         //no access if you are not logged in
         CheckSession::sessionAuth();
 
@@ -547,8 +567,6 @@ class ControllerText extends Controller{
             // TODO: with autosave, this could happen... so message should be clean
             $this->sendJsonResponse(false, 'No input data received');
         }
-
-        //error_log("line507 input: " . json_encode($input));
 
         $text = new Text;
         $keyword = new Keyword;
@@ -662,6 +680,16 @@ class ControllerText extends Controller{
                 ];
                 $gameHasPlayer->insert($gameHasPlayerData);
             }          
+        }
+
+        // Update the game's modified_at--but only if the text is a root text.
+        // TODO: this needs to happen even if the text is not a Root... 
+        // TODO: I need to check if "published" catches adding a note...
+        // TODO: I need to update modified_at in function of "seen"
+        // TODO: this code, in slightly modified forms, needs to be in instaPublish and in store... it IS... but it needs to be handling the previous notes. 
+        if ($update && $status == 'published' && $isRoot) {
+            $game = new Game;
+            $game->update(['id' => $gameId, 'modified_at' => date('Y-m-d H:i:s')]);
         }
 
         //using class Prep to prepare keywords arrays... 

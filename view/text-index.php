@@ -1,5 +1,8 @@
 {{ include('header.php', {title: 'All Texts!'})}}
-
+<!-- Store the complete data in a hidden script tag -->
+<script type="application/json" id="games-data">
+    {{ gamesData|raw }}
+</script>
 
 <!-- an area to show all the starting stories that might be contributed to -->
 <div data-stories class="stories">
@@ -54,7 +57,7 @@
                     prompt:
                 </h3>
                 <p>
-                    {{ text.prompt }}
+                    {{ text.prompt|raw }}
                 </p>
             </div>
             {% endif %}

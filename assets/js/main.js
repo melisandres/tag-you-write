@@ -23,6 +23,8 @@ import { AutoSaveManager } from './autoSaveManager.js';
 import { eventBus } from './eventBus.js';
 import { ValidationManager } from './validationManager.js';
 import { ButtonUpdateManager } from './formButtonsUpdateManager.js';
+import { PaginationManager } from './paginationManager.js';
+import { GameListManager } from './gameListManager.js';
 
 // Make eventBus globally available immediately
 window.eventBus = eventBus;
@@ -47,6 +49,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // StoryManager is initialized with the modal and seenManager instances
   const storyManager = new StoryManager(path, modal, seenManager);
+  const paginationManager = new PaginationManager(document.querySelector('[data-stories]'), storyManager);
+
+  // Add after your other initializations
+  const gameListManager = new GameListManager(document.querySelector('[data-stories]'), path);
 
   // Initialize GameManager
   new GameManager(path);

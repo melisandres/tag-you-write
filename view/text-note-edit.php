@@ -6,7 +6,7 @@
         {% endif %}
         <p>Here's what you wrote: </p>
         <h3>{{ data.title }}</h3>
-        <p>{{ data.writing }}</p>
+        <p>{{ data.writing|raw }}</p>
     </div>
 
     <form id="main-form" data-form-type="addingNote" data-form-activity="editing" action="{{path}}text/update" method="post">
@@ -19,7 +19,7 @@
                     <span class="word-count-tooltip"></span>
                 </div> -->
             </div>
-            <textarea name="note" placeholder="oh dear! I meant to write 'warm' not 'worm' so embarassing..." rows="10" cols="50">{{data.note}}</textarea>
+            <textarea name="note" placeholder="oh dear! I meant to write 'warm' not 'worm' so embarassing..." rows="10" cols="50">{{data.note|raw}}</textarea>
         </label>
 
         <input type="hidden" name="note_date" value="{{ 'now'|date('Y-m-d H:i:s') }}">

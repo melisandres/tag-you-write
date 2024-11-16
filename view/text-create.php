@@ -16,10 +16,10 @@
     {% if data.parent_id %}
         <div class="iteration-info">
             <p><strong>you are iterating on:</strong><span> {{ data.parentFirstName }} {{ data.parentLastName }}'s</span> <span> "{{ data.parentTitle }}"</span></p>
-            <p>{{ data.parentWriting }}</p>
+            <p>{{ data.parentWriting|raw }}</p>
         </div>
         <div class="prompt-info">
-            <p><strong>prompt:</strong> {{ data.prompt }}</p>
+            <p><strong>prompt:</strong> {{ data.prompt|raw }}</p>
         </div>
     {% elseif not data.id %}
         <p>While your title and prompt will be carved in STONE,

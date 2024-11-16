@@ -1,4 +1,5 @@
 import { ShelfVisualizer } from './shelfVisualizer.js';
+import { DataManager } from './dataManager.js';
 /* this may create some issues... to require the modal the constructor. I'm going to initialize it as an empty string... there are pages where I will surely call the story manager where the modal will be innaccessible? or I should put the modal in the header? */
 
 export class StoryManager {
@@ -7,6 +8,7 @@ export class StoryManager {
     this.seenManager = seenManager;
     this.modal = modal;
     this.storyTreeData = [];
+    this.dataManager = new DataManager(this.path);
      // Add event listener for the custom event
      // TODO: Add this event to the eventBus? 
      document.addEventListener('showStoryInModalRequest', this.handleShowStoryInModalRequest.bind(this));
@@ -41,9 +43,19 @@ export class StoryManager {
   }
 
   async drawTree(id, container) {
-    const datas = await this.fetchTree(id);
-    this.storyTreeData = datas[0];
-    eventBus.emit('drawTree', { container, data: this.storyTreeData });
+    // Check cache first
+    let treeData = this.dataManager.getTree(id);
+
+    if (!treeData) {
+        const datas = await this.fetchTree(id);
+        treeData = datas[0];
+        this.dataManager.setTree(id, treeData);
+    } else {
+        // Unwrap the cached data
+        treeData = treeData.data;
+    }
+    
+    eventBus.emit('drawTree', { container, data: treeData });
 }
 
   async drawShelf(id, container) {
@@ -73,6 +85,12 @@ export class StoryManager {
     shelfVisualizer.updateOneDrawer(data);
   }
   
+  // Add pagination methods
+  async loadPage(pageNumber) {
+    this.dataManager.setPage(pageNumber);
+    const paginatedData = this.dataManager.getPaginatedData();
+    eventBus.emit('updateStoryList', paginatedData);
+  }
 }
   /* getStoryDataById(id) {
     // Base case: If data is undefined or null, return undefined

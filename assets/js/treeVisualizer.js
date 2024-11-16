@@ -97,6 +97,7 @@ export class TreeVisualizer {
     }
   
     drawTree(data) {
+        console.log('Tree data received:', data);
         // Check if D3 is available
         if (typeof d3 === 'undefined') {
             this.showD3UnavailableMessage();
@@ -267,7 +268,7 @@ export class TreeVisualizer {
                 const transform = event.transform;
             
                 // Log the zoom scale
-                console.log(`Zoom scale: ${transform.k}`);
+               /*  console.log(`Zoom scale: ${transform.k}`); */
             
                 // Calculate the size of the tree at the current zoom level
                 const zoomedWidth = bounds.width * transform.k;
@@ -610,7 +611,7 @@ export class TreeVisualizer {
             const titleFontSize = this.calculateFontSize(scale, 'title');
             const authorFontSize = this.calculateFontSize(scale, 'author');
             const authorVisibility = this.calculateAuthorVisibility(scale);
-            console.log(`Scale: ${scale}, Title size: ${titleFontSize}, Author size: ${authorFontSize}`);
+            /* console.log(`Scale: ${scale}, Title size: $ {titleFontSize}, Author size: ${authorFontSize}`)*/;
 
             const titleBottomPosition = this.updateTitle(titleGroup, d.data.title || "Untitled", titleFontSize);
 

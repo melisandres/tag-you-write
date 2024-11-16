@@ -10,7 +10,7 @@
         <p class='keyword' data-keyword-index='{{ key }}'>keyword {{ count }}: {{ value }}</p>
     {% endfor %}
 
-    <p><strong>text: </strong>{{ text.writing }}</p>
+    <p><strong>text: </strong>{{ text.writing|raw }}</p>
 
    <!--  The buttons -->
     {% if session.writer_id == text.writer_id %}

@@ -35,10 +35,12 @@ export class IndexUpdateManager {
 
   // TODO: test this
   handleInstaPublish({ textId, status}) {
-    console.log("textId", textId);
     const textContainer = document.querySelector(`[data-story-id='${textId}']`);
-    const gameContainer = textContainer.closest(`[data-game-id]`);
+
+    const gameContainer = textContainer ? textContainer.closest(`[data-game-id]`): document.querySelector(`.story.story-has-showcase`);
+    console.log("gameContainer", gameContainer);
     const statusIndicator = gameContainer.querySelector('.game-status-indicator');
+    console.log("statusIndicator", statusIndicator);
     if (statusIndicator && statusIndicator.classList.contains('pending')) {
       statusIndicator.classList.remove('pending');
       statusIndicator.classList.add('open');
