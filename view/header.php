@@ -20,7 +20,15 @@
 <body>
     <nav>   
         <a class="nav-link home" title="about" href="{{path}}">?</a>    
-        <a class="nav-link texts" href="{{path}}text">all games</a>     
+
+        {% if title == 'All Texts!' %}
+            <a class="nav-link filter">
+                <span class="icon"></span>
+            </a>   
+        {% else %} 
+            <a class="nav-link texts" href="{{path}}text">game list</a>  
+        {% endif %}
+
     {% if guest %}
         <a class="nav-link writers" href="{{path}}login"></a>
     {% else %}
@@ -35,6 +43,8 @@
         <a href="{{path}}produit/create">Produits</a>
     {% endif %} -->
     </nav>
+
+
 
 
 

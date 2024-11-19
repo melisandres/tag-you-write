@@ -26,6 +26,8 @@ import { ButtonUpdateManager } from './formButtonsUpdateManager.js';
 import { PaginationManager } from './paginationManager.js';
 import { GameListManager } from './gameListManager.js';
 import { DataManager } from './dataManager.js';
+import { UpdateManager } from './updateManager.js';
+import { FilterManager } from './filterManager.js';
 
 // Make eventBus globally available immediately
 window.eventBus = eventBus;
@@ -58,14 +60,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const storyManager = new StoryManager(path, modal, seenManager);
   const paginationManager = new PaginationManager(document.querySelector('[data-stories]'), storyManager);
 
+  // Initialize UIManager with the storyManager and modal instances
+  const uiManager = new UIManager(storyManager, modal);
+
   // Add after your other initializations
-  const gameListManager = new GameListManager(document.querySelector('[data-stories]'), path);
+  const gameListManager = new GameListManager(document.querySelector('[data-stories]'), path, uiManager);
 
   // Initialize GameManager
   new GameManager(path);
-
-  // Initialize UIManager with the storyManager and modal instances
-  const uiManager = new UIManager(storyManager, modal);
 
   // Initialize RefreshManager
   const autoSaveManager = new AutoSaveManager(path);
@@ -120,6 +122,10 @@ document.addEventListener("DOMContentLoaded", () => {
        localStorage.removeItem('pendingToast');
    }
 
+  // Initialize managers independently
+  const updateManager = new UpdateManager(path);
+  updateManager.initialize();
+
   // Handle browser refresh by saving state before unload
   window.addEventListener('beforeunload', (event) => {
       console.log('beforeunload event triggered');
@@ -128,10 +134,5 @@ document.addEventListener("DOMContentLoaded", () => {
       // Only show the warning if there are unsaved changes
   });
 
-  // Handle browser refresh by saving state before unload
-/*   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') {
-        refreshManager.saveState();
-    }
-  }); */
+  const filterManager = new FilterManager();
 });

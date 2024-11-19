@@ -528,255 +528,255 @@ export class SVGManager{
          id="text14">from the Noun Project</text>
       </svg>
       `;    
-}
+   }
 
-static get shelfSVG() {
-   return `
-      <svg
-         data-name="Слой 1"
-         viewBox="0 0 49.262329 46.120129"
-         x="0px"
-         y="0px"
-         version="1.1"
-         id="svg6"
-         sodipodi:docname="noun-menu-2723108.svg"
-         width="27"
-         height="27"
-         inkscape:version="1.3.2 (091e20e, 2023-11-25)"
-         xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-         xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-         xmlns="http://www.w3.org/2000/svg"
-         xmlns:svg="http://www.w3.org/2000/svg">
-      <defs
-         id="defs6" />
-      <sodipodi:namedview
-         id="namedview6"
-         pagecolor="#ffffff"
-         bordercolor="#000000"
-         borderopacity="0.25"
-         inkscape:showpageshadow="2"
-         inkscape:pageopacity="0.0"
-         inkscape:pagecheckerboard="0"
-         inkscape:deskcolor="#d1d1d1"
-         inkscape:zoom="1.888"
-         inkscape:cx="29.925847"
-         inkscape:cy="35.487288"
-         inkscape:window-width="1312"
-         inkscape:window-height="449"
-         inkscape:window-x="0"
-         inkscape:window-y="37"
-         inkscape:window-maximized="0"
-         inkscape:current-layer="svg6" />
-      <title
-         id="title1">view shelf</title>
-      <g
-         id="g5"
-         transform="translate(-20.366581,-26.9403)"
-         fill="#FFC34E"
-         >
+   static get shelfSVG() {
+      return `
+         <svg
+            data-name="Слой 1"
+            viewBox="0 0 49.262329 46.120129"
+            x="0px"
+            y="0px"
+            version="1.1"
+            id="svg6"
+            sodipodi:docname="noun-menu-2723108.svg"
+            width="27"
+            height="27"
+            inkscape:version="1.3.2 (091e20e, 2023-11-25)"
+            xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+            xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+            xmlns="http://www.w3.org/2000/svg"
+            xmlns:svg="http://www.w3.org/2000/svg">
+         <defs
+            id="defs6" />
+         <sodipodi:namedview
+            id="namedview6"
+            pagecolor="#ffffff"
+            bordercolor="#000000"
+            borderopacity="0.25"
+            inkscape:showpageshadow="2"
+            inkscape:pageopacity="0.0"
+            inkscape:pagecheckerboard="0"
+            inkscape:deskcolor="#d1d1d1"
+            inkscape:zoom="1.888"
+            inkscape:cx="29.925847"
+            inkscape:cy="35.487288"
+            inkscape:window-width="1312"
+            inkscape:window-height="449"
+            inkscape:window-x="0"
+            inkscape:window-y="37"
+            inkscape:window-maximized="0"
+            inkscape:current-layer="svg6" />
+         <title
+            id="title1">view shelf</title>
+         <g
+            id="g5"
+            transform="translate(-20.366581,-26.9403)"
+            fill="#FFC34E"
+            >
 
-         <circle
-            stroke="FFC34E"
-            cx="26.428961"
-            cy="33.00256"
-            r="6.0622602"
-            id="circle1" />
-         <circle
-            cx="26.428961"
-            cy="50.000118"
-            r="6.0622602"
-            id="circle2" />
-         <circle
-            cx="26.428961"
-            cy="66.998047"
-            r="6.0623798"
-            id="circle3" />
-         <rect
-            x="34.561039"
-            y="32.50293"
-            width="35.067871"
-            height="1"
-            id="rect3" />
-         <rect
-            x="34.561039"
-            y="49.5"
-            width="35.067871"
-            height="1"
-            id="rect4" />
-         <rect
-            x="34.561039"
-            y="66.498047"
-            width="35.067871"
-            height="1"
-            id="rect5" />
-      </g>
-      <text
-         x="-20.366581"
-         y="88.0597"
-         fill="#000000"
-         font-size="5px"
-         font-weight="bold"
-         font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif"
-         id="text5">Created by Roman</text>
-      <text
-         x="-20.366581"
-         y="93.0597"
-         fill="#000000"
-         font-size="5px"
-         font-weight="bold"
-         font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif"
-         id="text6">from the Noun Project</text>
-      </svg>
+            <circle
+               stroke="FFC34E"
+               cx="26.428961"
+               cy="33.00256"
+               r="6.0622602"
+               id="circle1" />
+            <circle
+               cx="26.428961"
+               cy="50.000118"
+               r="6.0622602"
+               id="circle2" />
+            <circle
+               cx="26.428961"
+               cy="66.998047"
+               r="6.0623798"
+               id="circle3" />
+            <rect
+               x="34.561039"
+               y="32.50293"
+               width="35.067871"
+               height="1"
+               id="rect3" />
+            <rect
+               x="34.561039"
+               y="49.5"
+               width="35.067871"
+               height="1"
+               id="rect4" />
+            <rect
+               x="34.561039"
+               y="66.498047"
+               width="35.067871"
+               height="1"
+               id="rect5" />
+         </g>
+         <text
+            x="-20.366581"
+            y="88.0597"
+            fill="#000000"
+            font-size="5px"
+            font-weight="bold"
+            font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif"
+            id="text5">Created by Roman</text>
+         <text
+            x="-20.366581"
+            y="93.0597"
+            fill="#000000"
+            font-size="5px"
+            font-weight="bold"
+            font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif"
+            id="text6">from the Noun Project</text>
+         </svg>
 
-   `;
-}
-
-static get treeSVG() {
-   return `
-      <svg
-         version="1.1"
-         x="0px"
-         y="0px"
-         viewBox="0 0 71.599998 89.5"
-         xml:space="preserve"
-         id="svg2"
-         sodipodi:docname="noun-graph-theory-374731.svg"
-         width="30"
-         height="30"
-         inkscape:version="1.3.2 (091e20e, 2023-11-25)"
-         xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-         xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-         xmlns="http://www.w3.org/2000/svg"
-         xmlns:svg="http://www.w3.org/2000/svg"><defs
-         id="defs2" /><sodipodi:namedview
-         id="namedview2"
-         pagecolor="#ffffff"
-         bordercolor="#000000"
-         borderopacity="0.25"
-         inkscape:showpageshadow="2"
-         inkscape:pageopacity="0.0"
-         inkscape:pagecheckerboard="0"
-         inkscape:deskcolor="#d1d1d1"
-         inkscape:zoom="1.888"
-         inkscape:cx="35.752119"
-         inkscape:cy="57.20339"
-         inkscape:window-width="1312"
-         inkscape:window-height="449"
-         inkscape:window-x="0"
-         inkscape:window-y="37"
-         inkscape:window-maximized="0"
-         inkscape:current-layer="svg2" />
-            <title
-               id="title1">view tree</title>
-         <path
-         fill="#FFC34E"
-         d="M 56.9,41.6 C 50.3,41.6 44.7,46 42.8,51.9 L 26.7,48.5 c 0.1,-0.6 0.2,-1.2 0.2,-1.8 0,-5.3 -4.3,-9.6 -9.6,-9.6 -0.3,0 -0.7,0 -1,0.1 L 13,19.8 c 4.6,-0.9 8,-5 8,-9.8 C 21,4.5 16.5,0 11,0 5.5,0 1,4.5 1,10 c 0,5.5 4.5,10 10,10 0.4,0 0.8,0 1.3,-0.1 l 3.3,17.4 c -4.4,0.8 -7.8,4.7 -7.8,9.4 0,4.1 2.6,7.7 6.3,9 L 8.4,75.4 C 8,75.3 7.6,75.3 7.1,75.3 3.2,75.3 0,78.5 0,82.4 c 0,3.9 3.2,7.1 7.1,7.1 3.9,0 7.1,-3.2 7.1,-7.1 0,-3.2 -2.1,-5.9 -5,-6.8 L 14.8,56 c 0.8,0.2 1.6,0.3 2.5,0.3 4.4,0 8.1,-2.9 9.2,-7 l 16.1,3.4 c -0.3,1.2 -0.4,2.4 -0.4,3.6 0,8.1 6.6,14.7 14.7,14.7 C 65,71 71.6,64.4 71.6,56.3 71.6,48.2 65,41.6 56.9,41.6 Z"
-         id="path1" /><text
-         x="-14.2"
-         y="109.7"
-         fill="#000000"
-         font-size="5px"
-         font-weight="bold"
-         font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif"
-         id="text1">Created by Ecem Afacan</text><text
-         x="-14.2"
-         y="114.7"
-         fill="#000000"
-         font-size="5px"
-         font-weight="bold"
-         font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif"
-         id="text2">from the Noun Project</text></svg>
       `;
-}
+   }
 
-static get voteSVG() {
-   return `
-      <svg
-         viewBox="0 0 38.000065 56"
-         x="0px"
-         y="0px"
-         version="1.1"
-         id="svg2"
-         sodipodi:docname="noun-vote-6099049.svg"
-         width="38.000065"
-         height="56"
-         inkscape:version="1.3.2 (091e20e, 2023-11-25)"
-         xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-         xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-         xmlns="http://www.w3.org/2000/svg"
-         xmlns:svg="http://www.w3.org/2000/svg">
-      <defs
-         id="defs2" />
-      <title
-         id="title1">vote!</title>
-      <g
-         id="g1"
-         transform="translate(-12.999968,-3.9999997)">
+   static get treeSVG() {
+      return `
+         <svg
+            version="1.1"
+            x="0px"
+            y="0px"
+            viewBox="0 0 71.599998 89.5"
+            xml:space="preserve"
+            id="svg2"
+            sodipodi:docname="noun-graph-theory-374731.svg"
+            width="30"
+            height="30"
+            inkscape:version="1.3.2 (091e20e, 2023-11-25)"
+            xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+            xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+            xmlns="http://www.w3.org/2000/svg"
+            xmlns:svg="http://www.w3.org/2000/svg"><defs
+            id="defs2" /><sodipodi:namedview
+            id="namedview2"
+            pagecolor="#ffffff"
+            bordercolor="#000000"
+            borderopacity="0.25"
+            inkscape:showpageshadow="2"
+            inkscape:pageopacity="0.0"
+            inkscape:pagecheckerboard="0"
+            inkscape:deskcolor="#d1d1d1"
+            inkscape:zoom="1.888"
+            inkscape:cx="35.752119"
+            inkscape:cy="57.20339"
+            inkscape:window-width="1312"
+            inkscape:window-height="449"
+            inkscape:window-x="0"
+            inkscape:window-y="37"
+            inkscape:window-maximized="0"
+            inkscape:current-layer="svg2" />
+               <title
+                  id="title1">view tree</title>
+            <path
+            fill="#FFC34E"
+            d="M 56.9,41.6 C 50.3,41.6 44.7,46 42.8,51.9 L 26.7,48.5 c 0.1,-0.6 0.2,-1.2 0.2,-1.8 0,-5.3 -4.3,-9.6 -9.6,-9.6 -0.3,0 -0.7,0 -1,0.1 L 13,19.8 c 4.6,-0.9 8,-5 8,-9.8 C 21,4.5 16.5,0 11,0 5.5,0 1,4.5 1,10 c 0,5.5 4.5,10 10,10 0.4,0 0.8,0 1.3,-0.1 l 3.3,17.4 c -4.4,0.8 -7.8,4.7 -7.8,9.4 0,4.1 2.6,7.7 6.3,9 L 8.4,75.4 C 8,75.3 7.6,75.3 7.1,75.3 3.2,75.3 0,78.5 0,82.4 c 0,3.9 3.2,7.1 7.1,7.1 3.9,0 7.1,-3.2 7.1,-7.1 0,-3.2 -2.1,-5.9 -5,-6.8 L 14.8,56 c 0.8,0.2 1.6,0.3 2.5,0.3 4.4,0 8.1,-2.9 9.2,-7 l 16.1,3.4 c -0.3,1.2 -0.4,2.4 -0.4,3.6 0,8.1 6.6,14.7 14.7,14.7 C 65,71 71.6,64.4 71.6,56.3 71.6,48.2 65,41.6 56.9,41.6 Z"
+            id="path1" /><text
+            x="-14.2"
+            y="109.7"
+            fill="#000000"
+            font-size="5px"
+            font-weight="bold"
+            font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif"
+            id="text1">Created by Ecem Afacan</text><text
+            x="-14.2"
+            y="114.7"
+            fill="#000000"
+            font-size="5px"
+            font-weight="bold"
+            font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif"
+            id="text2">from the Noun Project</text></svg>
+         `;
+   }
+
+   static get voteSVG() {
+      return `
+         <svg
+            viewBox="0 0 38.000065 56"
+            x="0px"
+            y="0px"
+            version="1.1"
+            id="svg2"
+            sodipodi:docname="noun-vote-6099049.svg"
+            width="38.000065"
+            height="56"
+            inkscape:version="1.3.2 (091e20e, 2023-11-25)"
+            xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+            xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+            xmlns="http://www.w3.org/2000/svg"
+            xmlns:svg="http://www.w3.org/2000/svg">
+         <defs
+            id="defs2" />
+         <title
+            id="title1">vote!</title>
+         <g
+            id="g1"
+            transform="translate(-12.999968,-3.9999997)">
+            <path
+               d="M 32,4 A 18.99658,18.99658 0 0 0 28,41.568 V 57 a 3.00328,3.00328 0 0 0 3,3 h 2 a 3.00328,3.00328 0 0 0 3,-3 V 41.568 A 18.99658,18.99658 0 0 0 32,4 Z m 2,53 a 1.00068,1.00068 0 0 1 -1,1 H 31 A 1.00068,1.00068 0 0 1 30,57 V 41.89252 a 18.66135,18.66135 0 0 0 4,0 z M 32,40 A 17,17 0 1 1 49,23 17.019,17.019 0 0 1 32,40 Z m 3.55566,-25.48828 h -0.02051 a 5.95517,5.95517 0 0 0 -3.51953,1.13965 5.95685,5.95685 0 0 0 -3.53125,-1.16309 H 28.46386 A 5.99937,5.99937 0 0 0 24.208,24.7168 l 7.04785,7.09473 a 0.99965,0.99965 0 0 0 1.41406,0.0039 l 7.09473,-7.04785 a 5.99954,5.99954 0 0 0 -4.209,-10.25586 z m 2.79883,8.83789 -6.38477,6.34277 -6.34372,-6.38574 a 4,4 0 0 1 2.83789,-6.81836 h 0.01367 a 3.98,3.98 0 0 1 2.8252,1.18164 1.00052,1.00052 0 0 0 1.41406,0.0039 3.97187,3.97187 0 0 1 2.81836,-1.16211 h 0.01367 a 4,4 0 0 1 2.80566,6.83789 z"
+               id="path1" />
+         </g>
+         <text
+            x="-12.999969"
+            y="75"
+            fill="#000000"
+            font-size="5px"
+            font-weight="bold"
+            font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif"
+            id="text1">Created by mim studio</text>
+         <text
+            x="-12.999969"
+            y="80"
+            fill="#000000"
+            font-size="5px"
+            font-weight="bold"
+            font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif"
+            id="text2">from the Noun Project</text>
+         </svg>
+      `;
+   }
+
+   static get bookmarkSVG() {
+      return `
+         <svg
+            version="1.1"
+            viewBox="-5 -10 28.78447 100.00342"
+            id="svg2"
+            sodipodi:docname="noun-bookmark-6789846.svg"
+            width="14.4"
+            height="50"
+            inkscape:version="1.3.2 (091e20e, 2023-11-25)"
+            xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+            xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+            xmlns="http://www.w3.org/2000/svg"
+            xmlns:svg="http://www.w3.org/2000/svg">
+         <defs
+            id="defs2" />
+         <title
+            id="title1">bookmark (coming soon!)</title>
          <path
-            d="M 32,4 A 18.99658,18.99658 0 0 0 28,41.568 V 57 a 3.00328,3.00328 0 0 0 3,3 h 2 a 3.00328,3.00328 0 0 0 3,-3 V 41.568 A 18.99658,18.99658 0 0 0 32,4 Z m 2,53 a 1.00068,1.00068 0 0 1 -1,1 H 31 A 1.00068,1.00068 0 0 1 30,57 V 41.89252 a 18.66135,18.66135 0 0 0 4,0 z M 32,40 A 17,17 0 1 1 49,23 17.019,17.019 0 0 1 32,40 Z m 3.55566,-25.48828 h -0.02051 a 5.95517,5.95517 0 0 0 -3.51953,1.13965 5.95685,5.95685 0 0 0 -3.53125,-1.16309 H 28.46386 A 5.99937,5.99937 0 0 0 24.208,24.7168 l 7.04785,7.09473 a 0.99965,0.99965 0 0 0 1.41406,0.0039 l 7.09473,-7.04785 a 5.99954,5.99954 0 0 0 -4.209,-10.25586 z m 2.79883,8.83789 -6.38477,6.34277 -6.34372,-6.38574 a 4,4 0 0 1 2.83789,-6.81836 h 0.01367 a 3.98,3.98 0 0 1 2.8252,1.18164 1.00052,1.00052 0 0 0 1.41406,0.0039 3.97187,3.97187 0 0 1 2.81836,-1.16211 h 0.01367 a 4,4 0 0 1 2.80566,6.83789 z"
+            fill="currentColor"
+            d="m 9.4289287,77.394656 c -1.5742,1.5859 -3.0273,3.0703 -4.4961,4.543 l -7.3086,7.3164 -0.17188,0.17578 c -1,0.95703 -1.9727,0.69922 -2.3281,-0.64453 l -0.0039,-0.0039 c -0.08984,-0.41016 -0.13281,-0.83203 -0.11719,-1.2539 v -27.625 -67.797 c 0,-1.3633 0.23828,-2.1055 2.0703,-2.1055 8.2344,0.042969 16.4800003,0 24.7070003,0 1.6328,0 2.0039,0.36328 2.0039,1.9883 v 95.652 c 0.0039,0.52344 -0.08984,1.043 -0.27344,1.5352 -0.11719,0.39062 -0.43359,0.6875 -0.82813,0.78125 -0.39453,0.09375 -0.80859,-0.03125 -1.0859,-0.32812 -0.19922,-0.17188 -0.37891,-0.36328 -0.5625,-0.55078 l -10.953,-10.922 c -0.2031203,-0.19922 -0.3710903,-0.4375 -0.6523403,-0.76172 z m -12.023,8.6562 c 0.12891,-0.07813 0.25391,-0.16797 0.37109,-0.26562 l 10.582,-10.625 c 0.23438,-0.32812 0.61328,-0.51953 1.0156,-0.51953 0.40234,0 0.7812503,0.19141 1.0156003,0.51953 l 10.582,10.602 c 0.11719,0.09766 0.24609,0.18359 0.37891,0.25391 0.17188,-1.4844 0.10547,-80.227 -0.05859,-80.762 H -2.5944613 Z m 0,-83.262 23.9960003,0.0039 v -10.387 l -23.9960003,-0.0039 z"
             id="path1" />
-      </g>
-      <text
-         x="-12.999969"
-         y="75"
-         fill="#000000"
-         font-size="5px"
-         font-weight="bold"
-         font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif"
-         id="text1">Created by mim studio</text>
-      <text
-         x="-12.999969"
-         y="80"
-         fill="#000000"
-         font-size="5px"
-         font-weight="bold"
-         font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif"
-         id="text2">from the Noun Project</text>
-      </svg>
-   `;
-}
-
-static get bookmarkSVG() {
-   return `
-      <svg
-         version="1.1"
-         viewBox="-5 -10 28.78447 100.00342"
-         id="svg2"
-         sodipodi:docname="noun-bookmark-6789846.svg"
-         width="14.4"
-         height="50"
-         inkscape:version="1.3.2 (091e20e, 2023-11-25)"
-         xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-         xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-         xmlns="http://www.w3.org/2000/svg"
-         xmlns:svg="http://www.w3.org/2000/svg">
-      <defs
-         id="defs2" />
-      <title
-         id="title1">bookmark (coming soon!)</title>
-      <path
-         fill="currentColor"
-         d="m 9.4289287,77.394656 c -1.5742,1.5859 -3.0273,3.0703 -4.4961,4.543 l -7.3086,7.3164 -0.17188,0.17578 c -1,0.95703 -1.9727,0.69922 -2.3281,-0.64453 l -0.0039,-0.0039 c -0.08984,-0.41016 -0.13281,-0.83203 -0.11719,-1.2539 v -27.625 -67.797 c 0,-1.3633 0.23828,-2.1055 2.0703,-2.1055 8.2344,0.042969 16.4800003,0 24.7070003,0 1.6328,0 2.0039,0.36328 2.0039,1.9883 v 95.652 c 0.0039,0.52344 -0.08984,1.043 -0.27344,1.5352 -0.11719,0.39062 -0.43359,0.6875 -0.82813,0.78125 -0.39453,0.09375 -0.80859,-0.03125 -1.0859,-0.32812 -0.19922,-0.17188 -0.37891,-0.36328 -0.5625,-0.55078 l -10.953,-10.922 c -0.2031203,-0.19922 -0.3710903,-0.4375 -0.6523403,-0.76172 z m -12.023,8.6562 c 0.12891,-0.07813 0.25391,-0.16797 0.37109,-0.26562 l 10.582,-10.625 c 0.23438,-0.32812 0.61328,-0.51953 1.0156,-0.51953 0.40234,0 0.7812503,0.19141 1.0156003,0.51953 l 10.582,10.602 c 0.11719,0.09766 0.24609,0.18359 0.37891,0.25391 0.17188,-1.4844 0.10547,-80.227 -0.05859,-80.762 H -2.5944613 Z m 0,-83.262 23.9960003,0.0039 v -10.387 l -23.9960003,-0.0039 z"
-         id="path1" />
-      <text
-         x="-40.606071"
-         y="107.49966"
-         font-size="5px"
-         font-weight="bold"
-         font-family="'Arbeit Regular', Helvetica, Arial-Unicode, Arial, Sans-serif"
-         fill="#000000"
-         id="text1">Created by carna diri</text>
-      <text
-         x="-40.606071"
-         y="112.49966"
-         font-size="5px"
-         font-weight="bold"
-         font-family="'Arbeit Regular', Helvetica, Arial-Unicode, Arial, Sans-serif"
-         fill="#000000"
-         id="text2">from Noun Project</text>
-      </svg>
-   `;
-}
+         <text
+            x="-40.606071"
+            y="107.49966"
+            font-size="5px"
+            font-weight="bold"
+            font-family="'Arbeit Regular', Helvetica, Arial-Unicode, Arial, Sans-serif"
+            fill="#000000"
+            id="text1">Created by carna diri</text>
+         <text
+            x="-40.606071"
+            y="112.49966"
+            font-size="5px"
+            font-weight="bold"
+            font-family="'Arbeit Regular', Helvetica, Arial-Unicode, Arial, Sans-serif"
+            fill="#000000"
+            id="text2">from Noun Project</text>
+         </svg>
+      `;
+   }
 
    static get votesSVG (){
       return `
@@ -1276,6 +1276,7 @@ static get bookmarkSVG() {
          </svg>
       `;
    }
+
    static get notificationSVG() {
       return `
          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -1289,6 +1290,126 @@ static get bookmarkSVG() {
                   <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-5.0 -10.0 110.0 135.0">
          <path d="m67.723 61.684c-0.011718-0.058594-0.027344-0.11719-0.050781-0.17578-0.72266-1.8125-1.168-3.7227-1.3164-5.668-0.046875-0.48438-0.070313-0.99609-0.070313-1.5625l0.003906-5.5547c0-7.4648-4.168-14.027-10.453-16.648h-0.003907c0.035157-0.26172 0.054688-0.52344 0.054688-0.78516 0.003906-1.6328-0.67188-3.1953-1.8633-4.3086-1.1914-1.1172-2.793-1.6875-4.4219-1.5742-1.6289 0.10938-3.1367 0.89062-4.168 2.1562-1.0312 1.2695-1.4883 2.9062-1.2656 4.5234-6.2891 2.6289-10.457 9.1836-10.457 16.637v5.5547c0 0.57031-0.023438 1.082-0.070313 1.582-0.14453 1.9375-0.58594 3.8398-1.3086 5.6445-0.023437 0.058594-0.042969 0.11719-0.054687 0.17969l-0.99219 4.9023c-0.058594 0.29297 0.015625 0.59766 0.20703 0.83203 0.19141 0.23047 0.47266 0.36719 0.77344 0.36719h9.9961c0.49609 3.8945 3.8125 6.8125 7.7383 6.8125s7.2422-2.918 7.7383-6.8125h9.9961c0.30078 0 0.58203-0.13672 0.77344-0.36719 0.19141-0.23438 0.26563-0.53906 0.20703-0.83203zm-17.723-34.281c2.1445 0 3.8828 1.7383 3.8867 3.8867v0.10938c-2.5469-0.67578-5.2266-0.67188-7.7734 0.011718v-0.125 0.003906c0.003907-2.1484 1.7422-3.8867 3.8867-3.8867zm0.007812 45.195c-2.8242-0.003906-5.2383-2.0312-5.7305-4.8125h11.445c-0.48438 2.7773-2.8945 4.8086-5.7148 4.8125zm6.8164-6.8125-0.015625-0.003906h-13.617l-0.015625 0.003906h-9.6875l0.73047-3.6133v-0.003906c0.78125-1.9609 1.2578-4.0312 1.4141-6.1367 0.054688-0.54688 0.078126-1.1211 0.078126-1.7578l0.003906-5.5508c0-6.9492 4.0156-13.016 9.9922-15.098 0.21094-0.074219 0.42188-0.12891 0.63281-0.19141v-0.003906c2.4141-0.62891 4.9492-0.62891 7.3633 0.003906 0.19922 0.058594 0.39844 0.11328 0.58984 0.17969 5.9766 2.082 9.9922 8.1523 9.9922 15.109v5.5547c0 0.63281 0.027344 1.207 0.078125 1.7383v-0.003906c0.16406 2.1133 0.64062 4.1875 1.418 6.1562l0.73047 3.6172z"/>
          <text x="0.0" y="117.5" font-size="5.0" font-weight="bold" font-family="Arbeit Regular, Helvetica, Arial-Unicode, Arial, Sans-serif" fill="#000000">Created by ennbe</text><text x="0.0" y="122.5" font-size="5.0" font-weight="bold" font-family="Arbeit Regular, Helvetica, Arial-Unicode, Arial, Sans-serif" fill="#000000">from Noun Project</text></svg>
+      `;
+   }
+
+   static get allGamesSVG() {
+      return `
+         <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+            <svg
+               version="1.1"
+               viewBox="-5 -10 89.998131 89.115852"
+               id="svg2"
+               sodipodi:docname="noun-galaxy-star-7137012.svg"
+               width="20"
+               height="20"
+               inkscape:version="1.3.2 (091e20e, 2023-11-25)"
+               xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+               xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+               xmlns="http://www.w3.org/2000/svg"
+               xmlns:svg="http://www.w3.org/2000/svg">
+            <defs
+               id="defs2" />
+            <sodipodi:namedview
+               id="namedview2"
+               pagecolor="#ffffff"
+               bordercolor="#000000"
+               borderopacity="0.25"
+               inkscape:showpageshadow="2"
+               inkscape:pageopacity="0.0"
+               inkscape:pagecheckerboard="0"
+               inkscape:deskcolor="#d1d1d1"
+               inkscape:zoom="1.7481481"
+               inkscape:cx="45.476695"
+               inkscape:cy="52.055085"
+               inkscape:window-width="1312"
+               inkscape:window-height="449"
+               inkscape:window-x="0"
+               inkscape:window-y="37"
+               inkscape:window-maximized="0"
+               inkscape:current-layer="svg2" />
+            <path
+               d="m 83.81452,33.275968 -22.566,-1.7734 21.152,-8.0625 c 0.64453,-0.24609 0.96875,-0.90234 0.77344,-1.5625 -0.19531,-0.66016 -0.82031,-1.0352 -1.4961,-0.89453 l -22.152,4.6562 18.027,-13.695 c 0.54687,-0.41406 0.67578,-1.1406 0.30469,-1.7188 -0.37109,-0.5781998 -1.082,-0.7617198 -1.6875,-0.4374998 l -19.949,10.7109998 13.438,-18.2189998 c 0.40625,-0.55469 0.32812,-1.28120002 -0.19141,-1.73440002 -0.51953,-0.44922 -1.2539,-0.42578 -1.7422,0.05469 l -16.121,15.89499982 7.7617,-21.2659998 c 0.23437,-0.64453 -0.04688,-1.3242 -0.67188,-1.6094 -0.625004,-0.2852 -1.3242,-0.058594 -1.6562,0.54688 l -10.992,19.7929998 1.457,-22.5899998 c 0.04297,-0.6875 -0.41797,-1.2578 -1.0977,-1.3555 -0.68359,-0.097656 -1.2852,0.31641 -1.4375,0.98828 l -4.9688,22.0859998 -4.9688,-22.0819998 c -0.15234,-0.67188 -0.75781,-1.0859002 -1.4375,-0.98828 -0.67969,0.097656 -1.1445,0.66797 -1.0977,1.3555 l 1.457,22.5899998 -10.988,-19.7969998 c -0.33594,-0.60156 -1.0312,-0.83203 -1.6562,-0.54688 -0.625,0.28515 -0.91016,0.96484 -0.67188,1.6094 l 7.7617,21.2659998 -16.121,-15.89499982 c -0.48828,-0.48438 -1.2227,-0.50781 -1.7422,-0.05469 -0.51953,0.44922 -0.60156,1.17970002 -0.19141,1.73440002 L 23.78107,20.498938 3.83207,9.7919382 c -0.60547,-0.32422 -1.3164,-0.14062 -1.6875,0.4374998 -0.37109,0.57812 -0.24219,1.3008 0.30469,1.7188 l 18.027,13.695 -22.156,-4.6602 c -0.67187,-0.14062 -1.3047,0.23438 -1.4961,0.89453 -0.19531,0.66016 0.13281,1.3164 0.77344,1.5625 l 21.152,8.0625 -22.566,1.7734 C -4.5039,33.330658 -5,33.869718 -5,34.557168 c 0,0.68745 0.49609,1.2266 1.1836,1.2812 l 22.566,1.7734 -21.152,8.0586 c -0.64453,0.24609 -0.96875,0.90234 -0.77344,1.5625 0.19531,0.66016 0.82422,1.0352 1.4961,0.89453 l 22.152,-4.6562 -18.027,13.695 c -0.54687,0.41406 -0.67578,1.1406 -0.30469,1.7188 0.37109,0.5782 1.082,0.76172 1.6875,0.4375 l 19.945,-10.707 -13.434,18.215 c -0.41016,0.55469 -0.32812,1.2812 0.19141,1.7344 0.51953,0.44922 1.2539,0.42578 1.7422,-0.05469 l 16.121,-15.895 -7.7617,21.266 c -0.23437,0.64453 0.04688,1.3242 0.67188,1.6094 0.625004,0.2852 1.3242,0.05859 1.6562,-0.54688 l 10.988,-19.789 -1.457,22.59 c -0.04297,0.6875 0.41797,1.2578 1.0977,1.3555 0.68359,0.09766 1.2852,-0.31641 1.4375,-0.98828 l 4.9727,-22.086 4.9688,22.086 c 0.13672,0.60547 0.64062,1.0039 1.2383,1.0039 0.06641,0 0.12891,-0.0039 0.19531,-0.01563 0.67969,-0.09766 1.1445,-0.66797 1.0977,-1.3555 l -1.457,-22.59 10.988,19.789 c 0.33594,0.60156 1.0312,0.83203 1.6562,0.54688 0.625,-0.28515 0.91016,-0.96484 0.67188,-1.6094 l -7.7617,-21.266 16.121,15.895 c 0.48828,0.48438 1.2227,0.50781 1.7422,0.05469 0.51953,-0.44922 0.60156,-1.1797 0.19141,-1.7344 l -13.43,-18.215 19.945,10.711 c 0.60547,0.32422 1.3164,0.14062 1.6875,-0.4375 0.37109,-0.57812 0.24219,-1.3008 -0.30469,-1.7188 l -18.023,-13.695 22.152,4.6562 c 0.67578,0.14062 1.3047,-0.23438 1.4961,-0.89453 0.19531,-0.66016 -0.13281,-1.3164 -0.77344,-1.5625 l -21.152,-8.0625 22.566,-1.7734 c 0.6875,-0.05469 1.1836,-0.59375 1.1836,-1.2812 0,-0.68745 -0.49609,-1.2266 -1.1836,-1.2812 z"
+               id="path1" fill="currentColor" />
+            <text
+               x="-10.00148"
+               y="102.05697"
+               font-size="5px"
+               font-weight="bold"
+               font-family="'Arbeit Regular', Helvetica, Arial-Unicode, Arial, Sans-serif"
+               fill="#000000"
+               id="text1">Created by Oksana Latysheva</text>
+            <text
+               x="-10.00148"
+               y="107.05697"
+               font-size="5px"
+               font-weight="bold"
+               font-family="'Arbeit Regular', Helvetica, Arial-Unicode, Arial, Sans-serif"
+               fill="#000000"
+               id="text2">from Noun Project</text>
+            </svg>
+      `;
+   }
+
+   static get myGamesSVG() {
+      return SVGManager.starSVG;
+   }
+
+   static get filterSVG() {
+      return `
+         <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+            <svg
+               version="1.1"
+               viewBox="-5 -10 75.501465 70.585403"
+               id="svg2"
+               sodipodi:docname="noun-filter-7335246.svg"
+               width="75.501465"
+               height="70.585403"
+               inkscape:version="1.3.2 (091e20e, 2023-11-25)"
+               xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+               xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+               xmlns="http://www.w3.org/2000/svg"
+               xmlns:svg="http://www.w3.org/2000/svg">
+            <defs
+               id="defs2" />
+            <sodipodi:namedview
+               id="namedview2"
+               pagecolor="#ffffff"
+               bordercolor="#000000"
+               borderopacity="0.25"
+               inkscape:showpageshadow="2"
+               inkscape:pageopacity="0.0"
+               inkscape:pagecheckerboard="0"
+               inkscape:deskcolor="#d1d1d1"
+               inkscape:zoom="1.7481481"
+               inkscape:cx="38.040254"
+               inkscape:cy="40.614407"
+               inkscape:window-width="1312"
+               inkscape:window-height="449"
+               inkscape:window-x="0"
+               inkscape:window-y="37"
+               inkscape:window-maximized="0"
+               inkscape:current-layer="svg2" />
+            <path
+               d="m 32.751234,-5.83571 c 11.543,0 22.793,1.332 33.582,3.918 l -25.25,25.25 v 16.418 l -16.664,16.664 v -33.082 l -25.25000042,-25.25 c 10.78900002,-2.582 22.03900042,-3.918 33.58200042,-3.918 m 0,-4.1641 c -11.754,0 -23.3790004,1.3555 -34.5550004,4.0312 -1.4688,0.35156 -2.6289,1.4688 -3.0391,2.9219 -0.4102,1.4531 -0.0039,3.0117 1.0625,4.0781 l 24.0310004,24.031 v 31.355 c 0,1.6836 1.0156,3.2031 2.5703,3.8516 0.51563,0.21484 1.0586,0.31641 1.5938,0.31641 1.0859,0 2.1484,-0.42188 2.9453,-1.2188 l 16.672,-16.672 c 0.78125,-0.78125 1.2188,-1.8398 1.2188,-2.9453 v -14.691 l 24.031,-24.031 c 1.0664,-1.0664 1.4727,-2.6289 1.0625,-4.0781 -0.41016,-1.4531 -1.5742,-2.5703 -3.0391,-2.9219 -11.176,-2.6719 -22.801,-4.0273 -34.555,-4.0273 z"
+               id="path1" />
+            <text
+               x="-17.248766"
+               y="90.832291"
+               font-size="5px"
+               font-weight="bold"
+               font-family="'Arbeit Regular', Helvetica, Arial-Unicode, Arial, Sans-serif"
+               fill="#000000"
+               id="text1">Created by Skena Grafis</text>
+            <text
+               x="-17.248766"
+               y="95.832291"
+               font-size="5px"
+               font-weight="bold"
+               font-family="'Arbeit Regular', Helvetica, Arial-Unicode, Arial, Sans-serif"
+               fill="#000000"
+               id="text2">from Noun Project</text>
+            </svg>
       `;
    }
 }

@@ -16,9 +16,40 @@
                         'modified_at'
                         ];
 
-   public function getGames($order = null) {
+   public function getGames($order = null, $filters = []) {
       $loggedInWriterId = isset($_SESSION['writer_id']) ? $_SESSION['writer_id'] : "";
    
+      // Build filter string
+      $filterString = "";
+      
+      // Handle hasContributed filter
+      if (isset($filters['hasContributed'])) {
+         if ($filters['hasContributed'] === true) {
+            $filterString .= " AND EXISTS (
+               SELECT 1 FROM text t2 
+               WHERE t2.game_id = g.id 
+               AND t2.writer_id = :loggedInWriterId
+            )";
+         } elseif ($filters['hasContributed'] === 'mine') {
+            $filterString .= " AND rt.writer_id = :loggedInWriterId";
+         }
+      }
+      
+      // Handle gameState filter
+      if (isset($filters['gameState']) && $filters['gameState'] !== 'all') {
+         switch($filters['gameState']) {
+            case 'open':
+               $filterString .= " AND g.open_for_changes = 1 AND ts.status = 'published'";
+               break;
+            case 'closed':
+               $filterString .= " AND g.open_for_changes = 0";
+               break;
+            case 'pending':
+               $filterString .= " AND ts.status IN ('draft', 'incomplete_draft')";
+               break;
+         }
+      }
+      
       $sql =   "SELECT g.id AS game_id, 
                         g.prompt,
                         g.open_for_changes AS openForChanges,
@@ -39,6 +70,8 @@
                         (ts.status = 'published' OR (ts.status = 'draft' AND rt.writer_id = :loggedInWriterId) OR (ts.status = 'incomplete_draft' AND rt.writer_id = :loggedInWriterId)) 
                   INNER JOIN text t ON g.id = t.game_id
                   LEFT JOIN seen s ON t.id = s.text_id AND s.writer_id = :loggedInWriterId
+                  WHERE 1=1 
+                  $filterString
                   GROUP BY g.id, g.prompt, rt.id, rt.title";
       
       if ($order) {
@@ -73,7 +106,21 @@
       return $stmt->fetchAll();
   }
 
-   public function getModifiedSince($lastCheck) {
+   public function getModifiedSince($lastCheck, $filters = []) {
+      $filterString = "";
+      
+      if (isset($filters['hasContributed'])) {
+         if ($filters['hasContributed'] === true) {
+            $filterString .= " AND EXISTS (
+               SELECT 1 FROM text t2 
+               WHERE t2.game_id = g.id 
+               AND t2.writer_id = :loggedInWriterId
+            )";
+         } elseif ($filters['hasContributed'] === 'mine') {
+            $filterString .= " AND rt.writer_id = :loggedInWriterId";
+         }
+      }
+
       $sql = "SELECT g.id AS game_id, 
                      g.prompt,
                      g.modified_at,
@@ -96,11 +143,13 @@
             INNER JOIN text t ON g.id = t.game_id
             LEFT JOIN seen s ON t.id = s.text_id AND s.writer_id = :loggedInWriterId
             WHERE CAST(g.modified_at AS DATETIME) > CAST(:lastCheck AS DATETIME)
+            $filterString
             GROUP BY g.id, g.prompt, rt.id, rt.title";
 
       $stmt = $this->prepare($sql);
       $stmt->bindValue(':lastCheck', $lastCheck);
       $stmt->bindValue(':loggedInWriterId', $_SESSION['writer_id'] ?? 0);
+      
       $stmt->execute();
 
       $results = $stmt->fetchAll(PDO::FETCH_ASSOC);

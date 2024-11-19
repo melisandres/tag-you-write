@@ -42,38 +42,43 @@ class ControllerGame extends Controller {
         return;
     }
 
+    public function getGames() {
+        try {
+            $jsonData = file_get_contents('php://input');
+            $data = json_decode($jsonData, true);
+            $filters = $data['filters'] ?? [];
+
+            $game = new Game();
+            $games = $game->getGames(null, $filters);  // Pass filters to model
+
+            header('Content-Type: application/json');
+            echo json_encode($games);
+        } catch (Exception $e) {
+            header('HTTP/1.1 500 Internal Server Error');
+            echo json_encode(['error' => $e->getMessage()]);
+        }
+    }
+
     public function modifiedSince() {
         try {
-            // Debug incoming request
-            error_log('Received modifiedSince request');
-            
-            // Get JSON data from request body
             $jsonData = file_get_contents('php://input');
-            error_log('Received JSON data: ' . $jsonData);
-            
             $data = json_decode($jsonData, true);
-            error_log('Decoded data: ' . print_r($data, true));
             
             if (!isset($data['lastCheck'])) {
                 throw new Exception('Missing lastCheck parameter');
             }
-    
-            // Convert JavaScript timestamp to MySQL datetime
+
             $lastCheck = date('Y-m-d H:i:s', $data['lastCheck'] / 1000);
-            error_log('Converted lastCheck to: ' . $lastCheck);
+            $filters = $data['filters'] ?? [];  // Get filters instead of gameIds
             
             $game = new Game();
-            $modifiedGames = $game->getModifiedSince($lastCheck);
-            
-            // Debug response
-            error_log('Sending response: ' . json_encode($modifiedGames));
+            $modifiedGames = $game->getModifiedSince($lastCheck, $filters);
             
             header('Content-Type: application/json');
             echo json_encode($modifiedGames);
         } catch (Exception $e) {
             error_log('Error in modifiedSince: ' . $e->getMessage());
-            header('Content-Type: application/json');
-            http_response_code(400);
+            header('HTTP/1.1 500 Internal Server Error');
             echo json_encode(['error' => $e->getMessage()]);
         }
     }

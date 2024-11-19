@@ -4,6 +4,23 @@
     {{ gamesData|raw }}
 </script>
 
+{% if session.writer_id %}
+<div class="filter-menu" id="gameFilters">
+    <button class="filter-button" aria-label="Filter Games">
+        <span class="filter-icon">
+            <!-- We'll update this icon based on current filter state -->
+            <svg class="filter-svg"></svg>
+        </span>
+    </button>
+    <div class="game-state-filters">
+        <button class="filter-button game-state-filter" data-state="open">Open Games</button>
+        <button class="filter-button game-state-filter" data-state="closed">Closed Games</button>
+        <button class="filter-button game-state-filter" data-state="pending">Pending Games</button>
+        <button class="filter-button game-state-filter" data-state="all">All Games</button>
+    </div>
+</div>
+{% endif %}
+
 <!-- an area to show all the starting stories that might be contributed to -->
 <div data-stories class="stories">
 {% for text in texts %}

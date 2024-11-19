@@ -5,5 +5,4 @@
     flex-direction: column;
     gap: 0px;
     flex-wrap: wrap;
-    margin-top: var(--spacing-medium);
 }

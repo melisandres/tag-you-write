@@ -23,7 +23,15 @@ export class DataManager {
                 currentPage: 1,
                 itemsPerPage: 10,
                 totalItems: 0
-            }
+            },
+            filters: {
+                hasContributed: null,  // null = all, true = my games
+                gameState: 'all',
+                // gameState: null,  // null = all, 'open', 'closed', 'pending'
+                // sort: 'newest',   // 'newest', 'oldest', etc.
+                // search: ''        // search term
+            },
+            lastCheck: null
         };
         this.currentUserId = null; // Track current user
         this.recentlyModifiedGames = new Set(); // Track modified game IDs
@@ -56,7 +64,15 @@ export class DataManager {
                 currentPage: 1,
                 itemsPerPage: 10,
                 totalItems: 0
-            }
+            },
+            filters: {
+                hasContributed: null,  // null = all, true = my games
+                // Future filters:
+                // gameState: null,  // null = all, 'open', 'closed', 'pending'
+                // sort: 'newest',   // 'newest', 'oldest', etc.
+                // search: ''        // search term
+            },
+            lastCheck: null
         };
     }
 
@@ -119,6 +135,10 @@ export class DataManager {
             this.saveCache();
             return false;
         }
+        const filters = {
+            hasContributed: false,  // or get from current filter state
+            // later we can add: isOpen, isPending, searchTerm, etc.
+        };
 
         try {
             const response = await fetch(`${this.path}game/modifiedSince`, {
@@ -127,7 +147,8 @@ export class DataManager {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    lastCheck: this.cache.lastGamesCheck
+                    lastCheck: this.cache.lastGamesCheck,
+                    filters
                 })
             });
 
@@ -316,5 +337,14 @@ export class DataManager {
     setTreeLastCheck(rootId) {
         this.treeChecks.set(rootId, Date.now());
         this.saveCache();
+    }
+
+    setFilter(filterName, value) {
+        this.cache.filters[filterName] = value;
+        this.saveCache();
+    }
+
+    getFilters() {
+        return this.cache.filters;
     }
 }

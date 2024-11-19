@@ -1,44 +1,69 @@
+import { eventBus } from './eventBus.js';
+
 export class SSEManager {
     constructor(path) {
         this.path = path;
-        this.lastId = 0;
-        this.initPolling();
+        this.eventSource = null;
+        this.retryCount = 0;
+        this.maxRetries = 5;
+
+        // Listen for control events
+        eventBus.on('startSSE', ({path, gameIds}) => this.connect(gameIds));
+        eventBus.on('stopSSE', () => this.disconnect());
     }
 
-    initPolling() {
-        console.log("Initializing polling...");
-        this.pollForUpdates();
-    }
+    async connect(gameIds = []) {
+        try {
+            // Close existing connection if any
+            if (this.eventSource) {
+                this.eventSource.close();
+            }
 
-    pollForUpdates() {
-        console.log("Polling for updates...");
-        fetch(`${this.path}sse/stream?lastId=${this.lastId}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.text();
-            })
-            .then(text => {
-                console.log("Received response:", text);
-                const events = text.split('\n\n');
-                events.forEach(event => {
-                    if (event.startsWith('event: newGame')) {
-                        const dataLine = event.split('\n')[1];
-                        if (dataLine && dataLine.startsWith('data: ')) {
-                            const data = JSON.parse(dataLine.substring(6));
-                            console.log("New game received!", data);
-                            // Handle the new game data here
-                        }
-                    } else if (event.startsWith('id:')) {
-                        this.lastId = parseInt(event.substring(3).trim());
-                    }
-                });
-            })
-            .catch(error => console.error('Polling error:', error))
-            .finally(() => {
-                // Poll again after a short delay
-                setTimeout(() => this.pollForUpdates(), 5000);
+            // Build the URL with parameters
+            const params = new URLSearchParams({
+                lastCheck: Date.now(),
+                gameIds: gameIds.join(',')
             });
+
+            this.eventSource = new EventSource(
+                `${this.path}sse/stream?${params.toString()}`
+            );
+
+            this.eventSource.onopen = () => {
+                console.log('SSE Connection established');
+                this.retryCount = 0;
+                eventBus.emit('sseConnected');
+            };
+
+            this.setupEventListeners();
+
+        } catch (error) {
+            console.error('SSE connection error:', error);
+            eventBus.emit('sseFailed', error);
+        }
+    }
+
+    disconnect() {
+        if (this.eventSource) {
+            this.eventSource.close();
+            this.eventSource = null;
+        }
+    }
+
+    setupEventListeners() {
+        this.eventSource.addEventListener('gameUpdate', (event) => {
+            try {
+                const modifiedGames = JSON.parse(event.data);
+                eventBus.emit('gamesModified', modifiedGames);
+            } catch (error) {
+                console.error('Error parsing game update:', error);
+            }
+        });
+
+        this.eventSource.onerror = (error) => {
+            console.error('SSE error:', error);
+            this.disconnect();
+            eventBus.emit('sseFailed', error);
+        };
     }
 }

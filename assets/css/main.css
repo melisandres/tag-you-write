@@ -14,6 +14,7 @@
 @import url(./atoms/buttons/top-shelf-btns.css);
 @import url(./atoms/buttons/svg-btns.css);
 @import url(./atoms/buttons/warning-btns.css);
+
 /* cards: repeated structures */
 @import url(./cards/story.css);
 
@@ -25,6 +26,7 @@
 @import url(./elements/tables.css);
 @import url(./elements/showcase.css);
 @import url(./elements/warningModal.css);
+@import url(./elements/filters.css);
 
 /* general: a catch-all  */
 @import url(./general/general.css);

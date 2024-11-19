@@ -1,0 +1,152 @@
+.filter-menu {
+    position: fixed;
+    width: 100%;
+    top: calc(var(--header-height));
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    background-color: var(--color-black-dark);
+    height: var(--filters-height);
+    transform: translateY(-100%);
+    transition: transform 0.3s ease-in-out;
+    z-index: 1;
+    padding: 0 20px;
+}
+
+.filter-menu.visible {
+    transform: translateY(0);
+}
+
+.close-filter {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    height: 36px;
+    width: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-filter svg {
+    width: 20px;
+    height: 20px;
+    fill: white;
+}
+
+.close-filter:hover svg {
+    fill: var(--hover-color);
+}
+
+.filter-options {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    height: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.game-state-filters {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    height: 100%;
+}
+
+.filter-button {
+    display: flex;
+    flex-direction: column;
+    height: 40px;
+    min-height: 40px;
+    padding: 0 16px;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: white;
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-radius: 20px;
+    transition: background-color 0.2s;
+}
+
+.filter-button:hover {
+    background-color: var(--hover-bg);
+}
+
+.filter-button.active {
+    background-color: var(--active-bg);
+}
+
+.filter-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.filter-icon svg {
+    width: 35px;
+    height: 35px;
+}
+
+.filter-icon.mine svg,
+.filter-icon.contributor svg {
+    width: 30px;
+    height: 30px;
+}
+
+/* most icons */
+.filter-icon path {
+    stroke: var(--color-black-light);
+    fill-opacity: 0.5;
+}
+
+/* mine */
+.filter-icon.mine path {
+    stroke: var(--color-primary);
+    stroke-width: 0.5px;
+    fill: var(--color-black-dark);
+}
+
+.filter-icon.contributor path {
+    stroke: var(--color-secondary-light);
+    stroke-width: 0.5px;
+    fill: black;
+}
+
+.filter-icon ~ .filter-text {
+    margin-top: -15px;
+}
+
+.filter-icon.mine ~ .filter-text,
+.filter-icon.contributor ~ .filter-text {
+    margin-top: -10px;
+}
+
+.filter-icon.pending path {
+    fill: var(--color-primary);
+}
+
+.filter-icon.open path {
+    fill: var(--color-success);
+}
+
+.filter-icon.closed path {
+    fill: var(--color-error);
+}
+
+.filter-icon.all path {
+    fill: var(--color-grey-light);
+}
+
+.filter-text {
+    font-size: 14px;
+    font-weight: 500;
+}

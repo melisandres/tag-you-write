@@ -4,6 +4,11 @@ nav{
     flex-wrap: wrap;
     justify-content: center;
     background-color: black;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: var(--header-height);
+    z-index: 3;
 }
 
 a.nav-link{
