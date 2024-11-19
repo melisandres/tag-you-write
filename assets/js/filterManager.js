@@ -11,6 +11,9 @@ export class FilterManager {
         this.filterNavLink = document.querySelector('.nav-link.filter');
         this.filterMenu = document.querySelector('.filter-menu');
         this.storiesContainer = document.querySelector('.stories');
+        const userIdMeta = document.querySelector('meta[name="user"]');
+        this.currentWriterId = userIdMeta.getAttribute('data-user-id');
+        console.log("current writer id", this.currentWriterId);
         
         // Initialize filters if they don't exist
         if (!this.dataManager.cache.filters) {
@@ -22,17 +25,22 @@ export class FilterManager {
 
         this.initializeUI();
         this.bindEvents();
+        eventBus.on('filterApplied', () => this.updateNavLink());
     }
 
     initializeUI() {
         if (this.filterNavLink) {
             // Set the filter icon in the nav
             this.filterNavLink.innerHTML = SVGManager.filterSVG;
+
+            console.log("current writer id", this.currentWriterId);
+
             
             // Create the filter menu content
             this.filterMenu.innerHTML = `
                 <div class="filter-options">
                     <button class="close-filter">${SVGManager.xSVG}</button>
+                    ${ this.currentWriterId !== 'null' ? `
                     <button class="filter-button my-games-filter" aria-label="Filter My Games">
                         <span class="filter-icon ${this.dataManager.cache.filters.gameState}">
                             ${SVGManager.myGamesSVG}
@@ -41,6 +49,8 @@ export class FilterManager {
                             ${this.dataManager.cache.filters.hasContributed ? 'contributed' : 'everyone\'s'}
                         </span>
                     </button>
+                    ` : ''
+                    }
                     <button class="filter-button game-state-filter" aria-label="Filter Game States">
                         <span class="filter-icon ${this.dataManager.cache.filters.gameState}">
                             ${SVGManager.allGamesSVG}
@@ -66,14 +76,16 @@ export class FilterManager {
 
         // Contribution filter
         const filterButton = this.filterMenu.querySelector('.my-games-filter');
-        filterButton.addEventListener('click', () => {
-            const currentState = this.dataManager.cache.filters.hasContributed;
-            const newState = this.getNextContributionState(currentState);
-            this.dataManager.setFilter('hasContributed', newState);
-            this.updateFilterButton(newState);
-            eventBus.emit('filterApplied');
-            eventBus.emit('refreshGames');
-        });
+        if (filterButton) {
+            filterButton.addEventListener('click', () => {
+                const currentState = this.dataManager.cache.filters.hasContributed;
+                const newState = this.getNextContributionState(currentState);
+                this.dataManager.setFilter('hasContributed', newState);
+                this.updateFilterButton(newState);
+                eventBus.emit('filterApplied');
+                eventBus.emit('refreshGames');
+                });
+        }       
 
         // Game state filter
         const stateButton = this.filterMenu.querySelector('.game-state-filter');
@@ -85,6 +97,13 @@ export class FilterManager {
             eventBus.emit('filterApplied');
             eventBus.emit('refreshGames');
         });
+    }
+
+    updateNavLink() {
+         // Check if there are active filters
+         const hasActiveFilters = this.dataManager.cache.filters.hasContributed !== null || this.dataManager.cache.filters.gameState !== 'all';
+         // Toggle the active class based on the presence of active filters
+         this.filterNavLink.classList.toggle('active', hasActiveFilters);
     }
 
     toggleFilterMenu() {
@@ -112,17 +131,25 @@ export class FilterManager {
     }
 
     getGameStateText(state) {
-        const states = {
+        const states =  this.currentWriterId !== 'null' 
+        ? {
             'all': 'open/closed/pending',
             'open': 'open',
             'closed': 'closed',
             'pending': 'pending'
+        }
+        :{
+            'all': 'open/closed',
+            'open': 'open',
+            'closed': 'closed',
         };
         return states[state] || states['all'];
     }
 
     getNextGameState(currentState) {
-        const stateOrder = ['all', 'open', 'closed', 'pending'];
+        const stateOrder = this.currentWriterId !== 'null' 
+            ? ['all', 'open', 'closed', 'pending']
+            : ['all', 'open', 'closed'];
         const currentIndex = stateOrder.indexOf(currentState);
         const nextIndex = (currentIndex + 1) % stateOrder.length;
         return stateOrder[nextIndex];
@@ -145,7 +172,9 @@ export class FilterManager {
     }
 
     getPreviousGameState(currentState) {
-        const stateOrder = ['all', 'open', 'closed', 'pending'];
+        const stateOrder = this.currentWriterId !== 'null'
+            ? ['all', 'open', 'closed', 'pending']
+            : ['all', 'open', 'closed'];
         const currentIndex = stateOrder.indexOf(currentState);
         const previousIndex = (currentIndex - 1 + stateOrder.length) % stateOrder.length;
         return stateOrder[previousIndex];

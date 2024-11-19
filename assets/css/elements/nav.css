@@ -36,3 +36,6 @@ a.nav-link:hover svg {
     fill: pink; /* This changes the SVG color to pink on hover, matching the text color */
 }
 
+.nav-link.filter.active {
+    border-bottom: hotpink solid 3px;
+}

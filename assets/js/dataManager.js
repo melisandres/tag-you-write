@@ -12,13 +12,14 @@ export class DataManager {
             return DataManager.instance;
         }
 
+        const userIdMeta = document.querySelector('meta[name="user"]');
         this.path = path;
         this.cache = this.loadCache() || {
             games: new Map(),
             trees: new Map(),
             nodes: new Map(),
             lastGamesCheck: null,
-            lastUserId: null,
+            lastUserId: userIdMeta.getAttribute('data-user-id') !== 'null' ? userIdMeta.getAttribute('data-user-id') : null,
             pagination: {
                 currentPage: 1,
                 itemsPerPage: 10,
