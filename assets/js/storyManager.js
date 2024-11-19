@@ -25,7 +25,6 @@ export class StoryManager {
 
 
   async fetchTree(id) {
-    console.log("fetching tree", id);
     const url = `${this.path}text/getTree/${id}`;
     const response = await fetch(url);
     if (!response.ok) {

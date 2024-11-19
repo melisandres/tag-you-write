@@ -202,84 +202,111 @@ export class GameListRenderer {
     }
 
     saveCurrentViewState() {
+        console.log("Starting saveCurrentViewState");
         const showcaseEl = document.querySelector("#showcase");
-        if (!showcaseEl) return;
+        if (!showcaseEl) {
+            console.log("No showcase element found");
+            return;
+        }
 
         this.currentViewState = {
             textId: showcaseEl.closest('[data-text-id]')?.dataset.textId,
             viewType: showcaseEl.dataset.showcase,
-            drawers: [],
-            zoomTransform: this.captureD3Transform()
+            drawers: []
         };
 
-        // Save open drawers for shelf view
-        if (this.currentViewState.viewType === 'shelf') {
-            showcaseEl.querySelectorAll('.writing:not(.hidden)').forEach(drawer => {
-                const storyId = drawer.closest('[data-story-id]')?.dataset.storyId;
-                if (storyId) this.currentViewState.drawers.push(storyId);
-            });
-        }
-    }
+        console.log("Current view state initialized:", this.currentViewState);
 
-    captureD3Transform() {
-        const svg = d3.select('#showcase svg');
-        if (!svg.empty()) {
-            const transform = d3.zoomTransform(svg.node());
-            return {
-                x: transform.x,
-                y: transform.y,
-                k: transform.k
-            };
+        if (this.currentViewState.viewType === 'tree') {
+            const svg = d3.select('#showcase svg');
+            if (!svg.empty()) {
+                const svgNode = svg.node();
+                console.log("SVG node found:", svgNode);
+                
+                const transform = d3.zoomTransform(svgNode);
+                console.log("Raw d3.zoomTransform result:", transform);
+                
+                this.currentViewState.zoomTransform = {
+                    x: transform.x,
+                    y: transform.y,
+                    k: transform.k
+                };
+                
+                console.log("Stored zoom transform:", this.currentViewState.zoomTransform);
+                window.refreshManagerInstance.state.zoomTransform = this.currentViewState.zoomTransform;
+                
+                const savedState = JSON.stringify(window.refreshManagerInstance.state);
+                console.log("State being saved to localStorage:", savedState);
+                localStorage.setItem('pageState', savedState);
+            } else {
+                console.log("No SVG element found");
+            }
         }
-        return null;
     }
 
     async restoreViewState() {
-        if (!this.currentViewState || !this.currentViewState.textId) return;
-
-        // Wait a brief moment for the DOM to update
-        await new Promise(resolve => setTimeout(resolve, 100));
-
-        // Recreate the view
-        console.log("restoring view state", this.currentViewState);
-        console.log("current view state id", this.currentViewState.textId);
-        const container = this.uiManager.createShowcaseContainer(this.currentViewState.textId);
-        if (!container) return;
-
-        if (this.currentViewState.viewType === 'shelf') {
-            await this.uiManager.drawShelf(this.currentViewState.textId, container);
-            // Restore open drawers
-            this.currentViewState.drawers.forEach(storyId => {
-                const drawer = container.querySelector(`[data-story-id="${storyId}"] .writing`);
-                if (drawer) {
-                    drawer.classList.add('visible');
-                    drawer.classList.remove('hidden');
-                    const arrow = drawer.closest('.node').querySelector(".arrow");
-                    if (arrow) arrow.textContent = '▼';
-                }
-            });
-        } else if (this.currentViewState.viewType === 'tree') {
-            await this.uiManager.drawTree(this.currentViewState.textId, container);
-            // Restore zoom transform if it exists
-            if (this.currentViewState.zoomTransform) {
-                const svg = d3.select('#showcase svg');
-                if (!svg.empty()) {
-                    const transform = this.currentViewState.zoomTransform;
-                    const zoom = d3.zoom()
-                        .on('zoom', (event) => {
-                            svg.select('g')
-                                .attr('transform', event.transform);
-                        });
-                    
-                    svg.call(zoom);
-                    svg.call(zoom.transform, d3.zoomIdentity
-                        .translate(transform.x, transform.y)
-                        .scale(transform.k));
-                }
-            }
+        console.log("Starting restoreViewState");
+        console.log("Current view state:", this.currentViewState);
+        
+        if (!this.currentViewState || !this.currentViewState.textId) {
+            console.log("No valid view state to restore");
+            return;
         }
 
-        // Clear the state after restoration
+        await new Promise(resolve => setTimeout(resolve, 250));
+
+        const container = this.uiManager.createShowcaseContainer(this.currentViewState.textId);
+        if (!container) {
+            console.log("Failed to create showcase container");
+            return;
+        }
+
+        if (this.currentViewState.viewType === 'tree') {
+            console.log("Restoring tree view");
+            
+            // Set a flag to prevent TreeVisualizer from applying its initial transform
+            window.skipInitialTreeTransform = true;
+            
+            await this.uiManager.drawTree(this.currentViewState.textId, container);
+            
+            if (this.currentViewState.zoomTransform) {
+                const svg = d3.select('#showcase svg');
+                
+                if (!svg.empty()) {
+                    // Instead of creating a new zoom behavior, use TreeVisualizer's existing zoom
+                    const treeVis = window.treeVisualizerInstance; // You'll need to store this instance
+                    if (treeVis && treeVis.zoom) {
+                        const transform = this.currentViewState.zoomTransform;
+                        console.log("Applying zoom transform:", transform);
+                        
+                        const newTransform = d3.zoomIdentity
+                            .translate(transform.x, transform.y)
+                            .scale(transform.k);
+                            
+                        svg.call(treeVis.zoom.transform, newTransform);
+                    }
+                }
+            }
+            
+            // Reset the flag
+            window.skipInitialTreeTransform = false;
+        } else if (this.currentViewState.viewType === 'shelf') {
+            await this.uiManager.drawShelf(this.currentViewState.textId, container);
+            this.restoreDrawers(this.currentViewState.drawers);
+        }
+
         this.currentViewState = null;
+    }
+
+    restoreDrawers(drawers) {
+        drawers.forEach(storyId => {
+            const drawer = this.container.querySelector(`[data-story-id="${storyId}"] .writing`);
+            if (drawer) {
+                drawer.classList.add('visible');
+                drawer.classList.remove('hidden');
+                const arrow = drawer.closest('.node').querySelector(".arrow");
+                if (arrow) arrow.textContent = '▼';
+            }
+        });
     }
 }

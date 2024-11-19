@@ -13,7 +13,6 @@ export class FilterManager {
         this.storiesContainer = document.querySelector('.stories');
         const userIdMeta = document.querySelector('meta[name="user"]');
         this.currentWriterId = userIdMeta.getAttribute('data-user-id');
-        console.log("current writer id", this.currentWriterId);
         
         // Initialize filters if they don't exist
         if (!this.dataManager.cache.filters) {
@@ -32,10 +31,7 @@ export class FilterManager {
         if (this.filterNavLink) {
             // Set the filter icon in the nav
             this.filterNavLink.innerHTML = SVGManager.filterSVG;
-
-            console.log("current writer id", this.currentWriterId);
-
-            
+       
             // Create the filter menu content
             this.filterMenu.innerHTML = `
                 <div class="filter-options">

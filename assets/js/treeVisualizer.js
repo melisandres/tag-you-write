@@ -72,6 +72,9 @@ export class TreeVisualizer {
             titleLineHeight: 1.2,  // Line height factor for title
             titleAuthorSpacing: -7,  // Adjust the vertical position on the author
         };
+
+        // Store instance globally
+        window.treeVisualizerInstance = this;
     }
     
     handleDrawTree({ container, data }) {
@@ -304,36 +307,41 @@ export class TreeVisualizer {
         // Store the zoom behavior
         this.zoom = zoom;
 
-        // Apply zoom to SVG
-        this.svg.call(this.zoom);
+        if (!window.skipInitialTreeTransform) {
+            // Apply zoom to SVG
+            this.svg.call(this.zoom);
+        }
         
         // Check for saved state
         const savedState = JSON.parse(localStorage.getItem('pageState'));
         
-        if (savedState && savedState.showcase === 'tree' && savedState.zoomTransform && this.pageJustLoaded) {
-            // Apply saved transform
-            const transform = savedState.zoomTransform;
-            const initialTransform = d3.zoomIdentity
-                .translate(transform.x, transform.y)
-                .scale(transform.k);
-            
-            this.svg.call(this.zoom.transform, initialTransform);
-        } else {
-            // Calculate and apply initial transform as before
-            const initialScale = Math.max(minScale, Math.min(
-                (this.containerWidth - this.margin.left - this.margin.right * 2) / bounds.width,
-                (this.containerHeight - this.margin.top - this.margin.bottom * 2) / bounds.height,
-                1
-            ));
+        // Only apply initial transform if we're not restoring from GameListRenderer
+        if (!window.skipInitialTreeTransform) {
+            if (savedState && savedState.showcase === 'tree' && savedState.zoomTransform && this.pageJustLoaded) {
+                // Apply saved transform
+                const transform = savedState.zoomTransform;
+                const initialTransform = d3.zoomIdentity
+                    .translate(transform.x, transform.y)
+                    .scale(transform.k);
+                
+                this.svg.call(this.zoom.transform, initialTransform);
+            } else {
+                // Calculate and apply initial transform as before
+                const initialScale = Math.max(minScale, Math.min(
+                    (this.containerWidth - this.margin.left - this.margin.right * 2) / bounds.width,
+                    (this.containerHeight - this.margin.top - this.margin.bottom * 2) / bounds.height,
+                    1
+                ));
 
-            const initialTransform = d3.zoomIdentity
-                .translate(
-                    (this.containerWidth - bounds.width * initialScale) / 2 - bounds.x * initialScale,
-                    (this.containerHeight - bounds.height * initialScale) / 2 - bounds.y * initialScale
-                )
-                .scale(initialScale);
+                const initialTransform = d3.zoomIdentity
+                    .translate(
+                        (this.containerWidth - bounds.width * initialScale) / 2 - bounds.x * initialScale,
+                        (this.containerHeight - bounds.height * initialScale) / 2 - bounds.y * initialScale
+                    )
+                    .scale(initialScale);
 
-            this.svg.call(this.zoom.transform, initialTransform);
+                this.svg.call(this.zoom.transform, initialTransform);
+            }
         }
 
         // The Legend
