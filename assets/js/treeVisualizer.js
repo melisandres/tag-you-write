@@ -307,10 +307,8 @@ export class TreeVisualizer {
         // Store the zoom behavior
         this.zoom = zoom;
 
-        if (!window.skipInitialTreeTransform) {
-            // Apply zoom to SVG
-            this.svg.call(this.zoom);
-        }
+        // Apply zoom to SVG
+        this.svg.call(this.zoom);
         
         // Check for saved state
         const savedState = JSON.parse(localStorage.getItem('pageState'));
