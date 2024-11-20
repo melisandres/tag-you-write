@@ -196,7 +196,11 @@ export class DataManager {
                 nodes: new Map(parsed.nodes),
                 lastGamesCheck: parsed.lastGamesCheck,
                 lastUserId: parsed.lastUserId,
-                pagination: parsed.pagination
+                pagination: parsed.pagination,
+                filters: parsed.filters || {  // Add filters to cache loading
+                    hasContributed: null,
+                    gameState: 'all'
+                }
             };
         }
         return null;
@@ -210,7 +214,8 @@ export class DataManager {
             nodes: Array.from(this.cache.nodes.entries()),
             lastGamesCheck: this.cache.lastGamesCheck,
             lastUserId: this.cache.lastUserId,
-            pagination: this.cache.pagination
+            pagination: this.cache.pagination,
+            filters: this.cache.filters  // Add filters to cache saving
         };
         localStorage.setItem('storyCache', JSON.stringify(cacheToSave));
     }
@@ -340,8 +345,11 @@ export class DataManager {
         this.saveCache();
     }
 
-    setFilter(filterName, value) {
-        this.cache.filters[filterName] = value;
+    setFilters(filters) {
+        this.cache.filters = {
+            hasContributed: filters.hasContributed ?? null,
+            gameState: filters.gameState ?? 'all'
+        };
         this.saveCache();
     }
 

@@ -3,15 +3,15 @@ import { GameListRenderer } from './gameListRenderer.js';
 
 export class GameListManager {
     constructor(container, path, uiManager) {
+        if (!container) {
+            console.log('No games container found, skipping GameListManager initialization');
+            return;
+        }
+        
         this.path = path;
         this.dataManager = window.dataManager;
         this.pollingIntervalId = null;
         this.pollingDuration = 30000;
-        this.filters = {
-            showContributed: true,
-            showOpenForChanges: true,
-            showPending: true,
-        };
         
         this.renderer = new GameListRenderer(container, path, uiManager);
 
@@ -19,16 +19,22 @@ export class GameListManager {
         eventBus.on('startPolling', () => this.startUpdateChecker());
         eventBus.on('stopPolling', () => this.stopUpdateChecker());
         eventBus.on('gamesModified', (games) => this.handleGameUpdates(games));
+        eventBus.on('refreshGames', () => this.refreshGamesList());
 
         // Initialize with default polling if needed
         this.startUpdateChecker();
 
-        // Add filter change listeners
-        document.querySelector('#show-contributed')?.addEventListener('change', 
-            (e) => this.updateFilters({ hasContributed: e.target.checked }));
+        // Get initial filters from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const initialFilters = {
+            hasContributed: urlParams.get('hasContributed'),
+            gameState: urlParams.get('gameState') || 'all'
+        };
 
-        // Add listener for filter changes
-        eventBus.on('refreshGames', () => this.refreshGamesList());
+        // Set filters in DataManager
+        this.dataManager.setFilters(initialFilters);
+
+        // No need to trigger immediate refresh since page was just rendered
     }
 
     startUpdateChecker() {
@@ -54,12 +60,6 @@ export class GameListManager {
         games.forEach(game => {
             eventBus.emit('updateGame', game);
         });
-    }
-
-    updateFilters(newFilters) {
-        this.filters = { ...this.filters, ...newFilters };
-        this.dataManager.setFilters(this.filters);  // Update DataManager's filters
-        // Optionally refresh the current view
     }
 
     async refreshGamesList() {

@@ -70,3 +70,6 @@
 {% endfor %}
 </div>
 {{ include('footer.php') }}
+
+<!-- Make sure the JSON is properly escaped for HTML -->
+<meta name="initial-filters" content="{{ initialFilters|e('html_attr') }}">

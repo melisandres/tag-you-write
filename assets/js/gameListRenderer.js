@@ -59,6 +59,10 @@ export class GameListRenderer {
     renderGameCard(game) {
         const isOpen = game.openForChanges === '1' || game.openForChanges === true;
         const hasContributed = game.hasContributed === '1' || game.hasContributed === true;
+
+        console.log("userLoggedIn", this.userLoggedIn);
+        console.log("game unseens", game.unseen_count);
+        console.log("game useen > 0", game.seen_count > 0);
         
         return `
             <div class="story ${isOpen ? '' : 'closed'}" 
@@ -173,12 +177,8 @@ export class GameListRenderer {
 
         // Update title and unreads status
         const titleDiv = gameElement.querySelector('.story-title');
-        if (titleDiv) {
-            if (this.userLoggedIn) {
-                titleDiv.classList.remove('unreads');
-            } else {
-                titleDiv.classList.add('unreads');
-            }
+        if (titleDiv && this.userLoggedIn) {
+            titleDiv.classList.toggle('unreads', gameData.unseen_count > 0);
         }
     }
 
@@ -209,93 +209,64 @@ export class GameListRenderer {
             return;
         }
 
-        this.currentViewState = {
+        const viewState = {
             textId: showcaseEl.closest('[data-text-id]')?.dataset.textId,
             viewType: showcaseEl.dataset.showcase,
             drawers: []
         };
 
-        console.log("Current view state initialized:", this.currentViewState);
-
-        if (this.currentViewState.viewType === 'tree') {
+        if (viewState.viewType === 'tree') {
             const svg = d3.select('#showcase svg');
             if (!svg.empty()) {
                 const svgNode = svg.node();
-                console.log("SVG node found:", svgNode);
-                
                 const transform = d3.zoomTransform(svgNode);
-                console.log("Raw d3.zoomTransform result:", transform);
-                
-                this.currentViewState.zoomTransform = {
+                viewState.zoomTransform = {
                     x: transform.x,
                     y: transform.y,
                     k: transform.k
                 };
-                
-                console.log("Stored zoom transform:", this.currentViewState.zoomTransform);
-                window.refreshManagerInstance.state.zoomTransform = this.currentViewState.zoomTransform;
-                
-                const savedState = JSON.stringify(window.refreshManagerInstance.state);
-                console.log("State being saved to localStorage:", savedState);
-                localStorage.setItem('pageState', savedState);
-            } else {
-                console.log("No SVG element found");
             }
         }
+
+        // Save to RefreshManager's state
+        window.refreshManagerInstance.state.viewState = viewState;
+        localStorage.setItem('pageState', JSON.stringify(window.refreshManagerInstance.state));
     }
 
     async restoreViewState() {
-        console.log("Starting restoreViewState");
-        console.log("Current view state:", this.currentViewState);
-        
-        if (!this.currentViewState || !this.currentViewState.textId) {
+        // Get state from RefreshManager instead of internal state
+        const savedState = JSON.parse(localStorage.getItem('pageState'));
+        if (!savedState || !savedState.viewState) {
             console.log("No valid view state to restore");
             return;
         }
 
-        await new Promise(resolve => setTimeout(resolve, 250));
-
-        const container = this.uiManager.createShowcaseContainer(this.currentViewState.textId);
+        const viewState = savedState.viewState;
+        
+        const container = this.uiManager.createShowcaseContainer(viewState.textId);
         if (!container) {
             console.log("Failed to create showcase container");
             return;
         }
 
-        if (this.currentViewState.viewType === 'tree') {
-            console.log("Restoring tree view");
-            
-            // Set a flag to prevent TreeVisualizer from applying its initial transform
+        if (viewState.viewType === 'tree') {
             window.skipInitialTreeTransform = true;
+            await this.uiManager.drawTree(viewState.textId, container);
             
-            await this.uiManager.drawTree(this.currentViewState.textId, container);
-            
-            if (this.currentViewState.zoomTransform) {
+            if (viewState.zoomTransform) {
                 const svg = d3.select('#showcase svg');
-                
-                if (!svg.empty()) {
-                    // Instead of creating a new zoom behavior, use TreeVisualizer's existing zoom
-                    const treeVis = window.treeVisualizerInstance; // You'll need to store this instance
-                    if (treeVis && treeVis.zoom) {
-                        const transform = this.currentViewState.zoomTransform;
-                        console.log("Applying zoom transform:", transform);
-                        
-                        const newTransform = d3.zoomIdentity
-                            .translate(transform.x, transform.y)
-                            .scale(transform.k);
-                            
-                        svg.call(treeVis.zoom.transform, newTransform);
-                    }
+                if (!svg.empty() && window.treeVisualizerInstance?.zoom) {
+                    const transform = viewState.zoomTransform;
+                    const newTransform = d3.zoomIdentity
+                        .translate(transform.x, transform.y)
+                        .scale(transform.k);
+                    svg.call(window.treeVisualizerInstance.zoom.transform, newTransform);
                 }
             }
-            
-            // Reset the flag
             window.skipInitialTreeTransform = false;
-        } else if (this.currentViewState.viewType === 'shelf') {
-            await this.uiManager.drawShelf(this.currentViewState.textId, container);
-            this.restoreDrawers(this.currentViewState.drawers);
+        } else if (viewState.viewType === 'shelf') {
+            await this.uiManager.drawShelf(viewState.textId, container);
         }
-
-        this.currentViewState = null;
     }
 
     restoreDrawers(drawers) {

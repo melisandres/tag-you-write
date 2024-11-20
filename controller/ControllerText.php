@@ -16,14 +16,40 @@ class ControllerText extends Controller{
 
     //show the page with all the texts
     public function index(){
+        // Debug all superglobals
+        error_log('REQUEST_URI: ' . $_SERVER['REQUEST_URI']);
+        error_log('QUERY_STRING: ' . $_SERVER['QUERY_STRING']);
+        error_log('Raw GET array: ' . print_r($_GET, true));
+
+        // Get filter parameters from URL
+        $filters = [
+            'hasContributed' => isset($_GET['hasContributed']) ? 
+                ($_GET['hasContributed'] === 'true' ? true : 
+                ($_GET['hasContributed'] === 'mine' ? 'mine' : null)) : null,
+            'gameState' => isset($_GET['gameState']) ? $_GET['gameState'] : 'all'
+        ];
+
+        error_log('GET filters: ' . print_r($_GET, true));
+        // Debug: Log processed filters
+        error_log('Processed filters: ' . print_r($filters, true));
+
+        // TODO: Get the sort parameter from URL
+        $sort = null;
+
+        error_log('Sort: ' . $sort);
+
         // Getting the games
         $game = new Game;
-        $allGames = $game->getGames();
+        $allGames = $game->getGames($sort, $filters);
+
+        error_log('testing with mygames and pending');
+        error_log('Count of all games: ' . count($allGames));
 
         // Send both the rendered data and the complete dataset
         Twig::render('text-index.php', [
             'texts' => $allGames,
-            'gamesData' => json_encode($allGames) // This will be used by our frontend JS
+            'gamesData' => json_encode($allGames),
+            'initialFilters' => json_encode($filters) 
         ]);
     }
 

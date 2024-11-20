@@ -6,6 +6,10 @@ export class FilterManager {
             console.error('DataManager not initialized');
             return;
         }
+        this.filterMenu = document.querySelector('.filter-menu');
+        if (!this.filterMenu) {
+            return;
+        }
         
         this.dataManager = window.dataManager;
         this.filterNavLink = document.querySelector('.nav-link.filter');
@@ -25,12 +29,19 @@ export class FilterManager {
         this.initializeUI();
         this.bindEvents();
         eventBus.on('filterApplied', () => this.updateNavLink());
+        eventBus.on('filtersUpdated', (filters) => this.handlefiltersUpdated(filters));
     }
 
     initializeUI() {
         if (this.filterNavLink) {
             // Set the filter icon in the nav
             this.filterNavLink.innerHTML = SVGManager.filterSVG;
+
+            // Set the class name for hasContributed
+            const hasContributed = this.dataManager.cache.filters.hasContributed;
+            const hasContributedClass = hasContributed === null ? 'all' : hasContributed === true ? 'contributor' : 'mine';
+            const hasContributedText = hasContributed === null ? 'everyone\'s' : hasContributed === true ? 'contributed' : 'started';
+
        
             // Create the filter menu content
             this.filterMenu.innerHTML = `
@@ -38,11 +49,11 @@ export class FilterManager {
                     <button class="close-filter">${SVGManager.xSVG}</button>
                     ${ this.currentWriterId !== 'null' ? `
                     <button class="filter-button my-games-filter" aria-label="Filter My Games">
-                        <span class="filter-icon ${this.dataManager.cache.filters.gameState}">
+                        <span class="filter-icon ${hasContributedClass}">
                             ${SVGManager.myGamesSVG}
                         </span>
                         <span class="filter-text">
-                            ${this.dataManager.cache.filters.hasContributed ? 'contributed' : 'everyone\'s'}
+                            ${hasContributedText}
                         </span>
                     </button>
                     ` : ''
@@ -58,6 +69,7 @@ export class FilterManager {
                 </div>
             `;
         }
+        this.updateNavLink();
     }
 
     bindEvents() {
@@ -76,7 +88,10 @@ export class FilterManager {
             filterButton.addEventListener('click', () => {
                 const currentState = this.dataManager.cache.filters.hasContributed;
                 const newState = this.getNextContributionState(currentState);
-                this.dataManager.setFilter('hasContributed', newState);
+                this.dataManager.setFilters({
+                    ...this.dataManager.getFilters(),
+                    hasContributed: newState
+                });
                 this.updateFilterButton(newState);
                 eventBus.emit('filterApplied');
                 eventBus.emit('refreshGames');
@@ -88,14 +103,49 @@ export class FilterManager {
         stateButton.addEventListener('click', () => {
             const currentState = this.dataManager.cache.filters.gameState;
             const newState = this.getNextGameState(currentState);
-            this.dataManager.setFilter('gameState', newState);
+            this.dataManager.setFilters({
+                ...this.dataManager.getFilters(),
+                gameState: newState
+            });
             this.updateGameStateButton(newState);
             eventBus.emit('filterApplied');
             eventBus.emit('refreshGames');
         });
+
+        // When filters change, update URL too
+        const updateUrlWithFilters = (filters) => {
+            const params = new URLSearchParams(window.location.search);
+            if (filters.hasContributed !== null) {
+                params.set('hasContributed', filters.hasContributed);
+            } else {
+                params.delete('hasContributed');
+            }
+            if (filters.gameState !== 'all') {
+                params.set('gameState', filters.gameState);
+            } else {
+                params.delete('gameState');
+            }
+            
+            // Update URL without reload
+            const newUrl = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`;
+            window.history.pushState({}, '', newUrl);
+        };
+
+        // Add to existing filter change handlers
+        eventBus.on('filterApplied', () => {
+            const currentFilters = this.dataManager.getFilters();
+            updateUrlWithFilters(currentFilters);
+        });
+    }
+
+    handleFiltersUpdated(filters) {
+        this.updateFilterButton(filters.hasContributed);
+        this.updateGameStateButton(filters.gameState);
+        this.updateNavLink();
     }
 
     updateNavLink() {
+        console.log('updateNavLink');
          // Check if there are active filters
          const hasActiveFilters = this.dataManager.cache.filters.hasContributed !== null || this.dataManager.cache.filters.gameState !== 'all';
          // Toggle the active class based on the presence of active filters

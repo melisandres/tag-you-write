@@ -96,7 +96,6 @@ export class FormManager {
 
         switch(status) {
             case 'writerSave':
-                console.log('writerSave');
                this.handleWriterSave();
                break;
             case 'published':
@@ -110,11 +109,22 @@ export class FormManager {
                 this.handleDelete();
                 break;
             case 'cancel':
-                // TODO: you may want this to redirect to the last page... when things get more complex
-                window.location.href=`${this.path}text`;
+                this.handleCancel();
                 break;
             default:
                 console.log("button has not been given a purpose!");
+        }
+    }
+
+    // 
+    async handleCancel() {
+        try {
+            const redirectUrl = await this.getRedirectUrlWithFilters();
+            window.location.href = redirectUrl;
+        } catch (error) {
+            console.error('Error generating redirect URL:', error);
+            // Fallback to simple redirect
+            window.location.href = `${this.path}text`;
         }
     }
 
@@ -176,10 +186,13 @@ export class FormManager {
         this.submitForm(urlAction);
     }
 
-    handleDelete() {
+    async handleDelete() {
         const idInput = this.form.querySelector('[data-id]');
         if (!idInput || !idInput.value) {
-            window.location.href = `${this.path}text`;
+            // Create a redirect with filters
+            const redirectUrl = await this.getRedirectUrlWithFilters();
+            window.location.href = redirectUrl;
+
             localStorage.setItem('pendingToast', JSON.stringify({
                 message: 'Creation aborted',
                 type: 'success'
@@ -285,107 +298,100 @@ export class FormManager {
 
     
     // Submits the form to store OR update.
-    submitForm(actionUrl) {
-        const formData = new FormData(this.form);
-        const action = actionUrl; 
-        // || this.form.getAttribute('action'); // This gets the action URL
+    async submitForm(actionUrl) {
+        try {
+            const formData = new FormData(this.form);
+            const data = {};
+            formData.forEach((value, key) => {
+                data[key] = value;
+            });
 
-        // Convert FormData to a plain object
-        const data = {};
-        formData.forEach((value, key) => {
-            data[key] = value;
-        });
+            const response = await fetch(actionUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
 
-        console.log('Form Data:', data); // Debugging: Check the collected form data
+            const responseData = await response.json();
 
-        fetch(action, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Update the lastKeywords hidden input
+            if (responseData.success) {
+                // Update form fields if needed
                 const lastKeywordsInput = this.form.querySelector('[name="lastKeywords"]');
                 if (lastKeywordsInput) {
                     lastKeywordsInput.value = formData.get('keywords');
-                    //TODO: just trying to save the lastKeywords and id to the lastSavedContent...
-                    //this.autoSaveManager.lastSavedContent.keywords = formData.get('keywords');
                 }
                 // Only update the Id if it's not already set
                 let idInput = this.form.querySelector('[data-id]');
-                if (idInput && !idInput.value && data.textId) {
-                    idInput.value = data.textId;
-                    //this.autoSaveManager.lastSavedContent.id = data.textId;
+                if (idInput && !idInput.value && responseData.textId) {
+                    idInput.value = responseData.textId;
                 }
                 // Changge the data-form-activity attribute
                 this.form.setAttribute('data-form-activity', 'editing');
 
-                // AutoSaveManager will reset the timers and lasSavedContent
-                if (this.formType == 'root' || this.formType == 'iteration'){  
-                    // Send the latest form data to AutoSaveManager
+                if (this.formType == 'root' || this.formType == 'iteration') {
                     eventBus.emit('manualSave');
                 }
+
+                if (responseData.redirectUrl) {
+                    localStorage.setItem('pendingToast', JSON.stringify({
+                        message: responseData.toastMessage,
+                        type: responseData.toastType
+                    }));
+
+                    const redirectUrl = await this.getRedirectUrlWithFilters(response, responseData.redirectUrl);
+                    window.location.href = redirectUrl;
+                } else {
+                    eventBus.emit('showToast', {
+                        message: responseData.toastMessage,
+                        type: responseData.toastType
+                    });
+                }
             }
-            if (data.redirectUrl) {
-                // Store toast data in localStorage before redirecting
-                localStorage.setItem('pendingToast', JSON.stringify({
-                    message: data.toastMessage,
-                    type: data.toastType
-                }));
-                window.location.href = `${this.path}${data.redirectUrl}`;
-            } else {
-                eventBus.emit('showToast', { 
-                    message: data.toastMessage, 
-                    type: data.toastType 
-                });
-            }
-        })
-        .catch(error => {
+        } catch (error) {
             console.error('Error:', error);
-            eventBus.emit('showToast', { 
-                message: 'An error occurred', 
+            eventBus.emit('showToast', {
+                message: 'An error occurred',
                 type: 'error'
             });
-        });
+        }
     }
 
     // Submit Writer information--new account
-    submitNewAccountInfo(actionUrl) {
-        const formData = new FormData(this.form);
+    async submitNewAccountInfo(actionUrl) {
+        try {
+            const formData = new FormData(this.form);
+            const response = await fetch(actionUrl, {
+                method: 'POST',
+                body: formData
+            });
 
-        fetch(actionUrl, {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
+            const data = await response.json();
+
             if (data.success) {
                 // Store toast data in localStorage before redirecting
                 localStorage.setItem('pendingToast', JSON.stringify({
                     message: 'Account created successfully! Welcome!',
                     type: 'success'
                 }));
+
                 // Redirect to the text page
-                window.location.href = `${this.path}text`;
+                const redirectUrl = await this.getRedirectUrlWithFilters(response);
+                window.location.href = redirectUrl;
             } else {
-                // Handle validation errors or other issues
-                eventBus.emit('showToast', { 
-                    message: data.message || 'An error occurred', 
+                eventBus.emit('showToast', {
+                    message: data.message || 'An error occurred',
                     type: 'error'
                 });
             }
-        })
-        .catch(error => {
+        } catch (error) {
             console.error('Error:', error);
-            eventBus.emit('showToast', { 
-                message: 'An error occurred', 
+            eventBus.emit('showToast', {
+                message: 'An error occurred',
                 type: 'error'
             });
-        });
+        }
     }
 
     // Method to handle form deletion
@@ -410,7 +416,10 @@ export class FormManager {
                     message: result.toastMessage,
                     type: result.toastType
                 }));
-                window.location.href = `${this.path}text`;
+
+                // Get the redirect URL with filters
+                const redirectUrl = await this.getRedirectUrlWithFilters(response);
+                window.location.href = redirectUrl;
             } else {
                 // Handle error
                 console.error('Delete failed:', result.message);
@@ -428,5 +437,24 @@ export class FormManager {
         }
         // A flag to prevent the beforeunload event from triggering
         this.isIntentionalNavigation = false;
+    }
+
+    async getRedirectUrlWithFilters(response = null, redirectUrl = 'text') {
+        // Debug URL construction
+        const filters = window.dataManager.getFilters();
+        console.log('Filters before URL construction:', filters);
+        
+        const filterParams = new URLSearchParams();
+        if (filters.hasContributed !== null) {
+            filterParams.append('hasContributed', filters.hasContributed);
+        }
+        if (filters.gameState !== 'all') {
+            filterParams.append('gameState', filters.gameState);
+        }
+        
+        const finalUrl = `${this.path}${redirectUrl}${filterParams.toString() ? '?' + filterParams.toString() : ''}`;
+        console.log('Constructed redirect URL:', finalUrl);
+        
+        return finalUrl;
     }
 }

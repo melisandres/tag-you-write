@@ -37,9 +37,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const path = window.location.origin + "/tag-you-write-repo/tag-you-write/";
   
-  // Initialize singleton DataManager
-  const dataManager = DataManager.getInstance(path);
-  window.dataManager = dataManager; 
+  // Initialize DataManager first
+  window.dataManager = DataManager.getInstance(path);
 
   const treeModal = document.querySelector('.modal-background');
   const warningManager = new WarningManager();
@@ -63,8 +62,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize UIManager with the storyManager and modal instances
   const uiManager = new UIManager(storyManager, modal);
 
-  // Add after your other initializations
-  const gameListManager = new GameListManager(document.querySelector('[data-stories]'), path, uiManager);
+  // Only initialize GameListManager if we're on the games list page
+  const gamesContainer = document.querySelector('.stories');
+  if (gamesContainer) {
+      const gameListManager = new GameListManager(gamesContainer, path, uiManager);
+  }
 
   // Initialize GameManager
   new GameManager(path);

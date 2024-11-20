@@ -14,8 +14,18 @@ export class RefreshManager {
         this.state = {};
         this.uiManager = uiManager;        
         this.previousUrl = sessionStorage.getItem('previousUrl');
-        this.isAPageRefresh = this.isPageRefresh();
+        this.shouldRefreshGames = false;
+        
+        // Initialize dataManager reference before any methods that might use it
+        this.dataManager = window.dataManager;
+        if (!this.dataManager) {
+            console.error('DataManager not initialized');
+            return;
+        }
 
+        // Move this after dataManager initialization
+        this.isAPageRefresh = this.isPageRefresh();
+        
         window.refreshManagerInstance = this;
         
         this.initCustomEvents();
@@ -49,6 +59,17 @@ export class RefreshManager {
                 });
             }
         });
+
+        window.addEventListener('beforeunload', (e) => {
+            if (this.isStoriesPage() && !this.shouldRefreshGames) {
+                //e.preventDefault();
+                eventBus.emit('refreshGames');
+            }
+        });
+    }
+
+    triggerRefreshGames() {
+        this.shouldRefreshGames = true;
     }
 
     handleFormUpdated() {
@@ -134,6 +155,12 @@ export class RefreshManager {
     saveCurrentPageUrl() {
         sessionStorage.setItem('previousUrl', window.location.href);
         this.previousUrl = window.location.href;
+
+        // Remove the filter clearing since we want to preserve filters
+        // when navigating to/from form pages
+        /* if (!this.isStoriesPage()) {
+            localStorage.removeItem('currentFilters');
+        } */
     }
 
     // Get the saved state from localStorage
@@ -272,6 +299,7 @@ export class RefreshManager {
 
         if (!svg.empty()) {
             const transform = d3.zoomTransform(svg.node());
+            console.log('Saving transform:', transform);
             this.state.zoomTransform = {
                 x: transform.x,
                 y: transform.y,
@@ -287,9 +315,9 @@ export class RefreshManager {
             return;
         }
 
+        // Handle form state restoration
         if (savedState.formData && savedState.formType && this.isAPageRefresh) {
             const form = document.querySelector(`[data-form-type="${savedState.formType}"]`);
-
             if (form) {
                 const formData = JSON.parse(savedState.formData);
                 Object.keys(formData).forEach(key => {
@@ -301,30 +329,69 @@ export class RefreshManager {
                         input.dispatchEvent(event);
                     }
                 });
-                /* console.log(formData.id); */
                 if(formData.id !== '') {
                     form.setAttribute('data-form-activity', 'editing');
-                    // Emit formUpdated to ensure buttons are properly updated
                     eventBus.emit('formUpdated');
                 }
             }
         }
 
-        // Use the uiManager's method to create the container you need
+        // Create showcase container and restore view state
         const container = this.uiManager.createShowcaseContainer(savedState.rootStoryId);
-        if (!container) return;
+        if (container) {
+            if (savedState.showcase === 'shelf') {
+                await this.uiManager.drawShelf(savedState.rootStoryId, container).then(() => {
+                    this.restoreDrawers(savedState);
+                });
+            } else if (savedState.showcase === 'tree') {
+                console.log('Restoring tree view');
+                
+                // Set flag before drawing tree
+                window.skipInitialTreeTransform = true;
+                
+                // Wait for tree to be drawn
+                await this.uiManager.drawTree(savedState.rootStoryId, container);
+                
+                // Wait a bit for D3 to initialize
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
+                // Add tree-specific zoom transform restoration
+                if (savedState.zoomTransform) {
+                    const svg = d3.select('#showcase svg');
+                    if (!svg.empty() && window.treeVisualizerInstance?.zoom) {
+                        const transform = savedState.zoomTransform;
+                        
+                        // Only apply if values are valid
+                        if (transform && 
+                            typeof transform.x === 'number' && 
+                            typeof transform.y === 'number' && 
+                            typeof transform.k === 'number' && 
+                            !isNaN(transform.x) && 
+                            !isNaN(transform.y) && 
+                            !isNaN(transform.k)) {
+                            
+                            try {
+                                // Create new transform
+                                const newTransform = d3.zoomIdentity
+                                    .translate(transform.x, transform.y)
+                                    .scale(transform.k);
+                                
+                                // Apply transform
+                                window.treeVisualizerInstance.zoom.transform(svg, newTransform);
+                            } catch (error) {
+                                console.error('Failed to apply transform:', error);
+                            }
+                        }
+                    }
+                }
+                
+                // Reset flag
+                window.skipInitialTreeTransform = false;
+            }
+        }
 
-
-        if (savedState.showcase === 'shelf') {
-            await this.uiManager.drawShelf(savedState.rootStoryId, container).then(() => {
-                this.restoreDrawers(savedState);
-            });
-        } else if (savedState.showcase === 'tree') {
-            await this.uiManager.drawTree(savedState.rootStoryId, container);
-        } 
-        
-        //check if there's a modal id saved
-        if (savedState.modal){
+        // Restore modal state
+        if (savedState.modal) {
             this.storyManager.showStoryInModal(savedState.modalTextId);
         }
 
@@ -332,7 +399,7 @@ export class RefreshManager {
         if (savedState.scrollPosition) {
             setTimeout(() => {
                 window.scrollTo(savedState.scrollPosition.x, savedState.scrollPosition.y);
-            }, 100); // Adjust the delay as needed
+            }, 100);
         }
     }
 
@@ -348,10 +415,32 @@ export class RefreshManager {
         });
     }
 
-    // Handle page refresh Written for games
+    // Handle page refresh
     handlePageRefresh() {
         if (this.isStoriesPage()) {    
-            // Prevent default refresh behavior
+            // Make sure dataManager exists before using it
+            if (!this.dataManager) {
+                console.error('DataManager not available for refresh handling');
+                return true; // Allow default refresh if no dataManager
+            }
+
+            // Show loading indicator
+            document.body.classList.add('refreshing');
+
+             // Check for updates without full rerender
+            window.dataManager.checkForUpdates().then(hasUpdates => {
+                if (hasUpdates) {
+                    const modifiedGames = window.dataManager.getRecentlyModifiedGames();
+                    modifiedGames.forEach(game => {
+                        eventBus.emit('updateGame', game);
+                    });
+                }
+                // Restore state after updates
+                this.restoreState();
+                document.body.classList.remove('refreshing');
+            });
+            
+            // Prevent browser refresh
             return false;
         }
         return true; // Allow refresh for other pages
