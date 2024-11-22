@@ -59,6 +59,15 @@ export class ButtonUpdateManager {
         //Listen for a form that has no unsaved changes--called from autoSaveManager
         eventBus.on('hasUnsavedChanges', this.handleHasUnsavedChanges.bind(this));
 
+        // Add listener for form restored
+        eventBus.on('formRestored', () => {
+            // Force button state update
+            if (this.autoSaveManager) {
+                const hasChanges = this.autoSaveManager.hasUnsavedChanges();
+                this.handleHasUnsavedChanges(hasChanges);
+            }
+        });
+
     }
 
     updateButtons() {
@@ -79,7 +88,7 @@ export class ButtonUpdateManager {
     }
 
     handleValidationChanged(results) {    
-        console.log('handleValidationChanged called with results:', results);
+        //console.log('handleValidationChanged called with results:', results);
         if (this.formType === 'writerCreate') {
             this.updateSaveButton(results.canPublish);
         } else {
@@ -93,13 +102,13 @@ export class ButtonUpdateManager {
 
     // This listens for an event emitted by autoSaveManager, at every input change, looking for unsaved changes. 
     handleHasUnsavedChanges(hasUnsavedChanges) {
-        console.log('handleHasUnsavedChanges called with:', hasUnsavedChanges);
+        //console.log('handleHasUnsavedChanges called with:', hasUnsavedChanges);
         this.hasUnsavedChanges = hasUnsavedChanges;
         this.updateSaveButton(this.hasUnsavedChanges);
     }
 
     handleFormUpdated() {
-        console.log('updateSaveButton called from handleFormUpdated()');
+        //console.log('updateSaveButton called from handleFormUpdated()');
         if (!this.hasAnId){
             this.hasAnId = true;
             this.updateDeleteButton();
@@ -118,7 +127,7 @@ export class ButtonUpdateManager {
         // This may receive a stateChange = hasUnsavedChanges or canAutosave
         // hasUnsavedChanges is connected to a listener on form inputs
         // canAutosave is connected to a listener on validation
-        console.log('updateSaveButton', stateChange);
+        //console.log('updateSaveButton', stateChange);
         if (this.saveButton) {
             this.saveButton.classList.toggle('disabled', !stateChange);
         }

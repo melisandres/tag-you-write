@@ -25,8 +25,9 @@ export class RefreshManager {
 
         // Move this after dataManager initialization
         this.isAPageRefresh = this.isPageRefresh();
-        
         window.refreshManagerInstance = this;
+
+        //console.log('RefreshManager initialized');
         
         this.initCustomEvents();
         this.init();
@@ -34,11 +35,13 @@ export class RefreshManager {
 
     initCustomEvents() {
         // Listen for any changes to the form
+        //console.log('Initializing custom events');
         eventBus.on('inputChanged', this.handleInputChanged.bind(this));
         eventBus.on('formUpdated', this.handleFormUpdated.bind(this));
         eventBus.on('manualSave', this.handleManualSave.bind(this));
         // Add event listener for restoringState for story page and forms   
         eventBus.on('restoringState', this.handleRestoringState.bind(this));
+        //console.log('Custom events initialized');
     }
 
     init() {    
@@ -97,36 +100,56 @@ export class RefreshManager {
     // It is async to enable removing the saved state after it is restored
     // But the localStorage is not being removed for now, because the state is being kept in order to handle returns to the story page from other pages. When the system becomes more complex, this may need to be revisited. 
     async handleRestoringState() {
+        //console.log('handleRestoringState called');
         this.isAPageRefresh = this.isPageRefresh();
-        console.log('handleRestoringState', 'isAPageRefresh', this.isAPageRefresh);
-
+        //console.log('isAPageRefresh:', this.isAPageRefresh);
+        
         const savedState = this.getSavedState();
-        if (!savedState) return;
-
-        // Ensure savedState.formData is properly parsed if it exists
-        if (savedState.formData && typeof savedState.formData === 'string') {
-            savedState.formData = JSON.parse(savedState.formData);
+        //console.log('savedState:', savedState);
+        
+        if (!savedState) {
+            //console.log('No saved state found');
+            return;
         }
+        // Clear form data if we're not on a form page
+/*         if (!this.isFormPage() && savedState.formData) {
+            const pageState = {...savedState};
+            pageState.formData = null;
+            pageState.formType = null;
+            localStorage.setItem('pageState', JSON.stringify(pageState));
+        } */
+        
+        const isFormPage = this.isFormPage();
+        const isStoriesPage = this.isStoriesPage();
 
-        // If we're on a form page and it's a refresh, restore form state
-        if (this.isFormPage() && this.isAPageRefresh) {
+
+/*         console.log('Current page type:', {
+            isFormPage,
+            isStoriesPage
+        }); */
+
+        // Only restore form state if we're on a form page AND it's a refresh
+        if (isFormPage && this.isAPageRefresh) {
+            //console.log('Attempting to restore form state');
             this.restoreFormState(savedState);
-            //this.autoSaveManager.setLastSavedContent(savedState.formData);
+            //console.log('Form state restored');
         }
 
-        // If we're on a stories page, restore stories state
-        if (this.isStoriesPage()) {
+        // Always restore stories state if we're on the stories page
+        if (isStoriesPage && savedState.showcase) {
+            //console.log('Attempting to restore stories state');
             await this.restoreState();
+            //console.log('Stories state restored');
         }
     }
 
-    // Check if the page is a refresh
+    // Check if the page is a refresh-- if it is trigger handlePageRefresh
     isPageRefresh() {
         const isRefresh = this.previousUrl === window.location.href;
         
         // If URL has ?new=true, it's not a refresh (it's a new game)
         if (window.location.search.includes('new=true')) {
-            console.log('isPageRefresh: NOT CAUSE new=true');
+            //console.log('isPageRefresh: NOT CAUSE new=true');
             return false;
         }
         if (isRefresh) {
@@ -138,7 +161,8 @@ export class RefreshManager {
 
     // Check if the page is a form page
     isFormPage() {
-        return document.querySelector('[data-form-type="root"], [data-form-type="iteration"], [data-form-type="addingNote"], [data-form-type="writerCreate"], [data-form-type="login"]') !== null;
+        const result = document.querySelector('[data-form-type]') !== null;
+        return result;
     }
 
         // Method to check if the form includes a password field
@@ -169,35 +193,52 @@ export class RefreshManager {
     }
 
     // Restore the form state
-    restoreFormState(savedState) {
-        console.log('restoreFormState', savedState);
-        if (savedState.formData) {
-            // Parse the JSON string if it's not already an object
-            const formData = typeof savedState.formData === 'string' 
-                ? JSON.parse(savedState.formData) 
-                : savedState.formData;
+    async restoreFormState(savedState) {
+        //console.log('restoreFormState', savedState);
+        if (!savedState.formData) return;
 
-            const form = document.querySelector('[data-form-type="root"], [data-form-type="iteration"], [data-form-type="addingNote"], [data-form-type="writerCreate"], [data-form-type="login"]');
-            if (form) {
-                Object.entries(formData).forEach(([key, value]) => {
-                    const input = form.elements[key];
-                    if (input) {
-                        // Prevent triggering input events during initial restoration
-                        input.value = value;
-                    }
-                });
+        const form = document.querySelector('[data-form-type="root"], [data-form-type="iteration"], [data-form-type="addingNote"], [data-form-type="writerCreate"], [data-form-type="login"]');
 
-                // Set the last database state in autoSaveManager
-                if (savedState.lastDatabaseState && this.autoSaveManager) {
-                    console.log("about to call setlastsavedcontent");
-                    this.autoSaveManager.setLastSavedContent(savedState.lastDatabaseState);
-                }
+        if (!form) return;
 
-                // Trigger form restored event
-                eventBus.emit('formRestored', savedState.formData);
+        // Parse the form data
+        const formData = typeof savedState.formData === 'string' 
+            ? JSON.parse(savedState.formData) 
+            : savedState.formData;
+
+        // Then restore form values
+        Object.entries(formData).forEach(([key, value]) => {
+            const input = form.elements[key];
+            if (input) {
+                input.value = value;
+                // Trigger input event for validation and word count
+                const event = new Event('input', { bubbles: true, cancelable: true });
+                input.dispatchEvent(event);
             }
+        });
+
+        // Set form activity state if we have an ID
+        if (formData.id !== '') {
+            form.setAttribute('data-form-activity', 'editing');
         }
+
+        // Set the last database state in autoSaveManager
+        if (savedState.lastDatabaseState && this.autoSaveManager) {
+            //console.log("Setting last database state before form restoration");
+            this.autoSaveManager.setLastSavedContent(savedState.lastDatabaseState, false);
+        } 
+
+        // Force a check for unsaved changes
+        if (this.autoSaveManager) {
+            const hasChanges = this.autoSaveManager.hasUnsavedChanges();
+            eventBus.emit('hasUnsavedChanges', hasChanges);
+        }
+
+        // Emit events
+        eventBus.emit('formRestored', formData);
+        eventBus.emit('formUpdated');
     }
+    
 
     handleInputChanged() {
         this.saveFormData();
@@ -308,8 +349,9 @@ export class RefreshManager {
         }
     }
 
+    // This is used to restore the state of the page with the game list
     async restoreState() {
-        console.log('Restoring state...');
+        //console.log('Restoring state...');
         const savedState = JSON.parse(localStorage.getItem('pageState'));
         if (!savedState) {
             return;
@@ -355,6 +397,7 @@ export class RefreshManager {
                 // Wait a bit for D3 to initialize
                 await new Promise(resolve => setTimeout(resolve, 100));
                 
+                // TODO: seems like a duplicate of gameListRenderer.js line 247-- HOWEVER... that is called when the filters are changed... to apply to the game when it returns in the list of games as filters change... we may want to consolidate these and just grab them from the same place when they are needed. 
                 // Add tree-specific zoom transform restoration
                 if (savedState.zoomTransform) {
                     const svg = d3.select('#showcase svg');

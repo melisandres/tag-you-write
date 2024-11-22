@@ -26,9 +26,10 @@ export class DataManager {
                 totalItems: 0
             },
             filters: {
-                hasContributed: null,  // null = all, true = my games
-                gameState: 'all',
-                // gameState: null,  // null = all, 'open', 'closed', 'pending'
+                hasContributed: null,  // null = all, 'contributor', 'mine'
+                gameState: 'all',  // 'all', 'open', 'closed', 'pending'
+                // FUTURE:
+                // Bookmarked: 'bookmarked', 'unbookmarked', all? 
                 // sort: 'newest',   // 'newest', 'oldest', etc.
                 // search: ''        // search term
             },
@@ -38,7 +39,6 @@ export class DataManager {
         this.recentlyModifiedGames = new Set(); // Track modified game IDs
         this.treeChecks = new Map(); // Store last check time for each tree
 
-        // Subscribe to relevant events
         // Subscribe to relevant events
         eventBus.on('requestGameData', (gameId) => {
             const gameData = this.cache.games.get(gameId)?.data;
@@ -67,9 +67,9 @@ export class DataManager {
                 totalItems: 0
             },
             filters: {
-                hasContributed: null,  // null = all, true = my games
+                hasContributed: null,  // null = all, 'contributor', 'mine'
+                gameState: 'all',  // 'all', 'open', 'closed', 'pending'
                 // Future filters:
-                // gameState: null,  // null = all, 'open', 'closed', 'pending'
                 // sort: 'newest',   // 'newest', 'oldest', etc.
                 // search: ''        // search term
             },
@@ -131,6 +131,7 @@ export class DataManager {
 
     // Add method to check if games need refresh
     async checkForUpdates() {
+        console.log('checking for updates');
         if (this.cache.lastGamesCheck === null) {
             this.cache.lastGamesCheck = Date.now();
             this.saveCache();
@@ -229,6 +230,7 @@ export class DataManager {
     }
 
     getTree(rootId) {
+        console.log('getTree', rootId);
         return this.cache.trees.get(rootId);
     }
 

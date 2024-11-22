@@ -664,12 +664,19 @@ class ControllerText extends Controller{
                 'note_date' => $input['note_date'],
                 'id' => $input['id']
             ];
-/*             $updateNote['note'] = $input['note'];
-            $updateNote['note_date'] = $input['note_date'];
-            $updateNote['id'] = $input['id']; */
+
             $update = $text->update($updateNote);
 
-            // TODO: you'll probably want to access this async too with a little message :)
+            //Update the game's modified_at, so that you can show the "unseen" count
+            if ($update) {
+                $game = new Game;
+                $game_id = $text->selectGameId($textId);
+                $game->update([
+                    'id' => $game_id, 
+                    'modified_at' => date('Y-m-d H:i:s')
+                ]);
+            }
+
             $this->sendJsonResponse($update, $update ? 'Note updated' : 'Failed to update note', 'text');  
             exit;
         }else{

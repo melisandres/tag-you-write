@@ -40,6 +40,11 @@ export class GameListRenderer {
             this.dataManager.initializeGamesData(gamesData);
         }
         this.initialLoadComplete = true;
+
+        // Check if gamesData is empty and display message
+        if (!gamesData || gamesData.length === 0) {
+            this.container.insertAdjacentHTML('beforeend', '<p class="no-games">No games found matching your current filters</p>');
+        }
     }
 
     loadGamesData() {
@@ -190,6 +195,12 @@ export class GameListRenderer {
 
         // Clear existing content
         this.container.innerHTML = '';
+
+        // Message if the games list is empty
+        if (games.length === 0) {
+            this.container.insertAdjacentHTML('beforeend', '<p class="no-games">No games found matching your current filters</p>');
+            return;
+        }
         
         // Render the games
         games.forEach(game => {

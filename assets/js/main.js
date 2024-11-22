@@ -33,7 +33,7 @@ import { FilterManager } from './filterManager.js';
 window.eventBus = eventBus;
 
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
 
   const path = window.location.origin + "/tag-you-write-repo/tag-you-write/";
   
@@ -82,6 +82,11 @@ document.addEventListener("DOMContentLoaded", () => {
       console.warn('RefreshManager already exists. Using existing instance.');
   }
 
+   // Trigger state restoration
+  /*  console.log('Triggering state restoration'); // Add this debug log
+   eventBus.emit('restoringState');
+   console.log('State restoration triggered'); // Add this debug log */
+
 
   // Initialize VoteManager
   new VoteManager(path, warningManager);
@@ -100,10 +105,9 @@ document.addEventListener("DOMContentLoaded", () => {
   new FormManager(autoSaveManager, path);
   new ValidationManager();
 
-  // Emit the restoringState event -- to restore the state on initial load
-  eventBus.emit('restoringState');
 
-  //new ValidationManager(formManager);
+
+
 
   // Initialize InstaPublishManager and InstaDeleteManager
   new InstaPublishManager(path, warningManager);
@@ -127,6 +131,27 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize managers independently
   const updateManager = new UpdateManager(path);
   updateManager.initialize();
+
+  // Wait for initial state restoration before continuing
+  const handleInitialState = async () => {
+      const refreshManager = window.refreshManager;
+      if (!refreshManager) return;
+
+      console.log('Triggering state restoration'); // Add this debug log
+      eventBus.emit('restoringState');
+      console.log('State restoration triggered');
+
+      // Only restore state if we're returning to the stories page
+     /*  if (refreshManager.isStoriesPage()) {
+          const savedState = refreshManager.getSavedState();
+          if (savedState && savedState.showcase) {
+              await refreshManager.restoreState();
+          }
+      } */
+  };
+
+  // Call after all managers are initialized
+  handleInitialState();
 
   // Handle browser refresh by saving state before unload
   window.addEventListener('beforeunload', (event) => {

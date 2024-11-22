@@ -35,6 +35,7 @@ export class AutoSaveManager {
         // Now check for changes and start timers if needed
         const hasChanges = this.hasUnsavedChanges();
         if (hasChanges) {
+            eventBus.emit('hasUnsavedChanges', hasChanges);
             this.startAutoSaveTimer();
             this.startContinuousTypingTimer();
         }
@@ -43,7 +44,7 @@ export class AutoSaveManager {
     // Must check if validation fails for autosave
     handleValidationChanged(results) {
         this.canAutosave = results.canAutosave;
-        console.log("can autosave:", this.canAutosave);
+        //console.log("can autosave:", this.canAutosave);
 
         if (!this.canAutosave) {
             const failedFields = Object.entries(results.fields)
@@ -98,17 +99,19 @@ export class AutoSaveManager {
     }
 
     // When the page is refreshed, the lastSavedContent is set from localStorage
-    setLastSavedContent(content) {
+    setLastSavedContent(content, checkForChanges = true) {
         this.lastSavedContent = typeof content === 'string' 
-        ? JSON.parse(content) 
-        : content;
+            ? JSON.parse(content) 
+            : content;
         
-        console.log('setLastSavedContent', this.lastSavedContent);
-/*         // Check for unsaved changes immediately after setting last saved content
-        if (this.form) {
+        //console.log('setLastSavedContent', this.lastSavedContent);
+        // Check for unsaved changes immediately after setting last saved content
+        //TODO: this was commented out... I don't know why. I needed to put it back
+        // because it allows the save button to be availabel after a page refresh on a form that has unsaved changes. 
+        if (this.form && checkForChanges) {
             const hasChanges = this.hasUnsavedChanges();
             eventBus.emit('hasUnsavedChanges', hasChanges);
-        } */
+        }
     }
 
     handleInputChange() {
@@ -174,9 +177,15 @@ export class AutoSaveManager {
         const dataObj = Object.fromEntries(formData.entries());
         const currentData = JSON.stringify(dataObj);
     
+/*         console.log('hasUnsavedChanges check:', {
+            currentData,
+            lastSavedContent: this.lastSavedContent,
+            isLastSavedNull: this.lastSavedContent === null
+        }); */
         
         // Handle null lastSavedContent case
         if (this.lastSavedContent === null) {
+            //console.log('lastSavedContent is null, returning true');
             if (this.previousHasChangesState !== true) {
                 this.previousHasChangesState = true;
                 eventBus.emit('hasUnsavedChanges', true);
@@ -189,8 +198,15 @@ export class AutoSaveManager {
                 ? this.lastSavedContent 
                 : JSON.stringify(this.lastSavedContent);
                 
+/*             console.log('Comparing:', {
+                currentData,
+                lastSavedString,
+                areEqual: currentData === lastSavedString
+            }); */
+
             // Quick equality check first
             if (currentData === lastSavedString) {
+                //console.log('Data matches exactly, no changes');
                 if (this.previousHasChangesState !== false) {
                     this.previousHasChangesState = false;
                     eventBus.emit('hasUnsavedChanges', false);
@@ -199,12 +215,16 @@ export class AutoSaveManager {
             }
                 
             const differences = this.getDifferences(lastSavedString, currentData);
+            //console.log('Differences found:', differences);
+
             const hasOnlyIdDifference = Object.keys(differences).length === 1 && differences.hasOwnProperty('id');
-            
-            const hasDifferences = Object.keys(differences).length > 0 
-                && !hasOnlyIdDifference;
-    
-            // Only emit if the state has changed
+            const hasDifferences = Object.keys(differences).length > 0 && !hasOnlyIdDifference;
+
+/*             console.log('Difference analysis:', {
+                hasOnlyIdDifference,
+                hasDifferences
+            }); */
+
             if (this.previousHasChangesState !== hasDifferences) {
                 this.previousHasChangesState = hasDifferences;
                 eventBus.emit('hasUnsavedChanges', hasDifferences);
@@ -214,6 +234,7 @@ export class AutoSaveManager {
         }
         
         // Default case
+        //console.log('No lastSavedContent, returning false');
         if (this.previousHasChangesState !== false) {
             this.previousHasChangesState = false;
             eventBus.emit('hasUnsavedChanges', false);
