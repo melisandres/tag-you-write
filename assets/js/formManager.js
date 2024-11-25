@@ -37,6 +37,9 @@ export class FormManager {
     }
 
     initializeWysiwygEditors() {
+        // Initialize the global CKEditor instances container if it doesn't exist
+        window.CKEditorInstances = window.CKEditorInstances || {};
+
         const textareas = document.querySelectorAll('textarea');
         textareas.forEach(textarea => {
             const container = document.createElement('div');
@@ -49,6 +52,9 @@ export class FormManager {
                     placeholder: textarea.placeholder
                 })
                 .then(editor => {
+                    // Store editor instance globally
+                    window.CKEditorInstances[textarea.name] = editor;
+
                     // Set initial content
                     if (textarea.value) {
                         editor.setData(textarea.value);
@@ -60,9 +66,15 @@ export class FormManager {
                         const event = new Event('input', { bubbles: true });
                         textarea.dispatchEvent(event);
                     });
+
+                   // Emit when this specific editor is ready
+                    eventBus.emit('editorReady', {
+                        name: textarea.name,
+                        editor: editor
+                    });
                 })
                 .catch(error => {
-                    console.error(error);
+                    console.error('Error initializing CKEditor:', error);
                 });
         });
     }

@@ -92,7 +92,7 @@ export class DataManager {
             console.error('Expected array of games, got:', games);
             return [];
         }
-
+        console.log('updateGamesData', games);
         const updatedGameIds = [];
         games.forEach(game => {
             const existingGame = this.cache.games.get(game.id);
@@ -101,7 +101,9 @@ export class DataManager {
                 existingGame.data.text_count !== game.text_count ||
                 existingGame.data.seen_count !== game.seen_count ||
                 existingGame.data.unseen_count !== game.unseen_count ||
-                existingGame.data.title !== game.title;
+                existingGame.data.title !== game.title ||
+                existingGame.data.voteCount !== game.voteCount ||
+                existingGame.data.hasVoted !== game.hasVoted;
                 
             if (gameChanged) {
                 this.cache.games.set(game.id, {
@@ -131,59 +133,67 @@ export class DataManager {
 
     // Add method to check if games need refresh
     async checkForUpdates() {
-        console.log('checking for updates');
-        if (this.cache.lastGamesCheck === null) {
-            this.cache.lastGamesCheck = Date.now();
-            this.saveCache();
+        if (!navigator.onLine) {
+            console.log('Browser is offline, skipping update check');
             return false;
         }
-        const filters = {
-            hasContributed: false,  // or get from current filter state
-            // later we can add: isOpen, isPending, searchTerm, etc.
-        };
 
         try {
+            console.log('Sending update check request...');
             const response = await fetch(`${this.path}game/modifiedSince`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    lastCheck: this.cache.lastGamesCheck,
-                    filters
+                    lastCheck: this.cache.lastGamesCheck || 0,
+                    filters: this.cache.filters || {}
                 })
             });
 
-            const rawText = await response.text();
-            console.log('Raw server response:', rawText);
+            console.log('Update check response:', response.status);
 
-            if (rawText.trim().startsWith('{') || rawText.trim().startsWith('[')) {
-                const modifiedGames = JSON.parse(rawText);
-                if (modifiedGames.length > 0) {
-                    // Clear previous modifications
-                    this.recentlyModifiedGames.clear();
-                    
-                    // Update cache and track modified games
-                    modifiedGames.forEach(game => {
-                        this.cache.games.set(game.id, {
-                            data: game,
-                            timestamp: Date.now()
-                        });
-                        this.recentlyModifiedGames.add(game.id);
-                    });
-
-                    this.cache.lastGamesCheck = Date.now();
-                    this.saveCache();
-                    return true;
-                }
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-            
-            this.cache.lastGamesCheck = Date.now();
-            return false;
+
+            const data = await response.json();
+            console.log('Update check data:', data);
+            return this.handleUpdateResponse(data);
         } catch (error) {
-            console.error('Error checking for updates:', error);
+            if (error.name === 'AbortError' || error.name === 'TypeError') {
+                console.log('Update check error:', error.message);
+                return false;
+            }
+            console.error('Update check failed:', error);
             return false;
         }
+    }
+
+    handleUpdateResponse(modifiedGames) {
+        if (!Array.isArray(modifiedGames)) {
+            console.error('Expected array of modified games');
+            return false;
+        }
+
+        if (modifiedGames.length > 0) {
+            // Clear previous modifications
+            this.recentlyModifiedGames = new Set();
+            
+            // Update cache and track modified games
+            modifiedGames.forEach(game => {
+                this.cache.games.set(game.id, {
+                    data: game,
+                    timestamp: Date.now()
+                });
+                this.recentlyModifiedGames.add(game.id);
+            });
+
+            this.cache.lastGamesCheck = Date.now();
+            this.saveCache();
+            return true;
+        }
+        
+        this.cache.lastGamesCheck = Date.now();
+        return false;
     }
 
     // Load cache from localStorage

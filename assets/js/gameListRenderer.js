@@ -4,10 +4,13 @@ import { SVGManager } from './svgManager.js';
 
 export class GameListRenderer {
     constructor(container, path, uiManager) {
-        this.container = container;
+        if (!container) return;
+        
         this.path = path;
         this.dataManager = window.dataManager;
         this.initialLoadComplete = false;
+        this.container = container;
+        this.uiManager = uiManager;
         
         // Get user ID from meta tag or data attribute
         const userDataElement = document.querySelector('meta[name="user"]');
@@ -27,8 +30,6 @@ export class GameListRenderer {
         // Add state tracking
         this.currentViewState = null;
 
-        this.uiManager = uiManager;
-        
         // Listen for filter updates
         eventBus.on('filterApplied', () => this.saveCurrentViewState());
         eventBus.on('gamesListUpdated', () => this.restoreViewState());
@@ -164,6 +165,11 @@ export class GameListRenderer {
     }
 
     updateExistingGame(gameElement, gameData) {
+        if (!gameElement || !gameData) {
+            console.warn('Missing element or data for game update');
+            return;
+        }
+
         // Ensure boolean conversion is consistent
         const isOpen = gameData.openForChanges === '1' || gameData.openForChanges === true;
         const hasContributed = gameData.hasContributed === '1' || gameData.hasContributed === true;

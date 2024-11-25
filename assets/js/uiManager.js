@@ -119,13 +119,6 @@ export class UIManager {
     this.storyManager.showStoryInModal(textId);
   }
 
-    // Handle the showing of the story modal
-    // by being send the id directly. 
-/*     drawTreeModal(textId){
-      this.storyManager.showStoryInModal(textId)
-    }
- */
-
   // To be accessed while doing automatic refreshes
   createShowcaseContainer(rootStoryId) {
     let container = document.querySelector('#showcase');

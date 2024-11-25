@@ -2,10 +2,13 @@ import { eventBus } from './eventBus.js';
 import { GameListRenderer } from './gameListRenderer.js';
 
 export class GameListManager {
-    constructor(container, path, uiManager) {
-        if (!container) {
-            console.log('No games container found, skipping GameListManager initialization');
-            return;
+    constructor(path, uiManager) {
+        // TODO: If you want to poll for updates while on the form page, you'll have to stop checking for a the stories container... and adjust the logic. 
+        this.container = document.querySelector('.stories');
+        if (!this.container) return;
+
+        if (window.gameListManagerInstance) {
+            return window.gameListManagerInstance;
         }
         
         this.path = path;
@@ -13,7 +16,13 @@ export class GameListManager {
         this.pollingIntervalId = null;
         this.pollingDuration = 30000;
         
-        this.renderer = new GameListRenderer(container, path, uiManager);
+        this.uiManager = uiManager;
+        // Make sure uiManager has required methods
+        if (!this.uiManager || typeof this.uiManager.createShowcaseContainer !== 'function') {
+            console.error('UIManager missing required methods');
+            return;
+        }
+        this.renderer = new GameListRenderer(this.container, path, this.uiManager);
 
         // Listen for control events
         eventBus.on('startPolling', () => this.startUpdateChecker());
@@ -34,19 +43,36 @@ export class GameListManager {
         // Set filters in DataManager
         this.dataManager.setFilters(initialFilters);
 
+        window.gameListManagerInstance = this;
+
         // No need to trigger immediate refresh since page was just rendered
     }
 
     startUpdateChecker() {
-        if (this.pollingIntervalId) this.stopUpdateChecker();
+        console.log('Starting update checker...');  // Debug log
+        
+        if (this.pollingIntervalId) {
+            console.log('Stopping existing update checker...');  // Debug log
+            this.stopUpdateChecker();
+        }
         
         this.pollingIntervalId = setInterval(async () => {
-            const hasUpdates = await this.dataManager.checkForUpdates();
-            if (hasUpdates) {
-                const modifiedGames = this.dataManager.getRecentlyModifiedGames();
-                eventBus.emit('gamesModified', modifiedGames);
+            console.log('Polling for updates...');  // Debug log
+            try {
+                const hasUpdates = await this.dataManager.checkForUpdates();
+                console.log('Update check result:', hasUpdates);  // Debug log
+                
+                if (hasUpdates) {
+                    const modifiedGames = this.dataManager.getRecentlyModifiedGames();
+                    console.log('Modified games:', modifiedGames);  // Debug log
+                    eventBus.emit('gamesModified', modifiedGames);
+                }
+            } catch (error) {
+                console.error('Polling error:', error);
             }
         }, this.pollingDuration);
+        
+        console.log('Update checker started with interval:', this.pollingDuration);  // Debug log
     }
 
     stopUpdateChecker() {

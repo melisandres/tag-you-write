@@ -55,6 +55,13 @@ class ControllerVote extends Controller {
         //check if you are getting gameID
         $text = new Text;
         $gameId = $text->selectGameId($text_id); 
+
+        // update the game modified_at timestamp
+        $game = new Game;
+        $game->update([
+            'id' => $gameId,
+            'modified_at' => date('Y-m-d H:i:s')
+        ]);
     
         // Build the response data
         $response = [

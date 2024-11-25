@@ -63,10 +63,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   const uiManager = new UIManager(storyManager, modal);
 
   // Only initialize GameListManager if we're on the games list page
-  const gamesContainer = document.querySelector('.stories');
-  if (gamesContainer) {
-      const gameListManager = new GameListManager(gamesContainer, path, uiManager);
-  }
+  //const gamesContainer = document.querySelector('.stories');
+/*   if (gamesContainer) { */
+/*       const gameListManager = new GameListManager( gamesContainer,  path, uiManager); */
+/*   } */
 
   // Initialize GameManager
   new GameManager(path);
@@ -105,13 +105,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   new FormManager(autoSaveManager, path);
   new ValidationManager();
 
-
-
-
-
   // Initialize InstaPublishManager and InstaDeleteManager
   new InstaPublishManager(path, warningManager);
-  new InstaDeleteManager(path, storyManager, refreshManager);
+  new InstaDeleteManager(path);
 
   // Initialize UpdateManagers
   new ShelfUpdateManager(path);
@@ -132,26 +128,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const updateManager = new UpdateManager(path);
   updateManager.initialize();
 
-  // Wait for initial state restoration before continuing
-  const handleInitialState = async () => {
-      const refreshManager = window.refreshManager;
-      if (!refreshManager) return;
-
-      console.log('Triggering state restoration'); // Add this debug log
-      eventBus.emit('restoringState');
-      console.log('State restoration triggered');
-
-      // Only restore state if we're returning to the stories page
-     /*  if (refreshManager.isStoriesPage()) {
-          const savedState = refreshManager.getSavedState();
-          if (savedState && savedState.showcase) {
-              await refreshManager.restoreState();
-          }
-      } */
-  };
-
-  // Call after all managers are initialized
-  handleInitialState();
+  // No need for separate handleInitialState
 
   // Handle browser refresh by saving state before unload
   window.addEventListener('beforeunload', (event) => {
@@ -162,4 +139,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   const filterManager = new FilterManager();
+
+  // Initialize GameListManager
+  const gameListManager = new GameListManager(path, uiManager);
+  
+  // Start polling if we're on the right page
+  if (document.querySelector('.stories-page')) {  // Adjust selector as needed
+      console.log('Starting game list polling...');
+      gameListManager.startUpdateChecker();
+  }
 });

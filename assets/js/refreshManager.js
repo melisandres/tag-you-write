@@ -4,15 +4,19 @@ import { Modal } from './modal.js' ;
 export class RefreshManager {
     constructor(path, uiManager, storyManager, autoSaveManager) {
         if (window.refreshManagerInstance) {
+            // Ensure pendingEditorContent exists on the existing instance
+/*             if (!window.refreshManagerInstance.pendingEditorContent) {
+                window.refreshManagerInstance.pendingEditorContent = new Map();
+            } */
             return window.refreshManagerInstance;
         }
         
         this.path = path;
         this.textPagePath = `${path}text/`;
         this.storyManager = storyManager;
+        this.uiManager = uiManager;
         this.autoSaveManager = autoSaveManager;
         this.state = {};
-        this.uiManager = uiManager;        
         this.previousUrl = sessionStorage.getItem('previousUrl');
         this.shouldRefreshGames = false;
         
@@ -25,10 +29,13 @@ export class RefreshManager {
 
         // Move this after dataManager initialization
         this.isAPageRefresh = this.isPageRefresh();
-        window.refreshManagerInstance = this;
+        this.isRestoring = false;
+        this.isRefreshing = false;
+        this.pendingRefresh = null;
+        this.initialized = false;
+        this.pendingEditorContent = new Map();
 
-        //console.log('RefreshManager initialized');
-        
+        window.refreshManagerInstance = this;
         this.initCustomEvents();
         this.init();
     }
@@ -42,33 +49,56 @@ export class RefreshManager {
         // Add event listener for restoringState for story page and forms   
         eventBus.on('restoringState', this.handleRestoringState.bind(this));
         //console.log('Custom events initialized');
+        eventBus.on('editorReady', this.handleEditorReady.bind(this));
     }
 
     init() {    
+        if (this.initialized) return;
+        this.initialized = true;
+
         // Prevent default refresh for games page
         window.addEventListener('load', () => {
-            if (this.isStoriesPage() && this.isPageRefresh()) {
+            //if (this.isStoriesPage() /* && this.isPageRefresh() */) {
                 // Prevent the default refresh behavior
-                window.stop();
-                
-                // Use our update mechanism instead
-                window.dataManager.checkForUpdates().then(hasUpdates => {
-                    if (hasUpdates) {
-                        const modifiedGames = window.dataManager.getRecentlyModifiedGames();
-                        modifiedGames.forEach(game => {
-                            eventBus.emit('updateGame', game);
-                        });
-                    }
-                });
-            }
-        });
+                this.handleInitialLoad();
+            //}
+        }, { once: true });
 
         window.addEventListener('beforeunload', (e) => {
             if (this.isStoriesPage() && !this.shouldRefreshGames) {
-                //e.preventDefault();
                 eventBus.emit('refreshGames');
+                this.saveState();
+                this.saveCurrentPageUrl();
             }
         });
+    }
+
+    async handleInitialLoad() {
+        if (this.isRefreshing) {
+            console.log('Refresh already in progress, skipping...');
+            return;
+        }
+        
+        this.isRefreshing = true;
+
+        try {
+            document.body.classList.add('refreshing');
+            // Single state restoration
+            await this.restoreState();
+        } finally {
+            document.body.classList.remove('refreshing');
+            this.isRefreshing = false;
+        }
+    }
+
+    handleEditorReady({ name, editor }) {
+        // Check if we have pending content for this editor
+        if (this.pendingEditorContent && this.pendingEditorContent.has(name)) {
+            const content = this.pendingEditorContent.get(name);
+            editor.setData(content);
+            console.log(`Updated CKEditor content for ${name}:`, content);
+            this.pendingEditorContent.delete(name);
+        }
     }
 
     triggerRefreshGames() {
@@ -144,7 +174,7 @@ export class RefreshManager {
     }
 
     // Check if the page is a refresh-- if it is trigger handlePageRefresh
-    isPageRefresh() {
+/*     isPageRefresh() {
         const isRefresh = this.previousUrl === window.location.href;
         
         // If URL has ?new=true, it's not a refresh (it's a new game)
@@ -157,6 +187,11 @@ export class RefreshManager {
             return this.handlePageRefresh();
         }
         return true;
+    } */
+
+    isPageRefresh() {
+        const isRefresh = this.previousUrl === window.location.href;
+        return isRefresh && !window.location.search.includes('new=true');
     }
 
     // Check if the page is a form page
@@ -194,7 +229,6 @@ export class RefreshManager {
 
     // Restore the form state
     async restoreFormState(savedState) {
-        //console.log('restoreFormState', savedState);
         if (!savedState.formData) return;
 
         const form = document.querySelector('[data-form-type="root"], [data-form-type="iteration"], [data-form-type="addingNote"], [data-form-type="writerCreate"], [data-form-type="login"]');
@@ -215,11 +249,27 @@ export class RefreshManager {
                 const event = new Event('input', { bubbles: true, cancelable: true });
                 input.dispatchEvent(event);
             }
+
+            // Special handling for CKEditor 5
+            if (['writing', 'prompt', 'note'].includes(key)) {
+                // First try to get existing editor instance
+                const editor = window.CKEditorInstances?.[key];
+                if (editor) {
+                    // Editor already exists, update it directly
+                    editor.setData(value);
+                    console.log(`Updated CKEditor content for ${key}:`, value);
+                } else {
+                    // Store content to be set when editor becomes ready
+                    this.pendingEditorContent.set(key, value);
+                    console.log(`Stored pending content for ${key}`);
+                }
+            }
         });
 
         // Set form activity state if we have an ID
         if (formData.id !== '') {
             form.setAttribute('data-form-activity', 'editing');
+            //eventBus.emit('formUpdated');
         }
 
         // Set the last database state in autoSaveManager
@@ -351,98 +401,95 @@ export class RefreshManager {
 
     // This is used to restore the state of the page with the game list
     async restoreState() {
-        //console.log('Restoring state...');
-        const savedState = JSON.parse(localStorage.getItem('pageState'));
-        if (!savedState) {
+        console.log('restoreState called from:', new Error().stack);
+        
+        if (this.isRestoring) {
+            console.log('Already restoring state, skipping...');
             return;
         }
+        this.isRestoring = true;
 
-        // Handle form state restoration
-        if (savedState.formData && savedState.formType && this.isAPageRefresh) {
-            const form = document.querySelector(`[data-form-type="${savedState.formType}"]`);
-            if (form) {
-                const formData = JSON.parse(savedState.formData);
-                Object.keys(formData).forEach(key => {
-                    const input = form.elements[key];
-                    if (input) {
-                        input.value = formData[key];
-                        // Trigger input event to update validation and word count
-                        const event = new Event('input', { bubbles: true, cancelable: true });
-                        input.dispatchEvent(event);
-                    }
-                });
-                if(formData.id !== '') {
-                    form.setAttribute('data-form-activity', 'editing');
-                    eventBus.emit('formUpdated');
-                }
+        try {
+            // Check for saved state
+            const savedState = JSON.parse(localStorage.getItem('pageState'));
+            if (!savedState) return;
+
+            // Handle form state restoration
+            if (savedState.formData && savedState.formType && this.isAPageRefresh) {
+               await this.restoreFormState(savedState);
             }
-        }
 
-        // Create showcase container and restore view state
-        const container = this.uiManager.createShowcaseContainer(savedState.rootStoryId);
-        if (container) {
-            if (savedState.showcase === 'shelf') {
-                await this.uiManager.drawShelf(savedState.rootStoryId, container).then(() => {
-                    this.restoreDrawers(savedState);
-                });
-            } else if (savedState.showcase === 'tree') {
-                console.log('Restoring tree view');
-                
-                // Set flag before drawing tree
-                window.skipInitialTreeTransform = true;
-                
-                // Wait for tree to be drawn
-                await this.uiManager.drawTree(savedState.rootStoryId, container);
-                
-                // Wait a bit for D3 to initialize
-                await new Promise(resolve => setTimeout(resolve, 100));
-                
-                // TODO: seems like a duplicate of gameListRenderer.js line 247-- HOWEVER... that is called when the filters are changed... to apply to the game when it returns in the list of games as filters change... we may want to consolidate these and just grab them from the same place when they are needed. 
-                // Add tree-specific zoom transform restoration
-                if (savedState.zoomTransform) {
-                    const svg = d3.select('#showcase svg');
-                    if (!svg.empty() && window.treeVisualizerInstance?.zoom) {
-                        const transform = savedState.zoomTransform;
+            // Create showcase container and restore view state
+            if (this.isStoriesPage()) {
+                if (!savedState.rootStoryId) {
+                    console.log('No root story ID found, skipping showcase container creation');
+                    return;
+                }
+                const container = this.uiManager.createShowcaseContainer(savedState.rootStoryId);
+                console.log('this is my container:', container);
+                if (container) {
+                    console.log('container exists');
+                    if (savedState.showcase === 'shelf') {
+                        console.log('Restoring shelf view');
+                        await this.uiManager.drawShelf(savedState.rootStoryId, container);
+                        this.restoreDrawers(savedState);
+                    } else if (savedState.showcase === 'tree') {
+                        console.log('Restoring tree view');
+                        window.skipInitialTreeTransform = true;
                         
-                        // Only apply if values are valid
-                        if (transform && 
-                            typeof transform.x === 'number' && 
-                            typeof transform.y === 'number' && 
-                            typeof transform.k === 'number' && 
-                            !isNaN(transform.x) && 
-                            !isNaN(transform.y) && 
-                            !isNaN(transform.k)) {
-                            
-                            try {
-                                // Create new transform
-                                const newTransform = d3.zoomIdentity
-                                    .translate(transform.x, transform.y)
-                                    .scale(transform.k);
-                                
-                                // Apply transform
-                                window.treeVisualizerInstance.zoom.transform(svg, newTransform);
-                            } catch (error) {
-                                console.error('Failed to apply transform:', error);
-                            }
+                        await this.uiManager.drawTree(savedState.rootStoryId, container);
+                        
+                        // Wait for D3 initialization
+                        //await new Promise(resolve => setTimeout(resolve, 100));
+                        
+                        if (savedState.zoomTransform) {
+                            await new Promise(resolve => setTimeout(resolve, 100));
+                            this.restoreTreeTransform(savedState.zoomTransform);
                         }
+                        window.skipInitialTreeTransform = false;
                     }
                 }
-                
-                // Reset flag
-                window.skipInitialTreeTransform = false;
+
+                // Restore modal state
+                if (savedState.modal && savedState.modalTextId) {
+                    await this.storyManager.showStoryInModal(savedState.modalTextId);
+                }
+
+            // Restore scroll position
+            if (savedState.scrollPosition) {
+                setTimeout(() => {
+                    window.scrollTo(savedState.scrollPosition.x, savedState.scrollPosition.y);
+                }, 100);
             }
+        } } catch (error) {
+            console.error('Error restoring state:', error);
+        } finally {
+            this.isRestoring = false;
         }
+    }
 
-        // Restore modal state
-        if (savedState.modal) {
-            this.storyManager.showStoryInModal(savedState.modalTextId);
-        }
-
-        // Restore scroll position
-        if (savedState.scrollPosition) {
-            setTimeout(() => {
-                window.scrollTo(savedState.scrollPosition.x, savedState.scrollPosition.y);
-            }, 100);
+    // Helper method to restore tree transform
+    restoreTreeTransform(transform) {
+        const svg = d3.select('#showcase svg');
+        if (!svg.empty() && window.treeVisualizerInstance?.zoom) {
+            if (transform && 
+                typeof transform.x === 'number' && 
+                typeof transform.y === 'number' && 
+                typeof transform.k === 'number' && 
+                !isNaN(transform.x) && 
+                !isNaN(transform.y) && 
+                !isNaN(transform.k)) {
+                
+                try {
+                    const newTransform = d3.zoomIdentity
+                        .translate(transform.x, transform.y)
+                        .scale(transform.k);
+                    
+                    window.treeVisualizerInstance.zoom.transform(svg, newTransform);
+                } catch (error) {
+                    console.error('Failed to apply transform:', error);
+                }
+            }
         }
     }
 
@@ -458,8 +505,46 @@ export class RefreshManager {
         });
     }
 
+    async handlePageRefresh() {
+        // Prevent multiple simultaneous refreshes
+        if (this.isRefreshing) {
+            console.log('Refresh already in progress, skipping...');
+            return false;
+        }
+
+        if (!this.isStoriesPage()) {
+            return true;
+        }
+
+        this.isRefreshing = true;
+        
+        try {
+            document.body.classList.add('refreshing');
+            
+            // Single update check
+            const hasUpdates = await window.dataManager.checkForUpdates();
+            if (hasUpdates) {
+                const modifiedGames = window.dataManager.getRecentlyModifiedGames();
+                modifiedGames.forEach(game => {
+                    eventBus.emit('updateGame', game);
+                });
+            }
+
+            // Single state restoration
+            await this.restoreState();
+            
+        } catch (error) {
+            console.error('Error during page refresh:', error);
+        } finally {
+            document.body.classList.remove('refreshing');
+            this.isRefreshing = false;
+        }
+        
+        return false;
+    }
+
     // Handle page refresh
-    handlePageRefresh() {
+   /*  handlePageRefresh() {
         if (this.isStoriesPage()) {    
             // Make sure dataManager exists before using it
             if (!this.dataManager) {
@@ -487,5 +572,5 @@ export class RefreshManager {
             return false;
         }
         return true; // Allow refresh for other pages
-    }
+    } */
 }

@@ -53,6 +53,7 @@
       $sql =   "SELECT g.id AS game_id, 
                         g.prompt,
                         g.open_for_changes AS openForChanges,
+                        g.modified_at,
                         rt.id AS id,
                         rt.title AS title,
                         ts.status AS root_text_status,

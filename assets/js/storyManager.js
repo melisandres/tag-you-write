@@ -9,6 +9,7 @@ export class StoryManager {
     this.modal = modal;
     this.storyTreeData = [];
     this.dataManager = new DataManager(this.path);
+    this.currentFetch = null;
      // Add event listener for the custom event
      // TODO: Add this event to the eventBus? 
      document.addEventListener('showStoryInModalRequest', this.handleShowStoryInModalRequest.bind(this));
@@ -25,12 +26,33 @@ export class StoryManager {
 
 
   async fetchTree(id) {
-    const url = `${this.path}text/getTree/${id}`;
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`Error fetching tree data: ${response.status}`);
+    // Abort any existing fetch
+    if (this.currentFetch) {
+      this.currentFetch.abort();
     }
-    return await response.json();
+
+    // Create new abort controller
+    this.currentFetch = new AbortController();
+    
+    try {
+      const response = await fetch(`${this.path}text/getTree/${id}`, {
+        signal: this.currentFetch.signal
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        console.log('Fetch aborted');
+        return null;
+      }
+      throw error;
+    } finally {
+      this.currentFetch = null;
+    }
   }
 
   async fetchStoryNode(id){
@@ -42,35 +64,102 @@ export class StoryManager {
     return await response.json();
   }
 
-  async drawTree(id, container) {
-    let treeData/*  = this.dataManager.getTree(id) */;
-   /* let needsUpdate = true;
+  async prepareData(id) {
+    let cachedData = this.dataManager.getTree(id);
+    let needsUpdate = false;
 
-    if (treeData) {
-        // Check if cached tree needs updating
-        needsUpdate = await this.dataManager.shouldRefreshTree(id);
-        console.log("needsUpdate", needsUpdate);
-    } */
-
-    if (!treeData /* || needsUpdate */) {
-        const datas = await this.fetchTree(id);
-        treeData = datas[0];
-        //this.dataManager.setTree(id, treeData);
-        //this.dataManager.setTreeLastCheck(id);
-    } else {
-        // Unwrap the cached data
-        treeData = treeData.data;
+    // Get the game data to compare timestamps
+    const gameData = this.dataManager.cache.games.get(id);
+    
+    if (gameData && cachedData) {
+        // Convert date string to UTC timestamp
+        const gameDate = new Date(gameData.data.modified_at + ' UTC');
+        const gameModifiedAt = gameDate.getTime();
+        const dataTimestamp = cachedData.timestamp;
+        
+        console.log('Game date string:', gameData.data.modified_at);
+        console.log('Game timestamp:', gameModifiedAt);
+        console.log('Cache timestamp:', dataTimestamp);
+        
+        needsUpdate = gameModifiedAt > dataTimestamp;
     }
 
+    if (!cachedData || needsUpdate) {
+        console.log(`Fetching fresh tree data`);
+        const datas = await this.fetchTree(id);
+        const freshData = datas[0];
+
+        if (!freshData) {
+          console.error('No tree data received from server');
+          return null;
+        }
+        
+        // I should probably call this something other than Tree... like storyHierarchy? 
+        this.dataManager.setTree(id, freshData);
+        this.dataManager.setTreeLastCheck(id);
+        return freshData;
+    } else {
+        // Unwrap the cached data
+        console.log(`Using cached tree data`, cachedData.data);
+        cachedData = cachedData.data;
+        return cachedData;
+    }
+  }
+
+  /* // TODO: this is where we will start!
+  async drawTree(id, container) {
+    let treeData = this.dataManager.getTree(id);
+    let needsUpdate = false;
+
+    if (treeData) {
+        // Get the game data to compare timestamps
+        const gameData = this.dataManager.cache.games.get(id);
+        
+        if (gameData) {
+            // Convert both timestamps to numbers for comparison
+            const gameModifiedAt = new Date(gameData.data.modified_at).getTime();
+            const treeTimestamp = treeData.timestamp;
+
+            // Compare timestamps
+            needsUpdate = gameModifiedAt > treeTimestamp;
+
+            console.log('Game Modified At:', gameModifiedAt);
+            console.log('Tree Timestamp:', treeTimestamp);
+            console.log('Needs Update:', needsUpdate);
+        }
+    }
+
+    if (!treeData || needsUpdate) {
+        console.log('Fetching fresh tree data');
+        const datas = await this.fetchTree(id);
+        treeData = datas[0];
+        this.dataManager.setTree(id, treeData);
+        this.dataManager.setTreeLastCheck(id);
+    } else {
+        // Unwrap the cached data
+        console.log('using cached tree data');
+        treeData = treeData.data;
+    }
     
     eventBus.emit('drawTree', { container, data: treeData });
-}
+} */
 
-  async drawShelf(id, container) {
+  async drawTree(id, container) {
+    const treeData = await this.prepareData(id);
+    eventBus.emit('drawTree', { container, data: treeData });
+  }
+
+/*   async drawShelf(id, container) {
     const datas = await this.fetchTree(id);
     this.storyTreeData = datas[0];
     const shelfVisualizer = new ShelfVisualizer(container, this.path);
     shelfVisualizer.drawShelf(this.storyTreeData);
+  } */
+
+  async drawShelf(id, container) {
+    const shelfData = await this.prepareData(id);
+    const shelfVisualizer = new ShelfVisualizer(container, this.path);
+    shelfVisualizer.drawShelf(shelfData);
   }
 
   async showStoryInModal(id) {
