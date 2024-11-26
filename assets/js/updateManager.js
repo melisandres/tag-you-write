@@ -1,13 +1,10 @@
-import { SSEManager } from './sseManager.js';
-import { PollingManager } from './pollingManager.js';
 import { eventBus } from './eventBus.js';
+/* import { PollingManager } from './pollingManager.js'; */
 
 export class UpdateManager {
     constructor(path) {
         this.preferSSE = false;
         this.path = path;
-        this.currentGameIds = new Set();
-        this.sseManager = new SSEManager(path);
 
         // Listen for success/failure of SSE
         eventBus.on('sseConnected', () => this.handleSSESuccess());
@@ -16,47 +13,32 @@ export class UpdateManager {
 
     // Called by main.js to ensure other managers set up their event listeners first, and ensures that the DOM is ready. (?)
     initialize() {
-        this.updateVisibleGameIds();
+        console.log('UpdateManager initialized');
+        //this.updateVisibleGameIds();
         window.addEventListener('beforeunload', () => this.cleanup());
 
         if (this.preferSSE) {
-            // Signal to start SSE
+            console.log('Attempting SSE connection');
             eventBus.emit('startSSE', {
                 path: this.path,
-                gameIds: Array.from(this.currentGameIds)
+                filters: Array.from(this.currentFilters)
             });
         } else {
-            this.initializePolling();
+            console.log('Initializing polling from UpdateManager');
+            eventBus.emit('initializePolling');
         }
-    }
-
-    handleSSESuccess() {
-        // Stop polling when SSE connects
-        eventBus.emit('stopPolling');
-        console.log('SSE connected, polling stopped');
     }
 
     handleSSEFailure() {
         console.log('SSE failed, falling back to polling');
         this.preferSSE = false;
-        this.initializePolling();
+        eventBus.emit('initializePolling');
     }
 
-    initializePolling() {
-        if (this.currentGameIds.size > 0) {
-            eventBus.emit('startPolling', {
-                gameIds: Array.from(this.currentGameIds)
-            });
-        }
-    }
-
-    updateVisibleGameIds() {
-        const visibleGameIds = Array.from(
-            document.querySelectorAll('[data-game-id]')
-        ).map(el => el.dataset.gameId);
-        
-        this.currentGameIds = new Set(visibleGameIds);
-        return visibleGameIds;
+    handleSSESuccess() {
+        console.log('SSE connected, stopping polling');
+        this.preferSSE = true;
+        eventBus.emit('stopPolling');
     }
 
     cleanup() {

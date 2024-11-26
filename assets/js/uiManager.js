@@ -126,11 +126,13 @@ export class UIManager {
 
     if (container) {
       container.remove();
+      eventBus.emit('showcaseChanged', null);
     }
 
     if (story) {
       story.innerHTML += '<div id="showcase"></div>';
       container = document.querySelector('#showcase');
+      eventBus.emit('showcaseChanged', rootStoryId);
     }
 
     return container;

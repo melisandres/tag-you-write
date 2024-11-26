@@ -115,11 +115,18 @@ export class FilterManager {
         // When filters change, update URL too
         const updateUrlWithFilters = (filters) => {
             const params = new URLSearchParams(window.location.search);
+            
+            // Convert backend values to URL strings
+            const urlHasContributed = filters.hasContributed === null ? 'all' :
+                                     filters.hasContributed === true ? 'contributor' :
+                                     'mine';
+            
             if (filters.hasContributed !== null) {
-                params.set('hasContributed', filters.hasContributed);
+                params.set('hasContributed', urlHasContributed);
             } else {
                 params.delete('hasContributed');
             }
+            
             if (filters.gameState !== 'all') {
                 params.set('gameState', filters.gameState);
             } else {
@@ -142,6 +149,7 @@ export class FilterManager {
         this.updateFilterButton(filters.hasContributed);
         this.updateGameStateButton(filters.gameState);
         this.updateNavLink();
+        eventBus.emit('filtersChanged', filters);
     }
 
     updateNavLink() {

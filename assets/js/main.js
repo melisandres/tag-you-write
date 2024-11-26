@@ -28,7 +28,7 @@ import { GameListManager } from './gameListManager.js';
 import { DataManager } from './dataManager.js';
 import { UpdateManager } from './updateManager.js';
 import { FilterManager } from './filterManager.js';
-
+import { PollingManager } from './pollingManager.js';
 // Make eventBus globally available immediately
 window.eventBus = eventBus;
 
@@ -125,8 +125,13 @@ document.addEventListener("DOMContentLoaded", async () => {
    }
 
   // Initialize managers independently
+  console.log('Initializing managers');
+  const pollingManager = new PollingManager(path);
   const updateManager = new UpdateManager(path);
   updateManager.initialize();
+  
+  const gameListManager = new GameListManager(path, uiManager);
+  const filterManager = new FilterManager();
 
   // No need for separate handleInitialState
 
@@ -138,14 +143,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Only show the warning if there are unsaved changes
   });
 
-  const filterManager = new FilterManager();
-
   // Initialize GameListManager
-  const gameListManager = new GameListManager(path, uiManager);
+/*   const gameListManager = new GameListManager(path, uiManager); */
+
   
   // Start polling if we're on the right page
-  if (document.querySelector('.stories-page')) {  // Adjust selector as needed
+/*   if (document.querySelector('.stories-page')) {  // Adjust selector as needed
       console.log('Starting game list polling...');
       gameListManager.startUpdateChecker();
-  }
+  } */
 });

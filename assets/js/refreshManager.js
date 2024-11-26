@@ -4,10 +4,6 @@ import { Modal } from './modal.js' ;
 export class RefreshManager {
     constructor(path, uiManager, storyManager, autoSaveManager) {
         if (window.refreshManagerInstance) {
-            // Ensure pendingEditorContent exists on the existing instance
-/*             if (!window.refreshManagerInstance.pendingEditorContent) {
-                window.refreshManagerInstance.pendingEditorContent = new Map();
-            } */
             return window.refreshManagerInstance;
         }
         

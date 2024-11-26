@@ -33,6 +33,9 @@ export class GameListRenderer {
         // Listen for filter updates
         eventBus.on('filterApplied', () => this.saveCurrentViewState());
         eventBus.on('gamesListUpdated', () => this.restoreViewState());
+
+        // Add event listener for game updates
+        eventBus.on('gamesModified', (games) => this.handleGamesModified(games));
     }
 
     initializeFromServerData() {
@@ -46,6 +49,20 @@ export class GameListRenderer {
         if (!gamesData || gamesData.length === 0) {
             this.container.insertAdjacentHTML('beforeend', '<p class="no-games">No games found matching your current filters</p>');
         }
+    }
+
+    handleGamesModified(games) {
+        console.log('Handling modified games in renderer:', games);
+        games.forEach(game => {
+            const gameElement = document.querySelector(`[data-game-id="${game.id}"]`);
+            if (gameElement) {
+                // Update existing game
+                this.updateExistingGame(gameElement, game);
+            } else {
+                // Insert new game in correct position
+                this.insertNewGame(game);
+            }
+        });
     }
 
     loadGamesData() {
@@ -139,38 +156,29 @@ export class GameListRenderer {
         `;
     }
 
-    updateGameElement(gameData) {
+    // Insert new game in correct position
+    insertNewGame(gameData) {
+        const newGameElement = this.renderGameCard(gameData);
         const gameId = gameData.game_id;
-        const gameElement = this.container.querySelector(`[data-game-id="${gameId}"]`);
         
-        if (gameElement) {
-            this.updateExistingGame(gameElement, gameData);
+        // Find correct position based on game ID
+        const existingGames = Array.from(this.container.children);
+        const insertIndex = existingGames.findIndex(game => 
+            parseInt(game.dataset.gameId) > gameId
+        );
+        
+        // Insert at correct position or at end
+        if (insertIndex === -1) {
+            this.container.insertAdjacentHTML('beforeend', newGameElement);
         } else {
-            const existingGame = this.container.querySelector(`[data-text-id="${gameData.id}"]`);
-            if (!existingGame) {
-                const newGameElement = this.renderGameCard(gameData);
-                
-                const games = Array.from(this.container.children);
-                const insertIndex = games.findIndex(game => 
-                    parseInt(game.dataset.gameId) > gameId
-                );
-                
-                if (insertIndex === -1) {
-                    this.container.insertAdjacentHTML('beforeend', newGameElement);
-                } else {
-                    games[insertIndex].insertAdjacentHTML('beforebegin', newGameElement);
-                }
-            }
+            existingGames[insertIndex].insertAdjacentHTML('beforebegin', newGameElement);
         }
     }
 
     updateExistingGame(gameElement, gameData) {
-        if (!gameElement || !gameData) {
-            console.warn('Missing element or data for game update');
-            return;
-        }
+        if (!gameElement || !gameData) return;
 
-        // Ensure boolean conversion is consistent
+        // Update open/closed status and hasContributed status
         const isOpen = gameData.openForChanges === '1' || gameData.openForChanges === true;
         const hasContributed = gameData.hasContributed === '1' || gameData.hasContributed === true;
 
@@ -181,7 +189,9 @@ export class GameListRenderer {
             gameElement.classList.add('closed');
         }
 
-        // Update data attributes
+        // Update hasContributed status? For now its done locally.
+
+        // Update counts
         gameElement.dataset.unseenCount = gameData.unseen_count;
         gameElement.dataset.seenCount = gameData.seen_count;
         gameElement.dataset.textCount = gameData.text_count;

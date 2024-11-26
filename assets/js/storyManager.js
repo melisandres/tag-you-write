@@ -93,6 +93,12 @@ export class StoryManager {
           console.error('No tree data received from server');
           return null;
         }
+
+        // Compare old and new tree data if we had cached data
+        if (cachedData && freshData) {
+          const differences = this.dataManager.compareTreeData(cachedData.data, freshData);
+          console.log('Tree differences:', differences);
+        }
         
         // I should probably call this something other than Tree... like storyHierarchy? 
         this.dataManager.setTree(id, freshData);

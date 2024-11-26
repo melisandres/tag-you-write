@@ -92,6 +92,11 @@ export class IndexUpdateManager {
               (gameData.openForChanges ? 'open' : 'closed')
           }`;
       }
+
+      // TODO: added this-- it handles game updates... or should. Update other game elements using GameListRenderer
+      if (this.renderer) {
+          this.renderer.updateExistingGame(gameElement, gameData);
+      }
     }
   }
  /*  // TODO: handle game updates. 

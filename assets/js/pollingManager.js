@@ -1,56 +1,51 @@
+import { eventBus } from './eventBus.js';
+
 export class PollingManager {
-    constructor() {
-        this.pollingInterval = null;
-        this.listeners = new Map();
-        this.currentGameId = null;
-        this.lastUpdateTimestamp = Date.now();
+    constructor(path) {
+        this.path = path;
+        this.pollingIntervals = new Map();
+        this.timeBetweenChecks = 10000;
+        this.dataManager = window.dataManager;
+
+        // Event listeners
+        eventBus.on('initializePolling', () => this.handleInitializePolling());
+        eventBus.on('stopPolling', () => this.stopPolling());
     }
 
-    setCurrentGame(gameId) {
-        this.currentGameId = gameId;
-        this.lastUpdateTimestamp = Date.now();
+    handleInitializePolling() {
+        console.log('Game list polling initialized');
+        this.startPolling();
     }
 
-    addListener(key, callback) {
-        this.listeners.set(key, callback);
-    }
+    startPolling() {
+        if (this.pollingIntervals.has('games')) {
+            console.log('Stopping existing game list polling');
+            this.stopPolling();
+        }
 
-    removeListener(key) {
-        this.listeners.delete(key);
-    }
+        console.log('Starting new polling interval');
+        const intervalId = setInterval(async () => {
+            try {
+                console.log('Checking for updates...');
+                const hasUpdates = await this.dataManager.checkForUpdates();
+                if (hasUpdates) {
+                    const modifiedGames = this.dataManager.getRecentlyModifiedGames();
+                    console.log('Modified games found:', modifiedGames);
+                }
+            } catch (error) {
+                console.error('Polling error:', error);
+            }
+        }, this.timeBetweenChecks);
 
-    startPolling(interval = 5000) {
-        if (this.pollingInterval) this.stopPolling();
-        this.pollingInterval = setInterval(() => this.pollForUpdates(), interval);
+        this.pollingIntervals.set('games', intervalId);
     }
 
     stopPolling() {
-        if (this.pollingInterval) {
-            clearInterval(this.pollingInterval);
-            this.pollingInterval = null;
-        }
-    }
-
-    async pollForUpdates() {
-        if (!this.currentGameId) return;
-
-        try {
-            const response = await fetch(`/api/updates?gameId=${this.currentGameId}&since=${this.lastUpdateTimestamp}`);
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            const updates = await response.json();
-
-            if (updates.length > 0) {
-                this.processUpdates(updates);
-                this.lastUpdateTimestamp = Date.now();
-            }
-        } catch (error) {
-            console.error('Error polling for updates:', error);
-        }
-    }
-
-    processUpdates(updates) {
-        for (const [key, callback] of this.listeners) {
-            callback(updates);
+        const intervalId = this.pollingIntervals.get('games');
+        if (intervalId) {
+            console.log('Stopping polling');
+            clearInterval(intervalId);
+            this.pollingIntervals.delete('games');
         }
     }
 }

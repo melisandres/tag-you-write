@@ -12,6 +12,7 @@ export class DataManager {
             return DataManager.instance;
         }
 
+        this.currentViewedGameId = null;
         const userIdMeta = document.querySelector('meta[name="user"]');
         this.path = path;
         this.cache = this.loadCache() || {
@@ -45,13 +46,23 @@ export class DataManager {
             eventBus.emit('gameDataResponse', { gameId, data: gameData });
         });
 
+        // update the data cache with passed parameter
         eventBus.on('updateGame', (gameData) => {
             this.updateGamesData([gameData]);
         });
+        eventBus.on('showcaseChanged', (rootStoryId) => this.setCurrentViewedRootStoryId(rootStoryId));
         
         this.saveCache();
         DataManager.instance = this;
         //this.clearCache();
+    }
+
+    setCurrentViewedRootStoryId(rootStoryId) {
+        this.currentViewedRootStoryId = rootStoryId;
+    }
+
+    getCurrentViewedRootStoryId() {
+        return this.currentViewedRootStoryId;
     }
 
     getInitialCache() {
@@ -139,24 +150,25 @@ export class DataManager {
         }
 
         try {
-            console.log('Sending update check request...');
+            //console.log('Sending update check request...');
             const response = await fetch(`${this.path}game/modifiedSince`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     lastCheck: this.cache.lastGamesCheck || 0,
-                    filters: this.cache.filters || {}
+                    filters: this.cache.filters || {},
+                    rootStoryId: this.currentViewedRootStoryId || null
                 })
             });
 
-            console.log('Update check response:', response.status);
+            //console.log('Update check response:', response.status);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const data = await response.json();
-            console.log('Update check data:', data);
+            //console.log('Update check data:', data);
             return this.handleUpdateResponse(data);
         } catch (error) {
             if (error.name === 'AbortError' || error.name === 'TypeError') {
@@ -169,11 +181,6 @@ export class DataManager {
     }
 
     handleUpdateResponse(modifiedGames) {
-        if (!Array.isArray(modifiedGames)) {
-            console.error('Expected array of modified games');
-            return false;
-        }
-
         if (modifiedGames.length > 0) {
             // Clear previous modifications
             this.recentlyModifiedGames = new Set();
@@ -189,6 +196,9 @@ export class DataManager {
 
             this.cache.lastGamesCheck = Date.now();
             this.saveCache();
+            
+            // Emit event only once
+            eventBus.emit('gamesModified', modifiedGames);
             return true;
         }
         
@@ -367,5 +377,48 @@ export class DataManager {
 
     getFilters() {
         return this.cache.filters;
+    }
+
+    // Add this method to the DataManager class
+    compareTreeData(oldTree, newTree) {
+        const differences = [];
+        
+        // Helper function to compare nodes
+        const compareNodes = (oldNode, newNode) => {
+            if (!oldNode || !newNode) return null;
+            
+            const changes = {};
+            let hasChanges = false;
+            
+            // Compare all properties except children
+            Object.keys(newNode).forEach(key => {
+                if (key !== 'children' && JSON.stringify(oldNode[key]) !== JSON.stringify(newNode[key])) {
+                    changes[key] = {
+                        old: oldNode[key],
+                        new: newNode[key]
+                    };
+                    hasChanges = true;
+                }
+            });
+            
+            if (hasChanges) {
+                differences.push({
+                    id: newNode.id,
+                    parent_id: newNode.parent_id,
+                    changes
+                });
+            }
+            
+            // Recursively compare children
+            if (newNode.children && oldNode.children) {
+                newNode.children.forEach(newChild => {
+                    const oldChild = oldNode.children.find(child => child.id === newChild.id);
+                    compareNodes(oldChild, newChild);
+                });
+            }
+        };
+        
+        compareNodes(oldTree, newTree);
+        return differences;
     }
 }
