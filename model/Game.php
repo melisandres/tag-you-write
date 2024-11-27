@@ -57,9 +57,19 @@
                         rt.id AS id,
                         rt.title AS title,
                         ts.status AS root_text_status,
-                        SUM(CASE WHEN t.status_id = 2 AND t.writer_id != :loggedInWriterId THEN 1 ELSE 0 END) AS text_count,
-                        SUM(CASE WHEN s.text_id IS NOT NULL AND t.status_id = 2 AND t.writer_id != :loggedInWriterId AND (t.note_date IS NULL OR s.read_at > t.note_date) THEN 1 ELSE 0 END) AS seen_count,
-                        SUM(CASE WHEN s.text_id IS NULL AND t.status_id = 2 AND t.writer_id != :loggedInWriterId THEN 1 ELSE 0 END) AS unseen_count,
+                        SUM(CASE WHEN t.status_id = 2 THEN 1 ELSE 0 END) AS text_count,
+                        SUM(CASE 
+                            WHEN t.status_id = 2 AND (
+                                t.writer_id = :loggedInWriterId OR                    
+                                (s.text_id IS NOT NULL AND                           
+                                 (t.note_date IS NULL OR s.read_at > t.note_date))   
+                            ) THEN 1 ELSE 0 END) AS seen_count,
+                        SUM(CASE 
+                            WHEN t.status_id = 2 AND 
+                                 t.writer_id != :loggedInWriterId AND                
+                                 (s.text_id IS NULL OR                               
+                                  (t.note_date IS NOT NULL AND s.read_at < t.note_date)) 
+                            THEN 1 ELSE 0 END) AS unseen_count,
                         (CASE WHEN EXISTS (
                            SELECT 1
                            FROM text t2
@@ -129,9 +139,19 @@
                      rt.id AS id,
                      rt.title AS title,
                      ts.status AS root_text_status,
-                     SUM(CASE WHEN t.status_id = 2 AND t.writer_id != :loggedInWriterId THEN 1 ELSE 0 END) AS text_count,
-                     SUM(CASE WHEN s.text_id IS NOT NULL AND t.status_id = 2 AND t.writer_id != :loggedInWriterId AND (t.note_date IS NULL OR s.read_at > t.note_date) THEN 1 ELSE 0 END) AS seen_count,
-                     SUM(CASE WHEN s.text_id IS NULL AND t.status_id = 2 AND t.writer_id != :loggedInWriterId THEN 1 ELSE 0 END) AS unseen_count,
+                      SUM(CASE WHEN t.status_id = 2 THEN 1 ELSE 0 END) AS text_count,
+                        SUM(CASE 
+                            WHEN t.status_id = 2 AND (
+                                t.writer_id = :loggedInWriterId OR                    
+                                (s.text_id IS NOT NULL AND                           
+                                 (t.note_date IS NULL OR s.read_at > t.note_date))   
+                            ) THEN 1 ELSE 0 END) AS seen_count,
+                        SUM(CASE 
+                            WHEN t.status_id = 2 AND 
+                                 t.writer_id != :loggedInWriterId AND                
+                                 (s.text_id IS NULL OR                               
+                                  (t.note_date IS NOT NULL AND s.read_at < t.note_date)) 
+                            THEN 1 ELSE 0 END) AS unseen_count,
                      (CASE WHEN EXISTS (
                         SELECT 1
                         FROM text t2
@@ -161,6 +181,15 @@
       }
 
       return $results;
+   }
+
+   public function selectGameId($rootId) {
+      $sql = "SELECT game_id FROM text WHERE id = :rootId";
+      $stmt = $this->prepare($sql);
+      $stmt->bindValue(':rootId', $rootId);
+      $stmt->execute();
+      $result = $stmt->fetchColumn();
+      return $result;
    }
 
   /* public function getModifiedSince($lastCheck) {

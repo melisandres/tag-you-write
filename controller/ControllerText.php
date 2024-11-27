@@ -16,11 +16,6 @@ class ControllerText extends Controller{
 
     //show the page with all the texts
     public function index(){
-        // Debug all superglobals
-        error_log('REQUEST_URI: ' . $_SERVER['REQUEST_URI']);
-        error_log('QUERY_STRING: ' . $_SERVER['QUERY_STRING']);
-        error_log('Raw GET array: ' . print_r($_GET, true));
-
         // Get filter parameters from URL
         $filters = [
             'hasContributed' => isset($_GET['hasContributed']) ? 
@@ -28,10 +23,6 @@ class ControllerText extends Controller{
                 ($_GET['hasContributed'] === 'mine' ? 'mine' : null)) : null,
             'gameState' => isset($_GET['gameState']) ? $_GET['gameState'] : 'all'
         ];
-
-        error_log('GET filters: ' . print_r($_GET, true));
-        // Debug: Log processed filters
-        error_log('Processed filters: ' . print_r($filters, true));
 
         // TODO: Get the sort parameter from URL
         $sort = null;
@@ -41,9 +32,6 @@ class ControllerText extends Controller{
         // Getting the games
         $game = new Game;
         $allGames = $game->getGames($sort, $filters);
-
-        error_log('testing with mygames and pending');
-        error_log('Count of all games: ' . count($allGames));
 
         // Send both the rendered data and the complete dataset
         Twig::render('text-index.php', [
@@ -114,11 +102,18 @@ class ControllerText extends Controller{
     // An end point from which you can receive a single tree from the db
     public function getTree($rootId = null){
         $text = new Text;
+        $game = new Game;
+
+        // Get the gameId
+        $gameId = $game->selectGameId($rootId);
+
         // Get the current user Id
         $currentUserId = $_SESSION['writer_id'] ?? null;
-        $select = $text->selectTexts($currentUserId);
 
-        // Get the requested tree
+        // Get only the texts for this game
+        $select = $text->selectTexts($currentUserId, $gameId, true);
+
+        // Build the requested tree
         $tree = $this->buildHierarchy($select, 'id', $rootId);
 
         // Add permissions to each node iteratively

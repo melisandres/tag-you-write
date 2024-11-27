@@ -25,7 +25,7 @@ export class GameListRenderer {
         this.initializeFromServerData();
         
         // Listen for game updates
-        eventBus.on('updateGame', (gameData) => this.updateGameElement(gameData));
+/*         eventBus.on('updateGame', (gameData) => this.updateGameElement(gameData)); */
 
         // Add state tracking
         this.currentViewState = null;
@@ -54,7 +54,7 @@ export class GameListRenderer {
     handleGamesModified(games) {
         console.log('Handling modified games in renderer:', games);
         games.forEach(game => {
-            const gameElement = document.querySelector(`[data-game-id="${game.id}"]`);
+            const gameElement = document.querySelector(`[data-game-id="${game.game_id}"]`);
             if (gameElement) {
                 // Update existing game
                 this.updateExistingGame(gameElement, game);
@@ -176,17 +176,28 @@ export class GameListRenderer {
     }
 
     updateExistingGame(gameElement, gameData) {
+        console.log("HERE!!updateExistingGame", gameData);
         if (!gameElement || !gameData) return;
 
         // Update open/closed status and hasContributed status
         const isOpen = gameData.openForChanges === '1' || gameData.openForChanges === true;
+        console.log("isOpen", isOpen);
         const hasContributed = gameData.hasContributed === '1' || gameData.hasContributed === true;
 
         // Update story class for open/closed status
+        const gameStatusIndicator = gameElement.querySelector('.game-status-indicator');
         if (isOpen) {
-            gameElement.classList.remove('closed');
+            gameStatusIndicator.classList.remove('closed');
+            gameStatusIndicator.classList.add('open');
+            // TODO update the game status text
+            gameStatusIndicator.querySelector('.game-status').innerHTML = `<span>GAME</span>
+                        <span>OPEN</span>`;
         } else {
-            gameElement.classList.add('closed');
+            gameStatusIndicator.classList.add('closed');
+            gameStatusIndicator.classList.remove('open');
+            // TODO update the game status text
+            gameStatusIndicator.querySelector('.game-status').innerHTML = `<span>GAME</span>
+                        <span>CLOSED</span>`;
         }
 
         // Update hasContributed status? For now its done locally.

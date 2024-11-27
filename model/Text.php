@@ -18,7 +18,8 @@ class Text extends Crud{
                         'status_id'
                         ];
 
-    public function selectTexts($current_writer = null, $idValue = null) {
+    // This is used to get ONE, MANY, or ALL texts. the id value can be the text id, if you only want one text, or the game id, if you want one arborescence of texts. The arborescence is built in the controller, the permissions are added there as well. 
+    public function selectTexts($current_writer = null, $idValue = null, $idIsGameId = false) {
         // Base SQL part
         $sql = "SELECT text.*, 
                         writer.firstName AS firstName, 
@@ -83,8 +84,11 @@ class Text extends Crud{
         }
         
         // Add condition if idValue is provided
-        if ($idValue !== null) {
+        if ($idValue !== null && !$idIsGameId) {
             $conditions[] = "text.id = :idValue";
+        }
+        if ($idValue !== null && $idIsGameId) {
+            $conditions[] = "text.game_id = :idValue";
         }
         
         // Combine all conditions and append to SQL
@@ -110,7 +114,7 @@ class Text extends Crud{
         $stmt->execute();
         
         // Return single row if idValue is provided, else return all rows
-        if ($idValue !== null) {
+        if ($idValue !== null && !$idIsGameId) {
             return $stmt->fetch();
         } else {
             return $stmt->fetchAll();
