@@ -41,7 +41,8 @@ export class GameListRenderer {
     initializeFromServerData() {
         const gamesData = this.loadGamesData();
         if (gamesData) {
-            this.dataManager.initializeGamesData(gamesData);
+            this.dataManager.updateGamesData(gamesData, true);
+            //this.dataManager.initializeGamesData(gamesData);
         }
         this.initialLoadComplete = true;
 
@@ -53,6 +54,9 @@ export class GameListRenderer {
 
     handleGamesModified(games) {
         console.log('Handling modified games in renderer:', games);
+        // update the games cache
+        this.dataManager.updateGamesData(games, false);
+
         games.forEach(game => {
             const gameElement = document.querySelector(`[data-game-id="${game.game_id}"]`);
             if (gameElement) {
@@ -80,8 +84,8 @@ export class GameListRenderer {
 
     // All your existing render methods
     renderGameCard(game) {
-        const isOpen = game.openForChanges === '1' || game.openForChanges === true;
-        const hasContributed = game.hasContributed === '1' || game.hasContributed === true;
+        const isOpen = game.openForChanges === '1' || game.openForChanges === true || game.openForChanges === 1;
+        const hasContributed = game.hasContributed === '1' || game.hasContributed === true || game.hasContributed === 1;
 
         console.log("userLoggedIn", this.userLoggedIn);
         console.log("game unseens", game.unseen_count);
@@ -129,7 +133,7 @@ export class GameListRenderer {
     }
 
     renderGameStatus(game) {
-        const isOpen = game.openForChanges === '1' || game.openForChanges === true;
+        const isOpen = game.openForChanges === '1' || game.openForChanges === true || game.openForChanges === 1;
         let status = game.pending ? 'pending' : (isOpen ? 'open' : 'closed');
         let statusText = status.toUpperCase();
         
@@ -159,13 +163,16 @@ export class GameListRenderer {
     // Insert new game in correct position
     insertNewGame(gameData) {
         const newGameElement = this.renderGameCard(gameData);
-        const gameId = gameData.game_id;
+        const placementIndex = gameData.placement_index;
         
-        // Find correct position based on game ID
+        // Find correct position based on placement index
         const existingGames = Array.from(this.container.children);
-        const insertIndex = existingGames.findIndex(game => 
-            parseInt(game.dataset.gameId) > gameId
-        );
+        const insertIndex = existingGames.findIndex(game => {
+            const gameElement = game.closest('.story');
+            if (!gameElement) return false;
+            const currentGame = this.dataManager.getGameById(gameElement.dataset.gameId);
+            return currentGame && currentGame.placement_index > placementIndex;
+        });
         
         // Insert at correct position or at end
         if (insertIndex === -1) {
@@ -180,9 +187,9 @@ export class GameListRenderer {
         if (!gameElement || !gameData) return;
 
         // Update open/closed status and hasContributed status
-        const isOpen = gameData.openForChanges === '1' || gameData.openForChanges === true;
+        const isOpen = gameData.openForChanges === '1' || gameData.openForChanges === true || gameData.openForChanges === 1;
         console.log("isOpen", isOpen);
-        const hasContributed = gameData.hasContributed === '1' || gameData.hasContributed === true;
+        const hasContributed = gameData.hasContributed === '1' || gameData.hasContributed === true || gameData.hasContributed === 1;
 
         // Update story class for open/closed status
         const gameStatusIndicator = gameElement.querySelector('.game-status-indicator');
@@ -247,54 +254,57 @@ export class GameListRenderer {
             return;
         }
 
-        const viewState = {
-            textId: showcaseEl.closest('[data-text-id]')?.dataset.textId,
-            viewType: showcaseEl.dataset.showcase,
-            drawers: []
-        };
+        // Get existing state
+        const refreshManager = window.refreshManagerInstance;
+        if (!refreshManager) return;
 
-        if (viewState.viewType === 'tree') {
-            const svg = d3.select('#showcase svg');
-            if (!svg.empty()) {
-                const svgNode = svg.node();
-                const transform = d3.zoomTransform(svgNode);
-                viewState.zoomTransform = {
-                    x: transform.x,
-                    y: transform.y,
-                    k: transform.k
-                };
-            }
+        // Update only the showcase portion of the state
+        refreshManager.setShowcaseState({
+            type: showcaseEl.dataset.showcase,
+            rootStoryId: showcaseEl.closest('[data-text-id]')?.dataset.textId,
+        });
+
+         // Capture transform separately if it's a tree view
+        if (showcaseEl.dataset.showcase === 'tree') {
+            refreshManager.captureD3Transform();
         }
 
-        // Save to RefreshManager's state
-        window.refreshManagerInstance.state.viewState = viewState;
-        localStorage.setItem('pageState', JSON.stringify(window.refreshManagerInstance.state));
+        // TODO: Make sure this is good. Capture open drawers if it's a shelf view
+        if (showcaseEl.dataset.showcase === 'shelf') {
+            const openDrawers = Array.from(document.querySelectorAll('.writing:not(.hidden)'))
+                .map(drawer => drawer.closest('[data-story-id]')?.dataset.storyId)
+                .filter(Boolean);
+                
+            refreshManager.setShowcaseState({
+                type: showcaseEl.dataset.showcase,
+                rootStoryId: showcaseEl.closest('[data-text-id]')?.dataset.textId,
+                drawers: openDrawers
+            });
+        }
     }
 
     async restoreViewState() {
-        // Get state from RefreshManager instead of internal state
         const savedState = JSON.parse(localStorage.getItem('pageState'));
-        if (!savedState || !savedState.viewState) {
+        if (!savedState?.showcase?.rootStoryId) {
             console.log("No valid view state to restore");
             return;
         }
 
-        const viewState = savedState.viewState;
-        
-        const container = this.uiManager.createShowcaseContainer(viewState.textId);
+        const showcase = savedState.showcase;
+        const container = this.uiManager.createShowcaseContainer(showcase.rootStoryId);
         if (!container) {
             console.log("Failed to create showcase container");
             return;
         }
 
-        if (viewState.viewType === 'tree') {
+        if (showcase.type === 'tree') {
             window.skipInitialTreeTransform = true;
-            await this.uiManager.drawTree(viewState.textId, container);
+            await this.uiManager.drawTree(showcase.rootStoryId, container);
             
-            if (viewState.zoomTransform) {
+            if (showcase.transform) {
                 const svg = d3.select('#showcase svg');
                 if (!svg.empty() && window.treeVisualizerInstance?.zoom) {
-                    const transform = viewState.zoomTransform;
+                    const transform = showcase.transform;
                     const newTransform = d3.zoomIdentity
                         .translate(transform.x, transform.y)
                         .scale(transform.k);
@@ -302,8 +312,8 @@ export class GameListRenderer {
                 }
             }
             window.skipInitialTreeTransform = false;
-        } else if (viewState.viewType === 'shelf') {
-            await this.uiManager.drawShelf(viewState.textId, container);
+        } else if (showcase.type === 'shelf') {
+            await this.uiManager.drawShelf(showcase.rootStoryId, container);
         }
     }
 

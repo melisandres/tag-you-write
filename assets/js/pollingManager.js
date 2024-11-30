@@ -26,12 +26,7 @@ export class PollingManager {
         console.log('Starting new polling interval');
         const intervalId = setInterval(async () => {
             try {
-                console.log('Checking for updates...');
-                const hasUpdates = await this.dataManager.checkForUpdates();
-                if (hasUpdates) {
-                    const modifiedGames = this.dataManager.getRecentlyModifiedGames();
-                    console.log('Modified games found:', modifiedGames);
-                }
+                await this.dataManager.checkForUpdates();
             } catch (error) {
                 console.error('Polling error:', error);
             }

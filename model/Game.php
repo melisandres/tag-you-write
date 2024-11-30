@@ -18,7 +18,7 @@
 
    public function getGames($order = null, $filters = []) {
       $loggedInWriterId = isset($_SESSION['writer_id']) ? $_SESSION['writer_id'] : "";
-   
+
       // Build filter string
       $filterString = "";
       
@@ -50,14 +50,16 @@
          }
       }
       
-      $sql =   "SELECT g.id AS game_id, 
+      $sql =   "SELECT  g.id AS game_id, 
                         g.prompt,
                         g.open_for_changes AS openForChanges,
                         g.modified_at,
                         rt.id AS id,
                         rt.title AS title,
                         ts.status AS root_text_status,
-                        SUM(CASE WHEN t.status_id = 2 THEN 1 ELSE 0 END) AS text_count,
+                        @row_num := @row_num + 1 AS placement_index,
+                        SUM(CASE 
+                            WHEN t.status_id = 2 THEN 1 ELSE 0 END) AS text_count,
                         SUM(CASE 
                             WHEN t.status_id = 2 AND (
                                 t.writer_id = :loggedInWriterId OR                    
@@ -75,7 +77,8 @@
                            FROM text t2
                            WHERE t2.game_id = g.id AND t2.writer_id = :loggedInWriterId
                         ) THEN 1 ELSE 0 END) AS hasContributed
-                  FROM game g
+                  FROM (SELECT @row_num := 0) r,
+                        game g
                   INNER JOIN text rt ON g.id = rt.game_id AND rt.parent_id IS NULL
                   INNER JOIN text_status ts ON rt.status_id = ts.id AND 
                         (ts.status = 'published' OR (ts.status = 'draft' AND rt.writer_id = :loggedInWriterId) OR (ts.status = 'incomplete_draft' AND rt.writer_id = :loggedInWriterId)) 
@@ -102,6 +105,8 @@
             $game['hasUnseenTexts'] = ($game['unseen_count'] > 0) ? true : false;
             $game['pending'] = ($game['root_text_status'] == 'draft' || $game['root_text_status'] == 'incomplete_draft') ? true : false;
       }
+
+      error_log('games: ' . print_r($games, true));
    
       return $games;
    }
@@ -139,6 +144,7 @@
                      rt.id AS id,
                      rt.title AS title,
                      ts.status AS root_text_status,
+                     @row_num := @row_num + 1 AS placement_index,
                       SUM(CASE WHEN t.status_id = 2 THEN 1 ELSE 0 END) AS text_count,
                         SUM(CASE 
                             WHEN t.status_id = 2 AND (
@@ -157,7 +163,8 @@
                         FROM text t2
                         WHERE t2.game_id = g.id AND t2.writer_id = :loggedInWriterId
                      ) THEN 1 ELSE 0 END) AS hasContributed
-            FROM game g
+            FROM (SELECT @row_num := 0) r,
+            game g
             INNER JOIN text rt ON g.id = rt.game_id AND rt.parent_id IS NULL
             INNER JOIN text_status ts ON rt.status_id = ts.id AND 
                   (ts.status = 'published' OR (ts.status = 'draft' AND rt.writer_id = :loggedInWriterId) OR (ts.status = 'incomplete_draft' AND rt.writer_id = :loggedInWriterId)) 

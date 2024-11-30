@@ -18,8 +18,8 @@ class Text extends Crud{
                         'status_id'
                         ];
 
-    // This is used to get ONE, MANY, or ALL texts. the id value can be the text id, if you only want one text, or the game id, if you want one arborescence of texts. The arborescence is built in the controller, the permissions are added there as well. 
-    public function selectTexts($current_writer = null, $idValue = null, $idIsGameId = false) {
+    // This is used to get ONE, MANY, or ALL texts. the ID_VALUE can be the TEXT_ID, if you only want one text (3rd param false), or the GAME_ID (3rd param true), if you want one arborescence of texts, FINALLY, if you want only an array of texts, that have been modified since a timestamp, add it as MODIFIED_SINCE parameter.The arborescence is built in the controllerText, the permissions are added there as well. 
+    public function selectTexts($current_writer = null, $idValue = null, $idIsGameId = false, $modifiedSince = null) {
         // Base SQL part
         $sql = "SELECT text.*, 
                         writer.firstName AS firstName, 
@@ -27,6 +27,7 @@ class Text extends Crud{
                         game.prompt AS prompt,
                         game.open_for_changes AS openForChanges,
                         text_status.status AS text_status,
+                        text.modified_at AS modified_at,
                         root_text.title AS game_title,
                         IFNULL(voteCounts.voteCount, 0) AS voteCount,
                         IFNULL(playerCounts.playerCount, 0) AS playerCount,
@@ -75,6 +76,12 @@ class Text extends Crud{
         
         // Initialize an array to collect conditions
         $conditions = [];
+
+        // Add condition for modified since
+        if ($modifiedSince !== null) {
+            error_log("Comparing against modified_since (Unix timestamp): " . $modifiedSince);
+            $conditions[] = "text.modified_at > :modifiedSince";
+        }
         
         // Add condition for filtering out the drafts, only if they don't belong to the currentUser
         if ($current_writer) {
@@ -110,15 +117,19 @@ class Text extends Crud{
         if ($idValue !== null) {
             $stmt->bindValue(':idValue', $idValue);
         }
+
+        // Bind the modifiedSince if it's provided
+        if ($modifiedSince !== null) {
+            $stmt->bindValue(':modifiedSince', $modifiedSince);
+            error_log("SQL with bound values: " . str_replace(':modifiedSince', $modifiedSince, $sql));
+        }
         
         $stmt->execute();
         
-        // Return single row if idValue is provided, else return all rows
-        if ($idValue !== null && !$idIsGameId) {
-            return $stmt->fetch();
-        } else {
-            return $stmt->fetchAll();
-        }
+        $results = ($idValue !== null && !$idIsGameId) ? $stmt->fetch() : $stmt->fetchAll();
+        
+        error_log("Query results: " . print_r($results, true));
+        return $results;
     }
 
     //returns the text as well as the first and last name of the writer

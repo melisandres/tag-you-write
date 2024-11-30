@@ -1,12 +1,14 @@
 /* import { StoryManager } from './storyManager.js';
 import { Modal } from './modal.js';  */
 import { SVGManager } from './svgManager.js';
+import { ShowcaseManager } from './showcaseManager.js';
 
 export class UIManager {
   constructor(storyManager, modal) {
     this.storyManager = storyManager;
     this.modal = modal;
     this.SVGManager = SVGManager;
+    this.showcaseManager = new ShowcaseManager(this.path);
     this.initSvgs();
     this.insertLoginLogoutSVGs(); // Add this line
     this.initEventListeners();
@@ -82,7 +84,23 @@ export class UIManager {
     // check if the action to toggle off the view, or to get a new view
     if(previousViewType == targetType && textId == previousTextId){
       story.classList.remove('story-has-showcase');
+      // set the current rootStoryId to null, so that the cache is updated
+      eventBus.emit('showcaseChanged', null);
       return;
+    }
+
+    // Emit both the showcase change and type
+    //TODO: can I delete this?
+    //eventBus.emit('showcaseChanged', textId);
+    if (targetType !== 'none') {
+      console.log('emitting showcaseTypeChanged');
+      console.log('targetType:', targetType);
+      console.log('textId:', textId);
+
+        eventBus.emit('showcaseTypeChanged', {
+            type: targetType,
+            rootStoryId: textId
+        });
     }
 
     // now create showcase container and append to the current story
@@ -109,6 +127,12 @@ export class UIManager {
   // Call drawShelf from the storyManager
   async drawShelf(textId, container) {
     await this.storyManager.drawShelf(textId, container);
+    
+    // TODO: make sure this is good Restore drawers if available in state
+    const savedState = JSON.parse(localStorage.getItem('pageState'));
+    if (savedState?.showcase?.drawers?.length > 0) {
+        window.refreshManagerInstance.restoreDrawers(savedState);
+    }
   }
 
   // Handle the showing of the story modal 
@@ -132,6 +156,13 @@ export class UIManager {
     if (story) {
       story.innerHTML += '<div id="showcase"></div>';
       container = document.querySelector('#showcase');
+      
+      // Get showcase type from URL or default to 'shelf'
+      const { type } = this.showcaseManager.getShowcaseParams();
+      if (type) {
+          container.dataset.showcase = type;
+      }
+      
       eventBus.emit('showcaseChanged', rootStoryId);
     }
 

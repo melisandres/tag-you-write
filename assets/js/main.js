@@ -29,6 +29,7 @@ import { DataManager } from './dataManager.js';
 import { UpdateManager } from './updateManager.js';
 import { FilterManager } from './filterManager.js';
 import { PollingManager } from './pollingManager.js';
+import { GameUpdateHandler } from './gameUpdateHandler.js';
 // Make eventBus globally available immediately
 window.eventBus = eventBus;
 
@@ -83,9 +84,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
    // Trigger state restoration
-  /*  console.log('Triggering state restoration'); // Add this debug log
-   eventBus.emit('restoringState');
-   console.log('State restoration triggered'); // Add this debug log */
+   console.log('Triggering state restoration'); // Add this debug log
+/*    eventBus.emit('restoringState'); */
+   console.log('State restoration triggered'); // Add this debug log
 
 
   // Initialize VoteManager
@@ -152,4 +153,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.log('Starting game list polling...');
       gameListManager.startUpdateChecker();
   } */
+
+  // Initialize update handling
+  const gameUpdateHandler = new GameUpdateHandler();
 });

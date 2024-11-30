@@ -56,10 +56,16 @@ class ControllerVote extends Controller {
         $text = new Text;
         $gameId = $text->selectGameId($text_id); 
 
-        // update the game modified_at timestamp
+        // update the game modified_at timestamp: so the UI knows to change how this node is displayed.
         $game = new Game;
         $game->update([
             'id' => $gameId,
+            'modified_at' => date('Y-m-d H:i:s')
+        ]);
+
+        // update the text modified_at timestamp: so the UI knows to change how this node is displayed.
+        $text->update([
+            'id' => $text_id,
             'modified_at' => date('Y-m-d H:i:s')
         ]);
     

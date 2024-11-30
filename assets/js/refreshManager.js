@@ -1,5 +1,6 @@
 import { StoryManager } from './storyManager.js';
 import { Modal } from './modal.js' ;
+import { ShowcaseManager } from './showcaseManager.js';
 
 export class RefreshManager {
     constructor(path, uiManager, storyManager, autoSaveManager) {
@@ -12,7 +13,27 @@ export class RefreshManager {
         this.storyManager = storyManager;
         this.uiManager = uiManager;
         this.autoSaveManager = autoSaveManager;
-        this.state = {};
+        this.state = {
+            showcase: {
+                type: null,
+                rootStoryId: null,
+                transform: null,
+                drawers: []
+            },
+            modal: {
+                isOpen: false,
+                textId: null
+            },
+            form: {
+                data: null,
+                type: null,
+                lastDatabaseState: null
+            },
+            scroll: {
+                x: 0,
+                y: 0
+            }
+        };
         this.previousUrl = sessionStorage.getItem('previousUrl');
         this.shouldRefreshGames = false;
         
@@ -42,10 +63,11 @@ export class RefreshManager {
         eventBus.on('inputChanged', this.handleInputChanged.bind(this));
         eventBus.on('formUpdated', this.handleFormUpdated.bind(this));
         eventBus.on('manualSave', this.handleManualSave.bind(this));
-        // Add event listener for restoringState for story page and forms   
-        eventBus.on('restoringState', this.handleRestoringState.bind(this));
+/*         // Add event listener for restoringState for story page and forms   
+        eventBus.on('restoringState', this.handleRestoringState.bind(this)); */
         //console.log('Custom events initialized');
         eventBus.on('editorReady', this.handleEditorReady.bind(this));
+        eventBus.on('showcaseChanged', (newShowcaseAndId) => this.setShowcaseState(newShowcaseAndId));
     }
 
     init() {    
@@ -111,6 +133,29 @@ export class RefreshManager {
         this.updateLastSavedContent(this.autoSaveManager.lastSavedContent);
     }
 
+    setShowcaseState(showcaseData) {
+        // Get existing state
+        const currentState = JSON.parse(localStorage.getItem('pageState')) || {
+            showcase: {
+                type: null,
+                rootStoryId: null,
+                transform: null,
+                drawers: []
+            }
+        };
+
+        // Only update the properties that are provided
+        if (showcaseData) {
+            currentState.showcase = {
+                ...currentState.showcase,  // preserve existing showcase state
+                ...showcaseData           // update only provided properties
+            };
+        }
+
+        // Save back to localStorage
+        localStorage.setItem('pageState', JSON.stringify(currentState));
+    }
+
     updateLastSavedContent(formData) {
         if (formData) {
             this.state.lastDatabaseState = formData;
@@ -118,23 +163,19 @@ export class RefreshManager {
 
         // Save to localStorage
         const pageState = JSON.parse(localStorage.getItem('pageState') || '{}');
-        pageState.lastDatabaseState = formData;
+        pageState.form.lastDatabaseState = formData;
         localStorage.setItem('pageState', JSON.stringify(pageState));
     }
 
     // This is called when the restoringState event is emitted from the main.js file
     // It is async to enable removing the saved state after it is restored
     // But the localStorage is not being removed for now, because the state is being kept in order to handle returns to the story page from other pages. When the system becomes more complex, this may need to be revisited. 
-    async handleRestoringState() {
-        //console.log('handleRestoringState called');
+/*     async handleRestoringState() {
+        console.log('HERE handleRestoringState called');
         this.isAPageRefresh = this.isPageRefresh();
-        //console.log('isAPageRefresh:', this.isAPageRefresh);
-        
         const savedState = this.getSavedState();
-        //console.log('savedState:', savedState);
         
         if (!savedState) {
-            //console.log('No saved state found');
             return;
         }
         // Clear form data if we're not on a form page
@@ -145,29 +186,41 @@ export class RefreshManager {
             localStorage.setItem('pageState', JSON.stringify(pageState));
         } */
         
-        const isFormPage = this.isFormPage();
+        /*const isFormPage = this.isFormPage();
         const isStoriesPage = this.isStoriesPage();
-
-
-/*         console.log('Current page type:', {
-            isFormPage,
-            isStoriesPage
-        }); */
 
         // Only restore form state if we're on a form page AND it's a refresh
         if (isFormPage && this.isAPageRefresh) {
-            //console.log('Attempting to restore form state');
             this.restoreFormState(savedState);
-            //console.log('Form state restored');
         }
 
-        // Always restore stories state if we're on the stories page
-        if (isStoriesPage && savedState.showcase) {
-            //console.log('Attempting to restore stories state');
-            await this.restoreState();
-            //console.log('Stories state restored');
+        // For stories page, check both URL params and saved state
+        if (isStoriesPage) {
+            // First check URL parameters
+            const { type: urlType, rootStoryId: urlRootStoryId } = this.showcaseManager.getShowcaseParams();
+            console.log('urlType:', urlType);
+            console.log('urlRootStoryId:', urlRootStoryId);
+            
+            // If URL has showcase params, use those
+            if (urlRootStoryId) {
+                console.log('Restoring showcase state from URL params');
+                const container = this.uiManager.createShowcaseContainer(urlRootStoryId);
+                if (container) {
+                    if (urlType === 'tree') {
+                        await this.uiManager.drawTree(urlRootStoryId, container);
+                    } else {
+                        await this.uiManager.drawShelf(urlRootStoryId, container);
+                    }
+                }
+            } 
+            // Otherwise use saved state
+            // TODO: showcase.type? 
+            else if (savedState.showcase.type) {
+                console.log('Restoring showcase state');
+                await this.restoreState();
+            }
         }
-    }
+    } */
 
     // Check if the page is a refresh-- if it is trigger handlePageRefresh
 /*     isPageRefresh() {
@@ -225,16 +278,16 @@ export class RefreshManager {
 
     // Restore the form state
     async restoreFormState(savedState) {
-        if (!savedState.formData) return;
+        if (!savedState.form.data) return;
 
         const form = document.querySelector('[data-form-type="root"], [data-form-type="iteration"], [data-form-type="addingNote"], [data-form-type="writerCreate"], [data-form-type="login"]');
 
         if (!form) return;
 
         // Parse the form data
-        const formData = typeof savedState.formData === 'string' 
-            ? JSON.parse(savedState.formData) 
-            : savedState.formData;
+        const formData = typeof savedState.form.data === 'string' 
+            ? JSON.parse(savedState.form.data) 
+            : savedState.form.data;
 
         // Then restore form values
         Object.entries(formData).forEach(([key, value]) => {
@@ -271,7 +324,7 @@ export class RefreshManager {
         // Set the last database state in autoSaveManager
         if (savedState.lastDatabaseState && this.autoSaveManager) {
             //console.log("Setting last database state before form restoration");
-            this.autoSaveManager.setLastSavedContent(savedState.lastDatabaseState, false);
+            this.autoSaveManager.setLastSavedContent(savedState.form.lastDatabaseState, false);
         } 
 
         // Force a check for unsaved changes
@@ -316,9 +369,9 @@ export class RefreshManager {
 
         // Save to localStorage
         const pageState = JSON.parse(localStorage.getItem('pageState') || '{}');
-        pageState.formData = formDataObj;
-        pageState.formType = formType;
-        pageState.lastDatabaseState = this.autoSaveManager.lastSavedContent;
+        pageState.form.data = formDataObj;
+        pageState.form.type = formType;
+        pageState.form.lastDatabaseState = this.autoSaveManager.lastSavedContent;
         localStorage.setItem('pageState', JSON.stringify(pageState));
     }
 
@@ -332,50 +385,59 @@ export class RefreshManager {
             return;
         }
 
-        // Where you can keep drawer data
-        this.state.drawers = [];
-        this.state.showcase = "none";
-        this.state.rootStoryId = null;
-        this.state.modal = false;
-        this.state.modalTextId = null;
-        this.state.zoomTransform = null;
-        this.state.formData = null;
-        this.state.formType = null;
-
-        this.state.scrollPosition = {
-            x: window.scrollX,
-            y: window.scrollY
+        // Single source of truth for view state
+        this.state = {
+            // View-related state
+            showcase: {
+                type: null,        // 'tree' or 'shelf'
+                rootStoryId: null, // text_id of the root story
+                drawers: [],       // array of open drawer IDs
+                transform: null    // zoom/pan state for tree view
+            },
+            // Modal state
+            modal: {
+                isOpen: false,
+                textId: null
+            },
+            // Form state
+            form: {
+                data: null,
+                type: null
+            },
+            // Page state
+            scroll: {
+                x: window.scrollX,
+                y: window.scrollY
+            }
         };
 
-        const storiesEl = document.querySelector("[data-stories]")
-        const showcaseEl = storiesEl ? storiesEl.querySelector("#showcase") : null; // The showcase element
-        const treeModalEl = document.querySelector("[data-tree-modal='visible']"); // The modal element if visible
+        const storiesEl = document.querySelector("[data-stories]");
+        const showcaseEl = storiesEl ? storiesEl.querySelector("#showcase") : null;
+        const treeModalEl = document.querySelector("[data-tree-modal='visible']");
 
-        if(showcaseEl){
-            // Save state of open drawers
+        if (showcaseEl) {
+            // Save showcase state
+            this.state.showcase.type = showcaseEl.dataset.showcase;
+            this.state.showcase.rootStoryId = showcaseEl.closest('[data-text-id]').dataset.textId;
+            
+            // Save open drawers
             showcaseEl.querySelectorAll('.writing').forEach(drawer => {
-                if(!drawer.classList.contains("hidden")){
-                    this.state.drawers.push(drawer.closest('[data-story-id]').dataset.storyId);
+                if (!drawer.classList.contains("hidden")) {
+                    this.state.showcase.drawers.push(
+                        drawer.closest('[data-story-id]').dataset.storyId
+                    );
                 }
-            });  
+            });
 
-            // Save current view type
-            this.state.showcase = showcaseEl.dataset.showcase;
-
-            // Save story id
-            this.state.rootStoryId = showcaseEl.closest('[data-text-id]').dataset.textId;
-
-            // Save zoom transform
-            this.captureD3Transform();
+            // Save transform for tree view
+            if (this.state.showcase.type === 'tree') {
+                this.captureD3Transform();
+            }
         }
 
-        if(treeModalEl){
-            // TODO: add a dataset to a parent element for the textID
-            const currentTextId = treeModalEl.dataset.textId;
-            this.state.modalTextId = currentTextId;
-            this.state.modal = true;
-        }else{
-            this.state.modal = false;
+        if (treeModalEl) {
+            this.state.modal.isOpen = true;
+            this.state.modal.textId = treeModalEl.dataset.textId;
         }
 
         localStorage.setItem('pageState', JSON.stringify(this.state));
@@ -383,26 +445,29 @@ export class RefreshManager {
 
     captureD3Transform() {
         const svg = d3.select('#showcase svg');
-
         if (!svg.empty()) {
             const transform = d3.zoomTransform(svg.node());
-            console.log('Saving transform:', transform);
-            this.state.zoomTransform = {
-                x: transform.x,
-                y: transform.y,
-                k: transform.k
-            };
+            if (transform) {
+                // Update both local state and localStorage
+                this.state.showcase.transform = {
+                    x: transform.x,
+                    y: transform.y,
+                    k: transform.k
+                };
+                
+                // Update localStorage with new transform
+                const currentState = JSON.parse(localStorage.getItem('pageState')) || { showcase: {} };
+                currentState.showcase.transform = this.state.showcase.transform;
+                localStorage.setItem('pageState', JSON.stringify(currentState));
+            }
         }
     }
 
     // This is used to restore the state of the page with the game list
     async restoreState() {
-        console.log('restoreState called from:', new Error().stack);
-        
-        if (this.isRestoring) {
-            console.log('Already restoring state, skipping...');
-            return;
-        }
+        console.log('RESTORING');
+        //console.log('restoreState called from:', new Error().stack);
+        if (this.isRestoring) return;
         this.isRestoring = true;
 
         try {
@@ -410,51 +475,67 @@ export class RefreshManager {
             const savedState = JSON.parse(localStorage.getItem('pageState'));
             if (!savedState) return;
 
+             // Check URL parameters first
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlShowcaseType = urlParams.get('showcase');
+            const urlRootStoryId = urlParams.get('rootStoryId');
+
+            // Priority is URL params, then saved state
+            const priorityShowcaseType = urlShowcaseType || savedState.showcase.type;
+            const priorityRootStoryId = urlRootStoryId || savedState.showcase.rootStoryId;
+
+
             // Handle form state restoration
-            if (savedState.formData && savedState.formType && this.isAPageRefresh) {
+            if (savedState.form.data && savedState.form.type && this.isAPageRefresh) {
                await this.restoreFormState(savedState);
             }
 
             // Create showcase container and restore view state
             if (this.isStoriesPage()) {
-                if (!savedState.rootStoryId) {
+                if (!priorityRootStoryId) {
                     console.log('No root story ID found, skipping showcase container creation');
                     return;
                 }
-                const container = this.uiManager.createShowcaseContainer(savedState.rootStoryId);
-                console.log('this is my container:', container);
+                const container = this.uiManager.createShowcaseContainer(priorityRootStoryId);
                 if (container) {
                     console.log('container exists');
-                    if (savedState.showcase === 'shelf') {
+                    if (priorityShowcaseType === 'shelf') {
                         console.log('Restoring shelf view');
-                        await this.uiManager.drawShelf(savedState.rootStoryId, container);
+                        await this.uiManager.drawShelf(savedState.showcase.rootStoryId, container);
                         this.restoreDrawers(savedState);
-                    } else if (savedState.showcase === 'tree') {
-                        console.log('Restoring tree view');
+                    } else if (priorityShowcaseType === 'tree') {
                         window.skipInitialTreeTransform = true;
                         
-                        await this.uiManager.drawTree(savedState.rootStoryId, container);
-                        
-                        // Wait for D3 initialization
-                        //await new Promise(resolve => setTimeout(resolve, 100));
-                        
-                        if (savedState.zoomTransform) {
-                            await new Promise(resolve => setTimeout(resolve, 100));
-                            this.restoreTreeTransform(savedState.zoomTransform);
+                        try {
+                            // TODO: this is why getTree is called twice. 
+                            // Check if we have valid tree data before attempting to draw
+                            const treeData = await this.storyManager.prepareData(priorityRootStoryId);
+                            if (!treeData) {
+                                console.error('Failed to restore tree view - no valid data');
+                                return;
+                            }
+                            
+                            await this.uiManager.drawTree(priorityRootStoryId, container);
+                            
+                            if (savedState.showcase.transform !== null) {
+                                await new Promise(resolve => setTimeout(resolve, 100));
+                                this.restoreTreeTransform(savedState.showcase.transform);
+                            }
+                        } finally {
+                            window.skipInitialTreeTransform = false;
                         }
-                        window.skipInitialTreeTransform = false;
                     }
                 }
 
-                // Restore modal state
-                if (savedState.modal && savedState.modalTextId) {
-                    await this.storyManager.showStoryInModal(savedState.modalTextId);
-                }
+            // Restore modal state
+            if (savedState.modal.isOpen && savedState.modal.textId) {
+                await this.storyManager.showStoryInModal(savedState.modal.textId);
+            }
 
             // Restore scroll position
-            if (savedState.scrollPosition) {
+            if (savedState.scroll) {
                 setTimeout(() => {
-                    window.scrollTo(savedState.scrollPosition.x, savedState.scrollPosition.y);
+                    window.scrollTo(savedState.scroll.x, savedState.scroll.y);
                 }, 100);
             }
         } } catch (error) {
@@ -466,6 +547,7 @@ export class RefreshManager {
 
     // Helper method to restore tree transform
     restoreTreeTransform(transform) {
+        console.log('restoreTreeTransform called', transform);
         const svg = d3.select('#showcase svg');
         if (!svg.empty() && window.treeVisualizerInstance?.zoom) {
             if (transform && 
@@ -490,7 +572,7 @@ export class RefreshManager {
     }
 
     restoreDrawers(savedState) {
-        savedState.drawers.forEach(storyId => {
+        savedState.showcase.drawers.forEach(storyId => {
             const drawer = document.querySelector(`[data-story-id="${storyId}"] .writing`);
             if (drawer) {
                 drawer.classList.add('visible');
@@ -517,14 +599,8 @@ export class RefreshManager {
         try {
             document.body.classList.add('refreshing');
             
-            // Single update check
-            const hasUpdates = await window.dataManager.checkForUpdates();
-            if (hasUpdates) {
-                const modifiedGames = window.dataManager.getRecentlyModifiedGames();
-                modifiedGames.forEach(game => {
-                    eventBus.emit('updateGame', game);
-                });
-            }
+           // Single update check - updates will be handled by listeners
+            await window.dataManager.checkForUpdates();
 
             // Single state restoration
             await this.restoreState();
@@ -538,35 +614,4 @@ export class RefreshManager {
         
         return false;
     }
-
-    // Handle page refresh
-   /*  handlePageRefresh() {
-        if (this.isStoriesPage()) {    
-            // Make sure dataManager exists before using it
-            if (!this.dataManager) {
-                console.error('DataManager not available for refresh handling');
-                return true; // Allow default refresh if no dataManager
-            }
-
-            // Show loading indicator
-            document.body.classList.add('refreshing');
-
-             // Check for updates without full rerender
-            window.dataManager.checkForUpdates().then(hasUpdates => {
-                if (hasUpdates) {
-                    const modifiedGames = window.dataManager.getRecentlyModifiedGames();
-                    modifiedGames.forEach(game => {
-                        eventBus.emit('updateGame', game);
-                    });
-                }
-                // Restore state after updates
-                this.restoreState();
-                document.body.classList.remove('refreshing');
-            });
-            
-            // Prevent browser refresh
-            return false;
-        }
-        return true; // Allow refresh for other pages
-    } */
 }

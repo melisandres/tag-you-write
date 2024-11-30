@@ -315,9 +315,11 @@ export class TreeVisualizer {
         
         // Only apply initial transform if we're not restoring from GameListRenderer
         if (!window.skipInitialTreeTransform) {
-            if (savedState && savedState.showcase === 'tree' && savedState.zoomTransform && this.pageJustLoaded) {
+            if (savedState?.showcase?.type === 'tree'
+                && savedState.showcase.transform 
+                && this.pageJustLoaded) {
                 // Apply saved transform
-                const transform = savedState.zoomTransform;
+                const transform = savedState.transform;
                 const initialTransform = d3.zoomIdentity
                     .translate(transform.x, transform.y)
                     .scale(transform.k);

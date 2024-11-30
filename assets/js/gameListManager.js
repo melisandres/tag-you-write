@@ -43,9 +43,11 @@ export class GameListManager {
     }
 
     handleGameUpdates(games) {
-        games.forEach(game => {
+/*         games.forEach(game => {
             eventBus.emit('updateGame', game);
-        });
+        }); */
+        /* this.dataManager.updateGamesData(games, false);  */
+        console.log('GAMES LIST MANAGER WAS SUPPOSED TO CALL UPDATE GAMES DATA here... but it becomes circular... does this break anything?', games);
     }
 
     handleFiltersChanged(filters) {
@@ -56,8 +58,6 @@ export class GameListManager {
     async refreshGamesList() {
         try {
             const filters = this.dataManager.getFilters();
-            
-            // Use existing endpoint with filters
             const response = await fetch(`${this.path}game/getGames`, {
                 method: 'POST',
                 headers: {
@@ -69,8 +69,7 @@ export class GameListManager {
             if (!response.ok) throw new Error('Failed to fetch games');
             
             const games = await response.json();
-            
-            this.dataManager.initializeGamesData(games);
+            this.dataManager.updateGamesData(games, true);
             this.renderer.renderGamesList(games);
             
         } catch (error) {

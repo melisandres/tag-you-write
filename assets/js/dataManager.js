@@ -12,13 +12,13 @@ export class DataManager {
             return DataManager.instance;
         }
 
-        this.currentViewedGameId = null;
+        this.currentViewedRootStoryId = null;
         const userIdMeta = document.querySelector('meta[name="user"]');
         this.path = path;
         this.cache = this.loadCache() || {
             games: new Map(),
             trees: new Map(),
-            nodes: new Map(),
+            nodesMap: new Map(), // A flat structure to make updates easier
             lastGamesCheck: null,
             lastUserId: userIdMeta.getAttribute('data-user-id') !== 'null' ? userIdMeta.getAttribute('data-user-id') : null,
             pagination: {
@@ -34,8 +34,13 @@ export class DataManager {
                 // sort: 'newest',   // 'newest', 'oldest', etc.
                 // search: ''        // search term
             },
-            lastCheck: null
         };
+
+        // Ensure nodesMap exists even if loaded from cache
+        if (!this.cache.nodesMap) {
+            this.cache.nodesMap = new Map();
+        }
+
         this.currentUserId = null; // Track current user
         this.recentlyModifiedGames = new Set(); // Track modified game IDs
         this.treeChecks = new Map(); // Store last check time for each tree
@@ -50,7 +55,6 @@ export class DataManager {
         eventBus.on('updateGame', (gameData) => {
             this.updateGamesData([gameData]);
         });
-        eventBus.on('showcaseChanged', (rootStoryId) => this.setCurrentViewedRootStoryId(rootStoryId));
         
         this.saveCache();
         DataManager.instance = this;
@@ -59,6 +63,14 @@ export class DataManager {
 
     setCurrentViewedRootStoryId(rootStoryId) {
         this.currentViewedRootStoryId = rootStoryId;
+        
+        // Ensure tree exists in cache
+        if (!this.cache.trees.has(rootStoryId)) {
+            this.cache.trees.set(rootStoryId, {
+                data: null,  // Will be populated by setFullTree later
+                timestamp: Date.now()
+            });
+        }
     }
 
     getCurrentViewedRootStoryId() {
@@ -69,8 +81,8 @@ export class DataManager {
         return {
             games: new Map(),
             trees: new Map(),
-            nodes: new Map(),
-            lastGamesCheck: null,
+            nodesMap: new Map(),
+            lastGamesCheck: Date.now(),
             lastUserId: null,
             pagination: {
                 currentPage: 1,
@@ -78,13 +90,9 @@ export class DataManager {
                 totalItems: 0
             },
             filters: {
-                hasContributed: null,  // null = all, 'contributor', 'mine'
-                gameState: 'all',  // 'all', 'open', 'closed', 'pending'
-                // Future filters:
-                // sort: 'newest',   // 'newest', 'oldest', etc.
-                // search: ''        // search term
-            },
-            lastCheck: null
+                hasContributed: null,
+                gameState: 'all'
+            }
         };
     }
 
@@ -98,50 +106,6 @@ export class DataManager {
         this.currentUserId = userId;
     }
 
-    updateGamesData(games) {
-        if (!Array.isArray(games)) {
-            console.error('Expected array of games, got:', games);
-            return [];
-        }
-        console.log('updateGamesData', games);
-        const updatedGameIds = [];
-        games.forEach(game => {
-            const existingGame = this.cache.games.get(game.id);
-            const gameChanged = !existingGame || 
-                existingGame.data.open_for_changes !== game.open_for_changes ||
-                existingGame.data.text_count !== game.text_count ||
-                existingGame.data.seen_count !== game.seen_count ||
-                existingGame.data.unseen_count !== game.unseen_count ||
-                existingGame.data.title !== game.title ||
-                existingGame.data.voteCount !== game.voteCount ||
-                existingGame.data.hasVoted !== game.hasVoted;
-                
-            if (gameChanged) {
-                this.cache.games.set(game.id, {
-                    data: {
-                        ...game,
-                        text_id: game.id || null,
-                        open_for_changes: game.openForChanges === '1' || game.open_for_changes === true,
-                        hasContributed: game.hasContributed === '1' || game.has_contributed === true,
-                        text_count: parseInt(game.text_count) || 0,
-                        seen_count: parseInt(game.seen_count) || 0,
-                        unseen_count: parseInt(game.unseen_count) || 0
-                    },
-                    timestamp: Date.now()
-                });
-                updatedGameIds.push(game.id);
-            }
-        });
-
-        if (updatedGameIds.length > 0) {
-            this.saveCache();
-            console.log('Emitting gamesUpdated for:', updatedGameIds);
-            eventBus.emit('gamesUpdated', updatedGameIds);
-        }
-
-        return updatedGameIds;
-    }
-
     // Add method to check if games need refresh
     async checkForUpdates() {
         if (!navigator.onLine) {
@@ -149,80 +113,221 @@ export class DataManager {
             return false;
         }
 
+        const rootId = this.currentViewedRootStoryId;
+        const lastGamesCheck = this.cache.lastGamesCheck || 0;
+        
+        console.log('Checking for updates with:', {
+            currentViewedRootStoryId: this.currentViewedRootStoryId,
+            lastGamesCheck: new Date(lastGamesCheck).toISOString(),
+            treeTimestamp: this.cache.trees.get(rootId)?.timestamp
+        });
+
         try {
-            //console.log('Sending update check request...');
             const response = await fetch(`${this.path}game/modifiedSince`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    lastCheck: this.cache.lastGamesCheck || 0,
+                    lastGamesCheck: lastGamesCheck,
                     filters: this.cache.filters || {},
-                    rootStoryId: this.currentViewedRootStoryId || null
+                    rootStoryId: rootId,
+                    lastTreeCheck: this.cache.trees.get(rootId)?.timestamp || 0
                 })
             });
-
-            //console.log('Update check response:', response.status);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            const data = await response.json();
-            //console.log('Update check data:', data);
-            return this.handleUpdateResponse(data);
+            const modifiedData = await response.json();
+            console.log('Modified data:', modifiedData);
+            return this.handleUpdateResponse(modifiedData, rootId);
         } catch (error) {
-            if (error.name === 'AbortError' || error.name === 'TypeError') {
-                console.log('Update check error:', error.message);
-                return false;
-            }
-            console.error('Update check failed:', error);
+            console.error('Error checking for updates:', error);
             return false;
         }
     }
 
-    handleUpdateResponse(modifiedGames) {
-        if (modifiedGames.length > 0) {
-            // Clear previous modifications
-            this.recentlyModifiedGames = new Set();
-            
-            // Update cache and track modified games
-            modifiedGames.forEach(game => {
-                this.cache.games.set(game.id, {
-                    data: game,
-                    timestamp: Date.now()
-                });
-                this.recentlyModifiedGames.add(game.id);
-            });
+    setCurrentViewedRootStoryId(rootStoryId) {
+        this.currentViewedRootStoryId = rootStoryId;
+    }
 
-            this.cache.lastGamesCheck = Date.now();
-            this.saveCache();
-            
-            // Emit event only once
+    // This creates the recently modified games list
+    handleUpdateResponse(response, currentlyViewedRootId) {
+        const { modifiedGames, modifiedNodes } = response;
+        let hasUpdates = false;
+        let hasTreeUpdates = false;
+
+        if (modifiedGames?.length > 0) {
+            this.updateGamesData(modifiedGames, false);
+            // this event refreshes the view in gameListRenderer.js
             eventBus.emit('gamesModified', modifiedGames);
+            hasUpdates = true;
+        }
+
+        if (modifiedNodes?.length > 0) {
+            this.updateTreeData(modifiedNodes, currentlyViewedRootId, false);
+            eventBus.emit('treeNodesModified', modifiedNodes);
+            hasUpdates = true;
+            hasTreeUpdates = true;
+        }
+
+        if (hasUpdates) {
+            this.cache.lastGamesCheck = Date.now();
+            if (hasTreeUpdates) {
+                const cachedTree = this.cache.trees.get(currentlyViewedRootId);
+                if (!cachedTree) {
+                    this.cache.trees.set(currentlyViewedRootId, {
+                        data: null,  // Will be populated later
+                        timestamp: Date.now()
+                    });
+                } else {
+                    cachedTree.timestamp = Date.now();
+                }
+            } 
+            this.saveCache();
+        }
+        
+        return hasUpdates;
+    }
+
+
+    updateTreeData(treeNodes, rootId, isFullUpdate = false) {
+        if (!Array.isArray(treeNodes)) {
+            console.error('Expected array of nodes, got:', treeNodes);
+            return;
+        }
+        
+        if (isFullUpdate) {
+            // Handle full tree update
+            this.setFullTree(rootId, treeNodes);
+        } else {
+            // Handle partial updates
+            this.updateTreeNodes(treeNodes, rootId);
+        }  
+    
+        this.saveCache();
+    }
+
+    updateGamesData(games, isFullUpdate = false) {
+        if (!Array.isArray(games)) {
+            console.error('Expected array of games, got:', games);
+            return [];
+        }
+        
+        if (isFullUpdate) {
+            this.replaceAll(games);
+        } else {
+            this.updateGames(games);
+        }  
+
+        this.saveCache();
+        return Array.from(this.cache.games.values())
+            .map(game => game.data)
+            .sort((a, b) => a.placement_index - b.placement_index);
+    }
+
+
+    updateTreeNodes(modifiedNodes, rootId) {
+        if (!modifiedNodes?.length) return;
+        
+        const cachedTree = this.cache.trees.get(rootId);
+        if (!cachedTree) return;
+
+        let hasUpdates = false;
+        
+        modifiedNodes.forEach(updatedNode => {
+            // Update flat map
+            const existingNode = this.cache.nodesMap.get(updatedNode.id);
+            
+            if (existingNode) {
+                // Preserve children if updating existing node
+                const children = existingNode.children || [];
+                this.cache.nodesMap.set(updatedNode.id, {
+                    ...updatedNode,
+                    children
+                });
+            } else {
+                // New node
+                this.cache.nodesMap.set(updatedNode.id, {
+                    ...updatedNode,
+                    children: []
+                });
+            }
+            
+            // Update hierarchical structure
+            this.updateNodeInHierarchy(cachedTree.data, updatedNode);
+            hasUpdates = true;
+        });
+
+        if (hasUpdates) {
+            cachedTree.timestamp = Date.now();
+            this.saveCache();
+        }
+    }
+
+    updateNodeInHierarchy(treeNode, updatedNode) {
+        if (treeNode.id === updatedNode.id) {
+            // Preserve existing children when updating
+            const children = treeNode.children || [];
+            Object.assign(treeNode, updatedNode, { children });
             return true;
         }
         
-        this.cache.lastGamesCheck = Date.now();
-        return false;
+        return treeNode.children?.some(child => 
+            this.updateNodeInHierarchy(child, updatedNode)
+        );
+    }
+
+    // Helper method to get a node quickly
+    getNode(nodeId) {
+        return this.cache.nodesMap.get(nodeId);
+    }
+
+    // Helper method to get parent of a node
+    getParentNode(nodeId) {
+        const node = this.getNode(nodeId);
+        return node ? this.getNode(node.parent_id) : null;
+    }
+
+    clearTreeNodes(rootId) {
+        // Ensure nodesMap exists
+        if (!this.cache.nodesMap) {
+            this.cache.nodesMap = new Map();
+        }
+
+        const removeNodes = (node) => {
+            if (!node) return;
+            this.cache.nodesMap.delete(node.id);
+            node.children?.forEach(removeNodes);
+        };
+        
+        const existingTree = this.cache.trees.get(rootId);
+        if (existingTree?.data) {
+            removeNodes(existingTree.data);
+        }
     }
 
     // Load cache from localStorage
     loadCache() {
-        const savedCache = localStorage.getItem('storyCache');
-        if (savedCache) {
-            const parsed = JSON.parse(savedCache);
-            return {
-                games: new Map(parsed.games),
-                trees: new Map(parsed.trees),
-                nodes: new Map(parsed.nodes),
-                lastGamesCheck: parsed.lastGamesCheck,
-                lastUserId: parsed.lastUserId,
-                pagination: parsed.pagination,
-                filters: parsed.filters || {  // Add filters to cache loading
-                    hasContributed: null,
-                    gameState: 'all'
-                }
-            };
+        try {
+            const savedCache = localStorage.getItem('storyCache');
+            if (savedCache) {
+                const parsed = JSON.parse(savedCache);
+                return {
+                    games: new Map(parsed.games),
+                    trees: new Map(parsed.trees),
+                    nodesMap: new Map(parsed.nodesMap),
+                    lastGamesCheck: parsed.lastGamesCheck || Date.now(),
+                    lastUserId: parsed.lastUserId,
+                    pagination: parsed.pagination,
+                    filters: parsed.filters || {
+                        hasContributed: null,
+                        gameState: 'all'
+                    }
+                };
+            }
+        } catch (e) {
+            console.error('Error loading cache:', e);
         }
         return null;
     }
@@ -232,13 +337,18 @@ export class DataManager {
         const cacheToSave = {
             games: Array.from(this.cache.games.entries()),
             trees: Array.from(this.cache.trees.entries()),
-            nodes: Array.from(this.cache.nodes.entries()),
+            nodesMap: Array.from(this.cache.nodesMap.entries()),
             lastGamesCheck: this.cache.lastGamesCheck,
             lastUserId: this.cache.lastUserId,
             pagination: this.cache.pagination,
-            filters: this.cache.filters  // Add filters to cache saving
+            filters: this.cache.filters
         };
-        localStorage.setItem('storyCache', JSON.stringify(cacheToSave));
+        
+        try {
+            localStorage.setItem('storyCache', JSON.stringify(cacheToSave));
+        } catch (e) {
+            console.error('Error saving cache:', e);
+        }
     }
 
     setTree(rootId, treeData) {
@@ -252,14 +362,6 @@ export class DataManager {
     getTree(rootId) {
         console.log('getTree', rootId);
         return this.cache.trees.get(rootId);
-    }
-
-    setNode(nodeId, nodeData) {
-        this.cache.nodes.set(nodeId, {
-            data: nodeData,
-            timestamp: Date.now()
-        });
-        this.saveCache();
     }
 
     getPaginatedData() {
@@ -291,11 +393,10 @@ export class DataManager {
 
     // Add method to clear cache if needed
     clearCache() {
-        localStorage.removeItem('storyCache');
         this.cache = {
             games: new Map(),
             trees: new Map(),
-            nodes: new Map(),
+            nodesMap: new Map(),
             lastGamesCheck: null,
             pagination: {
                 currentPage: 1,
@@ -303,6 +404,7 @@ export class DataManager {
                 totalItems: 0
             }
         };
+        this.saveCache();
     }
 
     // A meta has been added in the header to track user id and logged in status
@@ -320,32 +422,8 @@ export class DataManager {
             .filter(game => game !== undefined);
     }
 
-    // New method for initial data load
-    initializeGamesData(games) {
-        if (!Array.isArray(games)) {
-            console.error('Expected array of games, got:', games);
-            return;
-        }
-
-        games.forEach(game => {
-            this.cache.games.set(game.id, {
-                data: {
-                    ...game,
-                    text_id: game.id || null,
-                    open_for_changes: game.openForChanges === '1' || game.open_for_changes === true,
-                    hasContributed: game.hasContributed === '1' || game.has_contributed === true,
-                    text_count: parseInt(game.text_count) || 0,
-                    seen_count: parseInt(game.seen_count) || 0,
-                    unseen_count: parseInt(game.unseen_count) || 0
-                },
-                timestamp: Date.now()
-            });
-        });
-
-        this.saveCache();
-    }
-
-    async shouldRefreshTree(rootId) {
+    // TODO: Delete this soon
+/*     async shouldRefreshTree(rootId) {
         const lastCheck = this.treeChecks.get(rootId) || 0;
         const response = await fetch(`${this.path}text/checkTreeUpdates`, {
             method: 'POST',
@@ -360,7 +438,7 @@ export class DataManager {
         
         const result = await response.json();
         return result.needsUpdate;
-    }
+    } */
 
     setTreeLastCheck(rootId) {
         this.treeChecks.set(rootId, Date.now());
@@ -368,6 +446,7 @@ export class DataManager {
     }
 
     setFilters(filters) {
+        console.log('setFilters', filters);
         this.cache.filters = {
             hasContributed: filters.hasContributed ?? null,
             gameState: filters.gameState ?? 'all'
@@ -379,8 +458,9 @@ export class DataManager {
         return this.cache.filters;
     }
 
-    // Add this method to the DataManager class
+    /* // Add this method to the DataManager class called from storyManager.js prepareData() TODO: Delete this soon
     compareTreeData(oldTree, newTree) {
+        console.log('compareTreeData', oldTree, newTree);
         const differences = [];
         
         // Helper function to compare nodes
@@ -420,5 +500,82 @@ export class DataManager {
         
         compareNodes(oldTree, newTree);
         return differences;
+    } */
+
+     // For full list updates (filters, page refresh)
+     replaceAll(games) {
+        this.cache.games.clear();
+        games.forEach(game => {
+            this.cache.games.set(game.game_id, {
+                data: this.normalizeGameData(game),
+                timestamp: Date.now()
+            });
+        });
+        this.cache.lastGamesCheck = Date.now();
+    }
+
+    // For poll updates
+    updateGames(games) {
+        games.forEach(game => {
+            const normalized = this.normalizeGameData(game);
+            const existing = this.cache.games.get(game.game_id);
+            
+            if (!existing || existing.timestamp < this.lastFullUpdate) {
+                this.cache.games.set(game.game_id, {
+                    data: normalized,
+                    timestamp: Date.now()
+                });
+            }
+        });
+    }
+
+    // Normalize game data to match the expected format
+    normalizeGameData(game) {
+        return {
+            game_id: game.game_id,
+            text_id: game.id,
+            title: game.title,
+            prompt: game.prompt,
+            open_for_changes: game.openForChanges === '1' || 
+                             game.openForChanges === true || 
+                             game.openForChanges === 1,
+            hasContributed: game.hasContributed === '1' || 
+                           game.hasContributed === true || 
+                           game.hasContributed === 1,
+            text_count: parseInt(game.text_count) || 0,
+            seen_count: parseInt(game.seen_count) || 0,
+            unseen_count: parseInt(game.unseen_count) || 0,
+            placement_index: parseInt(game.placement_index)
+        };
+    }
+
+    setFullTree(rootId, treeData) {
+        // Ensure nodesMap exists
+        if (!this.cache.nodesMap) {
+            this.cache.nodesMap = new Map();
+        }
+
+        // Clear existing nodes for this tree
+        this.clearTreeNodes(rootId);
+        
+        // Flatten tree into nodesMap
+        const flattenTree = (node, parentId = null) => {
+            if (!node) return;
+            
+            const nodeData = { ...node, parent_id: parentId };
+            this.cache.nodesMap.set(node.id, nodeData);
+            
+            node.children?.forEach(child => flattenTree(child, node.id));
+        };
+        
+        flattenTree(treeData);
+        
+        // Store the hierarchical structure
+        this.cache.trees.set(rootId, {
+            data: treeData,
+            timestamp: Date.now()
+        });
+
+        this.saveCache();
     }
 }

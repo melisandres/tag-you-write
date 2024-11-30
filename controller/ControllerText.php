@@ -106,12 +106,16 @@ class ControllerText extends Controller{
 
         // Get the gameId
         $gameId = $game->selectGameId($rootId);
+        error_log("gameId: " . $gameId);
+        error_log("rootId: " . $rootId);
 
         // Get the current user Id
         $currentUserId = $_SESSION['writer_id'] ?? null;
 
         // Get only the texts for this game
         $select = $text->selectTexts($currentUserId, $gameId, true);
+
+        error_log("select: " . print_r($select, true));
 
         // Build the requested tree
         $tree = $this->buildHierarchy($select, 'id', $rootId);
@@ -125,29 +129,28 @@ class ControllerText extends Controller{
         return $jsonData;
     }
 
+    // An end point for only modified text nodes from a single tree. 
     public function checkTreeUpdates() {
-        $input = json_decode(file_get_contents('php://input'), true);
-        $rootId = $input['rootId'];
-        $lastCheck = $input['lastCheck'];
-        
+        $data = json_decode(file_get_contents('php://input'), true);
+        $rootId = $data['rootId'];
+        $lastTreeCheck = $data['lastTreeCheck'];
+
         $text = new Text;
-        $gameId = $text->selectGameId($rootId);
-        
-        // Check if any nodes in this tree have been modified
-        $sql = "SELECT COUNT(*) as count 
-                FROM text 
-                WHERE game_id = :gameId 
-                AND (modified_at > FROM_UNIXTIME(:lastCheck/1000) 
-                     OR note_date > FROM_UNIXTIME(:lastCheck/1000))";
-        
-        $stmt = $text->prepare($sql);
-        $stmt->bindValue(':gameId', $gameId);
-        $stmt->bindValue(':lastCheck', $lastCheck);
-        $stmt->execute();
-        
-        $result = $stmt->fetch();
-        
-        return json_encode(['needsUpdate' => $result['count'] > 0]);
+        $game = new Game;
+
+        // Get the gameId
+        $gameId = $game->selectGameId($rootId);
+
+        // Get the current user Id
+        $currentUserId = $_SESSION['writer_id'] ?? null;
+
+        // Get only the texts for this game
+        $modifiedNodes = $text->selectTexts($currentUserId, $gameId, true, $lastTreeCheck);
+
+        // Convert the hierarchical array to JSON format
+        $jsonData = json_encode($modifiedNodes);
+
+        return $jsonData;
     }
 
     // An end point from which to get the data for just one node
@@ -166,41 +169,7 @@ class ControllerText extends Controller{
         return $jsonData;
     }
 
-    // Recursive function to add permissions to each node
-    /* private function addPermissions(&$node, $currentUserId, $hierarchy) {
-        // Set 1s and 0s to trues and falses
-        $node['hasContributed'] = $node['hasContributed'] == 1 ? true : false;
-        $node['isWinner'] = $node['isWinner'] == 1 ? true : false;
-        $node['openForChanges'] = $node['openForChanges'] == 1 ? true : false;
-
-        // Create some vars to make the permissions clearer
-        $isAParentText = !empty($node['children']);
-        $gameOpen = $node['openForChanges'];
-        $hasContributed = $node['hasContributed'];
-        $isDraft = $node['text_status'] == "draft" ? true : false;
-        $nodeWriter = $node['writer_id'];
-        $isMyText = $currentUserId === $nodeWriter;
-        $isLoggedIn = $currentUserId !== null;
-        
-        // TODO: You can reuse this logic in every method, to ensure that we enforce these permissions.
-
-        //TODO: you might want to treat "can edit" differently than "can add note"
-
-        $node['permissions'] = [
-            'canEdit' => $isLoggedIn && $isMyText && $gameOpen,
-            'canDelete' => !$isAParentText && $isMyText && $gameOpen && $isDraft,
-            'canIterate' => $isLoggedIn && !$isMyText && $gameOpen && !$isDraft,
-            'isMyText' => $isMyText,
-            'canVote' => !$isMyText && $hasContributed && $gameOpen
-        ];
-
-        if (!empty($node['children'])) {
-            foreach ($node['children'] as &$child) {
-                $this->addPermissions($child, $currentUserId, $hierarchy);
-            }
-        }
-    } */
-
+    // This works hand in hand with the library/permissions.php. I can't remember why it isn't included in this system... I think it just works a little differently, and so it's easier to keep it here (?)
     private function addPermissions(&$node, $currentUserId, $hierarchy = []) {
         // selectTexts adds hasContributed, isWinner, and openForChanges, but 
         // the front end works better if these are just true/false instead of 0/1
@@ -352,6 +321,12 @@ class ControllerText extends Controller{
             'writer_id' => $currentWriterId,
             'date' => date('Y-m-d H:i:s')
         ];
+
+        // Modified_at is to refresh the UI... so only when published
+        if ($status == 'published') {
+            $textToSave['modified_at'] = date('Y-m-d H:i:s');
+        }
+
         //save the text
         $textIdFromInsert = $text->insert($textToSave);
 
@@ -379,7 +354,10 @@ class ControllerText extends Controller{
         // Which should basically never happen, but it's here if it does.
         if ($status == 'published') {
             $game = new Game;
-            $game->update(['id' => $input['game_id'], 'modified_at' => date('Y-m-d H:i:s')]);
+            $game->update([
+                'id' => $input['game_id'], 
+                'modified_at' => date('Y-m-d H:i:s')
+            ]);
         }
 
         // Handle keywords
@@ -550,7 +528,8 @@ class ControllerText extends Controller{
         // Prepare the data for update
         $data = [
             'id' => $textId,
-            'status_id' => $statusId // Dynamically retrieved 'published' status_id
+            'status_id' => $statusId, // Dynamically retrieved 'published' status_id
+            'modified_at' => date('Y-m-d H:i:s')
         ];
 
         $success = $text->update($data);
@@ -657,7 +636,8 @@ class ControllerText extends Controller{
             $updateNote = [
                 'note' => $input['note'],
                 'note_date' => $input['note_date'],
-                'id' => $input['id']
+                'id' => $input['id'],
+                'modified_at' => date('Y-m-d H:i:s')
             ];
 
             $update = $text->update($updateNote);
@@ -714,17 +694,21 @@ class ControllerText extends Controller{
         $lastKeywords = $input['lastKeywords'];
 /*         unset($input['lastKeywords']);  */
 
-        //send the text info to CRUD
+        // TODO: HERE would be the place to add an "editing" table... 
         $newText = [
             'id' => $textId,
             'status_id' => $input['status_id'],
             'writing' => $input['writing'],
             'title' => $input['title'],
-            'date' => date('Y-m-d H:i:s')
+            'date' => date('Y-m-d H:i:s'),
         ];
-        //error_log("line615 Saving newText: " . json_encode($newText));
+
+        // Modified_at is to refresh the UI... so only when published
+        if ($status == 'published') {
+            $textToSave['modified_at'] = date('Y-m-d H:i:s');
+        }
+
         $update = $text->update($newText);
-        //error_log("line616 update: " . json_encode($update));
 
 
         // If the publish was a success, add the player to the game
@@ -811,12 +795,8 @@ class ControllerText extends Controller{
         // No access if you are not logged in
         CheckSession::sessionAuth();
 
-        error_log("LOOK HERE LOOK HERE LOOK HERE");
-
         $currentWriterId = $_SESSION['writer_id'];
         $textId = $_POST['id']; 
-
-        error_log("textId: " . $textId);
 
 
         //$insta = isset($_POST['insta']) && $_POST['insta'] === '1';
@@ -824,33 +804,16 @@ class ControllerText extends Controller{
         $keyword = new Keyword;
         $textHasKeyword = new TextHasKeyword;
 
-        //TODO: I think I'm going a little crazy. a bunch of things I need for my checks will be in $textData--like the parent_id, which I don't need to send via the form--oh, but I do, because it helps decide the view.
         $textData = $text->selectTexts($currentWriterId, $textId);
-
-        error_log("textData: " . json_encode($textData));
 
         $this->addPermissions($textData, $currentWriterId);
         $isRoot = $textData['parent_id'] == '' ? true : false;
 
         // Check user's permission to edit (myText && openForChanges)
         if (!Permissions::canDelete($textData, $currentWriterId)) {
-            $this->sendJsonResponse(false, 'Permission to delete denied');
+            $this->sendJsonResponse(false, 'Permission denied');
             exit();
         }
-
-        /* // $select will be false if 'id' is not found in the column 'parent_id' for any other text
-        $select = $text->selectId($textId, 'parent_id');
-        if($select){
-            Twig::render('home-error.php', ['message'=> "Another writer has iterated on this text, and therefore it can no longer be deleted. Sorry."]);
-            return;
-        }
-
-        // Block if the writer logged in is not this text's writer
-        if($textData['writer_id'] != $_SESSION['writer_id']){
-
-            Twig::render('home-error.php', ['message'=> "You can't delete another writer's text."]);
-            return;
-        } */
 
         // $keyWordIds is given an associative array where all keys are "keyword_id"
         // it is empty if there are no keywords in the given text.
@@ -882,8 +845,9 @@ class ControllerText extends Controller{
             $game->update(['id' => $textData['game_id'], 'root_text_id' => null]);
         }
 
-        // Now that the game (if this is a root) doesn't reference this text, delete it
+        // Now that the game (if this is a root) doesn't reference this text, you can delete it
         $response = $text->delete($textId);
+        // TODO: you can create a softDelete in CRUD, and use it here instead of a real delete... I think that will help you with the UI updates.
 
         if ($response && $isRoot) {
             // If delete text worked now we can safely delete the game
@@ -898,22 +862,6 @@ class ControllerText extends Controller{
         } else {
             $this->sendJsonResponse(true, 'deleted!', 'text');
         } 
-
-        // TODO: It's possible that I may no longer need to check for $insta, as everything might be instant... so... in that case, eliminate the $instas, and the checks, and just have the whole method function for async calls. 
-        // From the text page $insta is true, from the form it is false.
-/*         if ($response !== true) {
-            if (!$insta) {
-                RequirePage::redirect('text');
-            } else {
-                $this->sendJsonResponse(false, 'Failed to delete');
-            }
-        } else {
-            if (!$insta) {
-                RequirePage::redirect('text');
-            } else {
-                $this->sendJsonResponse(true, 'Deleted!');
-            }
-        }  */
     }
 
 
@@ -1001,7 +949,7 @@ class ControllerText extends Controller{
 
         // Check if basic validation passes
         if (!$val->isSuccess()) {
-                // TODO: send the errors in a good structure... so that the front end can display it nicely. 
+                // TODO: send the errors in a structure... so that the front end can display next to each input field. 
                  // Convert the errors to JSON format
                 $jsonData = json_encode($val->displayErrors());
                 return $jsonData;
@@ -1026,8 +974,8 @@ class ControllerText extends Controller{
             if ($intended_status == 'draft') {
                 return 'incomplete_draft';
             } else {
-                // TODO: send the errors in a workable structure... so that the front end can display it nicely. 
-                    // Convert the errors to JSON format
+                // TODO: send the errors in a structure... so that the front end can display next to each input field. 
+                // Convert the errors to JSON format
                 $jsonData = json_encode($val->displayErrors());
                 return $jsonData;
             }
