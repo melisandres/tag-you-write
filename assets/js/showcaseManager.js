@@ -7,11 +7,13 @@ export class ShowcaseManager {
     bindEvents() {
         // Listen for showcase changes
         eventBus.on('showcaseChanged', (rootStoryId) => {
+            console.log('showcaseChanged event:', rootStoryId);
             this.updateShowcaseParams(rootStoryId);
         });
 
         // Listen for showcase type changes (tree/shelf)
         eventBus.on('showcaseTypeChanged', ({ type, rootStoryId }) => {
+            console.log('showcaseTypeChanged event:', { type, rootStoryId });
             this.updateShowcaseParams(rootStoryId, type);
         });
     }
@@ -28,9 +30,18 @@ export class ShowcaseManager {
             if (type) {
                 urlParams.set('showcase', type);
             } else {
-                // Get existing type or default to 'shelf'
+                // First try to get the type from localStorage
+                const savedState = JSON.parse(localStorage.getItem('pageState')) || {};
+                const savedType = savedState.showcase?.type;
+                
+                // Then try URL, then DOM, then default to shelf
+                const existingType = urlParams.get('showcase');
                 const showcaseEl = document.querySelector('#showcase');
-                const currentType = showcaseEl?.dataset.showcase || 'shelf';
+                const currentType = type || savedType || existingType || showcaseEl?.dataset.showcase || 'shelf';
+                
+                console.log('Setting showcase type:', currentType, 
+                    'from:', { type, savedType, existingType, domType: showcaseEl?.dataset.showcase });
+                
                 urlParams.set('showcase', currentType);
             }
             urlParams.set('rootStoryId', rootStoryId);

@@ -380,6 +380,7 @@ export class RefreshManager {
         if (!this.textPagePath.endsWith(currentPath)) return; */
 
          // If we're on a form page, save complete form state
+         console.log('Saving state...');
         if (this.isFormPage()) {
             this.saveFormData();
             return;
@@ -387,7 +388,6 @@ export class RefreshManager {
 
         // Single source of truth for view state
         this.state = {
-            // View-related state
             showcase: {
                 type: null,        // 'tree' or 'shelf'
                 rootStoryId: null, // text_id of the root story
@@ -414,6 +414,7 @@ export class RefreshManager {
         const storiesEl = document.querySelector("[data-stories]");
         const showcaseEl = storiesEl ? storiesEl.querySelector("#showcase") : null;
         const treeModalEl = document.querySelector("[data-tree-modal='visible']");
+        console.log('Current showcase element:', showcaseEl?.dataset);
 
         if (showcaseEl) {
             // Save showcase state
@@ -438,6 +439,7 @@ export class RefreshManager {
         if (treeModalEl) {
             this.state.modal.isOpen = true;
             this.state.modal.textId = treeModalEl.dataset.textId;
+            console.log('Saving showcase state:', this.state.showcase);
         }
 
         localStorage.setItem('pageState', JSON.stringify(this.state));
@@ -473,17 +475,23 @@ export class RefreshManager {
         try {
             // Check for saved state
             const savedState = JSON.parse(localStorage.getItem('pageState'));
+            console.log('Initial savedState:', savedState);
+
             if (!savedState) return;
 
-             // Check URL parameters first
+            // Check URL parameters first
             const urlParams = new URLSearchParams(window.location.search);
             const urlShowcaseType = urlParams.get('showcase');
             const urlRootStoryId = urlParams.get('rootStoryId');
 
+            console.log('URL params:', { urlShowcaseType, urlRootStoryId });
+
             // Priority is URL params, then saved state
             const priorityShowcaseType = urlShowcaseType || savedState.showcase.type;
+            console.log('priorityShowcaseType:', priorityShowcaseType, 
+                'from URL:', urlShowcaseType, 
+                'from savedState:', savedState.showcase.type);
             const priorityRootStoryId = urlRootStoryId || savedState.showcase.rootStoryId;
-
 
             // Handle form state restoration
             if (savedState.form.data && savedState.form.type && this.isAPageRefresh) {
@@ -501,7 +509,7 @@ export class RefreshManager {
                     console.log('container exists');
                     if (priorityShowcaseType === 'shelf') {
                         console.log('Restoring shelf view');
-                        await this.uiManager.drawShelf(savedState.showcase.rootStoryId, container);
+                        await this.uiManager.drawShelf(priorityRootStoryId, container);
                         this.restoreDrawers(savedState);
                     } else if (priorityShowcaseType === 'tree') {
                         window.skipInitialTreeTransform = true;
