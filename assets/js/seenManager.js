@@ -1,3 +1,5 @@
+import { DataManager } from './dataManager.js';
+
 export class SeenManager {
     constructor(path) {
         this.path = path;
@@ -51,8 +53,9 @@ export class SeenManager {
         return await response.json();
     }
 
-    // TODO: you may want to update the dataManager with read status
+    // Update the read status of a story in the UI and in the dataManager
     updateReadStatus(id) {
+        console.log("updating read status", id);
         // Try to find the shelf heart first
         let element = document.querySelector(`[data-story-id="${id}"]`)?.querySelector('.shelf-heart');
         
@@ -70,6 +73,11 @@ export class SeenManager {
             element.classList.add('read');
             this.updateTopLevelUnseenCount(topLevelElement);
         }
+
+        // Update the dataManager
+        const dataManager = DataManager.getInstance();
+        console.log("updating node in dataManager", id);
+        dataManager.updateNode(id, { text_seen: "1" });
 
         // No need to update D3 circle separately, as we're now using the same element for both shelf and tree
     }

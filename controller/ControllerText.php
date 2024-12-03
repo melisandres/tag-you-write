@@ -106,16 +106,12 @@ class ControllerText extends Controller{
 
         // Get the gameId
         $gameId = $game->selectGameId($rootId);
-        error_log("gameId: " . $gameId);
-        error_log("rootId: " . $rootId);
 
         // Get the current user Id
         $currentUserId = $_SESSION['writer_id'] ?? null;
 
         // Get only the texts for this game
         $select = $text->selectTexts($currentUserId, $gameId, true);
-
-        error_log("select: " . print_r($select, true));
 
         // Build the requested tree
         $tree = $this->buildHierarchy($select, 'id', $rootId);
@@ -133,7 +129,8 @@ class ControllerText extends Controller{
     public function checkTreeUpdates() {
         $data = json_decode(file_get_contents('php://input'), true);
         $rootId = $data['rootId'];
-        $lastTreeCheck = $data['lastTreeCheck'];
+        $lastTreeCheck =  date('Y-m-d H:i:s', $data['lastTreeCheck'] / 1000);
+        error_log('lastTreeCheck: ' . $lastTreeCheck);
 
         $text = new Text;
         $game = new Game;
@@ -147,10 +144,14 @@ class ControllerText extends Controller{
         // Get only the texts for this game
         $modifiedNodes = $text->selectTexts($currentUserId, $gameId, true, $lastTreeCheck);
 
+        error_log('modifiedNodes: ' . json_encode($modifiedNodes));
+
         // Convert the hierarchical array to JSON format
         $jsonData = json_encode($modifiedNodes);
 
-        return $jsonData;
+        header('Content-Type: application/json');
+        echo $jsonData;
+        exit;
     }
 
     // An end point from which to get the data for just one node

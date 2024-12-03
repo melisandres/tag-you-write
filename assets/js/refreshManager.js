@@ -509,11 +509,11 @@ export class RefreshManager {
                         try {
                             // TODO: this is why getTree is called twice. 
                             // Check if we have valid tree data before attempting to draw
-                            const treeData = await this.storyManager.prepareData(priorityRootStoryId);
+/*                             const treeData = await this.storyManager.prepareData(priorityRootStoryId);
                             if (!treeData) {
                                 console.error('Failed to restore tree view - no valid data');
                                 return;
-                            }
+                            } */
                             
                             await this.uiManager.drawTree(priorityRootStoryId, container);
                             

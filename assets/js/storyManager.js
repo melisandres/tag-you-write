@@ -55,6 +55,51 @@ export class StoryManager {
     }
   }
 
+  async fetchTreeUpdates(treeId, lastTreeCheck) {
+    console.log('Fetching updates with timestamp:', {
+        timestamp: lastTreeCheck,
+        timestampDate: new Date(lastTreeCheck).toISOString(),
+        currentTime: new Date().toISOString()
+    });
+    const url = `${this.path}text/checkTreeUpdates`;
+    const payload = {
+        rootId: treeId,
+        lastTreeCheck: lastTreeCheck,
+    };
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        });
+
+        const responseText = await response.text(); // Get the raw response text
+
+        if (!response.ok) {
+            console.error(`Failed to fetch tree updates: ${response.status} ${response.statusText}`);
+            return null;
+        }
+
+        const data = JSON.parse(responseText); // Parse the JSON from the response
+        
+        // Now we can safely map over the parsed data
+        console.log('Parsed updates:', data.map(u => ({
+            id: u.id,
+            modified_at: u.modified_at,
+            timestamp_comparison: new Date(u.modified_at) > new Date(lastTreeCheck)
+        })));
+
+        return data;
+    } catch (error) {
+        console.error('Error fetching tree updates:', error);
+        return null;
+    }
+}
+
+
   async fetchStoryNode(id){
     const url = `${this.path}text/getStoryNode/${id}`;
     const response = await fetch(url);
@@ -64,51 +109,46 @@ export class StoryManager {
     return await response.json();
   }
 
+  // A tree is requested, this is where we check the cache
   async prepareData(id) {
     let cachedData = this.dataManager.getTree(id);
-    let needsUpdate = false;
 
     // If no cached data, or if it's just the timestamp without data
     if (!cachedData || !cachedData.data) {
         console.log(`No valid cached data, fetching fresh tree data`);
-        const datas = await this.fetchTree(id);
-        const freshData = datas[0];
+        const freshData = await this.fetchTree(id);
 
-        if (!freshData) {
+        if (!freshData || !freshData[0]) {
             console.error('No tree data received from server');
             return null;
         }
 
-        this.dataManager.setFullTree(id, freshData);
-        return freshData;
+        this.dataManager.setFullTree(id, freshData[0]);
+        return this.dataManager.getTree(id).data;
     }
 
-    // Get the game data to compare timestamps
-    const gameData = this.dataManager.cache.games.get(id);
-    
-    if (gameData) {
-        const gameDate = new Date(gameData.data.modified_at + ' UTC');
-        const gameModifiedAt = gameDate.getTime();
-        const dataTimestamp = cachedData.timestamp;
-        
-        needsUpdate = gameModifiedAt > dataTimestamp;
-    }
+    // Determine if updates are needed
+    const gameId = cachedData.data.game_id;
+    const lastGameUpdate = this.dataManager.getGame(gameId).timestamp;
+    const needsUpdate = lastGameUpdate && cachedData.timestamp 
+        ? new Date(lastGameUpdate).getTime() > cachedData.timestamp
+        : false;
 
     if (needsUpdate) {
-        console.log(`Cache outdated, fetching fresh tree data`);
-        const datas = await this.fetchTree(id);
-        const freshData = datas[0];
+        console.log(`Fetching updates for tree ID: ${id}`);
+        const updates = await this.fetchTreeUpdates(id, cachedData.timestamp);
 
-        if (!freshData) {
-            console.error('No tree data received from server');
-            return null;
+        if (!updates || updates.length === 0) {
+            console.warn('No updates found for tree, using cached data');
+            return cachedData.data;
         }
 
-        this.dataManager.setFullTree(id, freshData);
-        return freshData;
+        console.log(`Applying updates to cached tree for ID: ${id}`);
+        this.dataManager.updateTreeData(updates, id);
+        return this.dataManager.getTree(id).data;
     }
 
-    console.log(`Using cached tree data`, cachedData.data);
+    console.log(`Using cached data for tree ID: ${id}`);
     return cachedData.data;
   }
 

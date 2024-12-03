@@ -42,7 +42,8 @@ export class DataManager {
         }
 
         this.currentUserId = null; // Track current user
-        this.recentlyModifiedGames = new Set(); // Track modified game IDs
+        // TODO: Am I still using this? 
+        /* this.recentlyModifiedGames = new Set();  */// Track modified game IDs
         this.treeChecks = new Map(); // Store last check time for each tree
 
         // Subscribe to relevant events
@@ -58,9 +59,12 @@ export class DataManager {
         
         this.saveCache();
         DataManager.instance = this;
+
+        // TODO: help with testing
         //this.clearCache();
     }
 
+    // To keep track of the currently viewed root story id
     setCurrentViewedRootStoryId(rootStoryId) {
         this.currentViewedRootStoryId = rootStoryId;
         
@@ -96,6 +100,7 @@ export class DataManager {
         };
     }
 
+    // TODO: there may be some issues when you are logged out by being away for a while... and still have current User set? What checks the current user? 
     setCurrentUser(userId) {
         if (this.cache.lastUserId !== userId) {
             // Clear cache if user changed
@@ -147,9 +152,6 @@ export class DataManager {
         }
     }
 
-    setCurrentViewedRootStoryId(rootStoryId) {
-        this.currentViewedRootStoryId = rootStoryId;
-    }
 
     // This creates the recently modified games list
     handleUpdateResponse(response, currentlyViewedRootId) {
@@ -226,8 +228,63 @@ export class DataManager {
             .sort((a, b) => a.placement_index - b.placement_index);
     }
 
-
     updateTreeNodes(modifiedNodes, rootId) {
+        if (!modifiedNodes?.length) return;
+    
+        modifiedNodes.forEach(updatedNode => {
+            this.updateNode(updatedNode.id, updatedNode);
+        });
+    
+        const cachedTree = this.cache.trees.get(rootId);
+        if (cachedTree) {
+            cachedTree.timestamp = Date.now();
+            this.saveCache();
+        }
+    }
+
+    updateNode(nodeId, updateData) {
+        if (!this.cache.nodesMap.has(nodeId)) {
+            console.error(`Node with ID ${nodeId} not found in cache.`);
+            return;
+        }
+    
+        // Update the flat map
+        const existingNode = this.cache.nodesMap.get(nodeId);
+        
+        // Preserve all existing properties, including permissions and children
+        const updatedNode = {
+            ...existingNode,           // Keep all existing properties
+            ...updateData,            // Apply new updates
+            children: existingNode.children || [], // Explicitly preserve children
+            permissions: existingNode.permissions, // Explicitly preserve permissions
+
+        };
+
+        // Update the flat map
+        this.cache.nodesMap.set(nodeId, updatedNode);
+
+        // Update the hierarchical tree structure
+        const rootId = this.getCurrentViewedRootStoryId();
+        const cachedTree = this.cache.trees.get(rootId);
+
+        if (cachedTree?.data) {
+            this.updateNodeInHierarchy(cachedTree.data, updatedNode);
+        }
+
+        // Save changes to the cache
+        this.saveCache();
+
+        // Log the complete updated node to verify all properties are preserved
+        console.log('Node updated with all properties:', this.cache.nodesMap.get(nodeId));
+
+        // Emit an event if needed to notify UI or other components
+        eventBus.emit('nodeUpdated', { id: nodeId, node: updatedNode });
+    }
+    
+    
+
+
+/*     updateTreeNodes(modifiedNodes, rootId) {
         if (!modifiedNodes?.length) return;
         
         const cachedTree = this.cache.trees.get(rootId);
@@ -264,7 +321,7 @@ export class DataManager {
             this.saveCache();
         }
     }
-
+ */
     updateNodeInHierarchy(treeNode, updatedNode) {
         if (treeNode.id === updatedNode.id) {
             // Preserve existing children when updating
@@ -289,31 +346,13 @@ export class DataManager {
         return node ? this.getNode(node.parent_id) : null;
     }
 
-    clearTreeNodes(rootId) {
-        // Ensure nodesMap exists
-        if (!this.cache.nodesMap) {
-            this.cache.nodesMap = new Map();
-        }
-
-        const removeNodes = (node) => {
-            if (!node) return;
-            this.cache.nodesMap.delete(node.id);
-            node.children?.forEach(removeNodes);
-        };
-        
-        const existingTree = this.cache.trees.get(rootId);
-        if (existingTree?.data) {
-            removeNodes(existingTree.data);
-        }
-    }
-
     // Load cache from localStorage
     loadCache() {
         try {
             const savedCache = localStorage.getItem('storyCache');
             if (savedCache) {
                 const parsed = JSON.parse(savedCache);
-                return {
+                const cache = {
                     games: new Map(parsed.games),
                     trees: new Map(parsed.trees),
                     nodesMap: new Map(parsed.nodesMap),
@@ -325,6 +364,8 @@ export class DataManager {
                         gameState: 'all'
                     }
                 };
+                console.log('Loaded cache:', cache);
+                return cache;
             }
         } catch (e) {
             console.error('Error loading cache:', e);
@@ -359,9 +400,19 @@ export class DataManager {
         this.saveCache();
     }
 
-    getTree(rootId) {
-        console.log('getTree', rootId);
-        return this.cache.trees.get(rootId);
+    getTree(id) {
+        const tree = this.cache.trees.get(id);
+        console.log('Tree cache data:', {
+            id,
+            hasTree: !!tree,
+            timestamp: tree?.timestamp,
+            timestampDate: tree?.timestamp ? new Date(tree.timestamp).toISOString() : null
+        });
+        return tree;
+    }
+
+    getGame(gameId) {
+        return this.cache.games.get(gameId);
     }
 
     getPaginatedData() {
@@ -416,11 +467,11 @@ export class DataManager {
         return this.currentUserId;
     }
 
-    getRecentlyModifiedGames() {
+/*     getRecentlyModifiedGames() {
         return Array.from(this.recentlyModifiedGames)
             .map(id => this.cache.games.get(id)?.data)
             .filter(game => game !== undefined);
-    }
+    } */
 
     // TODO: Delete this soon
 /*     async shouldRefreshTree(rootId) {
@@ -514,6 +565,7 @@ export class DataManager {
         this.cache.lastGamesCheck = Date.now();
     }
 
+    // TODO: I also have an updateGameData... how are these difterent? 
     // For poll updates
     updateGames(games) {
         games.forEach(game => {
@@ -549,6 +601,7 @@ export class DataManager {
         };
     }
 
+    // This the main logic handling the flat map / tree structure, when a full tree is received. 
     setFullTree(rootId, treeData) {
         // Ensure nodesMap exists
         if (!this.cache.nodesMap) {
@@ -577,5 +630,24 @@ export class DataManager {
         });
 
         this.saveCache();
+    }
+
+    // When setting a 
+    clearTreeNodes(rootId) {
+        // Ensure nodesMap exists
+        if (!this.cache.nodesMap) {
+            this.cache.nodesMap = new Map();
+        }
+
+        const removeNodes = (node) => {
+            if (!node) return;
+            this.cache.nodesMap.delete(node.id);
+            node.children?.forEach(removeNodes);
+        };
+        
+        const existingTree = this.cache.trees.get(rootId);
+        if (existingTree?.data) {
+            removeNodes(existingTree.data);
+        }
     }
 }

@@ -4,7 +4,7 @@ export class PollingManager {
     constructor(path) {
         this.path = path;
         this.pollingIntervals = new Map();
-        this.timeBetweenChecks = 10000;
+        this.timeBetweenChecks = 1000000000;
         this.dataManager = window.dataManager;
 
         // Event listeners
