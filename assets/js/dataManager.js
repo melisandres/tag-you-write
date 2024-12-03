@@ -14,13 +14,13 @@ export class DataManager {
 
         this.currentViewedRootStoryId = null;
         const userIdMeta = document.querySelector('meta[name="user"]');
+        this.currentUserId = userIdMeta.getAttribute('data-user-id') !== 'null' ? userIdMeta.getAttribute('data-user-id') : null;
         this.path = path;
         this.cache = this.loadCache() || {
             games: new Map(),
             trees: new Map(),
             nodesMap: new Map(), // A flat structure to make updates easier
             lastGamesCheck: null,
-            lastUserId: userIdMeta.getAttribute('data-user-id') !== 'null' ? userIdMeta.getAttribute('data-user-id') : null,
             pagination: {
                 currentPage: 1,
                 itemsPerPage: 10,
@@ -41,11 +41,6 @@ export class DataManager {
             this.cache.nodesMap = new Map();
         }
 
-        this.currentUserId = null; // Track current user
-        // TODO: Am I still using this? 
-        /* this.recentlyModifiedGames = new Set();  */// Track modified game IDs
-        this.treeChecks = new Map(); // Store last check time for each tree
-
         // Subscribe to relevant events
         eventBus.on('requestGameData', (gameId) => {
             const gameData = this.cache.games.get(gameId)?.data;
@@ -58,10 +53,27 @@ export class DataManager {
         });
         
         this.saveCache();
+        this.initAuthState();
         DataManager.instance = this;
 
         // TODO: help with testing
         //this.clearCache();
+    }
+
+    initAuthState() {
+        const storedUserId = localStorage.getItem('currentUserId');
+        const currentUserId = document.querySelector('meta[name="user"]').dataset.userId;
+
+        // Always set the initial state
+        this.currentUserId = currentUserId;
+        
+        // If they're different, emit the auth change event
+        if (storedUserId !== currentUserId) {
+            // Update localStorage
+            localStorage.setItem('currentUserId', currentUserId);
+            // Emit the change event
+            this.handleAuthStateChange(currentUserId);
+        }
     }
 
     // To keep track of the currently viewed root story id
@@ -87,7 +99,6 @@ export class DataManager {
             trees: new Map(),
             nodesMap: new Map(),
             lastGamesCheck: Date.now(),
-            lastUserId: null,
             pagination: {
                 currentPage: 1,
                 itemsPerPage: 10,
@@ -102,13 +113,14 @@ export class DataManager {
 
     // TODO: there may be some issues when you are logged out by being away for a while... and still have current User set? What checks the current user? 
     setCurrentUser(userId) {
-        if (this.cache.lastUserId !== userId) {
+        const previousUserId = this.currentUserId;
+        this.currentUserId = userId;
+
+        if (previousUserId !== userId) {
             // Clear cache if user changed
             this.clearCache();
-            this.cache.lastUserId = userId;
             this.saveCache();
         }
-        this.currentUserId = userId;
     }
 
     // Add method to check if games need refresh
@@ -357,7 +369,6 @@ export class DataManager {
                     trees: new Map(parsed.trees),
                     nodesMap: new Map(parsed.nodesMap),
                     lastGamesCheck: parsed.lastGamesCheck || Date.now(),
-                    lastUserId: parsed.lastUserId,
                     pagination: parsed.pagination,
                     filters: parsed.filters || {
                         hasContributed: null,
@@ -380,7 +391,6 @@ export class DataManager {
             trees: Array.from(this.cache.trees.entries()),
             nodesMap: Array.from(this.cache.nodesMap.entries()),
             lastGamesCheck: this.cache.lastGamesCheck,
-            lastUserId: this.cache.lastUserId,
             pagination: this.cache.pagination,
             filters: this.cache.filters
         };
@@ -453,9 +463,13 @@ export class DataManager {
                 currentPage: 1,
                 itemsPerPage: 10,
                 totalItems: 0
+            },
+            filters: {
+                hasContributed: null,
+                gameState: 'all'
             }
         };
-        this.saveCache();
+        localStorage.removeItem('storyCache');  // Completely remove from localStorage
     }
 
     // A meta has been added in the header to track user id and logged in status
@@ -466,30 +480,6 @@ export class DataManager {
     getCurrentUserId() {
         return this.currentUserId;
     }
-
-/*     getRecentlyModifiedGames() {
-        return Array.from(this.recentlyModifiedGames)
-            .map(id => this.cache.games.get(id)?.data)
-            .filter(game => game !== undefined);
-    } */
-
-    // TODO: Delete this soon
-/*     async shouldRefreshTree(rootId) {
-        const lastCheck = this.treeChecks.get(rootId) || 0;
-        const response = await fetch(`${this.path}text/checkTreeUpdates`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                rootId,
-                lastCheck
-            })
-        });
-        
-        const result = await response.json();
-        return result.needsUpdate;
-    } */
 
     setTreeLastCheck(rootId) {
         this.treeChecks.set(rootId, Date.now());
@@ -508,50 +498,6 @@ export class DataManager {
     getFilters() {
         return this.cache.filters;
     }
-
-    /* // Add this method to the DataManager class called from storyManager.js prepareData() TODO: Delete this soon
-    compareTreeData(oldTree, newTree) {
-        console.log('compareTreeData', oldTree, newTree);
-        const differences = [];
-        
-        // Helper function to compare nodes
-        const compareNodes = (oldNode, newNode) => {
-            if (!oldNode || !newNode) return null;
-            
-            const changes = {};
-            let hasChanges = false;
-            
-            // Compare all properties except children
-            Object.keys(newNode).forEach(key => {
-                if (key !== 'children' && JSON.stringify(oldNode[key]) !== JSON.stringify(newNode[key])) {
-                    changes[key] = {
-                        old: oldNode[key],
-                        new: newNode[key]
-                    };
-                    hasChanges = true;
-                }
-            });
-            
-            if (hasChanges) {
-                differences.push({
-                    id: newNode.id,
-                    parent_id: newNode.parent_id,
-                    changes
-                });
-            }
-            
-            // Recursively compare children
-            if (newNode.children && oldNode.children) {
-                newNode.children.forEach(newChild => {
-                    const oldChild = oldNode.children.find(child => child.id === newChild.id);
-                    compareNodes(oldChild, newChild);
-                });
-            }
-        };
-        
-        compareNodes(oldTree, newTree);
-        return differences;
-    } */
 
      // For full list updates (filters, page refresh)
      replaceAll(games) {
@@ -648,6 +594,17 @@ export class DataManager {
         const existingTree = this.cache.trees.get(rootId);
         if (existingTree?.data) {
             removeNodes(existingTree.data);
+        }
+    }
+
+    handleAuthStateChange(newUserId) {
+        // Clear cache and set current user 
+        this.clearCache();
+        this.setCurrentUser(newUserId);
+        
+        // If logging in, fetch fresh server data (not when logging out)
+        if (newUserId !== null && newUserId !== 'null') {
+            eventBus.emit('refreshGameList');
         }
     }
 }

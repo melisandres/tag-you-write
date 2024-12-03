@@ -19,6 +19,14 @@ export class SeenManager {
     }
 
     async markAsSeen(id) {
+        const dataManager = DataManager.getInstance();
+    
+        // If not logged in, only update local cache
+        if (!dataManager.isUserLoggedIn()) {
+            dataManager.updateNode(id, { text_seen: "1" });
+            return;
+        }
+
         const url = `${this.path}seen/markAsSeen/${id}`;
         try {
             const response = await fetch(url);
@@ -72,13 +80,11 @@ export class SeenManager {
             element.classList.remove('unread');
             element.classList.add('read');
             this.updateTopLevelUnseenCount(topLevelElement);
+            // Update the dataManager
+            const dataManager = DataManager.getInstance();
+            console.log("updating node in dataManager", id);
+            dataManager.updateNode(id, { text_seen: "1" });
         }
-
-        // Update the dataManager
-        const dataManager = DataManager.getInstance();
-        console.log("updating node in dataManager", id);
-        dataManager.updateNode(id, { text_seen: "1" });
-
         // No need to update D3 circle separately, as we're now using the same element for both shelf and tree
     }
 

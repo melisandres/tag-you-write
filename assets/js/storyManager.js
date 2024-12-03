@@ -191,6 +191,7 @@ export class StoryManager {
   }
 
   async updateDrawer(id){
+    console.log('updateDrawer', id);
     const data = await this.fetchStoryNode(id);
     const container = document.querySelector("#showcase.with-shelf");
     const shelfVisualizer = new ShelfVisualizer(container, this.path);
