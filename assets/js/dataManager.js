@@ -242,11 +242,14 @@ export class DataManager {
 
     updateTreeNodes(modifiedNodes, rootId) {
         if (!modifiedNodes?.length) return;
-    
-        modifiedNodes.forEach(updatedNode => {
+
+        // Sort nodes to ensure parents are processed before children
+        const sortedNodes = this.sortNodesByHierarchy(modifiedNodes);
+
+        sortedNodes.forEach(updatedNode => {
             this.updateNode(updatedNode.id, updatedNode);
         });
-    
+
         const cachedTree = this.cache.trees.get(rootId);
         if (cachedTree) {
             cachedTree.timestamp = Date.now();
@@ -254,21 +257,41 @@ export class DataManager {
         }
     }
 
+    sortNodesByHierarchy(nodes) {
+        const nodeMap = new Map();
+        nodes.forEach(node => nodeMap.set(node.id, node));
+
+        const sortedNodes = [];
+        const visited = new Set();
+
+        const visit = (node) => {
+            if (visited.has(node.id)) return;
+            visited.add(node.id);
+
+            const parent = nodeMap.get(node.parent_id);
+            if (parent && !visited.has(parent.id)) {
+                visit(parent);
+            }
+
+            sortedNodes.push(node);
+        };
+
+        nodes.forEach(node => visit(node));
+        return sortedNodes;
+    }
+
     updateNode(nodeId, updateData) {
         nodeId = String(nodeId);
         console.log("Attempting to update node:", nodeId);
 
-        if (!this.cache.nodesMap.has(nodeId)) {
-            console.log("nodesMap", this.cache.nodesMap);
-            console.log("nodeId", nodeId);
-            console.log("updateData", updateData);
-            console.error(`Node with ID ${nodeId} not found in cache.`);
+        let existingNode = this.cache.nodesMap.get(nodeId);
+
+        if (!existingNode) {
+            console.log(`Node with ID ${nodeId} not found in cache. Adding new node.`);
+            this.addNewNode(nodeId, updateData);
             return;
         }
     
-        // Update the flat map
-        const existingNode = this.cache.nodesMap.get(nodeId);
-        console.log("Existing node data:", existingNode);
 
         // Preserve all existing properties, including permissions and children
         const updatedNode = {
@@ -303,47 +326,6 @@ export class DataManager {
         //eventBus.emit('nodeUpdated', { id: nodeId, node: updatedNode });
     }
     
-    
-
-
-/*     updateTreeNodes(modifiedNodes, rootId) {
-        if (!modifiedNodes?.length) return;
-        
-        const cachedTree = this.cache.trees.get(rootId);
-        if (!cachedTree) return;
-
-        let hasUpdates = false;
-        
-        modifiedNodes.forEach(updatedNode => {
-            // Update flat map
-            const existingNode = this.cache.nodesMap.get(updatedNode.id);
-            
-            if (existingNode) {
-                // Preserve children if updating existing node
-                const children = existingNode.children || [];
-                this.cache.nodesMap.set(updatedNode.id, {
-                    ...updatedNode,
-                    children
-                });
-            } else {
-                // New node
-                this.cache.nodesMap.set(updatedNode.id, {
-                    ...updatedNode,
-                    children: []
-                });
-            }
-            
-            // Update hierarchical structure
-            this.updateNodeInHierarchy(cachedTree.data, updatedNode);
-            hasUpdates = true;
-        });
-
-        if (hasUpdates) {
-            cachedTree.timestamp = Date.now();
-            this.saveCache();
-        }
-    }
- */
     updateNodeInHierarchy(treeNode, updatedNode) {
         // Convert both IDs to strings for comparison
         const treeNodeId = String(treeNode.id);
@@ -368,6 +350,68 @@ export class DataManager {
         
         console.log(`Node with ID ${updatedNodeId} not found in current branch.`);
         return false;
+    }
+
+    addNewNode(nodeId, nodeData) {
+        // Add the new node to the flat map
+        this.cache.nodesMap.set(nodeId, {
+            ...nodeData,
+            children: nodeData.children || []
+        });
+        console.log(`Added node ${nodeId} to nodesMap`);
+
+        // Update the hierarchical structure
+        const rootId = this.getCurrentViewedRootStoryId();
+        const cachedTree = this.cache.trees.get(String(rootId));
+
+        if (cachedTree?.data) {
+            console.log(`Attempting to insert node ${nodeId} into hierarchy under root ${rootId}`);
+            const inserted = this.insertNodeInHierarchy(cachedTree.data, nodeData);
+            if (inserted) {
+                console.log(`Node ${nodeId} successfully inserted into hierarchy`);
+            } else {
+                console.warn(`Failed to insert node ${nodeId} into hierarchy`);
+            }
+        } else {
+            console.warn(`No cached tree data found for rootId ${rootId}`);
+        }
+
+        // Save changes to the cache
+        this.saveCache();
+        console.log('Cache saved to local storage:', JSON.stringify(this.cache));
+    }
+
+    insertNodeInHierarchy(treeNode, newNode) {
+        const parentNode = this.findNodeInTree(treeNode, String(newNode.parent_id));
+        if (parentNode) {
+            // Ensure the parent node has a children array
+            parentNode.children = parentNode.children || [];
+            
+            // Add the new node to the parent's children array
+            parentNode.children.push({
+                ...newNode,
+                children: newNode.children || [] // Initialize children array for the new node
+            });
+            
+            console.log(`Inserted new node ${newNode.id} under parent ${newNode.parent_id}`);
+            return true;
+        } else {
+            console.warn(`Parent node with ID ${newNode.parent_id} not found in tree.`);
+            return false;
+        }
+    }
+
+    findNodeInTree(treeNode, nodeId) {
+        if (treeNode.id === nodeId) {
+            return treeNode;
+        }
+        if (treeNode.children) {
+            for (let child of treeNode.children) {
+                const found = this.findNodeInTree(child, nodeId);
+                if (found) return found;
+            }
+        }
+        return null;
     }
 
     // Helper method to get a node quickly
@@ -433,15 +477,8 @@ export class DataManager {
         this.saveCache();
     }
 
-    getTree(id) {
-        const tree = this.cache.trees.get(id);
-        console.log('Tree cache data:', {
-            id,
-            hasTree: !!tree,
-            timestamp: tree?.timestamp,
-            timestampDate: tree?.timestamp ? new Date(tree.timestamp).toISOString() : null
-        });
-        return tree;
+    getTree(rootId) {
+        return this.cache.trees.get(rootId);
     }
 
     getGame(gameId) {
