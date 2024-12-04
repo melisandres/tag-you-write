@@ -30,6 +30,7 @@ import { UpdateManager } from './updateManager.js';
 import { FilterManager } from './filterManager.js';
 import { PollingManager } from './pollingManager.js';
 import { GameUpdateHandler } from './gameUpdateHandler.js';
+import { TreeShelfModalPollingUpdateManager } from './TreeShelfModalPollingUpdateManager.js';
 // Make eventBus globally available immediately
 window.eventBus = eventBus;
 
@@ -155,5 +156,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   } */
 
   // Initialize update handling
+  new TreeShelfModalPollingUpdateManager();
   const gameUpdateHandler = new GameUpdateHandler();
 });

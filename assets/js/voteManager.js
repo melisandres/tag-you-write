@@ -44,10 +44,11 @@ export class VoteManager {
                     // Send a "Vote!" event to the tree, shelf and modal update managers
                     eventBus.emit('voteToggle', {  
                         data: { 
-                            textId, 
+                            /* textId,  */
+                            id: textId,
                             voteCount: result.voteCount, 
                             playerCountMinusOne: result.playerCountMinusOne, 
-                            voted: result.voted 
+                            hasVoted: result.voted 
                         } 
                     });
                 }

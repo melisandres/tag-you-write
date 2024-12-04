@@ -133,24 +133,29 @@ export class ModalUpdateManager {
     if (!container) {
         return;
     }
+    const modalTextId = container.dataset.textId;
+    if (modalTextId !== data.id) {
+      return;
+    }
 
     const resultsSpan = container.querySelector('.vote-count.small');
     const votesIcon = container.querySelector('.votes i svg path');
     const button = container.querySelector('.vote[data-vote]');
-    
+    const playerCountMinusOne = data.playerCountMinusOne || data.playerCount - 1;
+
     // Update vote button state
-    if (data.voted) {
-        button.classList.add('voted');
+    if (data.hasVoted) {
+      if (button) button.classList.add('voted');
     } else {
-        button.classList.remove('voted');
+      if (button) button.classList.remove('voted');
     }
 
     // Update vote count display
-    resultsSpan.innerHTML = `${data.voteCount}/${data.playerCountMinusOne} votes`;
+    resultsSpan.innerHTML = `${data.voteCount}/${playerCountMinusOne} votes`;
     resultsSpan.setAttribute('data-vote-count', data.voteCount);
 
     // Update color based on vote count
-    const colorScale = createColorScale(data.playerCountMinusOne);
+    const colorScale = createColorScale(playerCountMinusOne);
     const fillColor = colorScale(data.voteCount);
     
     // Update the votes icon color

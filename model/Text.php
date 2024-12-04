@@ -36,7 +36,10 @@ class Text extends Crud{
         // Check if current_writer is provided or not
         if ($current_writer) {
             // When a writer is logged in
-            $sql .= ", CASE WHEN vote.writer_id IS NOT NULL THEN 1 ELSE 0 END AS hasVoted,
+            $sql .= ", CASE 
+                            WHEN vote.writer_id = :currentUserId THEN 1 
+                            ELSE 0 
+                        END AS hasVoted,
                         CASE 
                             WHEN text.writer_id = :currentUserId THEN 1
                             WHEN seen.text_id IS NULL THEN 0
@@ -44,7 +47,10 @@ class Text extends Crud{
                             WHEN seen.read_at > text.note_date THEN 1
                             ELSE 0
                         END AS text_seen,
-                        CASE WHEN game_has_player.player_id IS NOT NULL THEN 1 ELSE 0 END AS hasContributed";
+                        CASE 
+                            WHEN game_has_player.player_id IS NOT NULL THEN 1 
+                            ELSE 0 
+                        END AS hasContributed";
         } else {
             // When no writer is logged in
             $sql .= ", 0 AS hasContributed";
@@ -67,7 +73,7 @@ class Text extends Crud{
                     ) AS playerCounts ON text.game_id = playerCounts.game_id";
         
         if ($current_writer) {
-            $sql .= " LEFT JOIN game_has_player ON text.game_id = game_has_player.game_id AND game_has_player.player_id = :currentUserId
+            $sql .= "   LEFT JOIN game_has_player ON text.game_id = game_has_player.game_id AND game_has_player.player_id = :currentUserId
                         LEFT JOIN vote ON text.id = vote.text_id AND vote.writer_id = :currentUserId
                         LEFT JOIN seen ON text.id = seen.text_id AND seen.writer_id = :currentUserId";
         } else {
@@ -106,6 +112,9 @@ class Text extends Crud{
         // Group it by text.id
         $sql .= " GROUP BY text.id";
         
+        // Log the SQL query and parameters
+        //error_log("Executing selectTexts with SQL: " . $sql);
+
         $stmt = $this->prepare($sql);
         
         // Bind the current writer ID if it's provided
@@ -121,14 +130,13 @@ class Text extends Crud{
         // Bind the modifiedSince if it's provided
         if ($modifiedSince !== null) {
             $stmt->bindValue(':modifiedSince', $modifiedSince);
-            error_log("SQL with bound values: " . str_replace(':modifiedSince', $modifiedSince, $sql));
+            /* error_log("SQL with bound values: " . str_replace(':modifiedSince', $modifiedSince, $sql)); */
         }
         
         $stmt->execute();
         
         $results = ($idValue !== null && !$idIsGameId) ? $stmt->fetch() : $stmt->fetchAll();
         
-        error_log("Query results: " . print_r($results, true));
         return $results;
     }
 

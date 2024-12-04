@@ -108,15 +108,16 @@ export class TreeUpdateManager {
 
   handleVoteToggle({ data }) {
     const container = document.querySelector('#showcase[data-showcase="tree"]')
+    const playerCountMinusOne = data.playerCountMinusOne || data.playerCount - 1;
 
     // If the showcase is not a tree, do nothing
     if (!container) {
         return;
     }
 
-    const nodeId = data.textId
+    const nodeId = data.id
     const newVoteCount = data.voteCount 
-    const colorScale = createColorScale(data.playerCountMinusOne);
+    const colorScale = createColorScale(playerCountMinusOne);
     const node = container.querySelector(`.node path[data-id="${nodeId}"]`);
 
     if (!node || !colorScale) {

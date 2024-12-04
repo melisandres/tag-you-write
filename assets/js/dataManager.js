@@ -255,22 +255,32 @@ export class DataManager {
     }
 
     updateNode(nodeId, updateData) {
+        nodeId = String(nodeId);
+        console.log("Attempting to update node:", nodeId);
+
         if (!this.cache.nodesMap.has(nodeId)) {
+            console.log("nodesMap", this.cache.nodesMap);
+            console.log("nodeId", nodeId);
+            console.log("updateData", updateData);
             console.error(`Node with ID ${nodeId} not found in cache.`);
             return;
         }
     
         // Update the flat map
         const existingNode = this.cache.nodesMap.get(nodeId);
-        
+        console.log("Existing node data:", existingNode);
+
         // Preserve all existing properties, including permissions and children
         const updatedNode = {
-            ...existingNode,           // Keep all existing properties
-            ...updateData,            // Apply new updates
-            children: existingNode.children || [], // Explicitly preserve children
-            permissions: existingNode.permissions, // Explicitly preserve permissions
-
+            ...existingNode,
+            ...updateData,
+            children: existingNode.children || [],
+            permissions: existingNode.permissions,
         };
+        console.log("Updated node data:", updatedNode);
+
+        // Emit an event with both the old node and the new node
+        eventBus.emit('nodeUpdated', { oldNode: existingNode, newNode: updatedNode });
 
         // Update the flat map
         this.cache.nodesMap.set(nodeId, updatedNode);
@@ -290,7 +300,7 @@ export class DataManager {
         console.log('Node updated with all properties:', this.cache.nodesMap.get(nodeId));
 
         // Emit an event if needed to notify UI or other components
-        eventBus.emit('nodeUpdated', { id: nodeId, node: updatedNode });
+        //eventBus.emit('nodeUpdated', { id: nodeId, node: updatedNode });
     }
     
     
@@ -335,16 +345,29 @@ export class DataManager {
     }
  */
     updateNodeInHierarchy(treeNode, updatedNode) {
-        if (treeNode.id === updatedNode.id) {
-            // Preserve existing children when updating
+        // Convert both IDs to strings for comparison
+        const treeNodeId = String(treeNode.id);
+        const updatedNodeId = String(updatedNode.id);
+
+        console.log("Checking node:", treeNodeId, "against updated node:", updatedNodeId);
+        
+        if (treeNodeId === updatedNodeId) {
+            console.log(`Updating node in hierarchy: ${treeNodeId}`);
             const children = treeNode.children || [];
             Object.assign(treeNode, updatedNode, { children });
             return true;
         }
         
-        return treeNode.children?.some(child => 
-            this.updateNodeInHierarchy(child, updatedNode)
-        );
+        if (treeNode.children) {
+            for (const child of treeNode.children) {
+                if (this.updateNodeInHierarchy(child, updatedNode)) {
+                    return true;
+                }
+            }
+        }
+        
+        console.log(`Node with ID ${updatedNodeId} not found in current branch.`);
+        return false;
     }
 
     // Helper method to get a node quickly

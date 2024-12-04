@@ -128,18 +128,19 @@ export class ShelfUpdateManager {
   }
 
   handleVoteToggle({ data }) {
-    if (data.textId) {
-        const shelfNode = document.querySelector(`.node[data-story-id="${data.textId}"]`);
-        if (shelfNode) {
+    if ( data.id) {
+      const playerCountMinusOne = data.playerCountMinusOne || data.playerCount - 1;
+      const shelfNode = document.querySelector(`.node[data-story-id="${data.id}"]`);
+      if (shelfNode) {
             // Need to update vote count display to match new structure
             const votesDiv = shelfNode.querySelector('.votes');
             if (votesDiv) {
                 const voteCountSpan = votesDiv.querySelector('.vote-count');
-                voteCountSpan.textContent = `${data.voteCount}/${data.playerCountMinusOne} votes`;
+                voteCountSpan.textContent = `${data.voteCount}/${playerCountMinusOne} votes`;
                 voteCountSpan.setAttribute('data-vote-count', data.voteCount);
                 
                 // Need to update color scale
-                const maxVotes = data.playerCountMinusOne;
+                const maxVotes = playerCountMinusOne;
                 const colorScale = createColorScale(maxVotes);
                 const fillColor = colorScale(data.voteCount);
                 votesDiv.setAttribute('data-fill-color', fillColor);
@@ -152,9 +153,9 @@ export class ShelfUpdateManager {
             }
             // Update the vote count and button appearance for the shelf view
             const shelfResultsSpan = shelfNode.querySelector('[data-vote-count]');
-            const shelfVoteButton = shelfNode.querySelector(`.vote[data-vote="${data.textId}"]`);
+            const shelfVoteButton = shelfNode.querySelector(`.vote[data-vote="${data.id}"]`);
 
-            if (data.voted) {
+            if (data.hasVoted) {
                 shelfVoteButton.classList.add('voted');
             } else {
                 shelfVoteButton.classList.remove('voted');

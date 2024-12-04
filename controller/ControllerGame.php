@@ -102,6 +102,7 @@ class ControllerGame extends Controller {
                 'modifiedGames' => array_values($modifiedGames), // Convert to indexed array
                 'modifiedNodes' => array_values($modifiedNodes)  // Convert to indexed array
             ];
+            error_log("modifiedSince response: " . print_r($response, true));
             
             header('Content-Type: application/json');
             echo json_encode($response, JSON_NUMERIC_CHECK); // Add JSON_NUMERIC_CHECK
