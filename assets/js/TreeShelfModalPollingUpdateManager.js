@@ -7,18 +7,19 @@ export class TreeShelfModalPollingUpdateManager {
 
   initEventListeners() {
     eventBus.on('nodeUpdated', this.handleNodeUpdate.bind(this));
+    eventBus.on('nodesAdded', this.handleNodesAdded.bind(this));
   }
 
   handleNodeUpdate({ oldNode, newNode }) {
-    // Add playerCountMinusOne to the newNode
-    /* newNode.playerCountMinusOne = newNode.playerCount - 1; */
-
-    // Compare old and new node data
+    // Compare old and new node vote data
     if (oldNode && oldNode.voteCount !== newNode.voteCount) {
-        console.log('voteToggle', { data: newNode } );
-        eventBus.emit('voteToggle', { data: newNode } );
+        eventBus.emit('voteToggle', { data: newNode });
     }
-    console.log("done");
+  }
+
+  handleNodesAdded(nodes) {
+    console.log('New nodes detected:', nodes);
+    eventBus.emit('newNodesDiscovered', nodes);
   }
 
 

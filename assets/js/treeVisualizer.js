@@ -73,6 +73,8 @@ export class TreeVisualizer {
             titleAuthorSpacing: -7,  // Adjust the vertical position on the author
         };
 
+        this.treeData = null;
+
         // Store instance globally
         window.treeVisualizerInstance = this;
     }
@@ -102,6 +104,7 @@ export class TreeVisualizer {
   
     drawTree(data) {
         console.log('Tree data received:', data);
+
         // Check if D3 is available
         if (typeof d3 === 'undefined') {
             this.showD3UnavailableMessage();
@@ -135,6 +138,7 @@ export class TreeVisualizer {
         // Manage the visualisation of node votes
         const maxVotes = data.playerCount - 1;
         this.colorScale = this.createColorScale(maxVotes);
+        console.log('Initialized colorScale:', this.colorScale);
   
         // Create SVG element
         this.svg = d3.select(this.container).append("svg")
@@ -149,6 +153,7 @@ export class TreeVisualizer {
   
         // Transform data using D3 hierarchy
         const root = d3.hierarchy(data, d => d.children);
+        this.root = root;
 
         // Create a tree layout
         const treeLayout = d3.tree()
@@ -351,6 +356,9 @@ export class TreeVisualizer {
             console.log('pageJustLoaded is getting set to false');
             this.pageJustLoaded = false;
         }
+
+        // Store the tree data
+        this.treeData = data;
     }
 
     createLegend(d) {
@@ -609,6 +617,7 @@ export class TreeVisualizer {
             this.updateLegendPosition();
         }
     }
+
     //TODO: when should I call this? 
     cleanup() {
         window.removeEventListener('resize', this.handleResize);
@@ -616,6 +625,10 @@ export class TreeVisualizer {
 
     updateStyles(container, scale) {
         container.selectAll(".node").each((d, i, nodes) => {
+            if (!d || !d.data) {
+                console.error('Node data is undefined:', d);
+                return;
+            }
             const node = d3.select(nodes[i]);
             const titleGroup = node.select(".title-group");
             const author = node.select(".text-by");
@@ -734,6 +747,168 @@ export class TreeVisualizer {
     getTextWidth(text, fontSize) {
         // This is an approximation. For more accuracy, you might want to use canvas or SVG to measure text width
         return text.length * fontSize * 0.6;
+    }
+
+    updateTree(){
+        // Recalculate the layout
+        const root = d3.hierarchy(this.treeData, d => d.children);
+
+        // Calculate maxDepth and depthCounts
+        const maxDepth = d3.max(root.descendants(), d => d.depth);
+
+        const depthCounts = {};
+        root.each(d => {
+            if (!depthCounts[d.depth]) {
+                depthCounts[d.depth] = 0;
+            }
+            depthCounts[d.depth]++;
+        });
+
+        const maxNodesAtDepth = Math.max(...Object.values(depthCounts));
+        const requiredWidth = maxDepth * this.minSpacing;
+        const requiredHeight = maxNodesAtDepth * this.minSpacing;
+
+        // Apply the same tree layout configuration
+        const treeLayout = d3.tree()
+            .size([requiredHeight, requiredWidth])
+            .separation((a, b) => a.parent === b.parent ? 1 : 2);
+
+        treeLayout(root);
+
+        // Center the tree vertically within the container
+        const offsetY = (this.containerHeight - requiredHeight) / 2;
+
+        // Adjust the position of the nodes based on the root's position
+        root.each(d => {
+            d.x += offsetY;
+        });
+
+        // Get a stable color scale
+        const colorScale = this.colorScale;
+        const baseColor = this.baseColor;
+
+        // Select the inner <g> where nodes and links are drawn
+        const innerG = this.svg.select("g").select("g");
+
+        // Update nodes
+        const nodes = innerG.selectAll(".node")
+            .data(root.descendants(), d => d.data.id);
+
+        // Enter new nodes
+        const nodeEnter = nodes.enter().append("g")
+            .attr("class", d => `node${d.children ? " node--internal" : " node--leaf"}`)
+            .attr("transform", d => `translate(${d.y},${d.x})`)
+            .on("click", (event, d) => {
+                const customEvent = new CustomEvent('showStoryInModalRequest', {
+                    detail: { id: d.data.id }
+                });
+                document.dispatchEvent(customEvent);
+            });
+
+        // Append elements to new nodes
+        nodeEnter.each(function(d) {
+            const item = d3.select(this);
+            if (d.data.isWinner) {
+                item.append("path")
+                    .attr("d", d3.symbol().type(d3.symbolStar).size(200))
+                    .attr('class', d => d.data.text_seen == 1 ? 'star read' : 'star unread')
+                    .attr('data-id', d => d.data.id)
+                    .attr("fill", baseColor);
+            } else {
+                const heartPath = "m -10,-9 c -6.57,-7.05 -17.14,-7.05 -23.71,0 -6.56,7.05 -6.56,18.39 0,25.45 l 29.06,31.27 29.09,-31.23 c 6.57,-7.05 6.57,-18.4 0,-25.45 -6.57,-7.05 -17.14,-7.05 -23.71,0 l -5.35,5.75 -5.39,-5.78 z";
+                item.append("path")
+                    .attr("d", heartPath)
+                    .attr("transform", "scale(0.4) translate(0, -15)")
+                    .attr('class', d => {
+                        let classes = `${d.data.text_seen == 1 ? 'read' : 'unread'}`;
+                        classes += ` ${d.data.text_status == 'draft' || d.data.text_status == 'incomplete_draft' ? 'tree-node-draft' : ''}`; 
+                        return classes.trim();
+                    })
+                    .attr('data-id', d => d.data.id)
+                    .attr('data-vote-count', d => d.data.voteCount)
+                    .attr('fill', d => colorScale(d.data.voteCount));
+            }
+        });
+
+        // Add the title
+        const titleGroup = nodeEnter.append("g")
+            .attr("class", "title-group")
+            .attr("transform", "translate(0, -10)");
+
+        titleGroup.append("text")
+            .attr("x", d => d.children ? -13 : 13)
+            .style("text-anchor", d => d.children ? "end" : "start")
+            .text(d => d.data.title || "Untitled");
+
+        const titleBottomPosition = this.updateTitle(titleGroup, d => d.data.title || "Untitled", this.config.fontSize.title.max);
+
+        // Add the author name, positioned below the title
+        nodeEnter.append("text")
+            .attr("dy", `${titleBottomPosition + this.config.titleAuthorSpacing}px`)
+            .attr("x", d => d.children ? -13 : 13)
+            .style("text-anchor", d => d.children ? "end" : "start")
+            .attr("class", d => d.data.permissions.isMyText ? "text-by author" : "text-by")
+            .text(d => this.formatAuthorName(d.data));
+
+        // Update existing nodes
+        nodes.transition().duration(750)
+            .attr("transform", d => `translate(${d.y},${d.x})`)
+            .each(function(d) {
+                const node = d3.select(this);
+
+                // Calculate new x position based on text-anchor change
+                const newX = d.children ? -13 : 13;
+                
+                // Update title text with transition
+                node.selectAll(".title-group text")
+                    .transition().duration(750)
+                    .attr("x", newX)
+                    .style("text-anchor", d.children ? "end" : "start");
+        
+                // Update author text
+                node.select("text.text-by")
+                    .transition().duration(750)
+                    .attr("x", newX)
+                    .style("text-anchor", d.children ? "end" : "start");
+            });
+
+        // Remove old nodes
+        nodes.exit().remove();
+
+        // Update links
+        const links = innerG.selectAll(".link")
+            .data(root.links(), d => d.target.data.id);
+
+        // Enter new links
+        links.enter().insert("path", "g")
+        .attr("class", "link")
+        .attr("d", d => {
+            return `M${d.source.y},${d.source.x}
+                C${(d.source.y + d.target.y) / 2},${d.source.x}
+                ${(d.source.y + d.target.y) / 2},${d.target.x}
+                ${d.target.y},${d.target.x}`;
+        });
+
+        // Update existing links
+        links.transition().duration(750)
+            .attr("d", d => {
+            return `M${d.source.y},${d.source.x}
+                C${(d.source.y + d.target.y) / 2},${d.source.x}
+                ${(d.source.y + d.target.y) / 2},${d.target.x}
+                ${d.target.y},${d.target.x}`;
+        });
+
+        // Remove old links
+        links.exit().remove();
+        this.handleResize();
+    }
+
+    updateZoomConstraints() {
+        const bounds = this.svg.node().getBBox();
+        const minScale = Math.min(this.containerWidth / bounds.width, this.containerHeight / bounds.height);
+    
+        this.zoom.scaleExtent([minScale, this.maxScale]);
+        this.svg.call(this.zoom);
     }
 }
 

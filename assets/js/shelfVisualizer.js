@@ -7,6 +7,46 @@ export class ShelfVisualizer {
     this.path = path;
     this.container = container;
     this.SeenManager = new SeenManager(path);
+    this.initEventListeners();
+  }
+
+  initEventListeners() {
+    eventBus.on('newNodesDiscovered', this.handleNewNodes.bind(this));
+  }
+
+  handleNewNodes(nodes) {
+    nodes.forEach(node => {
+      this.handleNewNode(node);
+    });
+  }
+
+  handleNewNode(newNode) {
+    console.log("newNodeDiscovered", newNode);
+    const parentElement = this.container.querySelector(`li[data-story-id="${newNode.parent_id}"]`);
+    if (!parentElement) return;
+
+    const parentDepth = parseInt(parentElement.style.getPropertyValue('--node-depth'));
+    const newNodeDepth = parentDepth + 1;
+
+    // Find or create the ordered list for children
+    let childrenOl = parentElement.querySelector(':scope > ol');
+    if (!childrenOl) {
+        childrenOl = document.createElement('ol');
+        parentElement.appendChild(childrenOl);
+    }
+
+    // Create the new node HTML
+    const newNodeHtml = this.drawSingleNode(newNode, newNodeDepth);
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = newNodeHtml;
+    const newNodeElement = tempDiv.firstElementChild;
+
+    // Append the new node to the children's list
+    childrenOl.appendChild(newNodeElement);
+
+    // Re-apply event listeners and colors
+    this.addEventListeners();
+    this.applySVGColors(this.container);
   }
 
   drawShelf(data) {

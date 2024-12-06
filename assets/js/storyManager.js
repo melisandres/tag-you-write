@@ -1,5 +1,5 @@
 import { ShelfVisualizer } from './shelfVisualizer.js';
-import { DataManager } from './dataManager.js';
+//import { DataManager } from './dataManager.js';
 /* this may create some issues... to require the modal the constructor. I'm going to initialize it as an empty string... there are pages where I will surely call the story manager where the modal will be innaccessible? or I should put the modal in the header? */
 
 export class StoryManager {
@@ -8,7 +8,7 @@ export class StoryManager {
     this.seenManager = seenManager;
     this.modal = modal;
     this.storyTreeData = [];
-    this.dataManager = new DataManager(this.path);
+    this.dataManager = window.dataManager;
     this.currentFetch = null;
      // Add event listener for the custom event
      // TODO: Add this event to the eventBus? 

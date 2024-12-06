@@ -2,8 +2,10 @@ import { eventBus } from './eventBus.js';
 import { createColorScale } from './createColorScale.js';
 
 export class TreeUpdateManager {
-  constructor() {
+  constructor(treeVisualizer) {
     this.initEventListeners();
+    this.treeVisualizer = treeVisualizer;
+    this.dataManager = window.dataManager;
   }
 
   initEventListeners() {
@@ -12,6 +14,7 @@ export class TreeUpdateManager {
     eventBus.on('chooseWinner', this.handleChooseWinner.bind(this));
     eventBus.on('voteToggle', this.handleVoteToggle.bind(this));
     eventBus.on('gamePlayerCountUpdate', this.handleGamePlayerCountUpdate.bind(this));
+    eventBus.on('newNodesDiscovered', this.handleNewNodesDiscovered.bind(this));
   }
 
   handleInstaPublish({ textId, newStatus }) {
@@ -183,5 +186,17 @@ export class TreeUpdateManager {
         label.textContent = tickValues[index];
       });
     }
+  }
+
+  handleNewNodesDiscovered(newNodesData) {
+    // get the full tree
+    this.treeData = this.dataManager.getTreeByGameId(newNodesData[0].game_id);
+
+/*     const parentNode = this.dataManager.getNode(String(newNodesData[0].parent_id));
+
+    if (parentNode) { */
+        // Update the visualization for whole tree
+    this.treeVisualizer.updateTree();
+/*     } */
   }
 } 

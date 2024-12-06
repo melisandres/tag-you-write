@@ -156,9 +156,9 @@ export class ShelfUpdateManager {
             const shelfVoteButton = shelfNode.querySelector(`.vote[data-vote="${data.id}"]`);
 
             if (data.hasVoted) {
-                shelfVoteButton.classList.add('voted');
+                if (shelfVoteButton) shelfVoteButton.classList.add('voted');
             } else {
-                shelfVoteButton.classList.remove('voted');
+                if (shelfVoteButton) shelfVoteButton.classList.remove('voted');
             }
         }
     }
