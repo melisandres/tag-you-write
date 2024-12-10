@@ -52,6 +52,11 @@ export class DataManager {
         eventBus.on('updateGame', (gameData) => {
             this.updateGamesData([gameData]);
         });
+
+        // update the data cache for a node
+        eventBus.on('updateNode', (nodeData) => {
+            this.updateNode(nodeData.id, nodeData);
+        });
         
         this.saveCache();
         this.initAuthState();
@@ -256,11 +261,13 @@ export class DataManager {
         // Add new nodes
         sortedNodes.forEach(node => {
             if (!this.cache.nodesMap.has(String(node.id))) {
+                console.log('Adding new node:', node);
                 this.addNewNode(node.id, node);
                 newNodesAdded = true;
                 playerCountUpdated = Math.max(playerCountUpdated, node.playerCount);
                 nodesAdded.push(node);
             }else{
+                console.log('Updating node:', node);
                 // Only update nodes that haven't been added
                 nodesToUpdate.push(node);
             }
@@ -277,11 +284,14 @@ export class DataManager {
             eventBus.emit('gamePlayerCountUpdate', { newPlayerCount: playerCountUpdated, gameId: rootNode.gameId });
         }
 
-        nodesToUpdate.forEach(node => {
-            if (this.cache.nodesMap.has(node.id)) {
-                this.updateNode(node.id, node);
-            }
-        });
+        if (nodesToUpdate.length > 0) {
+            console.log('Updating nodes:', nodesToUpdate);
+            nodesToUpdate.forEach(node => {
+                if (this.cache.nodesMap.has(String(node.id))) {
+                    this.updateNode(node.id, node);
+                }
+            });
+        }
 
         const cachedTree = this.cache.trees.get(rootId);
         if (cachedTree) {

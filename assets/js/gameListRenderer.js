@@ -58,7 +58,7 @@ export class GameListRenderer {
         this.dataManager.updateGamesData(games, false);
 
         games.forEach(game => {
-            const gameElement = document.querySelector(`[data-game-id="${game.game_id}"]`);
+            const gameElement = document.querySelector(`.story[data-game-id="${game.game_id}"]`);
             if (gameElement) {
                 // Update existing game
                 this.updateExistingGame(gameElement, game);
@@ -192,6 +192,7 @@ export class GameListRenderer {
         const hasContributed = gameData.hasContributed === '1' || gameData.hasContributed === true || gameData.hasContributed === 1;
 
         // Update story class for open/closed status
+        console.log("gameElement", gameElement);
         const gameStatusIndicator = gameElement.querySelector('.game-status-indicator');
         if (isOpen) {
             gameStatusIndicator.classList.remove('closed');

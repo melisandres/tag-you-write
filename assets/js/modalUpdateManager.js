@@ -133,8 +133,9 @@ export class ModalUpdateManager {
     if (!container) {
         return;
     }
+
     const modalTextId = container.dataset.textId;
-    if (modalTextId !== data.id) {
+    if (String(modalTextId) !== String(data.id)) {
       return;
     }
 

@@ -12,10 +12,11 @@ export class Modal {
     }
   
     showModal(data) {
+      console.log('Modal: showModal called with data:', data);
       this.modalElement.classList.remove('display-none');
       this.modalElement.dataset.treeModal = "visible";
       this.modalElement.dataset.textId = data.id;
-      this.modalElement.dataset.gameId = data.gameId;
+      this.modalElement.dataset.gameId = data.game_id;
       let noteHtml = data.note ? `<p class="ps">P.S... ${data.note}</p>` : '';
 
       this.modalContent.innerHTML = `
