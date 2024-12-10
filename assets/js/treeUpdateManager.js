@@ -130,10 +130,16 @@ export class TreeUpdateManager {
     node.setAttribute('fill', colorScale(newVoteCount));
   }
 
-  handleGamePlayerCountUpdate({ gameId, newPlayerCount }) {
+  handleGamePlayerCountUpdate({ newPlayerCount, gameId }) {
     const container = document.querySelector('#showcase[data-showcase="tree"]');
     if (!container) return;
-    
+
+    const showCaseGameId = container.closest('[data-game-id]').dataset.gameId;
+    if (showCaseGameId !== gameId){
+      console.warn("Game ID mismatch in tree update manager");
+      return;
+    } 
+
     const maxVotes = newPlayerCount - 1;
     const colorScale = createColorScale(maxVotes);
     
