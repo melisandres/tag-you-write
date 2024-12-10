@@ -95,14 +95,17 @@ class ControllerGame extends Controller {
             // Add permissions to the modified nodes
             if (!empty($modifiedNodes)) {
                 $this->addPermissions($modifiedNodes[0], $currentUserId, $modifiedNodes);
+
             }
+            error_log("LINE 100 controllerGame.php : modifiedNodes: " . print_r($modifiedNodes, true));
 
             // Ensure data is properly formatted
             $response = [
-                'modifiedGames' => array_values($modifiedGames), // Convert to indexed array
-                'modifiedNodes' => array_values($modifiedNodes)  // Convert to indexed array
+                'modifiedGames' => $modifiedGames, // Convert to indexed array
+                'modifiedNodes' => $modifiedNodes  // Convert to indexed array
             ];
-            error_log("modifiedSince response: " . print_r($response, true));
+            error_Log('LINE 107 controllerGame.php : modifiedSince response: ' . print_r($response, true));
+            //error_log("modifiedSince response: " . print_r($response, true));
             
             header('Content-Type: application/json');
             echo json_encode($response, JSON_NUMERIC_CHECK); // Add JSON_NUMERIC_CHECK
@@ -114,11 +117,10 @@ class ControllerGame extends Controller {
     }
 
     private function addPermissions(&$node, $currentUserId, $hierarchy = []) {
-        // selectTexts adds hasContributed, isWinner, and openForChanges, but 
-        // the front end works better if these are just true/false instead of 0/1
-        $node['hasContributed'] = $node['hasContributed'] == 1 ? true : false;
-        $node['isWinner'] = $node['isWinner'] == 1 ? true : false;
-        $node['openForChanges'] = $node['openForChanges'] == 1 ? true : false;
+        // Convert integer values to boolean
+        $node['hasContributed'] = $node['hasContributed'] == 1;
+        $node['isWinner'] = $node['isWinner'] == 1;
+        $node['openForChanges'] = $node['openForChanges'] == 1;
 
         RequirePage::library('Permissions');
         $node = Permissions::aggregatePermissions($node, $currentUserId);

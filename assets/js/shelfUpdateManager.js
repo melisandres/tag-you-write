@@ -164,9 +164,15 @@ export class ShelfUpdateManager {
     }
   }
 
-  handleGamePlayerCountUpdate({ gameId, newPlayerCount }) {
+  handleGamePlayerCountUpdate({ newPlayerCount, gameId }) {
     const container = document.querySelector('#showcase[data-showcase="shelf"]');
     if (!container) return;
+
+    const showCaseGameId = container.closest('[data-game-id]').dataset.gameId;
+    if (showCaseGameId !== gameId){
+      console.warn("Game ID mismatch in shelf update manager");
+      return;
+    } 
     
     // Update all vote displays in the shelf
     const voteDisplays = container.querySelectorAll('.votes');

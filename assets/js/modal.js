@@ -15,6 +15,7 @@ export class Modal {
       this.modalElement.classList.remove('display-none');
       this.modalElement.dataset.treeModal = "visible";
       this.modalElement.dataset.textId = data.id;
+      this.modalElement.dataset.gameId = data.gameId;
       let noteHtml = data.note ? `<p class="ps">P.S... ${data.note}</p>` : '';
 
       this.modalContent.innerHTML = `

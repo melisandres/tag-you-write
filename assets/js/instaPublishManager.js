@@ -53,8 +53,8 @@ export class InstaPublishManager {
               // Update player counts if this was a new player
               if (result.gameData.isNewPlayer) {
                 eventBus.emit('gamePlayerCountUpdate', {
-                  gameId: result.gameData.gameId,
-                  newPlayerCount: result.gameData.playerCount
+                  newPlayerCount: result.gameData.playerCount,
+                  gameId: result.gameData.gameId
                 });
               }
               

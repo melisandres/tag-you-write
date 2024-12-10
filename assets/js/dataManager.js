@@ -274,6 +274,7 @@ export class DataManager {
         // Update all the nodes in the tree with the new player count
         if (playerCountUpdated > originalPlayerCount) {
             this.updatePlayerCountForTree(playerCountUpdated, rootId);
+            eventBus.emit('gamePlayerCountUpdate', { newPlayerCount: playerCountUpdated, gameId: rootNode.gameId });
         }
 
         nodesToUpdate.forEach(node => {

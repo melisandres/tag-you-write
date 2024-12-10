@@ -753,6 +753,9 @@ export class TreeVisualizer {
         // Recalculate the layout
         const root = d3.hierarchy(this.treeData, d => d.children);
 
+/*         console.log('Root:', root);
+        console.log('Root Descendants:', root.descendants()); */
+
         // Calculate maxDepth and depthCounts
         const maxDepth = d3.max(root.descendants(), d => d.depth);
 
@@ -763,6 +766,15 @@ export class TreeVisualizer {
             }
             depthCounts[d.depth]++;
         });
+
+        // Add a console log to check the descendants
+/*         root.each(d => {
+            console.log('Node:', d);
+            if (!d.data) {
+                console.error('Node data is undefined:', d);
+                console.log('Problematic Node:', d);
+            }
+        }); */
 
         const maxNodesAtDepth = Math.max(...Object.values(depthCounts));
         const requiredWidth = maxDepth * this.minSpacing;
@@ -875,14 +887,31 @@ export class TreeVisualizer {
         // Remove old nodes
         nodes.exit().remove();
 
+
+
         // Update links
         const links = innerG.selectAll(".link")
-            .data(root.links(), d => d.target.data.id);
+            .data(root.links(), d => {
+                if (!d.target || !d.target.data) {
+                    console.warn('Skipping link for node without target:', d);
+                    return; // Return a default path or handle the error
+                }else{
+                    console.log('Link Data:', d);
+                }
+                return d.target.data.id;
+            })
+
+            //TODO: remove this
+            //.data(root.links(), d => d.target.data.id);
 
         // Enter new links
         links.enter().insert("path", "g")
         .attr("class", "link")
         .attr("d", d => {
+            if (!d.target || !d.target.data) {
+                console.warn('Skipping link for node without target:', d);
+                return; // Return a default path or handle the error
+            }
             return `M${d.source.y},${d.source.x}
                 C${(d.source.y + d.target.y) / 2},${d.source.x}
                 ${(d.source.y + d.target.y) / 2},${d.target.x}

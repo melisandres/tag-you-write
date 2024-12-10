@@ -130,7 +130,6 @@ class ControllerText extends Controller{
         $data = json_decode(file_get_contents('php://input'), true);
         $rootId = $data['rootId'];
         $lastTreeCheck =  date('Y-m-d H:i:s', $data['lastTreeCheck'] / 1000);
-        error_log('lastTreeCheck: ' . $lastTreeCheck);
 
         $text = new Text;
         $game = new Game;
@@ -144,7 +143,9 @@ class ControllerText extends Controller{
         // Get only the texts for this game
         $modifiedNodes = $text->selectTexts($currentUserId, $gameId, true, $lastTreeCheck);
 
-        error_log('modifiedNodes: ' . json_encode($modifiedNodes));
+        if (!empty($modifiedNodes)) {
+            $this->addPermissions($modifiedNodes[0], $currentUserId, $modifiedNodes);
+        }
 
         // Convert the hierarchical array to JSON format
         $jsonData = json_encode($modifiedNodes);
@@ -174,9 +175,9 @@ class ControllerText extends Controller{
     private function addPermissions(&$node, $currentUserId, $hierarchy = []) {
         // selectTexts adds hasContributed, isWinner, and openForChanges, but 
         // the front end works better if these are just true/false instead of 0/1
-        $node['hasContributed'] = $node['hasContributed'] == 1 ? true : false;
-        $node['isWinner'] = $node['isWinner'] == 1 ? true : false;
-        $node['openForChanges'] = $node['openForChanges'] == 1 ? true : false;
+        $node['hasContributed'] = $node['hasContributed'] == 1;
+        $node['isWinner'] = $node['isWinner'] == 1;
+        $node['openForChanges'] = $node['openForChanges'] == 1;
 
         RequirePage::library('Permissions');
         $node = Permissions::aggregatePermissions($node, $currentUserId);
@@ -320,13 +321,16 @@ class ControllerText extends Controller{
             'game_id' => $input['game_id'],
             'status_id' => $input['status_id'],
             'writer_id' => $currentWriterId,
-            'date' => date('Y-m-d H:i:s')
+            'date' => date('Y-m-d H:i:s'),
+            'modified_at' => date('Y-m-d H:i:s')
         ];
 
         // Modified_at is to refresh the UI... so only when published
-        if ($status == 'published') {
+
+        // TODO: I'm replacing this righ now to add the modified_at to all stores and updates.
+/*         if ($status == 'published') {
             $textToSave['modified_at'] = date('Y-m-d H:i:s');
-        }
+        } */
 
         //save the text
         $textIdFromInsert = $text->insert($textToSave);
@@ -353,13 +357,14 @@ class ControllerText extends Controller{
 
         // Update the game's modified_at--if this store is for a published text
         // Which should basically never happen, but it's here if it does.
-        if ($status == 'published') {
+/*         if ($status == 'published') { */
+        // TODO: I'm trying this here for all stores, not only published
             $game = new Game;
             $game->update([
                 'id' => $input['game_id'], 
                 'modified_at' => date('Y-m-d H:i:s')
             ]);
-        }
+/*         } */
 
         // Handle keywords
         $prep = new Prep;
@@ -612,6 +617,7 @@ class ControllerText extends Controller{
         $textId = $input['id'];
         $textData = $text->selectTexts($currentWriterId, $textId);
         $isRoot = $textData['parent_id'] == '' ? true : false;
+        $gameId = $text->selectGameId($textId);
 
         $this->addPermissions($textData, $currentWriterId);
 
@@ -646,9 +652,8 @@ class ControllerText extends Controller{
             //Update the game's modified_at, so that you can show the "unseen" count
             if ($update) {
                 $game = new Game;
-                $game_id = $text->selectGameId($textId);
                 $game->update([
-                    'id' => $game_id, 
+                    'id' => $gameId, 
                     'modified_at' => date('Y-m-d H:i:s')
                 ]);
             }
@@ -662,7 +667,6 @@ class ControllerText extends Controller{
 
         // Root texts need to update the game prompt
         if ($isRoot) {
-            $gameId = $text->selectGameId($textId);
             $game = new Game;
             $game->update([
                 'id' => $gameId, 
@@ -702,12 +706,14 @@ class ControllerText extends Controller{
             'writing' => $input['writing'],
             'title' => $input['title'],
             'date' => date('Y-m-d H:i:s'),
+            'modified_at' => date('Y-m-d H:i:s')
         ];
 
+        // TODO: moving the modified_at to all updates, not only published
         // Modified_at is to refresh the UI... so only when published
-        if ($status == 'published') {
+/*         if ($status == 'published') {
             $textToSave['modified_at'] = date('Y-m-d H:i:s');
-        }
+        } */
 
         $update = $text->update($newText);
 
@@ -716,7 +722,6 @@ class ControllerText extends Controller{
         // BUT only if they are not already in it
         if ($update && $status == 'published') { 
             // Check if the player is already in the game
-            $gameId = $text->selectGameId($textId);
             $gameHasPlayer = new GameHasPlayer;
             $existingPlayer = $gameHasPlayer->selectCompositeId(['game_id' => $gameId, 'player_id' => $currentWriterId]);
 
@@ -736,13 +741,14 @@ class ControllerText extends Controller{
         // TODO: I need to check if "published" catches adding a note...
         // TODO: I need to update modified_at in function of "seen"
         // TODO: this code, in slightly modified forms, needs to be in instaPublish and in store... it IS... but it needs to be handling the previous notes. 
-        if ($update && $status == 'published') {
+        /* if ($update && $status == 'published') { */
+        // TODO: I'm trying this here for all updates, not only published
             $game = new Game;
             $game->update([
                 'id' => $gameId, 
                 'modified_at' => date('Y-m-d H:i:s')
             ]);
-        }
+        /* } */
 
         //using class Prep to prepare keywords arrays... 
         //words come in as strings, come out a clean arrays

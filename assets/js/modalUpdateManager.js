@@ -170,7 +170,7 @@ export class ModalUpdateManager {
     }
   }
 
-  handleGamePlayerCountUpdate({ gameId, newPlayerCount }) {
+  handleGamePlayerCountUpdate({ newPlayerCount, gameId }) {
     const modal = document.querySelector('.modal-background[data-tree-modal="visible"]');
     if (!modal) return;
 
@@ -179,6 +179,12 @@ export class ModalUpdateManager {
 
     const voteCountSpan = votesDiv.querySelector('.vote-count');
     if (!voteCountSpan) return;
+
+    const modalGameId = modal.dataset.gameId;
+    if (modalGameId !== gameId){
+      console.warn("Game ID mismatch in modal update manager");
+      return;
+    } 
 
     // Get current vote count
     const currentVotes = parseInt(voteCountSpan.dataset.voteCount || '0');
