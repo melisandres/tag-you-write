@@ -57,7 +57,16 @@ export class InstaPublishManager {
                   gameId: result.gameData.gameId
                 });
               }
-              
+
+              eventBus.emit('updateNode', {
+                id: textId,
+                playerCount: result.playerCount, 
+                text_status: 'published'
+              });
+
+              // update the game data
+              eventBus.emit('updateGame', result.gameData[0]);
+
               eventBus.emit('showToast', { 
                 message: result.toastMessage, 
                 type: result.toastType 

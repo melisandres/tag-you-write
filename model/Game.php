@@ -16,7 +16,7 @@
                         'modified_at'
                         ];
 
-   public function getGames($order = null, $filters = []) {
+   public function getGames($order = null, $filters = [], $id = null) {
       $loggedInWriterId = isset($_SESSION['writer_id']) ? $_SESSION['writer_id'] : "";
 
       // Build filter string
@@ -50,6 +50,11 @@
          }
       }
       
+      // Handle gameId filter
+      if ($id) {
+         $filterString .= " AND g.id = :id";
+      }
+
       $sql =   "SELECT  g.id AS game_id, 
                         g.prompt,
                         g.open_for_changes AS openForChanges,
@@ -96,6 +101,11 @@
       
       $stmt = $this->prepare($sql);
       $stmt->bindValue(':loggedInWriterId', $loggedInWriterId);
+
+      if ($id) {
+         $stmt->bindValue(':id', $id);
+      }
+      
       $stmt->execute();
       
       $games = $stmt->fetchAll();
@@ -176,7 +186,7 @@
 
       $stmt = $this->prepare($sql);
       $stmt->bindValue(':lastCheck', $lastCheck);
-      $stmt->bindValue(':loggedInWriterId', $_SESSION['writer_id'] ?? 0);
+      $stmt->bindValue(':loggedInWriterId', $_SESSION['writer_id'] ?? 0); 
       
       $stmt->execute();
 

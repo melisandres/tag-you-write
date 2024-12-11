@@ -51,7 +51,6 @@ export class VoteManager {
                             hasVoted: result.voted 
                         } 
                     });
-                    console.log('VoteManager: emitting updateNode event with this data:', result);
                     // update the data cache for the node
                     eventBus.emit('updateNode', {
                         id: textId,

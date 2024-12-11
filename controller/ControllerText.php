@@ -569,19 +569,17 @@ class ControllerText extends Controller{
                 'id' => $gameId, 
                 'modified_at' => date('Y-m-d H:i:s')
             ]);
-    
+
+            $gameData = $game->getGames(null, [], $gameId);
+            $gameData[0]['isNewPlayer'] = !$existingPlayer; 
         }
+
     
         $this->sendJsonResponse(
             $success, 
             $success ? 'Published!' : 'Failed to publish',
             [
-                'gameData' => [
-                    'playerCount' => $gameHasPlayer->selectPlayerCount($gameId),
-                    'gameId' => $gameId,
-                    'textId' => $textId,
-                    'isNewPlayer' => !$existingPlayer // This will be true if the player wasn't already in the game
-                ]
+                'gameData' => $gameData, 
             ]
         );
     }
@@ -736,19 +734,13 @@ class ControllerText extends Controller{
             }          
         }
 
-        // Update the game's modified_at--but only if the text is a root text.
-        // TODO: this needs to happen even if the text is not a Root... 
-        // TODO: I need to check if "published" catches adding a note...
-        // TODO: I need to update modified_at in function of "seen"
-        // TODO: this code, in slightly modified forms, needs to be in instaPublish and in store... it IS... but it needs to be handling the previous notes. 
-        /* if ($update && $status == 'published') { */
-        // TODO: I'm trying this here for all updates, not only published
-            $game = new Game;
-            $game->update([
-                'id' => $gameId, 
-                'modified_at' => date('Y-m-d H:i:s')
-            ]);
-        /* } */
+        // I'm trying this here for all updates, not only published
+        $game = new Game;
+        $game->update([
+            'id' => $gameId, 
+            'modified_at' => date('Y-m-d H:i:s')
+        ]);
+
 
         //using class Prep to prepare keywords arrays... 
         //words come in as strings, come out a clean arrays
@@ -794,6 +786,14 @@ class ControllerText extends Controller{
         }else{
             $this->sendJsonResponse(true, 'saved');
         }
+    }
+
+    public function softDelete(){
+        // TODO: implement softDelete
+
+        // there needs to be a way to "delete" offensive or inappropriate texts
+
+        // this would be different from the delete that a writer can apply to a draft... that basically clears it from the database. 
     }
 
 
@@ -854,7 +854,6 @@ class ControllerText extends Controller{
 
         // Now that the game (if this is a root) doesn't reference this text, you can delete it
         $response = $text->delete($textId);
-        // TODO: you can create a softDelete in CRUD, and use it here instead of a real delete... I think that will help you with the UI updates.
 
         if ($response && $isRoot) {
             // If delete text worked now we can safely delete the game
@@ -880,9 +879,6 @@ class ControllerText extends Controller{
         // Recuperate the text, and the keywords associated to it
         $text = new Text;
         $currentWriterId = $_SESSION['writer_id'];
-
-        // TODO: made these changes. check if it works.
-        //$textData = $text->selectTexts($currentWriterId, $_POST['id']);
         $parentId = $_POST['id'];
         $parentData = $text->selectTexts($currentWriterId, $parentId);
 

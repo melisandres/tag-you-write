@@ -152,7 +152,6 @@ export class StoryManager {
     return cachedData.data;
   }
 
-  // TODO: this is where we will start!
   async drawTree(id, container) {
     try {
         // Set the current viewed root story ID before preparing data

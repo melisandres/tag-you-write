@@ -170,7 +170,7 @@ export class GameListRenderer {
         const insertIndex = existingGames.findIndex(game => {
             const gameElement = game.closest('.story');
             if (!gameElement) return false;
-            const currentGame = this.dataManager.getGameById(gameElement.dataset.gameId);
+            const currentGame = this.dataManager.getGame(gameElement.dataset.gameId);
             return currentGame && currentGame.placement_index > placementIndex;
         });
         

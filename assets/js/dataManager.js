@@ -238,6 +238,7 @@ export class DataManager {
             this.replaceAll(games);
         } else {
             this.updateGames(games);
+            console.log('UPDATED GAMES?');
         }  
 
         this.saveCache();
@@ -639,21 +640,40 @@ export class DataManager {
         this.cache.lastGamesCheck = Date.now();
     }
 
-    // TODO: I also have an updateGameData... how are these difterent? 
+
     // For poll updates
     updateGames(games) {
+        if (!Array.isArray(games)) {
+            games = [games]; // Convert single game object to array
+        }
+        
         games.forEach(game => {
             const normalized = this.normalizeGameData(game);
-            const existing = this.cache.games.get(game.game_id);
-            
-            if (!existing || existing.timestamp < this.lastFullUpdate) {
+/*             const existing = this.cache.games.get(game.game_id);
+    
+            if (!existing || existing.timestamp < this.lastFullUpdate) { */
                 this.cache.games.set(game.game_id, {
                     data: normalized,
                     timestamp: Date.now()
                 });
-            }
+/*             } */
         });
     }
+
+/*     //update one game with incomplete data
+    updateGame(gameData) {
+        const game = this.cache.games.get(gameData.game_id);
+
+        const updatedGame = {
+            ...game,
+            ...gameData
+        };
+        
+        this.cache.games.set(game.game_id, {
+            data: updatedGame,
+            timestamp: Date.now()
+        });
+    } */
 
     // Normalize game data to match the expected format
     normalizeGameData(game) {
