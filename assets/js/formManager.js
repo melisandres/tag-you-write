@@ -414,6 +414,7 @@ export class FormManager {
         this.isIntentionalNavigation = true;
         try {
             const formData = new FormData(this.form);
+            const id = formData.get('id');
 
             const response = await fetch(`${this.path}text/delete`, {
                 method: 'POST', // Use DELETE method
@@ -423,8 +424,8 @@ export class FormManager {
             const result = await response.json();
             if (result.success) {
                 // Delete the node from the data cache
-                eventBus.emit('deleteNode', { textId });
-                
+                eventBus.emit('deleteNode', id );
+
                 // Show toast message
                 localStorage.setItem('pendingToast', JSON.stringify({
                     message: result.toastMessage,

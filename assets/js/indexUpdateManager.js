@@ -96,9 +96,12 @@ export class IndexUpdateManager {
     }
   }
 
+  // TODO: I'm currently only triggering this on deleteNode, in the dataManager... that means, for now, we only ever go from contributed to not contributed, and we look for the .contributed class, rather than the h5 or whatever it is. 
   handleGameContributionStatusChanged({gameId, hasContributed}) {
     const gameElement = document.querySelector(`[data-game-id="${gameId}"] .contributed`);
-    gameElement.classList.toggle('contributed', hasContributed);
+    if(gameElement) {
+      gameElement.classList.toggle('contributed', hasContributed);
+    }
   }
 
  /*  // TODO: handle game updates. 
