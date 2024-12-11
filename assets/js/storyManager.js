@@ -157,13 +157,24 @@ export class StoryManager {
         // Set the current viewed root story ID before preparing data
         this.dataManager.setCurrentViewedRootStoryId(id);
         
-        const treeData = await this.prepareData(id);
-        console.log('treeData', treeData);
-        if (!treeData) {
+        // First, get the initial tree data and draw it
+        const initialTreeData = this.dataManager.getTree(id)?.data;
+        if (initialTreeData) {
+            // Draw the initial tree first if we have cached data
+            eventBus.emit('drawTree', { container, data: initialTreeData });
+        }
+        
+        // Then prepare updated data (this might trigger polling updates)
+        const updatedTreeData = await this.prepareData(id);
+        if (!updatedTreeData) {
             console.error('Failed to prepare tree data for ID:', id);
             return;
         }
-        eventBus.emit('drawTree', { container, data: treeData });
+
+        // If we didn't have initial data, or if the data has changed, draw/update the tree
+        if (!initialTreeData || JSON.stringify(initialTreeData) !== JSON.stringify(updatedTreeData)) {
+            eventBus.emit('drawTree', { container, data: updatedTreeData });
+        }
     } catch (error) {
         console.error('Error in drawTree:', error);
     }

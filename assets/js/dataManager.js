@@ -48,14 +48,19 @@ export class DataManager {
             eventBus.emit('gameDataResponse', { gameId, data: gameData });
         });
 
-        // update the data cache with passed parameter
+        // Update the data cache with passed parameter
         eventBus.on('updateGame', (gameData) => {
             this.updateGamesData([gameData]);
         });
 
-        // update the data cache for a node
+        // Update the data cache for a node
         eventBus.on('updateNode', (nodeData) => {
             this.updateNode(nodeData.id, nodeData);
+        });
+
+        // Delete a node, and maybe the whole tree/game if its the root
+        eventBus.on('deleteNode', (nodeId) => {
+            this.deleteNode(nodeId);
         });
         
         this.saveCache();
@@ -754,5 +759,86 @@ export class DataManager {
         if (newUserId !== null && newUserId !== 'null') {
             eventBus.emit('refreshGameList');
         }
+    }
+
+    deleteNode(nodeId) {
+        console.log('DELETE NODEID?', nodeId);
+        nodeId = String(nodeId);
+        const nodeToDelete = this.cache.nodesMap.get(nodeId);
+        
+        if (!nodeToDelete) {
+            console.warn(`Node ${nodeId} not found in cache`);
+            return false;
+        }
+
+        const nodeIsRoot = nodeToDelete.parent_id === null;
+        const gameId = nodeToDelete.game_id;
+        const game = this.getGame(gameId);
+        const rootId = game.data.text_id;
+
+        if (nodeIsRoot) {
+            // Root node deletion - clean up entire tree and game
+            this.cache.trees.delete(rootId);
+            this.clearTreeNodes(rootId);
+            if (gameId) {
+                this.cache.games.delete(String(gameId));
+            }
+        } else {
+            // Non-root node deletion
+            // Use flat map to get parent directly
+            const parentNode = this.cache.nodesMap.get(String(nodeToDelete.parent_id));
+            if (parentNode) {
+                // Update parent's children in flat map
+                parentNode.children = parentNode.children.filter(
+                    child => String(child.id) !== nodeId
+                );
+
+                // Update the hierarchy
+                const cachedTree = this.cache.trees.get(rootId);
+                if (cachedTree?.data) {
+                    const hierarchyParent = this.findNodeInTree(cachedTree.data, String(nodeToDelete.parent_id));
+                    if (hierarchyParent) {
+                        hierarchyParent.children = hierarchyParent.children.filter(
+                            child => String(child.id) !== nodeId
+                        );
+                    }
+                }
+            }
+
+            // Remove from flat map
+            this.cache.nodesMap.delete(nodeId);
+
+            // Check if user still has contributions and update game accordingly
+            if (game) {
+                const hasRemainingContributions = this.checkUserContributions(gameId);
+                if (!hasRemainingContributions) {
+                    game.data.hasContributed = false;
+                    this.cache.games.set(String(gameId), {
+                        data: game.data,
+                        timestamp: Date.now()
+                    });
+                    // Emit event to update UI if needed
+                    eventBus.emit('gameContributionStatusChanged', {
+                        gameId: gameId,
+                        hasContributed: false
+                    });
+                }
+            }
+        }
+
+        this.saveCache();
+        return true;
+    }
+
+    // Add this new method
+    checkUserContributions(gameId) {
+        const currentUserId = this.getCurrentUserId();
+        if (!currentUserId || currentUserId === 'null') return false;
+
+        // Use the flat map to efficiently check all nodes in the tree
+        return Array.from(this.cache.nodesMap.values()).some(node => 
+            node.game_id === gameId && 
+            node.writer_id === currentUserId
+        );
     }
 }

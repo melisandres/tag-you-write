@@ -195,6 +195,7 @@ export class TreeUpdateManager {
   }
 
   handleNewNodesDiscovered(newNodesData) {
+    console.log('NEW NODES DISCOVERED', newNodesData);
     // get the full tree
     this.treeData = this.dataManager.getTreeByGameId(newNodesData[0].game_id);
 

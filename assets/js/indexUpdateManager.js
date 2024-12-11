@@ -13,6 +13,7 @@ export class IndexUpdateManager {
     eventBus.on('gamesUpdated', this.handleGamesUpdated.bind(this));
     eventBus.on('gameDataResponse', this.handleGameDataResponse.bind(this));
     this.makeTitlesShorter();
+    eventBus.on('gameContributionStatusChanged', this.handleGameContributionStatusChanged.bind(this));
   }
 
   makeTitlesShorter() {
@@ -40,7 +41,6 @@ export class IndexUpdateManager {
     const textContainer = document.querySelector(`[data-story-id='${textId}']`);
 
     const gameContainer = textContainer ? textContainer.closest(`[data-game-id]`): document.querySelector(`.story.story-has-showcase`);
-    console.log("gameContainer", gameContainer);
     const statusIndicator = gameContainer.querySelector('.game-status-indicator');
     if (statusIndicator && statusIndicator.classList.contains('pending')) {
       statusIndicator.classList.remove('pending');
@@ -54,14 +54,11 @@ export class IndexUpdateManager {
   }
 
   handleChooseWinner({ textId }) {
-    console.log("textId", textId);
     const textContainer = document.querySelector(`[data-id='${textId}']`) || document.querySelector(`[data-story-id='${textId}']`);
 
-    console.log("textContainer", textContainer);
     const gameContainer = textContainer.closest(`[data-game-id]`);
-    console.log("gameContainer", gameContainer);
     const statusIndicator = gameContainer.querySelector('.game-status-indicator');
-    console.log("statusIndicator", statusIndicator);
+
     if (statusIndicator && statusIndicator.classList.contains('open')) {
       statusIndicator.classList.remove('open');
       statusIndicator.classList.add('closed');
@@ -74,7 +71,6 @@ export class IndexUpdateManager {
   }
 
   handleGamesUpdated(gameIds) {
-    console.log("gameIds", gameIds);
     // Request the data for each updated game
     gameIds.forEach(gameId => {
         eventBus.emit('requestGameData', gameId);
@@ -99,6 +95,12 @@ export class IndexUpdateManager {
       }
     }
   }
+
+  handleGameContributionStatusChanged({gameId, hasContributed}) {
+    const gameElement = document.querySelector(`[data-game-id="${gameId}"] .contributed`);
+    gameElement.classList.toggle('contributed', hasContributed);
+  }
+
  /*  // TODO: handle game updates. 
   handleGameDataResponse(gameId, gameData) {
     console.log("gameIds", gameIds);

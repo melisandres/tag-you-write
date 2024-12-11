@@ -18,8 +18,12 @@ export class TreeShelfModalPollingUpdateManager {
   }
 
   handleNodesAdded(nodes) {
-    console.log('New nodes detected:', nodes);
-    eventBus.emit('newNodesDiscovered', nodes);
+    // Ensure nodes have children arrays
+    const normalizedNodes = nodes.map(node => ({
+        ...node,
+        children: node.children || []
+    }));
+    eventBus.emit('newNodesDiscovered', normalizedNodes);
   }
 
 

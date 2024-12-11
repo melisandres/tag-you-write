@@ -422,8 +422,10 @@ export class FormManager {
 
             const result = await response.json();
             if (result.success) {
-                // Handle success (e.g., show toast message)
-
+                // Delete the node from the data cache
+                eventBus.emit('deleteNode', { textId });
+                
+                // Show toast message
                 localStorage.setItem('pendingToast', JSON.stringify({
                     message: result.toastMessage,
                     type: result.toastType

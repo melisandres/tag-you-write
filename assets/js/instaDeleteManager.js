@@ -45,6 +45,9 @@ export class InstaDeleteManager {
                 try {
                     const result = JSON.parse(rawText);
                     if (result.success) {
+                        // Delete the node from the data cache
+                        eventBus.emit('deleteNode', textId);
+
                         // Show toast message
                         eventBus.emit('showToast', { 
                             message: result.toastMessage, 
