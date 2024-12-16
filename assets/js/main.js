@@ -28,6 +28,8 @@ import { GameListManager } from './gameListManager.js';
 import { DataManager } from './dataManager.js';
 import { UpdateManager } from './updateManager.js';
 import { FilterManager } from './filterManager.js';
+import { MenuManager } from './menuManager.js';
+import { SearchManager } from './searchManager.js';
 import { PollingManager } from './pollingManager.js';
 import { GameUpdateHandler } from './gameUpdateHandler.js';
 import { TreeShelfModalPollingUpdateManager } from './TreeShelfModalPollingUpdateManager.js';
@@ -133,7 +135,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   updateManager.initialize();
   
   const gameListManager = new GameListManager(path, uiManager);
+  window.menuManager = new MenuManager();
   const filterManager = new FilterManager();
+  const searchManager = new SearchManager();
 
   // No need for separate handleInitialState
 

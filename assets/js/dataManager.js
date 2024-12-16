@@ -144,11 +144,17 @@ export class DataManager {
         const rootId = this.currentViewedRootStoryId;
         const lastGamesCheck = this.cache.lastGamesCheck || 0;
         
-        console.log('Checking for updates with:', {
+/*         console.log('Checking for updates with:', {
             currentViewedRootStoryId: this.currentViewedRootStoryId,
             lastGamesCheck: new Date(lastGamesCheck).toISOString(),
             treeTimestamp: this.cache.trees.get(rootId)?.timestamp
-        });
+        }); */
+
+/*         console.log('Cache state before update:', {
+            rootId: this.currentViewedRootStoryId,
+            nodesMapSize: this.cache.nodesMap.size,
+            hasRootNode: this.cache.nodesMap.has(String(this.currentViewedRootStoryId))
+        }); */
 
         try {
             const response = await fetch(`${this.path}game/modifiedSince`, {
@@ -167,7 +173,7 @@ export class DataManager {
             }
 
             const modifiedData = await response.json();
-            console.log('Modified data:', modifiedData);
+            /* console.log('Modified data:', modifiedData); */
             return this.handleUpdateResponse(modifiedData, rootId);
         } catch (error) {
             console.error('Error checking for updates:', error);
@@ -217,6 +223,15 @@ export class DataManager {
 
 
     updateTreeData(treeNodes, rootId, isFullUpdate = false) {
+/*         console.log('Starting updateTreeData:', {
+            modifiedNodesLength: treeNodes?.length,
+            rootId,
+            cacheState: {
+                hasRoot: this.cache.nodesMap.has(String(rootId)),
+                rootData: this.cache.nodesMap.get(String(rootId))
+            }
+        }); */
+
         if (!Array.isArray(treeNodes)) {
             console.error('Expected array of nodes, got:', treeNodes);
             return;
@@ -253,9 +268,37 @@ export class DataManager {
     }
 
     updateTreeNodes(modifiedNodes, rootId) {
+        // Try both string and number versions of the key
+        let rootNode = this.cache.nodesMap.get(String(rootId)) || 
+                      this.cache.nodesMap.get(Number(rootId));
+
+/*         console.log('Root node lookup:', {
+            searchId: rootId,
+            foundWithString: this.cache.nodesMap.get(String(rootId)),
+            foundWithNumber: this.cache.nodesMap.get(Number(rootId)),
+            finalRootNode: rootNode
+        }); */
+
+        /* console.log('Cache keys:', Array.from(this.cache.nodesMap.keys())); */
+        
+        // Log each cache entry separately
+/*         console.log('Cache entries:');
+        this.cache.nodesMap.forEach((value, key) => {
+            console.log(`Key: "${key}" (${typeof key})`, {
+                value,
+                hasPlayerCount: value?.hasOwnProperty('playerCount'),
+                playerCount: value?.playerCount
+            });
+        }); */
+
+/*         console.log('Root node details:', {
+            rootNode,
+            rootNodeKeys: rootNode ? Object.keys(rootNode) : null,
+            playerCountValue: rootNode ? rootNode.playerCount : 'undefined'
+        }); */
+
         if (!modifiedNodes?.length) return;
         let newNodesAdded = false;
-        const rootNode = this.getNode(rootId);
         const originalPlayerCount = rootNode.playerCount;
         let playerCountUpdated = rootNode.playerCount;
 
@@ -267,13 +310,13 @@ export class DataManager {
         // Add new nodes
         sortedNodes.forEach(node => {
             if (!this.cache.nodesMap.has(String(node.id))) {
-                console.log('Adding new node:', node);
+                /* console.log('Adding new node:', node); */
                 this.addNewNode(node.id, node);
                 newNodesAdded = true;
                 playerCountUpdated = Math.max(playerCountUpdated, node.playerCount);
                 nodesAdded.push(node);
             }else{
-                console.log('Updating node:', node);
+                /* console.log('Updating node:', node); */
                 // Only update nodes that haven't been added
                 nodesToUpdate.push(node);
             }
@@ -330,13 +373,46 @@ export class DataManager {
     }
 
     updateNode(nodeId, updateData) {
-        nodeId = String(nodeId);
-        console.log("Attempting to update node:", nodeId);
+        // Log the types to debug
+/*         console.log('Key types:', {
+            nodeId: typeof nodeId,
+            nodeIdValue: nodeId,
+            existingKeys: Array.from(this.cache.nodesMap.keys()).map(key => ({
+                key,
+                type: typeof key,
+                matches: key === nodeId,
+                strictMatches: key === String(nodeId)
+            }))
+        }); */
 
-        let existingNode = this.cache.nodesMap.get(nodeId);
+        // Try both string and number versions of the key
+        let existingNode = this.cache.nodesMap.get(String(nodeId)) || 
+                          this.cache.nodesMap.get(Number(nodeId));
+
+/*         console.log('Node lookup:', {
+            searchId: nodeId,
+            foundWithString: this.cache.nodesMap.get(String(nodeId)),
+            foundWithNumber: this.cache.nodesMap.get(Number(nodeId)),
+            finalNode: existingNode
+        }); */
 
         if (!existingNode) {
-            console.log(`Node with ID ${nodeId} not found in cache. Adding new node.`);
+            /* console.log('Cache keys:', Array.from(this.cache.nodesMap.keys())); */
+            
+            // Log each cache entry separately
+            /* console.log('Cache entries:'); */
+            this.cache.nodesMap.forEach((value, key) => {
+                console.log(`Key: "${key}" (${typeof key})`, {
+                    value,
+                    hasPlayerCount: value?.hasOwnProperty('playerCount'),
+                    playerCount: value?.playerCount
+                });
+            });
+
+/*             console.log(`Node ${nodeId} not found in cache. Current cache state:`, {
+                nodesMapKeys: Array.from(this.cache.nodesMap.keys()),
+                treesKeys: Array.from(this.cache.trees.keys())
+            }); */
             this.addNewNode(nodeId, updateData);
             eventBus.emit('nodeUpdated', { oldNode: null, newNode: updateData });
             return;
@@ -349,13 +425,13 @@ export class DataManager {
             children: existingNode.children || [],
             permissions: existingNode.permissions,
         };
-        console.log("Updated node data:", updatedNode);
+        /* console.log("Updated node data:", updatedNode); */
 
         // Emit an event with both the old node and the new node
         eventBus.emit('nodeUpdated', { oldNode: existingNode, newNode: updatedNode });
 
         // Update the flat map
-        this.cache.nodesMap.set(nodeId, updatedNode);
+        this.cache.nodesMap.set(Number(nodeId), updatedNode);
 
         // Update the hierarchical tree structure
         const rootId = this.getCurrentViewedRootStoryId();
@@ -369,7 +445,7 @@ export class DataManager {
         this.saveCache();
 
         // Log the complete updated node to verify all properties are preserved
-        console.log('Node updated with all properties:', this.cache.nodesMap.get(nodeId));
+        /* console.log('Node updated with all properties:', this.cache.nodesMap.get(nodeId)); */
 
         // Emit an event if needed to notify UI or other components
         //eventBus.emit('nodeUpdated', { id: nodeId, node: updatedNode });
@@ -380,10 +456,10 @@ export class DataManager {
         const treeNodeId = String(treeNode.id);
         const updatedNodeId = String(updatedNode.id);
 
-        console.log("Checking node:", treeNodeId, "against updated node:", updatedNodeId);
+        /* console.log("Checking node:", treeNodeId, "against updated node:", updatedNodeId); */
         
         if (treeNodeId === updatedNodeId) {
-            console.log(`Updating node in hierarchy: ${treeNodeId}`);
+            /* console.log(`Updating node in hierarchy: ${treeNodeId}`); */
             const children = treeNode.children || [];
             Object.assign(treeNode, updatedNode, { children });
             return true;
@@ -397,41 +473,87 @@ export class DataManager {
             }
         }
         
-        console.log(`Node with ID ${updatedNodeId} not found in current branch.`);
+        /* console.log(`Node with ID ${updatedNodeId} not found in current branch.`); */
         return false;
     }
 
     addNewNode(nodeId, nodeData) {
-        // Add the new node to the flat map
-        this.cache.nodesMap.set(nodeId, {
+/*         console.log('addNewNode called with:', {
+            nodeId,
+            nodeData,
+            parentId: nodeData.parent_id,
+            currentRootId: this.getCurrentViewedRootStoryId()
+        }); */
+
+        // Normalize the data
+        const normalizedData = {
             ...nodeData,
-            children: nodeData.children || []
-        });
-        console.log(`Added node ${nodeId} to nodesMap`);
+            id: Number(nodeData.id),
+            parent_id: nodeData.parent_id ? Number(nodeData.parent_id) : null,
+            game_id: Number(nodeData.game_id),
+            children: nodeData.children || [],
+            permissions: nodeData.permissions || {}
+        };
+
+        /* console.log('Normalized data:', normalizedData); */
+
+        this.cache.nodesMap.set(String(nodeId), normalizedData);
+/*         console.log('Cache after setting new node:', {
+            nodesMapSize: this.cache.nodesMap.size,
+            hasNode: this.cache.nodesMap.has(String(nodeId)),
+            node: this.cache.nodesMap.get(String(nodeId))
+        }); */
 
         // Update the hierarchical structure
         const rootId = this.getCurrentViewedRootStoryId();
         const cachedTree = this.cache.trees.get(String(rootId));
 
+/*         console.log('Cached tree state:', {
+            rootId,
+            hasTree: Boolean(cachedTree),
+            treeData: cachedTree?.data
+        }); */
+
         if (cachedTree?.data) {
-            console.log(`Attempting to insert node ${nodeId} into hierarchy under root ${rootId}`);
-            const inserted = this.insertNodeInHierarchy(cachedTree.data, nodeData);
-            if (inserted) {
-                console.log(`Node ${nodeId} successfully inserted into hierarchy`);
-            } else {
-                console.warn(`Failed to insert node ${nodeId} into hierarchy`);
-            }
-        } else {
-            console.warn(`No cached tree data found for rootId ${rootId}`);
+            /* console.log('Attempting to insert into hierarchy with parent:', normalizedData.parent_id); */
+            const inserted = this.insertNodeInHierarchy(cachedTree.data, normalizedData);
+            /* console.log('Insertion result:', inserted); */
         }
 
-        // Save changes to the cache
+        // Log cache state before saving
+/*         console.log('Cache state before save:', {
+            games: this.cache.games.size,
+            trees: this.cache.trees.size,
+            nodesMap: this.cache.nodesMap.size,
+            sample: Array.from(this.cache.nodesMap.entries()).slice(0, 2)
+        }); */
+
         this.saveCache();
-        console.log('Cache saved to local storage:', JSON.stringify(this.cache));
+
+        // Log cache state after saving
+        const savedCache = localStorage.getItem('storyCache');
+/*         console.log('Saved cache state:', {
+            raw: savedCache,
+            parsed: JSON.parse(savedCache)
+        }); */
     }
 
     insertNodeInHierarchy(treeNode, newNode) {
+/*         console.log('insertNodeInHierarchy called with:', {
+            treeNode,
+            newNode,
+            parentId: newNode.parent_id
+        }); */
+
+        // Ensure the node is in the flat map
+        this.cache.nodesMap.set(String(newNode.id), {
+            ...newNode,
+            children: newNode.children || []
+        });
+        
         const parentNode = this.findNodeInTree(treeNode, String(newNode.parent_id));
+        /* console.log('Found parent node:', parentNode); */
+
         if (parentNode) {
             // Ensure the parent node has a children array
             parentNode.children = parentNode.children || [];
@@ -439,13 +561,17 @@ export class DataManager {
             // Add the new node to the parent's children array
             parentNode.children.push({
                 ...newNode,
-                children: newNode.children || [] // Initialize children array for the new node
+                children: newNode.children || []
             });
             
-            console.log(`Inserted new node ${newNode.id} under parent ${newNode.parent_id}`);
+            /* console.log(`Inserted node ${newNode.id} under parent ${newNode.parent_id}`); */
             return true;
         } else {
-            console.warn(`Parent node with ID ${newNode.parent_id} not found in tree.`);
+            console.warn('Parent node search details:', {
+                searchedId: String(newNode.parent_id),
+                treeNodeId: treeNode.id,
+                treeStructure: JSON.stringify(treeNode, null, 2)
+            });
             return false;
         }
     }
@@ -484,7 +610,7 @@ export class DataManager {
 
     // Helper method to get a node quickly
     getNode(nodeId) {
-        return this.cache.nodesMap.get(nodeId);
+        return this.cache.nodesMap.get(String(nodeId));
     }
 
     // Helper method to get parent of a node
@@ -510,7 +636,7 @@ export class DataManager {
                         gameState: 'all'
                     }
                 };
-                console.log('Loaded cache:', cache);
+                /* console.log('Loaded cache:', cache); */
                 return cache;
             }
         } catch (e) {
@@ -521,6 +647,12 @@ export class DataManager {
 
     // Save cache to localStorage
     saveCache() {
+/*         console.log('Starting saveCache with state:', {
+            gamesSize: this.cache.games.size,
+            treesSize: this.cache.trees.size,
+            nodesMapSize: this.cache.nodesMap.size
+        }); */
+
         const cacheToSave = {
             games: Array.from(this.cache.games.entries()),
             trees: Array.from(this.cache.trees.entries()),
@@ -532,6 +664,12 @@ export class DataManager {
         
         try {
             localStorage.setItem('storyCache', JSON.stringify(cacheToSave));
+/*             console.log('Cache saved successfully. Sample of saved data:', {
+                gamesCount: cacheToSave.games.length,
+                treesCount: cacheToSave.trees.length,
+                nodesCount: cacheToSave.nodesMap.length,
+                firstNode: cacheToSave.nodesMap[0]
+            }); */
         } catch (e) {
             console.error('Error saving cache:', e);
         }
@@ -550,13 +688,13 @@ export class DataManager {
     }
 
     getTreeByGameId(gameId) {
-        const game = this.getGame(gameId);
+        const game = this.getGame(String(gameId));
         if (!game) return null;
         return this.getTree(game.data.text_id);
     }
 
     getGame(gameId) {
-        return this.cache.games.get(String(gameId));
+        return this.cache.games.get(gameId);
     }
 
     getPaginatedData() {
@@ -621,7 +759,7 @@ export class DataManager {
     }
 
     setFilters(filters) {
-        console.log('setFilters', filters);
+        /* console.log('setFilters', filters); */
         this.cache.filters = {
             hasContributed: filters.hasContributed ?? null,
             gameState: filters.gameState ?? 'all'
@@ -762,7 +900,7 @@ export class DataManager {
     }
 
     deleteNode(nodeId) {
-        console.log('DELETE NODEID?', nodeId);
+        /* console.log('DELETE NODEID?', nodeId); */
         nodeId = String(nodeId);
         const nodeToDelete = this.cache.nodesMap.get(nodeId);
         

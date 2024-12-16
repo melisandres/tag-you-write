@@ -1412,4 +1412,63 @@ export class SVGManager{
             </svg>
       `;
    }
+
+   static get searchSVG() {
+      return `
+        <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+            <svg
+               version="1.1"
+               viewBox="-5 -10 61.987598 61.9995"
+               id="svg2"
+               sodipodi:docname="noun-search-7274792.svg"
+               width="61.987598"
+               height="61.9995"
+               inkscape:version="1.3.2 (091e20e, 2023-11-25)"
+               xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+               xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+               xmlns="http://www.w3.org/2000/svg"
+               xmlns:svg="http://www.w3.org/2000/svg">
+            <defs
+               id="defs2" />
+            <sodipodi:namedview
+               id="namedview2"
+               pagecolor="#ffffff"
+               bordercolor="#000000"
+               borderopacity="0.25"
+               inkscape:showpageshadow="2"
+               inkscape:pageopacity="0.0"
+               inkscape:pagecheckerboard="0"
+               inkscape:deskcolor="#d1d1d1"
+               inkscape:zoom="1.7481481"
+               inkscape:cx="31.175847"
+               inkscape:cy="38.326271"
+               inkscape:window-width="1312"
+               inkscape:window-height="449"
+               inkscape:window-x="0"
+               inkscape:window-y="37"
+               inkscape:window-maximized="0"
+               inkscape:current-layer="svg2" />
+            <path
+               d="M 42.5703,25.738 C 44.1289,22.4763 45,18.8396 45,15 45,1.211 33.789,-10 20,-10 6.211,-10 -5,1.211 -5,15 c 0,13.789 11.211,25 25,25 3.8398,0 7.4883,-0.87109 10.738,-2.4297 l 11.98,11.98 c 1.5781,1.5781 3.6797,2.4492 5.9102,2.4492 4.6094,0 8.3594,-3.75 8.3594,-8.3594 0,-2.2305 -0.87109,-4.3281 -2.4492,-5.9102 l -11.98,-11.98 z M 20.0003,36 c -11.578,0 -21,-9.4219 -21,-21 0,-11.5781 9.4219,-21 21,-21 11.5781,0 21,9.4219 21,21 0,11.5781 -9.4219,21 -21,21 z m 28.641,12 c -1.1484,0 -2.2695,-0.46875 -3.0898,-1.2812 l -11.238,-11.238 c 2.3984,-1.6797 4.4883,-3.7695 6.1719,-6.1719 l 11.238,11.238 c 0.80859,0.80859 1.2812,1.9414 1.2812,3.0898 0,2.4102 -1.9609,4.3594 -4.3594,4.3594 z"
+               id="path1" />
+            <text
+               x="-23.999701"
+               y="88.5"
+               font-size="5px"
+               font-weight="bold"
+               font-family="'Arbeit Regular', Helvetica, Arial-Unicode, Arial, Sans-serif"
+               fill="#000000"
+               id="text1">Created by Gregor Cresnar</text>
+            <text
+               x="-23.999701"
+               y="93.5"
+               font-size="5px"
+               font-weight="bold"
+               font-family="'Arbeit Regular', Helvetica, Arial-Unicode, Arial, Sans-serif"
+               fill="#000000"
+               id="text2">from Noun Project</text>
+            </svg>
+
+      `;
+   }
 }

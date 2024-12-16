@@ -94,8 +94,10 @@ class ControllerGame extends Controller {
 
             // Add permissions to the modified nodes
             if (!empty($modifiedNodes)) {
-                $this->addPermissions($modifiedNodes[0], $currentUserId, $modifiedNodes);
-
+                foreach ($modifiedNodes as &$node) {  // Make sure to iterate through all nodes
+                    $this->addPermissions($node, $currentUserId, $modifiedNodes);
+                }
+/*                 $this->addPermissions($modifiedNodes[0], $currentUserId, $modifiedNodes); */
             }
             error_log("LINE 100 controllerGame.php : modifiedNodes: " . print_r($modifiedNodes, true));
 

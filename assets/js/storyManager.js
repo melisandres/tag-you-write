@@ -84,13 +84,6 @@ export class StoryManager {
         }
 
         const data = JSON.parse(responseText); // Parse the JSON from the response
-        
-        // Now we can safely map over the parsed data
-        console.log('Parsed updates:', data.map(u => ({
-            id: u.id,
-            modified_at: u.modified_at,
-            timestamp_comparison: new Date(u.modified_at) > new Date(lastTreeCheck)
-        })));
 
         return data;
     } catch (error) {
@@ -129,26 +122,23 @@ export class StoryManager {
 
     // Determine if updates are needed
     const gameId = cachedData.data.game_id;
-    const lastGameUpdate = this.dataManager.getGame(gameId).timestamp;
+    const gameData = this.dataManager.getGame(gameId);
+    const lastGameUpdate = gameData.timestamp;
     const needsUpdate = lastGameUpdate && cachedData.timestamp 
         ? new Date(lastGameUpdate).getTime() > cachedData.timestamp
         : false;
 
     if (needsUpdate) {
-        console.log(`Fetching updates for tree ID: ${id}`);
         const updates = await this.fetchTreeUpdates(id, cachedData.timestamp);
 
         if (!updates || updates.length === 0) {
             console.warn('No updates found for tree, using cached data');
             return cachedData.data;
         }
-
-        console.log(`Applying updates to cached tree for ID: ${id}`);
         this.dataManager.updateTreeData(updates, id);
         return this.dataManager.getTree(id).data;
     }
 
-    console.log(`Using cached data for tree ID: ${id}`);
     return cachedData.data;
   }
 

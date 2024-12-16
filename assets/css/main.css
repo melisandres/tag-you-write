@@ -27,6 +27,8 @@
 @import url(./elements/showcase.css);
 @import url(./elements/warningModal.css);
 @import url(./elements/filters.css);
+@import url(./elements/search.css);
+@import url(./elements/menu.css);
 
 /* general: a catch-all  */
 @import url(./general/general.css);

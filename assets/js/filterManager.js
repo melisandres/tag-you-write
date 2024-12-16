@@ -2,6 +2,10 @@ import { SVGManager } from './svgManager.js';
 
 export class FilterManager {
     constructor() {
+        if (!window.menuManager) {
+            console.error('MenuManager not initialized');
+            return;
+        }
         if (!window.dataManager) {
             console.error('DataManager not initialized');
             return;
@@ -30,6 +34,7 @@ export class FilterManager {
         this.bindEvents();
         eventBus.on('filterApplied', () => this.updateNavLink());
         eventBus.on('filtersUpdated', (filters) => this.handlefiltersUpdated(filters));
+        this.menuManager = window.menuManager;
     }
 
     initializeUI() {
@@ -73,10 +78,14 @@ export class FilterManager {
     }
 
     bindEvents() {
-        if (!this.filterNavLink) return;
+        if (!this.filterNavLink) {
+            return;
+        }
 
         // Toggle filter menu
-        this.filterNavLink.addEventListener('click', () => this.toggleFilterMenu());
+        this.filterNavLink.addEventListener('click', () => {
+            this.toggleFilterMenu();
+        });
         
         // Close button
         const closeButton = this.filterMenu.querySelector('.close-filter');
@@ -153,22 +162,19 @@ export class FilterManager {
     }
 
     updateNavLink() {
-        console.log('updateNavLink');
-         // Check if there are active filters
-         const hasActiveFilters = this.dataManager.cache.filters.hasContributed !== null || this.dataManager.cache.filters.gameState !== 'all';
-         // Toggle the active class based on the presence of active filters
-         this.filterNavLink.classList.toggle('active', hasActiveFilters);
+        // Check if there are active filters
+        const hasActiveFilters = this.dataManager.cache.filters.hasContributed !== null || 
+                                this.dataManager.cache.filters.gameState !== 'all';
+        // Use 'active' class for filter state
+        this.filterNavLink.classList.toggle('active', hasActiveFilters);
     }
 
     toggleFilterMenu() {
+        this.menuManager.toggleMenu('filter');
         const isVisible = this.filterMenu.classList.contains('visible');
-        this.filterMenu.classList.toggle('visible');
         
-        // Toggle class on main element instead of directly setting margin
-        const mainElement = document.querySelector('main');
-        if (mainElement) {
-            mainElement.classList.toggle('with-filters', !isVisible);
-        }
+        // Use 'menu-open' instead of 'active' for menu state
+        this.filterNavLink.classList.toggle('menu-open', isVisible);
     }
 
     updateFilterButton(hasContributed) {

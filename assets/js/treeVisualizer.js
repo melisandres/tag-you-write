@@ -96,14 +96,14 @@ export class TreeVisualizer {
         if (!this.colorScale) {
             this.colorScale = this.createColorScale(maxVotes);
         }
-        //console.log("colorScale",this.colorScale)
+
         d3.select(node).select('circle')
             .attr('fill', this.colorScale(voteCount))
             .attr('data-vote-count', d => d.data.voteCount);
     }
   
     drawTree(data) {
-        console.log('Tree data received:', data);
+        /* console.log('Tree data received:', data); */
 
         // Check if D3 is available
         if (typeof d3 === 'undefined') {
@@ -138,7 +138,6 @@ export class TreeVisualizer {
         // Manage the visualisation of node votes
         const maxVotes = data.playerCount - 1;
         this.colorScale = this.createColorScale(maxVotes);
-        console.log('Initialized colorScale:', this.colorScale);
   
         // Create SVG element
         this.svg = d3.select(this.container).append("svg")
@@ -248,6 +247,8 @@ export class TreeVisualizer {
 
         const titleBottomPosition = this.updateTitle(titleGroup, d => d.data.title || "Untitled", this.config.fontSize.title.max);
 
+/*         console.log('Formatting author name:', data);
+        console.log('Permissions:', data.permissions); */
         // Add the author name, positioned below the title
         node.append("text")
             .attr("dy", `${titleBottomPosition + this.config.titleAuthorSpacing}px`)
@@ -353,7 +354,7 @@ export class TreeVisualizer {
         this.createLegend(data);   
 
         if (this.pageJustLoaded) {
-            console.log('pageJustLoaded is getting set to false');
+            /* console.log('pageJustLoaded is getting set to false'); */
             this.pageJustLoaded = false;
         }
 
@@ -364,7 +365,6 @@ export class TreeVisualizer {
     createLegend(d) {
         const self = this;
         
-        //console.log(d);
         //const gameTitle = data.title;
         const maxVotes = d.playerCount -1;
         const legendData = [
@@ -379,7 +379,6 @@ export class TreeVisualizer {
             .attr("transform", `translate(${self.containerWidth - 112}, ${self.containerHeight - 137})`)
             .style("cursor", "pointer")
             .on("click", () => {
-                console.log('Legend clicked');
                 self.toggleLegend();
             });
 
@@ -636,7 +635,6 @@ export class TreeVisualizer {
             const titleFontSize = this.calculateFontSize(scale, 'title');
             const authorFontSize = this.calculateFontSize(scale, 'author');
             const authorVisibility = this.calculateAuthorVisibility(scale);
-            /* console.log(`Scale: ${scale}, Title size: $ {titleFontSize}, Author size: ${authorFontSize}`)*/;
 
             const titleBottomPosition = this.updateTitle(titleGroup, d.data.title || "Untitled", titleFontSize);
 
@@ -753,9 +751,6 @@ export class TreeVisualizer {
         // Recalculate the layout
         const root = d3.hierarchy(this.treeData, d => d.children);
 
-/*         console.log('Root:', root);
-        console.log('Root Descendants:', root.descendants()); */
-
         // Calculate maxDepth and depthCounts
         const maxDepth = d3.max(root.descendants(), d => d.depth);
 
@@ -766,15 +761,6 @@ export class TreeVisualizer {
             }
             depthCounts[d.depth]++;
         });
-
-        // Add a console log to check the descendants
-/*         root.each(d => {
-            console.log('Node:', d);
-            if (!d.data) {
-                console.error('Node data is undefined:', d);
-                console.log('Problematic Node:', d);
-            }
-        }); */
 
         const maxNodesAtDepth = Math.max(...Object.values(depthCounts));
         const requiredWidth = maxDepth * this.minSpacing;
@@ -896,13 +882,10 @@ export class TreeVisualizer {
                     console.warn('Skipping link for node without target:', d);
                     return; // Return a default path or handle the error
                 }else{
-                    console.log('Link Data:', d);
+                    /* console.log('Link Data:', d); */
                 }
                 return d.target.data.id;
             })
-
-            //TODO: remove this
-            //.data(root.links(), d => d.target.data.id);
 
         // Enter new links
         links.enter().insert("path", "g")

@@ -25,6 +25,9 @@
             <a class="nav-link filter">
                 <span class="icon"></span>
             </a>   
+            <a class="nav-link search" href="{{path}}search">
+                <span class="icon"></span>
+            </a>
         {% else %} 
             <a class="nav-link texts" href="{{path}}text">game list</a>  
         {% endif %}
@@ -38,15 +41,21 @@
             <a class="nav-link writers" href="{{path}}journal">journal</a>
         {% endif %}
         <a class="nav-link writers" href="{{path}}login/logout"></a>
+
     {% endif %}
 <!--     {% if session.privilege == 1 or session.privilege == 2 %}
         <a href="{{path}}produit/create">Produits</a>
     {% endif %} -->
     </nav>
 
-
-
-
+    <div class="menu-container">
+        <div class="filter-menu">
+            <!-- Your existing filter menu content -->
+        </div>
+        <div class="search-menu">
+            <!-- New search menu content -->
+        </div>
+    </div>
 
     <!-- a modal for the showcase area (selected text) -->
     <div class="modal-background display-none" data-tree-modal="hidden" data-text-id="">

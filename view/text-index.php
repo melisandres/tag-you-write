@@ -6,6 +6,8 @@
 
 <div class="filter-menu" id="gameFilters">
 </div>
+<div class="search-menu" id="gameSearch">
+</div>
 
 
 <!-- an area to show all the starting stories that might be contributed to -->
