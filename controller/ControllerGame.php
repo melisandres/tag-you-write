@@ -50,9 +50,10 @@ class ControllerGame extends Controller {
             $jsonData = file_get_contents('php://input');
             $data = json_decode($jsonData, true);
             $filters = $data['filters'] ?? [];
+            $searchTerm = $data['search'] ?? null;
 
             $game = new Game();
-            $games = $game->getGames(null, $filters);  // Pass filters to model
+            $games = $game->getGames(null, $filters, null, $searchTerm);  // Pass search term to model
 
             header('Content-Type: application/json');
             echo json_encode($games);
@@ -72,6 +73,9 @@ class ControllerGame extends Controller {
                 throw new Exception('Missing lastGamesCheck parameter');
             }
 
+            // Get the search term
+            $searchTerm = $data['search'] ?? null;
+
             // Our user is logged in? 
             $currentUserId = $_SESSION['writer_id'] ?? null;
             
@@ -85,8 +89,8 @@ class ControllerGame extends Controller {
             
             $game = new Game();
             $text = new Text();
-            // Get the modified games
-            $modifiedGames = $game->getModifiedSince($lastGamesCheck, $filters);
+            // Get the modified games with search term
+            $modifiedGames = $game->getModifiedSince($lastGamesCheck, $filters, $searchTerm);
 
             // Get the modified nodes
             $gameId = $game->selectGameId($rootStoryId); 

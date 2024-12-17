@@ -104,6 +104,7 @@ export class StoryManager {
 
   // A tree is requested, this is where we check the cache
   async prepareData(id) {
+    console.log(`prepareData called for ID: ${id}`);
     let cachedData = this.dataManager.getTree(id);
 
     // If no cached data, or if it's just the timestamp without data

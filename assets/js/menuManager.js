@@ -18,7 +18,6 @@ export class MenuManager {
     }
 
     toggleMenu(menuName) {
-        console.log('MenuManager toggling:', menuName);
         const menu = this.menus.find(m => m.name === menuName);
         if (!menu) {
             console.error('Menu not found:', menuName);
@@ -26,7 +25,6 @@ export class MenuManager {
         }
 
         const isVisible = menu.element.classList.contains('visible');
-        console.log('Menu visibility before toggle:', isVisible);
         
         if (isVisible) {
             this.closeMenu(menu);

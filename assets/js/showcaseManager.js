@@ -2,6 +2,12 @@ export class ShowcaseManager {
     constructor(path) {
         this.path = path;
         this.bindEvents();
+        
+        // Listen for popstate event to handle browser navigation
+        window.addEventListener('popstate', () => this.handleUrlChange());
+
+        // Apply filters from URL on initial load
+        this.handleUrlChange();
     }
 
     bindEvents() {
@@ -16,6 +22,21 @@ export class ShowcaseManager {
             console.log('showcaseTypeChanged event:', { type, rootStoryId });
             this.updateShowcaseParams(rootStoryId, type);
         });
+    }
+
+    handleUrlChange() {
+        const params = new URLSearchParams(window.location.search);
+        const showcaseType = params.get('showcase');
+        const rootStoryId = params.get('rootStoryId');
+
+        if (rootStoryId) {
+            eventBus.emit('createShowcaseContainer', { rootStoryId, showcaseType });
+        }
+
+        const modalTextId = params.get('modalTextId');
+        if (modalTextId) {
+            eventBus.emit('showStoryInModal', modalTextId);
+        }
     }
 
     updateShowcaseParams(rootStoryId, type = null) {

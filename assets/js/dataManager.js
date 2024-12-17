@@ -118,7 +118,8 @@ export class DataManager {
             filters: {
                 hasContributed: null,
                 gameState: 'all'
-            }
+            },
+            search: ''
         };
     }
 
@@ -163,6 +164,7 @@ export class DataManager {
                 body: JSON.stringify({
                     lastGamesCheck: lastGamesCheck,
                     filters: this.cache.filters || {},
+                    search: this.cache.search || '',
                     rootStoryId: rootId,
                     lastTreeCheck: this.cache.trees.get(rootId)?.timestamp || 0
                 })
@@ -634,7 +636,8 @@ export class DataManager {
                     filters: parsed.filters || {
                         hasContributed: null,
                         gameState: 'all'
-                    }
+                    },
+                    search: parsed.search || ''
                 };
                 /* console.log('Loaded cache:', cache); */
                 return cache;
@@ -659,7 +662,8 @@ export class DataManager {
             nodesMap: Array.from(this.cache.nodesMap.entries()),
             lastGamesCheck: this.cache.lastGamesCheck,
             pagination: this.cache.pagination,
-            filters: this.cache.filters
+            filters: this.cache.filters,
+            search: this.cache.search
         };
         
         try {
@@ -739,7 +743,8 @@ export class DataManager {
             filters: {
                 hasContributed: null,
                 gameState: 'all'
-            }
+            },
+            search: ''
         };
         localStorage.removeItem('storyCache');  // Completely remove from localStorage
     }
@@ -769,6 +774,16 @@ export class DataManager {
 
     getFilters() {
         return this.cache.filters;
+    }
+
+    getSearch() {
+        return this.cache.search;
+    }
+
+    setSearch(search) {
+        console.log('Setting search in cache:', search);
+        this.cache.search = search;
+        this.saveCache();
     }
 
      // For full list updates (filters, page refresh)

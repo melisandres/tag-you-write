@@ -20,6 +20,7 @@ export class GameListManager {
         eventBus.on('gamesModified', (games) => this.handleGameUpdates(games));
         eventBus.on('refreshGames', () => this.refreshGamesList());
         eventBus.on('filtersChanged', (filters) => this.handleFiltersChanged(filters));
+        eventBus.on('searchApplied', (searchValue) => this.handleSearchApplied(searchValue));
 
         // Get initial filters from URL parameters
         const urlParams = new URLSearchParams(window.location.search);
@@ -55,15 +56,21 @@ export class GameListManager {
         this.refreshGamesList();
     }
 
+    handleSearchApplied(searchValue) {
+        this.dataManager.setSearch(searchValue);
+        this.refreshGamesList();
+    }
+
     async refreshGamesList() {
         try {
             const filters = this.dataManager.getFilters();
+            const search = this.dataManager.getSearch();
             const response = await fetch(`${this.path}game/getGames`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ filters })
+                body: JSON.stringify({ filters, search })
             });
 
             if (!response.ok) throw new Error('Failed to fetch games');

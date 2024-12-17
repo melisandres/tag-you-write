@@ -35,6 +35,12 @@ export class FilterManager {
         eventBus.on('filterApplied', () => this.updateNavLink());
         eventBus.on('filtersUpdated', (filters) => this.handlefiltersUpdated(filters));
         this.menuManager = window.menuManager;
+
+        // Listen for popstate event to handle browser navigation
+        window.addEventListener('popstate', () => this.applyFiltersFromUrl());
+
+        // Apply filters from URL on initial load
+        this.applyFiltersFromUrl();
     }
 
     initializeUI() {
@@ -244,8 +250,32 @@ export class FilterManager {
         const button = this.filterMenu.querySelector('.game-state-filter');
         const icon = button.querySelector('.filter-icon');
         const text = button.querySelector('.filter-text');
+        
+        // Update the text content
         text.textContent = this.getGameStateText(state);
-        icon.classList.remove(this.getPreviousGameState(state));
+        
+        // Remove all possible state classes before adding the new one
+        icon.classList.remove('all', 'open', 'closed', 'pending');
         icon.classList.add(state);
+    }
+
+    applyFiltersFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        const hasContributed = params.get('hasContributed');
+        const gameState = params.get('gameState');
+
+        const filters = {
+            hasContributed: hasContributed === null || hasContributed === 'all' ? null :
+                            hasContributed === 'contributor' ? true :
+                            'mine',
+            gameState: gameState || 'all'
+        };
+
+        this.dataManager.setFilters(filters);
+        this.updateFilterButton(filters.hasContributed);
+        this.updateGameStateButton(filters.gameState);
+        this.updateNavLink();
+        eventBus.emit('filtersChanged', filters);
+        eventBus.emit('refreshGames');
     }
 }

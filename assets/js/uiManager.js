@@ -10,9 +10,23 @@ export class UIManager {
     this.SVGManager = SVGManager;
     this.showcaseManager = new ShowcaseManager(this.path);
     this.initSvgs();
-    this.insertLoginLogoutSVGs(); // Add this line
+    this.insertLoginLogoutSVGs();
     this.initEventListeners();
     this.stories = document.querySelector(".stories");
+
+    // Listen for events from ShowcaseManager
+    eventBus.on('createShowcaseContainer', ({ rootStoryId, showcaseType }) => {
+      const container = this.createShowcaseContainer(rootStoryId);
+      if (showcaseType === 'tree') {
+        this.drawTree(rootStoryId, container);
+      } else if (showcaseType === 'shelf') {
+        this.drawShelf(rootStoryId, container);
+      }
+    });
+
+    eventBus.on('showStoryInModal', (textId) => {
+      this.storyManager.showStoryInModal(textId);
+    });
   }
 
   initSvgs(){

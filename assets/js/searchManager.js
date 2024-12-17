@@ -12,9 +12,12 @@ export class SearchManager {
         this.mainElement = document.querySelector('main');
         this.searchInput = null;
         this.menuManager = window.menuManager;
+        this.dataManager = window.dataManager;
 
         this.initializeUI();
         this.bindEvents();
+        this.syncSearchInputWithUrl();
+        this.updateSearchCacheFromUrl();
     }
 
     initializeUI() {
@@ -25,7 +28,7 @@ export class SearchManager {
             // Add search input HTML
             this.searchMenu.innerHTML = `
                 <div class="search-options">
-                    <input type="text" class="search-input" placeholder="Comming soon... search games...">
+                    <input type="text" class="search-input" placeholder="Coming soon... search games...">
                     <button class="close-search">${SVGManager.xSVG}</button>
                 </div>
             `;
@@ -51,6 +54,11 @@ export class SearchManager {
         const closeButton = this.searchMenu.querySelector('.close-search');
         closeButton.addEventListener('click', () => {
             this.toggleSearchMenu();
+            if (this.searchInput) {
+                this.searchInput.value = '';
+                this.updateNavLink();
+                this.updateUrlWithSearch('');
+            }
         });
 
         // Listen for filter menu changes
@@ -58,39 +66,52 @@ export class SearchManager {
             this.handleFilterMenuToggle(isFilterVisible);
         });
 
-        // Handle input changes
+        // Handle input changes with debouncing
         if (this.searchInput) {
-            this.searchInput.addEventListener('input', (e) => {
-                this.handleSearchInput(e.target.value);
-            });
+            this.searchInput.addEventListener('input', this.debounce((e) => {
+                const searchValue = e.target.value;
+                this.handleSearchInput(searchValue);
+                this.updateUrlWithSearch(searchValue);
+            }, 300)); // Adjust the debounce delay as needed
         }
+
+        // Listen for popstate event to update search input and cache
+        window.addEventListener('popstate', () => {
+            console.log('popstate event triggered');
+            this.syncSearchInputWithUrl();
+            this.updateSearchCacheFromUrl();
+        });
     }
 
     handleSearchInput(value) {
-        // TODO: Implement search logic
+        // if there is text in the search input, the nav link should be active
+        this.updateNavLink();
+        eventBus.emit('searchApplied', value);
+
         console.log('Search input:', value);
     }
 
+    debounce(func, wait) {
+        let timeout;
+        return function(...args) {
+            const context = this;
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(context, args), wait);
+        };
+    }
+
     toggleSearchMenu() {
-        console.log('Toggling SEARCH menu');  // Debug log
-        this.menuManager.toggleMenu('search');  // Explicitly toggle search
+        this.menuManager.toggleMenu('search');
         const isVisible = this.searchMenu.classList.contains('visible');
         
-        // Only handle the nav link and input focus
-        this.searchNavLink.classList.toggle('active', isVisible);
         if (isVisible) {
             this.searchInput?.focus();
-        } else {
-            if (this.searchInput) {
-                this.searchInput.value = '';
-            }
         }
 
         eventBus.emit('searchMenuToggled', isVisible);
     }
 
     handleFilterMenuToggle(isFilterVisible) {
-        // Ensure proper stacking when filter menu changes
         if (this.searchMenu.classList.contains('visible')) {
             this.searchMenu.style.transform = isFilterVisible ? 
                 `translateY(${getComputedStyle(document.documentElement).getPropertyValue('--filters-height')})` : 'translateY(0)';
@@ -98,9 +119,40 @@ export class SearchManager {
     }
 
     updateNavLink() {
-        // Only update for search content, not toggle state
         const hasSearchText = this.searchInput && this.searchInput.value.trim().length > 0;
-        // You might want to add a different class for when there's search text
         this.searchNavLink.classList.toggle('has-search', hasSearchText);
+        this.searchNavLink.classList.toggle('active', hasSearchText);
+    }
+
+    syncSearchInputWithUrl() {
+        const params = new URLSearchParams(window.location.search);
+        const searchValue = params.get('search') || '';
+        console.log('Syncing search input with URL:', searchValue);
+        if (this.searchInput) {
+            this.searchInput.value = searchValue;
+            this.updateNavLink();
+        }
+    }
+
+    updateSearchCacheFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        const searchValue = params.get('search') || '';
+        console.log('Updating search cache with:', searchValue);
+        this.dataManager.setSearch(searchValue);
+        eventBus.emit('refreshGames'); // Emit event to trigger data refresh
+    }
+
+    updateUrlWithSearch(search) {
+        const params = new URLSearchParams(window.location.search);
+        
+        if (search) {
+            params.set('search', search);
+        } else {
+            params.delete('search');
+        }
+        
+        // Update URL without reload
+        const newUrl = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`;
+        window.history.replaceState({}, '', newUrl);
     }
 }

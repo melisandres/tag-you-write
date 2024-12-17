@@ -16,7 +16,7 @@
                         'modified_at'
                         ];
 
-   public function getGames($order = null, $filters = [], $id = null) {
+   public function getGames($order = null, $filters = [], $id = null, $searchTerm = null) {
       $loggedInWriterId = isset($_SESSION['writer_id']) ? $_SESSION['writer_id'] : "";
 
       // Build filter string
@@ -54,6 +54,37 @@
       if ($id) {
          $filterString .= " AND g.id = :id";
       }
+
+      // Handle search term
+      if ($searchTerm) {
+         $filterString .= " AND (
+             g.prompt LIKE :searchTerm 
+             OR rt.title LIKE :searchTerm 
+             OR rt.note LIKE :searchTerm
+             OR EXISTS (
+                 SELECT 1 
+                 FROM text search_text 
+                 INNER JOIN text_status search_status ON search_text.status_id = search_status.id
+                 WHERE search_text.game_id = g.id 
+                 AND (
+                     search_status.status = 'published' 
+                     OR (search_status.status IN ('draft', 'incomplete_draft') 
+                         AND search_text.writer_id = :loggedInWriterId)
+                 )
+                 AND (
+                     search_text.title LIKE :searchTerm 
+                     OR search_text.writing LIKE :searchTerm 
+                     OR search_text.note LIKE :searchTerm
+                 )
+             )
+         )";
+      }
+/*       if ($searchTerm) {
+         $filterString .= " AND (g.prompt LIKE :searchTerm 
+                            OR rt.title LIKE :searchTerm 
+                            OR rt.writing LIKE :searchTerm 
+                            OR rt.note LIKE :searchTerm)";
+      } */
 
       $sql =   "SELECT  g.id AS game_id, 
                         g.prompt,
@@ -102,10 +133,17 @@
       $stmt = $this->prepare($sql);
       $stmt->bindValue(':loggedInWriterId', $loggedInWriterId);
 
+      if ($searchTerm) {
+         $searchValue = '%' . $searchTerm . '%';
+         $stmt->bindValue(':searchTerm', $searchValue);
+      }
+
       if ($id) {
          $stmt->bindValue(':id', $id);
       }
-      
+      error_log('Search Term: ' . $searchTerm);
+      error_log('sql: ' . $sql);
+
       $stmt->execute();
       
       $games = $stmt->fetchAll();
@@ -132,7 +170,7 @@
       return $stmt->fetchAll();
   }
 
-   public function getModifiedSince($lastCheck, $filters = []) {
+   public function getModifiedSince($lastCheck, $filters = [], $searchTerm = null) {
       $filterString = "";
       
       if (isset($filters['hasContributed'])) {
@@ -146,6 +184,50 @@
             $filterString .= " AND rt.writer_id = :loggedInWriterId";
          }
       }
+
+       // Handle gameState filter
+       if (isset($filters['gameState']) && $filters['gameState'] !== 'all') {
+         switch($filters['gameState']) {
+            case 'open':
+               $filterString .= " AND g.open_for_changes = 1 AND ts.status = 'published'";
+               break;
+            case 'closed':
+               $filterString .= " AND g.open_for_changes = 0";
+               break;
+            case 'pending':
+               $filterString .= " AND ts.status IN ('draft', 'incomplete_draft')";
+               break;
+         }
+      }
+
+      // Handle search term
+      if ($searchTerm) {
+         $filterString .= " AND (
+               g.prompt LIKE :searchTerm 
+               OR rt.title LIKE :searchTerm 
+               OR rt.note LIKE :searchTerm
+               OR EXISTS (
+                  SELECT 1 
+                  FROM text search_text 
+                  INNER JOIN text_status search_status ON search_text.status_id = search_status.id
+                  WHERE search_text.game_id = g.id 
+                  AND (
+                     search_status.status = 'published' 
+                     OR (search_status.status IN ('draft', 'incomplete_draft') 
+                           AND search_text.writer_id = :loggedInWriterId)
+                  )
+                  AND (
+                     search_text.title LIKE :searchTerm 
+                     OR search_text.writing LIKE :searchTerm 
+                     OR search_text.note LIKE :searchTerm
+                  )
+               )
+         )";
+      }
+
+/*       if ($searchTerm) {
+         $filterString .= " AND (g.prompt LIKE :searchTerm OR rt.title LIKE :searchTerm OR rt.text LIKE :searchTerm OR rt.writer_name LIKE :searchTerm OR rt.note LIKE :searchTerm)";
+      } */
 
       $sql = "SELECT g.id AS game_id, 
                      g.prompt,
@@ -186,6 +268,9 @@
 
       $stmt = $this->prepare($sql);
       $stmt->bindValue(':lastCheck', $lastCheck);
+      if ($searchTerm) {
+         $stmt->bindValue(':searchTerm', '%' . $searchTerm . '%');
+      }
       $stmt->bindValue(':loggedInWriterId', $_SESSION['writer_id'] ?? 0); 
       
       $stmt->execute();
