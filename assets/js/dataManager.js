@@ -1043,14 +1043,22 @@ export class DataManager {
 
         // Update the search results cache
         searchResults.forEach(node => {
+            // Convert each match property to boolean explicitly
+            const writingMatches = node.writingMatches === '1' || node.writingMatches === true;
+            const noteMatches = node.noteMatches === '1' || node.noteMatches === true;
+            const titleMatches = node.titleMatches === '1' || node.titleMatches === true;
+            const writerMatches = node.writerMatches === '1' || node.writerMatches === true;
+            const keywordMatches = node.keywordMatches === '1' || node.keywordMatches === true;
+
             this.cache.searchResults.nodes[String(node.id)] = {
                 id: node.id,
-                matches: node.writingMatches || node.noteMatches || node.titleMatches || node.writerMatches || node.keywordMatches,
-                writingMatches: node.writingMatches === '1' || node.writingMatches === true,
-                noteMatches: node.noteMatches === '1' || node.noteMatches === true,
-                titleMatches: node.titleMatches === '1' || node.titleMatches === true,
-                writerMatches: node.writerMatches === '1' || node.writerMatches === true,
-                keywordMatches: node.keywordMatches === '1' || node.keywordMatches === true
+                // Only true if any of the specific match types are true
+                matches: writingMatches || noteMatches || titleMatches || writerMatches || keywordMatches,
+                writingMatches,
+                noteMatches,
+                titleMatches,
+                writerMatches,
+                keywordMatches
             };
         });
 
@@ -1063,13 +1071,18 @@ export class DataManager {
             rootStoryId: rootStoryId,
             results: Array.isArray(searchResults) ? searchResults.map(item => ({
                 id: item.id,
-                matches: item.writingMatches || item.noteMatches || item.titleMatches || item.writerMatches || item.keywordMatches,
-                writingMatches: item.writingMatches === '1' || item.writingMatches === true, // Convert to boolean
-                noteMatches: item.noteMatches === '1' || item.noteMatches === true, // Convert to boolean
-                titleMatches: item.titleMatches === '1' || item.titleMatches === true, // Convert to boolean
-                writerMatches: item.writerMatches === '1' || item.writerMatches === true, // Convert to boolean
-                keywordMatches: item.keywordMatches === '1' || item.keywordMatches === true, // Convert to boolean
-
+                matches: Boolean(
+                    item.writingMatches === '1' || item.writingMatches === true ||
+                    item.noteMatches === '1' || item.noteMatches === true ||
+                    item.titleMatches === '1' || item.titleMatches === true ||
+                    item.writerMatches === '1' || item.writerMatches === true ||
+                    item.keywordMatches === '1' || item.keywordMatches === true
+                ),
+                writingMatches: item.writingMatches === '1' || item.writingMatches === true,
+                noteMatches: item.noteMatches === '1' || item.noteMatches === true,
+                titleMatches: item.titleMatches === '1' || item.titleMatches === true,
+                writerMatches: item.writerMatches === '1' || item.writerMatches === true,
+                keywordMatches: item.keywordMatches === '1' || item.keywordMatches === true
             })) : [],
             lastUpdate: lastUpdate
         };
