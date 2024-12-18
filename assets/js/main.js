@@ -137,7 +137,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const gameListManager = new GameListManager(path, uiManager);
   window.menuManager = new MenuManager();
   const filterManager = new FilterManager();
-  const searchManager = new SearchManager();
+  const searchManager = new SearchManager(path);
 
   // No need for separate handleInitialState
 

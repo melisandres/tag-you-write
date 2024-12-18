@@ -90,9 +90,9 @@ export class StoryManager {
         console.error('Error fetching tree updates:', error);
         return null;
     }
-}
+  }
 
-
+  // TODO: It might be nice to check in the dataManager.cache... to see if it exists there before fetching it from the server. 
   async fetchStoryNode(id){
     const url = `${this.path}text/getStoryNode/${id}`;
     const response = await fetch(url);
@@ -107,7 +107,15 @@ export class StoryManager {
     console.log(`prepareData called for ID: ${id}`);
     let cachedData = this.dataManager.getTree(id);
 
-    // If no cached data, or if it's just the timestamp without data
+    // Showing a new tree/shelfmeans updating search results IF there's an active search
+    if (this.dataManager.getSearch()) {
+      const searchResults = await this.fetchSearchResults(id);
+      if (searchResults) {
+          this.dataManager.updateSearchResults(searchResults, id, true);
+      }
+    }
+
+    // If no cached data, or if it's just the timestamp without data get tree from server
     if (!cachedData || !cachedData.data) {
         console.log(`No valid cached data, fetching fresh tree data`);
         const freshData = await this.fetchTree(id);
@@ -121,7 +129,7 @@ export class StoryManager {
         return this.dataManager.getTree(id).data;
     }
 
-    // Determine if updates are needed
+    // If there is data in the cache, determine if updates are needed
     const gameId = cachedData.data.game_id;
     const gameData = this.dataManager.getGame(gameId);
     const lastGameUpdate = gameData.timestamp;
@@ -204,6 +212,22 @@ export class StoryManager {
     this.dataManager.setPage(pageNumber);
     const paginatedData = this.dataManager.getPaginatedData();
     eventBus.emit('updateStoryList', paginatedData);
+  }
+
+  // Add new method to fetch search results
+  async fetchSearchResults(rootId) {
+    try {
+        const searchTerm = this.dataManager.getSearch();
+        if (!searchTerm) return null;
+
+        const response = await fetch(`${this.path}text/searchNodes?term=${encodeURIComponent(searchTerm)}&rootStoryId=${rootId}`);
+        if (!response.ok) return null;
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching search results:', error);
+        return null;
+    }
   }
 }
   /* getStoryDataById(id) {

@@ -65,6 +65,9 @@
                  SELECT 1 
                  FROM text search_text 
                  INNER JOIN text_status search_status ON search_text.status_id = search_status.id
+                 INNER JOIN writer w ON search_text.writer_id = w.id
+                 LEFT JOIN text_has_keyword thk ON search_text.id = thk.text_id
+                 LEFT JOIN keyword k ON thk.keyword_id = k.id
                  WHERE search_text.game_id = g.id 
                  AND (
                      search_status.status = 'published' 
@@ -75,16 +78,12 @@
                      search_text.title LIKE :searchTerm 
                      OR search_text.writing LIKE :searchTerm 
                      OR search_text.note LIKE :searchTerm
+                     OR CONCAT(w.firstName, ' ', w.lastName) LIKE :searchTerm
+                     OR k.word LIKE :searchTerm
                  )
              )
          )";
       }
-/*       if ($searchTerm) {
-         $filterString .= " AND (g.prompt LIKE :searchTerm 
-                            OR rt.title LIKE :searchTerm 
-                            OR rt.writing LIKE :searchTerm 
-                            OR rt.note LIKE :searchTerm)";
-      } */
 
       $sql =   "SELECT  g.id AS game_id, 
                         g.prompt,
@@ -210,6 +209,9 @@
                   SELECT 1 
                   FROM text search_text 
                   INNER JOIN text_status search_status ON search_text.status_id = search_status.id
+                  INNER JOIN writer w ON search_text.writer_id = w.id
+                  LEFT JOIN text_has_keyword thk ON search_text.id = thk.text_id
+                  LEFT JOIN keyword k ON thk.keyword_id = k.id
                   WHERE search_text.game_id = g.id 
                   AND (
                      search_status.status = 'published' 
@@ -220,14 +222,12 @@
                      search_text.title LIKE :searchTerm 
                      OR search_text.writing LIKE :searchTerm 
                      OR search_text.note LIKE :searchTerm
+                     OR CONCAT(w.firstName, ' ', w.lastName) LIKE :searchTerm
+                     OR k.word LIKE :searchTerm
                   )
                )
          )";
       }
-
-/*       if ($searchTerm) {
-         $filterString .= " AND (g.prompt LIKE :searchTerm OR rt.title LIKE :searchTerm OR rt.text LIKE :searchTerm OR rt.writer_name LIKE :searchTerm OR rt.note LIKE :searchTerm)";
-      } */
 
       $sql = "SELECT g.id AS game_id, 
                      g.prompt,

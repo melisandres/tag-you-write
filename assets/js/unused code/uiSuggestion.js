@@ -1,4 +1,4 @@
-import { SVGManager } from './svgManager.js';
+import { SVGManager } from '../svgManager.js';
 
 export class UIManager {
   constructor(storyManager, actionManagers, updateManagers) {

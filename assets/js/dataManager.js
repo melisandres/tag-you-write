@@ -22,19 +22,21 @@ export class DataManager {
             trees: new Map(),
             nodesMap: new Map(), // A flat structure to make updates easier
             lastGamesCheck: null,
+            currentViewedRootId: null,
             pagination: {
                 currentPage: 1,
                 itemsPerPage: 10,
                 totalItems: 0
             },
-            filters: {
-                hasContributed: null,  // null = all, 'contributor', 'mine'
-                gameState: 'all',  // 'all', 'open', 'closed', 'pending'
-                // FUTURE:
-                // Bookmarked: 'bookmarked', 'unbookmarked', all? 
-                // sort: 'newest',   // 'newest', 'oldest', etc.
-                // search: ''        // search term
+            search: '',
+            searchResults: {
+                rootId: null,
+                nodes: {}
             },
+            filters: {
+                hasContributed: null,
+                gameState: 'all'
+            }
         };
 
         // Ensure nodesMap exists even if loaded from cache
@@ -89,7 +91,7 @@ export class DataManager {
 
     // To keep track of the currently viewed root story id
     setCurrentViewedRootStoryId(rootStoryId) {
-        this.currentViewedRootStoryId = rootStoryId;
+        /* this.currentViewedRootStoryId = rootStoryId; */
         
         // Ensure tree exists in cache
         if (!this.cache.trees.has(rootStoryId)) {
@@ -98,10 +100,12 @@ export class DataManager {
                 timestamp: Date.now()
             });
         }
+        this.cache.currentViewedRootId = rootStoryId;
+        this.saveCache();
     }
 
     getCurrentViewedRootStoryId() {
-        return this.currentViewedRootStoryId;
+        return this.cache.currentViewedRootId;
     }
 
     getInitialCache() {
@@ -115,11 +119,12 @@ export class DataManager {
                 itemsPerPage: 10,
                 totalItems: 0
             },
+            search: '',
+            searchResults: new Map(),
             filters: {
                 hasContributed: null,
                 gameState: 'all'
             },
-            search: ''
         };
     }
 
@@ -175,7 +180,10 @@ export class DataManager {
             }
 
             const modifiedData = await response.json();
-            /* console.log('Modified data:', modifiedData); */
+/*             if (modifiedData.searchResults && this.currentViewedRootStoryId) {
+                this.updateSearchResults(modifiedData.searchResults, this.currentViewedRootStoryId, false);
+            } */
+            console.log('Modified data:', modifiedData);
             return this.handleUpdateResponse(modifiedData, rootId);
         } catch (error) {
             console.error('Error checking for updates:', error);
@@ -183,10 +191,9 @@ export class DataManager {
         }
     }
 
-
     // This creates the recently modified games list
     handleUpdateResponse(response, currentlyViewedRootId) {
-        const { modifiedGames, modifiedNodes } = response;
+        const { modifiedGames, modifiedNodes, searchResults } = response;
         let hasUpdates = false;
         let hasTreeUpdates = false;
 
@@ -204,6 +211,10 @@ export class DataManager {
             hasTreeUpdates = true;
         }
 
+        if (searchResults.length > 0) {
+            this.updateSearchResults(searchResults, currentlyViewedRootId, false);
+        }
+
         if (hasUpdates) {
             this.cache.lastGamesCheck = Date.now();
             if (hasTreeUpdates) {
@@ -216,10 +227,10 @@ export class DataManager {
                 } else {
                     cachedTree.timestamp = Date.now();
                 }
-            } 
+            }
             this.saveCache();
         }
-        
+
         return hasUpdates;
     }
 
@@ -632,14 +643,18 @@ export class DataManager {
                     trees: new Map(parsed.trees),
                     nodesMap: new Map(parsed.nodesMap),
                     lastGamesCheck: parsed.lastGamesCheck || Date.now(),
+                    currentViewedRootId: parsed.currentViewedRootId,
                     pagination: parsed.pagination,
+                    search: parsed.search || '',
+                    searchResults: {
+                        rootId: parsed.searchResults?.rootId || null,
+                        nodes: parsed.searchResults?.nodes || {}
+                    },
                     filters: parsed.filters || {
                         hasContributed: null,
                         gameState: 'all'
                     },
-                    search: parsed.search || ''
                 };
-                /* console.log('Loaded cache:', cache); */
                 return cache;
             }
         } catch (e) {
@@ -661,9 +676,14 @@ export class DataManager {
             trees: Array.from(this.cache.trees.entries()),
             nodesMap: Array.from(this.cache.nodesMap.entries()),
             lastGamesCheck: this.cache.lastGamesCheck,
+            currentViewedRootId: this.cache.currentViewedRootId,
             pagination: this.cache.pagination,
+            search: this.cache.search,
+            searchResults: {
+                rootId: this.cache.searchResults.rootId,
+                nodes: this.cache.searchResults.nodes
+            },
             filters: this.cache.filters,
-            search: this.cache.search
         };
         
         try {
@@ -740,11 +760,12 @@ export class DataManager {
                 itemsPerPage: 10,
                 totalItems: 0
             },
+            search: '',
+            searchResults: new Map(),
             filters: {
                 hasContributed: null,
                 gameState: 'all'
-            },
-            search: ''
+            }
         };
         localStorage.removeItem('storyCache');  // Completely remove from localStorage
     }
@@ -993,5 +1014,64 @@ export class DataManager {
             node.game_id === gameId && 
             node.writer_id === currentUserId
         );
+    }
+
+    updateSearchResults(searchResults, rootStoryId, isFullUpdate = false) {
+        console.log('Updating search results:', {
+            "rootStoryId": rootStoryId,
+            "isFullUpdate": isFullUpdate,
+            "resultsCount": searchResults?.length
+        });
+
+        if (!rootStoryId) {
+            console.log('No root story ID provided, clearing search results');
+            this.cache.searchResults = {
+                rootId: null,
+                nodes: {}
+            };
+            this.saveCache();
+            return;
+        }
+
+        if (isFullUpdate || this.cache.searchResults.rootId !== rootStoryId) {
+            // Clear previous search results for full updates or different trees
+            this.cache.searchResults = {
+                rootId: rootStoryId,
+                nodes: {}
+            };
+        }
+
+        // Update the search results cache
+        searchResults.forEach(node => {
+            this.cache.searchResults.nodes[String(node.id)] = {
+                id: node.id,
+                matches: node.writingMatches || node.noteMatches || node.titleMatches || node.writerMatches || node.keywordMatches,
+                writingMatches: node.writingMatches === '1' || node.writingMatches === true,
+                noteMatches: node.noteMatches === '1' || node.noteMatches === true,
+                titleMatches: node.titleMatches === '1' || node.titleMatches === true,
+                writerMatches: node.writerMatches === '1' || node.writerMatches === true,
+                keywordMatches: node.keywordMatches === '1' || node.keywordMatches === true
+            };
+        });
+
+        this.saveCache();
+    }
+
+    normalizeSearchResults(searchResults, rootStoryId, lastUpdate) {
+        // Transform the search results into the desired structure
+        return {
+            rootStoryId: rootStoryId,
+            results: Array.isArray(searchResults) ? searchResults.map(item => ({
+                id: item.id,
+                matches: item.writingMatches || item.noteMatches || item.titleMatches || item.writerMatches || item.keywordMatches,
+                writingMatches: item.writingMatches === '1' || item.writingMatches === true, // Convert to boolean
+                noteMatches: item.noteMatches === '1' || item.noteMatches === true, // Convert to boolean
+                titleMatches: item.titleMatches === '1' || item.titleMatches === true, // Convert to boolean
+                writerMatches: item.writerMatches === '1' || item.writerMatches === true, // Convert to boolean
+                keywordMatches: item.keywordMatches === '1' || item.keywordMatches === true, // Convert to boolean
+
+            })) : [],
+            lastUpdate: lastUpdate
+        };
     }
 }

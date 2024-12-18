@@ -1020,6 +1020,31 @@ class ControllerText extends Controller{
         echo json_encode($response);
         exit;
     }
+
+    public function searchNodes() {
+        try {
+            $searchTerm = $_GET['term'] ?? '';
+            $rootStoryId = $_GET['rootStoryId'] ?? null;
+            $text = new Text();
+
+            // Get the game ID from the rootStoryId
+            $gameId = $text->selectGameId($rootStoryId);
+
+            // Search nodes by term, game ID, and text status
+            $results = $text->searchNodesByTerm($searchTerm, $gameId, $_SESSION['writer_id'] ?? null);
+
+            // Debugging: Use var_dump or print_r instead of echo
+            error_log("Results: " . print_r($results, true));
+
+            header('Content-Type: application/json');
+            echo json_encode($results);
+        } catch (Exception $e) {
+            error_log('Error in searchNodes: ' . $e->getMessage());
+            header('HTTP/1.1 500 Internal Server Error');
+            echo json_encode(['error' => $e->getMessage()]);
+        }
+        exit;
+    }
 }
 
 ?>

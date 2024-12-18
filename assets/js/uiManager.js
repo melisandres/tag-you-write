@@ -13,6 +13,7 @@ export class UIManager {
     this.insertLoginLogoutSVGs();
     this.initEventListeners();
     this.stories = document.querySelector(".stories");
+    this.dataManager = window.dataManager;
 
     // Listen for events from ShowcaseManager
     eventBus.on('createShowcaseContainer', ({ rootStoryId, showcaseType }) => {
@@ -98,10 +99,14 @@ export class UIManager {
     // check if the action to toggle off the view, or to get a new view
     if(previousViewType == targetType && textId == previousTextId){
       story.classList.remove('story-has-showcase');
-      // set the current rootStoryId to null, so that the cache is updated
+      // Clear the current root story ID when closing showcase
+      this.dataManager.setCurrentViewedRootStoryId(null);
       eventBus.emit('showcaseChanged', null);
       return;
     }
+
+    // Set the new root story ID before creating showcase
+    this.dataManager.setCurrentViewedRootStoryId(textId);
 
     // Emit both the showcase change and type
     //TODO: can I delete this?
@@ -164,6 +169,7 @@ export class UIManager {
 
     if (container) {
       container.remove();
+      this.dataManager.setCurrentViewedRootStoryId(null);
       eventBus.emit('showcaseChanged', null);
     }
 
@@ -171,7 +177,9 @@ export class UIManager {
       story.innerHTML += '<div id="showcase"></div>';
       container = document.querySelector('#showcase');
       
-      // Get showcase type from URL or default to 'shelf'
+      // Set current root story ID when creating new showcase
+      this.dataManager.setCurrentViewedRootStoryId(rootStoryId);
+      
       const { type } = this.showcaseManager.getShowcaseParams();
       if (type) {
           container.dataset.showcase = type;

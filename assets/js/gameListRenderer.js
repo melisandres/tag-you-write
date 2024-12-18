@@ -32,6 +32,7 @@ export class GameListRenderer {
 
         // Listen for filter updates
         eventBus.on('filterApplied', () => this.saveCurrentViewState());
+        eventBus.on('searchApplied', () => this.saveCurrentViewState());
         eventBus.on('gamesListUpdated', () => this.restoreViewState());
 
         // Add event listener for game updates
@@ -86,10 +87,6 @@ export class GameListRenderer {
     renderGameCard(game) {
         const isOpen = game.openForChanges === '1' || game.openForChanges === true || game.openForChanges === 1;
         const hasContributed = game.hasContributed === '1' || game.hasContributed === true || game.hasContributed === 1;
-
-        console.log("userLoggedIn", this.userLoggedIn);
-        console.log("game unseens", game.unseen_count);
-        console.log("game useen > 0", game.seen_count > 0);
         
         return `
             <div class="story ${isOpen ? '' : 'closed'}" 

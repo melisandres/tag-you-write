@@ -66,21 +66,15 @@ class ControllerGame extends Controller {
     //TODO: this is where you are at: check for modified nodes also... if you are sent a rootStoryId, and a timestamp... no time stamp means all the tree... .
     public function modifiedSince() {
         try {
-            $jsonData = file_get_contents('php://input');
-            $data = json_decode($jsonData, true);
-            
-            if (!isset($data['lastGamesCheck'])) {
-                throw new Exception('Missing lastGamesCheck parameter');
-            }
+            $data = json_decode(file_get_contents('php://input'), true);
 
-            // Get the search term
             $searchTerm = $data['search'] ?? null;
 
             // Our user is logged in? 
             $currentUserId = $_SESSION['writer_id'] ?? null;
-            
+
             // Convert timestamp to datetime
-            $lastTreeCheck =  date('Y-m-d H:i:s', $data['lastTreeCheck'] / 1000);
+            $lastTreeCheck = date('Y-m-d H:i:s', $data['lastTreeCheck'] / 1000);
             $lastGamesCheck = date('Y-m-d H:i:s', $data['lastGamesCheck'] / 1000);
             
             // Get the filters and the rootStoryId
@@ -89,32 +83,33 @@ class ControllerGame extends Controller {
             
             $game = new Game();
             $text = new Text();
+            
             // Get the modified games with search term
             $modifiedGames = $game->getModifiedSince($lastGamesCheck, $filters, $searchTerm);
 
             // Get the modified nodes
-            $gameId = $game->selectGameId($rootStoryId); 
+            $gameId = $game->selectGameId($rootStoryId);
             $modifiedNodes = $text->selectTexts($currentUserId, $gameId, true, $lastTreeCheck);
+
+            // Search results
+            $searchResults = $text->searchNodesByTerm($searchTerm, $gameId, $currentUserId, $lastTreeCheck);
 
             // Add permissions to the modified nodes
             if (!empty($modifiedNodes)) {
-                foreach ($modifiedNodes as &$node) {  // Make sure to iterate through all nodes
+                foreach ($modifiedNodes as &$node) {
                     $this->addPermissions($node, $currentUserId, $modifiedNodes);
                 }
-/*                 $this->addPermissions($modifiedNodes[0], $currentUserId, $modifiedNodes); */
             }
-            error_log("LINE 100 controllerGame.php : modifiedNodes: " . print_r($modifiedNodes, true));
 
             // Ensure data is properly formatted
             $response = [
-                'modifiedGames' => $modifiedGames, // Convert to indexed array
-                'modifiedNodes' => $modifiedNodes  // Convert to indexed array
+                'modifiedGames' => $modifiedGames,
+                'modifiedNodes' => $modifiedNodes,
+                'searchResults' => $searchResults
             ];
-            error_Log('LINE 107 controllerGame.php : modifiedSince response: ' . print_r($response, true));
-            //error_log("modifiedSince response: " . print_r($response, true));
-            
+
             header('Content-Type: application/json');
-            echo json_encode($response, JSON_NUMERIC_CHECK); // Add JSON_NUMERIC_CHECK
+            echo json_encode($response, JSON_NUMERIC_CHECK);
         } catch (Exception $e) {
             error_log('Error in modifiedSince: ' . $e->getMessage());
             header('HTTP/1.1 500 Internal Server Error');

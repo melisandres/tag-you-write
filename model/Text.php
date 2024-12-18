@@ -188,6 +188,62 @@ class Text extends Crud{
         }
 
     }
+
+    public function searchNodesByTerm($term, $gameId, $currentWriterId = null, $lastTreeCheck = null) {
+        try {
+            $term = trim($term, '"');
+
+            $sql = "SELECT text.id,
+                    CASE WHEN writing LIKE :term THEN 1 ELSE 0 END AS writingMatches,
+                    CASE WHEN note LIKE :term THEN 1 ELSE 0 END AS noteMatches,
+                    CASE WHEN title LIKE :term THEN 1 ELSE 0 END AS titleMatches,
+                    CASE WHEN CONCAT(writer.firstName, ' ', writer.lastName) LIKE :term THEN 1 ELSE 0 END AS writerMatches,
+                    CASE WHEN keyword.word LIKE :term THEN 1 ELSE 0 END AS keywordMatches
+                    FROM text 
+                    INNER JOIN writer ON text.writer_id = writer.id
+                    INNER JOIN text_status ON text.status_id = text_status.id
+                    LEFT JOIN text_has_keyword ON text.id = text_has_keyword.text_id
+                    LEFT JOIN keyword ON text_has_keyword.keyword_id = keyword.id
+                    WHERE game_id = :gameId 
+                    AND (text_status.status = 'published' 
+                        OR (text_status.status IN ('draft', 'incomplete_draft') 
+                            AND writer_id = :currentWriterId))";
+
+            if ($lastTreeCheck !== null) {
+                $sql .= " AND text.modified_at > :lastTreeCheck";
+            }
+
+            $stmt = $this->prepare($sql);
+            $stmt->bindValue(':term', '%' . $term . '%', PDO::PARAM_STR);
+            $stmt->bindValue(':gameId', (int)$gameId, PDO::PARAM_INT);
+            $stmt->bindValue(':currentWriterId', (int)$currentWriterId, PDO::PARAM_INT);
+
+            if ($lastTreeCheck !== null) {
+                $stmt->bindValue(':lastTreeCheck', $lastTreeCheck, PDO::PARAM_STR);
+            }
+
+            // Log the SQL query with bound values for debugging
+            $boundSql = str_replace(
+                [':term', ':gameId', ':currentWriterId'],
+                ["'%" . $term . "%'", (int)$gameId, (int)$currentWriterId],
+                $sql
+            );
+            error_log("Executing SQL: " . $boundSql);
+
+            $stmt->execute();
+
+            // Check for SQL errors
+            $errorInfo = $stmt->errorInfo();
+            if ($errorInfo[0] !== '00000') {
+                error_log("SQL Error: " . print_r($errorInfo, true));
+            }
+
+            return $stmt->fetchAll();
+        } catch (PDOException $e) {
+            error_log('PDOException in searchNodesByTerm: ' . $e->getMessage());
+            return [];
+        }
+    }
 }
 
 

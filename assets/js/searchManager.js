@@ -1,11 +1,12 @@
 import { SVGManager } from './svgManager.js';
 
 export class SearchManager {
-    constructor() {
+    constructor(path) {
         if (!window.menuManager) {
             console.error('MenuManager not initialized');
             return;
         }
+        this.path = path;
         this.searchNavLink = document.querySelector('.nav-link.search');
         this.searchMenu = document.querySelector('.search-menu');
         this.filterMenu = document.querySelector('.filter-menu');
@@ -72,7 +73,7 @@ export class SearchManager {
                 const searchValue = e.target.value;
                 this.handleSearchInput(searchValue);
                 this.updateUrlWithSearch(searchValue);
-            }, 300)); // Adjust the debounce delay as needed
+            }, 500));
         }
 
         // Listen for popstate event to update search input and cache
@@ -88,7 +89,30 @@ export class SearchManager {
         this.updateNavLink();
         eventBus.emit('searchApplied', value);
 
+        if (value.trim()) {
+            // if there is a search term, make a request...
+            this.searchNodes(value);
+        } else {
+            // if there is no search term, clear the cache.searchResults
+            this.dataManager.updateSearchResults([], this.dataManager.getCurrentViewedRootStoryId(), true);
+        }
+
         console.log('Search input:', value);
+    }
+
+    searchNodes(searchTerm) {
+        const rootStoryId = this.dataManager.currentViewedRootStoryId;
+        console.log('Searching for:', searchTerm);
+        console.log('Root Story ID:', rootStoryId);
+        console.log('TRYING TO FETCH');
+        fetch(`${this.path}text/searchNodes?term=${encodeURIComponent(searchTerm)}&rootStoryId=${rootStoryId}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log('Search results received:', data); // Debugging line
+                this.dataManager.updateSearchResults(data, rootStoryId, true);
+                eventBus.emit('searchResultsUpdated', data);
+            })
+            .catch(error => console.error('Error fetching search results:', error));
     }
 
     debounce(func, wait) {
