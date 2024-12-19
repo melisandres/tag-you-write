@@ -2,6 +2,7 @@ import { eventBus } from './eventBus.js';
 import { SVGManager } from './svgManager.js';
 
 
+
 export class GameListRenderer {
     constructor(container, path, uiManager) {
         if (!container) return;
@@ -37,6 +38,16 @@ export class GameListRenderer {
 
         // Add event listener for game updates
         eventBus.on('gamesModified', (games) => this.handleGamesModified(games));
+
+        // Add listener for search updates
+        eventBus.on('searchApplied', (searchTerm) => {
+            this.saveCurrentViewState();
+            // This will trigger list refresh, which includes showcase redraw
+            this.refreshGamesList().then(() => {
+                // After everything is redrawn, apply highlights
+                this.handleSearchHighlighting(searchTerm);
+            });
+        });
     }
 
     initializeFromServerData() {
@@ -217,6 +228,12 @@ export class GameListRenderer {
         if (titleDiv && this.userLoggedIn) {
             titleDiv.classList.toggle('unreads', gameData.unseen_count > 0);
         }
+
+        // Reapply highlighting if there's an active search
+        const activeSearch = this.dataManager.getSearch();
+        if (activeSearch) {
+            this.handleSearchHighlighting(activeSearch);
+        }
     }
 
     renderGamesList(games) {
@@ -242,6 +259,12 @@ export class GameListRenderer {
 
         // Emit event after rendering is complete
         eventBus.emit('gamesListUpdated');
+
+        // After rendering, apply any active search highlighting
+        const activeSearch = this.dataManager.getSearch();
+        if (activeSearch) {
+            this.handleSearchHighlighting(activeSearch);
+        }
     }
 
     saveCurrentViewState() {
@@ -325,5 +348,28 @@ export class GameListRenderer {
                 if (arrow) arrow.textContent = '▼';
             }
         });
+    }
+
+    handleSearchHighlighting(searchTerm) {
+        if (!searchTerm) {
+            eventBus.emit('removeSearchHighlights', this.container);
+            return;
+        }
+
+        // Now safe to highlight both list and showcase as they're fully rendered
+        eventBus.emit('highlightSearchMatches', {
+            container: this.container,
+            searchTerm: searchTerm
+        });
+    }
+
+    async refreshGamesList() {
+        // ... existing refresh code ...
+        
+        // After list and showcase are redrawn
+        await this.restoreViewState();
+        
+        // Signal that all drawing is complete
+        eventBus.emit('gamesListRefreshComplete');
     }
 }

@@ -67,17 +67,20 @@ class ControllerGame extends Controller {
     public function modifiedSince() {
         try {
             $data = json_decode(file_get_contents('php://input'), true);
+            
+            // Add debug logging for incoming data
+            error_log("modifiedSince received data: " . json_encode($data));
 
-            $searchTerm = $data['search'] ?? null;
-
-            // Our user is logged in? 
             $currentUserId = $_SESSION['writer_id'] ?? null;
-
+            
             // Convert timestamp to datetime
             $lastTreeCheck = date('Y-m-d H:i:s', $data['lastTreeCheck'] / 1000);
             $lastGamesCheck = date('Y-m-d H:i:s', $data['lastGamesCheck'] / 1000);
             
-            // Get the filters and the rootStoryId
+            error_log("Converted timestamps - Tree: $lastTreeCheck, Games: $lastGamesCheck");
+
+            // Get the search term, filters and the rootStoryId
+            $searchTerm = $data['search'] ?? null;
             $filters = $data['filters'] ?? [];
             $rootStoryId = $data['rootStoryId'] ?? null;
             
@@ -108,10 +111,15 @@ class ControllerGame extends Controller {
                 'searchResults' => $searchResults
             ];
 
+            // Add logging after getting modified nodes
+            error_log("Modified nodes count: " . count($modifiedNodes));
+            error_log("Search results count: " . count($searchResults));
+
             header('Content-Type: application/json');
             echo json_encode($response, JSON_NUMERIC_CHECK);
         } catch (Exception $e) {
             error_log('Error in modifiedSince: ' . $e->getMessage());
+            error_log('Stack trace: ' . $e->getTraceAsString());
             header('HTTP/1.1 500 Internal Server Error');
             echo json_encode(['error' => $e->getMessage()]);
         }

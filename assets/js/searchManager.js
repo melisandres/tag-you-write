@@ -22,6 +22,8 @@ export class SearchManager {
     }
 
     initializeUI() {
+        console.log('Initializing search UI');
+        console.log('this.searchNavLink', this.searchNavLink);
         if (this.searchNavLink) {
             // Set the search icon in the nav
             this.searchNavLink.innerHTML = SVGManager.searchSVG;
@@ -87,32 +89,46 @@ export class SearchManager {
     handleSearchInput(value) {
         // if there is text in the search input, the nav link should be active
         this.updateNavLink();
-        eventBus.emit('searchApplied', value);
+        
+        // Store current search state
+        const previousSearch = this.dataManager.getSearch();
+        this.dataManager.setSearch(value);
 
         if (value.trim()) {
-            // if there is a search term, make a request...
-            this.searchNodes(value);
+            // Only fetch new results if search term changed
+            if (value !== previousSearch) {
+                // Wait for search results before triggering refresh
+                this.searchNodes(value);
+            }
         } else {
-            // if there is no search term, clear the cache.searchResults
-            this.dataManager.updateSearchResults([], this.dataManager.getCurrentViewedRootStoryId(), true);
+            // Clear results and refresh once
+            this.dataManager.updateSearchResults([], null, true);
+            eventBus.emit('searchApplied', '');
         }
-
-        console.log('Search input:', value);
     }
 
     searchNodes(searchTerm) {
-        const rootStoryId = this.dataManager.currentViewedRootStoryId;
+        const rootStoryId = this.dataManager.getCurrentViewedRootStoryId();
         console.log('Searching for:', searchTerm);
         console.log('Root Story ID:', rootStoryId);
         console.log('TRYING TO FETCH');
-        fetch(`${this.path}text/searchNodes?term=${encodeURIComponent(searchTerm)}&rootStoryId=${rootStoryId}`)
+        
+        // Return the Promise
+        return fetch(`${this.path}text/searchNodes?term=${encodeURIComponent(searchTerm)}&rootStoryId=${rootStoryId}`)
             .then(response => response.json())
             .then(data => {
-                console.log('Search results received:', data); // Debugging line
+                console.log('Search results received:', data);
                 this.dataManager.updateSearchResults(data, rootStoryId, true);
-                eventBus.emit('searchResultsUpdated', data);
+                // Trigger refresh after results are updated
+                eventBus.emit('searchApplied', searchTerm);
+                return data;
             })
-            .catch(error => console.error('Error fetching search results:', error));
+            .catch(error => {
+                console.error('Error fetching search results:', error);
+                // Still emit event even if search fails
+                eventBus.emit('searchApplied', searchTerm);
+                return [];
+            });
     }
 
     debounce(func, wait) {

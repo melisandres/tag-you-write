@@ -70,6 +70,9 @@ export class ShelfVisualizer {
     this.container.innerHTML += `<ol>${this.drawDrawer(data, 0)}</ol>`;
     this.addEventListeners();
     this.applySVGColors(this.container);
+
+    // Emit event after shelf is fully drawn. This is used to highlight search matches.
+    eventBus.emit('shelfDrawComplete', this.container);
   }
 
   drawDrawer(node, depth) {
@@ -99,7 +102,7 @@ export class ShelfVisualizer {
     return `
       <li class="node ${node.text_status === "published" ? "published" : "draft"}" data-story-id="${node.id}" style="--node-depth: ${depth}">
         <div class="node-headline ${isWinner}">
-          <div class="arrow">▶</div>
+          <div class="arrow closed">▶</div>
           <div class="shelf-heart ${unread}"> ${this.getNumberOfVotes(node)}</div>
           <div class="headline-content">
             <h2 class="title">
@@ -146,6 +149,7 @@ export class ShelfVisualizer {
         writingDiv.classList.remove('hidden');
         writingDiv.classList.add('visible');
         arrow.textContent = '▼';
+        arrow.classList.add('open');
       }
       
       this.addEventListeners(); // Re-add event listeners for the updated node
@@ -270,6 +274,8 @@ export class ShelfVisualizer {
           writingDiv.classList.remove('hidden');
           writingDiv.classList.add('visible');
           arrow.textContent = '▼';
+          arrow.classList.remove('closed');
+          arrow.classList.add('open');
           // Handle marking as "read"
           this.SeenManager.markAsSeen(text_id);
           this.SeenManager.updateReadStatus(text_id);
@@ -277,6 +283,8 @@ export class ShelfVisualizer {
           writingDiv.classList.add('hidden');
           writingDiv.classList.remove('visible');
           arrow.textContent = '▶';
+          arrow.classList.remove('open');   
+          arrow.classList.add('closed');
         }
       });
     });

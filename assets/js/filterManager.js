@@ -185,15 +185,18 @@ export class FilterManager {
 
     updateFilterButton(hasContributed) {
         const button = this.filterMenu.querySelector('.my-games-filter');
-        const icon = button.querySelector('.filter-icon');
-        const text = button.querySelector('.filter-text');
+        const icon = button?.querySelector('.filter-icon');
+        const text = button?.querySelector('.filter-text');
         
         // Update classes based on state
-        icon.classList.remove('all', 'contributor', 'mine');
-        icon.classList.add(hasContributed === null ? 'all' : 
-                          hasContributed === true ? 'contributor' : 'mine');
-        
-        text.textContent = this.getContributionStateText(String(hasContributed));
+        if (icon) {
+            icon.classList.remove('all', 'contributor', 'mine');
+            icon.classList.add(hasContributed === null ? 'all' : 
+                              hasContributed === true ? 'contributor' : 'mine');
+        }
+        if (text) {
+            text.textContent = this.getContributionStateText(String(hasContributed));
+        }
     }
 
     getGameStateText(state) {

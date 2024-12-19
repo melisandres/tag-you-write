@@ -132,6 +132,8 @@ export class StoryManager {
     // If there is data in the cache, determine if updates are needed
     const gameId = cachedData.data.game_id;
     const gameData = this.dataManager.getGame(gameId);
+    console.log('gameData:', gameData);
+    console.log('gameData.timestamp: sometime cant be found on the next line... so maybe check the gameData... to see what is happening');
     const lastGameUpdate = gameData.timestamp;
     const needsUpdate = lastGameUpdate && cachedData.timestamp 
         ? new Date(lastGameUpdate).getTime() > cachedData.timestamp

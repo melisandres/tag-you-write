@@ -140,8 +140,6 @@
       if ($id) {
          $stmt->bindValue(':id', $id);
       }
-      error_log('Search Term: ' . $searchTerm);
-      error_log('sql: ' . $sql);
 
       $stmt->execute();
       
@@ -152,8 +150,6 @@
             $game['hasUnseenTexts'] = ($game['unseen_count'] > 0) ? true : false;
             $game['pending'] = ($game['root_text_status'] == 'draft' || $game['root_text_status'] == 'incomplete_draft') ? true : false;
       }
-
-      error_log('games: ' . print_r($games, true));
    
       return $games;
    }

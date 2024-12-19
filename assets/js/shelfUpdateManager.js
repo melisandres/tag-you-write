@@ -1,11 +1,13 @@
 import { eventBus } from './eventBus.js';
 import { SVGManager } from './svgManager.js';
 import { createColorScale } from './createColorScale.js';
+import { SearchHighlighter } from './searchHighlighter.js';
 
 export class ShelfUpdateManager {
   constructor(path) {
     this.path = path;
     this.initEventListeners();
+    this.dataManager = window.dataManager;
   }
 
   initEventListeners() {
@@ -14,6 +16,75 @@ export class ShelfUpdateManager {
     eventBus.on('chooseWinner', this.handleChooseWinner.bind(this));
     eventBus.on('voteToggle', this.handleVoteToggle.bind(this));
     eventBus.on('gamePlayerCountUpdate', this.handleGamePlayerCountUpdate.bind(this));
+    eventBus.on('searchChanged', ({ searchTerm }) => {
+        // Only handle if we're in shelf view
+        const container = document.querySelector('#showcase[data-showcase="shelf"]');
+        if (!container) return;
+        
+        if (!searchTerm) {
+            eventBus.emit('removeSearchHighlights', container);
+            return;
+        }
+        
+        // Wait for search results before highlighting
+        const searchResults = window.dataManager.getSearchResults();
+        if (searchResults) {
+            eventBus.emit('highlightSearchMatches', {
+                container,
+                searchTerm
+            });
+        }
+    });
+
+    // Listen for shelf draw completion
+    eventBus.on('shelfDrawComplete', (container) => {
+        const searchTerm = this.dataManager.getSearch();
+        if (searchTerm) {
+            this.highlightShelfContent(container, searchTerm);
+        }
+    });
+  }
+
+  highlightShelfContent(container, searchTerm) {
+    const searchResults = this.dataManager.getSearchResults();
+    if (!searchResults) return;
+
+    const nodes = container.querySelectorAll('.node');
+    console.log('nodes:', nodes);
+    nodes.forEach(node => {
+        const storyId = node.dataset.storyId;
+        const nodeData = searchResults.nodes?.[storyId];
+        
+        if (nodeData?.matches) {
+          if (nodeData.writingMatches || nodeData.noteMatches) {
+            node.classList.add('has-search-match');
+          }
+
+            // Highlight title if it matches
+            if (nodeData.titleMatches) {
+                const titleElement = node.querySelector('.title');
+                if (titleElement) {
+                    titleElement.innerHTML = this.highlightText(titleElement.textContent, searchTerm);
+                }
+            }
+
+            // Highlight writing or note if they match
+            if (nodeData.writingMatches || nodeData.noteMatches) {
+                const writingElement = node.querySelectorAll('.writing p');
+                if (writingElement.length > 0) {
+                    for (let i = 0; i < writingElement.length; i++) {
+                        writingElement[i].innerHTML = this.highlightText(writingElement[i].textContent, searchTerm);
+                    }
+                }
+            }
+        }
+    });
+  }
+
+  // Helper function to highlight text
+  highlightText(text, searchTerm) {
+    const regex = new RegExp(`(${searchTerm})`, 'gi');
+    return text.replace(regex, '<mark>$1</mark>');
   }
 
   handleInstaPublish({ textId, newStatus }) {

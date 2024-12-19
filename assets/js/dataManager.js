@@ -147,7 +147,8 @@ export class DataManager {
             return false;
         }
 
-        const rootId = this.currentViewedRootStoryId;
+        const rootId = this.getCurrentViewedRootStoryId();
+        console.log('Root ID:', rootId);
         const lastGamesCheck = this.cache.lastGamesCheck || 0;
         
 /*         console.log('Checking for updates with:', {
@@ -798,6 +799,7 @@ export class DataManager {
     }
 
     getSearch() {
+        console.log('Getting search term from cache:', this.cache.search);
         return this.cache.search;
     }
 
@@ -1014,6 +1016,10 @@ export class DataManager {
             node.game_id === gameId && 
             node.writer_id === currentUserId
         );
+    }
+
+    getSearchResults() {
+        return this.cache.searchResults;
     }
 
     updateSearchResults(searchResults, rootStoryId, isFullUpdate = false) {

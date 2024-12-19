@@ -1,3 +1,21 @@
+.search-highlight {
+    background-color: yellow;
+    padding: 0 2px;
+    border-radius: 2px;
+}
+
+.has-search-match>.node-headline>.arrow.closed {
+    border-left: 5px solid yellow;
+}
+
+.has-search-match>.node-headline>.arrow.open {
+    border-top: 5px solid yellow;
+}
+
+.has-search-match .title {
+    font-weight: bold;
+}
+
 .search-options {
     display: flex;
     align-items: center;

@@ -57,7 +57,6 @@ export class GameListManager {
     }
 
     handleSearchApplied(searchValue) {
-        this.dataManager.setSearch(searchValue);
         this.refreshGamesList();
     }
 
