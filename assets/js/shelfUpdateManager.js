@@ -16,6 +16,9 @@ export class ShelfUpdateManager {
     eventBus.on('chooseWinner', this.handleChooseWinner.bind(this));
     eventBus.on('voteToggle', this.handleVoteToggle.bind(this));
     eventBus.on('gamePlayerCountUpdate', this.handleGamePlayerCountUpdate.bind(this));
+    eventBus.on('nodeTextContentUpdate', this.handleNodeTextContentUpdate.bind(this));
+
+    //TODO: can the following two be cleaned up? so that they point to methods? 
     eventBus.on('searchChanged', ({ searchTerm }) => {
         // Only handle if we're in shelf view
         const container = document.querySelector('#showcase[data-showcase="shelf"]');
@@ -43,6 +46,8 @@ export class ShelfUpdateManager {
             this.highlightShelfContent(container, searchTerm);
         }
     });
+
+
   }
 
   highlightShelfContent(container, searchTerm) {
@@ -268,6 +273,7 @@ export class ShelfUpdateManager {
         }
       }
     });
+
     // Add vote buttons to all published nodes
     const nodeGroups = container.querySelectorAll('li.node');
     nodeGroups.forEach(nodeGroup => {
@@ -299,6 +305,53 @@ export class ShelfUpdateManager {
         voteButton.innerHTML = SVGManager.voteSVG;
         
         iterateForm.parentNode.insertBefore(voteButton, iterateForm.nextSibling);
+    });
+  }
+
+  handleNodeTextContentUpdate({ data }) {
+    const { id, changes } = data;
+    const nodeElement = document.querySelector(`li[data-story-id="${id}"]`);
+    const heart = nodeElement?.querySelector('.shelf-heart');
+    if (heart) heart.classList.add('unread');
+    
+    if (!nodeElement) return;
+    
+    Object.entries(changes).forEach(([prop, value]) => {
+        switch(prop) {
+            case 'title':
+                nodeElement.querySelector('.title').textContent = value;
+                break;
+            case 'writing':
+                // Find the writing div but preserve the node-buttons
+                const writingDiv = nodeElement.querySelector('.writing');
+                const nodeButtons = writingDiv.querySelector('.node-buttons');
+                const dateSpan = writingDiv.querySelector('.date');
+                // Clear existing content except buttons
+                writingDiv.innerHTML = '';
+                // Add back the buttons
+                writingDiv.appendChild(nodeButtons);
+                // Add the new content
+                writingDiv.insertAdjacentHTML('beforeend', value);
+                // Add the old date
+                writingDiv.appendChild(dateSpan);
+                break;
+            case 'date':
+                const writingDateSpan = nodeElement.querySelector('.writing .date');
+                if (writingDateSpan) {
+                    writingDateSpan.textContent = `${value}   (just edited)`;
+                }
+                break;
+            case 'note':
+                const noteDiv = nodeElement.querySelector('.note');
+                if (noteDiv) noteDiv.innerHTML = `<p>P.S... </p>${value}`;
+                break;
+            case 'note_date':
+                const noteDateSpan = nodeElement.querySelector('.note + .date');
+                if (noteDateSpan) {
+                    noteDateSpan.textContent = `${value}   (just edited)`;
+                }
+                break;
+        }
     });
   }
 

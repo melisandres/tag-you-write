@@ -1,6 +1,9 @@
 export class MenuManager {
     constructor() {
         this.menuContainer = document.querySelector('.menu-container');
+        if (!this.menuContainer) {
+            return;
+        }
         this.menus = [
             {
                 name: 'search',

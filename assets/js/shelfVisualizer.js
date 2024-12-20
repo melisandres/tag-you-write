@@ -96,7 +96,7 @@ export class ShelfVisualizer {
     `<span class="author">by ${node.firstName} ${node.lastName}</span>`;
     const isWinner = node.isWinner ? "isWinner" : "";
     const unread = node.text_seen !== "1" ? "unread" : "";
-    const note = node.note ? `<p class="note">P.S... ${node.note}</p>` : '';
+    const note = node.note ? `<div class="note"><p>P.S... </p>${node.note}</div>` : '';
     const noteDate = node.note_date ?  `<span class="date"> ${node.note_date}</span>` : '';
 
     return `

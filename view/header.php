@@ -48,14 +48,16 @@
     {% endif %} -->
     </nav>
 
-    <div class="menu-container">
-        <div class="filter-menu">
-            <!-- Your existing filter menu content -->
+    {% if title == 'All Texts!' %}
+        <div class="menu-container">
+            <div class="filter-menu">
+                <!-- Your existing filter menu content -->
+            </div>
+            <div class="search-menu">
+                <!-- New search menu content -->
+            </div>
         </div>
-        <div class="search-menu">
-            <!-- New search menu content -->
-        </div>
-    </div>
+    {% endif %}
 
     <!-- a modal for the showcase area (selected text) -->
     <div class="modal-background display-none" data-tree-modal="hidden" data-text-id="">

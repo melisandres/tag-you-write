@@ -427,6 +427,8 @@ export class DataManager {
                 nodesMapKeys: Array.from(this.cache.nodesMap.keys()),
                 treesKeys: Array.from(this.cache.trees.keys())
             }); */
+
+            //TODO: I thought I was sending nodeAdded... instead of nodeUpdated with a null oldNode... 
             this.addNewNode(nodeId, updateData);
             eventBus.emit('nodeUpdated', { oldNode: null, newNode: updateData });
             return;
