@@ -61,6 +61,7 @@ export class SearchManager {
                 this.searchInput.value = '';
                 this.updateNavLink();
                 this.updateUrlWithSearch('');
+                this.handleSearchInput('');
             }
         });
 

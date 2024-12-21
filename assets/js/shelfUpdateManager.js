@@ -82,6 +82,15 @@ export class ShelfUpdateManager {
                     }
                 }
             }
+
+            // Highlight if author matches
+            if (nodeData.writerMatches) {
+                const authorElement = node.querySelector('.author');
+                console.log("authorElement", authorElement)
+                if (authorElement) {
+                    authorElement.innerHTML = this.highlightText(authorElement.textContent, searchTerm);
+                }
+            }
         }
     });
   }

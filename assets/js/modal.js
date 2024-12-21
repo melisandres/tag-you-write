@@ -1,5 +1,6 @@
 import { SVGManager } from './svgManager.js';
 import { createColorScale } from './createColorScale.js';
+import { eventBus } from './eventBus.js';
 
 export class Modal {
     constructor(modalElement, path) {
@@ -28,7 +29,7 @@ export class Modal {
             </div>
             <h2 class="headline">${data.title || "Untitled"}</h2>
             <h3 class="author"> -&nbsp${data.firstName} ${data.lastName}&nbsp- </h3>
-            <p>${data.writing}</p>
+            <div class="writing">${data.writing}</div>
             ${noteHtml}
         </div>
       `;
@@ -80,6 +81,12 @@ export class Modal {
       ` : ''}
     `;
     this.applySVGColors();
+    
+    // Emit event after modal is fully drawn
+    eventBus.emit('modalDrawComplete', {
+        container: this.modalElement,
+        textId: data.id
+    });
   }
 
   getNumberOfVotes(data) {

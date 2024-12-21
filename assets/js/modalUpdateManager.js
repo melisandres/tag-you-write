@@ -14,6 +14,12 @@ export class ModalUpdateManager {
     eventBus.on('chooseWinner', this.handleChooseWinner.bind(this));
     eventBus.on('voteToggle', this.handleVoteToggle.bind(this));
     eventBus.on('gamePlayerCountUpdate', this.handleGamePlayerCountUpdate.bind(this));
+    eventBus.on('modalDrawComplete', ({ container, textId }) => {
+        const searchTerm = window.dataManager.getSearch();
+        if (searchTerm) {
+            this.highlightModalContent(container, textId, searchTerm);
+        }
+    });
   }
 
   handleInstaPublish({ textId, newStatus }) {
@@ -193,5 +199,52 @@ export class ModalUpdateManager {
     // Update the display with new player count
     voteCountSpan.textContent = `${currentVotes}/${newPlayerCount - 1} votes`;
     voteCountSpan.dataset.playerCount = (newPlayerCount - 1).toString();
+  }
+
+  highlightModalContent(container, textId, searchTerm) {
+    const searchResults = window.dataManager.getSearchResults();
+    if (!searchResults || !searchResults.nodes?.[textId]) return;
+
+    const nodeData = searchResults.nodes[textId];
+    
+    if (nodeData?.matches) {
+        // Highlight title if it matches
+        if (nodeData.titleMatches) {
+            const titleElement = container.querySelector('.headline');
+            if (titleElement) {
+                titleElement.innerHTML = this.highlightText(titleElement.textContent, searchTerm);
+            }
+        }
+
+        // Highlight writing if it matches
+        if (nodeData.writingMatches) {
+            const writingElement = container.querySelector('.writing');
+            if (writingElement) {
+                writingElement.innerHTML = this.highlightText(writingElement.textContent, searchTerm);
+            }
+        }
+
+        // Highlight note if it matches
+        if (nodeData.noteMatches) {
+            const noteElement = container.querySelector('.ps');
+            if (noteElement) {
+                noteElement.innerHTML = `<p>P.S... ${this.highlightText(noteElement.textContent.replace('P.S... ', ''), searchTerm)}</p>`;
+            }
+        }
+
+        // Highlight author if it matches
+        if (nodeData.writerMatches) {
+            const authorElement = container.querySelector('.author');
+            if (authorElement) {
+                authorElement.innerHTML = this.highlightText(authorElement.textContent, searchTerm);
+            }
+        }
+    }
+  }
+
+  // Helper function to highlight text
+  highlightText(text, searchTerm) {
+    const regex = new RegExp(`(${searchTerm})`, 'gi');
+    return text.replace(regex, '<mark>$1</mark>');
   }
 }

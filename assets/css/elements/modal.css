@@ -108,6 +108,14 @@
     overflow-y: auto;
 }
 
+.modal-text .writing{
+    font-size: 15px;
+    font-weight: 100;
+    color: black; 
+    padding: 0;
+    padding-bottom: 10px;
+}
+
 .modal .votes svg {
     width: 25px;
     height: 25px;
