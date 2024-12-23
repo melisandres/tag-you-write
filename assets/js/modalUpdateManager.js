@@ -20,7 +20,15 @@ export class ModalUpdateManager {
             this.highlightModalContent(container, textId, searchTerm);
         }
     });
+    eventBus.on('searchApplied', this.handleSearchApplied.bind(this));
     eventBus.on('nodeTextContentUpdate', this.handleNodeTextContentUpdate.bind(this));
+  }
+
+  handleSearchApplied(searchTerm) {
+    const modal = document.querySelector(`.modal-background[data-tree-modal="visible"]`);
+    if (modal) {
+      this.highlightModalContent(modal, modal.dataset.textId, searchTerm);
+    }
   }
 
   handleInstaPublish({ textId, newStatus }) {
@@ -236,41 +244,67 @@ export class ModalUpdateManager {
   }
 
   highlightModalContent(container, textId, searchTerm) {
+    // Get the original node data from dataManager
+    const node = window.dataManager.getNode(textId);
+    console.log('Node data:', { textId, node, searchTerm });
+    if (!node) return;
+
+    // First, clear all existing highlights by restoring original content
+    const elements = {
+        headline: { selector: '.headline', content: node.title },
+        writing: { selector: '.writing', content: node.writing },
+        note: { selector: '.note:not(button)', content: node.note ? `<p>P.S... </p>${node.note}` : '' },
+        author: { selector: '.author', content: node.writer_name }
+    };
+
+    // Debug log the elements and their content
+    console.log('Elements to process:', elements);
+
+    // Reset all elements to their original content
+    Object.values(elements).forEach(({ selector, content }) => {
+        const element = container.querySelector(selector);
+        if (element && content !== undefined) {  // Check for undefined
+            element.innerHTML = content;
+        }
+    });
+
+    // If no search term, we're done (just cleared highlights)
+    if (!searchTerm) return;
+
     const searchResults = window.dataManager.getSearchResults();
+    console.log('Search results:', { searchResults, textId });
     if (!searchResults || !searchResults.nodes?.[textId]) return;
 
-    const nodeData = searchResults.nodes[textId];
+    const nodeMatches = searchResults.nodes[textId];
     
-    if (nodeData?.matches) {
-        // Highlight title if it matches
-        if (nodeData.titleMatches) {
-            const titleElement = container.querySelector('.headline');
-            if (titleElement) {
-                titleElement.innerHTML = this.highlightText(titleElement.textContent, searchTerm);
+    if (nodeMatches?.matches) {
+        // Apply highlights based on match types
+        if (nodeMatches.titleMatches && node.title) {  // Check if content exists
+            const element = container.querySelector('.headline');
+            if (element) {
+                element.innerHTML = this.highlightText(node.title, searchTerm);
             }
         }
 
-        // Highlight writing if it matches
-        if (nodeData.writingMatches) {
-            const writingElement = container.querySelector('.writing');
-            if (writingElement) {
-                writingElement.innerHTML = this.highlightText(writingElement.textContent, searchTerm);
+        if (nodeMatches.writingMatches && node.writing) {  // Check if content exists
+            const element = container.querySelector('.writing');
+            if (element) {
+                element.innerHTML = this.highlightText(node.writing, searchTerm);
             }
         }
 
-        // Highlight note if it matches
-        if (nodeData.noteMatches) {
-            const noteElement = container.querySelector('.note:not(button)');
-            if (noteElement) {
-                noteElement.innerHTML = `<p>P.S... </p>${this.highlightText(noteElement.textContent.replace('P.S... ', ''), searchTerm)}</p>`;
+        if (nodeMatches.noteMatches && node.note) {  // Check if content exists
+            const element = container.querySelector('.note:not(button)');
+            if (element) {
+                const originalNote = node.note;
+                element.innerHTML = `<p>P.S... </p>${this.highlightText(originalNote, searchTerm)}`;
             }
         }
 
-        // Highlight author if it matches
-        if (nodeData.writerMatches) {
-            const authorElement = container.querySelector('.author');
-            if (authorElement) {
-                authorElement.innerHTML = this.highlightText(authorElement.textContent, searchTerm);
+        if (nodeMatches.writerMatches && node.writer_name) {  // Check if content exists
+            const element = container.querySelector('.author');
+            if (element) {
+                element.innerHTML = this.highlightText(node.writer_name, searchTerm);
             }
         }
     }
@@ -278,7 +312,41 @@ export class ModalUpdateManager {
 
   // Helper function to highlight text
   highlightText(text, searchTerm) {
-    const regex = new RegExp(`(${searchTerm})`, 'gi');
-    return text.replace(regex, '<mark>$1</mark>');
+    // Add defensive checks
+    if (!text || !searchTerm) {
+        console.warn('Invalid input to highlightText:', { text, searchTerm });
+        return text || '';
+    }
+    
+    try {
+        // Escape special characters in search term for regex
+        const escapedSearchTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        
+        // Create a temporary div to work with the HTML
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = text;
+        
+        // Recursive function to process text nodes only
+        const highlightTextNodes = (node) => {
+            if (node.nodeType === Node.TEXT_NODE) {
+                const regex = new RegExp(`(${escapedSearchTerm})`, 'gi');
+                if (regex.test(node.textContent)) {
+                    const span = document.createElement('span');
+                    span.innerHTML = node.textContent.replace(regex, '<mark>$1</mark>');
+                    node.parentNode.replaceChild(span, node);
+                }
+            } else {
+                Array.from(node.childNodes).forEach(highlightTextNodes);
+            }
+        };
+        
+        // Process the content
+        highlightTextNodes(tempDiv);
+        
+        return tempDiv.innerHTML;
+    } catch (error) {
+        console.error('Error in highlightText:', error, { text, searchTerm });
+        return text;
+    }
   }
 }

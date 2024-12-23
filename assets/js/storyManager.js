@@ -133,7 +133,13 @@ export class StoryManager {
     const gameId = cachedData.data.game_id;
     const gameData = this.dataManager.getGame(gameId);
     console.log('gameData:', gameData);
-    console.log('gameData.timestamp: sometime cant be found on the next line... so maybe check the gameData... to see what is happening');
+
+    // Add defensive check
+    if (!gameData) {
+        console.warn(`No game data found for gameId: ${gameId}`);
+        return cachedData.data;
+    }
+
     const lastGameUpdate = gameData.timestamp;
     const needsUpdate = lastGameUpdate && cachedData.timestamp 
         ? new Date(lastGameUpdate).getTime() > cachedData.timestamp
