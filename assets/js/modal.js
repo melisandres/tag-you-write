@@ -18,10 +18,9 @@ export class Modal {
       this.modalElement.dataset.treeModal = "visible";
       this.modalElement.dataset.textId = data.id;
       this.modalElement.dataset.gameId = data.game_id;
-      let noteHtml = data.note ? `<p class="ps">P.S... ${data.note}</p>` : '';
+      let noteHtml = data.note ? `<p class="ps">P.S... </p> ${data.note}` : '';
 
       this.modalContent.innerHTML = `
-        <div class="modal-text ${data.isWinner ? 'isWinner' : ''}">
             <div class="top-info ${data.text_status}">
               ${this.getNumberOfVotes(data)}
               ${data.text_status=='draft' || data.text_status=='incomplete_draft' ? '<span class="status draft">DRAFT</span>' : ''}
@@ -30,7 +29,7 @@ export class Modal {
             <h2 class="headline">${data.title || "Untitled"}</h2>
             <h3 class="author"> -&nbsp${data.firstName} ${data.lastName}&nbsp- </h3>
             <div class="writing">${data.writing}</div>
-            ${noteHtml}
+            <div class="note">${noteHtml}</div>
         </div>
       `;
 

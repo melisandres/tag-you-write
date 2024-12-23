@@ -20,6 +20,7 @@ export class ModalUpdateManager {
             this.highlightModalContent(container, textId, searchTerm);
         }
     });
+    eventBus.on('nodeTextContentUpdate', this.handleNodeTextContentUpdate.bind(this));
   }
 
   handleInstaPublish({ textId, newStatus }) {
@@ -201,6 +202,39 @@ export class ModalUpdateManager {
     voteCountSpan.dataset.playerCount = (newPlayerCount - 1).toString();
   }
 
+  handleNodeTextContentUpdate({ data }) {
+    const { id, changes } = data;
+    const modal = document.querySelector(`.modal-background[data-text-id='${id}'][data-tree-modal="visible"]`);
+    if (!modal) return;
+
+    Object.entries(changes).forEach(([prop, value]) => {
+        switch(prop) {
+            case 'title':
+                modal.querySelector('.headline').textContent = value;
+                break;
+            case 'writing':
+                modal.querySelector('.writing').innerHTML = value;
+                break;
+            case 'note':
+                const noteElement = modal.querySelector('.note:not(button)');
+                if (noteElement) {
+                    noteElement.innerHTML = `<p>P.S... </p> ${value}`;
+                } else {
+                    // If note didn't exist before, add it
+                    const modalText = modal.querySelector('.modal-text');
+                    modalText.insertAdjacentHTML('beforeend', `<div class="note"><p class="ps">P.S... </p>${value}</div>`);
+                }
+                break;
+        }
+    });
+
+    // If there's an active search, re-highlight the updated content
+    const searchTerm = window.dataManager.getSearch();
+    if (searchTerm) {
+        this.highlightModalContent(modal, id, searchTerm);
+    }
+  }
+
   highlightModalContent(container, textId, searchTerm) {
     const searchResults = window.dataManager.getSearchResults();
     if (!searchResults || !searchResults.nodes?.[textId]) return;
@@ -226,9 +260,9 @@ export class ModalUpdateManager {
 
         // Highlight note if it matches
         if (nodeData.noteMatches) {
-            const noteElement = container.querySelector('.ps');
+            const noteElement = container.querySelector('.note:not(button)');
             if (noteElement) {
-                noteElement.innerHTML = `<p>P.S... ${this.highlightText(noteElement.textContent.replace('P.S... ', ''), searchTerm)}</p>`;
+                noteElement.innerHTML = `<p>P.S... </p>${this.highlightText(noteElement.textContent.replace('P.S... ', ''), searchTerm)}</p>`;
             }
         }
 
