@@ -328,7 +328,7 @@ export class ShelfUpdateManager {
     Object.entries(changes).forEach(([prop, value]) => {
         switch(prop) {
             case 'title':
-                nodeElement.querySelector('.title').textContent = value;
+                nodeElement.querySelector('.title').innerHTML = value;
                 break;
             case 'writing':
                 // Find the writing div but preserve the node-buttons
@@ -358,6 +358,39 @@ export class ShelfUpdateManager {
                 const noteDateSpan = nodeElement.querySelector('.note + .date');
                 if (noteDateSpan) {
                     noteDateSpan.textContent = `${value}   (just edited)`;
+                }
+                break;
+        }
+    });
+
+    // Finally, apply search highlighting if needed
+    const searchTerm = this.dataManager.getSearch();
+    if (searchTerm) {
+        this.highlightUpdatedContent(nodeElement, changes, searchTerm);
+    }
+  }
+
+  // New method specifically for highlighting updated content
+  highlightUpdatedContent(nodeElement, changes, searchTerm) {
+    Object.entries(changes).forEach(([prop, value]) => {
+        let element;
+        switch(prop) {
+            case 'title':
+                element = nodeElement.querySelector('.title');
+                if (element) {
+                    element.innerHTML = this.highlightText(value, searchTerm);
+                }
+                break;
+            case 'writing':
+                const writingElements = nodeElement.querySelectorAll('.writing p');
+                writingElements.forEach(el => {
+                    el.innerHTML = this.highlightText(el.textContent, searchTerm);
+                });
+                break;
+            case 'note':
+                element = nodeElement.querySelector('.note');
+                if (element) {
+                    element.innerHTML = `<p>P.S... </p>${this.highlightText(value, searchTerm)}`;
                 }
                 break;
         }

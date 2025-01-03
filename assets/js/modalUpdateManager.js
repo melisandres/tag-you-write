@@ -211,17 +211,30 @@ export class ModalUpdateManager {
   }
 
   handleNodeTextContentUpdate({ data }) {
+    console.log('Node text content update received:', data);
     const { id, changes } = data;
     const modal = document.querySelector(`.modal-background[data-text-id='${id}'][data-tree-modal="visible"]`);
     if (!modal) return;
 
+    // First, update the node in dataManager to ensure it has latest data
+    const currentNode = window.dataManager.getNode(id);
+    if (currentNode) {
+        Object.entries(changes).forEach(([prop, value]) => {
+            currentNode[prop] = value;
+        });
+        // Force update the node in dataManager
+        window.dataManager.updateNode(id, currentNode);
+    }
+
+    // Then update the modal content
     Object.entries(changes).forEach(([prop, value]) => {
         switch(prop) {
             case 'title':
-                modal.querySelector('.headline').textContent = value;
+                modal.querySelector('.headline').innerHTML = value;
                 break;
             case 'writing':
-                modal.querySelector('.writing').innerHTML = value;
+                const writingEl = modal.querySelector('.writing');
+                writingEl.innerHTML = value;
                 break;
             case 'note':
                 const noteElement = modal.querySelector('.note:not(button)');
@@ -236,11 +249,39 @@ export class ModalUpdateManager {
         }
     });
 
-    // If there's an active search, re-highlight the updated content
+    // Finally, apply search highlighting if needed
     const searchTerm = window.dataManager.getSearch();
     if (searchTerm) {
-        this.highlightModalContent(modal, id, searchTerm);
+        // Use a new method specifically for content updates
+        this.highlightUpdatedContent(modal, changes, searchTerm);
     }
+  }
+
+  // New method specifically for highlighting updated content
+  highlightUpdatedContent(modal, changes, searchTerm) {
+    Object.entries(changes).forEach(([prop, value]) => {
+        let element;
+        switch(prop) {
+            case 'title':
+                element = modal.querySelector('.headline');
+                if (element) {
+                    element.innerHTML = this.highlightText(value, searchTerm);
+                }
+                break;
+            case 'writing':
+                element = modal.querySelector('.writing');
+                if (element) {
+                    element.innerHTML = this.highlightText(value, searchTerm);
+                }
+                break;
+            case 'note':
+                element = modal.querySelector('.note:not(button)');
+                if (element) {
+                    element.innerHTML = `<p>P.S... </p>${this.highlightText(value, searchTerm)}`;
+                }
+                break;
+        }
+    });
   }
 
   highlightModalContent(container, textId, searchTerm) {
