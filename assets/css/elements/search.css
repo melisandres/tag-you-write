@@ -1,15 +1,33 @@
-.search-highlight {
-    background-color: yellow;
-    padding: 0 2px;
+mark {
+    background-color: var(--color-accent);
     border-radius: 2px;
 }
 
+.search-highlight {
+    background-color: var(--color-accent);
+    padding: 0 2px;
+    border-radius: 2px;
+    stroke: var(--color-accent);
+    stroke-width: 6px;
+    stroke-opacity: 0.6;
+}
+
+/* Tree search highlight */
+.node path.search-match {
+    stroke: var(--color-accent) !important; /* Yellow highlight */
+    stroke-width: 75px !important;
+    stroke-opacity: 1 !important;
+    stroke-linecap: round !important;    /* Rounds the endpoints */
+    stroke-linejoin: round !important;   /* Rounds the corners */
+    paint-order: stroke fill !important; /* Ensures stroke is painted before fill */
+}
+
 .has-search-match>.node-headline>.arrow.closed {
-    border-left: 5px solid yellow;
+    border-left: 5px solid var(--color-accent);
 }
 
 .has-search-match>.node-headline>.arrow.open {
-    border-top: 5px solid yellow;
+    border-top: 5px solid var(--color-accent);
 }
 
 .has-search-match .title {
@@ -80,3 +98,5 @@
 .nav-link.search svg {
     fill: var(--color-white);
 }
+
+/* No need for complex combined states - the stroke will work with existing unread styling */

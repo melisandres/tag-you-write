@@ -36,7 +36,7 @@ export class TreeShelfModalPollingUpdateManager {
                 }
             }
         });
-        
+        console.log("changes", changes);
         eventBus.emit('nodeTextContentUpdate', { data: changes });
     }
     // TODO: you need a whole flow for updates on search results. 

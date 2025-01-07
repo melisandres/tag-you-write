@@ -77,6 +77,10 @@ export class TreeVisualizer {
 
         // Store instance globally
         window.treeVisualizerInstance = this;
+        this.dataManager = dataManager;
+
+        // Add event listener for title updates
+        eventBus.on('updateTreeNodeTitle', this.handleTitleUpdate.bind(this));
     }
     
     handleDrawTree({ container, data }) {
@@ -213,6 +217,11 @@ export class TreeVisualizer {
         const colorScale = this.colorScale;
         const baseColor = this.baseColor;
 
+        // Get search results and term safely
+        const searchResults = this.dataManager.getSearchResults() || { nodes: {} };
+        const searchTerm = this.dataManager.getSearch();
+
+        // Draw the heart/star for each node
         node.each(function(d) {
             const item = d3.select(this);
             if (d.data.isWinner) {
@@ -225,13 +234,23 @@ export class TreeVisualizer {
                 // Replace circle with heart
                 const heartPath = "m -10,-9 c -6.57,-7.05 -17.14,-7.05 -23.71,0 -6.56,7.05 -6.56,18.39 0,25.45 l 29.06,31.27 29.09,-31.23 c 6.57,-7.05 6.57,-18.4 0,-25.45 -6.57,-7.05 -17.14,-7.05 -23.71,0 l -5.35,5.75 -5.39,-5.78 z";
                 
-                item.append("path")
+                // Build the classes string
+                const path = item.append("path")
                     .attr("d", heartPath)
                     .attr("transform", "scale(0.4) translate(0, -15)")  // Adjusted translation to center the heart
                     .attr('class', d => {
                         // Concatenate multiple classes based on conditions
                         let classes = `${d.data.text_seen == 1 ? 'read' : 'unread'}`;
                         classes += ` ${d.data.text_status == 'draft' || d.data.text_status == 'incomplete_draft' ? 'tree-node-draft' : ''}`; 
+                        
+                        // Only add search-match class if we have search results and this node matches
+                        if (searchResults.nodes && searchResults.nodes[d.data.id]) {
+                            const nodeData = searchResults.nodes[d.data.id];
+                            if (nodeData.writingMatches || nodeData.noteMatches) {
+                                classes += " search-match";
+                            }
+                        }
+                        
                         return classes.trim();
                     })
                     .attr('data-id', d => d.data.id)
@@ -360,6 +379,14 @@ export class TreeVisualizer {
 
         // Store the tree data
         this.treeData = data;
+
+        //TODO: make sure this works
+        // After creating/updating nodes, check for search term
+        if (searchTerm) {
+            node.each(d => {
+                this.handleTitleHighlight(d.data.id, searchTerm, true);
+            });
+        }
     }
 
     createLegend(d) {
@@ -643,6 +670,11 @@ export class TreeVisualizer {
                 .style("font-size", `${authorFontSize}px`)
                 .style("opacity", authorVisibility)
                 .text(d => this.formatAuthorName(d.data, authorFontSize));
+            
+            const searchTerm = this.dataManager.getSearch();   
+            if (searchTerm) {
+                    this.handleTitleHighlight(d.data.id, searchTerm, true);
+                }
         });
     }
     
@@ -820,6 +852,15 @@ export class TreeVisualizer {
                     .attr('class', d => {
                         let classes = `${d.data.text_seen == 1 ? 'read' : 'unread'}`;
                         classes += ` ${d.data.text_status == 'draft' || d.data.text_status == 'incomplete_draft' ? 'tree-node-draft' : ''}`; 
+                        
+                        // Add search-match class if applicable
+                        if (searchResults.nodes && searchResults.nodes[d.data.id]) {
+                            const nodeData = searchResults.nodes[d.data.id];
+                            if (nodeData.writingMatches || nodeData.noteMatches) {
+                                classes += " search-match";
+                            }
+                        }
+                        
                         return classes.trim();
                     })
                     .attr('data-id', d => d.data.id)
@@ -921,6 +962,163 @@ export class TreeVisualizer {
     
         this.zoom.scaleExtent([minScale, this.maxScale]);
         this.svg.call(this.zoom);
+    }
+
+    handleTitleUpdate({ nodeId, title }) {
+        // Select the inner <g> where nodes are drawn
+        const innerG = this.svg.select("g").select("g");
+        console.log("TITLE UPDATE", nodeId, title);
+        
+        // Find the node group and title group using D3's selection methods
+        const nodeGroup = innerG.selectAll(".node")
+            .filter(d => d.data.id === nodeId);
+        const titleGroup = nodeGroup.select('.title-group');
+
+        if (!titleGroup.empty()) {
+            // Get current zoom scale to calculate proper font size
+            const transform = d3.zoomTransform(this.svg.node());
+            const scale = transform.k;
+            const fontSize = this.calculateFontSize(scale, 'title');
+
+            // Create a title accessor function that returns the new title
+            const titleAccessor = () => title || "Untitled";
+
+            // Update the title using the existing updateTitle method
+            const titleBottomPosition = this.updateTitle(titleGroup, titleAccessor, fontSize);
+
+            // Update author position based on new title position
+            nodeGroup.select("text.text-by")
+                .attr("dy", `${titleBottomPosition + this.config.titleAuthorSpacing}px`);
+        }
+    }
+
+    handleTitleHighlight(nodeId, searchTerm, shouldHighlight = true) {
+        const innerG = this.svg.select("g").select("g");
+        const nodeGroup = innerG.selectAll(".node")
+            .filter(d => d.data.id === nodeId);
+
+        // Check if we found the node
+        if (nodeGroup.empty()) {
+            console.log("Node not found for ID:", nodeId);
+            return;
+        }
+
+        // Handle title text
+        const titleGroup = nodeGroup.select('.title-group');
+        if (!titleGroup.empty()) {
+            const titleTexts = titleGroup.selectAll("text");
+            if (!titleTexts.empty()) {
+                if (shouldHighlight) {
+                    titleTexts.each(function() {
+                        const text = d3.select(this);
+                        if (!text.node()) return;
+                        const originalText = text.text();
+                        const regex = new RegExp(`(${searchTerm})`, 'gi');
+                        if (regex.test(originalText)) {
+                            text.text(''); // Clear existing text
+                            const parts = originalText.split(regex);
+                            parts.forEach(part => {
+                                if (regex.test(part)) {
+                                    text.append('tspan')
+                                        .attr('class', 'search-highlight')
+                                        .text(part);
+                                } else {
+                                    text.append('tspan').text(part);
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    titleTexts.each(function() {
+                        const text = d3.select(this);
+                        if (!text.node()) return;
+                        const originalText = text.text();
+                        text.text(originalText); // Reset to original text
+                    });
+                }
+            }
+        }
+
+        // Handle author text
+        const authorText = nodeGroup.select("text.text-by");
+
+        if (!authorText.empty() && authorText.node()) {
+            const originalText = authorText.text();
+            
+            // Get the node data to check permissions and full name
+            const nodeGroup = d3.select(authorText.node().parentNode);
+            const nodeData = nodeGroup.datum();
+            
+            if (nodeData.data.permissions.isMyText) {
+                // Special handling for "by you" with name matching
+                const regex = new RegExp(`(${searchTerm})`, 'gi');
+                const firstName = nodeData.data.firstName || '';
+                const lastName = nodeData.data.lastName || '';
+                
+                // Check if search matches either first or last name
+                const nameMatch = firstName.match(regex) || lastName.match(regex);
+                
+                if (nameMatch && shouldHighlight) {
+                    authorText.text(''); // Clear existing text
+                    authorText.append('tspan')
+                        .text('by ');
+                    authorText.append('tspan')
+                        .attr('class', 'search-highlight')
+                        .text('you');
+                } else {
+                    authorText.text(originalText);
+                }
+            } else if (shouldHighlight) {
+                const regex = new RegExp(`(${searchTerm})`, 'gi');
+                
+                // Get full names from data
+                const firstName = nodeData.data.firstName || '';
+                const lastName = nodeData.data.lastName || '';
+                
+                // Get displayed text (without "by ")
+                const displayedText = originalText.replace(/^by\s+/, '');
+                const [initial, ...lastNameParts] = displayedText.split(' ');
+                const displayedLastName = lastNameParts.join(' ');
+                
+                authorText.text(''); // Clear existing text
+                authorText.append('tspan')
+                    .text('by ');
+                
+                // Check if search matches full first name
+                const firstNameMatch = firstName.match(regex);
+                
+                // Add initial with highlighting if full first name matches
+                if (firstNameMatch) {
+                    authorText.append('tspan')
+                        .attr('class', 'search-highlight')
+                        .text(initial);
+                } else {
+                    authorText.append('tspan')
+                        .text(initial);
+                }
+                
+                // Add space
+                authorText.append('tspan').text(' ');
+                
+                // Handle last name with normal string matching
+                if (regex.test(displayedLastName)) {
+                    const parts = displayedLastName.split(regex);
+                    parts.forEach(part => {
+                        if (regex.test(part)) {
+                            authorText.append('tspan')
+                                .attr('class', 'search-highlight')
+                                .text(part);
+                        } else {
+                            authorText.append('tspan').text(part);
+                        }
+                    });
+                } else {
+                    authorText.append('tspan').text(displayedLastName);
+                }
+            } else {
+                authorText.text(originalText);
+            }
+        }
     }
 }
 

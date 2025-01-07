@@ -15,6 +15,8 @@ export class TreeUpdateManager {
     eventBus.on('voteToggle', this.handleVoteToggle.bind(this));
     eventBus.on('gamePlayerCountUpdate', this.handleGamePlayerCountUpdate.bind(this));
     eventBus.on('newNodesDiscovered', this.handleNewNodesDiscovered.bind(this));
+    eventBus.on('nodeTextContentUpdate', this.handleNodeTextContentUpdate.bind(this));
+    eventBus.on('searchApplied', this.handleSearchUpdate.bind(this));
   }
 
   handleInstaPublish({ textId, newStatus }) {
@@ -205,5 +207,83 @@ export class TreeUpdateManager {
         // Update the visualization for whole tree
     this.treeVisualizer.updateTree();
 /*     } */
+  }
+
+  handleNodeTextContentUpdate(changes) {
+    console.log("1. handleNodeTextContentUpdate START:", changes);
+    const container = document.querySelector('#showcase[data-showcase="tree"]');
+    if (!container) return;
+
+    // Emit event for TreeVisualizer to handle title update
+    if (changes.data.changes.title) {
+        console.log("2. About to emit updateTreeNodeTitle");
+        eventBus.emit('updateTreeNodeTitle', {
+            nodeId: changes.data.id,
+            title: changes.data.changes.title
+        });
+    }
+
+    // Apply search highlighting for the specific updated node
+    const searchTerm = this.dataManager.getSearch();
+    if (searchTerm) {
+        console.log("3. Before updateSingleNodeSearchHighlight, current search results:", 
+            this.dataManager.getSearchResults());
+        this.updateSingleNodeSearchHighlight(changes.data.id);
+    }
+  }
+
+  handleNodeHighlighting(nodeId, container) {
+    const searchResults = this.dataManager.getSearchResults();
+    if (!searchResults?.nodes) return;
+
+    const stringNodeId = String(nodeId);
+    const nodeData = searchResults.nodes[stringNodeId];
+    const node = container.querySelector(`.node path[data-id="${stringNodeId}"]`);
+    
+    if (!node || !nodeData) return;
+
+    const searchTerm = this.dataManager.getSearch();
+
+    // Base node highlighting for content matches
+    if (nodeData.writingMatches || nodeData.noteMatches) {
+        d3.select(node).classed('search-match', true);
+    } else {
+        d3.select(node).classed('search-match', false);
+    }
+
+    // Title/author text highlighting
+    if (nodeData.titleMatches || nodeData.writerMatches) {
+        this.treeVisualizer.handleTitleHighlight(nodeId, searchTerm, true);
+    } else {
+        // Remove highlights if no matches
+        this.treeVisualizer.handleTitleHighlight(nodeId, searchTerm, false);
+    }
+  }
+
+  updateSingleNodeSearchHighlight(nodeId) {
+    const container = document.querySelector('#showcase[data-showcase="tree"]');
+    if (!container) return;
+    this.handleNodeHighlighting(nodeId, container);
+  }
+
+  handleSearchUpdate(searchTerm) {
+    const container = document.querySelector('#showcase[data-showcase="tree"]');
+    if (!container) return;
+
+    // Clear all previous search matches
+    const allNodes = container.querySelectorAll('.node path[data-id]:not(.link)');
+    allNodes.forEach(node => {
+        d3.select(node).classed('search-match', false);
+    });
+
+    if (!searchTerm) return;
+
+    // Get search results and highlight matching nodes
+    const searchResults = this.dataManager.getSearchResults();
+    if (!searchResults?.nodes) return;
+
+    Object.keys(searchResults.nodes).forEach(nodeId => {
+        this.handleNodeHighlighting(nodeId, container);
+    });
   }
 } 

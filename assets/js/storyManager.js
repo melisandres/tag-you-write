@@ -112,6 +112,7 @@ export class StoryManager {
       const searchResults = await this.fetchSearchResults(id);
       if (searchResults) {
           this.dataManager.updateSearchResults(searchResults, id, true);
+          console.log("searchResults updating:", searchResults);
       }
     }
 

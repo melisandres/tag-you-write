@@ -198,6 +198,11 @@ export class DataManager {
         let hasUpdates = false;
         let hasTreeUpdates = false;
 
+        // search results first so that they are ready for other updates to consult
+        if (searchResults.length > 0) {
+            this.updateSearchResults(searchResults, currentlyViewedRootId, false);
+        }
+
         if (modifiedGames?.length > 0) {
             this.updateGamesData(modifiedGames, false);
             // this event refreshes the view in gameListRenderer.js
@@ -210,10 +215,6 @@ export class DataManager {
             eventBus.emit('treeNodesModified', modifiedNodes);
             hasUpdates = true;
             hasTreeUpdates = true;
-        }
-
-        if (searchResults.length > 0) {
-            this.updateSearchResults(searchResults, currentlyViewedRootId, false);
         }
 
         if (hasUpdates) {
@@ -1051,12 +1052,12 @@ export class DataManager {
 
         // Update the search results cache
         searchResults.forEach(node => {
-            // Convert each match property to boolean explicitly
-            const writingMatches = node.writingMatches === '1' || node.writingMatches === true;
-            const noteMatches = node.noteMatches === '1' || node.noteMatches === true;
-            const titleMatches = node.titleMatches === '1' || node.titleMatches === true;
-            const writerMatches = node.writerMatches === '1' || node.writerMatches === true;
-            const keywordMatches = node.keywordMatches === '1' || node.keywordMatches === true;
+            // Add numeric 1 to the comparison
+            const writingMatches = node.writingMatches === '1' || node.writingMatches === 1 || node.writingMatches === true;
+            const noteMatches = node.noteMatches === '1' || node.noteMatches === 1 || node.noteMatches === true;
+            const titleMatches = node.titleMatches === '1' || node.titleMatches === 1 || node.titleMatches === true;
+            const writerMatches = node.writerMatches === '1' || node.writerMatches === 1 || node.writerMatches === true;
+            const keywordMatches = node.keywordMatches === '1' || node.keywordMatches === 1 || node.keywordMatches === true;
 
             this.cache.searchResults.nodes[String(node.id)] = {
                 id: node.id,
