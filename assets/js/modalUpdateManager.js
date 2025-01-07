@@ -342,10 +342,10 @@ export class ModalUpdateManager {
             }
         }
 
-        if (nodeMatches.writerMatches && node.writer_name) {  // Check if content exists
+        if (nodeMatches.writerMatches && (node.firstName || node.lastName)) {  // Check if content exists
             const element = container.querySelector('.author');
             if (element) {
-                element.innerHTML = this.highlightText(node.writer_name, searchTerm);
+                element.innerHTML = this.highlightText("- " + node.firstName + " " + node.lastName + " -", searchTerm);
             }
         }
     }
