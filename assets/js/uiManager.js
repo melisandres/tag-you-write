@@ -165,7 +165,7 @@ export class UIManager {
   // To be accessed while doing automatic refreshes
   createShowcaseContainer(rootStoryId) {
     let container = document.querySelector('#showcase');
-    const story = document.querySelector(`[data-text-id="${rootStoryId}"]`);
+    const story = document.querySelector(`.story[data-text-id="${rootStoryId}"]`);
 
     if (container) {
       container.remove();

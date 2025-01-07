@@ -363,6 +363,7 @@ export class GameListRenderer {
         });
     }
 
+    //TODO: wtf is this? 
     async refreshGamesList() {
         // ... existing refresh code ...
         
