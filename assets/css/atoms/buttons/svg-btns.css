@@ -1,44 +1,51 @@
 /* svg styles */
 
 .iterate svg {
-    fill: currentColor;
+    fill: black;
+    stroke: none;
     width: 37px; 
     height: 37px; 
 }
 
 .edit svg {
-    fill: currentColor;
+    fill: black;
+    stroke: none;
     width: 36px;
     height: 36px;
     transform: rotate(40deg);
 }
 
 .note svg {
-    fill: currentColor;
+    fill: black;
+    stroke: none;
     width: 36px;
     height: 36px;
 }
 
 .publish svg {
-    fill: currentColor; 
+    fill: black; 
+    stroke: none;
     width: 30px;
     height: 30px;
 }
 
 .login svg {
-    fill: currentColor;
+    fill: black;
+    stroke: black;
     width: 29px;
     height: 29px;
 }
 
 .logout svg {
     fill: currentColor;
+    stroke: currentColor;
     width: 29px;
     height: 29px;
 }
 
 .delete svg {
-    fill: currentColor;
+    fill: black;
+    stroke: none;
     width: 37px;
     height: 37px;
     transform: translateX(-2px);
@@ -59,4 +66,14 @@
 
 .modal-btns .vote.voted svg{
     transform: rotate(-30deg);
+}
+
+.close-modal svg{
+    fill: black;
+    stroke: none;
+}
+
+.save svg{
+    fill: black;
+    stroke: none;
 }

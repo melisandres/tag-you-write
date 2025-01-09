@@ -102,7 +102,7 @@ export class ShelfVisualizer {
     return `
       <li class="node ${node.text_status === "published" ? "published" : "draft"}" data-story-id="${node.id}" style="--node-depth: ${depth}">
         <div class="node-headline ${isWinner}">
-          <div class="arrow closed">▶</div>
+          <div class="arrow closed arrow-right"></div>
           <div class="shelf-heart ${unread}"> ${this.getNumberOfVotes(node)}</div>
           <div class="headline-content">
             <h2 class="title">
@@ -273,7 +273,8 @@ export class ShelfVisualizer {
         if (writingDiv.classList.contains('hidden')) {
           writingDiv.classList.remove('hidden');
           writingDiv.classList.add('visible');
-          arrow.textContent = '▼';
+          arrow.classList.remove('arrow-right');
+          arrow.classList.add('arrow-down'); 
           arrow.classList.remove('closed');
           arrow.classList.add('open');
           // Handle marking as "read"
@@ -282,9 +283,10 @@ export class ShelfVisualizer {
         } else {
           writingDiv.classList.add('hidden');
           writingDiv.classList.remove('visible');
-          arrow.textContent = '▶';
           arrow.classList.remove('open');   
           arrow.classList.add('closed');
+          arrow.classList.remove('arrow-down');
+          arrow.classList.add('arrow-right');
         }
       });
     });

@@ -12,20 +12,25 @@
 }
 
 .with-tree .node path.unread, .with-tree path.unread, .with-tree .star.unread{
-    /* fill: rgb(255, 202, 78); */
-    /* stroke: rgb(238, 167, 2); */
-/*     stroke-width: 1px; */
-    /* white gap */
-    filter: 
-        drop-shadow( 1.2px  0px 0px white) 
-        drop-shadow(-1.2px  0px 0px white)
-        drop-shadow( 0px  1.2px 0px white) 
-        drop-shadow( 0px -1.2px 0px white)
-
-        /* shadow */
-        drop-shadow(0 0 20px rgba(247, 173, 0, 1))
-        drop-shadow(0 0 35px rgba(247, 173, 0, 0.8));
+    stroke: black;
+    stroke-width: 1px;
+    filter: url(#unreadGlow);
 }
+
+/* Safari-specific adjustments */
+/* @media not all and (min-resolution:.001dpcm) { 
+    @supports (-webkit-appearance:none) {
+        .with-tree .node path.unread, .with-tree path.unread, .with-tree .star.unread {
+            -webkit-filter: 
+                drop-shadow( 1.2px  0px 0px white) 
+                drop-shadow(-1.2px  0px 0px white)
+                drop-shadow( 0px  1.2px 0px white) 
+                drop-shadow( 0px -1.2px 0px white)
+                drop-shadow(0 0 20px rgba(247, 173, 0, 1))
+                drop-shadow(0 0 35px rgba(247, 173, 0, 0.8));
+        }
+    }
+} */
 
 .unreads{
 /*     box-shadow: rgb(244, 218, 90, 1) -1px 0px, white -6px 0px, rgb(244, 218, 90, 0.7) -7px 0px, white -12px 0px, rgb(244, 218, 90, 0.4) -13px 0px, white -18px 0px, rgb(244, 218, 90, 0.1) -19px 0px; */

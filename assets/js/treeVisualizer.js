@@ -148,7 +148,86 @@ export class TreeVisualizer {
             .attr("width", this.containerWidth)
             .attr("height", this.containerHeight)
             .style("overflow", "visible");
-  
+
+        // A filter for the unread nodes
+        const defs = this.svg.append("defs");
+        const filter = defs.append("filter")
+            .attr("id", "unreadGlow")
+            .attr("x", "-300%")    // Even wider bounds
+            .attr("y", "-300%")
+            .attr("width", "700%") // Much larger to prevent any cutoff
+            .attr("height", "700%");
+
+        // Super bright inner glow
+        filter.append("feGaussianBlur")
+            .attr("in", "SourceGraphic")
+            .attr("stdDeviation", "3")
+            .attr("result", "blur1");
+
+        // Medium spread glow
+        filter.append("feGaussianBlur")
+            .attr("in", "SourceGraphic")
+            .attr("stdDeviation", "15")
+            .attr("result", "blur2");
+
+        // Extra wide outer glow
+        filter.append("feGaussianBlur")
+            .attr("in", "SourceGraphic")
+            .attr("stdDeviation", "25")   // Added third, wider blur
+            .attr("result", "blur3");
+
+        // Intense inner glow
+        filter.append("feFlood")
+            .attr("flood-color", "rgb(255, 220, 0)")
+            .attr("flood-opacity", "1")
+            .attr("result", "color1");
+
+        // Strong middle glow
+        filter.append("feFlood")
+            .attr("flood-color", "rgb(255, 180, 0)")
+            .attr("flood-opacity", "0.9")
+            .attr("result", "color2");
+
+        // Far-reaching outer glow
+        filter.append("feFlood")
+            .attr("flood-color", "rgb(255, 160, 0)") // Slightly more orange for distance
+            .attr("flood-opacity", "0.7")            // Still visible but softer
+            .attr("result", "color3");
+
+        // Composite operations
+        filter.append("feComposite")
+            .attr("in", "color1")
+            .attr("in2", "blur1")
+            .attr("operator", "in")
+            .attr("result", "glow1");
+
+        filter.append("feComposite")
+            .attr("in", "color2")
+            .attr("in2", "blur2")
+            .attr("operator", "in")
+            .attr("result", "glow2");
+
+        filter.append("feComposite")
+            .attr("in", "color3")
+            .attr("in2", "blur3")
+            .attr("operator", "in")
+            .attr("result", "glow3");
+
+        // Merge all layers with extra intensity
+        filter.append("feMerge")
+            .selectAll("feMergeNode")
+            .data([
+                "glow3", // furthest outer glow
+                "glow3", // doubled for distance
+                "glow2", // middle glow
+                "glow2", // doubled for intensity
+                "glow1", // inner glow
+                "glow1", // doubled for intensity
+                "SourceGraphic"
+            ])
+            .enter().append("feMergeNode")
+            .attr("in", d => d);
+
         const g = this.svg.append("g")
   
         // To correct the stutter of the tree when it is zoomed out and dragged, append a "g" to the original "g".
@@ -993,6 +1072,24 @@ export class TreeVisualizer {
     }
 
     handleTitleHighlight(nodeId, searchTerm, shouldHighlight = true) {
+        // Ensure we have a container
+        if (!this.container) {
+            console.warn('Container not available for highlighting');
+            return;
+        }
+
+        // Convert nodeId to string for consistent comparison
+        const id = String(nodeId);
+        
+        // Use CSS.escape to properly handle the selector
+        const selector = `.node path[data-id="${id}"]`;
+        const node = this.container.querySelector(selector);
+
+        if (!node) {
+            console.warn(`Node not found for ID: ${id}`);
+            return;
+        }
+
         const innerG = this.svg.select("g").select("g");
         const nodeGroup = innerG.selectAll(".node")
             .filter(d => d.data.id === nodeId);

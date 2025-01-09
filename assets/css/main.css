@@ -39,7 +39,11 @@
 @import url(./layouts/shelf.css);
 @import url(./layouts/stories.css);
 
+/* layouts: pages*/
+@import url(./layouts/tutorial.css);
+
 /* layouts: darkMode / lightMode */
 @import url(./layouts/darkMode.css);
 @import url(./layouts/lightMode.css);
+
 

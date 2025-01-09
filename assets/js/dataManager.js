@@ -627,7 +627,8 @@ export class DataManager {
 
     // Helper method to get a node quickly
     getNode(nodeId) {
-        return this.cache.nodesMap.get(String(nodeId));
+        return this.cache.nodesMap.get(String(nodeId)) || 
+               this.cache.nodesMap.get(Number(nodeId));
     }
 
     // Helper method to get parent of a node
@@ -669,15 +670,15 @@ export class DataManager {
 
     // Save cache to localStorage
     saveCache() {
-/*         console.log('Starting saveCache with state:', {
-            gamesSize: this.cache.games.size,
-            treesSize: this.cache.trees.size,
-            nodesMapSize: this.cache.nodesMap.size
-        }); */
-
-        const cacheToSave = {
+        // Filter out null keys from trees before saving
+        const cleanTrees = new Map(
+            Array.from(this.cache.trees.entries())
+                .filter(([key]) => key !== null)
+        );
+        
+        const cacheData = {
             games: Array.from(this.cache.games.entries()),
-            trees: Array.from(this.cache.trees.entries()),
+            trees: Array.from(cleanTrees.entries()),
             nodesMap: Array.from(this.cache.nodesMap.entries()),
             lastGamesCheck: this.cache.lastGamesCheck,
             currentViewedRootId: this.cache.currentViewedRootId,
@@ -691,7 +692,7 @@ export class DataManager {
         };
         
         try {
-            localStorage.setItem('storyCache', JSON.stringify(cacheToSave));
+            localStorage.setItem('storyCache', JSON.stringify(cacheData));
 /*             console.log('Cache saved successfully. Sample of saved data:', {
                 gamesCount: cacheToSave.games.length,
                 treesCount: cacheToSave.trees.length,

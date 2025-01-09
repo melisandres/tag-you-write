@@ -234,11 +234,26 @@ export class TreeUpdateManager {
 
   handleNodeHighlighting(nodeId, container) {
     const searchResults = this.dataManager.getSearchResults();
-    if (!searchResults?.nodes) return;
+    console.log('8. handleNodeHighlighting for nodeId:', nodeId);
+    if (!searchResults?.nodes) {
+        console.log('9. No search results available');
+        return;
+    }
 
     const stringNodeId = String(nodeId);
     const nodeData = searchResults.nodes[stringNodeId];
     const node = container.querySelector(`.node path[data-id="${stringNodeId}"]`);
+    
+    console.log('10. Node data:', {
+        nodeData,
+        nodeFound: !!node,
+        matches: nodeData ? {
+            writing: nodeData.writingMatches,
+            note: nodeData.noteMatches,
+            title: nodeData.titleMatches,
+            writer: nodeData.writerMatches
+        } : null
+    });
     
     if (!node || !nodeData) return;
 
@@ -246,16 +261,19 @@ export class TreeUpdateManager {
 
     // Base node highlighting for content matches
     if (nodeData.writingMatches || nodeData.noteMatches) {
+        console.log('11. Adding search-match class to node:', stringNodeId);
         d3.select(node).classed('search-match', true);
     } else {
+        console.log('12. Removing search-match class from node:', stringNodeId);
         d3.select(node).classed('search-match', false);
     }
 
     // Title/author text highlighting
     if (nodeData.titleMatches || nodeData.writerMatches) {
+        console.log('13. Handling title highlight for node:', stringNodeId);
         this.treeVisualizer.handleTitleHighlight(nodeId, searchTerm, true);
     } else {
-        // Remove highlights if no matches
+        console.log('14. Removing title highlight for node:', stringNodeId);
         this.treeVisualizer.handleTitleHighlight(nodeId, searchTerm, false);
     }
   }
@@ -267,22 +285,33 @@ export class TreeUpdateManager {
   }
 
   handleSearchUpdate(searchTerm) {
+    console.log('1. handleSearchUpdate called with term:', searchTerm);
     const container = document.querySelector('#showcase[data-showcase="tree"]');
+    console.log('2. Container found:', !!container);
     if (!container) return;
 
     // Clear all previous search matches
     const allNodes = container.querySelectorAll('.node path[data-id]:not(.link)');
+    console.log('3. Found nodes to clear:', allNodes.length);
     allNodes.forEach(node => {
         d3.select(node).classed('search-match', false);
     });
 
-    if (!searchTerm) return;
+    if (!searchTerm) {
+        console.log('4. No search term, exiting');
+        return;
+    }
 
     // Get search results and highlight matching nodes
     const searchResults = this.dataManager.getSearchResults();
-    if (!searchResults?.nodes) return;
+    console.log('5. Search results:', searchResults);
+    if (!searchResults?.nodes) {
+        console.log('6. No search results nodes found');
+        return;
+    }
 
     Object.keys(searchResults.nodes).forEach(nodeId => {
+        console.log('7. Processing node:', nodeId);
         this.handleNodeHighlighting(nodeId, container);
     });
   }
