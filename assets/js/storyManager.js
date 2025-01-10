@@ -164,23 +164,27 @@ export class StoryManager {
     try {
         // Set the current viewed root story ID before preparing data
         this.dataManager.setCurrentViewedRootStoryId(id);
+        const hasActiveSearch = this.dataManager.getSearch();
         
-        // First, get the initial tree data and draw it
-        const initialTreeData = this.dataManager.getTree(id)?.data;
-        if (initialTreeData) {
-            // Draw the initial tree first if we have cached data
-            eventBus.emit('drawTree', { container, data: initialTreeData });
+        if (!hasActiveSearch) {
+            // Original behavior for no search - draw from cache first if available
+            const initialTreeData = this.dataManager.getTree(id)?.data;
+            if (initialTreeData) {
+                eventBus.emit('drawTree', { container, data: initialTreeData });
+            }
         }
         
-        // Then prepare updated data (this might trigger polling updates)
+        // Prepare data (this will update search results if there's a search)
         const updatedTreeData = await this.prepareData(id);
         if (!updatedTreeData) {
             console.error('Failed to prepare tree data for ID:', id);
             return;
         }
 
-        // If we didn't have initial data, or if the data has changed, draw/update the tree
-        if (!initialTreeData || JSON.stringify(initialTreeData) !== JSON.stringify(updatedTreeData)) {
+        // If no search, only redraw if data changed
+        // If there is a search, always draw with prepared data
+        if (hasActiveSearch || !this.dataManager.getTree(id)?.data || 
+            JSON.stringify(this.dataManager.getTree(id)?.data) !== JSON.stringify(updatedTreeData)) {
             eventBus.emit('drawTree', { container, data: updatedTreeData });
         }
     } catch (error) {

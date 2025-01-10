@@ -335,6 +335,7 @@ export class TreeVisualizer {
                         classes += ` ${d.data.text_status == 'draft' || d.data.text_status == 'incomplete_draft' ? 'tree-node-draft' : ''}`; 
                         
                         // Only add search-match class if we have search results and this node matches
+                        console.log('DRAW THE HEART: searchResults:', searchResults);
                         if (searchResults.nodes && searchResults.nodes[d.data.id]) {
                             const nodeData = searchResults.nodes[d.data.id];
                             if (nodeData.writingMatches || nodeData.noteMatches) {
@@ -426,41 +427,6 @@ export class TreeVisualizer {
         // Apply zoom to SVG
         this.svg.call(this.zoom);
         
-        // Check for saved state
-        //TODO: this is where the saved state was previously being created
-        //savedState = JSON.parse(localStorage.getItem('pageState'));
-        
-        // Only apply initial transform if we're not restoring from GameListRenderer
-       /*  if (!window.skipInitialTreeTransform) {
-            if (savedState?.showcase?.type === 'tree'
-                && savedState.showcase.transform 
-                && this.pageJustLoaded) {
-                // Apply saved transform
-                const transform = savedState.transform;
-                const initialTransform = d3.zoomIdentity
-                    .translate(transform.x, transform.y)
-                    .scale(transform.k);
-                
-                this.svg.call(this.zoom.transform, initialTransform);
-            } else {
-                // Calculate and apply initial transform as before
-                const initialScale = Math.max(minScale, Math.min(
-                    (this.containerWidth - this.margin.left - this.margin.right * 2) / bounds.width,
-                    (this.containerHeight - this.margin.top - this.margin.bottom * 2) / bounds.height,
-                    1
-                ));
-
-                const initialTransform = d3.zoomIdentity
-                    .translate(
-                        (this.containerWidth - bounds.width * initialScale) / 2 - bounds.x * initialScale,
-                        (this.containerHeight - bounds.height * initialScale) / 2 - bounds.y * initialScale
-                    )
-                    .scale(initialScale);
-
-                this.svg.call(this.zoom.transform, initialTransform);
-            }
-        } */
-
         // After bounds are calculated, handle positioning
         if (shouldUseSavedTransform) {
             console.log('Applying saved transform for tree:', data.id);
@@ -486,14 +452,13 @@ export class TreeVisualizer {
         this.treeData = data;
 
         //TODO: make sure this works
-        // After creating/updating nodes, check for search term
-        // TODO: I'm getting some ghost search results sometimes... so it might be a good idea to check for a current search term, rather than maybe getting a ghost here...
-        if (searchTerm) {
-            node.each(d => {
-                this.handleTitleHighlight(d.data.id, searchTerm, true);
-            });
-        }
+        console.log('About to call applySearchMatches');
+        // After tree is completely drawn, apply search matches
+        this.applySearchMatches();
+        console.log('After calling applySearchMatches');
     }
+
+    
 
     centerTree(bounds, minScale) {
         console.log('Centering tree in container');
@@ -1114,6 +1079,46 @@ export class TreeVisualizer {
             nodeGroup.select("text.text-by")
                 .attr("dy", `${titleBottomPosition + this.config.titleAuthorSpacing}px`);
         }
+    }
+
+    // Add new method to handle search matches
+    applySearchMatches() {
+        console.log('ENTER applySearchMatches');
+        const searchTerm = this.dataManager.getSearch();
+        console.log('SEARCH TERM:', searchTerm);
+        const searchResults = this.dataManager.getSearchResults();
+        console.log('SEARCH RESULTS:', searchResults);
+
+        if (!searchTerm || !searchResults || !searchResults.nodes) {
+            console.log('Exiting early - missing data:', {
+                searchTerm,
+                hasSearchResults: !!searchResults,
+                hasNodes: searchResults?.nodes
+            });
+            return;
+        }
+
+        console.log('Applying search matches to tree:', searchResults);
+
+        // Select all node paths
+        const nodes = this.svg.selectAll('.node path');
+        
+        nodes.each(function(d) {
+            const node = d3.select(this);
+            const nodeId = node.attr('data-id');
+            
+            if (searchResults.nodes[nodeId]) {
+                const nodeData = searchResults.nodes[nodeId];
+                if (nodeData.writingMatches || nodeData.noteMatches) {
+                    node.classed('search-match', true);
+                }
+            }
+        });
+
+        // After applying search-match class, apply title highlights
+        this.svg.selectAll('.node').each((d) => {
+            this.handleTitleHighlight(d.data.id, searchTerm, true);
+        });
     }
 
     handleTitleHighlight(nodeId, searchTerm, shouldHighlight = true) {
