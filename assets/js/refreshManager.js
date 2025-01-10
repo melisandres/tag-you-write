@@ -467,14 +467,21 @@ export class RefreshManager {
 
     // This is used to restore the state of the page with the game list
     async restoreState() {
-        console.log('RESTORING');
-        //console.log('restoreState called from:', new Error().stack);
+        console.log('=== RESTORE STATE START ===');
+        console.log('Is restoring:', this.isRestoring);
         if (this.isRestoring) return;
         this.isRestoring = true;
 
         try {
+            let savedState = JSON.parse(localStorage.getItem('pageState'));
+            console.log('Saved state:', {
+                hasShowcase: !!savedState?.showcase,
+                showcaseType: savedState?.showcase?.type,
+                transform: savedState?.showcase?.transform
+            });
+
             // Check for saved state
-            const savedState = JSON.parse(localStorage.getItem('pageState'));
+            savedState = JSON.parse(localStorage.getItem('pageState'));
             console.log('Initial savedState:', savedState);
 
             if (!savedState) return;
@@ -512,26 +519,8 @@ export class RefreshManager {
                         await this.uiManager.drawShelf(priorityRootStoryId, container);
                         this.restoreDrawers(savedState);
                     } else if (priorityShowcaseType === 'tree') {
-                        window.skipInitialTreeTransform = true;
-                        
-                        try {
-                            // TODO: this is why getTree is called twice. 
-                            // Check if we have valid tree data before attempting to draw
-/*                             const treeData = await this.storyManager.prepareData(priorityRootStoryId);
-                            if (!treeData) {
-                                console.error('Failed to restore tree view - no valid data');
-                                return;
-                            } */
-                            
-                            await this.uiManager.drawTree(priorityRootStoryId, container);
-                            
-                            if (savedState.showcase.transform !== null) {
-                                await new Promise(resolve => setTimeout(resolve, 100));
-                                this.restoreTreeTransform(savedState.showcase.transform);
-                            }
-                        } finally {
-                            window.skipInitialTreeTransform = false;
-                        }
+                        // The transform will be handled directly in drawTree
+                        await this.uiManager.drawTree(priorityRootStoryId, container);
                     }
                 }
 

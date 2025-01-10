@@ -107,6 +107,18 @@ export class TreeVisualizer {
     }
   
     drawTree(data) {
+        console.log('=== TREE DRAW START ===');
+        
+        // Check if we have a saved position for this specific tree
+        const savedState = JSON.parse(localStorage.getItem('pageState'));
+        const shouldUseSavedTransform = savedState?.showcase?.rootStoryId === data.id && 
+                                      savedState?.showcase?.transform &&
+                                      typeof savedState.showcase.transform.x === 'number' &&
+                                      typeof savedState.showcase.transform.y === 'number' &&
+                                      typeof savedState.showcase.transform.k === 'number';
+        
+        //console.log('Initial transform state:', transform);
+
         /* console.log('Tree data received:', data); */
 
         // Check if D3 is available
@@ -415,10 +427,11 @@ export class TreeVisualizer {
         this.svg.call(this.zoom);
         
         // Check for saved state
-        const savedState = JSON.parse(localStorage.getItem('pageState'));
+        //TODO: this is where the saved state was previously being created
+        //savedState = JSON.parse(localStorage.getItem('pageState'));
         
         // Only apply initial transform if we're not restoring from GameListRenderer
-        if (!window.skipInitialTreeTransform) {
+       /*  if (!window.skipInitialTreeTransform) {
             if (savedState?.showcase?.type === 'tree'
                 && savedState.showcase.transform 
                 && this.pageJustLoaded) {
@@ -446,6 +459,19 @@ export class TreeVisualizer {
 
                 this.svg.call(this.zoom.transform, initialTransform);
             }
+        } */
+
+        // After bounds are calculated, handle positioning
+        if (shouldUseSavedTransform) {
+            console.log('Applying saved transform for tree:', data.id);
+            const savedTransform = savedState.showcase.transform;
+            const transform = d3.zoomIdentity
+                .translate(savedTransform.x, savedTransform.y)
+                .scale(savedTransform.k);
+            this.svg.call(this.zoom.transform, transform);
+        } else {
+            console.log('Centering tree in container');
+            this.centerTree(bounds, minScale);
         }
 
         // The Legend
@@ -461,11 +487,30 @@ export class TreeVisualizer {
 
         //TODO: make sure this works
         // After creating/updating nodes, check for search term
+        // TODO: I'm getting some ghost search results sometimes... so it might be a good idea to check for a current search term, rather than maybe getting a ghost here...
         if (searchTerm) {
             node.each(d => {
                 this.handleTitleHighlight(d.data.id, searchTerm, true);
             });
         }
+    }
+
+    centerTree(bounds, minScale) {
+        console.log('Centering tree in container');
+        const initialScale = Math.max(minScale, Math.min(
+            (this.containerWidth - this.margin.left - this.margin.right * 2) / bounds.width,
+            (this.containerHeight - this.margin.top - this.margin.bottom * 2) / bounds.height,
+            1
+        ));
+    
+        const initialTransform = d3.zoomIdentity
+            .translate(
+                (this.containerWidth - bounds.width * initialScale) / 2 - bounds.x * initialScale,
+                (this.containerHeight - bounds.height * initialScale) / 2 - bounds.y * initialScale
+            )
+            .scale(initialScale);
+    
+        this.svg.call(this.zoom.transform, initialTransform);
     }
 
     createLegend(d) {
