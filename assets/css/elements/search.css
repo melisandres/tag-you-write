@@ -3,13 +3,21 @@ mark {
     border-radius: 2px;
 }
 
-.search-highlight {
+/* .search-highlight {
     background-color: var(--color-accent);
     padding: 0 2px;
     border-radius: 2px;
     stroke: var(--color-accent);
     stroke-width: 6px;
     stroke-opacity: 0.6;
+} */
+
+.with-tree .search-highlight {
+    filter: url(#searchHighlight); /* Ensure text remains black */
+}
+
+.with-tree .text-by .search-highlight {
+    fill: rgb(160, 138, 0);
 }
 
 /* Tree search highlight */
@@ -23,11 +31,17 @@ mark {
 }
 
 .has-search-match>.node-headline>.arrow.closed {
-    border-left: 5px solid var(--color-accent);
+    border-left: 10px solid var(--color-accent);
+    border-top: 5.5px solid transparent;
+    border-bottom: 5.5px solid transparent;
+    filter: drop-shadow(-1px 0 0 rgb(242, 202, 42));
 }
 
 .has-search-match>.node-headline>.arrow.open {
-    border-top: 5px solid var(--color-accent);
+    border-top: 10px solid var(--color-accent);
+    border-left: 5.5px solid transparent;
+    border-right: 5.5px solid transparent;
+    filter: drop-shadow(0 -1px 0 rgb(242, 202, 42));
 }
 
 .has-search-match .title {

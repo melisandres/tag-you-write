@@ -575,7 +575,12 @@ export class RefreshManager {
                 drawer.classList.add('visible');
                 drawer.classList.remove('hidden');
                 const arrow = drawer.closest('.node').querySelector(".arrow");
-                arrow.textContent = '▼';
+                if (arrow) {
+                    arrow.classList.add('open');
+                    arrow.classList.add('arrow-down')
+                    arrow.classList.remove('closed');
+                    arrow.classList.remove('arrow-right');
+                }
             }
         });
     }

@@ -240,6 +240,41 @@ export class TreeVisualizer {
             .enter().append("feMergeNode")
             .attr("in", d => d);
 
+        // Update the search highlight filter
+        const searchHighlightFilter = defs.append("filter")
+            .attr("id", "searchHighlight")
+            .attr("x", "-20%")
+            .attr("y", "-20%")
+            .attr("width", "140%")
+            .attr("height", "140%");
+
+        // First, create a dilated version of the text for the highlight shape
+        searchHighlightFilter.append("feMorphology")
+            .attr("in", "SourceGraphic")
+            .attr("operator", "dilate")
+            .attr("radius", "3")
+            .attr("result", "thicken");
+
+        // Create the yellow highlight
+        searchHighlightFilter.append("feFlood")
+            .attr("flood-color", "var(--color-accent)")
+            .attr("flood-opacity", "0.6")
+            .attr("result", "highlightColor");
+
+        // Apply the highlight color to the thickened shape
+        searchHighlightFilter.append("feComposite")
+            .attr("in", "highlightColor")
+            .attr("in2", "thicken")
+            .attr("operator", "in")
+            .attr("result", "highlightShape");
+
+        // Critical: Merge with highlight FIRST, then SourceGraphic on top
+        searchHighlightFilter.append("feMerge")
+            .selectAll("feMergeNode")
+            .data(["highlightShape", "SourceGraphic"]) // Order matters here
+            .enter().append("feMergeNode")
+            .attr("in", d => d);
+
         const g = this.svg.append("g")
   
         // To correct the stutter of the tree when it is zoomed out and dragged, append a "g" to the original "g".
@@ -1170,7 +1205,8 @@ export class TreeVisualizer {
                                         .attr('class', 'search-highlight')
                                         .text(part);
                                 } else {
-                                    text.append('tspan').text(part);
+                                    text.append('tspan')
+                                    .text(part);
                                 }
                             });
                         }

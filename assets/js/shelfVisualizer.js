@@ -148,7 +148,6 @@ export class ShelfVisualizer {
         // Open the node
         writingDiv.classList.remove('hidden');
         writingDiv.classList.add('visible');
-        arrow.textContent = '▼';
         arrow.classList.add('open');
       }
       

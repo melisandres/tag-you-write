@@ -91,10 +91,14 @@ div.writing.visible{
 
 .with-shelf .writing{
     padding: 10px;
-    margin-left: 6.5px;
+    margin-left: 4.5px;
     border-left: 2px solid #ccc;
     height: auto;
     transition: height 8s ease-in-out;
+}
+
+.with-shelf .has-search-match > .writing{
+    border-left: 2px solid var(--color-accent);
 }
 
 .with-shelf .isWinner.writing {

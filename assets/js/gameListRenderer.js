@@ -345,7 +345,12 @@ export class GameListRenderer {
                 drawer.classList.add('visible');
                 drawer.classList.remove('hidden');
                 const arrow = drawer.closest('.node').querySelector(".arrow");
-                if (arrow) arrow.textContent = '▼';
+                if (arrow) {
+                    arrow.classList.add('open');
+                    arrow.classList.add('arrow-down')
+                    arrow.classList.remove('closed');
+                    arrow.classList.remove('arrow-right');
+                }
             }
         });
     }

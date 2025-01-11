@@ -126,7 +126,7 @@
     --form-button-font-size: var(--font-size-small);
     --form-button-icon-size: 40px;
     --form-button-svg-size: 30px;
-    --form-btns-padding-top: var(--spacing-giant);
+    --form-btns-padding-top: var(--spacing-extra-large);
 
     /* Modal buttons */
     --modal-button-opacity: 0.95;
