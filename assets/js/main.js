@@ -34,6 +34,7 @@ import { SearchHighlighter } from './searchHighlighter.js';
 import { PollingManager } from './pollingManager.js';
 import { GameUpdateHandler } from './gameUpdateHandler.js';
 import { TreeShelfModalPollingUpdateManager } from './TreeShelfModalPollingUpdateManager.js';
+import { HomePageManager } from './homePageManager.js';
 // Make eventBus globally available immediately
 window.eventBus = eventBus;
 
@@ -41,6 +42,8 @@ window.eventBus = eventBus;
 document.addEventListener("DOMContentLoaded", async () => {
 
   const path = window.location.origin + "/tag-you-write-repo/tag-you-write/";
+
+  new HomePageManager();
   
   // Initialize DataManager first
   window.dataManager = DataManager.getInstance(path);

@@ -29,6 +29,7 @@
 @import url(./elements/filters.css);
 @import url(./elements/search.css);
 @import url(./elements/menu.css);
+@import url(./elements/home-container.css);
 
 /* general: a catch-all  */
 @import url(./general/general.css);
