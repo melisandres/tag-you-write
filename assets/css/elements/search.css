@@ -3,15 +3,6 @@ mark {
     border-radius: 2px;
 }
 
-/* .search-highlight {
-    background-color: var(--color-accent);
-    padding: 0 2px;
-    border-radius: 2px;
-    stroke: var(--color-accent);
-    stroke-width: 6px;
-    stroke-opacity: 0.6;
-} */
-
 .with-tree .search-highlight {
     filter: url(#searchHighlight); /* Ensure text remains black */
 }
@@ -20,14 +11,19 @@ mark {
     fill: rgb(160, 138, 0);
 }
 
-/* Tree search highlight */
+/* Tree search highlight heart node */
 .node path.search-match {
     stroke: var(--color-accent) !important; /* Yellow highlight */
-    stroke-width: 75px !important;
+    stroke-width: 60px !important;
     stroke-opacity: 1 !important;
     stroke-linecap: round !important;    /* Rounds the endpoints */
     stroke-linejoin: round !important;   /* Rounds the corners */
     paint-order: stroke fill !important; /* Ensures stroke is painted before fill */
+}
+
+/* Tree search highlight star node */
+.node path.search-match.star {
+    stroke-width: 20px !important;
 }
 
 .has-search-match>.node-headline>.arrow.closed {
