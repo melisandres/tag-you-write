@@ -1,3 +1,4 @@
+import { IndexUpdateManager } from './indexUpdateManager.js';
 import { ShelfVisualizer } from './shelfVisualizer.js';
 //import { DataManager } from './dataManager.js';
 /* this may create some issues... to require the modal the constructor. I'm going to initialize it as an empty string... there are pages where I will surely call the story manager where the modal will be innaccessible? or I should put the modal in the header? */
@@ -127,6 +128,7 @@ export class StoryManager {
         }
 
         this.dataManager.setFullTree(id, freshData[0]);
+        console.log('freshData:', freshData);
         return this.dataManager.getTree(id).data;
     }
 
@@ -160,7 +162,7 @@ export class StoryManager {
     return cachedData.data;
   }
 
-  async drawTree(id, container) {
+/*   async drawTree(id, container) {
     try {
         // Set the current viewed root story ID before preparing data
         this.dataManager.setCurrentViewedRootStoryId(id);
@@ -176,17 +178,45 @@ export class StoryManager {
         
         // Prepare data (this will update search results if there's a search)
         const updatedTreeData = await this.prepareData(id);
+        console.log('updatedTreeData:', updatedTreeData);
         if (!updatedTreeData) {
             console.error('Failed to prepare tree data for ID:', id);
             return;
         }
 
+
+        const dataHasChanged = JSON.stringify(this.dataManager.getTree(id)?.data) !== JSON.stringify(updatedTreeData);
+        console.log('dataHasChanged:', dataHasChanged);
+
+        const treeDataIsEmpty = !this.dataManager.getTree(id)?.data;
+        console.log('treeDataIsEmpty:', treeDataIsEmpty);
+
         // If no search, only redraw if data changed
         // If there is a search, always draw with prepared data
-        if (hasActiveSearch || !this.dataManager.getTree(id)?.data || 
-            JSON.stringify(this.dataManager.getTree(id)?.data) !== JSON.stringify(updatedTreeData)) {
+        if (hasActiveSearch || treeDataIsEmpty || dataHasChanged) {
             eventBus.emit('drawTree', { container, data: updatedTreeData });
         }
+    } catch (error) {
+        console.error('Error in drawTree:', error);
+    }
+  } */
+
+  async drawTree(id, container) {
+    try {
+        // Set the current viewed root story ID before preparing data
+        this.dataManager.setCurrentViewedRootStoryId(id);
+
+        // Get the prepared data
+        const updatedTreeData = await this.prepareData(id);
+
+        if (!updatedTreeData) {
+          console.error('No tree data found for id: ', id);
+          return;
+        }
+
+        eventBus.emit('drawTree', { container, data: updatedTreeData });
+
+        // TODO: do you want to update the search results here? eventally if would be cleaner... maybe. But I have to study all the code involved. 
     } catch (error) {
         console.error('Error in drawTree:', error);
     }

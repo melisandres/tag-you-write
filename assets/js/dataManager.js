@@ -150,18 +150,6 @@ export class DataManager {
         const rootId = this.getCurrentViewedRootStoryId();
         console.log('Root ID:', rootId);
         const lastGamesCheck = this.cache.lastGamesCheck || 0;
-        
-/*         console.log('Checking for updates with:', {
-            currentViewedRootStoryId: this.currentViewedRootStoryId,
-            lastGamesCheck: new Date(lastGamesCheck).toISOString(),
-            treeTimestamp: this.cache.trees.get(rootId)?.timestamp
-        }); */
-
-/*         console.log('Cache state before update:', {
-            rootId: this.currentViewedRootStoryId,
-            nodesMapSize: this.cache.nodesMap.size,
-            hasRootNode: this.cache.nodesMap.has(String(this.currentViewedRootStoryId))
-        }); */
 
         try {
             const response = await fetch(`${this.path}game/modifiedSince`, {
@@ -181,9 +169,7 @@ export class DataManager {
             }
 
             const modifiedData = await response.json();
-/*             if (modifiedData.searchResults && this.currentViewedRootStoryId) {
-                this.updateSearchResults(modifiedData.searchResults, this.currentViewedRootStoryId, false);
-            } */
+
             console.log('Modified data:', modifiedData);
             return this.handleUpdateResponse(modifiedData, rootId);
         } catch (error) {

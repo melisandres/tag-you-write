@@ -37,6 +37,7 @@
     {% else %}
         <!-- <a class="nav-link writers" href="{{path}}writer">show all writers</a> -->
         <a class="nav-link texts" href="{{path}}text/create?new=true">new game</a>
+        <a class="nav-link notifications">N</a>
         {% if session.privilege == 1 %}
             <a class="nav-link writers" href="{{path}}journal">journal</a>
         {% endif %}
@@ -58,6 +59,13 @@
             </div>
         </div>
     {% endif %}
+
+    <div class="notifications-container">
+        <div class="notifications-menu">
+            <!-- New search menu content -->
+        </div>
+    </div>
+
 
     <!-- a modal for the showcase area (selected text) -->
     <div class="modal-background display-none" data-tree-modal="hidden" data-text-id="">
