@@ -16,7 +16,7 @@
 </head>
 <body>
     <nav>   
-        <a class="nav-link home" title="about" href="{{path}}">?</a>    
+        <a class="nav-link home" data-svg="home" title="about" href="{{path}}">?</a>    
 
         {% if title == 'All Texts!' %}
             <a class="nav-link filter">
@@ -33,8 +33,8 @@
         <a class="nav-link writers" href="{{path}}login"></a>
     {% else %}
         <!-- <a class="nav-link writers" href="{{path}}writer">show all writers</a> -->
-        <a class="nav-link texts" href="{{path}}text/create?new=true">new game</a>
-        <a class="nav-link notifications">N</a>
+        <a class="nav-link texts" data-svg="newGame" href="{{path}}text/create?new=true">new game</a>
+        <a class="nav-link notifications" data-svg="notification"></a>
         {% if session.privilege == 1 %}
             <a class="nav-link writers" href="{{path}}journal">journal</a>
         {% endif %}

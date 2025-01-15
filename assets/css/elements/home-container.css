@@ -6,24 +6,50 @@
     height: 100vh;
     position: relative;
     overflow: hidden;
+    
+}
+
+.home ::not(.nav-link){
+    background: linear-gradient(
+        45deg,
+        rgba(65, 88, 208, 0.15) 0%,
+        rgba(200, 80, 192, 0.15) 25%,
+        rgba(255, 204, 112, 0.15) 50%,
+        rgba(80, 192, 200, 0.15) 75%,
+        rgba(65, 88, 208, 0.15) 100%
+    );
+    animation: gradientFlow 20s ease infinite;
+    background-size: 400% 400%;
+
+}
+
+@keyframes gradientFlow {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 .background-svg {
     position: absolute;
-    left: -20vw; /* Adjust this value to move the heart left/right */
+    left: -20vw;
     top: 30%;
     transform: translateY(-50%);
-    width: 80vw; /* Adjust size relative to viewport width */
+    width: 80vw;
     height: auto;
     z-index: -1;
+    mix-blend-mode: multiply;
 }
 
-/* Control the actual SVG element inside */
 .background-svg svg {
     width: 100%;
     height: 100%;
-    fill: currentColor; /* Make sure the SVG can inherit color */
-    color: black; /* Set a default color - adjust as needed */
+    fill: white;
 }
 
 .text-container {

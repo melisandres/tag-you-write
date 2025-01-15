@@ -1296,12 +1296,71 @@ export class SVGManager{
 
    static get notificationSVG() {
       return `
-         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
-         fill="currentColor"
-         stroke="currentColor"
-         >
-            <path d="M12 2L2 5v6c0 5.55 3.84 10.74 9 12 0-5.57 4-12 4-12V5z"/>
-         </svg>
+         <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+            <svg
+               viewBox="0 0 6.733428 8.9957997"
+               version="1.1"
+               x="0px"
+               y="0px"
+               id="svg2"
+               fill="currentColor"
+               stroke="currentColor"
+               sodipodi:docname="noun-notification-4679164.svg"
+               width="6.733428"
+               height="8.9958"
+               inkscape:version="1.3.2 (091e20e, 2023-11-25)"
+               xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+               xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+               xmlns="http://www.w3.org/2000/svg"
+               xmlns:svg="http://www.w3.org/2000/svg">
+            <defs
+               id="defs2" />
+            <sodipodi:namedview
+               id="namedview2"
+               pagecolor="#ffffff"
+               bordercolor="#000000"
+               borderopacity="0.25"
+               inkscape:showpageshadow="2"
+               inkscape:pageopacity="0.0"
+               inkscape:pagecheckerboard="0"
+               inkscape:deskcolor="#d1d1d1"
+               inkscape:zoom="17.839368"
+               inkscape:cx="3.3913757"
+               inkscape:cy="5.8298028"
+               inkscape:window-width="1312"
+               inkscape:window-height="449"
+               inkscape:window-x="0"
+               inkscape:window-y="37"
+               inkscape:window-maximized="0"
+               inkscape:current-layer="svg2" />
+            <g
+               id="g1"
+               transform="translate(-1.9249527,-0.79376667)">
+               <path
+                  d="m 5.2916617,0.79376667 c -0.53426,0 -0.97011,0.44170003 -0.97011,0.97700003 v 0.3299 c -1.06042,0.393 -1.81611,1.4118 -1.81611,2.6075 v 2.2138 l -0.55491,1.1681 a 0.26460044,0.26460044 0 0 0 0.23896,0.3781 h 1.67434 c 0.0556,0.7374 0.67578,1.3214 1.42783,1.3214 0.75205,0 1.37225,-0.584 1.42784,-1.3214 h 1.67432 a 0.26460044,0.26460044 0 0 0 0.23898,-0.3781 l -0.55492,-1.1681 v -2.2138 c 0,-1.1957 -0.75569,-2.2145 -1.81612,-2.6075 v -0.3299 c 0,-0.5353 -0.43584,-0.97700003 -0.9701,-0.97700003 z m 0,0.52910003 c 0.24747,0 0.44095,0.1938 0.44095,0.4479 v 0.1914 c -0.14364,-0.023 -0.29088,-0.035 -0.44095,-0.035 -0.15007,0 -0.29732,0.012 -0.44096,0.035 v -0.1914 c 0,-0.2541 0.19349,-0.4479 0.44096,-0.4479 z m 0,1.1336 c 1.2553,0 2.25707,1 2.25707,2.2517 v 2.2735 a 0.26460044,0.26460044 0 0 0 0.0256,0.1135 l 0.40088,0.8438 h -1.25164 v 0 h -0.52915 v 0 h -1.80552 v 0 h -0.52915 v 0 h -1.25164 l 0.40088,-0.8438 a 0.26460044,0.26460044 0 0 0 0.0256,-0.1135 v -2.2735 c 0,-1.2517 1.00177,-2.2517 2.25707,-2.2517 z m -0.8965,6.0117 h 1.793 c -0.0522,0.4507 -0.42821,0.7923 -0.8965,0.7923 -0.46829,0 -0.84428,-0.3416 -0.8965,-0.7923 z"
+                  fill="currentColor"
+                  stroke-width="0.00446377"
+                  stroke-linecap="square"
+                  stroke-linejoin="round"
+                  id="path1" />
+            </g>
+            <text
+               x="-1.9249526"
+               y="24.789568"
+               fill="#000000"
+               font-size="5px"
+               font-weight="bold"
+               font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif"
+               id="text1">Created by Larea</text>
+            <text
+               x="-1.9249526"
+               y="29.789568"
+               fill="#000000"
+               font-size="5px"
+               font-weight="bold"
+               font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif"
+               id="text2">from the Noun Project</text>
+            </svg>
       `;
    }
  
@@ -1500,12 +1559,140 @@ export class SVGManager{
 
    static get heartSVG() {
       return `
-         <svg viewBox="-50 -50 100 100" xmlns="http://www.w3.org/2000/svg">
-            <path d="M 0,-10 C -6.57,-17.05 -17.14,-17.05 -23.71,-10 -30.27,-2.95 -30.27,8.39 -23.71,15.45 L 0,41.27 23.71,15.45 C 30.27,8.39 30.27,-2.95 23.71,-10 17.14,-17.05 6.57,-17.05 0,-10 Z" 
-               fill="currentColor" 
-               stroke="black" 
-               stroke-width="1"/>
+      <svg viewBox="-50 -50 100 100" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+              <mask id="heart-mask">
+                  <rect x="-50" y="-50" width="100" height="100" fill="black"/>
+                  <path d="M 0,-10 C -6.57,-17.05 -17.14,-17.05 -23.71,-10 -30.27,-2.95 -30.27,8.39 -23.71,15.45 L 0,41.27 23.71,15.45 C 30.27,8.39 30.27,-2.95 23.71,-10 17.14,-17.05 6.57,-17.05 0,-10 Z" 
+                      fill="white"/>
+              </mask>
+          </defs>
+          <rect x="-50" y="-50" width="100" height="100" 
+              fill="black" 
+              mask="url(#heart-mask)"/>
+      </svg>
+      `;
+   }
+
+   static get newGameSVG(){
+      return `
+         <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+         <svg
+            data-name="Layer 1"
+            viewBox="0 0 150.884 150.884"
+            x="0px"
+            y="0px"
+            version="1.1"
+            id="svg3"
+            sodipodi:docname="noun-new-4175917.svg"
+            width="150.884"
+            height="150.884"
+            inkscape:version="1.3.2 (091e20e, 2023-11-25)"
+            xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+            xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+            xmlns="http://www.w3.org/2000/svg"
+            xmlns:svg="http://www.w3.org/2000/svg">
+         <defs
+            id="defs3" />
+         <sodipodi:namedview
+            id="namedview3"
+            pagecolor="#ffffff"
+            bordercolor="#000000"
+            borderopacity="0.25"
+            inkscape:showpageshadow="2"
+            inkscape:pageopacity="0.0"
+            inkscape:pagecheckerboard="0"
+            inkscape:deskcolor="#d1d1d1"
+            inkscape:zoom="1.0488889"
+            inkscape:cx="75.794492"
+            inkscape:cy="98.199153"
+            inkscape:window-width="1312"
+            inkscape:window-height="449"
+            inkscape:window-x="0"
+            inkscape:window-y="37"
+            inkscape:window-maximized="0"
+            inkscape:current-layer="svg3" />
+         <path
+            d="M 108.318,71.442 H 79.442 V 42.566 a 4,4 0 1 0 -8,0 V 71.442 H 42.566 a 4,4 0 1 0 0,8 h 28.876 v 28.876 a 4,4 0 0 0 8,0 V 79.442 h 28.876 a 4,4 0 0 0 0,-8 z"
+            id="path1" />
+         <path
+            d="M 75.442,0 A 75.442,75.442 0 1 0 150.884,75.442 75.527,75.527 0 0 0 75.442,0 Z m 0,142.884 a 67.442,67.442 0 1 1 67.442,-67.442 67.518,67.518 0 0 1 -67.442,67.442 z"
+            id="path2" />
+         <text
+            x="-14.558"
+            y="180.442"
+            fill="#000000"
+            font-size="5px"
+            font-weight="bold"
+            font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif"
+            id="text2">Created by Chandru</text>
+         <text
+            x="-14.558"
+            y="185.442"
+            fill="#000000"
+            font-size="5px"
+            font-weight="bold"
+            font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif"
+            id="text3">from the Noun Project</text>
          </svg>
+      `;
+   }
+
+   static get homeSVG(){
+      return `
+         <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+            <svg
+               version="1.1"
+               viewBox="-5 -10 56.25 65.664062"
+               id="svg2"
+               sodipodi:docname="noun-home-7452715.svg"
+               width="56.25"
+               height="65.664062"
+               inkscape:version="1.3.2 (091e20e, 2023-11-25)"
+               xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+               xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+               xmlns="http://www.w3.org/2000/svg"
+               xmlns:svg="http://www.w3.org/2000/svg">
+            <defs
+               id="defs2" />
+            <sodipodi:namedview
+               id="namedview2"
+               pagecolor="#ffffff"
+               bordercolor="#000000"
+               borderopacity="0.25"
+               inkscape:showpageshadow="2"
+               inkscape:pageopacity="0.0"
+               inkscape:pagecheckerboard="0"
+               inkscape:deskcolor="#d1d1d1"
+               inkscape:zoom="1.7481481"
+               inkscape:cx="28.315678"
+               inkscape:cy="40.614407"
+               inkscape:window-width="1312"
+               inkscape:window-height="449"
+               inkscape:window-x="0"
+               inkscape:window-y="37"
+               inkscape:window-maximized="0"
+               inkscape:current-layer="svg2" />
+            <path
+               d="m 50.62395,12.226563 -26.562,-21.8750005 c -0.625,-0.4687505 -1.4062,-0.4687505 -2.0312,0 L -4.53125,12.226563 C -4.84375,12.539063 -5,13.007813 -5,13.476563 v 40.624999 c 0,0.9375 0.625,1.5625 1.5625,1.5625 h 53.125 c 0.9375,0 1.5625,-0.625 1.5625,-1.5625 V 13.476563 c 0,-0.46875 -0.15625,-0.9375 -0.625,-1.25 z m -19.688,40.311999 h -15.625 v -21.875 h 15.625 z m 17.188,0 h -14.062 V 29.100563 c 0,-0.9375 -0.625,-1.5625 -1.5625,-1.5625 h -18.75 c -0.9375,0 -1.5625,0.625 -1.5625,1.5625 v 23.437999 h -14.062 v -38.281 l 25,-20.6249995 25,20.6249995 z"
+               id="path1" />
+            <text
+               x="-26.876051"
+               y="90.351562"
+               font-size="5px"
+               font-weight="bold"
+               font-family="'Arbeit Regular', Helvetica, Arial-Unicode, Arial, Sans-serif"
+               fill="#000000"
+               id="text1">Created by mar_yani</text>
+            <text
+               x="-26.876051"
+               y="95.351562"
+               font-size="5px"
+               font-weight="bold"
+               font-family="'Arbeit Regular', Helvetica, Arial-Unicode, Arial, Sans-serif"
+               fill="#000000"
+               id="text2">from Noun Project</text>
+            </svg>
       `;
    }
 }

@@ -1,6 +1,6 @@
 {{ include('header.php', {title: 'Welcome'})}}
 {# comments #}
-
+    <div class="home">
     <div class="home-container">
         <div class="background-svg"></div>
         <div class="text-container">
@@ -8,7 +8,7 @@
             <h1>collaborative writing</h1>
             <p>Add a few words to someone else's.</p>
             <p>Write a sentence, and see it grow legs.</p>
-            <p>It's a game, it's a world, it's a chance to be alone together.</p>
+            <p>Write a phrase, and watch its head roll away.</p>
         </div>
     </div>
     <div class="tutorial">
@@ -29,6 +29,7 @@
             <li>write: text, prompt, keywords, etc.</li>
             <li>let your friends know! Or wait for someone from our community to contribute</li>
         </ul>
+    </div>
     </div>
 </body>
 </html>

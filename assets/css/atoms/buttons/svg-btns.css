@@ -77,3 +77,10 @@
     fill: black;
     stroke: none;
 }
+
+.notifications svg{
+    fill: white;
+    stroke: white;
+    transform: scale(1.1);
+    rotate: 10deg;
+}
