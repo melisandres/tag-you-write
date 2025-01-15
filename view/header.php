@@ -26,7 +26,7 @@
                 <span class="icon"></span>
             </a>
         {% else %} 
-            <a class="nav-link texts" href="{{path}}text">game list</a>  
+            <a class="nav-link texts" data-svg="browse" href="{{path}}text">browse</a>  
         {% endif %}
 
     {% if guest %}

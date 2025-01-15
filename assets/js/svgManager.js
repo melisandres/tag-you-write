@@ -1695,4 +1695,131 @@ export class SVGManager{
             </svg>
       `;
    }
+
+   static get browseSVG(){
+      return `
+            <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+            <svg
+               data-name="Layer 1"
+               viewBox="0 0 71.519669 60.62344"
+               x="0px"
+               y="0px"
+               version="1.1"
+               id="svg4"
+               fill="currentColor"
+               stroke="currentColor"
+               sodipodi:docname="noun-book-2102200.svg"
+               width="71.519669"
+               height="60.62344"
+               inkscape:version="1.3.2 (091e20e, 2023-11-25)"
+               xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+               xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+               xmlns="http://www.w3.org/2000/svg"
+               xmlns:svg="http://www.w3.org/2000/svg">
+            <defs
+               id="defs4" />
+            <sodipodi:namedview
+               id="namedview4"
+               pagecolor="#ffffff"
+               bordercolor="#000000"
+               borderopacity="0.25"
+               inkscape:showpageshadow="2"
+               inkscape:pageopacity="0.0"
+               inkscape:pagecheckerboard="0"
+               inkscape:deskcolor="#d1d1d1"
+               inkscape:zoom="1.888"
+               inkscape:cx="35.752119"
+               inkscape:cy="42.902542"
+               inkscape:window-width="1312"
+               inkscape:window-height="449"
+               inkscape:window-x="0"
+               inkscape:window-y="37"
+               inkscape:window-maximized="0"
+               inkscape:current-layer="svg4" />
+            <title
+               id="title1">book </title>
+            <path
+               d="M 13.380031,0.04562451 H 1.6100311 A 1.61,1.61 0 0 0 3.1056202e-5,1.6656245 V 58.425625 A 1.61,1.61 0 0 0 1.6100311,60.045625 H 13.380031 a 1.62,1.62 0 0 0 1.62,-1.62 V 1.6656245 a 1.62,1.62 0 0 0 -1.62,-1.61999999 z m 0.12,54.05000049 a 1,1 0 0 1 -0.95,1 H 2.4400311 a 0.94,0.94 0 0 1 -0.94,-1 v -1.1 a 0.94,0.94 0 0 1 0.94,-1 H 12.550031 a 1,1 0 0 1 0.95,1 z m 0,-39 a 1,1 0 0 1 -0.95,0.95 H 2.4400311 a 0.94,0.94 0 0 1 -0.94,-0.95 v -1.1 a 0.94,0.94 0 0 1 0.94,-1 H 12.550031 a 1,1 0 0 1 0.95,1 z m 0,-5 a 1,1 0 0 1 -0.95,0.95 H 2.4400311 a 0.94,0.94 0 0 1 -0.94,-0.95 V 8.9956245 a 0.94,0.94 0 0 1 0.94,-0.95 H 12.550031 a 1,1 0 0 1 0.95,0.95 z"
+               id="path1" />
+            <path
+               d="m 33.380031,0.04562451 h -11.77 a 1.61,1.61 0 0 0 -1.61,1.61999999 V 58.425625 a 1.61,1.61 0 0 0 1.61,1.62 h 11.77 a 1.62,1.62 0 0 0 1.62,-1.62 V 1.6656245 a 1.62,1.62 0 0 0 -1.62,-1.61999999 z m 0.12,54.05000049 a 1,1 0 0 1 -1,1 h -10.06 a 0.94,0.94 0 0 1 -0.94,-1 v -1.1 a 0.94,0.94 0 0 1 0.94,-1 h 10.11 a 1,1 0 0 1 1,1 z m 0,-39 a 1,1 0 0 1 -1,0.95 h -10.06 a 0.94,0.94 0 0 1 -0.94,-0.95 v -1.1 a 0.94,0.94 0 0 1 0.94,-1 h 10.11 a 1,1 0 0 1 1,1 z m 0,-5 a 1,1 0 0 1 -1,0.95 h -10.06 a 0.94,0.94 0 0 1 -0.94,-0.95 V 8.9956245 a 0.94,0.94 0 0 1 0.94,-0.95 h 10.11 a 1,1 0 0 1 1,0.95 z"
+               id="path2" />
+            <path
+               d="m 71.410031,54.315625 -19.75,-53.2200005 a 1.63,1.63 0 0 0 -2.09,-0.99999999 l -11,4.08999999 a 1.61,1.61 0 0 0 -0.97,2.13 l 19.75,53.2100005 a 1.6,1.6 0 0 0 2.07,1 l 11,-4.09 a 1.62,1.62 0 0 0 0.99,-2.12 z m -29.47,-40.62 -0.39,-1 a 0.94,0.94 0 0 1 0.55,-1.21 l 9.48,-3.5200005 a 0.94,0.94 0 0 1 1.22,0.56 l 0.39,1 a 1,1 0 0 1 -0.56,1.2200005 l -9.48,3.57 a 0.94,0.94 0 0 1 -1.21,-0.62 z m 12.43,1.74 -9.48,3.52 a 0.94,0.94 0 0 1 -1.21,-0.57 l -0.39,-1 a 1,1 0 0 1 0.55,-1.22 l 9.48,-3.52 a 1,1 0 0 1 1.22,0.56 l 0.39,1 a 1,1 0 0 1 -0.56,1.23 z m 13.57,36.56 -9.48,3.52 a 0.94,0.94 0 0 1 -1.21,-0.57 l -0.38,-1 a 0.94,0.94 0 0 1 0.55,-1.22 l 9.48,-3.51 a 0.94,0.94 0 0 1 1.22,0.56 l 0.38,1 a 1,1 0 0 1 -0.56,1.22 z"
+               id="path3" />
+            <text
+               x="-14.239969"
+               y="95.315628"
+               fill="#000000"
+               font-size="5px"
+               font-weight="bold"
+               font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif"
+               id="text3">Created by Visionary</text>
+            <text
+               x="-14.239969"
+               y="100.31563"
+               fill="#000000"
+               font-size="5px"
+               font-weight="bold"
+               font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif"
+               id="text4">from the Noun Project</text>
+            </svg>
+      `;
+   }
+
+   static get howSVG(){
+      return `
+         <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+            <svg
+               version="1.1"
+               x="0px"
+               y="0px"
+               viewBox="0 0 66.167999 66.166"
+               enable-background="new 0 0 100 100"
+               xml:space="preserve"
+               id="svg2"
+               sodipodi:docname="noun-what-1446406.svg"
+               width="66.167999"
+               height="66.166"
+               inkscape:version="1.3.2 (091e20e, 2023-11-25)"
+               xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+               xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+               xmlns="http://www.w3.org/2000/svg"
+               xmlns:svg="http://www.w3.org/2000/svg"><defs
+               id="defs2" /><sodipodi:namedview
+               id="namedview2"
+               pagecolor="#ffffff"
+               bordercolor="#000000"
+               borderopacity="0.25"
+               inkscape:showpageshadow="2"
+               inkscape:pageopacity="0.0"
+               inkscape:pagecheckerboard="0"
+               inkscape:deskcolor="#d1d1d1"
+               inkscape:zoom="1.888"
+               inkscape:cx="33.103814"
+               inkscape:cy="45.550847"
+               inkscape:window-width="1312"
+               inkscape:window-height="449"
+               inkscape:window-x="0"
+               inkscape:window-y="37"
+               inkscape:window-maximized="0"
+               inkscape:current-layer="svg2" /><path
+               d="M 33.084,0 C 14.842,0 0,14.841 0,33.083 0,51.325 14.842,66.166 33.084,66.166 51.326,66.166 66.168,51.325 66.168,33.083 66.168,14.841 51.326,0 33.084,0 Z m 0,62.166 C 17.047,62.166 4,49.12 4,33.083 4,17.046 17.047,4 33.084,4 49.121,4 62.168,17.046 62.168,33.083 62.168,49.12 49.121,62.166 33.084,62.166 Z M 32.756,15.616 C 23.875,16.77 21.531,23.182 21.532,26.411 l 4,0.017 c 0.011,-0.599 0.324,-5.882 7.739,-6.845 4.836,-0.629 7.292,1.588 7.984,3.871 0.591,1.946 0.011,4.492 -2.617,5.794 -7.625,3.778 -7.625,10.248 -7.625,14.114 h 4 c 0,-4.45 0.397,-8.051 5.4,-10.53 4.027,-1.996 5.947,-6.33 4.67,-10.54 -1.115,-3.674 -5.016,-7.627 -12.327,-6.676 z m -1.738,35.747 h 4 v -4.47 h -4 z"
+               id="path1" /><text
+               x="-16.916"
+               y="98.083"
+               fill="#000000"
+               font-size="5px"
+               font-weight="bold"
+               font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif"
+               id="text1">Created by amante de icono</text><text
+               x="-16.916"
+               y="103.083"
+               fill="#000000"
+               font-size="5px"
+               font-weight="bold"
+               font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif"
+               id="text2">from the Noun Project</text></svg>
+      `;
+   }
 }
