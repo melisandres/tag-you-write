@@ -2,3 +2,8 @@
 .tutorial ul, .tutorial ol, tutorial li {
     margin-left: 3em;
 }
+
+.tutorial{
+    padding: 15px;    
+    padding-top: 80px;
+}

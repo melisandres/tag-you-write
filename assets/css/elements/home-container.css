@@ -2,11 +2,13 @@
     display: grid;
     grid-template-areas: 
         "header"
-        "content";
+        "content"
+        "buttons";
     height: 100vh;
     position: relative;
     overflow: hidden;
-    
+    padding: 15px;  
+    min-height: clamp(600px, 60vh, 800px);  
 }
 
 .home:not(.nav-link){
@@ -20,7 +22,6 @@
     );
     animation: gradientFlow 20s ease infinite;
     background-size: 400% 400%;
-
 }
 
 @keyframes gradientFlow {
@@ -38,10 +39,10 @@
 .background-svg {
     position: absolute;
     left: -20vw;
-    top: 30%;
-    transform: translateY(-50%);
-    width: 80vw;
+    top: clamp(100px, 25vh, 375px);
+    width: clamp(30px, 70vw, 2500px);
     height: auto;
+    transform: translateY(-50%);  
     z-index: -1;
     mix-blend-mode: multiply;
 }
@@ -63,4 +64,65 @@
     position: relative;
     z-index: 1;
     mix-blend-mode: difference;
+    margin-top: 1rem;
+}
+
+.buttons-container{
+    grid-area: buttons;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: flex-start;
+}
+
+.text-container p{
+    font-size: clamp(0.8rem, 3vw, 2rem);
+}
+
+.home-button{
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    justify-content: start;
+    align-items: center;
+    background-color: var(--color-black);
+    padding: 10px;
+    border-radius: 10px;
+    font-size: clamp(0.8rem, 3vw, 2rem);
+    filter: 
+        drop-shadow(1.2px 0px 0px var(--color-secondary-dark)) 
+        drop-shadow(-1.2px 0px 0px var(--color-secondary-dark))
+        drop-shadow(0px 1.2px 0px var(--color-secondary-dark)) 
+        drop-shadow(0px -1.2px 0px var(--color-secondary-dark))
+        drop-shadow(0 0 5px rgb(227, 162, 226))
+        drop-shadow(0 0 15px rgba(237, 211, 151, 0.5));
+    transition: all 0.1s ease-out;
+    position: relative;
+    top: 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.home-button svg{
+    height: 40px;
+    width: auto;    
+    fill: white;
+}
+
+.home-button.login svg{
+    transform: scale(0.8);
+}
+
+/* Pressed state */
+.home-button:active {
+    top: 2px;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
+    filter: 
+        drop-shadow(1.5px 0px 0px var(--color-secondary-light)) 
+        drop-shadow(-1.5px 0px 0px var(--color-secondary-light))
+        drop-shadow(0px 1.2px 0px var(--color-secondary-light)) 
+        drop-shadow(0px -1.2px 0px var(--color-secondary-light))
+        drop-shadow(0 0 5px rgb(201, 178, 125))
+        drop-shadow(0 0 15px rgba(237, 211, 151, 0.5));
+    transform: scale(0.98);
 }

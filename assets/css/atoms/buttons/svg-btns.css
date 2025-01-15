@@ -84,3 +84,9 @@
     transform: scale(1.1);
     rotate: 10deg;
 }
+
+.texts svg{
+    fill: currentColor;
+    stroke: currentColor;
+    transform: scale(1.2);
+}
