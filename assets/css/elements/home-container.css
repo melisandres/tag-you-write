@@ -9,7 +9,7 @@
     
 }
 
-.home ::not(.nav-link){
+.home:not(.nav-link){
     background: linear-gradient(
         45deg,
         rgba(65, 88, 208, 0.15) 0%,
