@@ -2,9 +2,10 @@
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    justify-content: space-between;
+    justify-content: space-evenly;
     padding: 15px;    
     padding-top: 80px;
+    gap: 1.5em;
 }
 
 .tutorial-text-container {
@@ -18,6 +19,7 @@
     box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
     font-size: 1rem;
 }
+
 .tutorial-container ~ .tutorial-container .tutorial-text-container{
     background-color: var(--color-white-light);
 }
@@ -32,6 +34,7 @@
 
 .tutorial h2 {
     font-size: 1.4em;
+    margin-bottom: 0.5em;
 }
 
 .tutorial h3 {
