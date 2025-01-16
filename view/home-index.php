@@ -26,23 +26,82 @@
         </div>
     </div>
     <div class="tutorial" id="how">
-        <h2>join a collaboration</h2>
-        <ul>
-            <li>create an account and/or log in</li>
-            <li>in the top menu: click on "see all texts"</li>
-            <li>expand and explore the collaborations that interest you</li>
-            <li>choose a story node that inspires you, and "iterate"</li>
-            <li>vote on a winning text for this collaboration</li>
-            <li>iterate some more</li>
-            <li>** first text to get upvotes from all collaborating writers wins!</li>
-        </ul>
-        <h2>start a collaboration</h2>
-        <ul>
-            <li>create an account and/or log in</li>
-            <li>in the top menu: click on "write something"</li>
-            <li>write: text, prompt, keywords, etc.</li>
-            <li>let your friends know! Or wait for someone from our community to contribute</li>
-        </ul>
+        <div class="tutorial-container">
+            <h2>How to collaborate:</h2>
+            <ol>
+                <li>                
+                    <h3>
+                        1. Log in
+                        <span class="tutorial-icon" data-svg="logIn"></span>
+                    </h3>
+                    <div class="tutorial-text-container">    
+                        Create an account and/or log in.
+                    </div>
+                </li>
+                <li>
+                    <h3>
+                        2. Explore
+                        <div class="icons">
+                            <span class="tutorial-icon" data-svg="tree"></span>
+                            <span class="tutorial-icon" data-svg="shelf"></span>
+                        </div>
+                    </h3>
+                    <div class="tutorial-text-container">
+                        Click on <span class="tutorial-icon" data-svg="browse"></span> (top menu) to enter our library, where you can expand and explore collaborations.
+                    </div>
+                </li>
+                <li>
+                    <h3>
+                        3. Write
+                        <span class="tutorial-icon" data-svg="iterate"></span>
+                    </h3>
+                    <div class="tutorial-text-container">    
+                        Choose a story node that inspires you, change the text ("iterate"), and publish <span class="tutorial-icon" data-svg="publish"></span>your version when you're ready to share.
+                    </div>
+                </li>
+                <li>
+                    <h3>
+                        4. Vote
+                        <span class="tutorial-icon" data-svg="vote"></span>
+                    </h3>
+                    <div class="tutorial-text-container">    
+                        Vote on a winning text. The first text to get upvotes from all collaborating writers wins!
+                    </div>
+                </li>
+            </ol>
+        </div>
+        <div class="tutorial-container">
+            <h2>How to start a new collaboration:</h2>
+            <ol>
+                <li>
+                    <h3>
+                        1. Log in
+                        <span class="tutorial-icon" data-svg="logIn"></span>
+                    </h3>
+                    <div class="tutorial-text-container">    
+                        Create an account and/or log in.
+                    </div>
+                </li>
+                <li>
+                    <h3>
+                        2. Create
+                        <span class="tutorial-icon" data-svg="newGame"></span>
+                    </h3>
+                    <div class="tutorial-text-container">    
+                        Click on <span class="tutorial-icon" data-svg="newGame"></span> (top menu) to start a new collaboration. You will be asked to create a title, a prompt, and a starting text. All future collaborators will consult yout title and prompt while they write. When you're ready to share, just publish <span class="tutorial-icon" data-svg="publish"></span>.
+                    </div>
+                </li>
+                <li>
+                    <h3>
+                        3. Share
+                        <span class="tutorial-icon" data-svg="heart"></span>
+                    </h3>
+                    <div class="tutorial-text-container">    
+                        Let your friends know! Or wait for someone from our community to contribute.
+                    </div>
+                </li>
+            </ol>
+        </div>
     </div>
     </div>
 </body>
