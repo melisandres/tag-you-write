@@ -5,26 +5,53 @@
         <span class='error'>{{ errors|raw }}</span>
     {% endif %}
 
-    {% if data.game_title %}
+<!--     {% if data.game_title %}
         <p><strong>{{ data.game_title }}</strong></p>
-    {% endif %}
+    {% endif %} -->
 
 <!--     {% for key, value in data %}
         <pre>{{ key }}: {{ value }}</pre>
     {% endfor %} -->
 
     {% if data.parent_id %}
-        <div class="iteration-info">
-            <p><strong>you are iterating on:</strong><span> {{ data.parentFirstName }} {{ data.parentLastName }}'s</span> <span> "{{ data.parentTitle }}"</span></p>
-            <p>{{ data.parentWriting|raw }}</p>
-        </div>
-        <div class="prompt-info">
-            <p><strong>prompt:</strong> {{ data.prompt|raw }}</p>
+        <div class="game-info">
+            <h1 class="game-title"> 
+                {{ data.game_title|default('Untitled') }}
+            </h1>
+            <div class="info iterate">
+                <div class="info-container">
+                    <h3>iterating on: </h3>
+                    <div class="info-text-container parent">
+                        <div class="parent-title">
+                            {{ data.parentTitle }}
+                        </div>
+                        <div class="parent-author">
+                        - {{ data.parentFirstName }} {{ data.parentLastName }} -
+                        </div>
+                        <div class="parent-text">
+                            {{ data.parentWriting|raw }}
+                        </div>
+                    </div>  
+                </div>
+                <div class="info-container">
+                    <div class="info-text-container">
+                        <h3>prompt:</h3>
+                        <p> {{ data.prompt|raw }}</p>
+                    </div>
+                </div>
+            </div>
         </div>
     {% elseif not data.id %}
-        <p>While your title and prompt will be carved in STONE,
-        your text will be rehashed by all who join the game.<br>
-        May the best iteration win!</p>
+        <div class="info">
+            <div class="info-container">
+                <h3>good to know: </h3>
+                <div class="info-text-container">
+                    <p>While your title and prompt will be carved in STONE,
+                    your text will be rehashed by all who join the game.</p>
+                    <p>May the best iteration win!</p>
+                </div>
+            </div>
+        </div>
     {% endif %}
     <!-- action="{{ path }}text/{{ data.id ? 'update' : 'store' }}" -->
     </div>
@@ -52,14 +79,14 @@
         
         <label>
             <div class="title-and-word-count">
-                <span class="headline">{{ data.parent_id ? 'change the text' : 'kickoff the text' }}</span>
+                <span class="headline">{{ data.parent_id ? "your version of \"#{data.game_title|default('Untitled')}\"" : 'kickoff the text' }}</span>
                 <div class="word-count-display" data-word-count-display>
                     <span class="word-count-number"></span>
                     <span class="word-count-tooltip"></span>
                 </div>
             </div>
             {% if data.parent_id %}
-                <textarea name="writing" rows="10" cols="50" placeholder="{{ data.parentWriting }}">{{ data.writing|default('') }}</textarea>
+                <textarea name="writing" rows="10" cols="50" placeholder="{{ data.parentWriting|striptags|raw }}">{{ data.writing|default('') }}</textarea>
             {% else %}
                 <textarea name="writing" rows="10" cols="50" placeholder="When you climb out the window, don't forget your rainboots.">{{ data.writing|default('') }}</textarea>
             {% endif %}

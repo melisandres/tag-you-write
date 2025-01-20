@@ -1,11 +1,23 @@
 input, textarea{
     display: block;
-    font-size: var(--font-size-medium);
+    font-size: clamp(1rem, 2vw, 1.2rem);
     border: 1px solid var(--color-grey-light);
 }
 
-label{
-    margin-bottom: var(--spacing-extra-extra-large);
+.form-page h1 {
+    font-size: clamp(2rem, 5vw, 5rem);
+}
+
+#main-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1em;
+}
+
+#main-form label, #main-form .form-btns {
+    width: 100%;
+    max-width: 75ch;
 }
 
 label input{
@@ -28,7 +40,6 @@ span.error li,
 span.message{
     margin: var(--spacing-medium) 10px var(--spacing-medium) 10px;
 }
-
 
 .feedback{
     margin-top: 0.5em;
@@ -96,10 +107,6 @@ label .ck.ck-content.ck-editor__editable {
     border-top: 3px solid var(--color-pink);
 }
 
-/* .form-page{
-    background-color: var(--color-white);
-} */
-
 .form-page .feedback.error, .form-page .feedback.error{
     color: var(--color-error);
 }
@@ -134,6 +141,7 @@ label .ck.ck-content.ck-editor__editable {
 .ck-editor__editable {
     min-height: 150px;
     background: var(--color-white-lightest) !important;
+    font-size: clamp(1rem, 2vw, 1.2rem) !important;
 }
 
 .ck-editor__editable:focus {
@@ -155,25 +163,6 @@ label .ck.ck-content.ck-editor__editable {
     color: var(--color-secondary-dark);
     background: var(--color-secondary-light);
 }
-
-/* .ck.ck-button.ck-on, a.ck.ck-button.ck-on {
-    color: var(--color-secondary-light);
-    background: var(--color-secondary-lightest);
-}
-
-.ck.ck-button.ck-on:not(.ck-disabled):hover, a.ck.ck-button.ck-on:not(.ck-disabled):hover {
-    background: var(--color-secondary-light);
-}
-
-button.ck.ck-button.ck-on {
-    background: var(--color-secondary-lightest);
-    color: var(--color-secondary-light);
-}
-
-button.ck.ck-button.ck-on:not(.ck-disabled):hover {
-    background: var(--color-secondary-lighter);
-    color: var(--color-secondary-dark);
-} */
 
 /* the feedback is otherwise hidden by the editor */
 .feedback{

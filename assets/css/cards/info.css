@@ -1,0 +1,216 @@
+.info{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    padding: 10px;    
+    padding-top: var(--spacing-extra-extra-large);
+    gap: 2em;
+}
+
+.iterate.info {
+    flex-direction: row-reverse;
+    align-items: flex-end;
+    max-width: 75ch;
+    margin: 0 auto;
+}
+
+.iterate .info-container {
+    flex: 1 1 300px;
+    max-width: min(75ch, 600px);
+}
+
+.info-text-container {
+    border: 1px solid var(--color-primary);
+    background-color: var(--color-primary-lightest);
+    padding: 1em;
+    padding-top: 2em;
+    width: 100%;
+    position: relative;
+    max-width: min(75ch, 600px);
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+    font-size: 1rem;
+}
+
+.iterate .info-text-container {
+    background-color: var(--color-white-light);
+}
+
+.info-text-container.parent {
+    max-height: 250px;
+    overflow: scroll;
+}
+
+.info-text-container .parent-title {
+    text-align: center;
+    font-weight: 100;
+    font-size: 23px;
+}
+
+.info-text-container .parent-author {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 100;
+    padding: var(--general-padding);
+}
+
+.info-text-container .parent-text {
+    font-size: 14px;
+    font-weight: 100;
+    padding: var(--general-padding);
+}
+
+
+.info-container ~ .info-container .info-text-container{
+    background-color: var(--color-white-light);
+}
+
+.iterate .info-container ~ .info-container .info-text-container{
+    background-color: var(--color-primary-lightest);
+}
+
+.info-container ~ .info-container h3 {
+    background-image: linear-gradient(
+        to bottom,
+        transparent 50%,
+        var(--color-white-light) 50%
+    );
+}
+
+.iterate .info-container ~ .info-container h3 {
+    background-image: linear-gradient(
+        to bottom,
+        transparent 50%,
+        var(--color-primary-lightest) 50%
+    );
+}
+
+.info h2 {
+    font-size: 1.4em;
+    margin-bottom: 0.5em;
+}
+
+.info h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    font-family: var(--font-family-secondary);
+    position: absolute;
+    top: -0.62em;
+    left: 0;
+    padding: 0 0.5em;
+    margin-left: 0.5em;
+    z-index: 1;
+    background-image: linear-gradient(
+        to bottom,
+        transparent 50%,
+        var(--color-primary-lightest) 50%
+    );
+}
+
+.iterate.info h3 {
+    background-image: linear-gradient(
+        to bottom,
+        transparent 50%,
+        var(--color-white-light) 50%
+    );
+}
+
+/* adjust the top if there is a list */
+.info li h3 {
+    top: -0.25em;
+}
+
+.info ol {
+    list-style: none;
+    counter-reset: none;  
+}
+
+.info li::before {
+    display: none;  
+}
+
+.info li {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1em;
+    margin-bottom: 2em;
+    position: relative;
+    padding-left: 0;
+    padding-top: 1em;
+}
+
+.info-container {
+    position: relative;
+}
+
+.info li .icons {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5em;
+}
+
+.info-icon {
+    margin-bottom: 0.5em;  /* Space between icon and text */
+}
+
+.info-icon {
+    display: inline-flex;
+    width: 1.7em;
+    height: 1.7em;
+    border-radius: 50%;
+    background-color: var(--color-success);
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    vertical-align: middle;
+}
+
+/* SVG colors */
+.info-icon[data-svg="newGame"] svg path, 
+.info-icon path, .info-icon g, .info-icon stroke, .info-icon circle {
+    fill: black;
+    stroke: black;
+}
+
+.info-icon[data-svg="logIn"] svg {
+    transform: scale(0.7);
+} 
+
+.info-icon[data-svg="browse"] svg path, 
+.info-text-container .info-icon[data-svg="newGame"] svg path  {
+    fill: var(--color-white);
+    stroke: var(--color-white);
+}
+
+/* Background colors (for icons) */
+.info-icon[data-svg="logIn"], .info-icon[data-svg="publish"] {
+    background-color: var(--color-success);
+}
+
+.info-icon[data-svg="browse"], 
+.info-text-container .info-icon[data-svg="newGame"] {
+    background-color: var(--color-black);
+}
+
+.info-icon[data-svg="tree"], .info-icon[data-svg="shelf"] {
+    background-color: var(--color-primary);
+}
+
+.info-icon[data-svg="iterate"], .info-icon[data-svg="newGame"]  {
+    background-color: var(--color-write);
+}
+
+.info-icon[data-svg="vote"], .info-icon[data-svg="heart"] {
+    background-color: var(--color-love);
+}
+
+.info-icon[data-svg="save"] {
+    background-color: var(--color-save);
+}
+
+/* SVG size */
+.info-icon svg {
+    width: 1.5em;
+    height: 1.5em;
+}

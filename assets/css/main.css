@@ -17,6 +17,8 @@
 
 /* cards: repeated structures */
 @import url(./cards/story.css);
+@import url(./cards/info.css);
+
 
 /* elements: elements that reoccur */
 @import url(./elements/footer.css);
@@ -41,7 +43,7 @@
 @import url(./layouts/stories.css);
 
 /* layouts: pages*/
-@import url(./layouts/tutorial.css);
+
 
 /* layouts: darkMode / lightMode */
 @import url(./layouts/darkMode.css);

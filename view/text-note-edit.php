@@ -1,12 +1,24 @@
 {{ include('header.php', {title: 'edit something!'})}}
 <section class="form-page">
     <div class="form-info">
+        <div class="info">
+            <div class="info-container">
+                <h3>Here's what you wrote: </h3>
+                <div class="info-text-container">
+                    <div class="parent-title">
+                        {{ data.title }}</div>
+                    <div class="parent-author">
+                        - by you -
+                    </div>
+                    <div class="parent-text">
+                        {{ data.writing|raw }}
+                    </div>
+                </div>
+            </div>
+        </div>
         {% if errors is defined %}
             <span class='error'>{{ errors|raw}}</span>
         {% endif %}
-        <p>Here's what you wrote: </p>
-        <h3>{{ data.title }}</h3>
-        <p>{{ data.writing|raw }}</p>
     </div>
 
     <form id="main-form" data-form-type="addingNote" data-form-activity="editing" action="{{path}}text/update" method="post">

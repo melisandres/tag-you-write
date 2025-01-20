@@ -38,7 +38,7 @@ main.with-filters {
     margin-top: calc(var(--header-height) + var(--filters-height));
 }
 
-td, th, tr, form, input, textarea, h3, h2, h1, u, p {
+td, th, tr, input, textarea, h3, h2, h1, u, p, form {
     padding: var(--general-padding);
 }
 

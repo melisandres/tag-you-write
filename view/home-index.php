@@ -25,16 +25,16 @@
             </a>
         </div>
     </div>
-    <div class="tutorial" id="how">
-        <div class="tutorial-container">
+    <div class="info" id="how">
+        <div class="info-container">
             <h2>How to collaborate:</h2>
             <ol>
                 <li>                
                     <h3>
                         1. Log in
-                        <span class="tutorial-icon" data-svg="logIn"></span>
+                        <span class="info-icon" data-svg="logIn"></span>
                     </h3>
-                    <div class="tutorial-text-container">    
+                    <div class="info-text-container">    
                         Create an account and/or log in.
                     </div>
                 </li>
@@ -42,61 +42,61 @@
                     <h3>
                         2. Explore
                         <div class="icons">
-                            <span class="tutorial-icon" data-svg="tree"></span>
-                            <span class="tutorial-icon" data-svg="shelf"></span>
+                            <span class="info-icon" data-svg="tree"></span>
+                            <span class="info-icon" data-svg="shelf"></span>
                         </div>
                     </h3>
-                    <div class="tutorial-text-container">
-                        Click on <span class="tutorial-icon" data-svg="browse"></span> (top menu) to enter our library, where you can expand and explore collaborations.
+                    <div class="info-text-container">
+                        Click on <span class="info-icon" data-svg="browse"></span> (top menu) to enter our library, where you can expand and explore collaborations.
                     </div>
                 </li>
                 <li>
                     <h3>
                         3. Write
-                        <span class="tutorial-icon" data-svg="iterate"></span>
+                        <span class="info-icon" data-svg="iterate"></span>
                     </h3>
-                    <div class="tutorial-text-container">    
-                        Choose a story node that inspires you, change the text ("iterate"), and publish <span class="tutorial-icon" data-svg="publish"></span>your version when you're ready to share.
+                    <div class="info-text-container">    
+                        Choose a story node that inspires you, change the text ("iterate"), and publish <span class="info-icon" data-svg="publish"></span>your version when you're ready to share.
                     </div>
                 </li>
                 <li>
                     <h3>
                         4. Vote
-                        <span class="tutorial-icon" data-svg="vote"></span>
+                        <span class="info-icon" data-svg="vote"></span>
                     </h3>
-                    <div class="tutorial-text-container">    
+                    <div class="info-text-container">    
                         Vote on a winning text. The first text to get upvotes from all collaborating writers wins!
                     </div>
                 </li>
             </ol>
         </div>
-        <div class="tutorial-container">
+        <div class="info-container">
             <h2>How to start a new collaboration:</h2>
             <ol>
                 <li>
                     <h3>
                         1. Log in
-                        <span class="tutorial-icon" data-svg="logIn"></span>
+                        <span class="info-icon" data-svg="logIn"></span>
                     </h3>
-                    <div class="tutorial-text-container">    
+                    <div class="info-text-container">    
                         Create an account and/or log in.
                     </div>
                 </li>
                 <li>
                     <h3>
                         2. Create
-                        <span class="tutorial-icon" data-svg="newGame"></span>
+                        <span class="info-icon" data-svg="newGame"></span>
                     </h3>
-                    <div class="tutorial-text-container">    
-                        Click on <span class="tutorial-icon" data-svg="newGame"></span> (top menu) to start a new collaboration. You will be asked to create a title, a prompt, and a starting text. All future collaborators will consult yout title and prompt while they write. When you're ready to share, just publish <span class="tutorial-icon" data-svg="publish"></span>.
+                    <div class="info-text-container">    
+                        Click on <span class="info-icon" data-svg="newGame"></span> (top menu) to start a new collaboration. You will be asked to create a title, a prompt, and a starting text. All future collaborators will consult yout title and prompt while they write. When you're ready to share, just publish <span class="info-icon" data-svg="publish"></span>.
                     </div>
                 </li>
                 <li>
                     <h3>
                         3. Share
-                        <span class="tutorial-icon" data-svg="heart"></span>
+                        <span class="info-icon" data-svg="heart"></span>
                     </h3>
-                    <div class="tutorial-text-container">    
+                    <div class="info-text-container">    
                         Let your friends know! Or wait for someone from our community to contribute.
                     </div>
                 </li>
