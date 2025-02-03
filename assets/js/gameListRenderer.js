@@ -94,6 +94,7 @@ export class GameListRenderer {
         return null;
     }
 
+    // TODO: This is where the modal was being called.
     // All your existing render methods
     renderGameCard(game) {
         const isOpen = game.openForChanges === '1' || game.openForChanges === true || game.openForChanges === 1;
@@ -108,7 +109,7 @@ export class GameListRenderer {
                  data-text-id="${game.id}">
                 <div class="story-title ${game.unseen_count > 0 && this.userLoggedIn ? 'unreads' : ''}">
                     <h2 class="${hasContributed ? 'contributed' : ''}">
-                        <a data-refresh-modal data-text-id="${game.id}">
+                        <a data-refresh-default data-text-id="${game.id}">
                             ${game.title || 'Untitled'}
                         </a>
                     </h2>

@@ -51,26 +51,19 @@ export class UIManager {
   handleStoriesRefresh(event) {
     const treeTarget = event.target.closest("[data-refresh-tree]");
     const shelfTarget = event.target.closest("[data-refresh-shelf]");
-    const modalTarget = event.target.closest("[data-refresh-modal]");
+    const defaultTarget = event.target.closest("[data-refresh-default]");
 
     // A variable to hold keyword shelf if shelfTarget, modal if modalTarget, and tree if treeTarget
     let targetType;
 
     if (shelfTarget) {
         targetType = 'shelf';
-    } else if (modalTarget) {
-        targetType = 'modal';
+    } else if (defaultTarget) {
+        targetType = 'default';
     } else if (treeTarget) {
         targetType = 'tree';
     } else {
         targetType = 'none';  // Or any other default value
-    }
-
-
-    // If modalTarget
-    if(modalTarget){
-      this.handleModalRefresh(event);
-      return;
     }
 
     // Don't continue if you clicked neither button
@@ -82,7 +75,7 @@ export class UIManager {
     const story = event.target.closest(".story");
 
     // Grab the textId from the button clicked
-    const targetElement = { tree: treeTarget, shelf: shelfTarget, modal: modalTarget }[targetType];
+    const targetElement = { tree: treeTarget, shelf: shelfTarget, default: defaultTarget }[targetType];
     const textId = targetElement ? targetElement.dataset.textId : null;
 
     // Grab the textId from the showcase on screen, if there is one
@@ -97,7 +90,12 @@ export class UIManager {
     container ? container.remove() : "";
 
     // check if the action to toggle off the view, or to get a new view
-    if(previousViewType == targetType && textId == previousTextId){
+    if (
+      // Close if clicking the same view type on the same story
+      (previousViewType === targetType && textId === previousTextId) ||
+      // Close if clicking default when any showcase is already open for this story
+      (targetType === 'default' && previousTextId === textId && previousViewType !== 'none')
+    ) {
       story.classList.remove('story-has-showcase');
       // Clear the current root story ID when closing showcase
       this.dataManager.setCurrentViewedRootStoryId(null);
@@ -127,15 +125,20 @@ export class UIManager {
     container = document.querySelector('#showcase');
 
     // now fill it depending on the button (tree or shelf)
-    if (treeTarget) {
+    if (targetType == 'tree') {
       //const textId = treeTarget.dataset.textId;
       this.drawTree(textId, container);
     }
 
-    if (shelfTarget) {
+    if (targetType == 'shelf') {
       //const textId = shelfTarget.dataset.textId;
       this.drawShelf(textId, container);
+    } 
+    if (defaultTarget) {
+      // for now, just draw the tree
+      this.handleDefaultRefresh(textId, container);
     }
+
   }
 
   // Call drawTree from the storyManager
@@ -154,12 +157,9 @@ export class UIManager {
     }
   }
 
-  // Handle the showing of the story modal 
-  // by getting the id via the click event
-  handleModalRefresh(event){
-    const modalTarget = event.target.closest("[data-refresh-modal]");
-    const textId = modalTarget.dataset.textId;
-    this.storyManager.showStoryInModal(textId);
+  // TODO: when clicking on the title... we could open the game, and give an option to view as tree or shelf... OR... as I'm doing here, just draw the tree
+  handleDefaultRefresh(textId, container){
+    this.drawTree(textId, container);
   }
 
   // To be accessed while doing automatic refreshes
