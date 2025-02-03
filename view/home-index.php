@@ -1,7 +1,7 @@
 {{ include('header.php', {title: 'Welcome'})}}
 {# comments #}
     <div class="home">
-    <div class="home-container">
+    <section class="home-container">
         <div class="background-svg"></div>
         <div class="text-container">
            <!--  <p>{{message}}</p> -->
@@ -24,8 +24,8 @@
                 <span>how it works</span>
             </a>
         </div>
-    </div>
-    <div class="info" id="how">
+</section>
+    <section class="info" id="how">
         <div class="info-container">
             <h2>How to collaborate:</h2>
             <ol>
@@ -103,6 +103,6 @@
             </ol>
         </div>
     </div>
-    </div>
+</section>
 </body>
 </html>

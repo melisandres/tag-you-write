@@ -18,7 +18,7 @@
             <h1 class="game-title"> 
                 {{ data.game_title|default('Untitled') }}
             </h1>
-            <div class="info iterate">
+            <section class="info iterate">
                 <div class="info-container">
                     <h3>iterating on: </h3>
                     <div class="info-text-container parent">
@@ -39,10 +39,10 @@
                         <p> {{ data.prompt|raw }}</p>
                     </div>
                 </div>
-            </div>
+            </section>
         </div>
     {% elseif not data.id %}
-        <div class="info">
+        <section class="info">
             <div class="info-container">
                 <h3>good to know: </h3>
                 <div class="info-text-container">
@@ -51,7 +51,7 @@
                     <p>May the best iteration win!</p>
                 </div>
             </div>
-        </div>
+        </section>
     {% endif %}
     <!-- action="{{ path }}text/{{ data.id ? 'update' : 'store' }}" -->
     </div>

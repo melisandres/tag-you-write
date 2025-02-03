@@ -1,4 +1,4 @@
-.info{
+section.info{
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
