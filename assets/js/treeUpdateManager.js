@@ -290,11 +290,14 @@ export class TreeUpdateManager {
     console.log('2. Container found:', !!container);
     if (!container) return;
 
-    // Clear all previous search matches
+    // Clear all previous search matches AND title highlights
     const allNodes = container.querySelectorAll('.node path[data-id]:not(.link)');
     console.log('3. Found nodes to clear:', allNodes.length);
     allNodes.forEach(node => {
+        const nodeId = node.getAttribute('data-id');
         d3.select(node).classed('search-match', false);
+        // Always call handleTitleHighlight with false when clearing
+        this.treeVisualizer.handleTitleHighlight(nodeId, '', false);
     });
 
     if (!searchTerm) {

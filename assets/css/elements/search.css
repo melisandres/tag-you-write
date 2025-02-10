@@ -108,5 +108,3 @@ mark {
 .nav-link.search svg {
     fill: var(--color-white);
 }
-
-/* No need for complex combined states - the stroke will work with existing unread styling */

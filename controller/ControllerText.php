@@ -10,7 +10,7 @@ RequirePage::model('GameHasPlayer');
 RequirePage::model('TextStatus');
 RequirePage::model('Seen');
 RequirePage::controller('ControllerGame');
-
+RequirePage::model('Notification');
 
 class ControllerText extends Controller{
 
@@ -33,11 +33,59 @@ class ControllerText extends Controller{
         $game = new Game;
         $allGames = $game->getGames($sort, $filters);
 
+        // Get the notifications
+        $notification = new Notification;
+        $notifications = $notification->getNotifications();
+
         // Send both the rendered data and the complete dataset
         Twig::render('text-index.php', [
             'texts' => $allGames,
             'gamesData' => json_encode($allGames),
+            'notifications' => $notifications,
+            'notificationsData' => json_encode($notifications),
             'initialFilters' => json_encode($filters) 
+        ]);
+    }
+
+    public function collab($rootId = null) {
+        if ($rootId === null) {
+            Twig::render('home-error.php', ['message' => "No game specified."]);
+            exit();
+        }
+
+        // First get the game ID from the text ID
+        $text = new Text;
+        $gameId = $text->selectGameId($rootId);
+
+        if (!$gameId) {
+            Twig::render('home-error.php', ['message' => "Text not found."]);
+            exit();
+        }
+
+        // Get the game data using the game ID
+        $game = new Game;
+        $filters = []; // Empty filters since we want just this specific game
+        $gameData = $game->getGames(null, $filters, $gameId);
+
+        if (empty($gameData)) {
+            Twig::render('home-error.php', ['message' => "Game not found."]);
+            exit();
+        }
+
+        // Get the tree data
+        $treeData = $this->getTree($rootId);
+
+        // Get the notifications
+        $notification = new Notification;
+        $notifications = $notification->getNotifications();
+
+        // Render the collaboration view
+        Twig::render('text-collab.php', [
+            'game' => $gameData[0], // Single game data
+            'gameData' => json_encode($gameData[0]), // For JavaScript
+            'treeData' => $treeData, // The tree structure
+            'notifications' => $notifications,
+            'notificationsData' => json_encode($notifications)
         ]);
     }
 

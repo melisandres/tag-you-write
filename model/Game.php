@@ -156,7 +156,7 @@
 
    public function getPlayers($game_id) {
       // Fetch all players involved in the game
-      $sql = "SELECT writer_id 
+      $sql = "SELECT DISTINCT writer_id 
                FROM text 
                WHERE game_id = :game_id";
       $stmt = $this->prepare($sql);

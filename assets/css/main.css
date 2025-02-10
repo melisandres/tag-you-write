@@ -32,6 +32,7 @@
 @import url(./elements/search.css);
 @import url(./elements/menu.css);
 @import url(./elements/home-container.css);
+@import url(./elements/notifications-menu.css);
 
 /* general: a catch-all  */
 @import url(./general/general.css);

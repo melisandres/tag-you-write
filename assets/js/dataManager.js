@@ -39,6 +39,13 @@ export class DataManager {
             }
         };
 
+        // Move this after cache initialization and add explicit check for empty string
+        if (!this.cache.search || this.cache.search.trim() === '') {
+            console.log('No search term found, clearing search results');
+            this.emptySearchResults();
+            this.saveCache(); // Ensure the cleared state is saved
+        }
+
         // Ensure nodesMap exists even if loaded from cache
         if (!this.cache.nodesMap) {
             this.cache.nodesMap = new Map();
@@ -1059,6 +1066,14 @@ export class DataManager {
         });
 
         this.saveCache();
+    }
+
+    emptySearchResults() {
+        this.cache.search = '';
+        this.cache.searchResults = {
+            rootId: null,
+            nodes: {}
+        };
     }
 
     normalizeSearchResults(searchResults, rootStoryId, lastUpdate) {

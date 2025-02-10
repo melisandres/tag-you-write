@@ -189,6 +189,18 @@ class Text extends Crud{
 
     }
 
+    public function selectWriterId($textId) {
+        $sql = "SELECT writer_id 
+                FROM $this->table 
+                WHERE id = :id";
+    
+        $stmt = $this->prepare($sql);
+        $stmt->bindValue(":id", $textId);
+        $stmt->execute();
+    
+        return $stmt->fetch();
+    }
+
     public function searchNodesByTerm($term, $gameId, $currentWriterId = null, $lastTreeCheck = null) {
         try {
             $term = trim($term, '"');

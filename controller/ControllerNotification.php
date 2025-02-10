@@ -10,11 +10,12 @@ class ControllerNotification extends Controller {
     }
 
     // At the moment I am creating notifications from the game controler when a game ends. in the model notification->createNotification()
-    public function create($playerId, $gameId, $notificationType){
+    public function create($playerId, $gameId, $notificationType, $message){
         $data =[
             'writer_id' => $playerId,
             'game_id' => $gameId,
-            'notification_type' => $notificationType
+            'notification_type' => $notificationType,
+            'message' => $message
         ];
 
         $notification = new Notification;

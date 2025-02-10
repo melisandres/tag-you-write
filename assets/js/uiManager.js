@@ -13,6 +13,10 @@ export class UIManager {
     this.insertLoginLogoutSVGs();
     this.initEventListeners();
     this.stories = document.querySelector(".stories");
+    this.oneStory = document.querySelector('[data-one-story]');
+    if (!this.stories && this.oneStory){
+      this.stories = this.oneStory;
+    }
     this.dataManager = window.dataManager;
 
     // Listen for events from ShowcaseManager
@@ -45,7 +49,11 @@ export class UIManager {
   initEventListeners() {
     // Checking for any UI changes comming from the ".stories" div 
     const storiesContainer = document.querySelector('[data-stories]');
+    const oneStoryContainer = document.querySelector('[data-one-story]');
+
     storiesContainer ? storiesContainer.addEventListener('click', (event) => this.handleStoriesRefresh(event)) : "";
+
+    oneStoryContainer ? oneStoryContainer.addEventListener('click', (event) => this.handleStoriesRefresh(event)) : "";
   }
 
   handleStoriesRefresh(event) {

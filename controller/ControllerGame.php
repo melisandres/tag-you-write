@@ -36,10 +36,26 @@ class ControllerGame extends Controller {
         $players = $game->getPlayers($gameId);
         
 
+        // Get the winning player, text, and game -- to construct the message
+        $winning_player = $text->selectWriterId($textId, 'writer_id');
+        $winning_text = $text->selectId($textId);
+        $winning_game = $game->selectId($gameId);
+        $root_text = $text->selectId($winning_game['root_text_id']);
+        
         // Create notifications for each player
         $notification = new ControllerNotification;
         foreach ($players as $player) {
-            $notification->create($player['writer_id'], $gameId, 'game_won');
+            error_log("Comparing player writer_id: {$player['writer_id']} with winning writer_id: {$winning_player['writer_id']}");
+            $notification_type = ($player['writer_id'] == $winning_player['writer_id']) 
+                ? 'game_won' 
+                : 'game_closed';
+
+            $notification->create(
+                $player['writer_id'], 
+                $gameId, 
+                $notification_type,
+                null  // No message needed, will be constructed in template
+            );
         }
         
         return;

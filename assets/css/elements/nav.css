@@ -43,3 +43,7 @@ a.nav-link:hover svg {
 .nav-link.search.active {
     border-bottom: hotpink solid 3px;
 }
+
+.nav-link.notifications.active {
+    border-bottom: hotpink solid 3px;
+}

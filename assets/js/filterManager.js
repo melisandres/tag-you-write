@@ -11,7 +11,8 @@ export class FilterManager {
             return;
         }
         this.filterMenu = document.querySelector('.filter-menu');
-        if (!this.filterMenu) {
+        this.filterNavLink = document.querySelector('.nav-link.filter');
+        if (!this.filterMenu || !this.filterNavLink) {
             return;
         }
         

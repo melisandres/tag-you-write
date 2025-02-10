@@ -12,6 +12,23 @@
                         'message'
                         ];
 
+    public function getNotifications($order = 'DESC') {
+        $writer_id = $_SESSION['writer_id'];
+        $sql = "SELECT n.*, g.root_text_id, t.title as game_title, 
+                wt.title as winning_title 
+                FROM $this->table n
+                JOIN game g ON n.game_id = g.id
+                JOIN text t ON g.root_text_id = t.id
+                LEFT JOIN text wt ON g.winner = wt.id
+                WHERE n.writer_id = :writer_id
+                ORDER BY n.created_at $order";
+                
+        $stmt = $this->prepare($sql);
+        $stmt->bindValue(':writer_id', $writer_id);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
     public function getUnseenNotifications($writer_id, $game_id = NULL) {
         $sql = "SELECT * FROM notification WHERE writer_id = :writer_id AND is_seen = FALSE";
         

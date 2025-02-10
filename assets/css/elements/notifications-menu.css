@@ -1,0 +1,49 @@
+.notifications-menu {
+    position: fixed;
+    width: 100%;
+    top: calc(var(--header-height));
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-end;
+    background-color: var(--color-black-dark);
+    transition: transform 0.3s ease-in-out;
+    z-index: 4;
+    padding: 20px;
+    border-top: 1px solid var(--color-grey-dark);
+    color: white;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-grey-dark) var(--color-black-dark);
+    flex-direction: row;
+    gap: 20px;
+}
+
+.notification {
+    max-width: 250px;
+    background: var(--color-black-light);
+    border-radius: 8px;
+    padding: 15px;
+    border: 1px solid var(--color-grey-dark);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    flex-shrink: 0;
+}
+
+.notification h3 {
+    color: var(--color-primary);
+    margin-bottom: 8px;
+    font-size: 1em;
+}
+
+.notification p {
+    margin-bottom: 12px;
+    font-size: 0.7em;
+    line-height: 1.4;
+}
+
+.notification time {
+    display: block;
+    font-size: 0.4em;
+    color: var(--color-grey-light);
+    padding: var(--general-padding);
+}

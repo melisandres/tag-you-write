@@ -17,16 +17,22 @@
 <body>
     <nav>   
         <a class="nav-link home" data-svg="home" title="about" href="{{path}}">?</a>    
-
         {% if title == 'All Texts!' %}
             <a class="nav-link filter">
                 <span class="icon"></span>
-            </a>   
+            </a> 
+        {% else %} 
+            <a class="nav-link texts" data-svg="browse" href="{{path}}text">browse</a>  
+        {% endif %}
+
+        {% if title == 'All Texts!' %}
             <a class="nav-link search" href="{{path}}search">
                 <span class="icon"></span>
             </a>
-        {% else %} 
-            <a class="nav-link texts" data-svg="browse" href="{{path}}text">browse</a>  
+        {% elseif title == 'Story Collaboration' %}
+            <a class="nav-link search" href="{{path}}search">
+                <span class="icon"></span>
+            </a>
         {% endif %}
 
     {% if guest %}
@@ -46,23 +52,38 @@
     {% endif %} -->
     </nav>
 
-    {% if title == 'All Texts!' %}
+    {% if title == 'All Texts!' or title == 'Story Collaboration' %}
         <div class="menu-container">
             <div class="filter-menu">
                 <!-- Your existing filter menu content -->
             </div>
+
             <div class="search-menu">
                 <!-- New search menu content -->
             </div>
         </div>
     {% endif %}
 
-    <div class="notifications-container">
-        <div class="notifications-menu">
-            <!-- New search menu content -->
+    {% if notifications %}
+        <div class="notifications-container">
+            <div class="notifications-menu display-none">
+                {% for n in notifications %}
+                <article class="notification">
+                    {% if n.notification_type == 'game_won' %}
+                        <h3>Game Won!</h3>
+                        <p>The "<a href="{{ path }}text/collab/{{ n.root_text_id }}">{{ n.game_title }}</a>" 
+                           collaboration is closed. Your iteration: "{{ n.winning_title }}" has been unanimously chosen as the winner!</p>
+                    {% elseif n.notification_type == 'game_closed' %}
+                        <h3>Game Closed</h3>
+                        <p>The "<a href="{{ path }}text/collab/{{ n.root_text_id }}">{{ n.game_title }}</a>" 
+                           collaboration is closed. The winning text is "{{ n.winning_title }}"</p>
+                    {% endif %}
+                    <time>{{ n.created_at }}</time>
+                </article>
+                {% endfor %}
+            </div>
         </div>
-    </div>
-
+    {% endif %}
 
     <!-- a modal for the showcase area (selected text) -->
     <div class="modal-background display-none" data-tree-modal="hidden" data-text-id="">

@@ -11,6 +11,7 @@ export class VoteManager {
         // Use event delegation on the parent element
         const modalBtns = document.querySelector('.modal-btns');
         const dataStories = document.querySelector('[data-stories]');
+        const oneStory = document.querySelector('[data-one-story]');
 
         if (modalBtns) {
             modalBtns.addEventListener('click', this.handleVoteButtonClick.bind(this));
@@ -18,6 +19,9 @@ export class VoteManager {
 
         if (dataStories) {
             dataStories.addEventListener('click', this.handleVoteButtonClick.bind(this));
+        }
+        if (oneStory) {
+            oneStory.addEventListener('click', this.handleVoteButtonClick.bind(this));
         }
     }
 

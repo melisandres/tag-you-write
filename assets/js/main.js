@@ -35,9 +35,9 @@ import { PollingManager } from './pollingManager.js';
 import { GameUpdateHandler } from './gameUpdateHandler.js';
 import { TreeShelfModalPollingUpdateManager } from './TreeShelfModalPollingUpdateManager.js';
 import { HomePageManager } from './homePageManager.js';
+import { NotificationsMenuManager } from './notificationsMenuManager.js';
 // Make eventBus globally available immediately
 window.eventBus = eventBus;
-
 
 document.addEventListener("DOMContentLoaded", async () => {
 
@@ -69,6 +69,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Initialize UIManager with the storyManager and modal instances
   const uiManager = new UIManager(storyManager, modal);
+
+  new NotificationsMenuManager(path);
 
   // Only initialize GameListManager if we're on the games list page
   //const gamesContainer = document.querySelector('.stories');

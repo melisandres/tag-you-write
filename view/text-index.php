@@ -9,8 +9,6 @@
 <div class="search-menu" id="gameSearch">
 </div>
 
-
-<!-- an area to show all the starting stories that might be contributed to -->
 <div data-stories class="stories">
 {% for text in texts %}
     <div class="story {{ text.openForChanges ? '' : 'closed' }}" data-game-id="{{ text.game_id }}" data-unseen-count="{{ text.unseen_count }}" data-seen-count="{{ text.seen_count }}" data-text-count="{{ text.text_count }}" data-text-id="{{ text.id }}">
