@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ current_language }}">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -16,35 +16,88 @@
 </head>
 <body>
     <nav>   
-        <a class="nav-link home" data-svg="home" title="about" href="{{path}}">?</a>    
+        <div class="nav-link language-switcher">
+            <div class="current-language">
+                {% if current_language == 'en' %}EN{% else %}FR{% endif %}
+            </div>
+            <div class="nav-text" data-i18n="language">
+                {{ translate('language') }}
+            </div>
+            <div class="language-dropdown">
+                <a data-language="en" class="{% if current_language == 'en' %}active{% endif %}">EN</a>
+                <a data-language="fr" class="{% if current_language == 'fr' %}active{% endif %}">FR</a>
+            </div>
+        </div>
+        {% if title != 'Welcome' %}
+        <a class="nav-link home" href="{{ langUrl('') }}">
+            <span class="icon" data-svg="home"></span>
+            <span class="nav-text" data-i18n="home">
+                {{ translate('home') }}
+            </span>
+        </a>  
+        {% endif %}
         {% if title == 'All Texts!' %}
             <a class="nav-link filter">
                 <span class="icon"></span>
+                <span class="nav-text" data-i18n="filter">
+                    {{ translate('filter') }}
+                </span>
             </a> 
         {% else %} 
-            <a class="nav-link texts" data-svg="browse" href="{{path}}text">browse</a>  
+            <a class="nav-link texts" href="{{ langUrl('text') }}">
+                <span data-svg="browse" class="icon"></span>
+                <span class="nav-text" data-i18n="browse">
+                    {{ translate('browse') }}
+                </span>
+            </a>  
         {% endif %}
 
-        {% if title == 'All Texts!' %}
-            <a class="nav-link search" href="{{path}}search">
+        {% if title == 'All Texts!' or title == 'Story Collaboration' %}
+            <a class="nav-link search" href="{{ langUrl('search') }}">
                 <span class="icon"></span>
-            </a>
-        {% elseif title == 'Story Collaboration' %}
-            <a class="nav-link search" href="{{path}}search">
-                <span class="icon"></span>
+                <span class="nav-text" data-i18n="search">
+                    {{ translate('search') }}
+                </span>
             </a>
         {% endif %}
 
     {% if guest %}
-        <a class="nav-link writers" href="{{path}}login"></a>
+        <a class="nav-link writers" href="{{ langUrl('login') }}">
+            <span class="icon" data-svg="login"></span>
+            <span class="nav-text" data-i18n="login">
+                {{ translate('login') }}
+            </span>
+        </a>
     {% else %}
         <!-- <a class="nav-link writers" href="{{path}}writer">show all writers</a> -->
-        <a class="nav-link texts" data-svg="newGame" href="{{path}}text/create?new=true">new game</a>
-        <a class="nav-link notifications" data-svg="notification"></a>
+        <!-- <a class="nav-link newGame" href="{{path}}text/create?new=true"> -->
+        <a class="nav-link newGame" href="{{ langUrl('text/create?new=true') }}">
+            <span class="icon" data-svg="newGame"></span>
+            <span class="nav-text" data-i18n="newGame">
+                {{ translate('newGame') }}
+            </span>
+        </a>
+
+        <a class="nav-link notifications">
+            <span class="icon" data-svg="notification"></span>
+            <span class="nav-text" data-i18n="notifications">
+                {{ translate('notifications') }}
+            </span>
+        </a>
         {% if session.privilege == 1 %}
-            <a class="nav-link writers" href="{{path}}journal">journal</a>
+            <a class="nav-link writers" href="{{ langUrl('journal') }}">
+                <span class="icon" data-svg="journal">j</span>
+                <span class="nav-text" data-i18n="journal">
+                    {{ translate('journal') }}
+                </span>
+            </a>
         {% endif %}
-        <a class="nav-link writers" href="{{path}}login/logout"></a>
+        <a class="nav-link writers" href="{{ langUrl('login/logout') }}">
+            <span class="icon" data-svg="logout"></span>
+            <span class="nav-text" data-i18n="logout">
+                {{ translate('logout') }}
+            </span>
+        </a>
 
     {% endif %}
 <!--     {% if session.privilege == 1 or session.privilege == 2 %}
@@ -55,11 +108,11 @@
     {% if title == 'All Texts!' or title == 'Story Collaboration' %}
         <div class="menu-container">
             <div class="filter-menu">
-                <!-- Your existing filter menu content -->
+                <!-- filter menu content -->
             </div>
 
             <div class="search-menu">
-                <!-- New search menu content -->
+                <!-- search menu content -->
             </div>
         </div>
     {% endif %}
@@ -70,13 +123,33 @@
                 {% for n in notifications %}
                 <article class="notification">
                     {% if n.notification_type == 'game_won' %}
-                        <h3>Game Won!</h3>
-                        <p>The "<a href="{{ path }}text/collab/{{ n.root_text_id }}">{{ n.game_title }}</a>" 
-                           collaboration is closed. Your iteration: "{{ n.winning_title }}" has been unanimously chosen as the winner!</p>
+                        <h3 data-i18n="notification_game_won">
+                            {{ translate('notification_game_won') }}
+                        </h3>
+                        <p data-i18n="notification_game_won_text" 
+                           data-i18n-params="{{ {
+                               'game_title_link': '<a href=\"' ~ langUrl('text/collab/' ~ n.root_text_id) ~ '\">' ~ n.game_title ~ '</a>',
+                               'winning_title': n.winning_title
+                           }|json_encode }}">
+                            {{ translate('notification_game_won_text', {
+                                'game_title_link': '<a href="' ~ langUrl('text/collab/' ~ n.root_text_id) ~ '">' ~ n.game_title ~ '</a>',
+                                'winning_title': n.winning_title
+                            }, true) }}
+                        </p>
                     {% elseif n.notification_type == 'game_closed' %}
-                        <h3>Game Closed</h3>
-                        <p>The "<a href="{{ path }}text/collab/{{ n.root_text_id }}">{{ n.game_title }}</a>" 
-                           collaboration is closed. The winning text is "{{ n.winning_title }}"</p>
+                        <h3 data-i18n="notification_game_closed">
+                            {{ translate('notification_game_closed') }}
+                        </h3>
+                        <p data-i18n="notification_game_closed_text" 
+                           data-i18n-params="{{ {
+                               'game_title_link': '<a href=\"' ~ langUrl('text/collab/' ~ n.root_text_id) ~ '\">' ~ n.game_title ~ '</a>',
+                               'winning_title': n.winning_title
+                           }|json_encode }}">
+                            {{ translate('notification_game_closed_text', {
+                                'game_title_link': '<a href="' ~ langUrl('text/collab/' ~ n.root_text_id) ~ '">' ~ n.game_title ~ '</a>',
+                                'winning_title': n.winning_title
+                            }, true) }}
+                        </p>
                     {% endif %}
                     <time>{{ n.created_at }}</time>
                 </article>

@@ -1,0 +1,63 @@
+/* Language Switcher Styles */
+.nav-link.language-switcher {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-link.language-switcher .current-language {
+    padding: 4px 2px;
+    cursor: pointer;
+    border-radius: 3px;
+    font-size: 0.5em;
+    text-transform: uppercase;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    pointer-events: auto;
+}
+
+/* .nav-link.language-switcher .current-language:after {
+    content: "▼";
+    font-size: 0.8em;
+    margin-left: 4px;
+} */
+
+.nav-link.language-switcher .current-language:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-link.language-switcher .language-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: #333;
+    border-radius: 3px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    display: none;
+    min-width: 100%;
+}
+
+.nav-link.language-switcher.open .language-dropdown {
+    display: block;
+}
+
+.nav-link.language-switcher .language-dropdown a {
+    padding: 6px 5px;
+    display: block;
+    font-size: 0.5em;
+    text-transform: uppercase;
+    color: #fff;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.nav-link.language-switcher .language-dropdown a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-link.language-switcher .language-dropdown a.active {
+    font-weight: bold;
+    background-color: rgba(255, 255, 255, 0.2);
+}

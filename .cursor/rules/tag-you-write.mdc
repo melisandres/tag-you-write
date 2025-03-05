@@ -1,0 +1,15 @@
+---
+description: 
+globs: 
+---
+
+# Your rule content
+
+- MVC vanilla Js, vanilla php, using D3.js for showing hierarchical data in tree structures. 
+- It’s a collaborative writing game.
+- Using short-polling for game updates, and a lot of RESTfull calls in order to prevent page refreshes for a seamless user experience. 
+- Updates check for changes in the database, rather than sending all the data every time, which causes quite a bit of complexity, not only for handling polling but also for handling requests for trees, only changes to the tree data are reccuperated. 
+- Also the fact that the data is hierarchical also adds some complexity. 
+- The page state is saved in the URL but only in part. It is also saved in the refreshManager.js, so that the last state of the “games page” can be reinstated when a player returns to the game page. 
+- There is a search system—that relies on the efficiency of database searches on the backend, and formats the results returned from the backend for seamless visualization of results—so the page is pre-rendered on the front end when a search is made. 
+- Filtering also uses this logic, but more on the root-level of the hierarchical data, without delving into the depths of the hierarchies. 

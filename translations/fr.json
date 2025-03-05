@@ -1,0 +1,19 @@
+{
+    "welcome": "Bienvenue sur notre site",
+    "language": "Langue",
+    "home": "Accueil",
+    "about": "À propos de nous",
+    "browse": "Lire",
+    "contact": "Contactez-nous",
+    "search": "Rechercher",
+    "greeting": "Bonjour, {name}!",
+    "filter": "Filtrer",
+    "newGame": "Nouvelle Collaboration",
+    "notifications": "Notifications",
+    "logout": "Quitter",
+    "login": "Connexion",
+    "notification_game_won": "Partie Gagnée !",
+    "notification_game_won_text": "La collaboration {game_title_link} est terminée. Votre itération : \"{winning_title}\" a été choisie à l'unanimité comme gagnante !",
+    "notification_game_closed": "Partie Terminée",
+    "notification_game_closed_text": "La collaboration {game_title_link} est terminée. Le texte gagnant est \"{winning_title}\""
+  }

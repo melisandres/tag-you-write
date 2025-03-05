@@ -7,7 +7,7 @@
     align-items: flex-end;
     background-color: var(--color-black-dark);
     transition: transform 0.3s ease-in-out;
-    z-index: 4;
+    z-index: 3;
     padding: 20px;
     border-top: 1px solid var(--color-grey-dark);
     color: white;

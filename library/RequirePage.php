@@ -14,8 +14,16 @@ class RequirePage{
     }
 
     static public function redirect($page){
-        header('location:http://localhost:8888/tag-you-write-repo/tag-you-write/'.$page);
-
+        $lang = defined('CURRENT_LANGUAGE') ? CURRENT_LANGUAGE : 'en';
+        
+        $baseUrl = 'http://localhost:8888/tag-you-write-repo/tag-you-write/';
+        
+        // If page already includes language, don't add it again
+        if (strpos($page, $lang . '/') === 0) {
+            header('location:' . $baseUrl . $page);
+        } else {
+            header('location:' . $baseUrl . $lang . '/' . ltrim($page, '/'));
+        }
     }
 
     static public function getBaseUrl(){

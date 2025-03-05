@@ -1,0 +1,19 @@
+{
+    "welcome": "Welcome to our site",
+    "language": "Language",
+    "home": "Home",
+    "about": "About Us",
+    "browse": "Browse",
+    "contact": "Contact Us",
+    "search": "Search",
+    "greeting": "Hello, {name}!",
+    "filter": "Filter",
+    "newGame": "New Collaboration",
+    "notifications": "Notifications",
+    "notification_game_won": "Game Won!",
+    "logout": "Exit",
+    "login": "Enter",
+    "notification_game_won_text": "The {game_title_link} collaboration is closed. Your iteration: \"{winning_title}\" has been unanimously chosen as the winner!",
+    "notification_game_closed": "Game Closed",
+    "notification_game_closed_text": "The {game_title_link} collaboration is closed. The winning text is \"{winning_title}\""
+  }

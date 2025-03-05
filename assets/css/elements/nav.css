@@ -8,7 +8,7 @@ nav{
     top: 0;
     width: 100%;
     height: var(--header-height);
-    z-index: 3;
+    z-index: 4;
 }
 
 a.nav-link{
@@ -47,3 +47,7 @@ a.nav-link:hover svg {
 .nav-link.notifications.active {
     border-bottom: hotpink solid 3px;
 }
+
+.nav-link .nav-text {
+    display: none;
+  }
