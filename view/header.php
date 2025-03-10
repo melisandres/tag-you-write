@@ -5,7 +5,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="user" data-user-id="{{ session.writer_id ? session.writer_id : 'null' }}" data-guest="{{ guest ? 'true' : 'false' }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ title }}</title>
+    
+    {% if title_key is defined %}
+        <title data-i18n-title="{{ title_key }}">{{ translate(title_key) }}</title>
+    {% else %}
+        <title>{{ title }}</title>
+    {% endif %}
+    
     <script src="https://cdn.ckeditor.com/ckeditor5/40.2.0/classic/ckeditor.js"></script>
     <link rel="stylesheet" href="{{path}}assets/css/main.css">
     <script type="module" src="https://d3js.org/d3.v7.min.js" defer></script>
@@ -16,96 +22,100 @@
 </head>
 <body>
     <nav>   
-        <div class="nav-link language-switcher">
+        <div class="nav-link language-switcher" data-i18n-title="nav.language_tooltip" title="{{ translate('nav.language_tooltip') }}">
             <div class="current-language">
                 {% if current_language == 'en' %}EN{% else %}FR{% endif %}
             </div>
-            <div class="nav-text" data-i18n="language">
-                {{ translate('language') }}
+            <div class="nav-text" data-i18n="nav.language">
+                {{ translate('nav.language') }}
             </div>
             <div class="language-dropdown">
                 <a data-language="en" class="{% if current_language == 'en' %}active{% endif %}">EN</a>
                 <a data-language="fr" class="{% if current_language == 'fr' %}active{% endif %}">FR</a>
             </div>
         </div>
-        {% if title != 'Welcome' %}
+        {% if title_key != 'page_title.home' %}
         <a class="nav-link home" href="{{ langUrl('') }}">
-            <span class="icon" data-svg="home"></span>
-            <span class="nav-text" data-i18n="home">
-                {{ translate('home') }}
+            <span class="icon" data-svg="home" data-i18n-title="nav.home_tooltip" title="{{ translate('nav.home_tooltip') }}"></span>
+            <span class="nav-text" data-i18n="nav.home">
+                {{ translate('nav.home') }}
             </span>
         </a>  
         {% endif %}
-        {% if title == 'All Texts!' %}
+
+        {% if title_key == 'page_title.texts' %}
             <a class="nav-link filter">
-                <span class="icon"></span>
-                <span class="nav-text" data-i18n="filter">
-                    {{ translate('filter') }}
+                <span class="icon" data-svg="filter" data-i18n-title="nav.filter_tooltip" title="{{ translate('nav.filter_tooltip') }}"></span>
+                <span class="nav-text" data-i18n="nav.filter">
+                    {{ translate('nav.filter') }}
                 </span>
             </a> 
         {% else %} 
             <a class="nav-link texts" href="{{ langUrl('text') }}">
-                <span data-svg="browse" class="icon"></span>
-                <span class="nav-text" data-i18n="browse">
-                    {{ translate('browse') }}
+                <span class="icon" data-svg="browse" data-i18n-title="nav.browse_tooltip" title="{{ translate('nav.browse_tooltip') }}"></span>
+                <span class="nav-text" data-i18n="nav.browse">
+                    {{ translate('nav.browse') }}
                 </span>
             </a>  
         {% endif %}
 
-        {% if title == 'All Texts!' or title == 'Story Collaboration' %}
+        {% if title_key == 'page_title.texts' or title_key == 'page_title.collab' %}
             <a class="nav-link search" href="{{ langUrl('search') }}">
-                <span class="icon"></span>
-                <span class="nav-text" data-i18n="search">
-                    {{ translate('search') }}
+                <span class="icon" data-svg="search" data-i18n-title="nav.search_tooltip" title="{{ translate('nav.search_tooltip') }}"></span>
+                <span class="nav-text" data-i18n="nav.search">
+                    {{ translate('nav.search') }}
                 </span>
             </a>
         {% endif %}
 
-    {% if guest %}
+    {% if guest and title_key != 'page_title.login' %}
         <a class="nav-link writers" href="{{ langUrl('login') }}">
-            <span class="icon" data-svg="login"></span>
-            <span class="nav-text" data-i18n="login">
-                {{ translate('login') }}
+            <span class="icon" data-svg="logIn" data-i18n-title="nav.login_tooltip" title="{{ translate('nav.login_tooltip') }}"></span>
+            <span class="nav-text" data-i18n="nav.login">
+                {{ translate('nav.login') }}
             </span>
         </a>
-    {% else %}
+    {% endif %}
+    {% if not guest %}
         <!-- <a class="nav-link writers" href="{{path}}writer">show all writers</a> -->
         <!-- <a class="nav-link newGame" href="{{path}}text/create?new=true"> -->
         <a class="nav-link newGame" href="{{ langUrl('text/create?new=true') }}">
-            <span class="icon" data-svg="newGame"></span>
-            <span class="nav-text" data-i18n="newGame">
-                {{ translate('newGame') }}
+            <span class="icon" data-svg="newGame" data-i18n-title="nav.newGame_tooltip" title="{{ translate('nav.newGame_tooltip') }}"></span>
+            <span class="nav-text" data-i18n="nav.newGame">
+                {{ translate('nav.newGame') }}
             </span>
         </a>
 
         <a class="nav-link notifications">
-            <span class="icon" data-svg="notification"></span>
-            <span class="nav-text" data-i18n="notifications">
-                {{ translate('notifications') }}
+            <span class="icon" data-svg="notification" data-i18n-title="nav.notifications_tooltip" title="{{ translate('nav.notifications_tooltip') }}"></span>
+            <span class="nav-text" data-i18n="nav.notifications">
+                {{ translate('nav.notifications') }}
             </span>
         </a>
         {% if session.privilege == 1 %}
             <a class="nav-link writers" href="{{ langUrl('journal') }}">
-                <span class="icon" data-svg="journal">j</span>
-                <span class="nav-text" data-i18n="journal">
-                    {{ translate('journal') }}
+                <span class="icon" data-svg="journal" data-i18n-title="nav.journal_tooltip" title="{{ translate('nav.journal_tooltip') }}"></span>
+                <span class="nav-text" data-i18n="nav.journal">
+                    {{ translate('nav.journal') }}
                 </span>
             </a>
         {% endif %}
+    {% endif %}
+
+    {% if not guest and title_key != 'page_title.login' %}
         <a class="nav-link writers" href="{{ langUrl('login/logout') }}">
-            <span class="icon" data-svg="logout"></span>
-            <span class="nav-text" data-i18n="logout">
-                {{ translate('logout') }}
+            <span class="icon" data-svg="logOut" data-i18n-title="nav.logout_tooltip" title="{{ translate('nav.logout_tooltip') }}"></span>
+            <span class="nav-text" data-i18n="nav.logout">
+                {{ translate('nav.logout') }}
             </span>
         </a>
-
     {% endif %}
 <!--     {% if session.privilege == 1 or session.privilege == 2 %}
         <a href="{{path}}produit/create">Produits</a>
     {% endif %} -->
     </nav>
 
-    {% if title == 'All Texts!' or title == 'Story Collaboration' %}
+    {% if title_key == 'page_title.texts' or title_key == 'page_title.collab' %}
         <div class="menu-container">
             <div class="filter-menu">
                 <!-- filter menu content -->
@@ -123,29 +133,29 @@
                 {% for n in notifications %}
                 <article class="notification">
                     {% if n.notification_type == 'game_won' %}
-                        <h3 data-i18n="notification_game_won">
-                            {{ translate('notification_game_won') }}
+                        <h3 data-i18n="notifications.notification_game_won">
+                            {{ translate('notifications.notification_game_won') }}
                         </h3>
-                        <p data-i18n="notification_game_won_text" 
+                        <p data-i18n="notifications.notification_game_won_text" 
                            data-i18n-params="{{ {
                                'game_title_link': '<a href=\"' ~ langUrl('text/collab/' ~ n.root_text_id) ~ '\">' ~ n.game_title ~ '</a>',
                                'winning_title': n.winning_title
                            }|json_encode }}">
-                            {{ translate('notification_game_won_text', {
+                            {{ translate('notifications.notification_game_won_text', {
                                 'game_title_link': '<a href="' ~ langUrl('text/collab/' ~ n.root_text_id) ~ '">' ~ n.game_title ~ '</a>',
                                 'winning_title': n.winning_title
                             }, true) }}
                         </p>
                     {% elseif n.notification_type == 'game_closed' %}
-                        <h3 data-i18n="notification_game_closed">
-                            {{ translate('notification_game_closed') }}
+                        <h3 data-i18n="notifications.notification_game_closed">
+                            {{ translate('notifications.notification_game_closed') }}
                         </h3>
-                        <p data-i18n="notification_game_closed_text" 
+                        <p data-i18n="notifications.notification_game_closed_text" 
                            data-i18n-params="{{ {
                                'game_title_link': '<a href=\"' ~ langUrl('text/collab/' ~ n.root_text_id) ~ '\">' ~ n.game_title ~ '</a>',
                                'winning_title': n.winning_title
                            }|json_encode }}">
-                            {{ translate('notification_game_closed_text', {
+                            {{ translate('notifications.notification_game_closed_text', {
                                 'game_title_link': '<a href="' ~ langUrl('text/collab/' ~ n.root_text_id) ~ '">' ~ n.game_title ~ '</a>',
                                 'winning_title': n.winning_title
                             }, true) }}
@@ -170,9 +180,9 @@
             </div>
         </div>
     </div>
-<!--     <p>
-        {% if not guest %} 
-            Hello{{ " " ~ session.writer_firstName ~ " " ~ session.writer_lastName }},
-        {% endif %}
-    </p> -->
+
+<!--         {% if not guest %} 
+            {{ translate('greeting', {name: session.writer_firstName ~ " " ~ session.writer_lastName}) }}
+        {% endif %} -->
+
 <main>

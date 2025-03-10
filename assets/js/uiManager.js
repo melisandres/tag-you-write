@@ -200,7 +200,7 @@ export class UIManager {
   }
 
   insertLoginLogoutSVGs() {
-    const loginLink = document.querySelector('.nav-link.writers[href*="login"]:not([href*="logout"])');
+/*     const loginLink = document.querySelector('.nav-link.writers[href*="login"]:not([href*="logout"])');
     const logoutLink = document.querySelector('.nav-link.writers[href*="logout"]');
 
     if (loginLink) {
@@ -211,6 +211,6 @@ export class UIManager {
     if (logoutLink) {
       logoutLink.innerHTML = this.SVGManager.logOutSVG;
       logoutLink.setAttribute('title', 'Logout');
-    }
+    } */
   }
 }

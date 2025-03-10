@@ -8,6 +8,10 @@ input, textarea{
     font-size: clamp(2rem, 5vw, 5rem);
 }
 
+.form-page .note-info{
+    margin-top: var(--spacing-extra-large);
+}
+
 #main-form {
     display: flex;
     flex-direction: column;
@@ -124,8 +128,11 @@ label .ck.ck-content.ck-editor__editable {
 }
 
 @media screen and (max-width: 700px) {
-    .form-btns .draft-text {
-        display: block;
+    .form-btns .btn-2wordtitle {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
     }
 }
 

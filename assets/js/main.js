@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const path = window.location.origin + "/tag-you-write-repo/tag-you-write/";
 
   new HomePageManager();
-  
+
   window.i18n = new Localization(path);
   await window.i18n.init(); // It's async, so we need to call it here
   
@@ -174,4 +174,5 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Initialize update handling
   new TreeShelfModalPollingUpdateManager();
   const gameUpdateHandler = new GameUpdateHandler();
+
 });

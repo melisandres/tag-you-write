@@ -1,4 +1,4 @@
-{{ include('header.php', {title: 'Story Collaboration'})}}
+{{ include('header.php', {title_key: 'page_title.story_collab'})}}
 
 <!-- Store the complete data in hidden script tags -->
 <script type="application/json" id="game-data">
@@ -33,10 +33,10 @@
                 </button>
             {% endif %}
             <button data-refresh-tree data-text-id="{{ game.id }}" class="story-btn active" data-svg="tree">
-                <img class="refresh-tree" src="{{ path }}assets/imgs/icons/tree.svg" alt="view tree">
+<!--                 <img class="refresh-tree" src="{{ path }}assets/imgs/icons/tree.svg" alt="view tree"> -->
             </button>
             <button data-refresh-shelf data-text-id="{{ game.id }}" class="story-btn" data-svg="shelf">
-                <img class="refresh-shelf" src="{{ path }}assets/imgs/icons/shelf.svg" alt="view shelf"> 
+<!--                 <img class="refresh-shelf" src="{{ path }}assets/imgs/icons/shelf.svg" alt="view shelf">  -->
             </button>
         </div>
 
@@ -50,26 +50,26 @@
             {% endif %}
                 {% if game.pending %}
                     <p class="game-status">    
-                        <span>GAME</span>
-                        <span>PENDING</span>  
+                        <span data-i18n="general.game">{{ translate('general.game') }}</span>
+                        <span data-i18n="general.pending">{{ translate('general.pending') }}</span>  
                     </p>
                 {% elseif game.openForChanges %}
                     <p class="game-status">    
-                        <span>GAME</span>
-                        <span>OPEN</span>  
+                        <span data-i18n="general.game">{{ translate('general.game') }}</span>
+                        <span data-i18n="general.open">{{ translate('general.open') }}</span>  
                     </p>
                 {% else %}
                     <p class="game-status">
-                        <span>GAME</span>
-                        <span>CLOSED</span>
+                        <span data-i18n="general.game">{{ translate('general.game') }}</span>
+                        <span data-i18n="general.closed">{{ translate('general.closed') }}</span>
                     </p>
                 {% endif %}
             </div>
 
             {% if game.prompt %}
             <div class="story-prompt">
-                <h3 class="prompt-title very-small">
-                    prompt:
+                <h3 data-i18n="cr_it_ed.prompt" class="prompt-title very-small">
+                    {{ translate('cr_it_ed.prompt') }}
                 </h3>
                 <p>
                     {{ game.prompt|raw }}

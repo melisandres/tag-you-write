@@ -1,21 +1,25 @@
-{{ include('header.php', {title: 'Add a Writer'})}}
+{{ include('header.php', {title_key: 'page_title.writer_edit'})}}
 
 {% if errors is defined %}
     <span class='error'>{{ errors|raw}}</span>
 {% endif %}
 
-<form action="{{path}}writer/update" method="post">
+<form action=" {{ langUrl('writer/update') }}" method="post">
         <input type="hidden" name="id" value="{{data.id}}">
-        <label> first name
+        <label> 
+            <span data-i18n="writer-create.first_name">{{ translate('writer-create.first_name') }}</span>
             <input type="text" name="firstName" value="{{data.firstName}}">
         </label>
-        <label>last name
+        <label>
+            <span data-i18n="writer-create.last_name">{{ translate('writer-create.last_name') }}</span>
             <input type="text" name="lastName" value="{{data.lastName}}">
         </label>
-        <label>email
+        <label>
+            <span data-i18n="writer-create.email">{{ translate('writer-create.email') }}</span>
             <input type="email" name="email" value="{{data.email}}">
         </label>
-        <label>Date de naissance
+        <label>
+            <span data-i18n="writer-create.birthday">{{ translate('writer-create.birthday') }}</span>
             <input type="date" name="birthday" value="{{data.birthday}}">
         </label>
         {% if session.privilege == 1 %}

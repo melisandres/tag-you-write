@@ -41,14 +41,11 @@ export class FilterManager {
         window.addEventListener('popstate', () => this.applyFiltersFromUrl());
 
         // Apply filters from URL on initial load
-        this.applyFiltersFromUrl();
+        this.applyFiltersFromUrl(true);
     }
 
     initializeUI() {
         if (this.filterNavLink) {
-            // Set the filter icon in the nav
-            this.filterNavLink.innerHTML = SVGManager.filterSVG;
-
             // Set the class name for hasContributed
             const hasContributed = this.dataManager.cache.filters.hasContributed;
             const hasContributedClass = hasContributed === null ? 'all' : hasContributed === true ? 'contributor' : 'mine';
@@ -263,11 +260,13 @@ export class FilterManager {
         icon.classList.add(state);
     }
 
-    applyFiltersFromUrl() {
-        const params = new URLSearchParams(window.location.search);
-        const hasContributed = params.get('hasContributed');
-        const gameState = params.get('gameState');
+    applyFiltersFromUrl(thisIsInitialLoad = false) {
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const hasContributed = urlParams.get('hasContributed');
+        const gameState = urlParams.get('gameState');
 
+        // Create filters object
         const filters = {
             hasContributed: hasContributed === null || hasContributed === 'all' ? null :
                             hasContributed === 'contributor' ? true :
@@ -279,7 +278,11 @@ export class FilterManager {
         this.updateFilterButton(filters.hasContributed);
         this.updateGameStateButton(filters.gameState);
         this.updateNavLink();
-        eventBus.emit('filtersChanged', filters);
-        eventBus.emit('refreshGames');
+        
+        // Only emit filtersChanged - it already triggers a refresh
+        if (!thisIsInitialLoad) {
+            eventBus.emit('filtersChanged', filters);
+        }
+        //eventBus.emit('refreshGames');
     }
 }

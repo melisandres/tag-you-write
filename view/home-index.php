@@ -104,5 +104,4 @@
         </div>
     </div>
 </section>
-</body>
-</html>
+{{ include('footer.php')}}

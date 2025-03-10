@@ -25,9 +25,6 @@ export class SearchManager {
         console.log('Initializing search UI');
         console.log('this.searchNavLink', this.searchNavLink);
         if (this.searchNavLink) {
-            // Set the search icon in the nav
-            this.searchNavLink.innerHTML = SVGManager.searchSVG;
-            
             // Add search input HTML
             this.searchMenu.innerHTML = `
                 <div class="search-options">
@@ -180,7 +177,9 @@ export class SearchManager {
         const searchValue = params.get('search') || '';
         console.log('Updating search cache with:', searchValue);
         this.dataManager.setSearch(searchValue);
-        eventBus.emit('refreshGames'); // Emit event to trigger data refresh
+        if (searchValue !== '') {
+            eventBus.emit('refreshGames'); // Emit event to trigger data refresh
+        }
     }
 
     updateUrlWithSearch(search) {

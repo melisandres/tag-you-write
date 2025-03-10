@@ -32,7 +32,7 @@ export class ButtonUpdateManager {
             this.updatePublishButton(false);
             this.updateSaveButton(false);
             this.updateDeleteButton();
-            this.updateExitButton();
+            //this.updateExitButton();
         }
 
         // Add a MutationObserver to watch for changes to the id input value
@@ -139,7 +139,26 @@ export class ButtonUpdateManager {
     }
 
     updateExitButton() {
-        // If you haven't written anything, it's "Cancel" otherwise it's "Exit"
-        this.cancelButton.querySelector('span.title').textContent = this.hasAnId ? 'Exit' : 'Cancel';
+        // Get the title span element
+        const titleSpan = this.cancelButton.querySelector('span.title');
+        
+        // Update the data-i18n attribute based on whether we have an ID
+        const i18nKey = this.hasAnId ? 'general.exit' : 'general.cancel';
+        titleSpan.setAttribute('data-i18n', i18nKey);
+        
+        // If we have access to the localization system directly
+        if (window.localization) {
+            // Use the localization system to translate the text
+            titleSpan.textContent = window.localization.translate(i18nKey);
+        } else if (eventBus) {
+            // Otherwise, emit an event to request translation
+            eventBus.emit('requestTranslation', {
+                element: titleSpan,
+                key: i18nKey
+            });
+        } else {
+            // Fallback if neither is available (should rarely happen)
+            titleSpan.textContent = this.hasAnId ? 'Exit' : 'Cancel';
+        }
     }
 }

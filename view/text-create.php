@@ -1,26 +1,18 @@
-{{ include('header.php', {title: data.id ? 'Edit Text' : (data.parent_id ? 'Iterate Text' : 'Create Text')})}}
+{{ include('header.php', {title_key: data.id ? 'page_title.text_edit' : (data.parent_id ? 'page_title.text_iterate' : 'page_title.text_create')})}}
 <section class="form-page">
     <div class="form-info">
     {% if errors is defined %}
         <span class='error'>{{ errors|raw }}</span>
     {% endif %}
 
-<!--     {% if data.game_title %}
-        <p><strong>{{ data.game_title }}</strong></p>
-    {% endif %} -->
-
-<!--     {% for key, value in data %}
-        <pre>{{ key }}: {{ value }}</pre>
-    {% endfor %} -->
-
     {% if data.parent_id %}
         <div class="game-info">
             <h1 class="game-title"> 
-                {{ data.game_title|default('Untitled') }}
+                {{ data.game_title }}
             </h1>
             <section class="info iterate">
                 <div class="info-container">
-                    <h3>iterating on: </h3>
+                    <h3 data-i18n="cr_it_ed.iterating_on">{{ translate('cr_it_ed.iterating_on') }}</h3>
                     <div class="info-text-container parent">
                         <div class="parent-title">
                             {{ data.parentTitle }}
@@ -35,7 +27,7 @@
                 </div>
                 <div class="info-container">
                     <div class="info-text-container">
-                        <h3>prompt:</h3>
+                        <h3 data-i18n="cr_it_ed.prompt">{{ translate('cr_it_ed.prompt') }}</h3>
                         <p> {{ data.prompt|raw }}</p>
                     </div>
                 </div>
@@ -44,11 +36,9 @@
     {% elseif not data.id %}
         <section class="info">
             <div class="info-container">
-                <h3>good to know: </h3>
+                <h3 data-i18n="cr_it_ed.good_to_know">{{ translate('cr_it_ed.good_to_know') }}</h3>
                 <div class="info-text-container">
-                    <p>While your title and prompt will be carved in STONE,
-                    your text will be rehashed by all who join the game.</p>
-                    <p>May the best iteration win!</p>
+                    <article data-i18n="cr_it_ed.good_to_know_text" data-i18n-html="true">{{ translate('cr_it_ed.good_to_know_text')|raw }}</article>
                 </div>
             </div>
         </section>
@@ -59,27 +49,27 @@
     <form id="main-form" data-form-type="{{ data.parent_id ? 'iteration' : 'root' }}" data-form-activity="{{ data.id ? 'editing' : 'creating' }}" method="post">
         <label>
         {% if not data.parent_id %}
-            <span class="headline">choose a title</span>
+            <span class="headline" data-i18n="cr_it_ed.choose_a_title">{{ translate('cr_it_ed.choose_a_title') }}</span>
         {% else %}
-            <span class="headline">describe your changes</span>
+            <span class="headline" data-i18n="cr_it_ed.describe_your_changes">{{ translate('cr_it_ed.describe_your_changes') }}</span>
         {% endif %}
         {% if not data.parent_id %}
-            <input type="text" name="title" placeholder="Elsewhere" value="{{ data.title|default('') }}">
+            <input type="text" name="title" data-i18n-placeholder="cr_it_ed.title_placeholder" placeholder="{{ translate('cr_it_ed.title_placeholder') }}" value="{{ data.title|default('') }}">
         {% else %}
-            <input type="text" name="title" placeholder="Added a panda" value="{{ data.title|default('') }}">
+            <input type="text" name="title" data-i18n-placeholder="cr_it_ed.changes_placeholder" placeholder="{{ translate('cr_it_ed.changes_placeholder') }}" value="{{ data.title|default('') }}">
         {% endif %}
         </label>
         
         {% if not data.parent_id %}
             <label>
-                <span class="headline">create a prompt</span> 
-                <textarea name="prompt" rows="2" cols="50" placeholder="Instructions: how to run away from yourself, when you are also chasing yourself...">{{ data.prompt|default('') }}</textarea>
+                <span class="headline" data-i18n="cr_it_ed.create_prompt">{{ translate('cr_it_ed.create_prompt') }}</span> 
+                <textarea name="prompt" rows="2" cols="50" data-i18n-placeholder="cr_it_ed.prompt_placeholder" placeholder="{{ translate('cr_it_ed.prompt_placeholder') }}">{{ data.prompt|default('') }}</textarea>
             </label>
         {% endif %}
         
         <label>
             <div class="title-and-word-count">
-                <span class="headline">{{ data.parent_id ? "your version of \"#{data.game_title|default('Untitled')}\"" : 'kickoff the text' }}</span>
+                <span {{ data.parent_id ? 'data-i18n="cr_it_ed.your_version"' : 'data-i18n="cr_it_ed.kickoff_text"' }} class="headline">{{ data.parent_id ? translate('cr_it_ed.your_version', {game_title: data.game_title|default(translate('general.untitled'))}) : translate('cr_it_ed.kickoff_text') }}</span>
                 <div class="word-count-display" data-word-count-display>
                     <span class="word-count-number"></span>
                     <span class="word-count-tooltip"></span>
@@ -88,13 +78,15 @@
             {% if data.parent_id %}
                 <textarea name="writing" rows="10" cols="50" placeholder="{{ data.parentWriting|striptags|raw }}">{{ data.writing|default('') }}</textarea>
             {% else %}
-                <textarea name="writing" rows="10" cols="50" placeholder="When you climb out the window, don't forget your rainboots.">{{ data.writing|default('') }}</textarea>
+                <textarea name="writing" rows="10" cols="50" data-i18n-placeholder="cr_it_ed.writing_placeholder" placeholder="{{ translate('cr_it_ed.writing_placeholder') }}">{{ data.writing|default('') }}</textarea>
             {% endif %}
         </label>
         
         <label>
-            <span class="headline">keywords</span>
-            <input type="text" name="keywords" placeholder="adventure, rainboots" value="{{ data.keywords|default('') }}">
+            <span data-i18n="cr_it_ed.keywords" class="headline">
+                {{ translate('cr_it_ed.keywords') }}
+            </span>
+            <input type="text" name="keywords" data-i18n-placeholder="cr_it_ed.keywords_placeholder" placeholder="{{ translate('cr_it_ed.keywords_placeholder') }}" value="{{ data.keywords|default('') }}">
         </label>
 
         <input type="hidden" name="writer_id" value="{{ session.writer_id }}"> 
@@ -114,20 +106,38 @@
 
         <div class="form-btns">
             <button class="publish" type="button" data-status="published" data-button-type="publish">
-                <span class="icon"></span>
-                <span class="title">Publish</span>
+                <span dat-svg="publish" class="icon" data-i18n-title="general.publish_tooltip"></span>
+                <span class="title" data-i18n="general.publish">
+                    {{ translate('general.publish') }}
+                </span>
             </button>
             <button class="save" type="button" data-status="draft" data-button-type="save">
-                <span class="icon"></span>
-                <span class="title">Save <span class="draft-text">Draft</span></span>
+                <span data-svg="save" class="icon" data-i18n-title="general.save_tooltip"></span>
+                <div class="btn-2wordtitle">
+                    <span class="title" data-i18n="general.save">
+                        {{ translate('general.save') }}
+                    </span>
+                    <span class="title" data-i18n="general.draft">
+                        {{ translate('general.draft') }}
+                    </span>
+                </div>
             </button>
             <button class="delete" type="button" data-status="delete" data-button-type="delete">
-                <span class="icon"></span>
-                <span class="title">Delete <span class="draft-text">Draft</span></span>
+                <span data-svg="delete" class="icon" data-i18n-title="general.delete_tooltip"></span>
+                <div class="btn-2wordtitle">
+                    <span class="title" data-i18n="general.delete">
+                        {{ translate('general.delete') }}
+                    </span>
+                    <span class="title" data-i18n="general.draft">
+                        {{ translate('general.draft') }}
+                    </span>
+                </div>
             </button>
             <button class="cancel" type="button" data-status="cancel" data-button-type="exit">
-                <span class="icon"></span>
-                <span class="title">Cancel</span>
+                <span data-svg="cancel" class="icon" data-i18n-title="general.cancel_tooltip"></span>
+                <span class="title" data-i18n="general.cancel">
+                    {{ translate('general.cancel') }}
+                </span>
             </button>
         </div>
     </form>

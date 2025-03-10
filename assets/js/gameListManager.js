@@ -52,6 +52,7 @@ export class GameListManager {
     }
 
     handleFiltersChanged(filters) {
+        console.log('handleFiltersChanged called from:', new Error().stack);
         this.dataManager.setFilters(filters);
         this.refreshGamesList();
     }
@@ -61,9 +62,11 @@ export class GameListManager {
     }
 
     async refreshGamesList() {
+        console.log('refreshGamesList called from:', new Error().stack);
         try {
             const filters = this.dataManager.getFilters();
             const search = this.dataManager.getSearch();
+            console.log("REFRESHING THE GAME LIST");
             const response = await fetch(`${this.path}game/getGames`, {
                 method: 'POST',
                 headers: {

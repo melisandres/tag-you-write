@@ -1,19 +1,134 @@
 {
-    "welcome": "Bienvenue sur notre site",
-    "language": "Langue",
+  "nav": {
     "home": "Accueil",
-    "about": "À propos de nous",
-    "browse": "Lire",
-    "contact": "Contactez-nous",
-    "search": "Rechercher",
-    "greeting": "Bonjour, {name}!",
+    "home_tooltip": "accueil",
     "filter": "Filtrer",
+    "filter_tooltip": "filtrer les textes",
+    "browse": "Explorer",
+    "browse_tooltip": "explorer les textes",
+    "language": "Langue",
+    "language_tooltip": "changer de langue",
+    "search": "Rechercher",
+    "search_tooltip": "rechercher par mot-clé",
     "newGame": "Nouvelle Collaboration",
+    "newGame_tooltip": "créer une nouvelle collaboration",
     "notifications": "Notifications",
-    "logout": "Quitter",
+    "notifications_tooltip": "notifications",
     "login": "Connexion",
+    "login_tooltip": "connexion",
+    "logout": "Quitter",
+    "logout_tooltip": "déconnexion"
+  },
+  "notifications": {
     "notification_game_won": "Partie Gagnée !",
-    "notification_game_won_text": "La collaboration {game_title_link} est terminée. Votre itération : \"{winning_title}\" a été choisie à l'unanimité comme gagnante !",
     "notification_game_closed": "Partie Terminée",
+    "notification_game_won_text": "La collaboration {game_title_link} est terminée. Votre itération : \"{winning_title}\" a été choisie à l'unanimité comme gagnante !",
     "notification_game_closed_text": "La collaboration {game_title_link} est terminée. Le texte gagnant est \"{winning_title}\""
+  },
+  "footer": {
+    "made_with_love": "programmé avec amour, Mélisandre"
+  },
+  "page_title": {
+    "home": "Scratchez-moi ça!",
+    "texts": "Tous les Textes !",
+    "story_collab": "Collaboration d'Histoire",
+    "login": "Connexion",
+    "logout": "Quitter",
+    "forgot_password": "Mot de Passe Oublié",
+    "home_error": "Page Erreur",
+    "reset_password": "Réinitialiser le mot de passe",
+    "text_create": "Créer un Texte",
+    "text_edit": "Modifier un Texte",
+    "text_iterate": "Itérer sur un Texte",
+    "note_edit": "Laisser une note",
+    "writer_create": "Joindre notre communauté",
+    "writer_edit": "Modifier vos infos"
+  },
+  "forgot_password": {
+    "reset_password": "Réinitialiser le mot de passe",
+    "request_reset_link": "réinitialiser",
+    "email": "courriel",
+    "request_reset_link_tooltip": "réinitialiser le mot de passe"
+  },
+  "home_error": {
+    "page_title": "Page Erreur",
+    "error_message": "Nous ne pouvons pas faire cela.",
+    "default_error_message": "Félicitations! Il faut se perdre un peu pour se retrouver!"
+  },
+  "login": {
+    "page_title": "Connexion",
+    "login": "Connexion",
+    "login_tooltip": "connexion",
+    "forgot_password": "Mot de Passe Oublié",
+    "forgot_password_tooltip": "mot de passe oublié",
+    "create_account": "Créer un compte",
+    "create_account_tooltip": "créer un compte"
+  },
+  "reset_password": {
+    "page_title": "Réinitialiser le mot de passe",
+    "new_password": "nouveau mot de passe",
+    "update_password": "sauvegarder",
+    "update_password_tooltip": "mettre à jour le mot de pass"
+  },
+  "cr_it_ed": {
+    "iterating_on": "itérer sur:",
+    "prompt": "texte incitatif:",
+    "good_to_know": "bon à savoir:",
+    "good_to_know_text": "<p>Tant que votre titre et votre texte incitatif seront sculptés dans la pierre, votre texte sera réécrit par tous ceux qui rejoignent la partie.</p> <p>Le meilleur texte sera choisi à l'unanimité!</p>",
+    "choose_a_title": "choisir un titre",
+    "describe_your_changes": "décrire vos modifications",
+    "title_placeholder": "Ailleurs",
+    "changes_placeholder": "Ajout d'un panda",
+    "create_prompt": "créer un texte incitatif",
+    "prompt_placeholder": "Instructions: comment s'enfuir de soi-même, quand on se poursuit aussi soi-même...",
+    "your_version": "votre version de \"{game_title}\"",
+    "kickoff_text": "commencer le texte",
+    "writing_placeholder": "Quand vous sortez par la fenêtre, n'oubliez pas vos bottes de pluie.",
+    "keywords": "mots-clés"
+  },
+  "note-edit": {
+    "here_is_what_you_wrote": "Voici votre texte: ",
+    "by_you": "par vous",
+    "change_note_message": "Oops! Vous pouvez modifier votre note:",
+    "leave_note_message": "Oops! Vous pouvez laisser une note pour les autres écrivains:",
+    "add_note": "Ajouter Note",
+    "add_note_tooltip": "ajouter une note",
+    "change_note": "Modifier Note",
+    "change_note_tooltip": "modifier une note",
+    "note_placeholder": "Écrivez votre note ici..."
+  },
+  "general": {
+    "greeting": "Bonjour, {name}!",
+    "email": "courriel",
+    "password": "mot de passe",
+    "username": "nom d'utilisateur",
+    "untitled": "Sans titre",
+    "publish": "Publier",
+    "publish_tooltip": "Publier votre texte",
+    "save": "Garder",
+    "save_tooltip": "Sauvegarder comme brouillon",
+    "delete": "Jeter",
+    "delete_tooltip": "Supprimer ce texte",
+    "cancel": "Annuler",
+    "cancel_tooltip": "Quitter sans sauvegarder",
+    "draft": "brouillon",
+    "exit": "Quitter", 
+    "game": "COLLAB",
+    "closed": "FERMÉE",
+    "pending": "À VENIR",
+    "open": "OUVERTE",
+    "view_tree_tooltip": "voir l'arbre",
+    "view_shelf_tooltip": "voir en rayon",
+    "bookmark_tooltip": "marquer"
+  },
+  "writer-create": {
+    "first_name": "Prénom",
+    "last_name": "Nom de famille",
+    "email": "Email",
+    "birthday": "Date de naissance",
+    "password": "Mot de passe",
+    "save": "Sauvegarder",
+    "save_tooltip": "sauvegarder vos informations",
+    "cancel": "Annuler"
   }
+}

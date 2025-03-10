@@ -1,4 +1,6 @@
 {{ include('header.php', {title: 'read quietly'})}}
+<!-- TODO: this is not updated... and not currently used in the system, 
+ however, it is available in the system. That's fine for now. When and if this is updated... it will need to be redisigned and translated. -->
 
 <h1><strong>author: </strong><span class="author">{{ text.firstName }} {{ text.lastName }}</span></h1>
     <p><strong>title: </strong>{{ text.title }}</p>

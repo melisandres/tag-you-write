@@ -19,6 +19,7 @@ a.nav-link{
     text-decoration: none;
     max-width: 150px;
     border-bottom: black solid 3px;
+    cursor: pointer;
 }
 
 a.nav-link:hover{

@@ -49,6 +49,13 @@ export class Localization {
     
     // Initialize language switcher if it exists
     this.initLanguageSwitcher();
+
+    // Add this to the init() method in Localization class
+    eventBus.on('requestTranslation', (data) => {
+      if (data.element && data.key) {
+        data.element.textContent = this.translate(data.key);
+      }
+    });
   }
 
   /**
@@ -79,8 +86,28 @@ export class Localization {
       return key;
     }
     
-    // Get the translation or fall back to the key itself
-    let translation = this.translations[lang][key] || key;
+    // Handle nested keys like "header.home"
+    let translation = key;
+    if (key.includes('.')) {
+      const parts = key.split('.');
+      let current = this.translations[lang];
+      
+      // Navigate through the nested structure
+      for (const part of parts) {
+        if (current && typeof current === 'object' && part in current) {
+          current = current[part];
+        } else {
+          // If any part of the path doesn't exist, return the key
+          console.warn(`Translation key not found: ${key}`);
+          return key;
+        }
+      }
+      
+      translation = current;
+    } else {
+      // Handle flat keys for backward compatibility
+      translation = this.translations[lang][key] || key;
+    }
     
     // Handle replacements (e.g., "Hello, {name}" -> "Hello, John")
     Object.keys(replacements).forEach(placeholder => {
@@ -166,6 +193,9 @@ export class Localization {
       
       // Update all translations on the page
       this.updatePageTranslations();
+      
+      // Update the page title
+      this.updatePageTitle();
       
       // Update all URLs on the page
       this.updatePageUrls(previousLanguage, lang);
@@ -263,6 +293,8 @@ export class Localization {
     // Update all translations
     document.querySelectorAll('[data-i18n]').forEach(element => {
       const key = element.getAttribute('data-i18n');
+      const isHtml = element.hasAttribute('data-i18n-html') && 
+                    element.getAttribute('data-i18n-html') === 'true';
       
       // Check if there are parameters for this translation
       let params = {};
@@ -282,7 +314,7 @@ export class Localization {
         typeof value === 'string' && value.includes('<')
       );
       
-      if (hasHtmlParams) {
+      if (isHtml || hasHtmlParams) {
         // Apply all parameters to the translation
         Object.keys(params).forEach(param => {
           translation = translation.replace(
@@ -299,7 +331,47 @@ export class Localization {
       }
     });
     
+    // Update all title attributes that need translation
+    document.querySelectorAll('[data-i18n-title]').forEach(element => {
+      const key = element.getAttribute('data-i18n-title');
+      element.setAttribute('title', this.translate(key));
+    });
+    
+    // Update all placeholder attributes that need translation
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+      const key = element.getAttribute('data-i18n-placeholder');
+      const translation = this.translate(key);
+      
+      // Set the placeholder attribute on the original element
+      element.setAttribute('placeholder', translation);
+      
+      // Find and update the CKEditor placeholder if it exists
+      // First, look for the CKEditor container that follows this textarea
+      const editorContainer = element.nextElementSibling?.classList.contains('ck-editor') 
+        ? element.nextElementSibling 
+        : null;
+      
+      if (editorContainer) {
+        // Find the placeholder element within the CKEditor container
+        const placeholderElement = editorContainer.querySelector('.ck-placeholder[data-placeholder]');
+        if (placeholderElement) {
+          placeholderElement.setAttribute('data-placeholder', translation);
+        }
+      }
+    });
+    
     // Then update all links when language changes
     this.updatePageUrls(this.previousLanguage, this.currentLanguage);
+  }
+
+  /**
+   * Update the page title if it has a translation key
+   */
+  updatePageTitle() {
+    const titleElement = document.querySelector('title[data-i18n-title]');
+    if (titleElement) {
+      const titleKey = titleElement.getAttribute('data-i18n-title');
+      titleElement.textContent = this.translate(titleKey);
+    }
   }
 }

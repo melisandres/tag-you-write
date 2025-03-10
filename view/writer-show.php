@@ -1,4 +1,5 @@
 {{ include('header.php', {title: 'Writer'})}}
+<!-- TODO: eventually, this page should show a little bio of the writer. also, it should be localized. But let's do this when editing the writer is better designed, and re-instated -->
 
     <p><strong>first Name : </strong>{{ writer.firstName }}</p>
     <p><strong>last Name : </strong>{{ writer.lastName }}</p>

@@ -4,6 +4,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
 }
 
 .nav-link.language-switcher .current-language {
