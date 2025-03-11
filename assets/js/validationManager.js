@@ -504,6 +504,7 @@ export class ValidationManager {
     }
    
     checkOverallValidity() {
+        console.log('checking overall validity');
         const canAutosave = Object.values(this.formValidity).every(field => 
             field.canAutosave
         );
@@ -516,7 +517,23 @@ export class ValidationManager {
             canPublish,
             fields: this.formValidity
         };
+        console.log('this.formValidity', this.formValidity);
         /* console.log('newValidationStatus', newValidationStatus); */
+
+        // Check for changes in field validation status related to autosave
+        const autoSaveFieldsChanged = !this.lastFieldValidityStatus || 
+            JSON.stringify(this.getFailedAutoSaveFields(this.formValidity)) !== 
+            JSON.stringify(this.getFailedAutoSaveFields(this.lastFieldValidityStatus || {}));
+        
+        // Emit field validation changes event if needed
+        if (autoSaveFieldsChanged) {
+            console.log('autoSaveFieldsChanged', autoSaveFieldsChanged);
+            eventBus.emit('autoSaveFieldValidationChanged', {
+                failedAutoSaveFields: this.getFailedAutoSaveFields(this.formValidity),
+                fields: this.formValidity
+            });
+            this.lastFieldValidityStatus = {...this.formValidity};
+        }
 
         // Only emit if there's a change in canAutosave or canPublish
         if (this.lastValidationStatus?.canAutosave !== canAutosave || 
@@ -529,5 +546,11 @@ export class ValidationManager {
         }
     }
 
-    
+    // Helper method to get fields that fail autosave validation
+    getFailedAutoSaveFields(validityStatus) {
+        return Object.entries(validityStatus)
+            .filter(([_, fieldStatus]) => !fieldStatus.canAutosave)
+            .map(([fieldName, _]) => fieldName)
+            .sort(); // Sort for consistent comparison
+    }
 }

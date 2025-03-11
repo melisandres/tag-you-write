@@ -299,83 +299,87 @@ export class Localization {
 
   /**
    * Update all elements with data-i18n attributes
+   * @param {HTMLElement} container - Optional container to limit translation scope
    */
-  updatePageTranslations() {
-    // Update all translations
-    document.querySelectorAll('[data-i18n]').forEach(element => {
-      const key = element.getAttribute('data-i18n');
-      const isHtml = element.hasAttribute('data-i18n-html') && 
-                    element.getAttribute('data-i18n-html') === 'true';
-      
-      // Check if there are parameters for this translation
-      let params = {};
-      if (element.hasAttribute('data-i18n-params')) {
-        try {
-          params = JSON.parse(element.getAttribute('data-i18n-params'));
-        } catch (e) {
-          console.error('Error parsing i18n params:', e);
-        }
-      }
-      
-      // Get the translation with placeholders
-      let translation = this.translate(key);
-      
-      // Check if any parameter contains HTML (like links)
-      const hasHtmlParams = Object.values(params).some(value => 
-        typeof value === 'string' && value.includes('<')
-      );
-      
-      if (isHtml || hasHtmlParams) {
-        // Apply all parameters to the translation
-        Object.keys(params).forEach(param => {
-          translation = translation.replace(
-            new RegExp(`{${param}}`, 'g'), 
-            params[param]
-          );
-        });
+  updatePageTranslations(container = document) {
+    // Update all translations within the specified container
+    container.querySelectorAll('[data-i18n]').forEach(element => {
+        const key = element.getAttribute('data-i18n');
+        const isHtml = element.hasAttribute('data-i18n-html') && 
+                      element.getAttribute('data-i18n-html') === 'true';
         
-        // Set as HTML
-        element.innerHTML = translation;
-
-        // After updating the translation, check for SVGs that need to be inserted
-        this.updateSVGsInTranslatedContent(element);
-      } else {
-        // Standard text translation
-        element.textContent = this.translate(key, params);
-      }
-    });
-    
-    // Update all title attributes that need translation
-    document.querySelectorAll('[data-i18n-title]').forEach(element => {
-      const key = element.getAttribute('data-i18n-title');
-      element.setAttribute('title', this.translate(key));
-    });
-    
-    // Update all placeholder attributes that need translation
-    document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
-      const key = element.getAttribute('data-i18n-placeholder');
-      const translation = this.translate(key);
-      
-      // Set the placeholder attribute on the original element
-      element.setAttribute('placeholder', translation);
-      
-      // Find and update the CKEditor placeholder if it exists
-      // First, look for the CKEditor container that follows this textarea
-      const editorContainer = element.nextElementSibling?.classList.contains('ck-editor') 
-        ? element.nextElementSibling 
-        : null;
-      
-      if (editorContainer) {
-        // Find the placeholder element within the CKEditor container
-        const placeholderElement = editorContainer.querySelector('.ck-placeholder[data-placeholder]');
-        if (placeholderElement) {
-          placeholderElement.setAttribute('data-placeholder', translation);
+        // Check if there are parameters for this translation
+        let params = {};
+        if (element.hasAttribute('data-i18n-params')) {
+            try {
+                params = JSON.parse(element.getAttribute('data-i18n-params'));
+            } catch (e) {
+                console.error('Error parsing i18n params:', e);
+            }
         }
-      }
+        
+        // Get the translation with placeholders
+        let translation = this.translate(key);
+        
+        // Check if any parameter contains HTML (like links)
+        const hasHtmlParams = Object.values(params).some(value => 
+            typeof value === 'string' && value.includes('<')
+        );
+        
+        if (isHtml || hasHtmlParams) {
+            // Apply all parameters to the translation
+            Object.keys(params).forEach(param => {
+                translation = translation.replace(
+                    new RegExp(`{${param}}`, 'g'), 
+                    params[param]
+                );
+            });
+            
+            // Set as HTML
+            element.innerHTML = translation;
+
+            // After updating the translation, check for SVGs that need to be inserted
+            this.updateSVGsInTranslatedContent(element);
+        } else {
+            // Standard text translation
+            element.textContent = this.translate(key, params);
+        }
     });
     
-    // Then update all links when language changes
-    this.updatePageUrls(this.previousLanguage, this.currentLanguage);
+    // Update all title attributes that need translation within the container
+    container.querySelectorAll('[data-i18n-title]').forEach(element => {
+        const key = element.getAttribute('data-i18n-title');
+        element.setAttribute('title', this.translate(key));
+    });
+    
+    // Update all placeholder attributes that need translation within the container
+    container.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+        const key = element.getAttribute('data-i18n-placeholder');
+        const translation = this.translate(key);
+        
+        // Set the placeholder attribute on the original element
+        element.setAttribute('placeholder', translation);
+        
+        // Find and update the CKEditor placeholder if it exists
+        // First, look for the CKEditor container that follows this textarea
+        const editorContainer = element.nextElementSibling?.classList.contains('ck-editor') 
+            ? element.nextElementSibling 
+            : null;
+        
+        if (editorContainer) {
+            // Find the placeholder element within the CKEditor container
+            const placeholderElement = editorContainer.querySelector('.ck-placeholder[data-placeholder]');
+            if (placeholderElement) {
+                placeholderElement.setAttribute('data-placeholder', translation);
+            }
+        }
+    });
+    
+    // Only update links if we're updating the entire page
+    if (container === document) {
+        // Then update all links when language changes
+        this.updatePageUrls(this.previousLanguage, this.currentLanguage);
+    }
   }
 
   /**
@@ -414,5 +418,43 @@ export class Localization {
         console.error('Error loading SVGManager:', error);
       });
     }
+  }
+
+   /**
+   * Create an element with i18n attributes
+   */
+   createI18nElement(tagName, key, params = null, isHtml = false) {
+    const element = document.createElement(tagName);
+    element.setAttribute('data-i18n', key);
+    
+    if (params) {
+      element.setAttribute('data-i18n-params', JSON.stringify(params));
+    }
+    
+    if (isHtml) {
+      element.setAttribute('data-i18n-html', 'true');
+    }
+    
+    return element;
+  }
+  
+  /**
+   * Create a translated message with multiple parts
+   */
+  createTranslatedMessage(container, parts) {
+    // Clear container
+    container.innerHTML = '';
+    
+    // Add each part to the container
+    parts.forEach(part => {
+      const { key, params, isHtml } = part;
+      const span = this.createI18nElement('span', key, params, isHtml);
+      container.appendChild(span);
+    });
+    
+    // Translate the container
+    this.updatePageTranslations(container);
+    
+    return container;
   }
 }

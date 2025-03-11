@@ -23,11 +23,13 @@ export class AutoSaveManager {
         this.continuousTypingStartTime = null;
         this.lastAutoSaveTime = null;
         this.canAutosave = false; 
+        this.lastFailedFields = [];
 
         // Listen for events
         eventBus.on('inputChanged', this.handleInputChange.bind(this));
         eventBus.on('manualSave', this.handleManualSave.bind(this));
-        eventBus.on('validationChanged', this.handleValidationChanged.bind(this));
+        eventBus.on('autoSaveFieldValidationChanged', this.handleFieldValidationChanged.bind(this));
+        eventBus.on('fieldValidationChanged', this.handleFieldValidationChanged.bind(this));
         eventBus.on('formRestored', this.handleFormRestored.bind(this));
     }
 
@@ -41,50 +43,101 @@ export class AutoSaveManager {
         }
     }
 
-    // Must check if validation fails for autosave
+    // method to handle field validation changes
+    handleFieldValidationChanged(data) {
+        const failedFields = data.failedAutoSaveFields;
+        
+        // Update warning if failed fields have changed
+        if (JSON.stringify(failedFields) !== JSON.stringify(this.lastFailedFields)) {
+            this.lastFailedFields = failedFields;
+            
+            if (failedFields.length > 0) {
+                this.showFormWarning(failedFields);
+            } else {
+                this.removeFormWarning();
+            }
+        }
+    }
+
+    // Simplify the existing method since field-specific handling is now in handleFieldValidationChanged
     handleValidationChanged(results) {
         this.canAutosave = results.canAutosave;
-        //console.log("can autosave:", this.canAutosave);
-
+        
+        // Just update the overall autosave capability
         if (!this.canAutosave) {
             const failedFields = Object.entries(results.fields)
                 .filter(([_, fieldStatus]) => !fieldStatus.canAutosave)
                 .map(([fieldName, _]) => fieldName);
             
+            this.lastFailedFields = failedFields;
             this.showFormWarning(failedFields);
         } else {
+            this.lastFailedFields = [];
             this.removeFormWarning();
         }
     }
 
     showFormWarning(failedFields) {
+        // Create warning element if it doesn't exist
         if (!this.warningElement) {
             this.warningElement = document.createElement('div');
             this.warningElement.className = 'form-warning';
         }
         
+        // Format field names with spans
         const fieldSpans = failedFields.map(field => 
             `<span class="field-name">${field.replace(/[<>]/g, '')}</span>`
         );
         
-        let message = 'Please fix ';
+        // Clear previous content
+        this.warningElement.innerHTML = '';
+        
+        // Helper function to create and append i18n spans
+        const createI18nSpan = (key, params = null, isHtml = false) => {
+            const span = document.createElement('span');
+            span.setAttribute('data-i18n', key);
+            
+            if (params) {
+                span.setAttribute('data-i18n-params', JSON.stringify(params));
+            }
+            
+            if (isHtml) {
+                span.setAttribute('data-i18n-html', 'true');
+            }
+            
+            this.warningElement.appendChild(span);
+            return span;
+        };
+        
+        // Create the three parts of the message
+        createI18nSpan('auto_save.fix_fields_intro');
+        
+        // Handle field part with different cases for singular/dual/plural
         if (fieldSpans.length === 1) {
-            message += `the ${fieldSpans[0]} field`;
+            createI18nSpan('auto_save.field_singular', { field: fieldSpans[0] }, true);
         } else if (fieldSpans.length === 2) {
-            message += `the ${fieldSpans[0]} and ${fieldSpans[1]} fields`;
+            createI18nSpan('auto_save.field_dual', { 
+                field1: fieldSpans[0], 
+                field2: fieldSpans[1] 
+            }, true);
         } else {
             const lastField = fieldSpans.pop();
-            message += `the ${fieldSpans.join(', ')}, and ${lastField} fields`;
+            createI18nSpan('auto_save.field_plural', { 
+                fields: fieldSpans.join(', '), 
+                lastField: lastField 
+            }, true);
         }
-        message += ' to enable autosaving.';
         
-        this.warningElement.textContent = ''; // Clear existing content
-        const messageContainer = document.createElement('span');
-        messageContainer.innerHTML = message;
-        this.warningElement.appendChild(messageContainer);
+        createI18nSpan('auto_save.fix_fields_outro');
         
+        // Add to DOM if not already there
         if (this.form && !this.form.contains(this.warningElement)) {
             this.form.insertBefore(this.warningElement, this.form.firstChild);
+        }
+        
+        // Apply translations - assuming i18n is available
+        if (window.i18n) {
+            window.i18n.updatePageTranslations(this.warningElement);
         }
     }
 

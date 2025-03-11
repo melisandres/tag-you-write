@@ -142,6 +142,13 @@
     "field_plural": "les champs {fields}, et {lastField}",
     "fix_fields_outro": " pour activer la sauvegarde automatique."
   },
+  "auto_save_warning": {
+    "fix_fields_intro": "Veuillez corriger ",
+    "field_singular": "le champ {field}",
+    "field_dual": "les champs {field1} et {field2}",
+    "field_plural": "les champs {fields}, et {lastField}",
+    "fix_fields_outro": " pour activer la sauvegarde automatique."
+  },
   "home_index": {
     "title": "écriture collaborative",
     "add_a_few_words": "Enlevez quelques mots à un texte.",
