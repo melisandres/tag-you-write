@@ -121,7 +121,11 @@
       "closed": "CLOSED",
       "view_tree_tooltip": "view tree",
       "view_shelf_tooltip": "view shelf",
-      "bookmark_tooltip": "bookmark"
+      "tree_tooltip": "tree",
+      "shelf_tooltip": "shelf",
+      "bookmark_tooltip": "bookmark",
+      "iterate_tooltip": "iterate",
+      "new_game_tooltip": "new game"
     },
     "writer-create": {
       "first_name": "First Name",
@@ -133,5 +137,37 @@
       "save_tooltip": "save your information",
       "cancel": "Cancel",
       "untitled": "Untitled"
+    },
+    "auto_save": {
+      "fix_fields_intro": "Please fix ",
+      "field_singular": "the {field} field",
+      "field_dual": "the {field1} and {field2} fields",
+      "field_plural": "the {fields}, and {lastField} fields",
+      "fix_fields_outro": " to enable autosaving."
+    },
+    "home_index": {
+      "title": "collaborative writing",
+      "add_a_few_words": "Add a few words to someone else's.",
+      "write_a_sentence": "Write a sentence, and see it grow legs.",
+      "write_a_phrase": "Write a phrase, and watch its head roll away.",
+      "login": "login",
+      "browse": "browse collaborations",
+      "how": "how it works",
+      "how_to_collaborate": "how to collaborate",
+      "collaborate_step_one_title": "1. Log in",
+      "collaborate_step_one_text": "Create an account and/or log in.",
+      "collaborate_step_two_title": "2. Explore",
+      "collaborate_step_two_text": "Click on the <span class='info-icon' data-svg='browse'></span> (top menu) to enter our library, where you can expand and explore collaborations.",
+      "collaborate_step_three_title": "3. Write",
+      "collaborate_step_three_text": "Choose a story node that inspires you, change the text (\"iterate\"), and publish <span class='info-icon' data-svg='publish'></span> your version when you're ready to share.",
+      "collaborate_step_four_title": "4. Vote",
+      "collaborate_step_four_text": "Vote on a winning text. The first text to get upvotes from all collaborating writers wins!",
+      "how_to_start_new_collaboration": "how to start a new collaboration",
+      "create_collaboration_step_one_title": "1. Log in",
+      "create_collaboration_step_one_text": "Create an account and/or log in.",
+      "create_collaboration_step_two_title": "2. Create",
+      "create_collaboration_step_two_text": "Click on the <span class='info-icon' data-svg='newGame'></span> (top menu) to start a new collaboration. You will be asked to create a title, a prompt, and a starting text. All future collaborators will consult yout title and prompt while they write. When you're ready to share, just publish <span class='info-icon' data-svg='publish'></span>.",
+      "create_collaboration_step_three_title": "3. Share",
+      "create_collaboration_step_three_text": "Let your friends know! Or wait for someone from our community to contribute."
     }
   }

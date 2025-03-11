@@ -253,6 +253,17 @@ export class Localization {
         link.setAttribute('href', newHref);
       }
     });
+    
+    // Add this new code to update form action URLs
+    document.querySelectorAll('form[action]').forEach(form => {
+      const action = form.getAttribute('action');
+      
+      // Only update actions that contain the old language code
+      if (action && action.includes(`/${oldLang}/`)) {
+        const newAction = action.replace(`/${oldLang}/`, `/${newLang}/`);
+        form.setAttribute('action', newAction);
+      }
+    });
   }
 
   /**
@@ -325,6 +336,9 @@ export class Localization {
         
         // Set as HTML
         element.innerHTML = translation;
+
+        // After updating the translation, check for SVGs that need to be inserted
+        this.updateSVGsInTranslatedContent(element);
       } else {
         // Standard text translation
         element.textContent = this.translate(key, params);
@@ -372,6 +386,33 @@ export class Localization {
     if (titleElement) {
       const titleKey = titleElement.getAttribute('data-i18n-title');
       titleElement.textContent = this.translate(titleKey);
+    }
+  }
+
+  /**
+   * Update SVGs within translated content
+   * This specifically targets elements with data-i18n-svg attribute
+   */
+  updateSVGsInTranslatedContent(translatedElement) {
+    // Find all elements with data-i18n-svg within the translated content
+    const svgElements = translatedElement.querySelectorAll('[data-svg]');
+    
+    if (svgElements.length > 0) {
+      // Import SVGManager if not already available
+      import('./svgManager.js').then(module => {
+        const SVGManager = module.SVGManager;
+        
+        svgElements.forEach(element => {
+          const svgType = element.getAttribute('data-svg');
+          if (SVGManager[svgType + 'SVG']) {
+            element.innerHTML = SVGManager[svgType + 'SVG'];
+          } else {
+            console.error(`Method ${svgType}SVG not found on SVGManager.`);
+          }
+        });
+      }).catch(error => {
+        console.error('Error loading SVGManager:', error);
+      });
     }
   }
 }

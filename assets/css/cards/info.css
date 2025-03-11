@@ -108,6 +108,10 @@ section.info{
     );
 }
 
+.info h3 span {
+    font-family: var(--font-family-secondary);
+}
+
 .iterate.info h3 {
     background-image: linear-gradient(
         to bottom,

@@ -119,7 +119,11 @@
     "open": "OUVERTE",
     "view_tree_tooltip": "voir l'arbre",
     "view_shelf_tooltip": "voir en rayon",
-    "bookmark_tooltip": "marquer"
+    "tree_tooltip": "arbre",
+    "shelf_tooltip": "rayon",
+    "bookmark_tooltip": "marquer",
+    "iterate_tooltip": "iterer",
+    "new_game_tooltip": "nouvelle partie"
   },
   "writer-create": {
     "first_name": "Prénom",
@@ -130,5 +134,38 @@
     "save": "Sauvegarder",
     "save_tooltip": "sauvegarder vos informations",
     "cancel": "Annuler"
+  },
+  "auto_save": {
+    "fix_fields_intro": "Veuillez corriger ",
+    "field_singular": "le champ {field}",
+    "field_dual": "les champs {field1} et {field2}",
+    "field_plural": "les champs {fields}, et {lastField}",
+    "fix_fields_outro": " pour activer la sauvegarde automatique."
+  },
+  "home_index": {
+    "title": "écriture collaborative",
+    "add_a_few_words": "Enlevez quelques mots à un texte.",
+    "write_a_sentence": "Voyez-la prendre pied, ajoutez encore...",
+    "write_a_phrase": "voyez sa tête rouler.",
+    "login": "connexion",
+    "browse": "explorer les collaborations",
+    "how": "comment ça marche",
+    "how_to_collaborate": "comment collaborer",
+    "log_in": "connexion",
+    "collaborate_step_one_title": "1. Connectez-vous",
+    "collaborate_step_one_text": "Créez un compte et/ou connectez-vous.",
+    "collaborate_step_two_title": "2. Explorez",
+    "collaborate_step_two_text": "Cliquez sur le bouton <span class='info-icon' data-svg='browse'></span> (menu supérieur) pour entrer dans notre bibliothèque, où vous pouvez ouvrir et explorer les collaborations.",
+    "collaborate_step_three_title": "3. Écrivez",
+    "collaborate_step_three_text": "Choisissez un noeud d'histoire qui vous inspire, changez le texte (\"iterez\"), et publiez <span class='info-icon' data-svg='publish'></span> votre version lorsque vous êtes prêt à partager.",
+    "collaborate_step_four_title": "4. Votez",
+    "collaborate_step_four_text": "Votez sur un texte gagnant. Le premier texte à obtenir des votes de tous les écrivains collaboreurs gagne!",
+    "how_to_start_new_collaboration": "comment commencer une nouvelle collaboration",
+    "create_collaboration_step_one_title": "1. Connectez-vous",
+    "create_collaboration_step_one_text": "Créez un compte et/ou connectez-vous.",
+    "create_collaboration_step_two_title": "2. Créez",
+    "create_collaboration_step_two_text": "Cliquez sur le bouton <span class='info-icon' data-svg='newGame'></span> (menu supérieur) pour commencer une nouvelle collaboration. Vous serez invité à créer un titre, un texte incitatif et un texte de départ. Tous les futurs collaborateurs consulteront votre titre et votre texte incitatif en écrivant. Tapez <span class='info-icon' data-svg='publish'></span> lorsque vous êtes prêt à partager.",
+    "create_collaboration_step_three_title": "3. Partagez",
+    "create_collaboration_step_three_text": "Faites savoir à vos amis! Ou attendez que quelqu'un de notre communauté contribue."
   }
 }
