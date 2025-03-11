@@ -161,13 +161,17 @@ export class DataManager {
         try {
             const response = await fetch(`${this.path}game/modifiedSince`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Accept-Language': this.getCurrentLocale() // Get locale from URL
+                },
                 body: JSON.stringify({
                     lastGamesCheck: lastGamesCheck,
                     filters: this.cache.filters || {},
                     search: this.cache.search || '',
                     rootStoryId: rootId,
-                    lastTreeCheck: this.cache.trees.get(rootId)?.timestamp || 0
+                    lastTreeCheck: this.cache.trees.get(rootId)?.timestamp || 0,
+                    locale: this.getCurrentLocale() // Get locale from URL
                 })
             });
 
@@ -1097,5 +1101,20 @@ export class DataManager {
             })) : [],
             lastUpdate: lastUpdate
         };
+    }
+
+    // Add method to get current locale from URL
+    getCurrentLocale() {
+        // Extract locale from URL path (e.g., /en/page)
+        const pathMatch = window.location.pathname.match(/^\/([a-z]{2}(-[A-Z]{2})?)\//)
+        if (pathMatch) return pathMatch[1];
+        
+        // Or from query parameter (e.g., ?lang=en)
+        const urlParams = new URLSearchParams(window.location.search);
+        const langParam = urlParams.get('lang');
+        if (langParam) return langParam;
+        
+        // Fallback to default
+        return 'en';
     }
 }

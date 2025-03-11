@@ -174,5 +174,18 @@
     "create_collaboration_step_two_text": "Cliquez sur le bouton <span class='info-icon' data-svg='newGame'></span> (menu supérieur) pour commencer une nouvelle collaboration. Vous serez invité à créer un titre, un texte incitatif et un texte de départ. Tous les futurs collaborateurs consulteront votre titre et votre texte incitatif en écrivant. Tapez <span class='info-icon' data-svg='publish'></span> lorsque vous êtes prêt à partager.",
     "create_collaboration_step_three_title": "3. Partagez",
     "create_collaboration_step_three_text": "Faites savoir à vos amis! Ou attendez que quelqu'un de notre communauté contribue."
+  },
+  "filters": {
+    "contribution": {
+      "all": "de tous",
+      "contributed": "contribué",
+      "mine": "commencé"
+    },
+    "gameState": {
+      "all": "ouvertes/fermées/à venir",
+      "open": "ouvertes",
+      "closed": "fermées",
+      "pending": "à venir"
+    }
   }
 }

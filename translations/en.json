@@ -169,5 +169,18 @@
       "create_collaboration_step_two_text": "Click on the <span class='info-icon' data-svg='newGame'></span> (top menu) to start a new collaboration. You will be asked to create a title, a prompt, and a starting text. All future collaborators will consult yout title and prompt while they write. When you're ready to share, just publish <span class='info-icon' data-svg='publish'></span>.",
       "create_collaboration_step_three_title": "3. Share",
       "create_collaboration_step_three_text": "Let your friends know! Or wait for someone from our community to contribute."
+    },
+    "filters": {
+      "contribution": {
+        "all": "everyone's",
+        "contributed": "contributed",
+        "mine": "started"
+      },
+      "gameState": {
+        "all": "open/closed/pending",
+        "open": "open",
+        "closed": "closed",
+        "pending": "pending"
+      }
     }
   }
