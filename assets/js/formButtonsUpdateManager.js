@@ -146,12 +146,8 @@ export class ButtonUpdateManager {
         const i18nKey = this.hasAnId ? 'general.exit' : 'general.cancel';
         titleSpan.setAttribute('data-i18n', i18nKey);
         
-        // If we have access to the localization system directly
-        if (window.localization) {
-            // Use the localization system to translate the text
-            titleSpan.textContent = window.localization.translate(i18nKey);
-        } else if (eventBus) {
-            // Otherwise, emit an event to request translation
+        // Emit an event to request translation
+        if (eventBus) {   
             eventBus.emit('requestTranslation', {
                 element: titleSpan,
                 key: i18nKey

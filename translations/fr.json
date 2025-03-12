@@ -84,7 +84,8 @@
     "your_version": "votre version de \"{game_title}\"",
     "kickoff_text": "commencer le texte",
     "writing_placeholder": "Quand vous sortez par la fenêtre, n'oubliez pas vos bottes de pluie.",
-    "keywords": "mots-clés"
+    "keywords": "mots-clés",
+    "keywords_placeholder": "pluie, fenêtre, panda"
   },
   "note-edit": {
     "here_is_what_you_wrote": "Voici votre texte: ",

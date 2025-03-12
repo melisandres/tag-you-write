@@ -29,7 +29,7 @@ export class AutoSaveManager {
         eventBus.on('inputChanged', this.handleInputChange.bind(this));
         eventBus.on('manualSave', this.handleManualSave.bind(this));
         eventBus.on('autoSaveFieldValidationChanged', this.handleFieldValidationChanged.bind(this));
-        eventBus.on('fieldValidationChanged', this.handleFieldValidationChanged.bind(this));
+        eventBus.on('validationChanged', this.handleValidationChanged.bind(this));
         eventBus.on('formRestored', this.handleFormRestored.bind(this));
     }
 
@@ -59,22 +59,9 @@ export class AutoSaveManager {
         }
     }
 
-    // Simplify the existing method since field-specific handling is now in handleFieldValidationChanged
+    // If validation allows/disallows autosave, make it so
     handleValidationChanged(results) {
         this.canAutosave = results.canAutosave;
-        
-        // Just update the overall autosave capability
-        if (!this.canAutosave) {
-            const failedFields = Object.entries(results.fields)
-                .filter(([_, fieldStatus]) => !fieldStatus.canAutosave)
-                .map(([fieldName, _]) => fieldName);
-            
-            this.lastFailedFields = failedFields;
-            this.showFormWarning(failedFields);
-        } else {
-            this.lastFailedFields = [];
-            this.removeFormWarning();
-        }
     }
 
     showFormWarning(failedFields) {

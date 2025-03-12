@@ -69,7 +69,15 @@
         
         <label>
             <div class="title-and-word-count">
-                <span {{ data.parent_id ? 'data-i18n="cr_it_ed.your_version"' : 'data-i18n="cr_it_ed.kickoff_text"' }} class="headline">{{ data.parent_id ? translate('cr_it_ed.your_version', {game_title: data.game_title|default(translate('general.untitled'))}) : translate('cr_it_ed.kickoff_text') }}</span>
+                {% if data.parent_id %}
+                    <span data-i18n="cr_it_ed.your_version" data-i18n-params='{"game_title": "{{ data.game_title|default(translate('general.untitled'))|e('js') }}"}' class="headline">
+                        {{ translate('cr_it_ed.your_version', {game_title: data.game_title|default(translate('general.untitled'))}) }}
+                    </span>
+                {% else %}
+                    <span data-i18n="cr_it_ed.kickoff_text" class="headline">
+                        {{ translate('cr_it_ed.kickoff_text') }}
+                    </span>
+                {% endif %}
                 <div class="word-count-display" data-word-count-display>
                     <span class="word-count-number"></span>
                     <span class="word-count-tooltip"></span>
