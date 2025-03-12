@@ -185,5 +185,8 @@
     },
     "search": {
       "placeholder": "search games..."
+    },
+    "games": {
+      "noGamesMessage": "No games found matching your current filters"
     }
   }

@@ -45,10 +45,12 @@ export class IndexUpdateManager {
     if (statusIndicator && statusIndicator.classList.contains('pending')) {
       statusIndicator.classList.remove('pending');
       statusIndicator.classList.add('open');
+      const gameText = window.i18n.translate('general.game');
+      const openText = window.i18n.translate('general.open');
       statusIndicator.innerHTML = `
         <p class="game-status">    
-          <span>GAME</span>
-          <span>OPEN</span>  
+          <span data-i18n="general.game">${gameText}</span>
+          <span data-i18n="general.open">${openText}</span>  
         </p>`;
     }
   }
@@ -62,10 +64,12 @@ export class IndexUpdateManager {
     if (statusIndicator && statusIndicator.classList.contains('open')) {
       statusIndicator.classList.remove('open');
       statusIndicator.classList.add('closed');
+      const gameText = window.i18n.translate('general.game');
+      const closedText = window.i18n.translate('general.closed');
       statusIndicator.innerHTML = `
         <p class="game-status">    
-          <span>GAME</span>
-          <span>CLOSED</span>  
+          <span data-i18n="general.game">${gameText}</span>
+          <span data-i18n="general.closed">${closedText}</span>  
         </p>`;
     }
   }

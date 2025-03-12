@@ -59,7 +59,8 @@ export class GameListRenderer {
 
         // Check if gamesData is empty and display message
         if (!gamesData || gamesData.length === 0) {
-            this.container.insertAdjacentHTML('beforeend', '<p class="no-games">No games found matching your current filters</p>');
+            const message = window.i18n.translate('games.noGamesMessage');
+            this.container.insertAdjacentHTML('beforeend', `<p class="no-games" data-i18n="games.noGamesMessage">${message}</p>`);
         }
     }
 
@@ -143,23 +144,28 @@ export class GameListRenderer {
     renderGameStatus(game) {
         const isOpen = game.openForChanges === '1' || game.openForChanges === true || game.openForChanges === 1;
         let status = game.pending ? 'pending' : (isOpen ? 'open' : 'closed');
-        let statusText = status.toUpperCase();
+        //let statusText = status.toUpperCase();
         
+        const gameText = window.i18n.translate('general.game');
+        const statusText = window.i18n.translate(`general.${status}`);
+
+
         return `
             <div class="game-status-indicator ${status}">
                 <p class="game-status">    
-                    <span>GAME</span>
-                    <span>${statusText}</span>  
+                    <span data-i18n="general.game">${gameText}</span>
+                    <span data-i18n="general.open">${statusText}</span>  
                 </p>
             </div>
         `;
     }
 
     renderPrompt(prompt) {
+        const promptText = window.i18n.translate('cr_it_ed.prompt');
         return `
             <div class="story-prompt">
-                <h3 class="prompt-title very-small">
-                    prompt:
+                <h3 class="prompt-title very-small" data-i18n="cr_it_ed.prompt">
+                    ${promptText}
                 </h3>
                 <p>
                     ${prompt}
@@ -190,6 +196,7 @@ export class GameListRenderer {
         }
     }
 
+    // Update a game already rendered in the list
     updateExistingGame(gameElement, gameData) {
         console.log("HERE!!updateExistingGame", gameData);
         if (!gameElement || !gameData) return;
@@ -200,20 +207,24 @@ export class GameListRenderer {
         const hasContributed = gameData.hasContributed === '1' || gameData.hasContributed === true || gameData.hasContributed === 1;
 
         // Update story class for open/closed status
-        console.log("gameElement", gameElement);
         const gameStatusIndicator = gameElement.querySelector('.game-status-indicator');
+
+        // Update the game status indicator CSS class
+        gameStatusIndicator.classList.toggle('open', isOpen);
+        gameStatusIndicator.classList.toggle('closed', !isOpen);
+
+        // Update the game status text
+        const gameText = window.i18n.translate('general.game');
         if (isOpen) {
-            gameStatusIndicator.classList.remove('closed');
-            gameStatusIndicator.classList.add('open');
-            // TODO update the game status text
-            gameStatusIndicator.querySelector('.game-status').innerHTML = `<span>GAME</span>
-                        <span>OPEN</span>`;
+            const openText = window.i18n.translate('general.open');
+            gameStatusIndicator.querySelector('.game-status').innerHTML = 
+                `<span data-i18n="general.game">${gameText}</span>
+                <span data-i18n="general.open">${openText}</span>`;
         } else {
-            gameStatusIndicator.classList.add('closed');
-            gameStatusIndicator.classList.remove('open');
-            // TODO update the game status text
-            gameStatusIndicator.querySelector('.game-status').innerHTML = `<span>GAME</span>
-                        <span>CLOSED</span>`;
+            const closedText = window.i18n.translate('general.closed');
+            gameStatusIndicator.querySelector('.game-status').innerHTML = 
+                `<span data-i18n="general.game">${gameText}</span>
+                <span data-i18n="general.closed">${closedText}</span>`;
         }
 
         // Update hasContributed status? For now its done locally.
@@ -247,7 +258,8 @@ export class GameListRenderer {
 
         // Message if the games list is empty
         if (games.length === 0) {
-            this.container.insertAdjacentHTML('beforeend', '<p class="no-games">No games found matching your current filters</p>');
+            const message = window.i18n.translate('games.noGamesMessage');
+            this.container.insertAdjacentHTML('beforeend', `<p class="no-games" data-i18n="games.noGamesMessage">${message}</p>`);
             return;
         }
         

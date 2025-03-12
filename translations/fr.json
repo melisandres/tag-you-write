@@ -191,5 +191,8 @@
   },
   "search": {
     "placeholder": "rechercher des textes..."
+  },
+  "games": {
+    "noGamesMessage": "Aucun texte trouvé correspondant à vos filtres actuels"
   }
 }

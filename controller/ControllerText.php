@@ -19,7 +19,7 @@ class ControllerText extends Controller{
         // Get filter parameters from URL
         $filters = [
             'hasContributed' => isset($_GET['hasContributed']) ? 
-                ($_GET['hasContributed'] === 'true' ? true : 
+                ($_GET['hasContributed'] === 'true' || $_GET['hasContributed'] === 'contributor' ? true : 
                 ($_GET['hasContributed'] === 'mine' ? 'mine' : null)) : null,
             'gameState' => isset($_GET['gameState']) ? $_GET['gameState'] : 'all'
         ];
