@@ -2,7 +2,7 @@ import { eventBus } from './eventBus.js';
 import { GameListRenderer } from './gameListRenderer.js';
 
 export class GameListManager {
-    constructor(path, uiManager) {
+    constructor(uiManager) {
         this.container = document.querySelector('.stories');
         if (!this.container) return;
 
@@ -10,11 +10,10 @@ export class GameListManager {
             return window.gameListManagerInstance;
         }
         
-        this.path = path;
         this.dataManager = window.dataManager;
         this.uiManager = uiManager;
         
-        this.renderer = new GameListRenderer(this.container, path, this.uiManager);
+        this.renderer = new GameListRenderer(this.container, this.uiManager);
 
         // Event listeners
         eventBus.on('gamesModified', (games) => this.handleGameUpdates(games));
@@ -67,7 +66,9 @@ export class GameListManager {
             const filters = this.dataManager.getFilters();
             const search = this.dataManager.getSearch();
             console.log("REFRESHING THE GAME LIST");
-            const response = await fetch(`${this.path}game/getGames`, {
+            const endpoint = 'game/getGames';
+            const url = window.i18n.createUrl(endpoint);
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -1,6 +1,5 @@
 export class ShowcaseManager {
-    constructor(path) {
-        this.path = path;
+    constructor() {
         this.bindEvents();
         
         // Listen for popstate event to handle browser navigation

@@ -1,6 +1,5 @@
 export class NotificationManager {
-    constructor(path) {
-        this.path = path;
+    constructor() {
         this.init();
     }
 
@@ -12,7 +11,8 @@ export class NotificationManager {
     }
 
     checkForGameEnd(id) {
-        const url = `${this.path}notification/getGameEnd/${id}`;
+        const endpoint = `notification/getGameEnd/${id}`;
+        const url = window.i18n.createUrl(endpoint);
         fetch(url)
             .then(response => response.json())
             .then(data => {
@@ -26,7 +26,8 @@ export class NotificationManager {
     }
 
     markNotificationAsSeen(notificationId) {
-        const url = `${this.path}notification/markAsSeen/${notificationId}`;
+        const endpoint = `notification/markAsSeen/${notificationId}`;
+        const url = window.i18n.createUrl(endpoint);
         fetch(url)
             .catch(error => console.error('Error updating notification:', error));
     }

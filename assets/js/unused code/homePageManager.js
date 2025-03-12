@@ -1,4 +1,4 @@
-import { SVGManager } from './svgManager.js';
+import { SVGManager } from '../svgManager.js';
 export class HomePageManager {
     constructor() {
         this.page = document.querySelector('.home-container');
@@ -10,7 +10,7 @@ export class HomePageManager {
     }
 
     setBackgroundSVG() {
-        const backgroundSVG = document.querySelector('.background-svg');
-        backgroundSVG.innerHTML = SVGManager.heartSVG;
+/*         const backgroundSVG = document.querySelector('.background-svg');
+        backgroundSVG.innerHTML = SVGManager.heartSVG; */
     }
 }

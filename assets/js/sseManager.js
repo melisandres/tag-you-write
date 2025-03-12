@@ -1,14 +1,13 @@
 import { eventBus } from './eventBus.js';
 
 export class SSEManager {
-    constructor(path) {
-        this.path = path;
+    constructor() {
         this.eventSource = null;
         this.retryCount = 0;
         this.maxRetries = 5;
 
         // Listen for control events
-        eventBus.on('startSSE', ({path, gameIds}) => this.connect(gameIds));
+        eventBus.on('startSSE', ({gameIds}) => this.connect(gameIds));
         eventBus.on('stopSSE', () => this.disconnect());
     }
 
@@ -25,9 +24,9 @@ export class SSEManager {
                 gameIds: gameIds.join(',')
             });
 
-            this.eventSource = new EventSource(
-                `${this.path}sse/stream?${params.toString()}`
-            );
+            const endpoint = `sse/stream?${params.toString()}`;
+            const url = window.i18n.createUrl(endpoint);
+            this.eventSource = new EventSource(url);
 
             this.eventSource.onopen = () => {
                 console.log('SSE Connection established');

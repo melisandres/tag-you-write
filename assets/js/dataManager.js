@@ -1,22 +1,21 @@
 export class DataManager {
     static instance = null;
     
-    static getInstance(path) {
+    static getInstance() {
         if (!DataManager.instance) {
-            DataManager.instance = new DataManager(path);
+            DataManager.instance = new DataManager();
             window.dataManager = DataManager.instance;
         }
         return DataManager.instance;
     }
-    constructor(path) {
+    constructor() {
         if (DataManager.instance) {
             return DataManager.instance;
         }
-
+        
         this.currentViewedRootStoryId = null;
         const userIdMeta = document.querySelector('meta[name="user"]');
         this.currentUserId = userIdMeta.getAttribute('data-user-id') !== 'null' ? userIdMeta.getAttribute('data-user-id') : null;
-        this.path = path;
         this.cache = this.loadCache() || {
             games: new Map(),
             trees: new Map(),
@@ -159,7 +158,9 @@ export class DataManager {
         const lastGamesCheck = this.cache.lastGamesCheck || 0;
 
         try {
-            const response = await fetch(`${this.path}game/modifiedSince`, {
+            const endpoint = 'game/modifiedSince';
+            const url = window.i18n.createUrl(endpoint);
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',

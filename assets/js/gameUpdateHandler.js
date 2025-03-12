@@ -7,6 +7,7 @@ export class GameUpdateHandler {
         eventBus.on('gamesModified', this.handleGamesModified.bind(this));
     }
 
+    // TODO: I'm writing this months later... might be good to figure out why we are only checking for a specific view, without checking if the view corresponds to the modified game? or maybe that's happening in the updateGame/updateTreeGame/updateShelfGame functions?
     handleGamesModified(modifiedGames) {
         modifiedGames.forEach(game => {
             // Update game list

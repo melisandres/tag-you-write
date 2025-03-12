@@ -1,8 +1,7 @@
 import { eventBus } from './eventBus.js';
 
 export class AutoSaveManager {
-    constructor(path) {
-        this.path = path;
+    constructor() {
         this.form = document.querySelector('[data-form-type="root"], [data-form-type="iteration"]');
 
         // Initialize if you have a form that needs autosaving
@@ -309,8 +308,10 @@ export class AutoSaveManager {
             const formData = new FormData(this.form);
             const data = Object.fromEntries(formData.entries());
             data.text_status = 'draft';
+            const endpoint = 'text/autoSave';
+            const url = window.i18n.createUrl(endpoint);
 
-            fetch(`${this.path}text/autoSave`, {
+            fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

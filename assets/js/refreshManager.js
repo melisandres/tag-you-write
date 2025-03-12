@@ -1,15 +1,10 @@
-import { StoryManager } from './storyManager.js';
-import { Modal } from './modal.js' ;
-import { ShowcaseManager } from './showcaseManager.js';
-
 export class RefreshManager {
-    constructor(path, uiManager, storyManager, autoSaveManager) {
+    constructor(uiManager, storyManager, autoSaveManager) {
         if (window.refreshManagerInstance) {
             return window.refreshManagerInstance;
         }
         
-        this.path = path;
-        this.textPagePath = `${path}text/`;
+        this.textPagePath = window.i18n.createUrl('text/');
         this.storyManager = storyManager;
         this.uiManager = uiManager;
         this.autoSaveManager = autoSaveManager;

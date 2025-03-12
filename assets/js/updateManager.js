@@ -2,9 +2,8 @@ import { eventBus } from './eventBus.js';
 /* import { PollingManager } from './pollingManager.js'; */
 
 export class UpdateManager {
-    constructor(path) {
+    constructor() {
         this.preferSSE = false;
-        this.path = path;
 
         // Listen for success/failure of SSE
         eventBus.on('sseConnected', () => this.handleSSESuccess());
@@ -20,7 +19,6 @@ export class UpdateManager {
         if (this.preferSSE) {
             console.log('Attempting SSE connection');
             eventBus.emit('startSSE', {
-                path: this.path,
                 filters: Array.from(this.currentFilters)
             });
         } else {

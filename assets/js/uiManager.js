@@ -1,5 +1,3 @@
-/* import { StoryManager } from './storyManager.js';
-import { Modal } from './modal.js';  */
 import { SVGManager } from './svgManager.js';
 import { ShowcaseManager } from './showcaseManager.js';
 
@@ -8,7 +6,7 @@ export class UIManager {
     this.storyManager = storyManager;
     this.modal = modal;
     this.SVGManager = SVGManager;
-    this.showcaseManager = new ShowcaseManager(this.path);
+    this.showcaseManager = new ShowcaseManager();
     this.initSvgs();
     this.insertLoginLogoutSVGs();
     this.initEventListeners();

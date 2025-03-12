@@ -31,8 +31,10 @@ export class InstaPublishManager {
       try {
         const formData = new FormData();
         formData.append('id', textId);
+        const endpoint = 'text/instaPublish';
+        const actionUrl = window.i18n.createUrl(endpoint);
 
-        const response = await fetch(`${this.path}text/instaPublish`, {
+        const response = await fetch(actionUrl, {
           method: 'POST',
           body: formData
         });

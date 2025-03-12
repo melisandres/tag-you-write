@@ -3,8 +3,7 @@ import { SVGManager } from './svgManager.js';
 import { createColorScale } from './createColorScale.js';
 
 export class ModalUpdateManager {
-  constructor(path) {
-    this.path = path;
+  constructor() {
     this.initEventListeners();
   }
 
@@ -70,8 +69,9 @@ export class ModalUpdateManager {
       // Update buttons
       const modalBtns = modal.querySelector('.modal-dynamic-btns');
       if (modalBtns) {
+        const editAction = window.i18n.createUrl('text/edit');
         modalBtns.innerHTML = `
-          <form action="${this.path}text/edit" method="POST" class="note-form">
+          <form action="${editAction}" method="POST" class="note-form">
             <input type="hidden" name="id" value="${textId}">
             <button type="submit" class="note">
               ${SVGManager.addNoteSVG}

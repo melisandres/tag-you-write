@@ -182,5 +182,8 @@
         "closed": "closed",
         "pending": "pending"
       }
+    },
+    "search": {
+      "placeholder": "search games..."
     }
   }

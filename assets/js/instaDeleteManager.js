@@ -1,10 +1,9 @@
-import { WarningManager } from './warningManager.js';
+/* import { WarningManager } from './warningManager.js'; */
 import { eventBus } from './eventBus.js';
 
 export class InstaDeleteManager {
-    constructor(path) {
-        this.path = path;
-        this.warningManager = new WarningManager();
+    constructor(warningManager) {
+        this.warningManager = warningManager;
         this.initEventListeners();
     }
 
@@ -33,8 +32,10 @@ export class InstaDeleteManager {
             const formData = new FormData();
             formData.append('id', textId);
             formData.append('insta', '1');
+            const endpoint = 'text/delete';
+            const actionUrl = window.i18n.createUrl(endpoint);
 
-            const response = await fetch(`${this.path}text/delete`, {
+            const response = await fetch(actionUrl, {
                 method: 'POST',
                 body: formData
             });

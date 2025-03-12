@@ -1,12 +1,11 @@
 import { SVGManager } from './svgManager.js';
 
 export class SearchManager {
-    constructor(path) {
+    constructor() {
         if (!window.menuManager) {
             console.error('MenuManager not initialized');
             return;
         }
-        this.path = path;
         this.searchNavLink = document.querySelector('.nav-link.search');
         this.searchMenu = document.querySelector('.search-menu');
         this.filterMenu = document.querySelector('.filter-menu');
@@ -28,11 +27,11 @@ export class SearchManager {
             // Add search input HTML
             this.searchMenu.innerHTML = `
                 <div class="search-options">
-                    <input type="text" class="search-input" placeholder="Coming soon... search games...">
+                    <input type="text" class="search-input" data-i18n-placeholder="search.placeholder" placeholder="search games...">
                     <button class="close-search">${SVGManager.xSVG}</button>
                 </div>
             `;
-
+            window.i18n.updatePageTranslations(this.searchMenu);
             this.searchInput = this.searchMenu.querySelector('.search-input');
         }
     }
@@ -112,7 +111,9 @@ export class SearchManager {
         console.log('TRYING TO FETCH');
         
         // Return the Promise
-        return fetch(`${this.path}text/searchNodes?term=${encodeURIComponent(searchTerm)}&rootStoryId=${rootStoryId}`)
+        const endpoint = `text/searchNodes?term=${encodeURIComponent(searchTerm)}&rootStoryId=${rootStoryId}`;
+        const url = window.i18n.createUrl(endpoint);
+        return fetch(url)
             .then(response => response.json())
             .then(data => {
                 console.log('Search results received:', data);

@@ -4,8 +4,7 @@ import { ShelfVisualizer } from './shelfVisualizer.js';
 /* this may create some issues... to require the modal the constructor. I'm going to initialize it as an empty string... there are pages where I will surely call the story manager where the modal will be innaccessible? or I should put the modal in the header? */
 
 export class StoryManager {
-  constructor(path, modal, seenManager) {
-    this.path = path;
+  constructor(modal, seenManager) {
     this.seenManager = seenManager;
     this.modal = modal;
     this.storyTreeData = [];
@@ -36,7 +35,9 @@ export class StoryManager {
     this.currentFetch = new AbortController();
     
     try {
-      const response = await fetch(`${this.path}text/getTree/${id}`, {
+      const endpoint = `text/getTree/${id}`;
+      const url = window.i18n.createUrl(endpoint);
+      const response = await fetch(url, {
         signal: this.currentFetch.signal
       });
       
@@ -62,7 +63,8 @@ export class StoryManager {
         timestampDate: new Date(lastTreeCheck).toISOString(),
         currentTime: new Date().toISOString()
     });
-    const url = `${this.path}text/checkTreeUpdates`;
+    const endpoint = `text/checkTreeUpdates`;
+    const url = window.i18n.createUrl(endpoint);
     const payload = {
         rootId: treeId,
         lastTreeCheck: lastTreeCheck,
@@ -95,7 +97,8 @@ export class StoryManager {
 
   // TODO: It might be nice to check in the dataManager.cache... to see if it exists there before fetching it from the server. 
   async fetchStoryNode(id){
-    const url = `${this.path}text/getStoryNode/${id}`;
+    const endpoint = `text/getStoryNode/${id}`;
+    const url = window.i18n.createUrl(endpoint);
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`Error fetching story node data: ${response.status}`);
@@ -225,7 +228,7 @@ export class StoryManager {
   async drawShelf(id, container) {
     this.dataManager.setCurrentViewedRootStoryId(id);
     const shelfData = await this.prepareData(id);
-    const shelfVisualizer = new ShelfVisualizer(container, this.path);
+    const shelfVisualizer = new ShelfVisualizer(container);
     shelfVisualizer.drawShelf(shelfData);
   }
 
@@ -246,7 +249,7 @@ export class StoryManager {
     console.log('updateDrawer', id);
     const data = await this.fetchStoryNode(id);
     const container = document.querySelector("#showcase.with-shelf");
-    const shelfVisualizer = new ShelfVisualizer(container, this.path);
+    const shelfVisualizer = new ShelfVisualizer(container);
     shelfVisualizer.updateOneDrawer(data);
   }
   
@@ -263,8 +266,14 @@ export class StoryManager {
         const searchTerm = this.dataManager.getSearch();
         if (!searchTerm) return null;
 
-        const response = await fetch(`${this.path}text/searchNodes?term=${encodeURIComponent(searchTerm)}&rootStoryId=${rootId}`);
-        if (!response.ok) return null;
+        const endpoint = `text/searchNodes?term=${encodeURIComponent(searchTerm)}&rootStoryId=${rootId}`;
+        const url = window.i18n.createUrl(endpoint);
+
+        const response = await fetch(url);
+        if (!response.ok) {
+            console.warn(`Search request failed with status: ${response.status}`);
+            return null;
+        }
 
         return await response.json();
     } catch (error) {

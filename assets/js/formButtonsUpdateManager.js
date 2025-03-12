@@ -56,7 +56,7 @@ export class ButtonUpdateManager {
         // Listen for form updates relative to saving
         eventBus.on('formUpdated', this.handleFormUpdated.bind(this));
 
-        //Listen for a form that has no unsaved changes--called from autoSaveManager
+        // Listen for a form that has no unsaved changes--called from autoSaveManager
         eventBus.on('hasUnsavedChanges', this.handleHasUnsavedChanges.bind(this));
 
         // Add listener for form restored

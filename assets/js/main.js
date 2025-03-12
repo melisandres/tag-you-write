@@ -2,7 +2,6 @@ import { Modal } from './modal.js';
 import { StoryManager } from './storyManager.js';
 import { UIManager } from './uiManager.js';
 import { VoteManager } from './voteManager.js'; 
-import { GameManager } from './gameManager.js';
 import { RefreshManager } from './refreshManager.js';
 import { SeenManager } from './seenManager.js';
 import { WarningManager } from './warningManager.js';
@@ -34,7 +33,6 @@ import { SearchHighlighter } from './searchHighlighter.js';
 import { PollingManager } from './pollingManager.js';
 import { GameUpdateHandler } from './gameUpdateHandler.js';
 import { TreeShelfModalPollingUpdateManager } from './TreeShelfModalPollingUpdateManager.js';
-import { HomePageManager } from './homePageManager.js';
 import { NotificationsMenuManager } from './notificationsMenuManager.js';
 import { Localization } from './localization.js';
 // Make eventBus globally available immediately
@@ -47,20 +45,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   window.i18n = new Localization(path);
   await window.i18n.init(); // It's async, so we need to call it here
 
-  new HomePageManager();
-  
   // Initialize DataManager first
-  window.dataManager = DataManager.getInstance(path);
+  window.dataManager = DataManager.getInstance();
 
   const treeModal = document.querySelector('.modal-background');
   const warningManager = new WarningManager();
   new ToastManager();
 
   // Initialize Modal
-  const modal = new Modal(treeModal, path);
+  const modal = new Modal(treeModal);
 
   // Initialize SeenManager
-  const seenManager= new SeenManager(path);
+  const seenManager= new SeenManager();
 
 
 
@@ -68,30 +64,27 @@ document.addEventListener("DOMContentLoaded", async () => {
   const treeVisualizer = new TreeVisualizer();
 
   // StoryManager is initialized with the modal and seenManager instances
-  const storyManager = new StoryManager(path, modal, seenManager);
+  const storyManager = new StoryManager(modal, seenManager);
   const paginationManager = new PaginationManager(document.querySelector('[data-stories]'), storyManager);
 
   // Initialize UIManager with the storyManager and modal instances
   const uiManager = new UIManager(storyManager, modal);
 
-  new NotificationsMenuManager(path);
+  new NotificationsMenuManager();
 
   // Only initialize GameListManager if we're on the games list page
   //const gamesContainer = document.querySelector('.stories');
 /*   if (gamesContainer) { */
-/*       const gameListManager = new GameListManager( gamesContainer,  path, uiManager); */
+/*       const gameListManager = new GameListManager( gamesContainer, uiManager); */
 /*   } */
 
-  // Initialize GameManager
-  new GameManager(path);
-
   // Initialize RefreshManager
-  const autoSaveManager = new AutoSaveManager(path);
+  const autoSaveManager = new AutoSaveManager();
 
 
   // Initialize RefreshManager
   if (!window.refreshManager) {
-      window.refreshManager = new RefreshManager(path, uiManager, storyManager, autoSaveManager);
+      window.refreshManager = new RefreshManager(uiManager, storyManager, autoSaveManager);
   } else {
       console.warn('RefreshManager already exists. Using existing instance.');
   }
@@ -103,12 +96,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
   // Initialize VoteManager
-  new VoteManager(path, warningManager);
+  new VoteManager(warningManager);
 
 
 
   // Start Long Polling Manager
-  new NotificationManager(path);
+  new NotificationManager();
 
   // Initialize in UIManager or globally
   // const warningManager = new WarningManager();
@@ -116,17 +109,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   //And your forms need managing (!)
   // Buttons and forms listen for validation emitions... 
   new ButtonUpdateManager(autoSaveManager);
-  new FormManager(autoSaveManager, path);
+  new FormManager(autoSaveManager);
   new ValidationManager();
 
   // Initialize InstaPublishManager and InstaDeleteManager
-  new InstaPublishManager(path, warningManager);
-  new InstaDeleteManager(path);
+  new InstaPublishManager(warningManager);
+  new InstaDeleteManager(warningManager);
 
   // Initialize UpdateManagers
-  new ShelfUpdateManager(path);
+  new ShelfUpdateManager();
   new TreeUpdateManager(treeVisualizer);
-  new ModalUpdateManager(path);
+  new ModalUpdateManager();
   new IndexUpdateManager();
 
 
@@ -140,16 +133,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Initialize managers independently
   console.log('Initializing managers');
-  const pollingManager = new PollingManager(path);
-  const updateManager = new UpdateManager(path);
+  const pollingManager = new PollingManager();
+  const updateManager = new UpdateManager();
   updateManager.initialize();
   
   window.menuManager = new MenuManager();
 
-  const gameListManager = new GameListManager(path, uiManager);
+  const gameListManager = new GameListManager(uiManager);
   const filterManager = new FilterManager();
   window.searchHighlighter = new SearchHighlighter();
-  const searchManager = new SearchManager(path);
+  const searchManager = new SearchManager();
 
   // No need for separate handleInitialState
 
@@ -162,7 +155,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   // Initialize GameListManager
-/*   const gameListManager = new GameListManager(path, uiManager); */
+/*   const gameListManager = new GameListManager(uiManager); */
 
   
   // Start polling if we're on the right page

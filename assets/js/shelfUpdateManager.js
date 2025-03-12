@@ -4,8 +4,7 @@ import { createColorScale } from './createColorScale.js';
 import { SearchHighlighter } from './searchHighlighter.js';
 
 export class ShelfUpdateManager {
-  constructor(path) {
-    this.path = path;
+  constructor() {
     this.initEventListeners();
     this.dataManager = window.dataManager;
   }
@@ -143,10 +142,14 @@ export class ShelfUpdateManager {
         if (nodeButtons) {
           // Remove all existing buttons
           nodeButtons.innerHTML = '';
+
+          // Get the edit endpoint with Language
+          const endpoint = `text/edit`;
+          const actionUrl = window.i18n.createUrl(endpoint);
           
           // Add the note button
           nodeButtons.innerHTML = `
-            <form action="${this.path}text/edit" method="POST">
+            <form action="${actionUrl}" method="POST">
               <input type="hidden" name="id" value="${textId}">
               <button type="submit" class="note" value="Edit">
                 ${SVGManager.addNoteSVG}

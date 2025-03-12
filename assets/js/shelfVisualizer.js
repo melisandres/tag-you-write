@@ -3,10 +3,9 @@ import { SeenManager } from './seenManager.js';
 import { createColorScale } from './createColorScale.js'; // Import the utility function
 
 export class ShelfVisualizer {
-  constructor(container, path) {
-    this.path = path;
+  constructor(container) {
     this.container = container;
-    this.SeenManager = new SeenManager(path);
+    this.SeenManager = new SeenManager();
     this.initEventListeners();
   }
 
@@ -156,8 +155,10 @@ export class ShelfVisualizer {
   }
 
   getIterateForm(node) {
+    const endpoint = `text/iterate`;
+    const actionUrl = window.i18n.createUrl(endpoint);
     return `
-    <form action="${this.path}text/iterate" method="POST">
+    <form action="${actionUrl}" method="POST">
       <input type="hidden" name="id" value="${node.id}">
       <button type="submit" class="iterate">
         ${SVGManager.iterateSVG}
@@ -167,8 +168,10 @@ export class ShelfVisualizer {
   }
 
   getEditForm(node) {
+    const endpoint = `text/edit`;
+    const actionUrl = window.i18n.createUrl(endpoint);
     return `
-      <form action="${this.path}text/edit" method="POST">
+      <form action="${actionUrl}" method="POST">
         <input type="hidden" name="id" value="${node.id}">
         <input type="hidden" name="parent_id" value="${node.parent_id}">
         <button type="submit" class="edit" value="Edit">
@@ -179,8 +182,10 @@ export class ShelfVisualizer {
   }
 
   getNoteForm(node) {
+    const endpoint = `text/edit`;
+    const actionUrl = window.i18n.createUrl(endpoint);
     return `
-      <form action="${this.path}text/edit" method="POST">
+      <form action="${actionUrl}" method="POST">
         <input type="hidden" name="id" value="${node.id}">
         <button type="submit" class="note" value="Edit">
           ${SVGManager.addNoteSVG}

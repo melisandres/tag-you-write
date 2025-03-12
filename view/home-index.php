@@ -2,7 +2,7 @@
 {# comments #}
     <div class="home">
     <section class="home-container">
-        <div class="background-svg"></div>
+        <div class="background-svg" data-svg="heart"></div>
         <div class="text-container">
            <!--  <p>{{message}}</p> -->
             <h1 data-i18n="home_index.title">{{ translate('home_index.title') }}</h1>

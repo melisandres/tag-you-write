@@ -1,8 +1,7 @@
 import { eventBus } from './eventBus.js';
 
 export class PollingManager {
-    constructor(path) {
-        this.path = path;
+    constructor() {
         this.pollingIntervals = new Map();
         this.timeBetweenChecks = 10000;
         this.dataManager = window.dataManager;

@@ -188,5 +188,8 @@
       "closed": "fermées",
       "pending": "à venir"
     }
+  },
+  "search": {
+    "placeholder": "rechercher des textes..."
   }
 }

@@ -89,7 +89,7 @@ export class IndexUpdateManager {
           }`;
       }
 
-      // TODO: added this-- it handles game updates... or should. Update other game elements using GameListRenderer
+      // TODO: added this-- it would handle game updates... if there were a this.renderer or should. Update other game elements using GameListRenderer. The thing would be to create an event in the eventBus to handle this. but... I thought the logic was in place, so the following line may not be needed for functionality. to be investigated. 
       if (this.renderer) {
           this.renderer.updateExistingGame(gameElement, gameData);
       }

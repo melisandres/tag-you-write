@@ -4,10 +4,9 @@ import { SVGManager } from './svgManager.js';
 
 
 export class GameListRenderer {
-    constructor(container, path, uiManager) {
+    constructor(container, uiManager) {
         if (!container) return;
         
-        this.path = path;
         this.dataManager = window.dataManager;
         this.initialLoadComplete = false;
         this.container = container;
@@ -129,14 +128,14 @@ export class GameListRenderer {
         return `
             ${this.userLoggedIn ? `
                 <button data-bookmark-story data-text-id="${game.id}" class="story-btn bookmark-btn" data-svg="bookmark">
-                    ${SVGManager.bookmarkSVG}
+                    <span class="icon" data-svg="bookmark">${SVGManager.bookmarkSVG}</span>
                 </button>
             ` : ''}
             <button data-refresh-tree data-text-id="${game.id}" class="story-btn" data-svg="tree">
-                <img class="refresh-tree" src="${this.path}assets/imgs/icons/tree.svg" alt="view tree">
+                <span class="icon" data-svg="tree">${SVGManager.treeSVG}</span>
             </button>
             <button data-refresh-shelf data-text-id="${game.id}" class="story-btn" data-svg="shelf">
-                <img class="refresh-shelf" src="${this.path}assets/imgs/icons/shelf.svg" alt="view shelf"> 
+                <span class="icon" data-svg="shelf">${SVGManager.shelfSVG}</span>
             </button>
         `;
     }

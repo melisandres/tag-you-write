@@ -1,8 +1,7 @@
 import { DataManager } from './dataManager.js';
 
 export class SeenManager {
-    constructor(path) {
-        this.path = path;
+    constructor() {
 /*      this.userId = sessionStorage.getItem('currentUserId');
         console.log("I can get session storage here? ?", this.userId); */
         this.initEventListeners();
@@ -27,7 +26,8 @@ export class SeenManager {
             return;
         }
 
-        const url = `${this.path}seen/markAsSeen/${id}`;
+        const endpoint = `seen/markAsSeen/${id}`;
+        const url = window.i18n.createUrl(endpoint);
         try {
             const response = await fetch(url);
     
@@ -53,7 +53,9 @@ export class SeenManager {
     }
     
     async markAsUnseen(id) {
-        const url = `${this.path}seen/markAsUnseen/${id}`;
+        const endpoint = `seen/markAsUnseen/${id}`;
+        const url = window.i18n.createUrl(endpoint);
+
         const response = await fetch(url);
         if (!response.ok) {
           throw new Error(`Error marking as unseen: ${response.status}`);

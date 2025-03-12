@@ -3,8 +3,7 @@ import { createColorScale } from './createColorScale.js';
 import { eventBus } from './eventBus.js';
 
 export class Modal {
-    constructor(modalElement, path) {
-      this.path = path;
+    constructor(modalElement) {
       this.modalElement = modalElement;
       this.modalContent = modalElement.querySelector('.modal-dynamic-content');
       this.modalBtns = modalElement.querySelector('.modal-dynamic-btns');
@@ -33,9 +32,14 @@ export class Modal {
         </div>
       `;
 
-      this.modalBtns.innerHTML = `
+      const iterateAction = window.i18n.createUrl('text/iterate');
+      const editAction = window.i18n.createUrl('text/edit');
+      const noteAction = window.i18n.createUrl('text/edit');
+
+      this.modalBtns.innerHTML = 
+      `
       ${data.permissions.canIterate ? `
-        <form action="${this.path}text/iterate" method="POST" class="iterate-form">
+        <form action="${iterateAction}" method="POST" class="iterate-form">
           <input type="hidden" name="id" value="${data.id}">
           <button type="submit" class="iterate">
             ${SVGManager.iterateSVG}
@@ -44,7 +48,7 @@ export class Modal {
       ` : ''}
 
       ${data.permissions.canEdit ? `
-        <form action="${this.path}text/edit" method="POST" class="edit-form">
+        <form action="${editAction}" method="POST" class="edit-form">
           <input type="hidden" name="id" value="${data.id}">
           <button type="submit" class="edit">
             ${SVGManager.editSVG}
@@ -53,7 +57,7 @@ export class Modal {
       ` : ''}
 
       ${data.permissions.canAddNote ? `
-        <form action="${this.path}text/edit" method="POST" class="note-form">
+        <form action="${noteAction}" method="POST" class="note-form">
           <input type="hidden" name="id" value="${data.id}">
           <button type="submit" class="note">
             ${SVGManager.addNoteSVG}

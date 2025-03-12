@@ -3,10 +3,8 @@ import { WarningManager } from './warningManager.js';
 import { eventBus } from './eventBus.js';
 
 export class FormManager {
-    constructor(autoSaveManager, path) {
+    constructor(autoSaveManager) {
         this.autoSaveManager = autoSaveManager;
-        //this.validationManager = validationManager;
-        this.path = path;
         this.form = document.querySelector('#main-form');
         this.formType = this.form ? this.form.getAttribute('data-form-type') : null;
         this.statusField = this.form ? this.form.querySelector('[data-text-status]') : null;
@@ -128,7 +126,7 @@ export class FormManager {
         }
     }
 
-    // 
+    //  Redirect to the text page, with filters if they exist
     async handleCancel() {
         try {
             const redirectUrl = await this.getRedirectUrlWithFilters();
@@ -136,7 +134,8 @@ export class FormManager {
         } catch (error) {
             console.error('Error generating redirect URL:', error);
             // Fallback to simple redirect
-            window.location.href = `${this.path}text`;
+            const urlWithoutFilters = window.i18n.createUrl('text');
+            window.location.href = urlWithoutFilters;
         }
     }
 
@@ -151,7 +150,8 @@ export class FormManager {
        } else {
            // We need to check if this is a store or an update
            const idValue = this.form.querySelector('input[name="id"]').value;
-           const actionUrl = idValue === '' ? `${this.path}text/store` : `${this.path}text/update`;
+           const endpoint = idValue === '' ? 'text/store' : 'text/update';
+           const actionUrl = window.i18n.createUrl(endpoint);
            this.submitForm(actionUrl);
        }
     }
@@ -220,7 +220,9 @@ export class FormManager {
             "Your note will be public, but you can edit it any time.",
             () => {
                 this.statusField.value = 'published';
-                this.submitForm(`${this.path}text/update`);
+                const endpoint = 'text/update';
+                const actionUrl = window.i18n.createUrl(endpoint);
+                this.submitForm(actionUrl);
             },
             () => console.log("Note cancelled")
         );
@@ -232,7 +234,9 @@ export class FormManager {
             "Are you sure you want to publish this text? This action cannot be undone.",
             () => {
                 this.statusField.value = 'published';
-                this.submitForm(`${this.path}text/update`);
+                const endpoint = 'text/update';
+                const actionUrl = window.i18n.createUrl(endpoint);
+                this.submitForm(actionUrl);
             },
             () => console.log("Publish cancelled")
         );
@@ -244,7 +248,9 @@ export class FormManager {
             `Ready to start a new game? This action cannot be undone.`,
             () => {
                 this.statusField.value = 'published';
-                this.submitForm(`${this.path}text/update`);
+                const endpoint = 'text/update';
+                const actionUrl = window.i18n.createUrl(endpoint);
+                this.submitForm(actionUrl);
             },
             () => console.log("New game cancelled") 
         );
@@ -415,8 +421,10 @@ export class FormManager {
         try {
             const formData = new FormData(this.form);
             const id = formData.get('id');
+            const endpoint = 'text/delete';
+            const actionUrl = window.i18n.createUrl(endpoint);
 
-            const response = await fetch(`${this.path}text/delete`, {
+            const response = await fetch(actionUrl, {
                 method: 'POST', // Use DELETE method
                 body: formData // Send the form data as JSON
             });
@@ -455,19 +463,18 @@ export class FormManager {
     }
 
     async getRedirectUrlWithFilters(response = null, redirectUrl = 'text') {
-        // Debug URL construction
         const filters = window.dataManager.getFilters();
-        console.log('Filters before URL construction:', filters);
         
-        const filterParams = new URLSearchParams();
+        const queryParams = {};
         if (filters.hasContributed !== null) {
-            filterParams.append('hasContributed', filters.hasContributed);
+            queryParams.hasContributed = filters.hasContributed;
         }
         if (filters.gameState !== 'all') {
-            filterParams.append('gameState', filters.gameState);
+            queryParams.gameState = filters.gameState;
         }
         
-        const finalUrl = `${this.path}${redirectUrl}${filterParams.toString() ? '?' + filterParams.toString() : ''}`;
+        // Use the localization utility
+        const finalUrl = window.i18n.createUrl(redirectUrl, queryParams);
         console.log('Constructed redirect URL:', finalUrl);
         
         return finalUrl;

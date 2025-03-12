@@ -5,6 +5,7 @@ export class Localization {
   constructor(path) {
     this.basePath = path || ''; // Use provided base path
     this.currentLanguage = 'en'; // Default language
+    this.previousLanguage = 'en'; // Default language
     this.translations = {}; // Will hold all loaded translations
     this.supportedLanguages = ['en', 'fr']; // Add your supported languages
   }
@@ -182,7 +183,7 @@ export class Localization {
     }
     
     // Save current language
-    const previousLanguage = this.currentLanguage;
+    this.previousLanguage = this.currentLanguage;
     
     // Update current language
     this.currentLanguage = lang;
@@ -198,7 +199,7 @@ export class Localization {
       this.updatePageTitle();
       
       // Update all URLs on the page
-      this.updatePageUrls(previousLanguage, lang);
+      this.updatePageUrls(this.previousLanguage, lang);
       
       // Update URL without reloading the page
       const currentUrl = new URL(window.location.href);
@@ -228,14 +229,14 @@ export class Localization {
       // Emit an event that language has changed
       if (window.eventBus) {
         window.eventBus.emit('languageChanged', { 
-          from: previousLanguage, 
+          from: this.previousLanguage, 
           to: lang 
         });
       }
     } catch (error) {
       console.error('Error switching language:', error);
       // Revert to previous language on error
-      this.currentLanguage = previousLanguage;
+      this.currentLanguage = this.previousLanguage;
     }
   }
 
@@ -375,11 +376,9 @@ export class Localization {
         }
     });
     
-    // Only update links if we're updating the entire page
-    if (container === document) {
-        // Then update all links when language changes
-        this.updatePageUrls(this.previousLanguage, this.currentLanguage);
-    }
+    // Then update all links when language changes
+    console.log('updating page urls', this.previousLanguage, this.currentLanguage);
+    this.updatePageUrls(this.previousLanguage, this.currentLanguage);
   }
 
   /**
@@ -456,5 +455,22 @@ export class Localization {
     this.updatePageTranslations(container);
     
     return container;
+  }
+
+  // Add to your Localization class
+  createUrl(path, queryParams = {}) {
+    // Ensure path doesn't start with a slash
+    const cleanPath = path.replace(/^\/+/, '');
+    
+    // Create URL with current language
+    let url = `${this.basePath}${this.currentLanguage}/${cleanPath}`;
+    
+    // Add query parameters if any
+    const params = new URLSearchParams(queryParams);
+    if (params.toString()) {
+        url += `?${params.toString()}`;
+    }
+    
+    return url;
   }
 }

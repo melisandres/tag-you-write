@@ -1,8 +1,7 @@
 import { eventBus } from './eventBus.js';
 
 export class VoteManager {
-    constructor(path, warningManager) {
-        this.path = path;
+    constructor(warningManager) {
         this.init();
         this.warningManager = warningManager;
     }
@@ -70,7 +69,8 @@ export class VoteManager {
           
 
     async voteUnvote(id, isConfirmed) {
-        const url = `${this.path}vote/voteToggle/${id}/${isConfirmed}`;
+        const endpoint = `vote/voteToggle/${id}/${isConfirmed}`;
+        const url = window.i18n.createUrl(endpoint);
         const response = await fetch(url);
         
         if (!response.ok) {
