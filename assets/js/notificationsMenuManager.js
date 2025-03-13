@@ -23,13 +23,24 @@ export class NotificationsMenuManager {
         this.notificationsMenuToggle.classList.toggle('active', hasActiveNotificationsMenu);
     }
 
-    /* handle new notifications comming in via polling */
+    /* TODO: handle new notifications comming in via polling */
     addNewNotification(notification) {
         const notificationElement = document.createElement('article');
         notificationElement.classList.add('notification');
+
+        // Determine translation keys based on notification type
+        const titleKey = `notifications.notification_${notification.notification_type}`;
+        const contentKey = `notifications.notification_${notification.notification_type}_text`;
+        const gameUrl = window.i18n.createUrl('text/collab/' + notification.root_text_id);
+    
         notificationElement.innerHTML = `
-            <h3>${notification.notification_type}</h3>
-            <p>${notification.message}</p>
+            <h3 data-i18n="${titleKey}"></h3>
+            <p data-i18n="${contentKey}"
+            data-i18n-html="true"
+            data-i18n-params='${JSON.stringify({
+                'game_title_link': `<a href="${gameUrl}">${notification.game_title}</a>`,
+                'winning_title': notification.winning_title
+            })}'></p>
             <time>${notification.created_at}</time>
         `;
 
@@ -42,6 +53,11 @@ export class NotificationsMenuManager {
         } else {
             // If there are no children, just append it
             this.notificationsMenu.appendChild(notificationElement);
+        }
+
+        // Apply translations to the new notification element
+        if (window.i18n && typeof window.i18n.updatePageTranslations === 'function') {
+            window.i18n.updatePageTranslations(notificationElement);
         }
     }
 }

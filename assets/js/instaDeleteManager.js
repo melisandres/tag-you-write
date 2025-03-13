@@ -21,7 +21,7 @@ export class InstaDeleteManager {
 
     showDeleteWarning(textId) {
         this.warningManager.createWarningModal(
-            "Are you sure you want to delete this text? This action cannot be undone.",
+            "warning.delete",
             () => this.instaDelete(textId),
             () => console.log("Delete cancelled")
         );

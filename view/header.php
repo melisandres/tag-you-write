@@ -132,30 +132,17 @@
             <div class="notifications-menu display-none">
                 {% for n in notifications %}
                 <article class="notification">
-                    {% if n.notification_type == 'game_won' %}
-                        <h3 data-i18n="notifications.notification_game_won">
-                            {{ translate('notifications.notification_game_won') }}
+                    {# Since the messages are constructed similarly for game_won and game_closed, we can target them by using the same code, but just targetting the desired message by concatenating. Future notifications that follow this pattern should be added in the language files in the notification object, as notification_{notification_type} (for the title) and notification_{notification_type}_text (for the content) #}
+                    {% if n.notification_type == 'game_won' or n.notification_type == 'game_closed' %}
+                        <h3 data-i18n="notifications.notification_{{ n.notification_type }}">
+                            {{ translate('notifications.notification_' ~ n.notification_type) }}
                         </h3>
-                        <p data-i18n="notifications.notification_game_won_text" 
+                        <p data-i18n="notifications.notification_{{ n.notification_type }}_text" 
                            data-i18n-params="{{ {
                                'game_title_link': '<a href=\"' ~ langUrl('text/collab/' ~ n.root_text_id) ~ '\">' ~ n.game_title ~ '</a>',
                                'winning_title': n.winning_title
                            }|json_encode }}">
-                            {{ translate('notifications.notification_game_won_text', {
-                                'game_title_link': '<a href="' ~ langUrl('text/collab/' ~ n.root_text_id) ~ '">' ~ n.game_title ~ '</a>',
-                                'winning_title': n.winning_title
-                            }, true) }}
-                        </p>
-                    {% elseif n.notification_type == 'game_closed' %}
-                        <h3 data-i18n="notifications.notification_game_closed">
-                            {{ translate('notifications.notification_game_closed') }}
-                        </h3>
-                        <p data-i18n="notifications.notification_game_closed_text" 
-                           data-i18n-params="{{ {
-                               'game_title_link': '<a href=\"' ~ langUrl('text/collab/' ~ n.root_text_id) ~ '\">' ~ n.game_title ~ '</a>',
-                               'winning_title': n.winning_title
-                           }|json_encode }}">
-                            {{ translate('notifications.notification_game_closed_text', {
+                            {{ translate('notifications.notification_' ~ n.notification_type ~ '_text', {
                                 'game_title_link': '<a href="' ~ langUrl('text/collab/' ~ n.root_text_id) ~ '">' ~ n.game_title ~ '</a>',
                                 'winning_title': n.winning_title
                             }, true) }}

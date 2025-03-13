@@ -21,7 +21,7 @@ export class InstaPublishManager {
 
     showPublishWarning(textId) {
         this.warningManager.createWarningModal(
-            "Are you sure you want to publish this text? This action cannot be undone.",
+            "warning.publish",
             () => this.instaPublish(textId),
             () => console.log("Publish cancelled")
         );

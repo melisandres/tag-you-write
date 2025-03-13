@@ -217,7 +217,7 @@ export class FormManager {
     showAddNoteWarning() {
         const warningManager = new WarningManager();
         warningManager.createWarningModal(
-            "Your note will be public, but you can edit it any time.",
+            'warning.add_note',
             () => {
                 this.statusField.value = 'published';
                 const endpoint = 'text/update';
@@ -231,7 +231,7 @@ export class FormManager {
     showPublishWarning() {
         const warningManager = new WarningManager();
         warningManager.createWarningModal(
-            "Are you sure you want to publish this text? This action cannot be undone.",
+            "warning.publish",
             () => {
                 this.statusField.value = 'published';
                 const endpoint = 'text/update';
@@ -245,7 +245,7 @@ export class FormManager {
     showNewGameWarning() {
         const warningManager = new WarningManager();
         warningManager.createWarningModal(
-            `Ready to start a new game? This action cannot be undone.`,
+            "warning.newgame",
             () => {
                 this.statusField.value = 'published';
                 const endpoint = 'text/update';
@@ -259,7 +259,7 @@ export class FormManager {
     showDeleteWarning() {
         const warningManager = new WarningManager();
         warningManager.createWarningModal(
-            "Are you sure you want to delete this text? This action cannot be undone.",
+            "warning.delete",
             () => this.submitDelete(),
             () => console.log("Delete cancelled")
         );

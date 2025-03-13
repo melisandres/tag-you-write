@@ -6,23 +6,36 @@ export class WarningManager {
       this.modalsContainer.classList.add('warnings-modals-container');
     }
   
+    /**
+     * Create a warning modal with internationalization support
+     * @param {string|object} message - i18n key or string message
+     * @param {Function} onConfirm - Callback for confirmation
+     * @param {Function} onCancel - Callback for cancellation
+     */
     createWarningModal(message, onConfirm, onCancel) {
       document.body.appendChild(this.modalsContainer);
       
       const modal = document.createElement('div');
       modal.classList.add('warning-modal-wrapper');
+
+      // Translate the message and the buttons
+      const translatedText = window.i18n.translate(message);
+      const confirmText = window.i18n.translate('warning.confirm');
+      const cancelText = window.i18n.translate('warning.cancel');
+      
+      // Create the modal structure
       modal.innerHTML = `
         <div class="warning-modal">
           <div class="warning-content">
-            <p>${message}</p>
+            <div class="warning-message" data-i18n="${message}">${translatedText}</div>
             <div class="warning-buttons">
               <button class="confirm-button">
                 <span class="button-svg confirm-svg">${SVGManager.checkmarkSVG}</span>
-                Confirm
+                <span data-i18n="warning.confirm">${confirmText}</span>
               </button>
               <button class="cancel-button">
                 <span class="button-svg cancel-svg">${SVGManager.xSVG}</span>
-                Cancel
+                <span data-i18n="warning.cancel">${cancelText}</span>
               </button>
             </div>
           </div>

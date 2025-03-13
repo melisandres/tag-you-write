@@ -32,7 +32,7 @@ export class VoteManager {
                 let result = await this.voteUnvote(textId, false);
                 if (result.confirmationRequired) {
                     this.warningManager.createWarningModal(
-                        "This vote confirms the grand winner and ends the game. Are you sure?",
+                        "warning.last_vote",
                         async () => {
                             result = await this.voteUnvote(textId, true);
                             // Send a "Win!" event to the tree, shelf and modal update managers

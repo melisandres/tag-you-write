@@ -188,5 +188,14 @@
     },
     "games": {
       "noGamesMessage": "No games found matching your current filters"
+    },
+    "warning": {
+      "add_note": "Your note will be public, but you can edit it any time.",
+      "publish": "You are about to publish this text. This action is irreversible.",
+      "new_game": "Ready to start a new game? This action cannot be undone.",
+      "delete": "Are you sure you want to delete this text? This action cannot be undone.",
+      "last_vote": "This vote confirms the grand winner and ends the game. Are you sure?",
+      "confirm": "Confirm",
+      "cancel": "Cancel"
     }
   }

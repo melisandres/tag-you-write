@@ -143,13 +143,6 @@
     "field_plural": "les champs {fields}, et {lastField}",
     "fix_fields_outro": " pour activer la sauvegarde automatique."
   },
-  "auto_save_warning": {
-    "fix_fields_intro": "Veuillez corriger ",
-    "field_singular": "le champ {field}",
-    "field_dual": "les champs {field1} et {field2}",
-    "field_plural": "les champs {fields}, et {lastField}",
-    "fix_fields_outro": " pour activer la sauvegarde automatique."
-  },
   "home_index": {
     "title": "écriture collaborative",
     "add_a_few_words": "Enlevez quelques mots à un texte.",
@@ -194,5 +187,14 @@
   },
   "games": {
     "noGamesMessage": "Aucun texte trouvé correspondant à vos filtres actuels"
+  },
+  "warning": {
+    "add_note": "Votre note sera publique, mais vous pouvez la modifier à tout moment.",
+    "publish": "Vous êtes sur le point de publier ce texte. Cette action est irréversible.",
+    "new_game": "Vous êtes sur le point de commencer une nouvelle collaboration. Cette action est irréversible.",
+    "delete": "Vous êtes sur le point de supprimer ce texte. Cette action est irréversible.",
+    "last_vote": "Cette vote confirme le grand gagnant et termine la collaboration. Êtes-vous sûr de vouloir continuer?",
+    "confirm": "Confirmer",
+    "cancel": "Annuler"
   }
 }

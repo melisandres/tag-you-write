@@ -31,7 +31,7 @@
     padding: 20px;
 }
 
-.warning-content p {
+.warning-content .warning-message {
     font-size: var(--font-size-small);
     font-weight: 100;
     color: black;
