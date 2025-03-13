@@ -196,5 +196,10 @@
     "last_vote": "Cette vote confirme le grand gagnant et termine la collaboration. Êtes-vous sûr de vouloir continuer?",
     "confirm": "Confirmer",
     "cancel": "Annuler"
+  },
+  "form_field": {
+    "title": "titre",
+    "prompt": "texte incitatif",
+    "text": "texte"
   }
 }

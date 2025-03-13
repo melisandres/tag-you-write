@@ -379,6 +379,7 @@ export class Localization {
     // Then update all links when language changes
     console.log('updating page urls', this.previousLanguage, this.currentLanguage);
     this.updatePageUrls(this.previousLanguage, this.currentLanguage);
+    this.handleInnerTranslations();
   }
 
   /**
@@ -390,6 +391,14 @@ export class Localization {
       const titleKey = titleElement.getAttribute('data-i18n-title');
       titleElement.textContent = this.translate(titleKey);
     }
+  }
+
+  handleInnerTranslations() {
+    const innerElements = document.querySelectorAll('[data-i18n-inner]');
+    innerElements.forEach(innerElement => {
+      const key = innerElement.getAttribute('data-i18n-inner');
+      innerElement.textContent = this.translate(key);
+    });
   }
 
   /**

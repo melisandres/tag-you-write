@@ -70,10 +70,12 @@ export class AutoSaveManager {
             this.warningElement.className = 'form-warning';
         }
         
-        // Format field names with spans
-        const fieldSpans = failedFields.map(field => 
-            `<span class="field-name">${field.replace(/[<>]/g, '')}</span>`
-        );
+        // Format field names with spans that support i18n
+        const fieldSpans = failedFields.map(field => {
+            const sanitizedField = field.replace(/[<>]/g, '');
+            const translation = window.i18n.translate(`form_field.${sanitizedField}`);
+            return `<span class="field-name" data-i18n-inner="form_field.${sanitizedField}">${translation}</span>`;
+        });
         
         // Clear previous content
         this.warningElement.innerHTML = '';

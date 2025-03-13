@@ -197,5 +197,10 @@
       "last_vote": "This vote confirms the grand winner and ends the game. Are you sure?",
       "confirm": "Confirm",
       "cancel": "Cancel"
+    },
+    "form_field": {
+      "title": "title",
+      "prompt": "prompt",
+      "text": "text"
     }
   }
