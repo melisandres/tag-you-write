@@ -24,8 +24,9 @@ export class ToastManager {
     // show a toast
     show(message, type = 'success') {
         const toast = document.createElement('div');
+        const translation = window.i18n.translate(message);
         toast.className = `toast toast-${type}`;
-        toast.textContent = message;
+        toast.innerHTML = `<span data-i18n="${message}">${translation}</span>`;
 
         this.container.appendChild(toast);
 

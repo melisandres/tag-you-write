@@ -201,5 +201,32 @@
     "title": "titre",
     "prompt": "texte incitatif",
     "text": "texte"
+  },
+  "toast": {
+    "text": {
+      "invalid_json": "Données reçues invalides",
+      "no_input": "Aucune donnée reçue",
+      "auto_success": "Sauvegarde automatique!",
+      "success": "Sauvegardé!",
+      "permission_denied_iterate": "Permission refusée pour itérer",
+      "failed_create_game": "Échec de la création d'une nouvelle collaboration",
+      "permission_denied_publish": "Permission refusée pour publier",
+      "publish_success": "Publié!",
+      "publish_failed": "Échec de la publication",
+      "permission_denied_edit": "Permission refusée pour modifier",
+      "note_success": "Note mise à jour",
+      "note_failed": "Échec de la mise à jour de la note",
+      "permission_denied_delete": "Permission refusée pour supprimer",
+      "delete_failed": "Échec de la suppression",
+      "delete_success": "Supprimé!"
+    },
+    "form_manager": {
+      "up_to_date": "Déjà à jour!",
+      "please_fill_required_fields_correctly": "Veuillez remplir correctement les champs requis",
+      "validation_failed": "Validation échouée",
+      "error_occurred": "Une erreur est survenue",
+      "account_created_successfully": "Compte créé avec succès! Bienvenue!",
+      "error_deleting": "Une erreur est survenue lors de la suppression"
+    }
   }
 }

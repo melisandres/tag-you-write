@@ -144,7 +144,7 @@ export class FormManager {
        // Check if there are unsaved changes
        if (!this.autoSaveManager.hasUnsavedChanges()) {
            eventBus.emit('showToast', { 
-               message: 'Already up to date!', 
+               message: 'toast.form_manager.up_to_date', 
                type: 'info' 
            });
        } else {
@@ -163,7 +163,7 @@ export class FormManager {
             this.submitNewAccountInfo(actionUrl);
         } else {
             eventBus.emit('showToast', { 
-                message: 'Please fill all required fields correctly', 
+                message: 'toast.form_manager.please_fill_required_fields_correctly', 
                 type: 'error' 
             });
         }
@@ -173,7 +173,7 @@ export class FormManager {
     handlePublish() {
         if (!this.canPublish){
             eventBus.emit('showToast', { 
-                message: 'validation failed', 
+                message: 'toast.form_manager.validation_failed', 
                 type: 'error' 
             });
             return;
@@ -370,7 +370,7 @@ export class FormManager {
         } catch (error) {
             console.error('Error:', error);
             eventBus.emit('showToast', {
-                message: 'An error occurred',
+                message: 'toast.form_manager.error_occurred',
                 type: 'error'
             });
         }
@@ -390,7 +390,7 @@ export class FormManager {
             if (data.success) {
                 // Store toast data in localStorage before redirecting
                 localStorage.setItem('pendingToast', JSON.stringify({
-                    message: 'Account created successfully! Welcome!',
+                    message: 'toast.form_manager.account_created_successfully',
                     type: 'success'
                 }));
 
@@ -399,14 +399,14 @@ export class FormManager {
                 window.location.href = redirectUrl;
             } else {
                 eventBus.emit('showToast', {
-                    message: data.message || 'An error occurred',
+                    message: data.message || 'toast.form_manager.error_occurred',
                     type: 'error'
                 });
             }
         } catch (error) {
             console.error('Error:', error);
             eventBus.emit('showToast', {
-                message: 'An error occurred',
+                message: 'toast.form_manager.error_occurred',
                 type: 'error'
             });
         }
@@ -454,7 +454,7 @@ export class FormManager {
         } catch (error) {
             console.error('Error:', error);
             eventBus.emit('showToast', { 
-                message: 'An error occurred while deleting.', 
+                message: 'toast.form_manager.error_deleting', 
                 type: 'error' 
             });
         }

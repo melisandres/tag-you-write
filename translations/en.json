@@ -202,5 +202,32 @@
       "title": "title",
       "prompt": "prompt",
       "text": "text"
+    },
+    "toast": {
+      "text": {
+        "invalid_json": "Invalid data received",
+        "no_input": "No data received",
+        "auto_success": "Auto-save!",
+        "success": "Saved!",
+        "permission_denied_iterate": "Permission to iterate denied",
+        "failed_create_game": "Failed to create a new game",
+        "permission_denied_publish": "Permission to publish denied",
+        "publish_success": "Published!",
+        "publish_failed": "Failed to publish",
+        "permission_denied_edit": "Permission to edit denied",
+        "note_success": "Note updated",
+        "note_failed": "Failed to update note",
+        "permission_denied_delete": "Permission to delete denied",
+        "delete_failed": "Failed to delete",
+        "delete_success": "Deleted!"
+      },
+      "form_manager": {
+        "up_to_date": "Already up to date!",
+        "please_fill_required_fields_correctly": "Please fill required fields correctly",
+        "validation_failed": "Validation failed",
+        "error_occurred": "An error occurred",
+        "account_created_successfully": "Account created successfully! Welcome!",
+        "error_deleting": "An error occurred while deleting."
+      }
     }
   }

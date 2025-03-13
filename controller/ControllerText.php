@@ -254,11 +254,11 @@ class ControllerText extends Controller{
         // Get JSON input   
         $input = json_decode(file_get_contents('php://input'), true);
         if (json_last_error() !== JSON_ERROR_NONE) {
-            $this->sendJsonResponse(false, 'Invalid JSON data');
+            $this->sendJsonResponse(false, 'toast.text.invalid_json');
         }
     
         if (empty($input)) {
-            $this->sendJsonResponse(false, 'No input data received');
+            $this->sendJsonResponse(false, 'toast.text.no_input');
         }
     
         // Get the textId from the input
@@ -273,7 +273,7 @@ class ControllerText extends Controller{
             $textId = $this->store($input);
         }
         // Return the new text ID in the response
-        $this->sendJsonResponse(true, 'Auto-save successful', ['textId' => $textId]);
+        $this->sendJsonResponse(true, 'toast.text.auto_success', ['textId' => $textId]);
     }
 
 
@@ -293,13 +293,12 @@ class ControllerText extends Controller{
 
         // Check if the input is valid JSON
         if (json_last_error() !== JSON_ERROR_NONE) {
-            $this->sendJsonResponse(false, 'Invalid JSON data');
+            $this->sendJsonResponse(false, 'toast.text.invalid_json');
         }
 
         // Make sure we have input data
         if (empty($input)) {
-            // TODO: with autosave, this could happen... so message should be clean
-            $this->sendJsonResponse(false, 'No input data received');
+            $this->sendJsonResponse(false, 'toast.text.no_input');
         }
 
         $text = new Text;
@@ -320,7 +319,7 @@ class ControllerText extends Controller{
             $this->addPermissions($data, $currentWriterId);
 
             if (!Permissions::canIterate($data, $currentWriterId)) {
-                $this->sendJsonResponse(false, 'Permission denied to iterate');
+                $this->sendJsonResponse(false, 'toast.text.permission_denied_iterate');
             }
         }
 
@@ -336,7 +335,7 @@ class ControllerText extends Controller{
             $gameId = $gameController->createGame($input);
             //error_log("line 618 gameId: " . $gameId);
             if ($gameId === false) {
-                $this->sendJsonResponse(false, 'Failed to create a new game');
+                $this->sendJsonResponse(false, 'toast.text.failed_create_game');
             }
 
             $input['game_id'] = $gameId;
@@ -443,7 +442,7 @@ class ControllerText extends Controller{
 
         // Same action in both cases. Not an autosave, doing it here, Yes an autosave, doing it in the autosave method.
         if ($autoSaveInput == null) {
-            $this->sendJsonResponse(true, 'Auto-save successful', ['textId' => $textIdFromInsert]);
+            $this->sendJsonResponse(true, 'toast.text.success', ['textId' => $textIdFromInsert]);
         }else{
             // Return the new text ID
             return $textIdFromInsert;
@@ -570,7 +569,7 @@ class ControllerText extends Controller{
 
         // Check user's permission to edit (myText && openForChanges && isDraft -- a validated draft)
         if (!Permissions::canPublish($textData, $currentWriterId)) {
-            $this->sendJsonResponse(false, 'Permission to publish denied');
+            $this->sendJsonResponse(false, 'toast.text.permission_denied_publish');
         }
 
         // Get the 'published' status_id dynamically
@@ -625,7 +624,7 @@ class ControllerText extends Controller{
     
         $this->sendJsonResponse(
             $success, 
-            $success ? 'Published!' : 'Failed to publish',
+            $success ? 'toast.text.publish_success' : 'toast.text.publish_failed',
             [
                 'gameData' => $gameData, 
             ]
@@ -644,14 +643,12 @@ class ControllerText extends Controller{
             $input = $autoSaveInput;
         }
         if (json_last_error() !== JSON_ERROR_NONE) {
-            //error_log("Update: Invalid JSON data");
-            $this->sendJsonResponse(false, 'Invalid JSON data');
+            $this->sendJsonResponse(false, 'toast.text.invalid_json');
         }
 
         // Make sure we have input data
         if (empty($input)) {
-            // TODO: with autosave, this could happen... so message should be clean
-            $this->sendJsonResponse(false, 'No input data received');
+            $this->sendJsonResponse(false, 'toast.text.no_input');
         }
 
         $text = new Text;
@@ -669,7 +666,7 @@ class ControllerText extends Controller{
 
         // Check user's permission to edit (myText && openForChanges)
         if (!Permissions::canEdit($textData, $currentWriterId) && !Permissions::canAddNote($textData, $currentWriterId)) {
-            $this->sendJsonResponse(false, 'Permission to edit denied');   
+            $this->sendJsonResponse(false, 'toast.text.permission_denied_edit');   
         }
 
         //validate the $_POST
@@ -704,7 +701,7 @@ class ControllerText extends Controller{
                 ]);
             }
 
-            $this->sendJsonResponse($update, $update ? 'Note updated' : 'Failed to update note', 'text');  
+            $this->sendJsonResponse($update, $update ? 'toast.text.note_success' : 'toast.text.note_failed', 'text');  
             exit;
         }else{
             // Your validation may change the status, if the text isnt instaPublish ready
@@ -830,9 +827,14 @@ class ControllerText extends Controller{
             }   
         }
         if ($status == "published"){
-            $this->sendJsonResponse(true, 'published', 'text');
+            $this->sendJsonResponse(true, 'toast.text.publish_success', 'text');
         }else{
-            $this->sendJsonResponse(true, 'saved');
+            // give a "autosaved" message if it's an autosave
+            if( $autoSaveInput !== null){
+                $this->sendJsonResponse(true, 'toast.text.auto_success');
+            }else{
+                $this->sendJsonResponse(true, 'toast.text.success');
+            }
         }
     }
 
@@ -866,7 +868,7 @@ class ControllerText extends Controller{
 
         // Check user's permission to edit (myText && openForChanges)
         if (!Permissions::canDelete($textData, $currentWriterId)) {
-            $this->sendJsonResponse(false, 'Permission denied');
+            $this->sendJsonResponse(false, 'toast.text.permission_denied_delete');
             exit();
         }
 
@@ -912,9 +914,9 @@ class ControllerText extends Controller{
         }
 
         if ($response !== true) {
-            $this->sendJsonResponse(false, 'Failed to delete');
+            $this->sendJsonResponse(false, 'toast.text.delete_failed');
         } else {
-            $this->sendJsonResponse(true, 'deleted!', 'text');
+            $this->sendJsonResponse(true, 'toast.text.delete_success', 'text');
         } 
     }
 
