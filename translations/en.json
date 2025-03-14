@@ -229,5 +229,98 @@
         "account_created_successfully": "Account created successfully! Welcome!",
         "error_deleting": "An error occurred while deleting."
       }
+    },
+    "front_val": {
+      "word_count": {
+        "remaining": "you can add {remainingWords} word{pluralization}",
+        "over": "you are {remainingWords} word{pluralization} over the limit"
+      },
+      "root": {
+        "title": {
+          "required": "*a name for the text to grow into",
+          "max_char": "*100 characters max",
+          "typed": "*the title you choose will be carved in stone"
+        },
+        "writing": {
+          "required": "*don't be too precious...",
+          "typed": "*whatever you write will be subject to iteration",
+          "max_word_count": "*add 50 words max",
+          "max_word_count_warning_threshold": "*nearing 50 words..."
+        },
+        "prompt": {
+          "typed": "*your prompt will be the yardstick for all iterations",
+          "required": "*a prompt to steer all iterations",
+          "max_word_count": "*100 words max.",
+          "max_character_count_critical": "*500 characters max."
+        },
+        "keywords": {
+          "typed": "*max 3 keywords, separated by commas please",
+          "max_keywords": "*5 keywords max--comma separated",
+          "max_character_count": "*255 characters max",
+          "keyword_word_count": "*a keyword can be 2 words, but no more. Invalid keywords: {invalidKeywords}"
+        }
+      },
+      "iteration": {
+        "title": {
+          "required": "*required",
+          "typed": "*3 words or less",
+          "max_character_count_critical": "*100 characters max"
+        },
+        "writing": {
+          "required": "*required",
+          "max_word_count": "*add 50 words max",
+          "max_word_count_warning_threshold": "*nearing 50 words...",
+          "writing_changes": "*required"
+        },
+        "keywords": {
+          "typed": "*max 3 keywords, separated by commas please",
+          "max_keywords": "*5 keywords max--comma separated",
+          "max_character_count": "*255 characters max",
+          "keyword_word_count": "*a keyword can be 2 words, but no more. Invalid keywords: {invalidKeywords}"
+        }
+      },
+      "addingNote": {
+        "note": {
+          "required": "*required",
+          "max_word_count": "*50 words max",
+          "max_word_count_warning_threshold": "*nearing 50 words..."
+        }
+      },
+      "login": {
+        "email": {
+          "required": "*required",
+          "email": "*must be a valid email address"
+        },
+        "password": {
+          "required": "*required"
+        }
+      },
+      "writerCreate": {
+        "firstName": {
+          "required": "*required",
+          "max_character_count": "*45 characters max",
+          "pattern": "*only letters allowed"
+        },
+        "lastName": {
+          "required": "*required",
+          "max_character_count": "*45 characters max",
+          "pattern": "*only letters allowed"
+        },
+        "email": {
+          "required": "*required",
+          "max_character_count": "*50 characters max",
+          "email": "*must be a valid email address" 
+        },
+        "birthday": {
+          "required": "*required",
+          "date": "*must be a valid date"
+        },
+        "password": { 
+          "required": "*required",
+          "max_character_count": "*20 characters max",
+          "min_character_count": "*6 characters min",
+          "pattern": "*only letters and numbers allowed"
+        }
+      }
     }
   }

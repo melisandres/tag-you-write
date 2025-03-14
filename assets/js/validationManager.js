@@ -166,88 +166,87 @@ export class ValidationManager {
         const validators = {
             root: {
                 title: [
-                    this.validateRequired('*a name for the text to grow into'),
-                    this.validateMaxCharacterCount(100, '*100 characters max', 'critical'),
-                    this.validateMaxCharacterCount(0, '*the title you choose will be carved in stone', 'info')
+                    this.validateRequired('front_val.root.title.required'),
+                    this.validateMaxCharacterCount(100, 'front_val.root.title.max_char', 'critical'),
+                    this.validateMaxCharacterCount(0, 'front_val.root.title.typed', 'info')
                 ],
                 writing: [
-                    this.validateRequired('*don\'t be too precious...'),
-                    this.validateMaxCharacterCount(0, '*whatever you write will be subject to iteration', 'info'),
-                    this.validateMaxWordCount(0, 50, '*add 50 words max', '* nearing 50 words...', 45),
+                    this.validateRequired('front_val.root.writing.required'),
+                    this.validateMaxCharacterCount(0, 'front_val.root.writing.typed', 'info'),
+                    this.validateMaxWordCount(0, 50, 'front_val.root.writing.max_word_count', 'front_val.root.writing.max_word_count_warning_threshold', 45),
                 ], 
                 prompt: [
-                    this.validateMaxCharacterCount(0, '*your prompt will be the yardstick for all iterations', 'info'),
-                    this.validateRequired('*a prompt to steer all iterations'),
-                    this.validateMaxCharacterCount(0, '*the prompt you choose will be carved in stone', 'info'),
-                    this.validateMaxWordCount(0, 100, '*100 words max.'),
-                    this.validateMaxCharacterCount(500, '*500 characters max.', 'critical'),
+                    this.validateMaxCharacterCount(0, 'front_val.root.prompt.typed', 'info'),
+                    this.validateRequired('front_val.root.prompt.required'),
+                    this.validateMaxWordCount(0, 100, 'front_val.root.prompt.max_word_count'),
+                    this.validateMaxCharacterCount(500, 'front_val.root.prompt.max_character_count_critical', 'critical'),
                 ], 
                 keywords: [
-                    this.validateMaxCharacterCount(0, '*max 3 keywords, separated by commas please', 'info'),
-                    this.validateMaxKeywords(5, '*5 keywords max--comma separated'),
-                    this.validateMaxCharacterCount(255, '*255 characters max'),
-                    this.validateKeywordWordCount(2, '*a keyword can be 2 words, but no more.'),
+                    this.validateMaxCharacterCount(0, 'front_val.root.keywords.typed', 'info'),
+                    this.validateMaxKeywords(5, 'front_val.root.keywords.max_keywords'),
+                    this.validateMaxCharacterCount(255, 'front_val.root.keywords.max_character_count'),
+                    this.validateKeywordWordCount(2, 'front_val.root.keywords.keyword_word_count'),
                 ]
             },
             iteration: {
                 title: [
-                    this.validateRequired('*required'),
-                    this.validateMaxWordCount(0, 3, '*3 words or less'),
-                    this.validateMaxCharacterCount(100, '*100 characters max', 'critical'),
+                    this.validateRequired('front_val.iteration.title.required'),
+                    this.validateMaxWordCount(0, 3, 'frontend_validation.iteration.title.typed'),
+                    this.validateMaxCharacterCount(100, 'frontend_validation.iteration.title.max_character_count_critical', 'critical'),
                     //this.validateUniqueTitle(titleArray, 'Title must be unique')
                 ],
                 writing: [
-                    this.validateRequired('*required'),
-                    this.validateMaxWordCount(this.parentWordCount, 50, '*add 50 words max', '* nearing 50 words...', 45),
-                    this.validateWritingChanges(this.parentText, '*changes required')
+                    this.validateRequired('front_val.iteration.writing.required'),
+                    this.validateMaxWordCount(this.parentWordCount, 50, 'front_val.iteration.writing.max_word_count', 'front_val.iteration.writing.max_word_count_warning_threshold', 45),
+                    this.validateWritingChanges(this.parentText, 'front_val.iteration.writing.writing_changes')
                     ], 
                 keywords: [
-                    this.validateMaxCharacterCount(0, '*max 3 keywords, separated by commas please', 'info'),
-                    this.validateMaxKeywords(5, '*5 keywords max--comma separated'),
-                    this.validateMaxCharacterCount(255, '*255 characters max'),
-                    this.validateKeywordWordCount(2, '*a keyword can be 2 words, but no more.'),
+                    this.validateMaxCharacterCount(0, 'front_val.iteration.keywords.typed', 'info'),
+                    this.validateMaxKeywords(5, 'front_val.iteration.keywords.max_keywords'),
+                    this.validateMaxCharacterCount(255, 'front_val.iteration.keywords.max_character_count'),
+                    this.validateKeywordWordCount(2, 'front_val.iteration.keywords.keyword_word_count'),
                 ]
             },
             addingNote: {
                 note: [
-                    this.validateRequired('*required'),
-                    this.validateMaxWordCount(0, 50, '*50 words max', '*nearing 50 words...', 45),
+                    this.validateRequired('front_val.addingNote.note.required'),
+                    this.validateMaxWordCount(0, 50, 'front_val.addingNote.note.max_word_count', 'front_val.addingNote.note.max_word_count_warning_threshold', 45),
                 ]
             },
             login: {
                 email: [
-                    this.validateRequired('*required'),
-                    this.validateEmail('*must be a valid email address')
+                    this.validateRequired('front_val.login.email.required'),
+                    this.validateEmail('front_val.login.email.email')
                 ],
                 password: [
-                    this.validateRequired('*required')
+                    this.validateRequired('front_val.login.password.required')
                 ]
             },
             writerCreate: {
                 firstName: [
-                    this.validateRequired('*required', 'critical'),
-                    this.validateMaxCharacterCount(45, '*45 characters max', 'critical'),
-                    this.validatePattern('words', '*only letters allowed', 'critical'),
+                    this.validateRequired('front_val.writerCreate.firstName.required'),
+                    this.validateMaxCharacterCount(45, 'front_val.writerCreate.firstName.max_character_count', 'critical'),
+                    this.validatePattern('words', 'front_val.writerCreate.firstName.pattern', 'critical'),
                 ],
                 lastName: [
-                    this.validateRequired('*required', 'critical'),
-                    this.validateMaxCharacterCount(45, '*45 characters max', 'critical'),
-                    this.validatePattern('words', '*only letters allowed', 'critical'),
+                    this.validateRequired('front_val.writerCreate.lastName.required'),
+                    this.validateMaxCharacterCount(45, 'front_val.writerCreate.lastName.max_character_count', 'critical'),
+                    this.validatePattern('words', 'front_val.writerCreate.lastName.pattern', 'critical'),
                 ],
                 email: [
-                    this.validateRequired('*required', 'critical'),
-                    this.validateMaxCharacterCount(50, '*50 characters max', 'critical'),
-                    this.validateEmail('*must be a valid email address', 'critical'),
+                    this.validateRequired('front_val.writerCreate.email.required'),
+                    this.validateMaxCharacterCount(50, 'front_val.writerCreate.email.max_character_count', 'critical'),
+                    this.validateEmail('front_val.writerCreate.email.email', 'critical'),
                 ],
                 birthday: [
-                    this.validateDate('*must be a valid date', 'critical'),
-                    this.validateRequired('*required', 'critical')
+                    this.validateDate('front_val.writerCreate.birthday.date', 'critical'),
+                    this.validateRequired('front_val.writerCreate.birthday.required', 'critical')
                 ],
                 password: [
-                    this.validateRequired('*required', 'critical'),
-                    this.validateMaxCharacterCount(20, '*20 characters max', 'critical'),
-                    this.validateMinCharacterCount(6, '*6 characters min', 'critical'),
-                    this.validatePattern('alphanum', '*only letters and numbers allowed', 'critical'),
+                    this.validateRequired('front_val.writerCreate.password.required', 'critical'),
+                    this.validateMaxCharacterCount(20, 'front_val.writerCreate.password.max_character_count', 'critical'),
+                    this.validateMinCharacterCount(6, 'front_val.writerCreate.password.min_character_count', 'critical'),
+                    this.validatePattern('alphanum', 'front_val.writerCreate.password.pattern', 'critical'),
                 ]
             }
         };
@@ -310,14 +309,18 @@ export class ValidationManager {
             const keywords = value.split(',').map(keyword => keyword.trim());
             const invalidKeywords = keywords.filter(keyword => {
                 const wordCount = keyword.split(/\s+/).length;
-                return wordCount > maxWordsPerKeyword;
+                return wordCount > maxWordsPerKeyword && keyword.trim() !== '';
             });
     
             if (invalidKeywords.length > 0) {
                 const invalidKeywordList = invalidKeywords.join(', ');
                 return {
                     isValid: false,
-                    message: `${errorMessage} Invalid keywords: ${invalidKeywordList}`,
+                    // Return a structured message object instead of a string
+                    message: {
+                        key: errorMessage,
+                        params: { invalidKeywords: invalidKeywordList }
+                    },
                     severity: severity
                 };
             }
@@ -403,7 +406,6 @@ export class ValidationManager {
             words: /^[\p{L}\s]+$/u,
             alphanum: /^[a-zA-Z0-9]+$/,
             keywords: /^([\w\s]+)(, [\w\s]+)*$/
-            //TODO: is this keywords pattern correct? 
         };
         return function (value) {
             const isValid = patterns[patternName].test(value);
@@ -413,6 +415,52 @@ export class ValidationManager {
                 severity: severity
             };
         };
+    }
+
+    // Helper method to set feedback message with translation support
+    setFeedbackMessage(feedback, messageObj) {
+        const message = messageObj.message;
+        
+        // Check if the message is a structured object with key and params
+        if (message && typeof message === 'object' && message.key) {
+            // This is a structured message with parameters
+            feedback.setAttribute('data-i18n', message.key);
+            
+            if (message.params) {
+                feedback.setAttribute('data-i18n-params', JSON.stringify(message.params));
+                feedback.setAttribute('data-i18n-html', 'true');
+            }
+            
+            // Apply initial translation
+            if (window.i18n) {
+                const translatedBase = window.i18n.translate(message.key);
+                
+                // Replace parameters in the translated text
+                let finalText = translatedBase;
+                if (message.params) {
+                    Object.entries(message.params).forEach(([key, value]) => {
+                        finalText = finalText.replace(`{${key}}`, value);
+                    });
+                }
+                
+                feedback.textContent = finalText;
+
+            } else {
+                // Fallback if i18n is not available
+                feedback.textContent = message.key;
+            }
+        }
+        // Check if the message is a simple translation key
+        else if (typeof message === 'string' && message.startsWith('front_val.')) {
+            feedback.setAttribute('data-i18n', message);
+            feedback.textContent = window.i18n ? window.i18n.translate(message) : message;
+        } else {
+            // Handle regular messages
+            feedback.textContent = message;
+        }
+        
+        // Add the appropriate class based on severity
+        feedback.classList.add(messageObj.severity);
     }
 
     // Handle displaying the validation results
@@ -437,25 +485,20 @@ export class ValidationManager {
             labelElement.classList.add('has-feedback');
             
             if (criticalErrors.length > 0) {
-                feedback.textContent = criticalErrors[0].message;
-                feedback.classList.add('critical');
+                this.setFeedbackMessage(feedback, criticalErrors[0]);
             } else if (errors.length > 0) {
-                feedback.textContent = errors[0].message;
-                feedback.classList.add('error');
+                this.setFeedbackMessage(feedback, errors[0]);
             } else {
-                feedback.textContent = warnings[0].message;
-                feedback.classList.add('warning');
+                this.setFeedbackMessage(feedback, warnings[0]);
             }
         } else {
             // Remove has-feedback class when there are no errors
             labelElement.classList.remove('has-feedback');
             
             if (infos.length > 0) {
-                feedback.textContent = infos[0].message;
-                feedback.classList.add('info');
+                this.setFeedbackMessage(feedback, infos[0]);
             } else if (successes.length > 0) {
-                feedback.textContent = successes[0].message;
-                feedback.classList.add('success');
+                this.setFeedbackMessage(feedback, successes[0]);
             }
         }
 
@@ -471,6 +514,14 @@ export class ValidationManager {
         // Only insert feedback if there's a message
         if (feedback.textContent) {
             targetElement.parentNode.insertBefore(feedback, targetElement.nextSibling);
+            
+            // Now that the feedback element is in the DOM, we can update its translations
+            if (window.i18n && window.i18n.updatePageTranslations) {
+                // Use a small timeout to ensure the DOM has been updated
+                setTimeout(() => {
+                    window.i18n.updatePageTranslations(feedback.parentNode);
+                }, 0);
+            }
         }
     }
 
@@ -487,13 +538,23 @@ export class ValidationManager {
         numberElement.classList.toggle('positive', remainingWords > 0);
         numberElement.classList.toggle('negative', remainingWords < 0);
         
-        if (remainingWords >= 0) {
-            tooltipElement.textContent = `
-                you can add ${remainingWords} more word${remainingWords !== 1 ? 's' : ''}`;
-        } else {
-            tooltipElement.textContent = `
-                you are ${-remainingWords} word${remainingWords !== -1 ? 's' : ''} over the limit`;
-        }
+        // Prepare parameters for translation
+        const params = {
+            remainingWords: Math.abs(remainingWords),
+            pluralization: Math.abs(remainingWords) !== 1 ? 's' : ''
+        };
+        
+        // Set the appropriate translation key
+        const translationKey = remainingWords >= 0 
+            ? 'front_val.word_count.remaining' 
+            : 'front_val.word_count.over';
+        
+        // Set data attributes for translation system
+        tooltipElement.setAttribute('data-i18n', translationKey);
+        tooltipElement.setAttribute('data-i18n-params', JSON.stringify(params));
+
+        // Get the translation, for the tooltip
+        window.i18n ? window.i18n.updatePageTranslations(tooltipElement.parentNode) : null;
 
         this.wordCountDisplayElement.classList.toggle('warning', remainingWords < 0);
     }

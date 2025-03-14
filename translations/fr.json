@@ -228,5 +228,98 @@
       "account_created_successfully": "Compte créé avec succès! Bienvenue!",
       "error_deleting": "Une erreur est survenue lors de la suppression"
     }
+  },
+  "front_val": {
+    "word_count": {
+      "remaining": "vous pouvez ajouter {remainingWords} mot{pluralization}",
+      "over": "vous êtes {remainingWords} mot{pluralization} au-dessus de la limite"
+    },
+    "root": {
+      "title": {
+        "required": "*un titre pour le texte à grandir",
+        "max_char": "*100 caractères max",
+        "typed": "*le titre que vous choisissez sera sculpté dans la pierre"
+      },
+      "writing": {
+        "required": "*ne soyez pas trop précieux...",
+        "typed": "*ce que vous écrivez sera soumis à itération",
+        "max_word_count": "*ajoutez 50 mots max",
+        "max_word_count_warning_threshold": "*vous approchez de 50 mots..."
+      },
+      "prompt": {
+        "typed": "*votre texte incitatif sera le yardstick pour toutes les itérations",
+        "required": "*un texte incitatif pour diriger toutes les itérations",
+        "max_word_count": "*100 mots max.",
+        "max_character_count_critical": "*500 caractères max."
+      },
+      "keywords": {
+        "typed": "*max 3 mots-clés, séparés par des virgules",
+        "max_keywords": "*5 mots-clés max--séparés par des virgules",
+        "max_character_count": "*255 caractères max",
+        "keyword_word_count": "*un mot-clé peut être de 2 mots, mais pas plus. Mots-clés invalides: {invalidKeywords}"
+      }
+    },
+    "iteration": {
+      "title": {
+        "required": "*requis",
+        "typed": "*3 mots ou moins",
+        "max_character_count_critical": "*100 caractères max"
+      },
+      "writing": {
+        "required": "*requis",
+        "max_word_count": "*ajoutez 50 mots max",
+        "max_word_count_warning_threshold": "*vous approchez de 50 mots...",
+        "writing_changes": "*modifications requises"
+      },
+      "keywords": {
+        "typed": "*max 3 mots-clés, séparés par des virgules",
+        "max_keywords": "*5 mots-clés max--séparés par des virgules",
+        "max_character_count": "*255 caractères max",
+        "keyword_word_count": "*un mot-clé peut être de 2 mots, mais pas plus. Mots-clés invalides: {invalidKeywords}"
+      }   
+    },
+    "addingNote": {
+      "note": {
+        "required": "*requis",
+        "max_word_count": "*50 mots max",
+        "max_word_count_warning_threshold": "*vous approchez de 50 mots..."
+      }
+    },
+    "login": {
+      "email": {
+        "required": "*requis",
+        "email": "*doit être une adresse email valide"
+      },
+      "password": {
+        "required": "*requis"
+      }
+    },
+    "writerCreate": {
+      "firstName": {
+        "required": "*requis",
+        "max_character_count": "*45 caractères max",
+        "pattern": "*seuls les lettres sont autorisées"
+      },
+      "lastName": {
+        "required": "*requis",
+        "max_character_count": "*45 caractères max",
+        "pattern": "*seuls les lettres sont autorisées"
+      },
+      "email": {
+        "required": "*requis",
+        "max_character_count": "*50 caractères max",
+        "email": "*doit être une adresse email valide"
+      },
+      "birthday": { 
+        "required": "*requis",
+        "date": "*doit être une date valide"
+      },
+      "password": {
+        "required": "*requis",
+        "max_character_count": "*20 caractères max",
+        "min_character_count": "*6 caractères min",
+        "pattern": "*seuls les lettres et les chiffres sont autorisés"
+      }
+    }
   }
 }

@@ -175,3 +175,7 @@ label .ck.ck-content.ck-editor__editable {
 .feedback{
     position: absolute;
 }
+
+input[name="keywords"] ~ .feedback{
+    position: relative;
+}
