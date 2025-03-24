@@ -2,7 +2,7 @@
 
     {% if message is defined %}
         <h1 class="error" data-i18n="home_error.page_title">{{ translate('home_error.page_title') }}</h1>
-        <p data-i18n="{{ message }}">{{ message }}</p>
+        <p data-i18n="{{ message }}">{{ translate(message) }}</p>
     {% else %}
         <h1 class="error" data-i18n="home_error.page_title">{{ translate('home_error.page_title') }}</h1>
         <p> 

@@ -22,7 +22,7 @@ class ControllerWriter extends Controller{
         //you could build another CheckSession::sessionAuth, that
         //basically does the opposite... it would live better there.
         if(isSet($_SESSION['fingerPrint'])){
-            Twig::render('home-error.php', ['message'=> "You are already logged into an account ;P"]);
+            Twig::render('home-error.php', ['message'=> "error.already_logged_in"]);
             return;
         }
 
@@ -44,7 +44,7 @@ class ControllerWriter extends Controller{
 
         //block access without a post... 
         if($_SERVER["REQUEST_METHOD"] !== "POST"){
-            $response['message'] = 'Invalid request method';
+            $response['message'] = 'error.invalid_request_method';
             echo json_encode($response);
             exit();
         }
@@ -52,7 +52,7 @@ class ControllerWriter extends Controller{
         //this should not be available if you 
         //are logged in already
         if(isSet($_SESSION['fingerPrint'])){
-            $response['message'] = "You're already logged into an account";
+            $response['message'] = "error.already_logged_in";
             echo json_encode($response);
             exit();
         }
@@ -68,7 +68,7 @@ class ControllerWriter extends Controller{
 
         //I'm confused... maybe this was the begining of a solution that was not well implemented? 
         if($answer){
-            $response['message'] = "We already have a user registered with that email address.";
+            $response['message'] = "error.already_registered";
             echo json_encode($response);
             exit();
         }
@@ -96,14 +96,19 @@ class ControllerWriter extends Controller{
             session_write_close();
 
             $response['success'] = true;
-            $response['message'] = 'Account created successfully! Welcome!';
+            $response['message'] = 'auth.account_created';
             echo json_encode($response);
 
             // Send email after response is sent
             $email = new Email;
             $name = $firstName . " " .$lastName;
-            $subject = 'Welcome to the Tag You Write family';
-            $message = 'Welcome ' . $name . '! Welcome! Tag you write is an experiment. I\'m hoping it will be a fun way to write small pieces collaboratively. If you have any issues with your account, or any feedback, just hit "reply". Thanks for participating!';
+            
+            // Include the translation library explicitly
+            RequirePage::library('languages');
+            
+            $subject = translate('auth.account_created_email.email_title');
+            $message = translate('auth.account_created_email.email_message', ['name' => $name]);
+            
             $email->welcome($_POST['email'], $name, $subject, $message);
             exit();
         }
@@ -120,7 +125,7 @@ class ControllerWriter extends Controller{
 
         //error page if id doesn't exist, or if it's null
         if($id == null || !$selectId){
-            Twig::render('home-error.php', ['message'=> "Something went wrong. Sorry."]);
+            Twig::render('home-error.php', ['message'=> "error.something_went_wrong"]);
         }else{
             Twig::render('writer-show.php', ['writer' => $selectId]);
         }
@@ -193,6 +198,7 @@ class ControllerWriter extends Controller{
             }
             RequirePage::redirect('writer');
         }else{
+            //TODO: when I revisit this and implement a soft delete, I'll need to translate this. 
             Twig::render('home-error.php', ['message'=> "To delete this writer, you must first delete all their texts--which will only be possible if no one has iterated on them. We would recommend you deactivate this account instead, but we have not yet implemented this functionality. Sorry."]);
         }
     }

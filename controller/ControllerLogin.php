@@ -28,7 +28,7 @@ class ControllerLogin extends Controller {
             if($writer->checkWriter($email, $password)){
                 RequirePage::redirect('text');
             }else{
-                Twig::render('login.php', ["errors"=>"username and/or password don't match", "data"=>$_POST]);
+                Twig::render('login.php', ["errors"=>"auth.no_match", "data"=>$_POST]);
             }
 
             //RequirePage::redirect('user/create');
@@ -77,15 +77,17 @@ class ControllerLogin extends Controller {
                 // Send email
                 RequirePage::library('Email');
                 $emailer = new Email;
-                $subject = 'Password Reset Request';
-                $message = "Click the following link to reset your password: \n\n";
-                $message .= RequirePage::getBaseUrl() . "login/resetPassword/" . $token;
+                
+                // Get translated email content
+                $subject = translate('auth.password_reset.email_title');
+                $message = translate('auth.password_reset.email_message');
+                $message .= RequirePage::getBaseUrl() . langUrl('login/resetPassword/' . $token);
                 
                 $emailer->welcome($email, $writerData['firstName'], $subject, $message);
                 
-                Twig::render('login.php', ['message' => 'Password reset link has been sent to your email']);
+                Twig::render('login.php', ['message' => 'auth.password_reset.email_sent']);
             } else {
-                Twig::render('forgot-password.php', ['errors' => 'Email not found', 'data' => $_POST]);
+                Twig::render('forgot-password.php', ['errors' => 'auth.password_reset.email_not_found', 'data' => $_POST]);
             }
         } else {
             $errors = $val->displayErrors();
@@ -98,7 +100,7 @@ class ControllerLogin extends Controller {
         $writerData = $writer->selectId($token, "reset_token");
     
         if(!$writerData || strtotime($writerData['reset_expiry']) < time()) {
-            Twig::render('home-error.php', ['message' => 'Invalid or expired reset link']);
+            Twig::render('home-error.php', ['message' => 'auth.password_reset.invalid_or_expired_reset_link']);
             return;
         }
     
@@ -131,7 +133,7 @@ class ControllerLogin extends Controller {
                     'reset_expiry' => null
                 ]);
     
-                Twig::render('login.php', ['message' => 'Password updated successfully']);
+                Twig::render('login.php', ['message' => translate('auth.password_reset.password_updated')]);
             }
         } else {
             $errors = $val->displayErrors();

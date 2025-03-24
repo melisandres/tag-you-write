@@ -322,5 +322,35 @@
           "pattern": "*only letters and numbers allowed"
         }
       }
+    },
+    "error": {
+      "text_not_found": "Text not found",
+      "no_game_specified": "No game specified",
+      "game_not_found": "Game not found",
+      "game_does_not_exist": "Something went wrong. Sorry. The requested text does not exist.", 
+      "no_text_id_provided": "No text ID provided",
+      "permission_denied_edit": "Sorry! You don't have permission to edit this text.",
+      "permission_denied_iterate": "Sorry! This action is not permitted, for one of many reasons..",
+      "already_logged_in": "You are already logged into an account",
+      "invalid_request_method": "Invalid request method",
+      "already_registered": "We already have a user registered with that email address.",
+      "something_went_wrong": "Something went wrong. Sorry."
+    },
+    "auth": {
+      "no_match": "Username and/or password don't match",
+      "account_created": "Account created successfully! Welcome!",
+      "account_created_email": {
+        "email_title": "Welcome to the Tag You Write family",
+        "email_message": "Welcome {name}! Tag you write is an experiment. I'm hoping it will be a fun way to write small pieces collaboratively. If you have any issues with your account, or any feedback, just hit \"reply\". Thanks for participating!"
+      },
+      "password_reset": {
+        "email_title": "Password Reset Request",
+        "email_message": "Click the following link to reset your password: \n\n",
+        "email_link": "Reset Password",
+        "email_sent": "Password reset link has been sent to your email", 
+        "email_not_found": "Email not found", 
+        "invalid_or_expired_reset_link": "Invalid or expired reset link",
+        "password_updated": "Password updated successfully"
+      }
     }
   }

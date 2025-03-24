@@ -321,5 +321,35 @@
         "pattern": "*seuls les lettres et les chiffres sont autorisés"
       }
     }
+  },
+  "error": {
+    "text_not_found": "Texte non trouvé",
+    "no_game_specified": "Aucune partie spécifiée",
+    "game_not_found": "Partie non trouvée", 
+    "game_does_not_exist": "Quelque chose s'est mal passé. Désolé. Le texte demandé n'existe pas.",
+    "no_text_id_provided": "Aucun ID de texte spécifié",
+    "permission_denied_edit": "Désolé! Vous n'avez pas les permissions pour modifier ce texte.",
+    "permission_denied_iterate": "Désolé! Vous n'avez pas les permissions pour itérer sur ce texte.",
+    "already_logged_in": "Vous êtes déjà connecté à un compte",
+    "invalid_request_method": "Méthode de requête invalide",
+    "already_registered": "Nous avons déjà un utilisateur enregistré avec cette adresse email.",
+    "something_went_wrong": "Quelque chose s'est mal passé. Désolé."
+  },
+  "auth": {
+    "no_match": "Nom d'utilisateur et/ou mot de passe ne correspondent pas",
+    "account_created": "Compte créé avec succès! Bienvenue!",
+    "account_created_email": {
+      "email_title": "Bienvenue dans la famille Tag You Write",
+      "email_message": "Bienvenue {name}! Tag You Write est une expérience. J'espère qu'il sera un moyen amusant de rédiger des petites pièces collaborativement. Si vous avez des problèmes avec votre compte, ou des retours, n'hésitez pas à cliquer sur \"répondre\"."
+    },
+    "password_reset": {
+      "email_title": "Demande de réinitialisation de mot de passe",
+      "email_message": "Cliquez sur le lien suivant pour réinitialiser votre mot de passe: \n\n",
+      "email_link": "Réinitialiser le mot de passe",
+      "email_sent": "Le lien de réinitialisation de mot de passe a été envoyé à votre email",
+      "email_not_found": "Email non trouvé",
+      "invalid_or_expired_reset_link": "Lien de réinitialisation de mot de passe invalide ou expiré",
+      "password_updated": "Mot de passe mis à jour avec succès"
+    }
   }
 }

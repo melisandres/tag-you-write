@@ -2,10 +2,10 @@
 <section class="form-page">
     <h3 data-i18n="forgot_password.reset_password">{{ translate('forgot_password.reset_password') }}</h3>
     {% if errors is defined %}
-        <span class='error'>{{ errors|raw }}</span>
+        <span class='error' data-i18n="{{ errors }}">{{ translate(errors)|raw }}</span>
     {% endif %}
 
-    <form id="main-form" action="{{ langUrl('login/send_reset_link') }}" method="post">
+    <form id="main-form" action="{{ langUrl('login/sendResetLink') }}" method="post">
         <label>
             <span data-i18n="forgot_password.email">{{ translate('forgot_password.email') }}</span>
             <input type="email" name="email" value="{{data.email}}">

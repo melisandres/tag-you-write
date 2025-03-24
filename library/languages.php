@@ -18,4 +18,39 @@ function langUrl($path, $language = null) {
     
     return '/' . $lang . '/' . $path;
 }
+
+/**
+ * Translate a key
+ */
+function translate($key, $replacements = []) {
+    $lang = getCurrentLanguage();
+    $translations = json_decode(file_get_contents("translations/{$lang}.json"), true);
+    
+    // Handle nested keys like "header.home"
+    if (strpos($key, '.') !== false) {
+        $parts = explode('.', $key);
+        $current = $translations;
+        
+        // Navigate through the nested structure
+        foreach ($parts as $part) {
+            if (isset($current[$part])) {
+                $current = $current[$part];
+            } else {
+                // If any part of the path doesn't exist, return the key
+                return $key;
+            }
+        }
+        
+        $text = $current;
+    } else {
+        // Handle flat keys for backward compatibility
+        $text = isset($translations[$key]) ? $translations[$key] : $key;
+    }
+    
+    foreach ($replacements as $placeholder => $value) {
+        $text = str_replace("{{$placeholder}}", $value, $text);
+    }
+    
+    return $text;
+}
 ?>

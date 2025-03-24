@@ -54,7 +54,7 @@ class ControllerText extends Controller{
 
     public function collab($rootId = null) {
         if ($rootId === null) {
-            Twig::render('home-error.php', ['message' => "No game specified."]);
+            Twig::render('home-error.php', ['message' => "error.no_game_specified"]);
             exit();
         }
 
@@ -63,7 +63,7 @@ class ControllerText extends Controller{
         $gameId = $text->selectGameId($rootId);
 
         if (!$gameId) {
-            Twig::render('home-error.php', ['message' => "Text not found."]);
+            Twig::render('home-error.php', ['message' => "error.text_not_found"]);
             exit();
         }
 
@@ -73,7 +73,7 @@ class ControllerText extends Controller{
         $gameData = $game->getGames(null, $filters, $gameId);
 
         if (empty($gameData)) {
-            Twig::render('home-error.php', ['message' => "Game not found."]);
+            Twig::render('home-error.php', ['message' => "error.game_not_found"]);
             exit();
         }
 
@@ -473,7 +473,7 @@ class ControllerText extends Controller{
 
         //here, you check if the id doesn't exist, or if it's null
         if($id == null || !$selectId){
-            Twig::render('home-error.php', ['message'=> "Something went wrong. Sorry.The requested text does not exist."]);
+            Twig::render('home-error.php', ['message'=> "error.game_does_not_exist"]);
             exit;
         }
 
@@ -511,7 +511,7 @@ class ControllerText extends Controller{
         $textId = $_POST['id'] ?? $_GET['id'] ?? null;
         
         if (!$textId) {
-            Twig::render('home-error.php', ['message'=> "No text ID provided."]);
+            Twig::render('home-error.php', ['message'=> "error.no_text_id_provided"]);
             exit();
         }
 
@@ -521,7 +521,7 @@ class ControllerText extends Controller{
         
         // Check if text data was found
         if (!$textData) {
-            Twig::render('home-error.php', ['message'=> "Text not found."]);
+            Twig::render('home-error.php', ['message'=> "error.text_not_found"]);
             exit();
         }
         
@@ -530,7 +530,7 @@ class ControllerText extends Controller{
 
         // Check user's permission to edit (myText && openForChanges && (draft || incomplete_draft)) 
         if (!Permissions::canEdit($textData, $currentWriterId) && !Permissions::canAddNote($textData, $currentWriterId)) {
-            Twig::render('home-error.php', ['message'=> "Sorry! You don't have permission to edit this text."]);
+            Twig::render('home-error.php', ['message'=> "error.permission_denied_edit"]);
             exit();
         }
 
@@ -967,7 +967,7 @@ class ControllerText extends Controller{
 
         // Check user's permission to iterate (myText && openForChange && !isDraft)
         if (!Permissions::canIterate($parentData, $currentWriterId)) {
-            Twig::render('home-error.php', ['message'=> "Sorry! This action is not permitted, for one of many reasons."]);
+            Twig::render('home-error.php', ['message'=> "error.permission_denied_iterate"]);
             exit();
         }
 

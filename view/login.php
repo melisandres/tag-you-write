@@ -4,7 +4,7 @@
     <span class='error'>{{ errors|raw}}</span>
 {% endif %}
 {% if message is defined %}
-    <span class='message'>{{ message|raw}}</span>
+    <span class='message' data-i18n="{{ message }}">{{ translate(message)|raw}}</span>
 {% endif %}
 <section class="form-page">
     <h3 data-i18n="login.page_title">{{ translate('login.page_title') }}</h3>
