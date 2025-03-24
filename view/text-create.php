@@ -33,7 +33,7 @@
                 </div>
             </section>
         </div>
-    {% elseif not data.id %}
+    {% elseif not data.parent_id %}
         <section class="info">
             <div class="info-container">
                 <h3 data-i18n="cr_it_ed.good_to_know">{{ translate('cr_it_ed.good_to_know') }}</h3>

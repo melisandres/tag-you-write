@@ -38,7 +38,7 @@ export class SearchManager {
 
     bindEvents() {
         if (!this.searchNavLink) {
-            console.error('Search nav link not found');
+            //console.error('Search nav link not found');
             return;
         }
 

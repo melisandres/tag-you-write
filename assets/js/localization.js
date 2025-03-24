@@ -182,6 +182,10 @@ export class Localization {
         return;
     }
     
+    // Check if we're on a form page that's editing an existing text
+    const form = document.querySelector('[data-form-type][data-form-activity="editing"]');
+    const textId = form ? document.querySelector('[data-id]')?.value : null;
+    
     // Save current language
     this.previousLanguage = this.currentLanguage;
     
@@ -189,54 +193,59 @@ export class Localization {
     this.currentLanguage = lang;
     
     try {
-      // Load translations for new language
-      await this.loadTranslations(lang);
-      
-      // Update all translations on the page
-      this.updatePageTranslations();
-      
-      // Update the page title
-      this.updatePageTitle();
-      
-      // Update all URLs on the page
-      this.updatePageUrls(this.previousLanguage, lang);
-      
-      // Update URL without reloading the page
-      const currentUrl = new URL(window.location.href);
-      const pathParts = currentUrl.pathname.split('/');
-      
-      // Find the language segment index (usually after the base path)
-      let langIndex = -1;
-      for (let i = 0; i < pathParts.length; i++) {
-        if (this.supportedLanguages.includes(pathParts[i])) {
-          langIndex = i;
-          break;
-        }
-      }
-      
-      // Replace the language segment if found
-      if (langIndex !== -1) {
-        pathParts[langIndex] = lang;
-        currentUrl.pathname = pathParts.join('/');
+        // Load translations for new language
+        await this.loadTranslations(lang);
         
-        // Keep the query parameters and hash
-        window.history.pushState({}, '', currentUrl.toString());
-      }
-      
-      // Update language switcher UI
-      this.updateLanguageSwitcherUI(lang);
-      
-      // Emit an event that language has changed
-      if (window.eventBus) {
-        window.eventBus.emit('languageChanged', { 
-          from: this.previousLanguage, 
-          to: lang 
-        });
-      }
+        // Update all translations on the page
+        this.updatePageTranslations();
+        
+        // Update the page title
+        this.updatePageTitle();
+        
+        // Update all URLs on the page
+        this.updatePageUrls(this.previousLanguage, lang);
+        
+        // Update URL without reloading the page
+        const currentUrl = new URL(window.location.href);
+        const pathParts = currentUrl.pathname.split('/');
+        
+        // Find the language segment index (usually after the base path)
+        let langIndex = -1;
+        for (let i = 0; i < pathParts.length; i++) {
+            if (this.supportedLanguages.includes(pathParts[i])) {
+                langIndex = i;
+                break;
+            }
+        }
+        
+        // Replace the language segment if found
+        if (langIndex !== -1) {
+            pathParts[langIndex] = lang;
+            currentUrl.pathname = pathParts.join('/');
+            
+            // If we're on an editing form, add the text_id as a query parameter
+            if (form && textId) {
+                currentUrl.searchParams.set('id', textId);
+            }
+            
+            // Keep the query parameters and hash
+            window.history.pushState({}, '', currentUrl.toString());
+        }
+        
+        // Update language switcher UI
+        this.updateLanguageSwitcherUI(lang);
+        
+        // Emit an event that language has changed
+        if (window.eventBus) {
+            window.eventBus.emit('languageChanged', { 
+                from: this.previousLanguage, 
+                to: lang 
+            });
+        }
     } catch (error) {
-      console.error('Error switching language:', error);
-      // Revert to previous language on error
-      this.currentLanguage = this.previousLanguage;
+        console.error('Error switching language:', error);
+        // Revert to previous language on error
+        this.currentLanguage = this.previousLanguage;
     }
   }
 

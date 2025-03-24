@@ -34,8 +34,13 @@ class ControllerText extends Controller{
         $allGames = $game->getGames($sort, $filters);
 
         // Get the notifications
-        $notification = new Notification;
-        $notifications = $notification->getNotifications();
+        $currentUserId = $_SESSION['writer_id'] ?? null;
+        if ($currentUserId){
+            $notification = new Notification;
+            $notifications = $notification->getNotifications();
+        }else{
+            $notifications = [];
+        }
 
         // Send both the rendered data and the complete dataset
         Twig::render('text-index.php', [
@@ -328,6 +333,12 @@ class ControllerText extends Controller{
         $input['parent_id'] = $parentId;
         $status = $this->validateText($input, $isRootText, $status);
 
+        // Check if validation returned an error structure
+        if (is_array($status) && isset($status['status']) && $status['status'] === 'error') {
+            $this->sendJsonResponse(false, 'toast.text.validation_failed', ['errors' => $status['errors']]);
+            exit;
+        }
+
         // Create a new game if this is a root text (no game_id && no parent_id
         if ($isRootText) {
             //error_log("line 616 isRootText: " . $isRootText);
@@ -487,20 +498,33 @@ class ControllerText extends Controller{
     // for a draft: all fields can be altered. the draft-edit view is sent. 
     // a published text: only the note/note_date can be altered. the note-edit view is sent.
     public function edit(){
-        //no access if you are not logged in
+        // No access if you are not logged in
         CheckSession::sessionAuth();
 
-        //models
+        // Models
         $text = new Text;
 
-        //variables 
+        // Variables 
         $currentWriterId = $_SESSION['writer_id'];
-        $textId = $_POST['id'];
+        
+        // Check for text ID in both POST and GET
+        $textId = $_POST['id'] ?? $_GET['id'] ?? null;
+        
+        if (!$textId) {
+            Twig::render('home-error.php', ['message'=> "No text ID provided."]);
+            exit();
+        }
 
-        //get the latest info about text and game
+        // Get the latest info about text and game
         $textData = $text->selectTexts($currentWriterId, $textId);
         $status = $textData['text_status'];
-
+        
+        // Check if text data was found
+        if (!$textData) {
+            Twig::render('home-error.php', ['message'=> "Text not found."]);
+            exit();
+        }
+        
         // Add permissions to the retrieved data
         $this->addPermissions($textData, $currentWriterId);
 
@@ -511,7 +535,7 @@ class ControllerText extends Controller{
         }
 
         // All is good, lets save some keywords.
-        $keywords = $text->selectKeyword($_POST['id']);
+        $keywords = $text->selectKeyword($textId);
 
         // Prepare the keywords
         $keywordString = "";
@@ -706,6 +730,12 @@ class ControllerText extends Controller{
         }else{
             // Your validation may change the status, if the text isnt instaPublish ready
             $status = $this->validateText($input, $isRoot, $status);
+        }
+
+        // Check if validation returned an error structure
+        if (is_array($status) && isset($status['status']) && $status['status'] === 'error') {
+            $this->sendJsonResponse(false, 'toast.text.validation_failed', ['errors' => $status['errors']]);
+            exit;
         }
 
         // Root texts need to update the game prompt
@@ -980,7 +1010,7 @@ class ControllerText extends Controller{
 
     // Validate the text data 
     // The $autosave parameter is to check if the data is being sent via an api fetch or if it's a form submission
-    public function validateText($data, $isRoot, $intended_status, $autoSave = false){
+    private function validateText($data, $isRoot, $intended_status, $autoSave = false){
         RequirePage::library('Validation');
         $val = new Validation;
 
@@ -1002,10 +1032,11 @@ class ControllerText extends Controller{
 
         // Check if basic validation passes
         if (!$val->isSuccess()) {
-                // TODO: send the errors in a structure... so that the front end can display next to each input field. 
-                 // Convert the errors to JSON format
-                $jsonData = json_encode($val->displayErrors());
-                return $jsonData;
+            // Return validation errors in a structured format
+            return [
+                'status' => 'error',
+                'errors' => $val->getErrors()
+            ];
         }
 
         // Stricter validation for publication AND/OR for autoPublish-ready drafts
@@ -1027,10 +1058,11 @@ class ControllerText extends Controller{
             if ($intended_status == 'draft') {
                 return 'incomplete_draft';
             } else {
-                // TODO: send the errors in a structure... so that the front end can display next to each input field. 
-                // Convert the errors to JSON format
-                $jsonData = json_encode($val->displayErrors());
-                return $jsonData;
+                // Return validation errors in a structured format
+                return [
+                    'status' => 'error',
+                    'errors' => $val->getErrors()
+                ];
             }
         }
     }
