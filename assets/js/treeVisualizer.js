@@ -81,6 +81,14 @@ export class TreeVisualizer {
 
         // Add event listener for title updates
         eventBus.on('updateTreeNodeTitle', this.handleTitleUpdate.bind(this));
+
+        // Use eventBus instead of DOM events
+        if (window.eventBus) {
+            window.eventBus.on('languageChanged', () => {
+                console.log('Language changed event received in TreeVisualizer via eventBus');
+                this.handleLanguageChange();
+            });
+        }
     }
     
     handleDrawTree({ container, data }) {
@@ -885,7 +893,11 @@ export class TreeVisualizer {
     
     formatAuthorName(data, fontSize) {
         if (data.permissions.isMyText) {
-            return `${data.text_status == 'draft' || data.text_status == 'incomplete_draft' ? window.i18n ? window.i18n.translate("general.draft") + ' ' : 'DRAFT ' : ''} ${window.i18n ? window.i18n.translate("note-edit.by_you") : 'by you'}`;
+            const draftText = data.text_status == 'draft' || data.text_status == 'incomplete_draft' 
+                ? (window.i18n ? window.i18n.translate("general.draft") : 'DRAFT') + ' '
+                : '';
+            const byYouText = window.i18n ? window.i18n.translate("note-edit.by_you") : 'by you';
+            return `${draftText}${byYouText}`;
         }
     
         const names = `${data.firstName} ${data.lastName}`.split(' ');
@@ -901,7 +913,8 @@ export class TreeVisualizer {
             formattedName = this.truncateText(names[0], fontSize, this.config.authorMaxWidth);
         }
     
-        return `${window.i18n ? window.i18n.translate("general.by") : 'by'} ${formattedName}`;
+        const byText = window.i18n ? window.i18n.translate("general.by") : 'by';
+        return `${byText} ${formattedName}`;
     }
 
     updateTitle(titleGroup, titleOrAccessor, fontSize) {
@@ -1354,6 +1367,61 @@ export class TreeVisualizer {
             } else {
                 authorText.text(originalText);
             }
+        }
+    }
+
+    // New method to handle language changes
+    handleLanguageChange() {
+        if (!this.svg || !this.treeData) {
+            console.log('SVG or tree data not available');
+            return;
+        }
+        
+        console.log('Updating tree after language change');
+        
+        try {
+            // Instead of calling updateTree directly, let's try a safer approach
+            // that just updates the text content
+            this.svg.selectAll(".text-by")
+                .each(function() {
+                    const element = d3.select(this);
+                    const data = element.datum();
+                    
+                    // Only update if we have valid data
+                    if (data && data.data && data.data.permissions) {
+                        // Get the formatted author name
+                        let authorText = '';
+                        
+                        if (data.data.permissions.isMyText) {
+                            const draftText = (data.data.text_status === 'draft' || data.data.text_status === 'incomplete_draft') 
+                                ? (window.i18n ? window.i18n.translate("general.draft") : 'DRAFT') + ' '
+                                : '';
+                            const byYouText = window.i18n ? window.i18n.translate("note-edit.by_you") : 'by you';
+                            authorText = `${draftText}${byYouText}`;
+                        } else {
+                            const names = `${data.data.firstName} ${data.data.lastName}`.split(' ');
+                            let formattedName = '';
+                            
+                            if (names.length > 1) {
+                                // Keep the last name, initialize others
+                                for (let i = 0; i < names.length - 1; i++) {
+                                    formattedName += names[i][0] + '. ';
+                                }
+                                formattedName += names[names.length - 1]; // Last name
+                            } else {
+                                formattedName = names[0];
+                            }
+                            
+                            const byText = window.i18n ? window.i18n.translate("general.by") : 'by';
+                            authorText = `${byText} ${formattedName}`;
+                        }
+                        
+                        // Update the text content
+                        element.text(authorText);
+                    }
+                });
+        } catch (error) {
+            console.error('Error updating tree after language change:', error);
         }
     }
 }

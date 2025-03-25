@@ -237,9 +237,10 @@ export class Localization {
         
         // Emit an event that language has changed
         if (window.eventBus) {
+            console.log('Emitting languageChanged event');
             window.eventBus.emit('languageChanged', { 
                 from: this.previousLanguage, 
-                to: lang 
+                to: this.currentLanguage 
             });
         }
     } catch (error) {
