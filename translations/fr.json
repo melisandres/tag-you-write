@@ -351,5 +351,18 @@
       "invalid_or_expired_reset_link": "Lien de réinitialisation de mot de passe invalide ou expiré",
       "password_updated": "Mot de passe mis à jour avec succès"
     }
+  },
+  "legend": {
+    "winner": "gagnant",
+    "unread": "non lu",
+    "search": "recherche",
+    "votes": "# de votes",
+    "not_enough_players_line1": "*Pas assez",
+    "not_enough_players_line2": "de joueurs pour voter",
+    "show_legend": "Afficher Légende"
+  },
+  "d3_visualization": {
+    "unavailable_title": "Visualisation D3 Indisponible",
+    "unavailable_message": "La bibliothèque D3 n'a pas pu être chargée. Veuillez vérifier votre connexion internet ou contacter l'administrateur."
   }
 }

@@ -12,13 +12,17 @@ mark {
 }
 
 /* Tree search highlight heart node */
-.node path.search-match {
+path.search-match {
     stroke: var(--color-accent) !important; /* Yellow highlight */
     stroke-width: 60px !important;
     stroke-opacity: 1 !important;
     stroke-linecap: round !important;    /* Rounds the endpoints */
     stroke-linejoin: round !important;   /* Rounds the corners */
     paint-order: stroke fill !important; /* Ensures stroke is painted before fill */
+}
+
+.legend-item .search-match {
+    fill: var(--color-white);
 }
 
 /* Tree search highlight star node */

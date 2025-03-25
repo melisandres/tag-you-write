@@ -81,6 +81,14 @@ export class TreeVisualizer {
 
         // Add event listener for title updates
         eventBus.on('updateTreeNodeTitle', this.handleTitleUpdate.bind(this));
+
+        // Listen for language change events
+        if (window.eventBus) {
+            window.eventBus.on('languageChanged', () => {
+                console.log('Language changed, updating tree legend translations');
+                this.updateLegendTranslations();
+            });
+        }
     }
     
     handleDrawTree({ container, data }) {
@@ -519,15 +527,16 @@ export class TreeVisualizer {
         //const gameTitle = data.title;
         const maxVotes = d.playerCount -1;
         const legendData = [
-            { label: "Winner", type: "star"},
-            { label: "Unread", type: "unread-heart" },
-            { label: "# of votes", type: "vote-gradient", maxVotes: maxVotes }
+            { label: "legend.winner", type: "star"},
+            { label: "legend.unread", type: "unread-heart" },
+            { label: "legend.search", type: "search-match"},
+            { label: "legend.votes", type: "vote-gradient", maxVotes: maxVotes }
         ];
     
         const legend = self.svg.append("g")
             .attr("class", "legend")
             .classed("hidden", false)
-            .attr("transform", `translate(${self.containerWidth - 112}, ${self.containerHeight - 137})`)
+            .attr("transform", `translate(${self.containerWidth - 112}, ${self.containerHeight - 200})`)
             .style("cursor", "pointer")
             .on("click", () => {
                 self.toggleLegend();
@@ -541,23 +550,22 @@ export class TreeVisualizer {
             .attr("x", -legendBoxPadding)
             .attr("y", -legendBoxPadding)
             .attr("width", 130)  // Adjust width based on content
-            .attr("height", legendData.length * 45 + legendBoxPadding)  // Height based on the number of items
+            .attr("height", legendData.length * 45 + legendBoxPadding * 2)  // Fixed height calculation
             .attr("fill", "floralwhite")  // Set to non-transparent background
             .attr("stroke", "black")  // Optional border around the box
             .attr("rx", 5)  // Rounded corners
-            .attr("ry", 5) // Rounded corners
-            ; 
+            .attr("ry", 5); // Rounded corners
 
 
         const legendItems = legend.selectAll(".legend-item")
             .data(legendData)
             .enter().append("g")
             .attr("class", "legend-item")
-            .attr("transform", (d, i) => `translate(0, ${i * 45})`);  // Stack vertically
+            .attr("transform", (d, i) => `translate(0, ${i * 45})`);  // Adjusted spacing to match height calculation
 
         legendItems.each(function(d) {
             const item = d3.select(this);
-            if (d.type === "unread-heart") {  // Changed from "unread-circle"
+            if (d.type === "unread-heart") { 
                 // Add heart path
                 const heartPath = "m -10,-9 c -6.57,-7.05 -17.14,-7.05 -23.71,0 -6.56,7.05 -6.56,18.39 0,25.45 l 29.06,31.27 29.09,-31.23 c 6.57,-7.05 6.57,-18.4 0,-25.45 -6.57,-7.05 -17.14,-7.05 -23.71,0 l -5.35,5.75 -5.39,-5.78 z";
                 
@@ -569,58 +577,99 @@ export class TreeVisualizer {
                 item.append("text")
                     .attr("x", 20)  // Adjusted x position
                     .attr("y", 5)
-                    .text(d.label)
+                    .attr("data-i18n", d.label)
+                    .text(window.i18n ? window.i18n.translate(d.label) : d.label)
                     .style("font-size", "15px");
-            } else if (d.type === "vote-gradient") {
-                const gradientId = "vote-gradient";
-                const gradient = self.svg.append("defs")
-                    .append("linearGradient")
-                    .attr("id", gradientId)
-                    .attr("x1", "0%")
-                    .attr("x2", "100%");
-
-                gradient.append("stop")
-                    .attr("offset", "0%")
-                    .attr("stop-color", self.colorScale(0));
-
-                gradient.append("stop")
-                    .attr("offset", "100%")
-                    .attr("stop-color", self.colorScale(maxVotes));
-
-                item.append("rect")
-                    .attr("width", 100)
-                    .attr("height", 20)
-                    .attr("fill", `url(#${gradientId})`);
-
-                // Add tick marks
-                const tickValues = [0, Math.floor(maxVotes / 2), maxVotes];
-                tickValues.forEach((value, index) => {
-                    item.append("line")
-                        .attr("x1", index * 50)
-                        .attr("x2", index * 50)
-                        .attr("y1", 20)
-                        .attr("y2", 25)
-                        .attr("stroke", "black");
+            } else if (d.type === "search-match") {
+                // Add heart path
+                const heartPath = "m -10,-9 c -6.57,-7.05 -17.14,-7.05 -23.71,0 -6.56,7.05 -6.56,18.39 0,25.45 l 29.06,31.27 29.09,-31.23 c 6.57,-7.05 6.57,-18.4 0,-25.45 -6.57,-7.05 -17.14,-7.05 -23.71,0 l -5.35,5.75 -5.39,-5.78 z";
+                
+                item.append("path")
+                    .attr("d", heartPath)
+                    .attr("transform", "scale(0.3) translate(10, -20)")  // Adjust position as needed
+                    .attr("class", "search-match");
                     
-                    item.append("text")
-                        .attr("x", index * 50)
-                        .attr("y", 35)
-                        .attr("text-anchor", "middle")
-                        .text(value)
-                        .style("font-size", "12px")
-                        .attr('data-tick-value', value);
-                        
-                });
-
-
                 item.append("text")
-                    .attr("x", 50)
-                    .attr("y", -5)
-                    .attr("text-anchor", "middle")
-                    .text(d.label)
+                    .attr("x", 20)  // Adjusted x position
+                    .attr("y", 5)
+                    .attr("data-i18n", d.label)
+                    .text(window.i18n ? window.i18n.translate(d.label) : d.label)
                     .style("font-size", "15px");
+            }
+            else if (d.type === "vote-gradient") {
+                const heartPath = "m -10,-9 c -6.57,-7.05 -17.14,-7.05 -23.71,0 -6.56,7.05 -6.56,18.39 0,25.45 l 29.06,31.27 29.09,-31.23 c 6.57,-7.05 6.57,-18.4 0,-25.45 -6.57,-7.05 -17.14,-7.05 -23.71,0 l -5.35,5.75 -5.39,-5.78 z";
+                
+                if (maxVotes <= 0) {
+                    // Handle case with insufficient players - create multi-line text
+                    item.append("text")
+                        .attr("y", 5)
+                        .attr("x", 50)
+                        .attr("text-anchor", "middle")
+                        .attr("data-i18n", "legend.not_enough_players_line1")
+                        .style("font-size", "12px")
+                        .append("tspan")
+                        .text(window.i18n ? window.i18n.translate("legend.not_enough_players_line1") : "*Not enough")
+                        .attr("x", 50)
+                        .attr("dy", 0);
+                        
+                    item.append("text")
+                        .attr("y", 20)
+                        .attr("x", 50)
+                        .attr("text-anchor", "middle")
+                        .attr("data-i18n", "legend.not_enough_players_line2")
+                        .style("font-size", "12px")
+                        .append("tspan")
+                        .text(window.i18n ? window.i18n.translate("legend.not_enough_players_line2") : "players for votes")
+                        .attr("x", 50)
+                        .attr("dy", 0);
+                } else {
+                    // Determine positions and vote values based on maxVotes
+                    let positions, voteValues;
+                    
+                    if (maxVotes == 1) {
+                        // Just two hearts for 0 and 1 vote
+                        positions = [30, 70]; // Left and right positions
+                        voteValues = [0, 1];
+                    } else {
+                        // Three hearts for 0, middle, and max votes
+                        positions = [15, 50, 85]; // Left, middle, right positions
+                        voteValues = [0, Math.floor(maxVotes / 2), maxVotes];
+                    }
+                    
+                    const tickMarkOffset = -0.5; // Offset to shift tick marks left by 3 pixels
+                    
+                    positions.forEach((pos, index) => {
+                        // Add heart for each position
+                        item.append("path")
+                            .attr("d", heartPath)
+                            .attr("transform", `translate(${pos}, 10) scale(0.3)`)
+                            .attr("fill", self.colorScale(voteValues[index]))
+                            .attr("data-vote-count", voteValues[index])
+                            .attr("stroke", "black")
+                            .attr("stroke-width", 1);
+                        
+                        // Add vote count labels - moved further down
+                        item.append("text")
+                            .attr("x", pos + tickMarkOffset)
+                            .attr("y", 40) // Increased from 35 to 45 for more space
+                            .attr("text-anchor", "middle")
+                            .text(voteValues[index])
+                            .style("font-size", "12px")
+                            .attr('data-tick-value', voteValues[index]);
+                    });
+                    
+                    // Add title for the legend item
+                    item.append("text")
+                    .attr("x", 50)
+                    .attr("y", 55) // Moved below the hearts and labels
+                    .attr("text-anchor", "middle")
+                    .attr("data-i18n", d.label)
+                    .text(window.i18n ? window.i18n.translate(d.label) : d.label)
+                    .style("font-size", "10px");
+                }
 
-            }else if(d.type === "star"){
+              
+            } else if(d.type === "star"){
                 item.append("path")
                     .attr("d", d3.symbol().type(d3.symbolStar).size(100))  // Star with a size of 100
                     .attr("fill", self.baseColor)
@@ -628,7 +677,8 @@ export class TreeVisualizer {
                 item.append("text")
                     .attr("x", 20)
                     .attr("y", 5)
-                    .text(d.label)
+                    .attr("data-i18n", d.label)
+                    .text(window.i18n ? window.i18n.translate(d.label) : d.label)
                     .style("font-size", "15px");
             }  
         });
@@ -653,7 +703,8 @@ export class TreeVisualizer {
             .attr("x", 45)
             .attr("y", 17)
             .attr("text-anchor", "middle")
-            .text("Show Legend")
+            .attr("data-i18n", "legend.show_legend")
+            .text(window.i18n ? window.i18n.translate("legend.show_legend") : "Show Legend")
             .style("font-size", "14px")
             .style("fill", "black");
 
@@ -679,7 +730,7 @@ export class TreeVisualizer {
     updateLegendPosition() {
         if (this.legend) {
             const newX = this.container.clientWidth - 112;
-            const newY = this.container.clientHeight - 137;
+            const newY = this.container.clientHeight - 200;
             this.legend.attr("transform", `translate(${newX}, ${newY})`);
             
             // Update toggle button position
@@ -704,10 +755,20 @@ export class TreeVisualizer {
     showD3UnavailableMessage() {
         this.container.innerHTML = `
             <div style="text-align: center; padding: 20px;">
-                <h2>D3 Visualization Unavailable</h2>
-                <p>The D3 library could not be loaded. Please check your internet connection or contact the administrator.</p>
+                <h2 data-i18n="d3_visualization.unavailable_title">D3 Visualization Unavailable</h2>
+                <p data-i18n="d3_visualization.unavailable_message">The D3 library could not be loaded. Please check your internet connection or contact the administrator.</p>
             </div>
         `;
+        
+        // Apply translations if i18n is available
+        if (window.i18n) {
+            const container = this.container;
+            const elements = container.querySelectorAll('[data-i18n]');
+            elements.forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                element.textContent = window.i18n.translate(key);
+            });
+        }
     }
 
     toggleLegend() {

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="user" data-user-id="{{ session.writer_id ? session.writer_id : 'null' }}" data-guest="{{ guest ? 'true' : 'false' }}">
+    <meta name="base-url" data-base-url="{{ path }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     {% if title_key is defined %}
