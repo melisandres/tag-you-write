@@ -81,14 +81,6 @@ export class TreeVisualizer {
 
         // Add event listener for title updates
         eventBus.on('updateTreeNodeTitle', this.handleTitleUpdate.bind(this));
-
-        // Listen for language change events
-        if (window.eventBus) {
-            window.eventBus.on('languageChanged', () => {
-                console.log('Language changed, updating tree legend translations');
-                this.updateLegendTranslations();
-            });
-        }
     }
     
     handleDrawTree({ container, data }) {
@@ -893,7 +885,7 @@ export class TreeVisualizer {
     
     formatAuthorName(data, fontSize) {
         if (data.permissions.isMyText) {
-            return `${data.text_status == 'draft' || data.text_status == 'incomplete_draft' ? 'DRAFT ' : ''} by you`;
+            return `${data.text_status == 'draft' || data.text_status == 'incomplete_draft' ? window.i18n ? window.i18n.translate("general.draft") + ' ' : 'DRAFT ' : ''} ${window.i18n ? window.i18n.translate("note-edit.by_you") : 'by you'}`;
         }
     
         const names = `${data.firstName} ${data.lastName}`.split(' ');
@@ -909,7 +901,7 @@ export class TreeVisualizer {
             formattedName = this.truncateText(names[0], fontSize, this.config.authorMaxWidth);
         }
     
-        return `by ${formattedName}`;
+        return `${window.i18n ? window.i18n.translate("general.by") : 'by'} ${formattedName}`;
     }
 
     updateTitle(titleGroup, titleOrAccessor, fontSize) {

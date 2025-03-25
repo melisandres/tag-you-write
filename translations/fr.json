@@ -124,7 +124,8 @@
     "shelf_tooltip": "rayon",
     "bookmark_tooltip": "marquer",
     "iterate_tooltip": "iterer",
-    "new_game_tooltip": "nouvelle partie"
+    "new_game_tooltip": "nouvelle partie",
+    "by": "par"
   },
   "writer-create": {
     "first_name": "Prénom",
@@ -359,10 +360,15 @@
     "votes": "# de votes",
     "not_enough_players_line1": "*Pas assez",
     "not_enough_players_line2": "de joueurs pour voter",
-    "show_legend": "Afficher Légende"
+    "show_legend": "Voir légende"
   },
   "d3_visualization": {
     "unavailable_title": "Visualisation D3 Indisponible",
     "unavailable_message": "La bibliothèque D3 n'a pas pu être chargée. Veuillez vérifier votre connexion internet ou contacter l'administrateur."
+  },
+  "modal": {
+    "draft": "BROUILLON",
+    "winner": "GAGNANT",
+    "ps": "P.S..."
   }
 }

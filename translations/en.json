@@ -125,7 +125,8 @@
       "shelf_tooltip": "shelf",
       "bookmark_tooltip": "bookmark",
       "iterate_tooltip": "iterate",
-      "new_game_tooltip": "new game"
+      "new_game_tooltip": "new game",
+      "by": "by"
     },
     "writer-create": {
       "first_name": "First Name",
@@ -365,5 +366,10 @@
     "d3_visualization": {
       "unavailable_title": "D3 Visualization Unavailable",
       "unavailable_message": "The D3 library could not be loaded. Please check your internet connection or contact the administrator."
+    },
+    "modal": {
+      "draft": "DRAFT",
+      "winner": "WINNER",
+      "ps": "P.S..."
     }
   }
