@@ -1,8 +1,11 @@
 /* Custom styles for the tree */
 #showcase.with-tree{
-    height: 300px;
+    height: 400px;
 }
 
+.collab ~ #showcase.with-tree {
+    height: 65vh;
+}
 
 .with-tree .node path {
     stroke: var(--color-black);

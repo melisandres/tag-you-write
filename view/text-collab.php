@@ -79,7 +79,7 @@
         </div>
 
         <!-- Tree visualization will be inserted here by JavaScript -->
-        <div id="tree-visualization" class="tree-container active"></div>
+        <div id="tree-visualization" class="tree-container active collab"></div>
         <!-- Shelf visualization will be inserted here by JavaScript -->
         <div id="shelf-visualization" class="shelf-container"></div>
     </div>
