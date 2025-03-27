@@ -330,6 +330,16 @@ export class AutoSaveManager {
             })
             .then(result => {
                 if (result.success) {
+                    // Update URL if this is the first save (ID was empty before)
+                    let idInput = this.form.querySelector('[data-id]');
+                    if (idInput && result.textId && !idInput.value) {
+                        // Always use edit endpoint after first save - for both root and iterations
+                        let newUrl = window.i18n.createUrl(`text/edit?id=${result.textId}`);
+                        
+                        // Update browser history without refreshing
+                        window.history.replaceState({id: result.textId}, document.title, newUrl);
+                    }
+
                     // First update the form inputs
                     this.updateFormInputs(formData, result);
                     // Change the data-form-activity attribute
@@ -343,6 +353,7 @@ export class AutoSaveManager {
                     // Force a check for unsaved changes before emitting formUpdated
                     const hasChanges = this.hasUnsavedChanges();
 
+                  
                     eventBus.emit('formUpdated', result);
 
                 } else {

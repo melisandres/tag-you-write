@@ -27,6 +27,10 @@ class Email {
         
         // Set sender
         $this->mail->setFrom($_ENV['SMTP_USERNAME'], 'Tag You Write'); // Use the authenticated email as sender
+        
+        // Set character encoding to UTF-8
+        $this->mail->CharSet = 'UTF-8';
+        $this->mail->Encoding = 'base64';
     }
     
     public function welcome($to, $name, $subject, $message) {

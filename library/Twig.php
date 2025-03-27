@@ -7,7 +7,7 @@ class Twig{
         $twig = new \Twig\Environment($loader, array('auto_reload' => true)); 
 
         // Store the path in a variable that will be accessible in the closure
-        $basePath = 'http://localhost:8888/tag-you-write-repo/tag-you-write/';
+        $basePath =  $_ENV['BASE_URL'];
         
         $twig->addGlobal('path', $basePath);
         

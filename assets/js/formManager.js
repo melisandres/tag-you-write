@@ -13,6 +13,7 @@ export class FormManager {
         this.canAutosave = false;
         // A flag to prevent the beforeunload event from triggering
         this.isIntentionalNavigation = false;
+        this.wasIdAlreadySet = false;
         this.init();
     }
 
@@ -345,7 +346,7 @@ export class FormManager {
                 if (idInput && !idInput.value && responseData.textId) {
                     idInput.value = responseData.textId;
                 }
-                // Changge the data-form-activity attribute
+                // Change the data-form-activity attribute
                 this.form.setAttribute('data-form-activity', 'editing');
 
                 if (this.formType == 'root' || this.formType == 'iteration') {
@@ -365,6 +366,17 @@ export class FormManager {
                         message: responseData.toastMessage,
                         type: responseData.toastType
                     });
+                }
+
+                // Update URL if this is the first save (ID was empty before)
+                if (idInput && responseData.textId && !this.wasIdAlreadySet) {
+                    this.wasIdAlreadySet = true;
+                    
+                    // Always use edit endpoint after first save
+                    let newUrl = window.i18n.createUrl(`text/edit?id=${responseData.textId}`);
+                    
+                    // Update browser history without refreshing
+                    window.history.replaceState({id: responseData.textId}, document.title, newUrl);
                 }
             }
         } catch (error) {
