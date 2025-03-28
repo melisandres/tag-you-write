@@ -77,7 +77,7 @@ export class TreeVisualizer {
 
         // Store instance globally
         window.treeVisualizerInstance = this;
-        this.dataManager = dataManager;
+        this.dataManager = window.dataManager;
 
         // Add event listener for title updates
         eventBus.on('updateTreeNodeTitle', this.handleTitleUpdate.bind(this));
@@ -969,9 +969,17 @@ export class TreeVisualizer {
         return text.length * fontSize * 0.6;
     }
 
-    updateTree(){
+    updateTree() {
+        // Add defensive check for null or undefined treeData
+        if (!this.treeData) {
+            console.warn('No tree data available for tree visualization');
+            return;
+        }
         // Recalculate the layout
         const root = d3.hierarchy(this.treeData, d => d.children);
+
+         // Get search results from the data manager
+        const searchResults = this.dataManager.getSearchResults() || { nodes: {} };
 
         // Calculate maxDepth and depthCounts
         const maxDepth = d3.max(root.descendants(), d => d.depth);
@@ -1104,8 +1112,6 @@ export class TreeVisualizer {
         // Remove old nodes
         nodes.exit().remove();
 
-
-
         // Update links
         const links = innerG.selectAll(".link")
             .data(root.links(), d => {
@@ -1189,6 +1195,7 @@ export class TreeVisualizer {
         console.log('SEARCH TERM:', searchTerm);
         const searchResults = this.dataManager.getSearchResults();
         console.log('SEARCH RESULTS:', searchResults);
+        console.log('Search results structure:', JSON.stringify(searchResults, null, 2));
 
         if (!searchTerm || !searchResults || !searchResults.nodes) {
             console.log('Exiting early - missing data:', {
@@ -1251,6 +1258,8 @@ export class TreeVisualizer {
             return;
         }
 
+        console.log('Highlighting title for node:', nodeId, 'with term:', searchTerm, 'found node:', !nodeGroup.empty());
+
         // Handle title text
         const titleGroup = nodeGroup.select('.title-group');
         if (!titleGroup.empty()) {
@@ -1292,6 +1301,12 @@ export class TreeVisualizer {
         const authorText = nodeGroup.select("text.text-by");
 
         if (!authorText.empty() && authorText.node()) {
+            // Skip further processing if there are already tspans (which indicates it's been processed)
+            // This prevents double translation of "by" to "by par"
+            if (authorText.selectAll("tspan").size() > 0 && !shouldHighlight) {
+                return;
+            }
+            
             const originalText = authorText.text();
             
             // Get the node data to check permissions and full name
@@ -1309,12 +1324,15 @@ export class TreeVisualizer {
                 
                 if (nameMatch && shouldHighlight) {
                     authorText.text(''); // Clear existing text
+                    // Use the correct translation directly here
+                    const byText = window.i18n ? window.i18n.translate("general.by") : 'by';
                     authorText.append('tspan')
-                        .text('by ');
+                        .text(`${byText} `);
                     authorText.append('tspan')
                         .attr('class', 'search-highlight')
                         .text('you');
                 } else {
+                    // Simply reset without reformatting to prevent double prefixes
                     authorText.text(originalText);
                 }
             } else if (shouldHighlight) {
@@ -1324,14 +1342,17 @@ export class TreeVisualizer {
                 const firstName = nodeData.data.firstName || '';
                 const lastName = nodeData.data.lastName || '';
                 
-                // Get displayed text (without "by ")
-                const displayedText = originalText.replace(/^by\s+/, '');
+                // Extract the translated "by" part properly
+                const byText = window.i18n ? window.i18n.translate("general.by") : 'by';
+                
+                // Get displayed text (correctly handling the translated prefix)
+                const displayedText = originalText.replace(new RegExp(`^${byText}\\s+`), '');
                 const [initial, ...lastNameParts] = displayedText.split(' ');
                 const displayedLastName = lastNameParts.join(' ');
                 
                 authorText.text(''); // Clear existing text
                 authorText.append('tspan')
-                    .text('by ');
+                    .text(`${byText} `);
                 
                 // Check if search matches full first name
                 const firstNameMatch = firstName.match(regex);
@@ -1365,7 +1386,10 @@ export class TreeVisualizer {
                     authorText.append('tspan').text(displayedLastName);
                 }
             } else {
-                authorText.text(originalText);
+                // Properly get the formatted author name rather than manipulating the existing text
+                // This ensures we get the correct translation
+                const authorName = this.formatAuthorName(nodeData.data);
+                authorText.text(authorName);
             }
         }
     }
@@ -1423,6 +1447,15 @@ export class TreeVisualizer {
         } catch (error) {
             console.error('Error updating tree after language change:', error);
         }
+    }
+
+    setTreeData(data) {
+        this.treeData = data;
+        // Optionally trigger necessary updates
+    }
+
+    getTreeData() {
+        return this.treeData;
     }
 }
 

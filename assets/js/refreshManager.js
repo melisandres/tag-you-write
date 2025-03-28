@@ -79,7 +79,7 @@ export class RefreshManager {
 
         window.addEventListener('beforeunload', (e) => {
             if (this.isStoriesPage() && !this.shouldRefreshGames) {
-                eventBus.emit('refreshGames');
+                //eventBus.emit('refreshGames');
                 this.saveState();
                 this.saveCurrentPageUrl();
             }

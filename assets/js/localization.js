@@ -492,4 +492,8 @@ export class Localization {
     
     return url;
   }
+
+  getCurrentLocale() {
+    return this.currentLanguage;
+  }
 }

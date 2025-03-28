@@ -199,14 +199,13 @@ export class TreeUpdateManager {
   handleNewNodesDiscovered(newNodesData) {
     console.log('NEW NODES DISCOVERED', newNodesData);
     // get the full tree
-    this.treeData = this.dataManager.getTreeByGameId(newNodesData[0].game_id);
-
-/*     const parentNode = this.dataManager.getNode(String(newNodesData[0].parent_id));
-
-    if (parentNode) { */
-        // Update the visualization for whole tree
+    const updatedTreeData = this.dataManager.getTreeByGameId(newNodesData[0].game_id);
+    
+    // Update the visualizer's tree data
+    this.treeVisualizer.setTreeData(updatedTreeData);
+    
+    // Now update the visualization
     this.treeVisualizer.updateTree();
-/*     } */
   }
 
   handleNodeTextContentUpdate(changes) {

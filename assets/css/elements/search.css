@@ -3,6 +3,15 @@ mark {
     border-radius: 2px;
 }
 
+tspan.search-highlight {
+    stroke: var(--color-accent) !important; /* Yellow highlight */
+    stroke-width: 5px !important;
+    stroke-opacity: 1 !important;
+    stroke-linecap: round !important;    /* Rounds the endpoints */
+    stroke-linejoin: round !important;   /* Rounds the corners */
+    paint-order: stroke fill !important; /* Ensures stroke is painted before fill */
+}
+
 .with-tree .search-highlight {
     filter: url(#searchHighlight); /* Ensure text remains black */
 }

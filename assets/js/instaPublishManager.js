@@ -1,9 +1,9 @@
 import { eventBus } from './eventBus.js';
 
 export class InstaPublishManager {
-    constructor(path, warningManager) {
+    constructor(warningManager) {
       this.warningManager = warningManager;
-      this.path = path;
+      this.path = document.querySelector('[data-base-url]').getAttribute('data-base-url');
       this.initEventListeners();
     }
   
