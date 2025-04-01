@@ -164,7 +164,6 @@ export class DataManager {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
-                    'Accept-Language': this.getCurrentLocale() // Get locale from URL
                 },
                 body: JSON.stringify({
                     lastGamesCheck: lastGamesCheck,
@@ -172,7 +171,6 @@ export class DataManager {
                     search: this.cache.search || '',
                     rootStoryId: rootId,
                     lastTreeCheck: this.cache.trees.get(rootId)?.timestamp || 0,
-                    locale: this.getCurrentLocale() // Get locale from URL
                 })
             });
 

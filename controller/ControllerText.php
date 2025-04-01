@@ -1045,7 +1045,7 @@ class ControllerText extends Controller{
         if (!$isRoot) {
             // Iterations use a short title to describe changes to the parent text 
             $val->name('title')->value($data["title"])->required()->wordCount(3);
-            $val->name('writing')->value($cleanWriting)->required()->wordCount(50, $cleanParentWriting);
+            $val->name('writing')->value($cleanWriting)->required()->differentFrom($cleanParentWriting)->wordCount(50, $cleanParentWriting);
         } else {
             $val->name('title')->value($data["title"])->required()->max(100);
             $val->name('writing')->value($cleanWriting)->required()->wordCount(50, "");

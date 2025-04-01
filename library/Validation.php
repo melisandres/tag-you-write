@@ -456,4 +456,17 @@
             if(filter_var($value, FILTER_VALIDATE_EMAIL)) return true;
         }
 
+        /**
+         * Check if text is different from parent text
+         *
+         * @param string $parentText The parent text to compare against
+         * @return $this
+         */
+        public function differentFrom($parentText) {
+            if ($parentText && $this->value === $parentText) {
+                $this->errors[] = 'The '.$this->name.' field must be different from the parent text.';
+            }
+            return $this;
+        }
+
     }

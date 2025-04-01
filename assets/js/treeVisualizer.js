@@ -4,6 +4,10 @@ export class TreeVisualizer {
     constructor() {
         this.svg = null;
 
+        // Store instance globally
+        window.treeVisualizerInstance = this;
+        this.dataManager = window.dataManager;
+
         //get the container
         //this.container = container;
 
@@ -75,9 +79,7 @@ export class TreeVisualizer {
 
         this.treeData = null;
 
-        // Store instance globally
-        window.treeVisualizerInstance = this;
-        this.dataManager = window.dataManager;
+
 
         // Add event listener for title updates
         eventBus.on('updateTreeNodeTitle', this.handleTitleUpdate.bind(this));
@@ -369,6 +371,7 @@ export class TreeVisualizer {
                 const heartPath = "m -10,-9 c -6.57,-7.05 -17.14,-7.05 -23.71,0 -6.56,7.05 -6.56,18.39 0,25.45 l 29.06,31.27 29.09,-31.23 c 6.57,-7.05 6.57,-18.4 0,-25.45 -6.57,-7.05 -17.14,-7.05 -23.71,0 l -5.35,5.75 -5.39,-5.78 z";
                 
                 // Build the classes string
+                const self = this;
                 const path = item.append("path")
                     .attr("d", heartPath)
                     .attr("transform", "scale(0.4) translate(0, -15)")  // Adjusted translation to center the heart
@@ -377,9 +380,11 @@ export class TreeVisualizer {
                         let classes = `${d.data.text_seen == 1 ? 'read' : 'unread'}`;
                         classes += ` ${d.data.text_status == 'draft' || d.data.text_status == 'incomplete_draft' ? 'tree-node-draft' : ''}`; 
                         
-                        // Only add search-match class if we have search results and this node matches
-                        console.log('DRAW THE HEART: searchResults:', searchResults);
-                        if (searchResults.nodes && searchResults.nodes[d.data.id]) {
+                        // Then replace the search condition with
+                        if (self.dataManager && self.dataManager.getSearch() && 
+                            searchResults.nodes && 
+                            d.data.id && 
+                            searchResults.nodes[d.data.id]) {
                             const nodeData = searchResults.nodes[d.data.id];
                             if (nodeData.writingMatches || nodeData.noteMatches) {
                                 classes += " search-match";
@@ -399,7 +404,7 @@ export class TreeVisualizer {
             .attr("class", "title-group")
             .attr("transform", "translate(0, -10)");  // Adjust vertical position as needed
 
-        const titleBottomPosition = this.updateTitle(titleGroup, d => d.data.title || "Untitled", this.config.fontSize.title.max);
+        const titleBottomPosition = this.updateTitle(titleGroup, d => d.data.title || (window.i18n ? window.i18n.translate("general.untitled") : "Untitled"), this.config.fontSize.title.max);
 
 /*         console.log('Formatting author name:', data);
         console.log('Permissions:', data.permissions); */
@@ -499,6 +504,15 @@ export class TreeVisualizer {
         // After tree is completely drawn, apply search matches
         this.applySearchMatches();
         console.log('After calling applySearchMatches');
+        
+        // Explicitly translate all "Untitled" nodes immediately after drawing the tree
+        // TODO: This ensures that the "Untitled" text is always translated on first draw... which is not working otherwise... it's annoying. 
+/*         if (window.i18n) {
+            this.svg.selectAll(".title-group text[data-i18n='general.untitled']")
+                .text(window.i18n.translate("general.untitled"));
+        }
+        
+        console.log('Tree drawing complete, translations applied'); */
     }
 
     
@@ -848,7 +862,12 @@ export class TreeVisualizer {
             const authorFontSize = this.calculateFontSize(scale, 'author');
             const authorVisibility = this.calculateAuthorVisibility(scale);
 
-            const titleBottomPosition = this.updateTitle(titleGroup, d.data.title || "Untitled", titleFontSize);
+            // Use proper i18n for title fallback
+            const titleBottomPosition = this.updateTitle(
+                titleGroup, 
+                d => d.data.title || (window.i18n ? window.i18n.translate("general.untitled") : "Untitled"), 
+                titleFontSize
+            );
 
             author
                 .attr("dy", `${titleBottomPosition + this.config.titleAuthorSpacing}px`)
@@ -858,8 +877,8 @@ export class TreeVisualizer {
             
             const searchTerm = this.dataManager.getSearch();   
             if (searchTerm) {
-                    this.handleTitleHighlight(d.data.id, searchTerm, true);
-                }
+                this.handleTitleHighlight(d.data.id, searchTerm, true);
+            }
         });
     }
     
@@ -952,12 +971,18 @@ export class TreeVisualizer {
         });
 
         lines.forEach((line, i) => {
-            titleGroup.append("text")
+            const textEl = titleGroup.append("text")
                 .attr("dy", `${i * lineHeight}px`)
                 .attr("x", d => d.children ? -13 : 13)
                 .style("text-anchor", d => d.children ? "end" : "start")
-                .style("font-size", `${fontSize}px`)
-                .text(line);
+                .style("font-size", `${fontSize}px`);
+                
+            // If this is the default "Untitled" translation, add a data-i18n attribute
+            if (title === window.i18n?.translate("general.untitled") || title === "Untitled") {
+                textEl.attr("data-i18n", "general.untitled");
+            }
+            
+            textEl.text(line);
         });
 
         // Return the bottom position of the last line
@@ -975,8 +1000,14 @@ export class TreeVisualizer {
             console.warn('No tree data available for tree visualization');
             return;
         }
+        
         // Recalculate the layout
-        const root = d3.hierarchy(this.treeData, d => d.children);
+        const treeDataToUse = this.treeData.data || this.treeData;
+        
+        console.log('Using treeDataToUse structure:', Object.keys(treeDataToUse));
+        const root = d3.hierarchy(treeDataToUse, d => d.children);
+
+        console.log('this.treeData: ', this.treeData);
 
          // Get search results from the data manager
         const searchResults = this.dataManager.getSearchResults() || { nodes: {} };
@@ -1036,11 +1067,39 @@ export class TreeVisualizer {
         // Append elements to new nodes
         nodeEnter.each(function(d) {
             const item = d3.select(this);
+            
+            // Debug permissions for each node with defensive check
+            if (!d || !d.data) {
+                console.error("Node missing data object:", d);
+                return; // Skip processing this node
+            }
+            
+            if (!d.data.id) {
+                console.error("Node missing ID:", d);
+            }
+            
+            if (!d.data.permissions) {
+                console.error("Node missing permissions for ID:", d.data.id, d.data);
+                // Initialize permissions if missing to prevent errors
+                d.data.permissions = {
+                    canEdit: false,
+                    canAddNote: false,
+                    canDelete: false,
+                    canIterate: false,
+                    canPublish: false,
+                    canVote: false,
+                    isMyText: false
+                };
+            } else {
+                console.log("Node permissions for ID " + d.data.id + ":", d.data.permissions);
+            }
+            
+            // Remaining code with defensive checks...
             if (d.data.isWinner) {
                 item.append("path")
                     .attr("d", d3.symbol().type(d3.symbolStar).size(200))
-                    .attr('class', d => d.data.text_seen == 1 ? 'star read' : 'star unread')
-                    .attr('data-id', d => d.data.id)
+                    .attr('class', d => d.data && d.data.text_seen == 1 ? 'star read' : 'star unread')
+                    .attr('data-id', d => d.data ? d.data.id : null)
                     .attr("fill", baseColor);
             } else {
                 const heartPath = "m -10,-9 c -6.57,-7.05 -17.14,-7.05 -23.71,0 -6.56,7.05 -6.56,18.39 0,25.45 l 29.06,31.27 29.09,-31.23 c 6.57,-7.05 6.57,-18.4 0,-25.45 -6.57,-7.05 -17.14,-7.05 -23.71,0 l -5.35,5.75 -5.39,-5.78 z";
@@ -1048,11 +1107,16 @@ export class TreeVisualizer {
                     .attr("d", heartPath)
                     .attr("transform", "scale(0.4) translate(0, -15)")
                     .attr('class', d => {
+                        if (!d.data) return 'unread';
+                        
                         let classes = `${d.data.text_seen == 1 ? 'read' : 'unread'}`;
                         classes += ` ${d.data.text_status == 'draft' || d.data.text_status == 'incomplete_draft' ? 'tree-node-draft' : ''}`; 
                         
                         // Add search-match class if applicable
-                        if (searchResults.nodes && searchResults.nodes[d.data.id]) {
+                        if (this.dataManager && this.dataManager.getSearch() && 
+                            searchResults.nodes && 
+                            d.data.id && 
+                            searchResults.nodes[d.data.id]) {
                             const nodeData = searchResults.nodes[d.data.id];
                             if (nodeData.writingMatches || nodeData.noteMatches) {
                                 classes += " search-match";
@@ -1061,9 +1125,9 @@ export class TreeVisualizer {
                         
                         return classes.trim();
                     })
-                    .attr('data-id', d => d.data.id)
-                    .attr('data-vote-count', d => d.data.voteCount)
-                    .attr('fill', d => colorScale(d.data.voteCount));
+                    .attr('data-id', d => d.data ? d.data.id : null)
+                    .attr('data-vote-count', d => d.data ? d.data.voteCount : 0)
+                    .attr('fill', d => d.data ? colorScale(d.data.voteCount) : baseColor);
             }
         });
 
@@ -1072,27 +1136,41 @@ export class TreeVisualizer {
             .attr("class", "title-group")
             .attr("transform", "translate(0, -10)");
 
-        titleGroup.append("text")
-            .attr("x", d => d.children ? -13 : 13)
-            .style("text-anchor", d => d.children ? "end" : "start")
-            .text(d => d.data.title || "Untitled");
-
-        const titleBottomPosition = this.updateTitle(titleGroup, d => d.data.title || "Untitled", this.config.fontSize.title.max);
+        const titleBottomPosition = this.updateTitle(titleGroup, d => d.data.title || (window.i18n ? window.i18n.translate("general.untitled") : "Untitled"), this.config.fontSize.title.max);
 
         // Add the author name, positioned below the title
         nodeEnter.append("text")
             .attr("dy", `${titleBottomPosition + this.config.titleAuthorSpacing}px`)
             .attr("x", d => d.children ? -13 : 13)
             .style("text-anchor", d => d.children ? "end" : "start")
-            .attr("class", d => d.data.permissions.isMyText ? "text-by author" : "text-by")
-            .text(d => this.formatAuthorName(d.data));
+            .attr("class", d => {
+                // Add defensive check before accessing permissions
+                if (!d.data || !d.data.permissions) {
+                    console.warn("Missing permissions data for node:", d);
+                    return "text-by"; // Default class
+                }
+                return d.data.permissions.isMyText ? "text-by author" : "text-by";
+            })
+            .text(d => {
+                // Add defensive check before formatting author name
+                if (!d.data) {
+                    console.warn("Missing data for author text:", d);
+                    return "Unknown";
+                }
+                return this.formatAuthorName(d.data);
+            });
 
         // Update existing nodes
         nodes.transition().duration(750)
             .attr("transform", d => `translate(${d.y},${d.x})`)
             .each(function(d) {
-                const node = d3.select(this);
+                // Check if d.data is properly defined for debugging
+                if (!d || !d.data) {
+                    console.error("Invalid node data during transition:", d);
+                    return; // Skip processing this node
+                }
 
+                const node = d3.select(this);
                 // Calculate new x position based on text-anchor change
                 const newX = d.children ? -13 : 13;
                 
@@ -1116,7 +1194,7 @@ export class TreeVisualizer {
         const links = innerG.selectAll(".link")
             .data(root.links(), d => {
                 if (!d.target || !d.target.data) {
-                    console.warn('Skipping link for node without target:', d);
+                    //console.warn('Skipping link for node without target:', d);
                     return; // Return a default path or handle the error
                 }else{
                     /* console.log('Link Data:', d); */
@@ -1176,8 +1254,8 @@ export class TreeVisualizer {
             const scale = transform.k;
             const fontSize = this.calculateFontSize(scale, 'title');
 
-            // Create a title accessor function that returns the new title
-            const titleAccessor = () => title || "Untitled";
+            // Create a title accessor function that returns the new title with proper i18n
+            const titleAccessor = () => title || (window.i18n ? window.i18n.translate("general.untitled") : "Untitled");
 
             // Update the title using the existing updateTitle method
             const titleBottomPosition = this.updateTitle(titleGroup, titleAccessor, fontSize);
@@ -1404,8 +1482,11 @@ export class TreeVisualizer {
         console.log('Updating tree after language change');
         
         try {
-            // Instead of calling updateTree directly, let's try a safer approach
-            // that just updates the text content
+            // Update translations for node titles
+            this.svg.selectAll(".title-group text[data-i18n='general.untitled']")
+                .text(window.i18n ? window.i18n.translate("general.untitled") : "Untitled");
+            
+            // Update translations for author nodes (existing code)
             this.svg.selectAll(".text-by")
                 .each(function() {
                     const element = d3.select(this);

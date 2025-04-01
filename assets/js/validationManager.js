@@ -191,8 +191,8 @@ export class ValidationManager {
             iteration: {
                 title: [
                     this.validateRequired('front_val.iteration.title.required'),
-                    this.validateMaxWordCount(0, 3, 'frontend_validation.iteration.title.typed'),
-                    this.validateMaxCharacterCount(100, 'frontend_validation.iteration.title.max_character_count_critical', 'critical'),
+                    this.validateMaxWordCount(0, 3, 'front_val.iteration.title.typed'),
+                    this.validateMaxCharacterCount(100, 'front_val.iteration.title.max_character_count_critical', 'critical'),
                     //this.validateUniqueTitle(titleArray, 'Title must be unique')
                 ],
                 writing: [

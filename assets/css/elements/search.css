@@ -5,6 +5,7 @@ mark {
 
 tspan.search-highlight {
     stroke: var(--color-accent) !important; /* Yellow highlight */
+    fill: rgb(160, 138, 0);
     stroke-width: 5px !important;
     stroke-opacity: 1 !important;
     stroke-linecap: round !important;    /* Rounds the endpoints */
@@ -28,6 +29,28 @@ path.search-match {
     stroke-linecap: round !important;    /* Rounds the endpoints */
     stroke-linejoin: round !important;   /* Rounds the corners */
     paint-order: stroke fill !important; /* Ensures stroke is painted before fill */
+}
+
+/* More specific selector for Firefox compatibility */
+.node path.search-match, 
+g.node > path.search-match {
+    stroke: var(--color-accent) !important;
+    stroke-width: 60px !important;
+    stroke-opacity: 1 !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+    paint-order: stroke fill !important;
+}
+
+/* Force Firefox to respect the search highlight styles */
+@-moz-document url-prefix() {
+    path.search-match,
+    .node path.search-match {
+        stroke: var(--color-accent) !important;
+        stroke-width: 60px !important;
+        stroke-opacity: 1 !important;
+        paint-order: stroke fill !important;
+    }
 }
 
 .legend-item .search-match {
