@@ -45,8 +45,12 @@ export class IndexUpdateManager {
     if (statusIndicator && statusIndicator.classList.contains('pending')) {
       statusIndicator.classList.remove('pending');
       statusIndicator.classList.add('open');
+
+      // translate the strings
       const gameText = window.i18n.translate('general.game');
       const openText = window.i18n.translate('general.open');
+
+      // update the status indicator
       statusIndicator.innerHTML = `
         <p class="game-status">    
           <span data-i18n="general.game">${gameText}</span>

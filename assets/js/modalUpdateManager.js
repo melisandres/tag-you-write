@@ -230,7 +230,13 @@ export class ModalUpdateManager {
     Object.entries(changes).forEach(([prop, value]) => {
         switch(prop) {
             case 'title':
-                modal.querySelector('.headline').innerHTML = value;
+                const headlineEl = modal.querySelector('.headline');
+                if(headlineEl.dataset.i18n === 'general.untitled'){
+                    headlineEl.innerHTML = window.i18n ? window.i18n.translate("general.untitled") : "Untitled";
+                }
+                else{
+                    headlineEl.innerHTML = value;
+                }
                 break;
             case 'writing':
                 const writingEl = modal.querySelector('.writing');
@@ -290,6 +296,11 @@ export class ModalUpdateManager {
     console.log('Node data:', { textId, node, searchTerm });
     if (!node) return;
 
+    // translate the title if it is untitled
+    if(node.title === ''){
+      node.title = window.i18n ? window.i18n.translate("general.untitled") : "Untitled";
+    }
+
     // First, clear all existing highlights by restoring original content
     const elements = {
         headline: { selector: '.headline', content: node.title },
@@ -305,7 +316,12 @@ export class ModalUpdateManager {
     Object.values(elements).forEach(({ selector, content }) => {
         const element = container.querySelector(selector);
         if (element && content !== undefined) {  // Check for undefined
-            element.innerHTML = content;
+            // Special handling for the headline with data-i18n attribute
+            if (selector === '.headline' && element.dataset.i18n === 'general.untitled') {
+                element.innerHTML = window.i18n ? window.i18n.translate("general.untitled") : "Untitled";
+            } else {
+                element.innerHTML = content;
+            }
         }
     });
 

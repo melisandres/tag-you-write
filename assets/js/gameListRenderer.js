@@ -99,7 +99,12 @@ export class GameListRenderer {
     renderGameCard(game) {
         const isOpen = game.openForChanges === '1' || game.openForChanges === true || game.openForChanges === 1;
         const hasContributed = game.hasContributed === '1' || game.hasContributed === true || game.hasContributed === 1;
-        
+
+        // translate the strings
+        const untitledText = window.i18n ? window.i18n.translate("general.untitled") : "Untitled";
+        const untitledDataI18n = game.title ? '' : 'data-i18n="general.untitled"';
+
+        // build the game card
         return `
             <div class="story ${isOpen ? '' : 'closed'}" 
                  data-game-id="${game.game_id}" 
@@ -109,8 +114,8 @@ export class GameListRenderer {
                  data-text-id="${game.id}">
                 <div class="story-title ${game.unseen_count > 0 && this.userLoggedIn ? 'unreads' : ''}">
                     <h2 class="${hasContributed ? 'contributed' : ''}">
-                        <a data-refresh-default data-text-id="${game.id}">
-                            ${game.title || 'Untitled'}
+                        <a data-refresh-default ${untitledDataI18n} data-text-id="${game.id}">
+                            ${game.title || untitledText}
                         </a>
                     </h2>
                 </div>

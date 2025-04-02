@@ -132,7 +132,7 @@ export class ShelfUpdateManager {
         }
 
         // Remove "draft" text
-        const statusSpan = drawer.querySelector('[data-status]');
+        const statusSpan = drawer.querySelector('.status');
         if (statusSpan) {
           statusSpan.innerHTML = '';
         }
@@ -192,10 +192,11 @@ export class ShelfUpdateManager {
 
               // Add the winner status span
               const statusSpan = document.createElement('span');
+              const statusText = window.i18n ? window.i18n.translate("general.winner") : "WINNER";
               statusSpan.className = 'status';
               statusSpan.innerHTML = `
-                <span data-status="" class="status winner">
-                  WINNER
+                <span data-status="" class="status winner" data-i18n="general.winner">
+                  ${statusText}
                 </span>
               `;
               drawer.querySelector('.node-headline').appendChild(statusSpan);
@@ -292,11 +293,11 @@ export class ShelfUpdateManager {
         // Check if published
         if (!nodeGroup.classList.contains('published')) return;
         
-        // TODO: replace with user id check
+        // TODO:  eventually, I could check with the user id. but for now, this works.
         // Check if not user's own text
         const authorSpan = nodeGroup.querySelector('span.author');
         console.log("authorSpan", authorSpan)
-        if (authorSpan?.textContent === 'by you') return;
+        if (authorSpan?.dataset.i18n === 'general.by_you') return;
         
         const nodeButtons = nodeGroup.querySelector('.node-buttons');
         if (!nodeButtons) return;

@@ -96,7 +96,7 @@
       "add_note_tooltip": "add a note",
       "change_note": "Change Note",
       "change_note_tooltip": "change a note",
-      "by_you": "by you",
+      "your": "your",
       "note_placeholder": "Write your note here..."
     },
     "general": {
@@ -113,7 +113,7 @@
       "delete_tooltip": "Delete this text",
       "cancel": "Cancel",
       "cancel_tooltip": "Exit without saving",
-      "draft": "Draft",
+      "draft": "draft",
       "exit": "Exit",
       "game": "COLLAB",
       "pending": "PENDING",
@@ -126,7 +126,10 @@
       "bookmark_tooltip": "bookmark",
       "iterate_tooltip": "iterate",
       "new_game_tooltip": "new game",
-      "by": "by"
+      "by": "by",
+      "by_you": "by you",
+      "by_other": "by {firstName} {lastName}",
+      "winner": "WINNER"
     },
     "writer-create": {
       "first_name": "First Name",

@@ -89,14 +89,15 @@ export class ShelfVisualizer {
     return drawerHTML;
   }
 
+
+
   drawSingleNode(node, depth) {
-    const author = node.permissions.isMyText ? 
-    `<span class="author">by you</span>` : 
-    `<span class="author">by ${node.firstName} ${node.lastName}</span>`;
     const isWinner = node.isWinner ? "isWinner" : "";
     const unread = node.text_seen !== "1" ? "unread" : "";
     const note = node.note ? `<div class="note"><p>P.S... </p>${node.note}</div>` : '';
     const noteDate = node.note_date ?  `<span class="date"> ${node.note_date}</span>` : '';
+
+    const untitledText = window.i18n ? window.i18n.translate("general.untitled") : "Untitled";
 
     return `
       <li class="node ${node.text_status === "published" ? "published" : "draft"}" data-story-id="${node.id}" style="--node-depth: ${depth}">
@@ -104,14 +105,14 @@ export class ShelfVisualizer {
           <div class="arrow closed arrow-right"></div>
           <div class="shelf-heart ${unread}"> ${this.getNumberOfVotes(node)}</div>
           <div class="headline-content">
-            <h2 class="title">
-              ${node.title || "Untitled"}
+            <h2 class="title" ${node.title == "" ? "data-i18n='general.untitled'" : ""}>
+              ${node.title || untitledText}
             </h2>
             <p class="author">
-              ${author}
+              ${this.getAuthor(node)}
             </p>
           </div>
-          <span class="status">${node.isWinner ? 'WINNER' : (this.getStatus(node) || '')}</span>
+          <span class="status">${(this.getStatus(node) || '')}</span>
         </div>
         <div class="writing hidden ${isWinner}">
           <div class="node-buttons">
@@ -254,12 +255,38 @@ export class ShelfVisualizer {
     });
   }
 
+  getAuthor(node) {
+    // Create a proper JSON string for the parameters
+    const authorParams = JSON.stringify({
+      firstName: node.firstName || '',
+      lastName: node.lastName || ''
+    });
+    
+    const byYouText = window.i18n ? window.i18n.translate("general.by_you") : 'by you';
+    const byOtherText = window.i18n ? window.i18n.translate("general.by_other", {
+      firstName: node.firstName || '', 
+      lastName: node.lastName || ''
+    }) : `by ${node.firstName} ${node.lastName}`;
+    
+    // Return the appropriate author HTML based on permissions
+    return node.permissions.isMyText ? 
+      `<span class="author" data-i18n="general.by_you">${byYouText}</span>` : 
+      `<span class="author" data-i18n="general.by_other" data-i18n-params='${authorParams}'>${byOtherText}</span>`;
+  }
+
   getStatus(node){
-    if(node.text_status !== "published"){
-      console.log(node.text_status);
+    if(node.isWinner){
+      const status = window.i18n ? window.i18n.translate("general.winner") : "winner";
       return `
-      <span data-status class="status ${node.text_status === "draft" || node.text_status === "incomplete_draft" ? "draft" : "published" }">
-        ${node.text_status === "published" ? "published" : "draft"}
+      <span data-status class="status winner" data-i18n="general.winner"}>
+        ${status}
+      </span>`;
+    }
+    else if(node.text_status !== "published"){
+      const status = window.i18n ? window.i18n.translate("general.draft") : "draft";
+      return `
+      <span data-status class="status draft" data-i18n="general.draft"}>
+        ${status}
       </span>`;
     }else{
       return '';

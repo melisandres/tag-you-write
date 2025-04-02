@@ -89,7 +89,7 @@
   },
   "note-edit": {
     "here_is_what_you_wrote": "Voici votre texte: ",
-    "by_you": "par vous",
+    "your": "votre",
     "change_note_message": "Oops! Vous pouvez modifier votre note:",
     "leave_note_message": "Oops! Vous pouvez laisser une note pour les autres écrivains:",
     "add_note": "Ajouter Note",
@@ -125,7 +125,10 @@
     "bookmark_tooltip": "marquer",
     "iterate_tooltip": "iterer",
     "new_game_tooltip": "nouvelle partie",
-    "by": "par"
+    "by": "par",
+    "by_you": "votre texte",
+    "by_other": "par {firstName} {lastName}",
+    "winner": "GAGNANT"
   },
   "writer-create": {
     "first_name": "Prénom",

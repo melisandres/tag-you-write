@@ -17,24 +17,35 @@ export class Modal {
       this.modalElement.dataset.treeModal = "visible";
       this.modalElement.dataset.textId = data.id;
       this.modalElement.dataset.gameId = data.game_id;
+
+      // translate some strings
       let ps = window.i18n ? window.i18n.translate("modal.ps") : "P.S...";
       let draft = window.i18n ? window.i18n.translate("modal.draft") : "DRAFT";
       let winner = window.i18n ? window.i18n.translate("modal.winner") : "WINNER";
       let noteHtml = data.note ? `<p class="ps" data-i18n="modal.ps">${ps}</p> ${data.note}` : '';
+      const untitledText = window.i18n && window.i18n.translate("general.untitled") || "Untitled";
+      const untitledDataI18n = data.title ? '' : 'data-i18n="general.untitled"';
 
+      // log the values
+      console.log("untitledText", untitledText);
+      console.log("untitledDataI18n", untitledDataI18n);
+      console.log("data.title", data.title);
+
+      // build the modal content
       this.modalContent.innerHTML = `
             <div class="top-info ${data.text_status}">
               ${this.getNumberOfVotes(data)}
               ${data.text_status=='draft' || data.text_status=='incomplete_draft' ? `<span class="status draft" data-i18n="modal.draft">${draft}</span>` : ''}
               ${data.isWinner ? `<span class="status winner" data-i18n="modal.winner">${winner}</span>` : ''}
             </div>
-            <h2 class="headline">${data.title || "Untitled"}</h2>
+            <h2 class="headline" ${untitledDataI18n}>${data.title || untitledText}</h2>
             <h3 class="author"> -&nbsp${data.firstName} ${data.lastName}&nbsp- </h3>
             <div class="writing">${data.writing}</div>
             <div class="note">${noteHtml}</div>
         </div>
       `;
 
+      // build the actions with language in the url
       const iterateAction = window.i18n.createUrl('text/iterate');
       const editAction = window.i18n.createUrl('text/edit');
       const noteAction = window.i18n.createUrl('text/edit');

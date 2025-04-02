@@ -912,11 +912,15 @@ export class TreeVisualizer {
     
     formatAuthorName(data, fontSize) {
         if (data.permissions.isMyText) {
-            const draftText = data.text_status == 'draft' || data.text_status == 'incomplete_draft' 
-                ? (window.i18n ? window.i18n.translate("general.draft") : 'DRAFT') + ' '
-                : '';
-            const byYouText = window.i18n ? window.i18n.translate("note-edit.by_you") : 'by you';
-            return `${draftText}${byYouText}`;
+            if (data.text_status == 'draft' || data.text_status == 'incomplete_draft') {
+                // For drafts: "your DRAFT"
+                const yourText = window.i18n ? window.i18n.translate("note-edit.your") + ' ' : 'your ';
+                const draftText = window.i18n ? window.i18n.translate("general.draft") : 'DRAFT';
+                return `${yourText}${draftText}`;
+            } else {
+                // For completed texts: "by you"
+                return window.i18n ? window.i18n.translate("general.by_you") : 'by you';
+            }
         }
     
         const names = `${data.firstName} ${data.lastName}`.split(' ');
@@ -1494,15 +1498,18 @@ export class TreeVisualizer {
                     
                     // Only update if we have valid data
                     if (data && data.data && data.data.permissions) {
-                        // Get the formatted author name
                         let authorText = '';
                         
                         if (data.data.permissions.isMyText) {
-                            const draftText = (data.data.text_status === 'draft' || data.data.text_status === 'incomplete_draft') 
-                                ? (window.i18n ? window.i18n.translate("general.draft") : 'DRAFT') + ' '
-                                : '';
-                            const byYouText = window.i18n ? window.i18n.translate("note-edit.by_you") : 'by you';
-                            authorText = `${draftText}${byYouText}`;
+                            if (data.data.text_status === 'draft' || data.data.text_status === 'incomplete_draft') {
+                                // For drafts: "your DRAFT" / "votre brouillon"
+                                const yourText = window.i18n ? window.i18n.translate("note-edit.your") + ' ' : 'your ';
+                                const draftText = window.i18n ? window.i18n.translate("general.draft") : 'DRAFT';
+                                authorText = `${yourText}${draftText}`;
+                            } else {
+                                // For completed texts: "by you"/ "votre texte"
+                                authorText = window.i18n ? window.i18n.translate("general.by_you") : 'by you';
+                            }
                         } else {
                             const names = `${data.data.firstName} ${data.data.lastName}`.split(' ');
                             let formattedName = '';
