@@ -35,6 +35,8 @@ import { GameUpdateHandler } from './gameUpdateHandler.js';
 import { TreeShelfModalPollingUpdateManager } from './TreeShelfModalPollingUpdateManager.js';
 import { NotificationsMenuManager } from './notificationsMenuManager.js';
 import { Localization } from './localization.js';
+import { TooltipManager } from './tooltipManager.js';
+
 // Make eventBus globally available immediately
 window.eventBus = eventBus;
 
@@ -56,7 +58,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Initialize SeenManager
   const seenManager= new SeenManager();
-
 
 
   // TreeVisualizer is initialized sends a custom event to StoryManager when a node is clicked (to show the story in the modal)
@@ -120,6 +121,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   new TreeUpdateManager(treeVisualizer);
   new ModalUpdateManager();
   new IndexUpdateManager();
+
+    // Initialize TooltipManager
+    new TooltipManager();
 
 
    // Check for pending toasts

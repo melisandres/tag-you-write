@@ -112,10 +112,16 @@
 
     /* Contributed styles */
     --contributed-star: "☆ ";
-    --contributed-tooltip-text: "☆ contributor";
     --contributed-tooltip-left: var(--spacing-extra-large);
     --contributed-tooltip-top: 0;
     --contributed-tooltip-padding: 2px 6px;
+
+    /* Tooltip system (general) */
+    --tooltip-left: var(--spacing-extra-large);
+    --tooltip-top: 0;
+    --tooltip-padding: 2px 6px;
+    --tooltip-delay: var(--transition-delay);
+    --tooltip-transition: opacity var(--transition-duration) ease-in-out;
 
     /* Button styles */
     --button-width: 40px;

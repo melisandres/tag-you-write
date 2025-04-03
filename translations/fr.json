@@ -96,7 +96,8 @@
     "add_note_tooltip": "ajouter une note",
     "change_note": "Modifier Note",
     "change_note_tooltip": "modifier une note",
-    "note_placeholder": "Écrivez votre note ici..."
+    "note_placeholder": "Écrivez votre note ici...",
+    "by_you": "votre texte"
   },
   "general": {
     "greeting": "Bonjour, {name}!",
@@ -373,5 +374,8 @@
     "draft": "BROUILLON",
     "winner": "GAGNANT",
     "ps": "P.S..."
+  },
+  "tooltips": {
+    "contributor": "☆ contributeur"
   }
 }

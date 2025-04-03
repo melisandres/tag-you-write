@@ -103,6 +103,7 @@ export class GameListRenderer {
         // translate the strings
         const untitledText = window.i18n ? window.i18n.translate("general.untitled") : "Untitled";
         const untitledDataI18n = game.title ? '' : 'data-i18n="general.untitled"';
+        const tooltipContributor = hasContributed ? 'data-i18n-tooltip="tooltips.contributor"' : '';
 
         // build the game card
         return `
@@ -113,7 +114,7 @@ export class GameListRenderer {
                  data-text-count="${game.text_count}" 
                  data-text-id="${game.id}">
                 <div class="story-title ${game.unseen_count > 0 && this.userLoggedIn ? 'unreads' : ''}">
-                    <h2 class="${hasContributed ? 'contributed' : ''}">
+                    <h2 class="${hasContributed ? 'contributed' : ''}" ${tooltipContributor}>
                         <a data-refresh-default ${untitledDataI18n} data-text-id="${game.id}">
                             ${game.title || untitledText}
                         </a>

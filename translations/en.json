@@ -97,7 +97,8 @@
       "change_note": "Change Note",
       "change_note_tooltip": "change a note",
       "your": "your",
-      "note_placeholder": "Write your note here..."
+      "note_placeholder": "Write your note here...",
+      "by_you": "by you"
     },
     "general": {
       "greeting": "Hello, {name}!",
@@ -374,5 +375,8 @@
       "draft": "DRAFT",
       "winner": "WINNER",
       "ps": "P.S..."
+    },
+    "tooltips": {
+      "contributor": "☆ contributor"
     }
   }

@@ -383,35 +383,15 @@ export class DataManager {
         return sortedNodes;
     }
 
-    updateNode(nodeId, updateData) {
-        // Log the types to debug
-/*         console.log('Key types:', {
-            nodeId: typeof nodeId,
-            nodeIdValue: nodeId,
-            existingKeys: Array.from(this.cache.nodesMap.keys()).map(key => ({
-                key,
-                type: typeof key,
-                matches: key === nodeId,
-                strictMatches: key === String(nodeId)
-            }))
-        }); */
+    updateNode(nodeId, updateData) {        
+        // Always convert nodeId to string for consistency
+        const stringId = String(nodeId);
 
-        // Try both string and number versions of the key
-        let existingNode = this.cache.nodesMap.get(String(nodeId)) || 
-                          this.cache.nodesMap.get(Number(nodeId));
-
-/*         console.log('Node lookup:', {
-            searchId: nodeId,
-            foundWithString: this.cache.nodesMap.get(String(nodeId)),
-            foundWithNumber: this.cache.nodesMap.get(Number(nodeId)),
-            finalNode: existingNode
-        }); */
+        // Look up only using string ID
+        const existingNode = this.cache.nodesMap.get(stringId);
 
         if (!existingNode) {
-            /* console.log('Cache keys:', Array.from(this.cache.nodesMap.keys())); */
-            
-            // Log each cache entry separately
-            /* console.log('Cache entries:'); */
+            // Log each cache entry separately (keep your existing debug code)
             this.cache.nodesMap.forEach((value, key) => {
                 console.log(`Key: "${key}" (${typeof key})`, {
                     value,
@@ -420,13 +400,7 @@ export class DataManager {
                 });
             });
 
-/*             console.log(`Node ${nodeId} not found in cache. Current cache state:`, {
-                nodesMapKeys: Array.from(this.cache.nodesMap.keys()),
-                treesKeys: Array.from(this.cache.trees.keys())
-            }); */
-
-            //TODO: I thought I was sending nodeAdded... instead of nodeUpdated with a null oldNode... 
-            this.addNewNode(nodeId, updateData);
+            this.addNewNode(stringId, updateData);
             eventBus.emit('nodeUpdated', { oldNode: null, newNode: updateData });
             return;
         }
@@ -438,13 +412,12 @@ export class DataManager {
             children: existingNode.children || [],
             permissions: existingNode.permissions,
         };
-        /* console.log("Updated node data:", updatedNode); */
 
         // Emit an event with both the old node and the new node
         eventBus.emit('nodeUpdated', { oldNode: existingNode, newNode: updatedNode });
 
         // Update the flat map
-        this.cache.nodesMap.set(Number(nodeId), updatedNode);
+        this.cache.nodesMap.set(stringId, updatedNode);
 
         // Update the hierarchical tree structure
         const rootId = this.getCurrentViewedRootStoryId();
@@ -456,12 +429,6 @@ export class DataManager {
 
         // Save changes to the cache
         this.saveCache();
-
-        // Log the complete updated node to verify all properties are preserved
-        /* console.log('Node updated with all properties:', this.cache.nodesMap.get(nodeId)); */
-
-        // Emit an event if needed to notify UI or other components
-        //eventBus.emit('nodeUpdated', { id: nodeId, node: updatedNode });
     }
     
     updateNodeInHierarchy(treeNode, updatedNode) {
@@ -491,64 +458,39 @@ export class DataManager {
     }
 
     addNewNode(nodeId, nodeData) {
-/*         console.log('addNewNode called with:', {
-            nodeId,
-            nodeData,
-            parentId: nodeData.parent_id,
-            currentRootId: this.getCurrentViewedRootStoryId()
-        }); */
+        // Convert ID to string
+        const stringId = String(nodeId);
 
         // Normalize the data
         const normalizedData = {
             ...nodeData,
-            id: Number(nodeData.id),
-            parent_id: nodeData.parent_id ? Number(nodeData.parent_id) : null,
-            game_id: Number(nodeData.game_id),
+            id: stringId,
+            parent_id: nodeData.parent_id ? String(nodeData.parent_id) : null,
+            game_id: String(nodeData.game_id),
             children: nodeData.children || [],
             permissions: nodeData.permissions || {}
         };
 
-        /* console.log('Normalized data:', normalizedData); */
+        this.cache.nodesMap.set(stringId, normalizedData);
 
-        this.cache.nodesMap.set(String(nodeId), normalizedData);
-/*         console.log('Cache after setting new node:', {
-            nodesMapSize: this.cache.nodesMap.size,
-            hasNode: this.cache.nodesMap.has(String(nodeId)),
-            node: this.cache.nodesMap.get(String(nodeId))
-        }); */
+        // Log the node addition
+        console.log(`[DEBUG] Added new node data:`, {
+            id: normalizedData.id,
+            idType: typeof normalizedData.id,
+            status: normalizedData.text_status
+        });
 
         // Update the hierarchical structure
         const rootId = this.getCurrentViewedRootStoryId();
         const cachedTree = this.cache.trees.get(String(rootId));
 
-/*         console.log('Cached tree state:', {
-            rootId,
-            hasTree: Boolean(cachedTree),
-            treeData: cachedTree?.data
-        }); */
-
         if (cachedTree?.data) {
-            /* console.log('Attempting to insert into hierarchy with parent:', normalizedData.parent_id); */
             const inserted = this.insertNodeInHierarchy(cachedTree.data, normalizedData);
-            /* console.log('Insertion result:', inserted); */
+            console.log('Inserted node:', inserted);
         }
 
-        // Log cache state before saving
-/*         console.log('Cache state before save:', {
-            games: this.cache.games.size,
-            trees: this.cache.trees.size,
-            nodesMap: this.cache.nodesMap.size,
-            sample: Array.from(this.cache.nodesMap.entries()).slice(0, 2)
-        }); */
-
         this.saveCache();
-
-        // Log cache state after saving
-        const savedCache = localStorage.getItem('storyCache');
-/*         console.log('Saved cache state:', {
-            raw: savedCache,
-            parsed: JSON.parse(savedCache)
-        }); */
+        return normalizedData;
     }
 
     insertNodeInHierarchy(treeNode, newNode) {
@@ -623,8 +565,7 @@ export class DataManager {
 
     // Helper method to get a node quickly
     getNode(nodeId) {
-        return this.cache.nodesMap.get(String(nodeId)) || 
-               this.cache.nodesMap.get(Number(nodeId));
+        return this.cache.nodesMap.get(String(nodeId));
     }
 
     // Helper method to get parent of a node
@@ -640,9 +581,9 @@ export class DataManager {
             if (savedCache) {
                 const parsed = JSON.parse(savedCache);
                 const cache = {
-                    games: new Map(parsed.games),
-                    trees: new Map(parsed.trees),
-                    nodesMap: new Map(parsed.nodesMap),
+                    games: new Map(parsed.games || []),
+                    trees: new Map(parsed.trees || []),
+                    nodesMap: new Map(parsed.nodesMap || []),
                     lastGamesCheck: parsed.lastGamesCheck || Date.now(),
                     currentViewedRootId: parsed.currentViewedRootId,
                     pagination: parsed.pagination,
@@ -719,7 +660,7 @@ export class DataManager {
     }
 
     getGame(gameId) {
-        return this.cache.games.get(gameId);
+        return this.cache.games.get(String(gameId));
     }
 
     getPaginatedData() {
@@ -813,7 +754,10 @@ export class DataManager {
      replaceAll(games) {
         this.cache.games.clear();
         games.forEach(game => {
-            this.cache.games.set(game.game_id, {
+            // Always use string ID for the key
+            const gameId = String(game.game_id);
+            
+            this.cache.games.set(gameId, {
                 data: this.normalizeGameData(game),
                 timestamp: Date.now()
             });
@@ -830,14 +774,13 @@ export class DataManager {
         
         games.forEach(game => {
             const normalized = this.normalizeGameData(game);
-/*             const existing = this.cache.games.get(game.game_id);
-    
-            if (!existing || existing.timestamp < this.lastFullUpdate) { */
-                this.cache.games.set(game.game_id, {
-                    data: normalized,
-                    timestamp: Date.now()
-                });
-/*             } */
+            // Always use string ID for the key
+            const gameId = String(game.game_id);
+            
+            this.cache.games.set(gameId, {
+                data: normalized,
+                timestamp: Date.now()
+            });
         });
     }
 
@@ -859,8 +802,8 @@ export class DataManager {
     // Normalize game data to match the expected format
     normalizeGameData(game) {
         return {
-            game_id: game.game_id,
-            text_id: game.id,
+            game_id: String(game.game_id),  // Convert to string
+            text_id: String(game.id),       // Convert to string
             title: game.title,
             prompt: game.prompt,
             open_for_changes: game.openForChanges === '1' || 
@@ -890,10 +833,15 @@ export class DataManager {
         const flattenTree = (node, parentId = null) => {
             if (!node) return;
             
-            const nodeData = { ...node, parent_id: parentId };
-            this.cache.nodesMap.set(node.id, nodeData);
+            const stringId = String(node.id);
+            const nodeData = { 
+                ...node,
+                id: stringId,
+                parent_id: parentId ? String(parentId) : null
+            };
+            this.cache.nodesMap.set(stringId, nodeData);
             
-            node.children?.forEach(child => flattenTree(child, node.id));
+            node.children?.forEach(child => flattenTree(child, stringId));
         };
         
         flattenTree(treeData);

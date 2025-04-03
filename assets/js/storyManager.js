@@ -108,7 +108,6 @@ export class StoryManager {
 
   // A tree is requested, this is where we check the cache
   async prepareData(id) {
-    console.log(`prepareData called for ID: ${id}`);
     let cachedData = this.dataManager.getTree(id);
 
     // Showing a new tree/shelfmeans updating search results IF there's an active search

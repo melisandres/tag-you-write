@@ -246,7 +246,7 @@ export class FormManager {
     showNewGameWarning() {
         const warningManager = new WarningManager();
         warningManager.createWarningModal(
-            "warning.newgame",
+            "warning.new_game",
             () => {
                 this.statusField.value = 'published';
                 const endpoint = 'text/update';

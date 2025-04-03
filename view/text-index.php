@@ -13,7 +13,7 @@
 {% for text in texts %}
     <div class="story {{ text.openForChanges ? '' : 'closed' }}" data-game-id="{{ text.game_id }}" data-unseen-count="{{ text.unseen_count }}" data-seen-count="{{ text.seen_count }}" data-text-count="{{ text.text_count }}" data-text-id="{{ text.id }}">
         <div class="story-title {% if session.writer_id and text.unseen_count %}unreads{% endif %}">
-            <h2 class="{{ text.hasContributed ? 'contributed' : '' }}">
+            <h2 class="{{ text.hasContributed ? 'contributed' : '' }}" data-i18n-tooltip="{{ text.hasContributed ? 'tooltips.contributor' : '' }}">
                 <!-- TODO: The chosen language for "Untitled" or "Sans Titre" should be based on the language of that text as defined by the writer. For now, it will be updated based on the language toggle of the website. It's FINE, as Untitled is only possible for DRAFTS... meaning the draft text will ALWAYS BELONG TO THE USER, so having Untitled translated in their chosen language is APROPRIATE. -->
                 <a data-refresh-default data-text-id="{{ text.id }}" {{ text.title ? '' : 'data-i18n="general.untitled"' }}>{{ text.title ? text.title : translate('general.untitled') }}</a>
             </h2>

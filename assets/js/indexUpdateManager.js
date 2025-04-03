@@ -109,6 +109,7 @@ export class IndexUpdateManager {
     const gameElement = document.querySelector(`[data-game-id="${gameId}"] .contributed`);
     if(gameElement) {
       gameElement.classList.toggle('contributed', hasContributed);
+      gameElement.setAttribute('data-i18n-tooltip', hasContributed ? 'tooltips.contributor' : '');
     }
   }
 

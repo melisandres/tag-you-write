@@ -204,6 +204,9 @@ export class Localization {
         
         // Update all URLs on the page
         this.updatePageUrls(this.previousLanguage, lang);
+
+        // Update tooltips
+        this.updateTooltips();
         
         // Update URL without reloading the page
         const currentUrl = new URL(window.location.href);
@@ -351,6 +354,9 @@ export class Localization {
 
             // After updating the translation, check for SVGs that need to be inserted
             this.updateSVGsInTranslatedContent(element);
+
+            // Update tooltips
+            this.updateTooltips();
         } else {
             // Standard text translation
             element.textContent = this.translate(key, params);
@@ -401,6 +407,17 @@ export class Localization {
       const titleKey = titleElement.getAttribute('data-i18n-title');
       titleElement.textContent = this.translate(titleKey);
     }
+  }
+
+  /**
+   * Update all tooltips on the page
+   */
+  updateTooltips() {
+    const tooltipElements = document.querySelectorAll('[data-i18n-tooltip]');
+    tooltipElements.forEach(element => {
+      const key = element.getAttribute('data-i18n-tooltip');
+      element.setAttribute('data-tooltip-text', this.translate(key));
+    });
   }
 
   handleInnerTranslations() {

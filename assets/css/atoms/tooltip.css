@@ -1,0 +1,58 @@
+/* Base tooltip functionality */
+[data-i18n-tooltip] {
+    position: relative; /* Ensure that the tooltip is positioned relative to this element */
+}
+
+[data-i18n-tooltip]::after {
+    content: attr(data-tooltip-text); /* Will be set by JS */
+    position: absolute;
+    left: var(--tooltip-left);
+    top: var(--tooltip-top);
+    background-color: var(--color-black-light);
+    font-size: var(--font-size-small);
+    font-weight: 100;
+    color: var(--color-white);
+    padding: var(--tooltip-padding);
+    white-space: nowrap;
+    opacity: 0; /* Hide the tooltip initially */
+    transition: var(--tooltip-transition);
+    pointer-events: none; /* Prevent the tooltip from capturing pointer events */
+    z-index: 1; /* Ensure tooltip appears above other elements */
+}
+
+[data-i18n-tooltip]:hover::after {
+    opacity: 1; /* Show the tooltip on hover */
+    transition-delay: var(--tooltip-delay);
+}
+
+/* Maintain backward compatibility with .contributed */
+.contributed:not([data-i18n-tooltip])::before {
+    content: var(--contributed-star);
+    font-weight: 100;
+    color: var(--color-secondary-dark);
+}
+
+.contributed:not([data-i18n-tooltip]) {
+    position: relative;
+}
+
+.contributed:not([data-i18n-tooltip])::after {
+    content: var(--contributed-star) "contributor"; /* Fallback if JS doesn't run */
+    position: absolute;
+    left: var(--contributed-tooltip-left);
+    top: var(--contributed-tooltip-top);
+    background-color: var(--color-black-light);
+    font-size: var(--font-size-small);
+    font-weight: 100;
+    color: var(--color-white);
+    padding: var(--contributed-tooltip-padding);
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity var(--transition-duration) ease-in-out;
+    pointer-events: none;
+}
+
+.contributed:not([data-i18n-tooltip]):hover::after {
+    opacity: 1;
+    transition-delay: var(--transition-delay);
+}

@@ -6,6 +6,7 @@
 @import url(./atoms/toast.css);
 @import url(./atoms/word-count-display.css);
 @import url(./atoms/language-switcher.css);
+@import url(./atoms/tooltip.css);
 
 /* atoms/buttons */
 @import url(./atoms/buttons/btns.css);
