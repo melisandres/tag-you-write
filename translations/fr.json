@@ -302,7 +302,18 @@
         "email": "*doit être une adresse email valide"
       },
       "password": {
-        "required": "*requis"
+        "required": "*requis",
+        "max_character_count": "*20 caractères max",
+        "min_character_count": "*6 caractères min",
+        "pattern": "*seuls les lettres et les chiffres sont autorisés"
+      }
+    },
+    "resetPassword": {
+      "password": {
+        "required": "*requis",
+        "max_character_count": "*20 caractères max",
+        "min_character_count": "*6 caractères min",
+        "pattern": "*seuls les lettres et les chiffres sont autorisés"
       }
     },
     "writerCreate": {
@@ -349,6 +360,9 @@
   "auth": {
     "no_match": "Nom d'utilisateur et/ou mot de passe ne correspondent pas",
     "account_created": "Compte créé avec succès! Bienvenue!",
+    "login_success": "Connexion réussie",
+    "validation_failed": "Validation échouée",
+    "invalid_json": "Données reçues invalides",
     "account_created_email": {
       "email_title": "Bienvenue dans la famille Tag You Write",
       "email_message": "Bienvenue {name}! Tag You Write est une expérience. J'espère qu'il sera un moyen amusant de rédiger des petites pièces collaborativement. Si vous avez des problèmes avec votre compte, ou des retours, n'hésitez pas à cliquer sur \"répondre\"."

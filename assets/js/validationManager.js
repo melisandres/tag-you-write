@@ -219,7 +219,18 @@ export class ValidationManager {
                     this.validateEmail('front_val.login.email.email')
                 ],
                 password: [
-                    this.validateRequired('front_val.login.password.required')
+                    this.validateRequired('front_val.login.password.required'),
+                    this.validateMaxCharacterCount(20, 'front_val.login.password.max_character_count'),
+                    this.validateMinCharacterCount(6, 'front_val.login.password.min_character_count'),
+                    this.validatePattern('alphanum', 'front_val.login.password.pattern'),   
+                ]
+            },
+            resetPassword: {
+                password: [
+                    this.validateRequired('front_val.resetPassword.password.required'),
+                    this.validateMaxCharacterCount(20, 'front_val.resetPassword.password.max_character_count', 'critical'),
+                    this.validateMinCharacterCount(6, 'front_val.resetPassword.password.min_character_count', 'critical'),
+                    this.validatePattern('alphanum', 'front_val.resetPassword.password.pattern', 'critical'),   
                 ]
             },
             writerCreate: {

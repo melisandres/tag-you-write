@@ -122,6 +122,12 @@ export class FormManager {
             case 'cancel':
                 this.handleCancel();
                 break;
+            case 'login':
+                this.handleLogin();
+                break;
+            case 'resetPassword':
+                this.handleResetPassword();
+                break;
             default:
                 console.log("button has not been given a purpose!");
         }
@@ -195,9 +201,30 @@ export class FormManager {
     }
 
     handleLogin() {
-        const urlAction = this.form.getAttribute('action');
-        this.submitForm(urlAction);
+        if (this.canPublish) {
+            const urlAction = this.form.getAttribute('action');
+            this.submitForm(urlAction);
+        } else {
+            eventBus.emit('showToast', { 
+                message: 'toast.form_manager.please_fill_required_fields_correctly', 
+                type: 'error' 
+            });
+        }
     }
+
+    handleResetPassword() {
+        if (this.canPublish) {
+            const urlAction = this.form.getAttribute('action');
+            this.submitForm(urlAction);
+        } else {
+            eventBus.emit('showToast', { 
+                message: 'toast.form_manager.please_fill_required_fields_correctly', 
+                type: 'error' 
+            });
+        }
+    }
+
+    
 
     async handleDelete() {
         const idInput = this.form.querySelector('[data-id]');
@@ -377,6 +404,18 @@ export class FormManager {
                     
                     // Update browser history without refreshing
                     window.history.replaceState({id: responseData.textId}, document.title, newUrl);
+                }
+            } else {
+                // Handle unsuccessful responses (e.g., failed login)
+                eventBus.emit('showToast', {
+                    message: responseData.toastMessage,
+                    type: responseData.toastType || 'error'
+                });
+                
+                // If there are specific errors to display in the form
+                if (responseData.errors) {
+                    // You could add code here to display errors in the form if needed
+                    console.log('Validation errors:', responseData.errors);
                 }
             }
         } catch (error) {

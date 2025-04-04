@@ -303,7 +303,18 @@
           "email": "*must be a valid email address"
         },
         "password": {
-          "required": "*required"
+          "required": "*required",
+          "max_character_count": "*20 characters max",
+          "min_character_count": "*6 characters min",
+          "pattern": "*only letters and numbers allowed"
+        }
+      },
+      "resetPassword": {
+        "password": {
+          "required": "*required",
+          "max_character_count": "*20 characters max",
+          "min_character_count": "*6 characters min",
+          "pattern": "*only letters and numbers allowed"
         }
       },
       "writerCreate": {
@@ -350,6 +361,9 @@
     "auth": {
       "no_match": "Username and/or password don't match",
       "account_created": "Account created successfully! Welcome!",
+      "login_success": "Login successful",
+      "validation_failed": "Validation failed",
+      "invalid_json": "Invalid data received",
       "account_created_email": {
         "email_title": "Welcome to the Tag You Write family",
         "email_message": "Welcome {name}! Tag you write is an experiment. I'm hoping it will be a fun way to write small pieces collaboratively. If you have any issues with your account, or any feedback, just hit \"reply\". Thanks for participating!"

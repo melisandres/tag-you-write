@@ -27,7 +27,7 @@
 
         <div class="form-btns">
             <button class="login" type="submit" value="login" data-button-type="login">
-                <span class="icon" data-svg="logIn" data-i18n-title="login.login_tooltip" title="{{ translate('login.login_tooltip') }}"></span>
+                <span class="icon" data-status="login" data-svg="logIn" data-i18n-title="login.login_tooltip" title="{{ translate('login.login_tooltip') }}"></span>
                 <span data-i18n="login.login" class="title">{{ translate('login.login') }}</span>
             </button>
         </div>
