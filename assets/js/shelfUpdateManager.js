@@ -147,11 +147,14 @@ export class ShelfUpdateManager {
           const endpoint = `text/edit`;
           const actionUrl = window.i18n.createUrl(endpoint);
           
+          // translate the "titles"
+          const addNoteTitle = window.i18n.translate('general.add_note');
+
           // Add the note button
           nodeButtons.innerHTML = `
             <form action="${actionUrl}" method="POST">
               <input type="hidden" name="id" value="${textId}">
-              <button type="submit" class="note" value="Edit">
+              <button type="submit" class="note" value="Edit" data-i18n-title="general.add_note" title="${addNoteTitle}">
                 ${SVGManager.addNoteSVG}
               </button>
             </form>

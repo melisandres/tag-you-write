@@ -68,12 +68,16 @@ export class ModalUpdateManager {
 
       // Update buttons
       const modalBtns = modal.querySelector('.modal-dynamic-btns');
+
+      // translate the "titles"
+      const iterateTitle = window.i18n.translate('general.iterate');
+
       if (modalBtns) {
         const editAction = window.i18n.createUrl('text/edit');
         modalBtns.innerHTML = `
           <form action="${editAction}" method="POST" class="note-form">
             <input type="hidden" name="id" value="${textId}">
-            <button type="submit" class="note">
+            <button type="submit" class="note" data-i18n-title="general.add_note" title="${noteTitle}">
               ${SVGManager.addNoteSVG}
             </button>
           </form>
@@ -109,11 +113,15 @@ export class ModalUpdateManager {
       // Update status to indicate it's the winning text
       const topInfo = modal.querySelector('.top-info');
       if (topInfo) {
+        // translate the strings
+        const winnerTitle = window.i18n.translate('general.winner');
+
         // add winner class
         topInfo.classList.add('winner');
         const statusSpan = topInfo.querySelector('.status') || document.createElement('span');
         statusSpan.className = 'status winner';
-        statusSpan.textContent = 'WINNER';
+        statusSpan.setAttribute('data-i18n', 'general.winner');
+        statusSpan.textContent = winnerTitle;
         topInfo.appendChild(statusSpan);
 
         // change the vote count to +1

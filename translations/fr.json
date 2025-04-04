@@ -104,17 +104,17 @@
     "email": "courriel",
     "password": "mot de passe",
     "username": "nom d'utilisateur",
-    "untitled": "Sans titre",
-    "publish": "Publier",
-    "publish_tooltip": "Publier votre texte",
-    "save": "Garder",
-    "save_tooltip": "Sauvegarder comme brouillon",
-    "delete": "Jeter",
-    "delete_tooltip": "Supprimer ce texte",
-    "cancel": "Annuler",
-    "cancel_tooltip": "Quitter sans sauvegarder",
+    "untitled": "sans titre",
+    "publish": "publier",
+    "publish_tooltip": "publier votre texte",
+    "save": "garder",
+    "save_tooltip": "sauvegarder comme brouillon",
+    "delete": "jeter",
+    "delete_tooltip": "supprimer ce texte",
+    "cancel": "annuler",
+    "cancel_tooltip": "quitter sans sauvegarder",
     "draft": "brouillon",
-    "exit": "Quitter", 
+    "exit": "quitter", 
     "game": "COLLAB",
     "closed": "FERMÉE",
     "pending": "À VENIR",
@@ -123,13 +123,19 @@
     "view_shelf_tooltip": "voir en rayon",
     "tree_tooltip": "arbre",
     "shelf_tooltip": "rayon",
-    "bookmark_tooltip": "marquer",
+    "vote_tooltip": "votez!",
+    "login_tooltip": "connexion",
+    "bookmark_tooltip": "suivre",
     "iterate_tooltip": "iterer",
     "new_game_tooltip": "nouvelle partie",
     "by": "par",
     "by_you": "votre texte",
     "by_other": "par {firstName} {lastName}",
-    "winner": "GAGNANT"
+    "winner": "GAGNANT",
+    "iterate": "iterer",
+    "edit": "modifier",
+    "add_note": "ajouter une note",
+    "vote": "voter"
   },
   "writer-create": {
     "first_name": "Prénom",
@@ -376,6 +382,9 @@
     "ps": "P.S..."
   },
   "tooltips": {
-    "contributor": "☆ contributeur"
+    "contributor": "☆ contributeur",
+    "bookmark_tooltip": "suivre",
+    "tree_tooltip": "arbre",
+    "shelf_tooltip": "rayon"
   }
 }

@@ -53,6 +53,7 @@ export class DataManager {
         // Subscribe to relevant events
         eventBus.on('requestGameData', (gameId) => {
             const gameData = this.cache.games.get(gameId)?.data;
+            console.log('GAME DATA in requestGameData', gameData);
             eventBus.emit('gameDataResponse', { gameId, data: gameData });
         });
 

@@ -50,12 +50,20 @@ export class Modal {
       const editAction = window.i18n.createUrl('text/edit');
       const noteAction = window.i18n.createUrl('text/edit');
 
+      // translate the "titles"
+      const iterateTitle = window.i18n.translate('general.iterate');
+      const editTitle = window.i18n.translate('general.edit');
+      const noteTitle = window.i18n.translate('general.add_note');
+      const publishTitle = window.i18n.translate('general.publish');
+      const deleteTitle = window.i18n.translate('general.delete');
+      const voteTitle = window.i18n.translate('general.vote');
+
       this.modalBtns.innerHTML = 
       `
       ${data.permissions.canIterate ? `
         <form action="${iterateAction}" method="POST" class="iterate-form">
           <input type="hidden" name="id" value="${data.id}">
-          <button type="submit" class="iterate">
+          <button type="submit" class="iterate" data-i18n-title="general.iterate" title="${iterateTitle}">
             ${SVGManager.iterateSVG}
           </button>
         </form>
@@ -64,7 +72,7 @@ export class Modal {
       ${data.permissions.canEdit ? `
         <form action="${editAction}" method="POST" class="edit-form">
           <input type="hidden" name="id" value="${data.id}">
-          <button type="submit" class="edit">
+          <button type="submit" class="edit" data-i18n-title="general.edit" title="${editTitle}">
             ${SVGManager.editSVG}
           </button>
         </form>
@@ -73,26 +81,26 @@ export class Modal {
       ${data.permissions.canAddNote ? `
         <form action="${noteAction}" method="POST" class="note-form">
           <input type="hidden" name="id" value="${data.id}">
-          <button type="submit" class="note">
+          <button type="submit" class="note" data-i18n-title="general.add_note" title="${noteTitle}">
             ${SVGManager.addNoteSVG}
           </button>
         </form>
       ` : ''}
 
        ${data.permissions.canPublish ? `
-        <button data-text-id="${data.id}" data-insta-publish-button class="publish">
+        <button data-text-id="${data.id}" data-insta-publish-button class="publish" data-i18n-title="general.publish" title="${publishTitle}">
           ${SVGManager.publishSVG}
         </button>
       ` : ''}
 
       ${data.permissions.canDelete ? `
-        <button data-insta-delete-button data-text-id="${data.id}" class="delete">
+        <button data-insta-delete-button data-text-id="${data.id}" class="delete" data-i18n-title="general.delete" title="${deleteTitle}">
           ${SVGManager.deleteSVG}
         </button>
       ` : ''}
 
       ${data.permissions.canVote ? `
-        <button class="vote ${data.hasVoted == 1 ? 'voted' : ''}" data-vote=${data.id}>
+        <button class="vote ${data.hasVoted == 1 ? 'voted' : ''}" data-vote=${data.id} data-i18n-title="general.vote" title="${voteTitle}">
           ${SVGManager.voteSVG}
         </button>
       ` : ''}

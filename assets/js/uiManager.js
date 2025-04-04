@@ -8,7 +8,6 @@ export class UIManager {
     this.SVGManager = SVGManager;
     this.showcaseManager = new ShowcaseManager();
     this.initSvgs();
-    this.insertLoginLogoutSVGs();
     this.initEventListeners();
     this.stories = document.querySelector(".stories");
     this.oneStory = document.querySelector('[data-one-story]');
@@ -195,20 +194,5 @@ export class UIManager {
     }
 
     return container;
-  }
-
-  insertLoginLogoutSVGs() {
-/*     const loginLink = document.querySelector('.nav-link.writers[href*="login"]:not([href*="logout"])');
-    const logoutLink = document.querySelector('.nav-link.writers[href*="logout"]');
-
-    if (loginLink) {
-      loginLink.innerHTML = this.SVGManager.logInSVG;
-      loginLink.setAttribute('title', 'Login');
-    }
-
-    if (logoutLink) {
-      logoutLink.innerHTML = this.SVGManager.logOutSVG;
-      logoutLink.setAttribute('title', 'Logout');
-    } */
   }
 }

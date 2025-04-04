@@ -157,11 +157,17 @@ export class ShelfVisualizer {
 
   getIterateForm(node) {
     const endpoint = `text/iterate`;
+
+    // add language to the endpoint
     const actionUrl = window.i18n.createUrl(endpoint);
+
+    // translate the "title"
+    const iterateTitle = window.i18n.translate('general.iterate');
+
     return `
     <form action="${actionUrl}" method="POST">
       <input type="hidden" name="id" value="${node.id}">
-      <button type="submit" class="iterate">
+      <button type="submit" class="iterate" data-i18n-title="general.iterate" title="${iterateTitle}">
         ${SVGManager.iterateSVG}
       </button>
     </form>
@@ -170,12 +176,18 @@ export class ShelfVisualizer {
 
   getEditForm(node) {
     const endpoint = `text/edit`;
+
+    // add language to the endpoint
     const actionUrl = window.i18n.createUrl(endpoint);
+
+    // translate the "title"
+    const editTitle = window.i18n.translate('general.edit');
+
     return `
       <form action="${actionUrl}" method="POST">
         <input type="hidden" name="id" value="${node.id}">
         <input type="hidden" name="parent_id" value="${node.parent_id}">
-        <button type="submit" class="edit" value="Edit">
+        <button type="submit" class="edit" value="Edit" data-i18n-title="general.edit" title="${editTitle}">
           ${SVGManager.editSVG}
         </button>
       </form>
@@ -184,11 +196,17 @@ export class ShelfVisualizer {
 
   getNoteForm(node) {
     const endpoint = `text/edit`;
+
+    // add language to the endpoint
     const actionUrl = window.i18n.createUrl(endpoint);
+
+    // translate the "title"
+    const addNoteTitle = window.i18n.translate('general.add_note');
+
     return `
       <form action="${actionUrl}" method="POST">
         <input type="hidden" name="id" value="${node.id}">
-        <button type="submit" class="note" value="Edit">
+        <button type="submit" class="note" value="Edit" data-i18n-title="general.add_note" title="${addNoteTitle}">
           ${SVGManager.addNoteSVG}
         </button>
       </form>
@@ -196,26 +214,32 @@ export class ShelfVisualizer {
   }
 
   getVoteButton(node) {
-      return `
-        <button class="vote ${node.hasVoted == 1? 'voted' : ''}" data-vote=${node.id}>
-          ${SVGManager.voteSVG}
-        </button>
+    const voteTitle = window.i18n.translate('general.vote');
+
+    return `
+      <button class="vote ${node.hasVoted == 1? 'voted' : ''}" data-vote=${node.id} data-i18n-title="general.vote" title="${voteTitle}">
+        ${SVGManager.voteSVG}
+      </button>
     `;
   }
 
   getPublishForm(node) {
+    const publishTitle = window.i18n.translate('general.publish');
+
     return `
         <button data-text-id="${node.id}" 
-        data-insta-publish-button class="publish">
+        data-insta-publish-button class="publish" data-i18n-title="general.publish" title="${publishTitle}">
           ${SVGManager.publishSVG}
         </button>
     `;
   }
 
   getDeleteForm(node) {
+    const deleteTitle = window.i18n.translate('general.delete');
+
     return `
       <button
-      data-insta-delete-button data-text-id="${node.id}" class="delete">
+      data-insta-delete-button data-text-id="${node.id}" class="delete" data-i18n-title="general.delete" title="${deleteTitle}">
         ${SVGManager.deleteSVG}
       </button>
     `;
@@ -276,13 +300,16 @@ export class ShelfVisualizer {
 
   getStatus(node){
     if(node.isWinner){
+      // translate the string
       const status = window.i18n ? window.i18n.translate("general.winner") : "winner";
+
       return `
       <span data-status class="status winner" data-i18n="general.winner"}>
         ${status}
       </span>`;
     }
     else if(node.text_status !== "published"){
+      // translate the string
       const status = window.i18n ? window.i18n.translate("general.draft") : "draft";
       return `
       <span data-status class="status draft" data-i18n="general.draft"}>

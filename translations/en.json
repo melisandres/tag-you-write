@@ -15,8 +15,8 @@
         "newGame_tooltip": "create a new collaboration",
         "notifications": "Notifications",
         "notifications_tooltip": "notifications",
-        "login": "Login",
-        "login_tooltip": "login",
+        "login": "Log in",
+        "login_tooltip": "log in",
         "logout": "Logout",
         "logout_tooltip": "logout"
     },
@@ -59,7 +59,7 @@
     "login": {
       "page_title": "Log in",
       "login": "Log in",
-      "login_tooltip": "login",
+      "login_tooltip": "log in",
       "forgot_password": "Forgot Password",
       "forgot_password_tooltip": "forgot password",
       "create_account": "Create Account",
@@ -105,17 +105,17 @@
       "email": "email",
       "password": "password",
       "username": "username",
-      "untitled": "Untitled",
-      "publish": "Publish",
-      "publish_tooltip": "Publish your text",
-      "save": "Save",
-      "save_tooltip": "Save as draft",
-      "delete": "Delete",
-      "delete_tooltip": "Delete this text",
-      "cancel": "Cancel",
-      "cancel_tooltip": "Exit without saving",
+      "untitled": "untitled",
+      "publish": "publish",
+      "publish_tooltip": "publish your text",
+      "save": "save",
+      "save_tooltip": "save as draft",
+      "delete": "delete",
+      "delete_tooltip": "delete this text",
+      "cancel": "cancel",
+      "cancel_tooltip": "exit without saving",
       "draft": "draft",
-      "exit": "Exit",
+      "exit": "exit",
       "game": "COLLAB",
       "pending": "PENDING",
       "open": "OPEN",
@@ -124,13 +124,19 @@
       "view_shelf_tooltip": "view shelf",
       "tree_tooltip": "tree",
       "shelf_tooltip": "shelf",
+      "vote_tooltip": "vote!",
+      "login_tooltip": "log in",
       "bookmark_tooltip": "bookmark",
       "iterate_tooltip": "iterate",
       "new_game_tooltip": "new game",
       "by": "by",
       "by_you": "by you",
       "by_other": "by {firstName} {lastName}",
-      "winner": "WINNER"
+      "winner": "WINNER",
+      "iterate": "iterate",
+      "edit": "edit",
+      "add_note": "add note",
+      "vote": "vote"
     },
     "writer-create": {
       "first_name": "First Name",
@@ -155,7 +161,7 @@
       "add_a_few_words": "Add a few words to someone else's.",
       "write_a_sentence": "Write a sentence, and see it grow legs.",
       "write_a_phrase": "Write a phrase, and watch its head roll away.",
-      "login": "login",
+      "login": "log in",
       "browse": "browse collaborations",
       "how": "how it works",
       "how_to_collaborate": "how to collaborate",
@@ -377,6 +383,9 @@
       "ps": "P.S..."
     },
     "tooltips": {
-      "contributor": "☆ contributor"
+      "contributor": "☆ contributor",
+      "bookmark_tooltip": "bookmark",
+      "tree_tooltip": "tree",
+      "shelf_tooltip": "shelf"
     }
   }

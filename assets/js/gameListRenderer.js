@@ -132,16 +132,21 @@ export class GameListRenderer {
     }
 
     renderStoryButtons(game) {
+        //translate the tooltips
+        const bookmarkTooltip = window.i18n.translate('general.bookmark_tooltip');
+        const treeTooltip = window.i18n.translate('general.view_tree_tooltip');
+        const shelfTooltip = window.i18n.translate('general.view_shelf_tooltip');
+
         return `
             ${this.userLoggedIn ? `
-                <button data-bookmark-story data-text-id="${game.id}" class="story-btn bookmark-btn" data-svg="bookmark">
+                <button data-bookmark-story data-text-id="${game.id}" class="story-btn bookmark-btn" data-svg="bookmark" data-i18n-title="general.bookmark_tooltip" title="${bookmarkTooltip}">
                     <span class="icon" data-svg="bookmark">${SVGManager.bookmarkSVG}</span>
                 </button>
             ` : ''}
-            <button data-refresh-tree data-text-id="${game.id}" class="story-btn" data-svg="tree">
+            <button data-refresh-tree data-text-id="${game.id}" class="story-btn" data-svg="tree" data-i18n-title="general.view_tree_tooltip" title="${treeTooltip}">
                 <span class="icon" data-svg="tree">${SVGManager.treeSVG}</span>
             </button>
-            <button data-refresh-shelf data-text-id="${game.id}" class="story-btn" data-svg="shelf">
+            <button data-refresh-shelf data-text-id="${game.id}" class="story-btn" data-svg="shelf" data-i18n-title="general.view_shelf_tooltip" title="${shelfTooltip}">
                 <span class="icon" data-svg="shelf">${SVGManager.shelfSVG}</span>
             </button>
         `;

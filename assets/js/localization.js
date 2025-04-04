@@ -316,6 +316,10 @@ export class Localization {
    * @param {HTMLElement} container - Optional container to limit translation scope
    */
   updatePageTranslations(container = document) {
+    // In the container provided is null, exit.
+    if (!container) {
+      return;
+    }
     // Update all translations within the specified container
     container.querySelectorAll('[data-i18n]').forEach(element => {
         const key = element.getAttribute('data-i18n');
