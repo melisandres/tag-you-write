@@ -225,6 +225,12 @@ export class ValidationManager {
                     this.validatePattern('alphanum', 'front_val.login.password.pattern'),   
                 ]
             },
+            forgotPassword: {
+                email: [
+                    this.validateRequired('front_val.forgotPassword.email.required'),
+                    this.validateEmail('front_val.forgotPassword.email.email')
+                ]
+            },
             resetPassword: {
                 password: [
                     this.validateRequired('front_val.resetPassword.password.required'),

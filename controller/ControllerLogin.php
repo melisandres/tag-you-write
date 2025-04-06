@@ -82,7 +82,26 @@ class ControllerLogin extends Controller {
             exit();
         }
     
-        extract($_POST);
+        // Check if request contains JSON
+        $contentType = isset($_SERVER["CONTENT_TYPE"]) ? $_SERVER["CONTENT_TYPE"] : '';
+        
+        if (strpos($contentType, 'application/json') !== false) {
+            // Handle JSON input
+            $jsonInput = file_get_contents('php://input');
+            $data = json_decode($jsonInput, true);
+            
+            // Check for valid JSON
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                $this->sendJsonResponse(false, 'auth.password_reset.invalid_json');
+                exit();
+            }
+            
+            $email = $data['email'] ?? '';
+        } else {
+            // Handle form data from $_POST
+            extract($_POST);
+        }
+
         RequirePage::library('Validation');
         $val = new Validation;
         $val->name('email')->value($email)->pattern('email')->required();
@@ -114,13 +133,26 @@ class ControllerLogin extends Controller {
                 
                 $emailer->welcome($email, $writerData['firstName'], $subject, $message);
                 
-                Twig::render('login.php', ['message' => 'auth.password_reset.email_sent']);
+                // Send appropriate response based on request type
+                if (strpos($contentType, 'application/json') !== false) {
+                    $this->sendJsonResponse(true, 'auth.password_reset.email_sent');
+                } else {
+                    Twig::render('login.php', ['message' => 'auth.password_reset.email_sent']);
+                }
             } else {
-                Twig::render('forgot-password.php', ['errors' => 'auth.password_reset.email_not_found', 'data' => $_POST]);
+                if (strpos($contentType, 'application/json') !== false) {
+                    $this->sendJsonResponse(false, 'auth.password_reset.email_not_found');
+                } else {
+                    Twig::render('forgot-password.php', ['errors' => 'auth.password_reset.email_not_found', 'data' => $_POST]);
+                }
             }
         } else {
             $errors = $val->displayErrors();
-            Twig::render('forgot-password.php', ['errors' => $errors, 'data' => $_POST]);
+            if (strpos($contentType, 'application/json') !== false) {
+                $this->sendJsonResponse(false, 'auth.password_reset.validation_failed', ['errors' => $errors]);
+            } else {
+                Twig::render('forgot-password.php', ['errors' => $errors, 'data' => $_POST]);
+            }
         }
     }
     

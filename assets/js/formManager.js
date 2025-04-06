@@ -125,6 +125,9 @@ export class FormManager {
             case 'login':
                 this.handleLogin();
                 break;
+            case 'forgotPassword':
+                this.handleForgotPassword();
+                break;
             case 'resetPassword':
                 this.handleResetPassword();
                 break;
@@ -201,6 +204,18 @@ export class FormManager {
     }
 
     handleLogin() {
+        if (this.canPublish) {
+            const urlAction = this.form.getAttribute('action');
+            this.submitForm(urlAction);
+        } else {
+            eventBus.emit('showToast', { 
+                message: 'toast.form_manager.please_fill_required_fields_correctly', 
+                type: 'error' 
+            });
+        }
+    }
+
+    handleForgotPassword() {
         if (this.canPublish) {
             const urlAction = this.form.getAttribute('action');
             this.submitForm(urlAction);
@@ -349,7 +364,8 @@ export class FormManager {
             const formData = new FormData(this.form);
             const data = {};
             formData.forEach((value, key) => {
-                data[key] = value;
+                // Make sure to trim values to eliminate whitespace issues
+                data[key] = typeof value === 'string' ? value.trim() : value;
             });
 
             const response = await fetch(actionUrl, {
