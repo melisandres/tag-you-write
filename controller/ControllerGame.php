@@ -90,8 +90,8 @@ class ControllerGame extends Controller {
             $currentUserId = $_SESSION['writer_id'] ?? null;
             
             // Convert timestamp to datetime
-            $lastTreeCheck = date('Y-m-d H:i:s', $data['lastTreeCheck'] / 1000);
-            $lastGamesCheck = date('Y-m-d H:i:s', $data['lastGamesCheck'] / 1000);
+            $lastTreeCheck = date('Y-m-d H:i:s', (int)($data['lastTreeCheck'] / 1000));
+            $lastGamesCheck = date('Y-m-d H:i:s', (int)($data['lastGamesCheck'] / 1000));
             
             error_log("Converted timestamps - Tree: $lastTreeCheck, Games: $lastGamesCheck");
 

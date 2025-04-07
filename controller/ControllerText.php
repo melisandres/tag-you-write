@@ -182,7 +182,7 @@ class ControllerText extends Controller{
     public function checkTreeUpdates() {
         $data = json_decode(file_get_contents('php://input'), true);
         $rootId = $data['rootId'];
-        $lastTreeCheck =  date('Y-m-d H:i:s', $data['lastTreeCheck'] / 1000);
+        $lastTreeCheck =  date('Y-m-d H:i:s', (int)($data['lastTreeCheck'] / 1000));
 
         $text = new Text;
         $game = new Game;
