@@ -1,3 +1,5 @@
+import { eventBus } from './eventBus.js';
+
 export class NotificationsMenuManager {
     constructor() {
         this.notificationsMenuToggle = document.querySelector('.nav-link.notifications');
@@ -5,14 +7,51 @@ export class NotificationsMenuManager {
         if (!this.notificationsMenuToggle || !this.notificationsMenu) {
             return;
         }
+        this.unseenCount = 0;
+        this.unseenCountElement = this.createUnseenCountElement();
         this.initEventListeners();
         this.updateNavLink();
+    }
+
+    createUnseenCountElement() {
+        const countElement = document.createElement('span');
+        countElement.classList.add('unseen-count');
+        countElement.style.display = 'none';
+        this.notificationsMenuToggle.appendChild(countElement);
+        return countElement;
+    }
+
+    updateUnseenCount(count) {
+        this.unseenCount = count;
+        if (count > 0) {
+            this.unseenCountElement.textContent = count;
+            this.unseenCountElement.style.display = 'inline-block';
+        } else {
+            this.unseenCountElement.style.display = 'none';
+        }
     }
 
     initEventListeners() {
         this.notificationsMenuToggle.addEventListener('click', () => {
             this.notificationsMenu.classList.toggle('display-none');
             this.updateNavLink();
+            
+            // When opening the menu, mark all notifications as seen
+            if (!this.notificationsMenu.classList.contains('display-none') && this.unseenCount > 0) {
+                this.markAllNotificationsAsSeen();
+            }
+        });
+
+        this.notificationsMenu.addEventListener('click', (event) => {
+            // Check if the clicked element is a link within a notification
+            if (event.target.tagName === 'A' && event.target.closest('.notification')) {
+                const notificationElement = event.target.closest('.notification');
+                const notificationId = notificationElement.dataset.notificationId;
+                // Mark as read visually immediately for better UX
+                notificationElement.classList.remove('unread');
+                // Emit the event to mark as read in the backend
+                eventBus.emit('notification-clicked', notificationId);
+            }
         });
     }
 
@@ -23,11 +62,35 @@ export class NotificationsMenuManager {
         this.notificationsMenuToggle.classList.toggle('active', hasActiveNotificationsMenu);
     }
 
+    markAllNotificationsAsSeen() {
+        // Get all unseen notification IDs
+        const unseenNotifications = Array.from(this.notificationsMenu.querySelectorAll('.notification.unseen'))
+            .map(el => el.dataset.notificationId);
+        
+        if (unseenNotifications.length > 0) {
+            // Emit event to mark all as seen
+            eventBus.emit('mark-all-notifications-seen', unseenNotifications);
+            
+            // Update UI immediately
+            this.notificationsMenu.querySelectorAll('.notification.unseen').forEach(el => {
+                el.classList.remove('unseen');
+            });
+            
+            // Reset unseen count
+            this.updateUnseenCount(0);
+        }
+    }
+
     /* TODO: handle new notifications comming in via polling */
     addNewNotification(notification) {
         console.log('addNewNotification notification is:', notification);
+        const isRead = notification.read_at !== null;
+        const isSeen = notification.seen_at !== null;
         const notificationElement = document.createElement('article');
         notificationElement.classList.add('notification');
+        if (!isRead) notificationElement.classList.add('unread');
+        if (!isSeen) notificationElement.classList.add('unseen');
+        notificationElement.dataset.notificationId = notification.id;
 
         // Determine translation keys based on notification type
         const titleKey = `notifications.notification_${notification.notification_type}`;
@@ -89,6 +152,11 @@ export class NotificationsMenuManager {
             }
             
             window.i18n.updatePageTranslations(notificationElement);
+        }
+        
+        // Update unseen count if this is a new unseen notification
+        if (!isSeen) {
+            this.updateUnseenCount(this.unseenCount + 1);
         }
     }
 }

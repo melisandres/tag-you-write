@@ -75,6 +75,23 @@ class ControllerNotification extends Controller {
         return json_encode(['response' => 'ok']);
     }
 
+    // Mark a notification as read
+    public function markAsRead($notificationId) {
+        if(!isset($_SESSION['writer_id'])){
+            return json_encode(['status' => 'notLoggedin']);
+        }
+
+        $data = [
+            'id' => $notificationId,
+            'read_at' => date('Y-m-d H:i:s')
+        ];
+        
+        $notification = new Notification;
+        $result = $notification->update($data);
+        
+        return json_encode(['response' => 'ok']);
+    }
+
     // It should be possible to delete a notification
     public function delete($notificationId){
 

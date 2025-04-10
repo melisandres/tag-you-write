@@ -16,6 +16,15 @@ export class NotificationManager {
         eventBus.on('checkForNotifications', () => {
             this.fetchNotifications();
         });
+
+        eventBus.on('notification-clicked', (notificationId) => {
+            this.markNotificationAsRead(notificationId);
+        });
+        
+        // Listen for marking all notifications as seen
+        eventBus.on('mark-all-notifications-seen', (notificationIds) => {
+            this.markAllNotificationsAsSeen(notificationIds);
+        });
     }
 
     async fetchNotifications() {
@@ -242,5 +251,66 @@ export class NotificationManager {
         fetch(url)
             .then(response => response.json())
             .catch(error => console.error('Error updating notification:', error));
+    }
+
+    /**
+     * Mark a notification as read
+     * @param {string|number} notificationId - ID of the notification
+     */
+    markNotificationAsRead(notificationId) {
+        if (!notificationId) {
+            console.error('Cannot mark notification as read: No notification ID provided');
+            return;
+        }
+        
+        const endpoint = `notification/markAsRead/${notificationId}`;
+        const url = window.i18n.createUrl(endpoint);
+        
+        console.log(`Marking notification ${notificationId} as read...`);
+        
+        fetch(url)
+        .then(response => response.json())
+        .catch(error => console.error('Error updating notification:', error));
+    }
+
+    /**
+     * Mark multiple notifications as seen
+     * @param {Array} notificationIds - Array of notification IDs to mark as seen
+     */
+    markAllNotificationsAsSeen(notificationIds) {
+        if (!notificationIds || notificationIds.length === 0) {
+            console.error('Cannot mark notifications as seen: No notification IDs provided');
+            return;
+        }
+        
+        console.log(`Marking ${notificationIds.length} notifications as seen...`);
+        
+        // Create a promise for each notification
+        const promises = notificationIds.map(notificationId => {
+            const endpoint = `notification/markAsSeen/${notificationId}`;
+            const url = window.i18n.createUrl(endpoint);
+            
+            return fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Server responded with status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .catch(error => {
+                    console.error(`Error marking notification ${notificationId} as seen:`, error);
+                    return null; // Continue with other notifications even if one fails
+                });
+        });
+        
+        // Wait for all promises to resolve
+        Promise.all(promises)
+            .then(results => {
+                const successCount = results.filter(result => result !== null).length;
+                console.log(`Successfully marked ${successCount} of ${notificationIds.length} notifications as seen`);
+            })
+            .catch(error => {
+                console.error('Error marking notifications as seen:', error);
+            });
     }
 }
