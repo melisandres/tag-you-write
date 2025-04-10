@@ -92,9 +92,38 @@ class ControllerNotification extends Controller {
         return json_encode(['response' => 'ok']);
     }
 
+    // Mark a notification as deleted (soft delete)
+    public function markAsDeleted($notificationId) {
+        if(!isset($_SESSION['writer_id'])){
+            return json_encode(['status' => 'notLoggedin']);
+        }
+
+        $data = [
+            'id' => $notificationId,
+            'deleted_at' => date('Y-m-d H:i:s')
+        ];
+        
+        $notification = new Notification;
+        $result = $notification->update($data);
+        
+        return json_encode(['response' => 'ok']);
+    }
+
     // It should be possible to delete a notification
     public function delete($notificationId){
+        if(!isset($_SESSION['writer_id'])){
+            return json_encode(['status' => 'notLoggedin']);
+        }
 
+        $data = [
+            'id' => $notificationId,
+            'deleted_at' => date('Y-m-d H:i:s')
+        ];
+        
+        $notification = new Notification;
+        $result = $notification->update($data);
+        
+        return json_encode(['response' => 'ok']);
     }
 
     // making as seen... is there another way to update a notification? seems unlikely... I guess maybe not. 

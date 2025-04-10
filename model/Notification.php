@@ -11,7 +11,8 @@
                         'seen_at',
                         'read_at',
                         'created_at',
-                        'message'
+                        'message',
+                        'deleted_at'
                         ];
 
     public function getNotifications($order = 'DESC') {
@@ -23,6 +24,7 @@
                 JOIN text t ON g.root_text_id = t.id
                 LEFT JOIN text wt ON g.winner = wt.id
                 WHERE n.writer_id = :writer_id
+                AND n.deleted_at IS NULL
                 ORDER BY n.created_at $order";
                 
         $stmt = $this->prepare($sql);
@@ -39,7 +41,8 @@
                 JOIN game g ON n.game_id = g.id
                 JOIN text t ON g.root_text_id = t.id
                 LEFT JOIN text wt ON g.winner = wt.id
-                WHERE n.writer_id = :writer_id";
+                WHERE n.writer_id = :writer_id
+                AND n.deleted_at IS NULL";
                 
         if ($lastCheck !== null) {
             // Convert the lastCheck timestamp to the database timezone
@@ -67,7 +70,8 @@
                 JOIN game g ON n.game_id = g.id
                 JOIN text t ON g.root_text_id = t.id
                 LEFT JOIN text wt ON g.winner = wt.id
-                WHERE n.writer_id = :writer_id AND n.seen_at IS NULL";
+                WHERE n.writer_id = :writer_id AND n.seen_at IS NULL
+                AND n.deleted_at IS NULL";
         
         if ($game_id !== NULL) {
             $sql .= " AND n.game_id = :game_id";

@@ -45,12 +45,32 @@ export class NotificationsMenuManager {
         this.notificationsMenu.addEventListener('click', (event) => {
             // Check if the clicked element is a link within a notification
             if (event.target.tagName === 'A' && event.target.closest('.notification')) {
+                event.preventDefault(); // Prevent default link behavior
+                
                 const notificationElement = event.target.closest('.notification');
                 const notificationId = notificationElement.dataset.notificationId;
+                const linkHref = event.target.href; // Store the link destination
+                
                 // Mark as read visually immediately for better UX
                 notificationElement.classList.remove('unread');
-                // Emit the event to mark as read in the backend
-                eventBus.emit('notification-clicked', notificationId);
+                
+                // Emit the event to mark as read in the backend, passing the link URL
+                eventBus.emit('notification-clicked', { 
+                    notificationId: notificationId, 
+                    linkHref: linkHref 
+                });
+            }
+            
+            // Check if the clicked element is a close button within a notification
+            if (event.target.classList.contains('notification-delete') && event.target.closest('.notification')) {
+                const notificationElement = event.target.closest('.notification');
+                const notificationId = notificationElement.dataset.notificationId;
+                
+                // Remove the notification from the UI
+                notificationElement.remove();
+                
+                // Emit the event to mark as deleted in the backend
+                eventBus.emit('notification-deleted', notificationId);
             }
         });
     }
@@ -113,23 +133,30 @@ export class NotificationsMenuManager {
             'winning_title': winningTitle
         };
         
-        // Properly encode the JSON string to handle special characters
-        const i18nParamsJson = encodeURIComponent(JSON.stringify(i18nParams));
-        
         // Format the created_at timestamp
         let formattedDate = '';
         if (notification.created_at) {
             const date = new Date(notification.created_at);
             formattedDate = date.toLocaleString();
         }
-    
+        
+        // Get translated title and content directly
+        const titleText = window.i18n.translate(titleKey);
+        const contentText = window.i18n.translate(contentKey, i18nParams);
+        
+        // Create the notification element with the translated content
         notificationElement.innerHTML = `
-            <h3 data-i18n="${titleKey}"></h3>
-            <p data-i18n="${contentKey}"
-            data-i18n-html="true"
-            data-i18n-params="${i18nParamsJson}"></p>
+            <button class="notification-delete" aria-label="Delete notification">&times;</button>
+            <h3 data-i18n="${titleKey}">${titleText}</h3>
+            <p data-i18n="${contentKey}" data-i18n-html="true">${contentText}</p>
             <time>${formattedDate}</time>
         `;
+        
+        // Set the data-i18n-params attribute separately to avoid escaping issues
+        const paramsElement = notificationElement.querySelector(`[data-i18n="${contentKey}"]`);
+        if (paramsElement) {
+            paramsElement.setAttribute('data-i18n-params', JSON.stringify(i18nParams));
+        }
 
         // Get the first child of the notifications menu
         const firstChild = this.notificationsMenu.firstChild;
@@ -140,18 +167,6 @@ export class NotificationsMenuManager {
         } else {
             // If there are no children, just append it
             this.notificationsMenu.appendChild(notificationElement);
-        }
-
-        // Apply translations to the new notification element
-        if (window.i18n && typeof window.i18n.updatePageTranslations === 'function') {
-            // Decode the parameters before applying translations
-            const paramsElement = notificationElement.querySelector('[data-i18n-params]');
-            if (paramsElement) {
-                const encodedParams = paramsElement.getAttribute('data-i18n-params');
-                paramsElement.setAttribute('data-i18n-params', decodeURIComponent(encodedParams));
-            }
-            
-            window.i18n.updatePageTranslations(notificationElement);
         }
         
         // Update unseen count if this is a new unseen notification

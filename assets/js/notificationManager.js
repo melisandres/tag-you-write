@@ -17,13 +17,22 @@ export class NotificationManager {
             this.fetchNotifications();
         });
 
-        eventBus.on('notification-clicked', (notificationId) => {
-            this.markNotificationAsRead(notificationId);
+        eventBus.on('notification-clicked', (data) => {
+            // Handle both old format (just ID) and new format (object with ID and linkHref)
+            const notificationId = typeof data === 'object' ? data.notificationId : data;
+            const linkHref = typeof data === 'object' ? data.linkHref : null;
+            
+            this.markNotificationAsRead(notificationId, linkHref);
         });
         
         // Listen for marking all notifications as seen
         eventBus.on('mark-all-notifications-seen', (notificationIds) => {
             this.markAllNotificationsAsSeen(notificationIds);
+        });
+        
+        // Listen for notification deletion
+        eventBus.on('notification-deleted', (notificationId) => {
+            this.markNotificationAsDeleted(notificationId);
         });
     }
 
@@ -256,8 +265,9 @@ export class NotificationManager {
     /**
      * Mark a notification as read
      * @param {string|number} notificationId - ID of the notification
+     * @param {string|null} linkHref - URL to navigate to after marking as read
      */
-    markNotificationAsRead(notificationId) {
+    markNotificationAsRead(notificationId, linkHref = null) {
         if (!notificationId) {
             console.error('Cannot mark notification as read: No notification ID provided');
             return;
@@ -268,9 +278,35 @@ export class NotificationManager {
         
         console.log(`Marking notification ${notificationId} as read...`);
         
-        fetch(url)
-        .then(response => response.json())
-        .catch(error => console.error('Error updating notification:', error));
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin' // Include cookies
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(`Successfully marked notification ${notificationId} as read`);
+            
+            // Navigate to the link if provided
+            if (linkHref) {
+                window.location.href = linkHref;
+            }
+        })
+        .catch(error => {
+            console.error('Error updating notification:', error);
+            // Navigate to the link even if marking as read fails
+            if (linkHref) {
+                window.location.href = linkHref;
+            }
+        });
     }
 
     /**
@@ -312,5 +348,35 @@ export class NotificationManager {
             .catch(error => {
                 console.error('Error marking notifications as seen:', error);
             });
+    }
+
+    /**
+     * Mark a notification as deleted
+     * @param {string|number} notificationId - ID of the notification
+     */
+    markNotificationAsDeleted(notificationId) {
+        if (!notificationId) {
+            console.error('Cannot mark notification as deleted: No notification ID provided');
+            return;
+        }
+        
+        const endpoint = `notification/delete/${notificationId}`;
+        const url = window.i18n.createUrl(endpoint);
+        
+        console.log(`Marking notification ${notificationId} as deleted...`);
+        
+        fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Remove the notification from the local array
+            this.notifications = this.notifications.filter(n => n.id !== notificationId);
+            console.log(`Notification ${notificationId} marked as deleted successfully`);
+        })
+        .catch(error => console.error('Error deleting notification:', error));
     }
 }
