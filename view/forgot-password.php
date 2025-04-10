@@ -12,7 +12,7 @@
         </label>
         <!-- <button type="submit">Send Reset Link</button> -->
         <div class="form-btns">
-            <button class="publish" data-status="forgot-password" type="submit" data-button-type="publish">
+            <button class="publish" data-status="forgotPassword" type="submit" data-button-type="publish">
                 <span class="icon" data-i18n-title="forgot_password.request_reset_link_tooltip" title="{{ translate('forgot_password.request_reset_link_tooltip') }}"></span>
                 <span data-i18n="forgot_password.request_reset_link" class="title">{{ translate('forgot_password.request_reset_link') }}</span>
             </button>

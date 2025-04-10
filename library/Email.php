@@ -25,6 +25,13 @@ class Email {
         $this->mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
         $this->mail->Port = $_ENV['SMTP_PORT'];
         
+        // Enable debug output
+        $this->mail->SMTPDebug = SMTP::DEBUG_SERVER;
+        $this->mail->Debugoutput = function($str, $level) {
+            error_log("PHPMailer Debug: $str");
+            $this->logError("PHPMailer Debug: $str");
+        };
+        
         // Set sender
         $this->mail->setFrom($_ENV['SMTP_USERNAME'], 'Tag You Write'); // Use the authenticated email as sender
         
@@ -44,8 +51,30 @@ class Email {
             
             return $this->mail->send();
         } catch (Exception $e) {
-            error_log("Email error: " . $e->getMessage());
-            throw new Exception($e->getMessage());
+            $errorMessage = "Email error: " . $e->getMessage();
+            error_log($errorMessage);
+            $this->logError($errorMessage);
+            // Return false instead of throwing an exception
+            return false;
+        }
+    }
+
+    public function sendResetLink($to, $name, $subject, $message) {
+        try {
+            $this->mail->clearAddresses(); // Clear any previously set addresses
+            $this->mail->addAddress($to, $name);
+            $this->mail->isHTML(true);
+            $this->mail->Subject = $subject;
+            $this->mail->Body = $message;
+            $this->mail->AltBody = strip_tags($message);
+            
+            return $this->mail->send();
+        } catch (Exception $e) {
+            $errorMessage = "Email error: " . $e->getMessage();
+            error_log($errorMessage);
+            $this->logError($errorMessage);
+            // Return false instead of throwing an exception
+            return false;
         }
     }
 

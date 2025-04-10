@@ -216,10 +216,13 @@ export class FormManager {
     }
 
     handleForgotPassword() {
+        console.log('handleForgotPassword called, canPublish:', this.canPublish);
         if (this.canPublish) {
             const urlAction = this.form.getAttribute('action');
+            console.log('Forgot password form action URL:', urlAction);
             this.submitForm(urlAction);
         } else {
+            console.log('Forgot password validation failed');
             eventBus.emit('showToast', { 
                 message: 'toast.form_manager.please_fill_required_fields_correctly', 
                 type: 'error' 
@@ -361,12 +364,16 @@ export class FormManager {
     // Submits the form to store OR update.
     async submitForm(actionUrl) {
         try {
+            console.log('submitForm called with URL:', actionUrl);
             const formData = new FormData(this.form);
             const data = {};
             formData.forEach((value, key) => {
                 // Make sure to trim values to eliminate whitespace issues
                 data[key] = typeof value === 'string' ? value.trim() : value;
             });
+            
+            console.log('Form data being sent:', data);
+            console.log('Form type:', this.formType);
 
             const response = await fetch(actionUrl, {
                 method: 'POST',
@@ -376,7 +383,9 @@ export class FormManager {
                 body: JSON.stringify(data)
             });
 
+            console.log('Response status:', response.status);
             const responseData = await response.json();
+            console.log('Response data:', responseData);
 
             if (responseData.success) {
                 // Update form fields if needed

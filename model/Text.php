@@ -85,7 +85,7 @@ class Text extends Crud{
 
         // Add condition for modified since
         if ($modifiedSince !== null) {
-            error_log("Comparing against modified_since (Unix timestamp): " . $modifiedSince);
+            //error_log("Comparing against modified_since (Unix timestamp): " . $modifiedSince);
             $conditions[] = "text.modified_at > :modifiedSince";
         }
         
@@ -240,7 +240,7 @@ class Text extends Crud{
                 ["'%" . $term . "%'", (int)$gameId, (int)$currentWriterId],
                 $sql
             );
-            error_log("Executing SQL: " . $boundSql);
+            //error_log("Executing SQL: " . $boundSql);
 
             $stmt->execute();
 

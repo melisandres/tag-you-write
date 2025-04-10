@@ -27,7 +27,7 @@ class ControllerText extends Controller{
         // TODO: Get the sort parameter from URL
         $sort = null;
 
-        error_log('Sort: ' . $sort);
+        /* error_log('Sort: ' . $sort); */
 
         // Getting the games
         $game = new Game;
@@ -1116,7 +1116,7 @@ class ControllerText extends Controller{
             $results = $text->searchNodesByTerm($searchTerm, $gameId, $_SESSION['writer_id'] ?? null);
 
             // Debugging: Use var_dump or print_r instead of echo
-            error_log("Results: " . print_r($results, true));
+/*             error_log("Results: " . print_r($results, true)); */
 
             header('Content-Type: application/json');
             echo json_encode($results);

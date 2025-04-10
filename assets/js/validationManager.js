@@ -95,10 +95,13 @@ export class ValidationManager {
     }
 
     validateField({ fieldName, fieldValue, formType, init = false }) {
+        console.log('Validating field:', fieldName, 'with value:', fieldValue, 'for form type:', formType);
         const validators = this.getValidatorsForForm(formType);
         
         if (validators[fieldName]) {
+            console.log('Found validators for field:', fieldName);
             const validationResults = validators[fieldName].map((validator) => validator(fieldValue));
+            console.log('Validation results:', validationResults);
 
             const criticalErrors = validationResults.filter(result => !result.isValid && result.severity === 'critical');
             const errors = validationResults.filter(result => !result.isValid && result.severity === 'error');
@@ -162,6 +165,7 @@ export class ValidationManager {
     }
 
     getValidatorsForForm(formType) {
+        console.log('Getting validators for form type:', formType);
         // Strict validators are PUBLISHING: warnings on save
         const validators = {
             root: {
@@ -268,6 +272,7 @@ export class ValidationManager {
             }
         };
 
+        console.log('Validators for form type', formType, ':', validators[formType] || 'No validators found');
         return validators[formType] || {};
     }
 

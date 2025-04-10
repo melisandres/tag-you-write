@@ -51,6 +51,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const treeModal = document.querySelector('.modal-background');
   const warningManager = new WarningManager();
+  window.warningManager = warningManager; // Make warningManager globally available
   new ToastManager();
 
   // Initialize Modal
@@ -70,7 +71,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Initialize UIManager with the storyManager and modal instances
   const uiManager = new UIManager(storyManager, modal);
 
-  new NotificationsMenuManager();
+  // Initialize NotificationsMenuManager and make it globally available
+  window.notificationsMenuManager = new NotificationsMenuManager();
 
   // Only initialize GameListManager if we're on the games list page
   //const gamesContainer = document.querySelector('.stories');
@@ -101,7 +103,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
   // Start Long Polling Manager
-  new NotificationManager();
+  window.notificationManager = new NotificationManager();
 
   // Initialize in UIManager or globally
   // const warningManager = new WarningManager();

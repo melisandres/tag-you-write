@@ -4,7 +4,7 @@
     top: calc(var(--header-height));
     display: flex;
     justify-content: flex-start;
-    align-items: flex-end;
+    align-items: flex-start;
     background-color: var(--color-black-dark);
     transition: transform 0.3s ease-in-out;
     z-index: 3;

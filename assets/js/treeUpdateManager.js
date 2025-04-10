@@ -197,9 +197,10 @@ export class TreeUpdateManager {
   }
 
   handleNewNodesDiscovered(newNodesData) {
-    console.log('NEW NODES DISCOVERED', newNodesData);
-    // get the full tree
-    const updatedTreeData = this.dataManager.getTreeByGameId(newNodesData[0].game_id);
+    // Get the current root ID from the DataManager
+    const currentRootId = this.dataManager.getCurrentViewedRootStoryId();
+    // Get the tree directly using getTree
+    const updatedTreeData = this.dataManager.getTree(currentRootId);
     
     // Update the visualizer's tree data
     this.treeVisualizer.setTreeData(updatedTreeData);

@@ -81,7 +81,7 @@ class ControllerLogin extends Controller {
             RequirePage::redirect('login/forgotPassword');
             exit();
         }
-    
+
         // Check if request contains JSON
         $contentType = isset($_SERVER["CONTENT_TYPE"]) ? $_SERVER["CONTENT_TYPE"] : '';
         
@@ -92,14 +92,17 @@ class ControllerLogin extends Controller {
             
             // Check for valid JSON
             if (json_last_error() !== JSON_ERROR_NONE) {
+                error_log("JSON decode error: " . json_last_error_msg());
                 $this->sendJsonResponse(false, 'auth.password_reset.invalid_json');
                 exit();
             }
             
             $email = $data['email'] ?? '';
+            error_log("JSON data - email: " . (empty($email) ? 'empty' : $email));
         } else {
             // Handle form data from $_POST
             extract($_POST);
+            error_log("POST data - email: " . (empty($email) ? 'empty' : $email));
         }
 
         RequirePage::library('Validation');
@@ -123,21 +126,32 @@ class ControllerLogin extends Controller {
                 ]);
     
                 // Send email
-                RequirePage::library('Email');
-                $emailer = new Email;
-                
-                // Get translated email content
-                $subject = translate('auth.password_reset.email_title');
-                $message = translate('auth.password_reset.email_message');
-                $message .= RequirePage::getBaseUrl() . langUrl('login/resetPassword/' . $token);
-                
-                $emailer->welcome($email, $writerData['firstName'], $subject, $message);
-                
-                // Send appropriate response based on request type
-                if (strpos($contentType, 'application/json') !== false) {
-                    $this->sendJsonResponse(true, 'auth.password_reset.email_sent');
-                } else {
-                    Twig::render('login.php', ['message' => 'auth.password_reset.email_sent']);
+                try {
+                    RequirePage::library('Email');
+                    $emailer = new Email;
+                    
+                    // Get translated email content
+                    $subject = translate('auth.password_reset.email_title');
+                    $message = translate('auth.password_reset.email_message');
+                    $message .= RequirePage::getBaseUrl() . langUrl('login/resetPassword/' . $token);
+                    
+                    $emailer->welcome($email, $writerData['firstName'], $subject, $message);
+                    
+                    // Send appropriate response based on request type
+                    if (strpos($contentType, 'application/json') !== false) {
+                        $this->sendJsonResponse(true, 'auth.password_reset.email_sent');
+                    } else {
+                        Twig::render('login.php', ['message' => 'auth.password_reset.email_sent']);
+                    }
+                } catch (Exception $e) {
+                    error_log("Email sending error: " . $e->getMessage());
+                    
+                    // Still return success to the user, but log the error
+                    if (strpos($contentType, 'application/json') !== false) {
+                        $this->sendJsonResponse(true, 'auth.password_reset.email_sent');
+                    } else {
+                        Twig::render('login.php', ['message' => 'auth.password_reset.email_sent']);
+                    }
                 }
             } else {
                 if (strpos($contentType, 'application/json') !== false) {
@@ -184,15 +198,19 @@ class ControllerLogin extends Controller {
             
             // Check for valid JSON
             if (json_last_error() !== JSON_ERROR_NONE) {
+                error_log("JSON decode error: " . json_last_error_msg());
                 $this->sendJsonResponse(false, 'auth.password_reset.invalid_json');
                 exit();
             }
             
             $password = $data['password'] ?? '';
             $token = $data['token'] ?? '';
+            
+            error_log("JSON data - password: " . (empty($password) ? 'empty' : 'set') . ", token: " . (empty($token) ? 'empty' : 'set'));
         } else {
             // Handle form data from $_POST
             extract($_POST);
+            error_log("POST data - password: " . (empty($password) ? 'empty' : 'set') . ", token: " . (empty($token) ? 'empty' : 'set'));
         }
 
         RequirePage::library('Validation');
@@ -253,6 +271,8 @@ class ControllerLogin extends Controller {
             $response['redirectUrl'] = $additionalData;
         }
 
+        error_log("Sending JSON response: " . json_encode($response));
+        
         header('Content-Type: application/json');
         echo json_encode($response);
         exit;

@@ -1,18 +1,19 @@
 <?php
- require_once('Crud.php');
- require_once('config/timezone_config.php');
+require_once('Crud.php');
+require_once('config/timezone_config.php');
 
- class Notification extends Crud{
-   public $table = 'notification';
-   public $primaryKey = 'id';
-   public $fillable =  ['game_id',
-                        'writer_id', 
-                        'notification_type', 
-                        'seen_at',
-                        'read_at',
-                        'created_at',
-                        'message'
-                        ];
+class Notification extends Crud {
+    public $table = 'notification';
+    public $primaryKey = 'id';
+    public $fillable = [
+        'game_id',
+        'writer_id', 
+        'notification_type', 
+        'seen_at',
+        'read_at',
+        'created_at',
+        'message'
+    ];
 
     public function getNotifications($order = 'DESC') {
         $writer_id = $_SESSION['writer_id'];
@@ -28,7 +29,16 @@
         $stmt = $this->prepare($sql);
         $stmt->bindValue(':writer_id', $writer_id);
         $stmt->execute();
-        return $stmt->fetchAll();
+        $results = $stmt->fetchAll();
+        
+        // Convert timestamps to UTC for consistent client-side handling
+        foreach ($results as &$result) {
+            if (isset($result['created_at'])) {
+                $result['created_at'] = convertFromDbTimezone($result['created_at']);
+            }
+        }
+        
+        return $results;
     }
 
     public function getNewNotifications($lastCheck = null) {
@@ -42,11 +52,10 @@
                 WHERE n.writer_id = :writer_id";
                 
         if ($lastCheck !== null) {
-            // Convert the lastCheck timestamp to the database timezone
-            $dbLastCheck = convertToDbTimezone($lastCheck);
-            
-            // Use direct timestamp comparison in SQL
-            $sql .= " AND n.created_at > :lastCheck";
+            $sql .= " AND CAST(n.created_at AS DATETIME) > CAST(:lastCheck AS DATETIME)";
+            error_log("Notification::getNewNotifications - Using SQL with lastCheck: $lastCheck");
+        } else {
+            error_log("Notification::getNewNotifications - Using SQL without lastCheck filter");
         }
         
         $sql .= " ORDER BY n.created_at ASC";
@@ -54,10 +63,19 @@
         $stmt = $this->prepare($sql);
         $stmt->bindValue(':writer_id', $writer_id);
         if ($lastCheck !== null) {
-            $stmt->bindValue(':lastCheck', $dbLastCheck);
+            $stmt->bindValue(':lastCheck', $lastCheck);
         }
         $stmt->execute();
-        return $stmt->fetchAll();
+        $results = $stmt->fetchAll();
+        
+        // Convert timestamps to UTC for consistent client-side handling
+        foreach ($results as &$result) {
+            if (isset($result['created_at'])) {
+                $result['created_at'] = convertFromDbTimezone($result['created_at']);
+            }
+        }
+        
+        return $results;
     }
 
     public function getUnseenNotifications($writer_id, $game_id = NULL) {
@@ -81,7 +99,16 @@
         }
     
         $stmt->execute();
-        return $stmt->fetchAll();
+        $results = $stmt->fetchAll();
+        
+        // Convert timestamps to UTC for consistent client-side handling
+        foreach ($results as &$result) {
+            if (isset($result['created_at'])) {
+                $result['created_at'] = convertFromDbTimezone($result['created_at']);
+            }
+        }
+        
+        return $results;
     }
 
     public function markNotificationAsSeen($user_id, $game_id) {
@@ -94,3 +121,4 @@
         $stmt->execute();
     }
 }
+?> 

@@ -316,6 +316,12 @@
         "pattern": "*seuls les lettres et les chiffres sont autorisés"
       }
     },
+    "forgotPassword": {
+      "email": {
+        "required": "*requis",
+        "email": "*doit être une adresse email valide"
+      }
+    },
     "writerCreate": {
       "firstName": {
         "required": "*requis",
