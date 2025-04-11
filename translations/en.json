@@ -211,7 +211,9 @@
       "delete": "Are you sure you want to delete this text? This action cannot be undone.",
       "last_vote": "This vote confirms the grand winner and ends the game. Are you sure?",
       "confirm": "Confirm",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "confirm_game_done": "Understood!",
+      "cancel_game_done": "Ignore..."
     },
     "form_field": {
       "title": "title",

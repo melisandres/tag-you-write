@@ -210,7 +210,9 @@
     "delete": "Vous êtes sur le point de supprimer ce texte. Cette action est irréversible.",
     "last_vote": "Cette vote confirme le grand gagnant et termine la collaboration. Êtes-vous sûr de vouloir continuer?",
     "confirm": "Confirmer",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "confirm_game_done": "Compris!",
+    "cancel_game_done": "Ignorer..."
   },
   "form_field": {
     "title": "titre",
