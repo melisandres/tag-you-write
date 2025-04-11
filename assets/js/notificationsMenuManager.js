@@ -13,24 +13,6 @@ export class NotificationsMenuManager {
         this.updateNavLink();
     }
 
-    createUnseenCountElement() {
-        const countElement = document.createElement('span');
-        countElement.classList.add('unseen-count');
-        countElement.style.display = 'none';
-        this.notificationsMenuToggle.appendChild(countElement);
-        return countElement;
-    }
-
-    updateUnseenCount(count) {
-        this.unseenCount = count;
-        if (count > 0) {
-            this.unseenCountElement.textContent = count;
-            this.unseenCountElement.style.display = 'inline-block';
-        } else {
-            this.unseenCountElement.style.display = 'none';
-        }
-    }
-
     initEventListeners() {
         this.notificationsMenuToggle.addEventListener('click', () => {
             this.notificationsMenu.classList.toggle('display-none');
@@ -73,6 +55,30 @@ export class NotificationsMenuManager {
                 eventBus.emit('notification-deleted', notificationId);
             }
         });
+        
+        // Listen for notification-seen events
+        eventBus.on('notification-seen', (data) => {
+            this.markNotificationAsSeenInMenu(data.notificationId);
+        });
+    }
+
+
+    createUnseenCountElement() {
+        const countElement = document.createElement('span');
+        countElement.classList.add('unseen-count');
+        countElement.style.display = 'none';
+        this.notificationsMenuToggle.appendChild(countElement);
+        return countElement;
+    }
+
+    updateUnseenCount(count) {
+        this.unseenCount = count;
+        if (count > 0) {
+            this.unseenCountElement.textContent = count;
+            this.unseenCountElement.style.display = 'inline-block';
+        } else {
+            this.unseenCountElement.style.display = 'none';
+        }
     }
 
     updateNavLink() {
@@ -80,6 +86,25 @@ export class NotificationsMenuManager {
         const hasActiveNotificationsMenu = !this.notificationsMenu.classList.contains('display-none');
         // Use 'active' class for filter state
         this.notificationsMenuToggle.classList.toggle('active', hasActiveNotificationsMenu);
+    }
+
+        /**
+     * Mark a single notification as seen in the menu UI
+     * @param {string} notificationId - The ID of the notification to mark as seen
+     */
+    markNotificationAsSeenInMenu(notificationId) {
+        // Find the notification element in the menu
+        const notificationElement = this.notificationsMenu.querySelector(`.notification[data-notification-id="${notificationId}"]`);
+        
+        if (notificationElement) {
+            // Update the notification element to reflect that it's been seen
+            notificationElement.classList.remove('unseen');
+            
+            // Decrement the unseen count
+            if (this.unseenCount > 0) {
+                this.updateUnseenCount(this.unseenCount - 1);
+            }
+        }
     }
 
     markAllNotificationsAsSeen() {
@@ -92,13 +117,22 @@ export class NotificationsMenuManager {
             eventBus.emit('mark-all-notifications-seen', unseenNotifications);
             
             // Update UI immediately
-            this.notificationsMenu.querySelectorAll('.notification.unseen').forEach(el => {
-                el.classList.remove('unseen');
-            });
-            
-            // Reset unseen count
-            this.updateUnseenCount(0);
+            this.markAllNotificationsAsSeenInMenu();
         }
+    }
+
+    /**
+     * Mark all notifications as seen in the menu UI
+     */
+    markAllNotificationsAsSeenInMenu() {
+        // Update all notification elements in the menu that have the 'unseen' class
+        const unseenElements = this.notificationsMenu.querySelectorAll('.notification.unseen');
+        unseenElements.forEach(element => {
+            element.classList.remove('unseen');
+        });
+        
+        // Reset the unseen count to 0
+        this.updateUnseenCount(0);
     }
 
     /* TODO: handle new notifications comming in via polling */

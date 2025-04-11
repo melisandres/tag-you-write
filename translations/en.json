@@ -24,7 +24,11 @@
       "notification_game_won": "Game Won!",
       "notification_game_closed": "Game Closed",
       "notification_game_won_text": "The {game_title_link} collaboration is closed. Your iteration: \"{winning_title}\" has been unanimously chosen as the winner!",
-      "notification_game_closed_text": "The {game_title_link} collaboration is closed. The winning text is \"{winning_title}\""
+      "notification_game_closed_text": "The {game_title_link} collaboration is closed. The winning text is \"{winning_title}\"",
+      "warning_game_won_title": "Game Closed",
+      "warning_game_closed_title": "Game Closed",
+      "warning_game_won_text": "The winning vote was just cast! The {game_title} collaboration is closed. Your iteration: \"{winning_title}\" has been unanimously chosen as the winner! Sadly, the text you are working on is no longer in the running.",
+      "warning_game_closed_text": "The winning vote was just cast! The {game_title} collaboration is closed. The winning text is \"{winning_title}\". Sadly, the text you are working on is no longer in the running."
     },
     "footer": {
       "made_with_love": "Made with love by Melisandre"

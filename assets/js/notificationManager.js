@@ -205,35 +205,36 @@ export class NotificationManager {
         // Add to active notifications
         this.activeNotifications.add(notification.id);
         
-        // Create message based on notification type
-        let message = '';
-        
         // Get translation keys
-        const titleKey = `notifications.notification_${notification.notification_type}`;
-        const contentKey = `notifications.notification_${notification.notification_type}_text`;
+        const titleKey = `notifications.warning_${notification.notification_type}_title`;
+        const contentKey = `notifications.warning_${notification.notification_type}_text`;
+
+        // Parameters for the content translation
+        const contentParams = {
+            game_title: notification.game_title,
+            winning_title: notification.winning_title
+        };
         
         // Get translated title and content
         const title = window.i18n ? window.i18n.translate(titleKey) : notification.notification_type;
+        const message = window.i18n ? window.i18n.translate(contentKey, contentParams) : notification.notification_type;
         
-        // Create content with placeholders
-        let content = '';
-        if (notification.game_title) {
-            content += `Game: ${notification.game_title}\n`;
-        }
-        
-        if (notification.winning_title) {
-            content += `Winning text: ${notification.winning_title}\n`;
-        }
-        
-        // Combine title and content
-        message = `${title}\n\n${content}`;
-        
-        const onClose = () => {
+        // Create a formatted message with title and content
+        const formattedMessage = `<h3 data-i18n="${titleKey}">${title}</h3>
+        <p data-i18n="${contentKey}" data-i18n-params='${JSON.stringify(contentParams)}'>${message}</p>`;
+
+        const onConfirm = () => {
             this.markNotificationAsSeen(notification.id);
             this.activeNotifications.delete(notification.id);
         };
         
-        this.warningManager.createWarningModal(message, onClose, onClose);
+        const onCancel = () => {
+            // Maybe with the following line, the notification will come back next time its polled for, after the user cancels. 
+            this.activeNotifications.delete(notification.id);
+        };
+        
+        // Create a custom modal with the formatted message
+        this.warningManager.createWarningModal(formattedMessage, onConfirm, onCancel);
     }
 
     /**
@@ -259,6 +260,12 @@ export class NotificationManager {
         
         fetch(url)
             .then(response => response.json())
+            .then(data => {
+                // Emit an event to update the notification badge
+                if (window.eventBus) {
+                    window.eventBus.emit('notification-seen', { notificationId: notificationId });
+                }
+            })
             .catch(error => console.error('Error updating notification:', error));
     }
 

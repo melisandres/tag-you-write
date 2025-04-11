@@ -18,8 +18,11 @@ export class WarningManager {
       const modal = document.createElement('div');
       modal.classList.add('warning-modal-wrapper');
 
+      // Check if the message is HTML content
+      const isHtml = typeof message === 'string' && message.includes('<');
+      
       // Translate the message and the buttons
-      const translatedText = window.i18n.translate(message);
+      const translatedText = isHtml ? message : window.i18n.translate(message);
       const confirmText = window.i18n.translate('warning.confirm');
       const cancelText = window.i18n.translate('warning.cancel');
       
@@ -27,7 +30,7 @@ export class WarningManager {
       modal.innerHTML = `
         <div class="warning-modal">
           <div class="warning-content">
-            <div class="warning-message" data-i18n="${message}">${translatedText}</div>
+            <div class="warning-message" ${isHtml ? '' : `data-i18n="${message}"`}>${translatedText}</div>
             <div class="warning-buttons">
               <button class="confirm-button">
                 <span class="button-svg confirm-svg">${SVGManager.checkmarkSVG}</span>
