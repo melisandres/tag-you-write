@@ -27,7 +27,8 @@
     "warning_game_won_title": "Partie Gagnée!",
     "warning_game_closed_title": "Partie Terminée",
     "warning_game_won_text": "Le vote gagnant vient de voter! La collaboration {game_title} est terminée. Votre itération : \"{winning_title}\" a été choisie à l'unanimité comme gagnante ! Malheureusement, le texte que vous écrivez ne pourra pas être considéré.",
-    "warning_game_closed_text": "Le vote gagnant vient de voter! La collaboration {game_title} est terminée. Le texte gagnant est \"{winning_title}\". Malheureusement, le texte que vous écrivez ne pourra pas être considéré."
+    "warning_game_closed_text": "Le vote gagnant vient de voter! La collaboration \"{game_title}\" est terminée. Le texte gagnant est \"{winning_title}\". Malheureusement, le texte que vous écrivez ne pourra pas être considéré.",
+    "no_notifications": "Aucune notification"
   },
   "footer": {
     "made_with_love": "programmé avec amour, Mélisandre"

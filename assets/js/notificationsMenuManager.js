@@ -11,6 +11,7 @@ export class NotificationsMenuManager {
         this.unseenCountElement = this.createUnseenCountElement();
         this.initEventListeners();
         this.updateNavLink();
+        this.checkEmptyNotifications();
     }
 
     initEventListeners() {
@@ -53,6 +54,9 @@ export class NotificationsMenuManager {
                 
                 // Emit the event to mark as deleted in the backend
                 eventBus.emit('notification-deleted', notificationId);
+                
+                // Check if we need to update the empty notifications message
+                this.checkEmptyNotifications();
             }
         });
         
@@ -135,6 +139,29 @@ export class NotificationsMenuManager {
         this.updateUnseenCount(0);
     }
 
+    /**
+     * Check if there are any notifications and display a message if none exist
+     */
+    checkEmptyNotifications() {
+        // Check if there are any notification elements
+        const hasNotifications = this.notificationsMenu.querySelector('.notification') !== null;
+        
+        // Remove any existing "no notifications" message
+        const existingNoNotifications = this.notificationsMenu.querySelector('.no-notifications-message');
+        if (existingNoNotifications) {
+            existingNoNotifications.remove();
+        }
+        
+        // If there are no notifications, add the message
+        if (!hasNotifications) {
+            const noNotificationsElement = document.createElement('p');
+            noNotificationsElement.classList.add('no-notifications-message');
+            noNotificationsElement.setAttribute('data-i18n', 'notifications.no_notifications');
+            noNotificationsElement.textContent = window.i18n.translate('notifications.no_notifications');
+            this.notificationsMenu.appendChild(noNotificationsElement);
+        }
+    }
+
     /* TODO: handle new notifications comming in via polling */
     addNewNotification(notification) {
         console.log('addNewNotification notification is:', notification);
@@ -207,5 +234,8 @@ export class NotificationsMenuManager {
         if (!isSeen) {
             this.updateUnseenCount(this.unseenCount + 1);
         }
+        
+        // Check if we need to update the empty notifications message
+        this.checkEmptyNotifications();
     }
 }
