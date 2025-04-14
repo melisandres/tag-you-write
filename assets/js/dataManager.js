@@ -203,13 +203,15 @@ export class DataManager {
         if (modifiedGames?.length > 0) {
             this.updateGamesData(modifiedGames, false);
             // this event refreshes the view in gameListRenderer.js
-            eventBus.emit('gamesModified', modifiedGames);
+            // LETS TRY TO BE MORE GRANULAR
+            // eventBus.emit('gamesModified', modifiedGames);
             hasUpdates = true;
         }
 
         if (modifiedNodes?.length > 0) {
             this.updateTreeData(modifiedNodes, currentlyViewedRootId, false);
-            eventBus.emit('treeNodesModified', modifiedNodes);
+            // NOTHING SEEMS TO BE LISTENING FOR THIS EVENT
+            //eventBus.emit('treeNodesModified', modifiedNodes);
             hasUpdates = true;
             hasTreeUpdates = true;
         }
@@ -270,7 +272,6 @@ export class DataManager {
             this.replaceAll(games);
         } else {
             this.updateGames(games);
-            console.log('UPDATED GAMES?');
         }  
 
         this.saveCache();
@@ -406,13 +407,20 @@ export class DataManager {
             return;
         }
     
-        // Preserve all existing properties, including permissions and children
+        // Preserve all existing properties, including children
         const updatedNode = {
             ...existingNode,
             ...updateData,
             children: existingNode.children || [],
-            permissions: existingNode.permissions,
         };
+        
+        // Update permissions if they are included in the update data
+        if (updateData.permissions) {
+            updatedNode.permissions = updateData.permissions;
+        } else {
+            // Keep existing permissions if not provided in update data
+            updatedNode.permissions = existingNode.permissions;
+        }
 
         // Emit an event with both the old node and the new node
         eventBus.emit('nodeUpdated', { oldNode: existingNode, newNode: updatedNode });
@@ -778,6 +786,26 @@ export class DataManager {
             // Always use string ID for the key
             const gameId = String(game.game_id);
             
+            // Check if the game already exists in the cache
+            const existingGame = this.cache.games.get(gameId);
+            
+            console.log(`Processing game ${gameId}:`, {
+                exists: !!existingGame,
+                existingData: existingGame?.data,
+                newData: normalized
+            });
+            
+            if (existingGame) {
+                // Game exists - emit gameModified event with old and new game data
+                console.log(`Emitting gameModified for ${gameId}`);
+                eventBus.emit('gameModified', { newGame: normalized, oldGame: existingGame.data });
+            } else {
+                // New game - emit gameAdded event
+                console.log(`Emitting gameAdded for ${gameId}`);
+                eventBus.emit('gameAdded', normalized);
+            }
+            
+            // Update the cache
             this.cache.games.set(gameId, {
                 data: normalized,
                 timestamp: Date.now()
@@ -807,6 +835,7 @@ export class DataManager {
             text_id: String(game.id),       // Convert to string
             title: game.title,
             prompt: game.prompt,
+            openForChanges: game.openForChanges,  // Preserve original value type
             open_for_changes: game.openForChanges === '1' || 
                              game.openForChanges === true || 
                              game.openForChanges === 1,

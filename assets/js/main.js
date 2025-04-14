@@ -17,13 +17,13 @@ import { TreeUpdateManager } from './treeUpdateManager.js';
 import { SSEManager } from './sseManager.js';
 import { ShelfUpdateManager } from './shelfUpdateManager.js';
 import { ModalUpdateManager } from './modalUpdateManager.js';
-import { IndexUpdateManager } from './indexUpdateManager.js';
+import { GameListUpdateManager } from './gameListUpdateManager.js';
 import { AutoSaveManager } from './autoSaveManager.js';
 import { eventBus } from './eventBus.js';
 import { ValidationManager } from './validationManager.js';
 import { ButtonUpdateManager } from './formButtonsUpdateManager.js';
 import { PaginationManager } from './paginationManager.js';
-import { GameListManager } from './gameListManager.js';
+import { GameSearchFilterManager } from './gameSearchFilterManager.js';
 import { DataManager } from './dataManager.js';
 import { UpdateManager } from './updateManager.js';
 import { FilterManager } from './filterManager.js';
@@ -31,8 +31,8 @@ import { MenuManager } from './menuManager.js';
 import { SearchManager } from './searchManager.js';
 import { SearchHighlighter } from './searchHighlighter.js';
 import { PollingManager } from './pollingManager.js';
-import { GameUpdateHandler } from './gameUpdateHandler.js';
-import { TreeShelfModalPollingUpdateManager } from './TreeShelfModalPollingUpdateManager.js';
+import { GamesModifiedHandler } from './gamesModifiedHandler.js';
+import { NodesModifiedHandler } from './NodesModifiedHandler.js';
 import { NotificationsMenuManager } from './notificationsMenuManager.js';
 import { Localization } from './localization.js';
 import { TooltipManager } from './tooltipManager.js';
@@ -122,7 +122,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   new ShelfUpdateManager();
   new TreeUpdateManager(treeVisualizer);
   new ModalUpdateManager();
-  new IndexUpdateManager();
+  new GameListUpdateManager();
 
     // Initialize TooltipManager
     new TooltipManager();
@@ -144,7 +144,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   
   window.menuManager = new MenuManager();
 
-  const gameListManager = new GameListManager(uiManager);
+  const gameSearchFilterManager = new GameSearchFilterManager(uiManager);
   const filterManager = new FilterManager();
   window.searchHighlighter = new SearchHighlighter();
   const searchManager = new SearchManager();
@@ -170,7 +170,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   } */
 
   // Initialize update handling
-  new TreeShelfModalPollingUpdateManager();
-  const gameUpdateHandler = new GameUpdateHandler();
+  new NodesModifiedHandler();
+  const gamesModifiedHandler = new GamesModifiedHandler();
 
 });

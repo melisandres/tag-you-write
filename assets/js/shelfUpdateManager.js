@@ -16,6 +16,8 @@ export class ShelfUpdateManager {
     eventBus.on('voteToggle', this.handleVoteToggle.bind(this));
     eventBus.on('gamePlayerCountUpdate', this.handleGamePlayerCountUpdate.bind(this));
     eventBus.on('nodeTextContentUpdate', this.handleNodeTextContentUpdate.bind(this));
+    eventBus.on('searchApplied', this.handleSearchUpdate.bind(this));
+    eventBus.on('updateNodeWinner', this.handleChooseWinnerFromPolling.bind(this));
 
     //TODO: can the following two be cleaned up? so that they point to methods? 
     eventBus.on('searchChanged', ({ searchTerm }) => {
@@ -174,6 +176,11 @@ export class ShelfUpdateManager {
     }
   } 
 
+  handleChooseWinnerFromPolling({ data }) {
+    const textId = data.id;
+    this.handleChooseWinner({ textId });
+  }
+
   handleChooseWinner({ textId }) {
     const container = document.querySelector('#showcase[data-showcase="shelf"]');
     if (container) {
@@ -189,7 +196,7 @@ export class ShelfUpdateManager {
                 nodeButtons.appendChild(deleteButton);
               }
             }
-            if (drawer.dataset.storyId === textId) {
+            if (String(drawer.dataset.storyId) === String(textId)) {
               drawer.querySelector('.node-headline').classList.add('isWinner');
               drawer.querySelector('.writing').classList.add('isWinner');
 
@@ -402,6 +409,65 @@ export class ShelfUpdateManager {
                 break;
         }
     });
+  }
+
+  // TODO: This was suggested. Not sure why... look into it. 
+  handleSearchUpdate(searchData) {
+    console.log("a method was suggested here... for applying search to shelf... but I think it's already being handled... I just need to make sure... so if you read this, and you see search isn't being updated.... what does that mean? it means you have a shelf open... and it has been changed... a text has been updated via polling, and some of the new text added corresponds to an active search term... then the newly added text would need to be highlighted where it matches, righ? ")
+    /* const container = document.querySelector('#showcase[data-showcase="shelf"]');
+    if (!container) return;
+
+    const searchTerm = searchData.searchTerm;
+    if (!searchTerm) {
+        eventBus.emit('removeSearchHighlights', container);
+        return;
+    }
+
+    // Wait for search results before highlighting
+    const searchResults = this.dataManager.getSearchResults();
+    if (searchResults) {
+        eventBus.emit('highlightSearchMatches', {
+            container,
+            searchTerm
+        });
+    } */
+  }
+
+  handleShelfGameUpdate(gameData) {
+    const container = document.querySelector('#showcase[data-showcase="shelf"]');
+    if (!container) return;
+
+    // Check if this is the game being displayed in the shelf
+    const showCaseGameId = container.closest('[data-game-id]').dataset.gameId;
+    if (showCaseGameId !== gameData.game_id) {
+      return;
+    }
+
+    // TODO: Update the winning node... so that it says "winner" and has a star svg? 
+
+    // Update the game status indicator
+/*     const isOpen = gameData.openForChanges === '1' || gameData.openForChanges === true || gameData.openForChanges === 1;
+    const gameStatusIndicator = container.querySelector('.game-status-indicator');
+    
+    if (gameStatusIndicator) {
+      // Update the game status indicator CSS class
+      gameStatusIndicator.classList.toggle('open', isOpen);
+      gameStatusIndicator.classList.toggle('closed', !isOpen);
+
+      // Update the game status text
+      const gameText = window.i18n.translate('general.game');
+      if (isOpen) {
+        const openText = window.i18n.translate('general.open');
+        gameStatusIndicator.querySelector('.game-status').innerHTML = 
+          `<span data-i18n="general.game">${gameText}</span>
+          <span data-i18n="general.open">${openText}</span>`;
+      } else {
+        const closedText = window.i18n.translate('general.closed');
+        gameStatusIndicator.querySelector('.game-status').innerHTML = 
+          `<span data-i18n="general.game">${gameText}</span>
+          <span data-i18n="general.closed">${closedText}</span>`;
+      }
+    } */
   }
 
 }

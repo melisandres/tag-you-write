@@ -17,6 +17,8 @@ export class TreeUpdateManager {
     eventBus.on('newNodesDiscovered', this.handleNewNodesDiscovered.bind(this));
     eventBus.on('nodeTextContentUpdate', this.handleNodeTextContentUpdate.bind(this));
     eventBus.on('searchApplied', this.handleSearchUpdate.bind(this));
+    eventBus.on('updateNodeWinner', this.handleChooseWinnerFromPolling.bind(this));
+    //eventBus.on('updateWinnerOnTree', this.handleChooseWinner.bind(this));
   }
 
   handleInstaPublish({ textId, newStatus }) {
@@ -80,6 +82,12 @@ export class TreeUpdateManager {
           .classed('display-none', true);
       }
     }
+  }
+
+  handleChooseWinnerFromPolling({ data }) {
+    const textId = data.id;
+    console.log('TEXT ID', textId);
+    this.handleChooseWinner({ textId });
   }
 
   handleChooseWinner({ textId }) {

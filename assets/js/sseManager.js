@@ -53,6 +53,7 @@ export class SSEManager {
         this.eventSource.addEventListener('gameUpdate', (event) => {
             try {
                 const modifiedGames = JSON.parse(event.data);
+                // TODO: I'm changing how I construct gamesModified in the dataManager... I think I'm going to send one event for each game... so maybe gameModified instead of gamesModified, and I'm going to send two arguments, the new game and the old game, in order to compare... 
                 eventBus.emit('gamesModified', modifiedGames);
             } catch (error) {
                 console.error('Error parsing game update:', error);

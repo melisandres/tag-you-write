@@ -1,4 +1,4 @@
-import { IndexUpdateManager } from './indexUpdateManager.js';
+import { GameListUpdateManager } from './gameListUpdateManager.js';
 import { ShelfVisualizer } from './shelfVisualizer.js';
 //import { DataManager } from './dataManager.js';
 /* this may create some issues... to require the modal the constructor. I'm going to initialize it as an empty string... there are pages where I will surely call the story manager where the modal will be innaccessible? or I should put the modal in the header? */

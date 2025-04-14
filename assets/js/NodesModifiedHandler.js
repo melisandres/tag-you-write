@@ -1,6 +1,6 @@
 import { eventBus } from './eventBus.js';
 
-export class TreeShelfModalPollingUpdateManager {
+export class NodesModifiedHandler {
   constructor() {
     this.initEventListeners();
   }
@@ -40,6 +40,18 @@ export class TreeShelfModalPollingUpdateManager {
         eventBus.emit('nodeTextContentUpdate', { data: changes });
     }
     // TODO: you need a whole flow for updates on search results. 
+
+    // Check if winner status or permissions have changed
+    if (oldNode?.isWinner !== newNode?.isWinner || 
+        JSON.stringify(oldNode?.permissions) !== JSON.stringify(newNode?.permissions)) {
+        console.log('Winner status or permissions changed:', {
+            oldIsWinner: oldNode?.isWinner,
+            newIsWinner: newNode?.isWinner,
+            oldPermissions: oldNode?.permissions,
+            newPermissions: newNode?.permissions
+        });
+        eventBus.emit('updateNodeWinner', { textId: newNode.id, data: newNode });
+    }
   }
 
   handleNodesAdded(nodes) {
@@ -50,6 +62,8 @@ export class TreeShelfModalPollingUpdateManager {
     }));
     eventBus.emit('newNodesDiscovered', normalizedNodes);
   }
+
+
 
 
 /*   getCurrentViews() {

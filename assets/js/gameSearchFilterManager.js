@@ -1,13 +1,13 @@
 import { eventBus } from './eventBus.js';
 import { GameListRenderer } from './gameListRenderer.js';
 
-export class GameListManager {
+export class GameSearchFilterManager {
     constructor(uiManager) {
         this.container = document.querySelector('.stories');
         if (!this.container) return;
 
-        if (window.gameListManagerInstance) {
-            return window.gameListManagerInstance;
+        if (window.gameSearchFilterManagerInstance) {
+            return window.gameSearchFilterManagerInstance;
         }
         
         this.dataManager = window.dataManager;
@@ -16,7 +16,6 @@ export class GameListManager {
         this.renderer = new GameListRenderer(this.container, this.uiManager);
 
         // Event listeners
-        eventBus.on('gamesModified', (games) => this.handleGameUpdates(games));
         eventBus.on('refreshGames', () => this.refreshGamesList());
         eventBus.on('filtersChanged', (filters) => this.handleFiltersChanged(filters));
         eventBus.on('searchApplied', (searchValue) => this.handleSearchApplied(searchValue));
@@ -39,15 +38,7 @@ export class GameListManager {
         // Set initial filters
         this.dataManager.setFilters(initialFilters);
         
-        window.gameListManagerInstance = this;
-    }
-
-    handleGameUpdates(games) {
-/*         games.forEach(game => {
-            eventBus.emit('updateGame', game);
-        }); */
-        /* this.dataManager.updateGamesData(games, false);  */
-        console.log('GAMES LIST MANAGER WAS SUPPOSED TO CALL UPDATE GAMES DATA here... but it becomes circular... does this break anything?', games);
+        window.gameSearchFilterManagerInstance = this;
     }
 
     handleFiltersChanged(filters) {

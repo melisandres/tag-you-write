@@ -21,6 +21,7 @@ export class ModalUpdateManager {
     });
     eventBus.on('searchApplied', this.handleSearchApplied.bind(this));
     eventBus.on('nodeTextContentUpdate', this.handleNodeTextContentUpdate.bind(this));
+    eventBus.on('updateNodeWinner', this.handleChooseWinner.bind(this));
   }
 
   handleSearchApplied(searchTerm) {
@@ -101,54 +102,59 @@ export class ModalUpdateManager {
     }
   }
 
-  handleChooseWinner({ textId }) {
+  handleChooseWinner({ textId, nodeData = null }) {
     const modal = document.querySelector(`.modal-background[data-text-id='${textId}'][data-tree-modal="visible"]`);
-    if (modal) {
-      // Remove all buttons except the close button
-      const modalBtns = modal.querySelector('.modal-dynamic-btns');
-      if (modalBtns) {
-        modalBtns.innerHTML = '';
+
+    if (!modal) return;
+  
+    // Remove all buttons except the close button
+    const modalBtns = modal.querySelector('.modal-dynamic-btns');
+    if (modalBtns) {
+      modalBtns.innerHTML = '';
+    }
+
+    // Update status to indicate it's the winning text
+    const topInfo = modal.querySelector('.top-info');
+    if (topInfo) {
+
+      // translate the strings
+      const winnerTitle = window.i18n.translate('general.winner');
+
+      // add winner class
+      topInfo.classList.add('winner');
+
+      // add winner status span with localization
+      const statusSpan = topInfo.querySelector('.status') || document.createElement('span');
+      statusSpan.className = 'status winner';
+      statusSpan.setAttribute('data-i18n', 'general.winner');
+      statusSpan.textContent = winnerTitle;
+      topInfo.appendChild(statusSpan);
+
+      // change the vote count to +1
+      const voteCountSpan = topInfo.querySelector('.vote-count');
+      if (voteCountSpan) {
+        // TODO: May need to revisit this logic... even just to centralize win condition logic. right now, it allows the winning vote to update the modal immediately for the person casting it... which doesn't happen otherwise... although it should be happening via voteToggle... 
+        voteCountSpan.innerHTML = `${voteCountSpan.dataset.playerCount}/${voteCountSpan.dataset.playerCount} votes`;
       }
 
-      // Update status to indicate it's the winning text
-      const topInfo = modal.querySelector('.top-info');
-      if (topInfo) {
-        // translate the strings
-        const winnerTitle = window.i18n.translate('general.winner');
+      // create max color
+      const colorScale = createColorScale(1);
+      const fillColor = colorScale(1);
 
-        // add winner class
-        topInfo.classList.add('winner');
-        const statusSpan = topInfo.querySelector('.status') || document.createElement('span');
-        statusSpan.className = 'status winner';
-        statusSpan.setAttribute('data-i18n', 'general.winner');
-        statusSpan.textContent = winnerTitle;
-        topInfo.appendChild(statusSpan);
-
-        // change the vote count to +1
-        const voteCountSpan = topInfo.querySelector('.vote-count');
-        if (voteCountSpan) {
-          voteCountSpan.dataset.voteCount = parseInt(voteCountSpan.dataset.voteCount) + 1;
-          voteCountSpan.innerHTML = `${voteCountSpan.dataset.voteCount}/${voteCountSpan.dataset.playerCount} votes`;
-        }
-
-        // create max color
-        const colorScale = createColorScale(1);
-        const fillColor = colorScale(1);
-
-        // Replace the votes SVG with the star SVG
-        const votesIcon = topInfo.querySelector('.votes i');
-        if (votesIcon) {
-          votesIcon.innerHTML = SVGManager.starSVG;
-          votesIcon.querySelector('path').setAttribute('fill', fillColor);
-        }
-      }
-
-      // Add 'isWinner' class to modal-text
-      const modalText = modal.querySelector('.modal-text');
-      if (modalText) {
-        modalText.classList.add('isWinner');
+      // Replace the votes SVG with the star SVG
+      const votesIcon = topInfo.querySelector('.votes i');
+      if (votesIcon) {
+        votesIcon.innerHTML = SVGManager.starSVG;
+        votesIcon.querySelector('path').setAttribute('fill', fillColor);
       }
     }
+
+    // Add 'isWinner' class to modal-text
+    const modalText = modal.querySelector('.modal-text');
+    if (modalText) {
+      modalText.classList.add('isWinner');
+    }
+    
   }
 
   handleVoteToggle({ data }) {
@@ -414,4 +420,103 @@ export class ModalUpdateManager {
         return text;
     }
   }
+/* 
+  handleUpdateNodeWinner(nodeData) {
+    const container = document.querySelector('[data-tree-modal="visible"]');
+    if (!container) return;
+
+    // Check if this is the game being displayed in the modal
+    const showCaseGameId = container.getAttribute('data-game-id');
+    
+    // Convert both to strings for comparison to avoid type issues
+    if (String(showCaseGameId) !== String(nodeData.data.game_id)) {
+      return;
+    }
+
+    if (nodeData.data.isWinner) {
+      console.log('I WILL UPDATE THE MODAL WINNER 1');
+      const topInfo = container.querySelector('.top-info');
+      if (topInfo) {
+        // Add winner class
+        topInfo.classList.add('winner');
+        
+        // Add winner status span with localization
+        const winnerTitle = window.i18n.translate('general.winner');
+        const statusSpan = topInfo.querySelector('.status') || document.createElement('span');
+        statusSpan.className = 'status winner';
+        statusSpan.setAttribute('data-i18n', 'general.winner');
+        statusSpan.textContent = winnerTitle;
+        
+        // Only append if it doesn't already exist
+        if (!topInfo.querySelector('.status.winner')) {
+          topInfo.appendChild(statusSpan);
+        }
+        
+        // Replace the votes SVG with the star SVG
+        const votesIcon = topInfo.querySelector('.votes i');
+        if (votesIcon) {
+          votesIcon.innerHTML = SVGManager.starSVG;
+          
+            // Set the fill color for the star
+            const svgPath = votesIcon.querySelector('svg path');
+            if (svgPath) {
+              // Use the same color scale as in the modal.js getNumberOfVotes method
+              const maxVotes = parseInt(container.querySelector('.vote-count')?.dataset.playerCount || 1);
+              const voteCount = parseInt(container.querySelector('.vote-count')?.dataset.voteCount || 0);
+              const colorScale = createColorScale(maxVotes);
+              const fillColor = colorScale(voteCount);
+              
+              svgPath.setAttribute('fill', fillColor);
+            } 
+        }
+      }
+    }
+    
+    // Update permissions and remove buttons that are not allowed
+    const modalBtns = container.querySelector('.modal-dynamic-btns');
+    console.log('MODAL UPDATE MANAGER modalBtns', modalBtns);
+    console.log('MODAL UPDATE MANAGER nodeData.data.permissions', nodeData.data.permissions);
+    if (modalBtns && nodeData.data.permissions) {
+      console.log('nodeData.data.permissions', nodeData.data.permissions);
+      console.log('nodeData.data.permissions.canIterate', nodeData.data.permissions.canIterate);
+      // Remove buttons based on permissions
+      if (!nodeData.data.permissions.canIterate) {
+        console.log('I WILL REMOVE THE ITERATE FORM');
+        const iterateForm = modalBtns.querySelector('.iterate-form');
+        if (iterateForm) iterateForm.remove();
+      }
+      
+      if (!nodeData.data.permissions.canEdit) {
+        console.log('I WILL REMOVE THE EDIT FORM');
+        const editForm = modalBtns.querySelector('.edit-form');
+        if (editForm) editForm.remove();
+      }
+      
+      if (!nodeData.data.permissions.canAddNote) {
+        console.log('I WILL REMOVE THE NOTE FORM');
+        const noteForm = modalBtns.querySelector('.note-form');
+        if (noteForm) noteForm.remove();
+      }
+      
+      if (!nodeData.data.permissions.canPublish) {
+        console.log('I WILL REMOVE THE PUBLISH BUTTON');
+        const publishBtn = modalBtns.querySelector('[data-insta-publish-button]');
+        if (publishBtn) publishBtn.remove();
+      }
+      
+      if (!nodeData.data.permissions.canDelete) {
+        console.log('I WILL REMOVE THE DELETE BUTTON');
+        const deleteBtn = modalBtns.querySelector('[data-insta-delete-button]');
+        if (deleteBtn) deleteBtn.remove();
+      }
+      
+      if (!nodeData.data.permissions.canVote) {
+        console.log('I WILL REMOVE THE VOTE BUTTON');
+        const voteBtn = modalBtns.querySelector('.vote');
+        if (voteBtn) voteBtn.remove();
+      }
+    }
+
+    // TODO: This begs a question... what happens to the data when a game is closed... like... the data that says you can edit, can't vote, etc... is this data updated? if not... when you refresh the page, the buttons will be available... no? 
+  } */
 }

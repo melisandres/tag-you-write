@@ -1,8 +1,6 @@
 import { eventBus } from './eventBus.js';
 import { SVGManager } from './svgManager.js';
 
-
-
 export class GameListRenderer {
     constructor(container, uiManager) {
         if (!container) return;
@@ -24,19 +22,20 @@ export class GameListRenderer {
 
         this.initializeFromServerData();
         
+        // DEPRECATED: Old event system replaced by some logic in the GamesModifiedHandler class
         // Listen for game updates
-/*         eventBus.on('updateGame', (gameData) => this.updateGameElement(gameData)); */
+/*         eventBus.on('updateGame', (gameData) => this.updateExistingGame(gameData)); */
 
         // Add state tracking
         this.currentViewState = null;
 
         // Listen for filter updates
         eventBus.on('filterApplied', () => this.saveCurrentViewState());
-        eventBus.on('searchApplied', () => this.saveCurrentViewState());
         eventBus.on('gamesListUpdated', () => this.restoreViewState());
 
+        // DEPRECATED: Old event system replaced by some logic in the GamesModifiedHandler class
         // Add event listener for game updates
-        eventBus.on('gamesModified', (games) => this.handleGamesModified(games));
+/*         eventBus.on('gamesModified', (games) => this.handleGamesModified(games)); */
 
         // Add listener for search updates
         eventBus.on('searchApplied', (searchTerm) => {
@@ -47,6 +46,9 @@ export class GameListRenderer {
                 this.handleSearchHighlighting(searchTerm);
             });
         });
+        
+        // Add listener for new games
+        eventBus.on('gameAddedToRender', (game) => this.insertNewGame(game));
     }
 
     initializeFromServerData() {
@@ -65,7 +67,7 @@ export class GameListRenderer {
     }
 
     handleGamesModified(games) {
-        console.log('Handling modified games in renderer:', games);
+/*         console.log('Handling modified games in renderer:', games);
         // update the games cache
         this.dataManager.updateGamesData(games, false);
 
@@ -78,7 +80,7 @@ export class GameListRenderer {
                 // Insert new game in correct position
                 this.insertNewGame(game);
             }
-        });
+        }); */
     }
 
     loadGamesData() {
@@ -112,10 +114,10 @@ export class GameListRenderer {
                  data-unseen-count="${game.unseen_count}" 
                  data-seen-count="${game.seen_count}" 
                  data-text-count="${game.text_count}" 
-                 data-text-id="${game.id}">
+                 data-text-id="${game.id || game.text_id}">
                 <div class="story-title ${game.unseen_count > 0 && this.userLoggedIn ? 'unreads' : ''}">
                     <h2 class="${hasContributed ? 'contributed' : ''}" ${tooltipContributor}>
-                        <a data-refresh-default ${untitledDataI18n} data-text-id="${game.id}">
+                        <a data-refresh-default ${untitledDataI18n} data-text-id="${game.id || game.text_id}">
                             ${game.title || untitledText}
                         </a>
                     </h2>
@@ -143,10 +145,10 @@ export class GameListRenderer {
                     <span class="icon" data-svg="bookmark">${SVGManager.bookmarkSVG}</span>
                 </button>
             ` : ''}
-            <button data-refresh-tree data-text-id="${game.id}" class="story-btn" data-svg="tree" data-i18n-title="general.view_tree_tooltip" title="${treeTooltip}">
+            <button data-refresh-tree data-text-id="${game.id || game.text_id}" class="story-btn" data-svg="tree" data-i18n-title="general.view_tree_tooltip" title="${treeTooltip}">
                 <span class="icon" data-svg="tree">${SVGManager.treeSVG}</span>
             </button>
-            <button data-refresh-shelf data-text-id="${game.id}" class="story-btn" data-svg="shelf" data-i18n-title="general.view_shelf_tooltip" title="${shelfTooltip}">
+            <button data-refresh-shelf data-text-id="${game.id || game.text_id}" class="story-btn" data-svg="shelf" data-i18n-title="general.view_shelf_tooltip" title="${shelfTooltip}">
                 <span class="icon" data-svg="shelf">${SVGManager.shelfSVG}</span>
             </button>
         `;
@@ -205,11 +207,19 @@ export class GameListRenderer {
         } else {
             existingGames[insertIndex].insertAdjacentHTML('beforebegin', newGameElement);
         }
+
+        // TODO: NOT SURE IF THIS SHOULD BE HERE
+        // Reapply search highlighting if there's an active search
+        if (this.dataManager.activeSearch) {
+            this.handleSearchHighlighting(this.dataManager.activeSearch);
+        }
     }
 
     // Update a game already rendered in the list
-    updateExistingGame(gameElement, gameData) {
+   /*  updateExistingGame(gameData) {
         console.log("HERE!!updateExistingGame", gameData);
+        const gameElement = document.querySelector(`.story[data-game-id="${gameData.game_id}"]`);
+        console.log("gameElement", gameElement);
         if (!gameElement || !gameData) return;
 
         // Update open/closed status and hasContributed status
@@ -256,7 +266,9 @@ export class GameListRenderer {
         if (activeSearch) {
             this.handleSearchHighlighting(activeSearch);
         }
-    }
+    } */
+
+        // TODO: there's logic ABOVE to ensure an active search is applied to a game after it's added to the list. this needs to be integraed
 
     renderGamesList(games) {
         if (!Array.isArray(games)) {
