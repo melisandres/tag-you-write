@@ -33,9 +33,9 @@ export class GameListRenderer {
         eventBus.on('filterApplied', () => this.saveCurrentViewState());
         eventBus.on('gamesListUpdated', () => this.restoreViewState());
 
-        // DEPRECATED: Old event system replaced by some logic in the GamesModifiedHandler class
-        // Add event listener for game updates
-/*         eventBus.on('gamesModified', (games) => this.handleGamesModified(games)); */
+        // DEPRECATED: Old event system replaced by the handleGamesModified method in the GamesModifiedHandler class
+        // The functionality has been moved to the GamesModifiedHandler class
+        // eventBus.on('gamesModified', (games) => this.handleGamesModified(games));
 
         // Add listener for search updates
         eventBus.on('searchApplied', (searchTerm) => {
@@ -66,22 +66,23 @@ export class GameListRenderer {
         }
     }
 
-    handleGamesModified(games) {
-/*         console.log('Handling modified games in renderer:', games);
-        // update the games cache
-        this.dataManager.updateGamesData(games, false);
-
-        games.forEach(game => {
-            const gameElement = document.querySelector(`.story[data-game-id="${game.game_id}"]`);
-            if (gameElement) {
-                // Update existing game
-                this.updateExistingGame(gameElement, game);
-            } else {
-                // Insert new game in correct position
-                this.insertNewGame(game);
-            }
-        }); */
-    }
+    // DEPRECATED: This method has been moved to the GamesModifiedHandler class
+    // handleGamesModified(games) {
+    //     console.log('Handling modified games in renderer:', games);
+    //     // update the games cache
+    //     this.dataManager.updateGamesData(games, false);
+    // 
+    //     games.forEach(game => {
+    //         const gameElement = document.querySelector(`.story[data-game-id="${game.game_id}"]`);
+    //         if (gameElement) {
+    //             // Update existing game
+    //             this.updateExistingGame(gameElement, game);
+    //         } else {
+    //             // Insert new game in correct position
+    //             this.insertNewGame(game);
+    //         }
+    //     });
+    // }
 
     loadGamesData() {
         const dataElement = document.getElementById('games-data');
@@ -216,10 +217,8 @@ export class GameListRenderer {
     }
 
     // Update a game already rendered in the list
-   /*  updateExistingGame(gameData) {
-        console.log("HERE!!updateExistingGame", gameData);
-        const gameElement = document.querySelector(`.story[data-game-id="${gameData.game_id}"]`);
-        console.log("gameElement", gameElement);
+    updateExistingGame(gameElement, gameData) {
+        console.log("updateExistingGame", gameData);
         if (!gameElement || !gameData) return;
 
         // Update open/closed status and hasContributed status
@@ -248,7 +247,12 @@ export class GameListRenderer {
                 <span data-i18n="general.closed">${closedText}</span>`;
         }
 
-        // Update hasContributed status? For now its done locally.
+        // Update hasContributed status
+        const contributedElement = gameElement.querySelector('.contributed');
+        if (contributedElement) {
+            contributedElement.classList.toggle('contributed', hasContributed);
+            contributedElement.setAttribute('data-i18n-tooltip', hasContributed ? 'tooltips.contributor' : '');
+        }
 
         // Update counts
         gameElement.dataset.unseenCount = gameData.unseen_count;
@@ -266,9 +270,7 @@ export class GameListRenderer {
         if (activeSearch) {
             this.handleSearchHighlighting(activeSearch);
         }
-    } */
-
-        // TODO: there's logic ABOVE to ensure an active search is applied to a game after it's added to the list. this needs to be integraed
+    }
 
     renderGamesList(games) {
         if (!Array.isArray(games)) {

@@ -24,9 +24,9 @@ export class GameListUpdateManager {
     
     // New event listeners for specific game updates
     eventBus.on('gameContributionStatusChanged', this.handleGameContributionStatusChanged.bind(this));
-    eventBus.on('updateGameStatus', this.handleGameStatusUpdate.bind(this));
-    eventBus.on('updateGameCounts', this.handleGameCountsUpdate.bind(this));
-    eventBus.on('updateGameTitle', this.handleGameTitleUpdate.bind(this));
+    eventBus.on('gameStatusChanged', this.handleGameStatusUpdate.bind(this));
+    eventBus.on('gameCountsChanged', this.handleGameCountsUpdate.bind(this));
+    eventBus.on('gameTitleChanged', this.handleGameTitleUpdate.bind(this));
   }
 
   makeTitlesShorter() {
@@ -118,13 +118,16 @@ export class GameListUpdateManager {
   } */
 
   // TODO: I'm currently only triggering this on deleteNode, in the dataManager... that means, for now, we only ever go from contributed to not contributed, and we look for the .contributed class, rather than the h5 or whatever it is. 
-  handleGameContributionStatusChanged({gameId, hasContributed}) {
-    const gameElement = document.querySelector(`[data-game-id="${gameId}"] .contributed`);
-    if(gameElement) {
-      gameElement.classList.toggle('contributed', hasContributed);
-      gameElement.setAttribute('data-i18n-tooltip', hasContributed ? 'tooltips.contributor' : '');
+  handleGameContributionStatusChanged(newGame) {
+    const gameElement = document.querySelector(`[data-game-id="${newGame.game_id}"]`);
+    if (!gameElement) return;
+    
+    const h2Element = gameElement.querySelector('h2');
+    if (h2Element) {
+      const hasContributed = newGame.hasContributed === '1' || newGame.hasContributed === true || newGame.hasContributed === 1;
+      h2Element.classList.toggle('contributed', hasContributed);
+      h2Element.setAttribute('data-i18n-tooltip', hasContributed ? 'tooltips.contributor' : '');
     }
-
   }
 
   /* DEPRECATED: Old game update handling system
@@ -187,14 +190,16 @@ export class GameListUpdateManager {
 } */
 
   // New method to handle game status updates
-  handleGameStatusUpdate({ game_id, changes }) {
-    const gameElement = document.querySelector(`.story[data-game-id="${game_id}"]`);
+  handleGameStatusUpdate(newGame) {
+    console.log('handleGameStatusUpdate', { newGame });
+    const gameElement = document.querySelector(`.story[data-game-id="${newGame.game_id}"]`);
+    console.log('gameElement for status update', gameElement);
     if (!gameElement) return;
     
     const gameStatusIndicator = gameElement.querySelector('.game-status-indicator');
     if (!gameStatusIndicator) return;
     
-    const isOpen = changes.status === '1' || changes.status === true || changes.status === 1;
+    const isOpen = newGame.openForChanges === '1' || newGame.openForChanges === true || newGame.openForChanges === 1;
     
     // Update the game status indicator CSS class
     gameStatusIndicator.classList.toggle('open', isOpen);
@@ -216,38 +221,38 @@ export class GameListUpdateManager {
   }
   
   // New method to handle game counts updates
-  handleGameCountsUpdate({ game_id, changes }) {
-    const gameElement = document.querySelector(`.story[data-game-id="${game_id}"]`);
+  handleGameCountsUpdate(newGame) {
+    const gameElement = document.querySelector(`.story[data-game-id="${newGame.game_id}"]`);
     if (!gameElement) return;
     
     // Update counts
-    if (changes.counts.unseen !== undefined) {
-        gameElement.dataset.unseenCount = changes.counts.unseen;
+    if (newGame.unseen_count !== undefined) {
+        gameElement.dataset.unseenCount = newGame.unseen_count;
     }
-    if (changes.counts.seen !== undefined) {
-        gameElement.dataset.seenCount = changes.counts.seen;
+    if (newGame.seen_count !== undefined) {
+        gameElement.dataset.seenCount = newGame.seen_count;
     }
-    if (changes.counts.text !== undefined) {
-        gameElement.dataset.textCount = changes.counts.text;
+    if (newGame.text_count !== undefined) {
+        gameElement.dataset.textCount = newGame.text_count;
     }
     
     // Update title and unreads status
     const titleDiv = gameElement.querySelector('.story-title');
-    if (titleDiv && this.userLoggedIn && changes.counts.unseen !== undefined) {
-        titleDiv.classList.toggle('unreads', changes.counts.unseen > 0);
+    if (titleDiv && newGame.unseen_count !== undefined) {
+        titleDiv.classList.toggle('unreads', newGame.unseen_count > 0);
     }
   }
   
-  // New method to handle game title updates
-  handleGameTitleUpdate({ game_id, changes }) {
-    const gameElement = document.querySelector(`.story[data-game-id="${game_id}"]`);
+  // To be fair, a title update will probably never happen... unless a user is logged in on two devices... and we want the title to update on the device they are not working from... but there may be reasons to keep this. 
+  handleGameTitleUpdate(newGame) {
+    const gameElement = document.querySelector(`.story[data-game-id="${newGame.game_id}"]`);
     if (!gameElement) return;
     
     const titleElement = gameElement.querySelector('.story-title h2 a');
     if (!titleElement) return;
     
     // Update the title
-    const originalText = changes.title || window.i18n.translate("general.untitled");
+    const originalText = newGame.title || window.i18n.translate("general.untitled");
     titleElement.textContent = originalText;
     
     // Apply the same title shortening logic

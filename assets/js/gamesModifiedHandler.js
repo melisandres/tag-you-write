@@ -26,15 +26,27 @@ export class GamesModifiedHandler {
         }
         
         // Check for specific changes and emit appropriate events
-        if (newGame.status !== oldGame.status) {
-            console.log(`Game ${newGame.game_id} status changed from ${oldGame.status} to ${newGame.status}`);
+        if (String(newGame.openForChanges) !== String(oldGame.openForChanges)) {
+            console.log(`Game ${newGame.game_id} status changed from ${oldGame.openForChanges} to ${newGame.openForChanges}`);
+            
             eventBus.emit('gameStatusChanged', newGame);
         }
         
-        if (newGame.counts !== oldGame.counts) {
+        // Check if any of the count properties have changed
+        if (newGame.text_count !== oldGame.text_count || 
+            newGame.seen_count !== oldGame.seen_count || 
+            newGame.unseen_count !== oldGame.unseen_count) {
             console.log(`Game ${newGame.game_id} counts changed:`, {
-                old: oldGame.counts,
-                new: newGame.counts
+                old: {
+                    text_count: oldGame.text_count,
+                    seen_count: oldGame.seen_count,
+                    unseen_count: oldGame.unseen_count
+                },
+                new: {
+                    text_count: newGame.text_count,
+                    seen_count: newGame.seen_count,
+                    unseen_count: newGame.unseen_count
+                }
             });
             eventBus.emit('gameCountsChanged', newGame);
         }
@@ -44,12 +56,9 @@ export class GamesModifiedHandler {
             eventBus.emit('gameTitleChanged', newGame);
         }
         
-        if (newGame.is_contribution !== oldGame.is_contribution) {
-            console.log(`Game ${newGame.game_id} contribution status changed from ${oldGame.is_contribution} to ${newGame.is_contribution}`);
+        if (String(newGame.hasContributed) !== String(oldGame.hasContributed)) {
+            console.log(`Game ${newGame.game_id} contribution status changed from ${oldGame.hasContributed} to ${newGame.hasContributed}`);
             eventBus.emit('gameContributionChanged', newGame);
         }
-        
-        // Always emit gameModifiedToRender to update the UI
-        eventBus.emit('gameModifiedToRender', newGame);
     }
 }

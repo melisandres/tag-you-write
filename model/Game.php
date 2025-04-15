@@ -258,9 +258,11 @@
                   (ts.status = 'published' OR (ts.status = 'draft' AND rt.writer_id = :loggedInWriterId) OR (ts.status = 'incomplete_draft' AND rt.writer_id = :loggedInWriterId)) 
             INNER JOIN text t ON g.id = t.game_id
             LEFT JOIN seen s ON t.id = s.text_id AND s.writer_id = :loggedInWriterId
-            WHERE CAST(g.modified_at AS DATETIME) > CAST(:lastCheck AS DATETIME)
+            WHERE CAST(g.modified_at AS DATETIME) >= CAST(:lastCheck AS DATETIME)
             $filterString
             GROUP BY g.id, g.prompt, rt.id, rt.title";
+
+      //TODO: I changed the lastCheck verification from = to >=... and we need to see if this solves the issue of sometimes receiving a changed game that is 'open for changes' when it should be closed... possibly because the last vote is registering a change within a millisecond from the closing of the game, in another sql query... if they clock at the same time... then this will fix it... if they don't... I may have to combine the queries, so that ending a game executes all of the changes at once, ensuring that polling won't load just half a change... or I need to fingure out another solution. 
 
       $stmt = $this->prepare($sql);
       $stmt->bindValue(':lastCheck', $lastCheck);
