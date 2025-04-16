@@ -209,10 +209,10 @@ export class GameListRenderer {
             existingGames[insertIndex].insertAdjacentHTML('beforebegin', newGameElement);
         }
 
-        // TODO: NOT SURE IF THIS SHOULD BE HERE
         // Reapply search highlighting if there's an active search
-        if (this.dataManager.activeSearch) {
-            this.handleSearchHighlighting(this.dataManager.activeSearch);
+        const activeSearch = this.dataManager.getSearch();
+        if (activeSearch) {
+            this.handleSearchHighlighting(activeSearch);
         }
     }
 

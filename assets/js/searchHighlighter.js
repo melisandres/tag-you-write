@@ -7,6 +7,7 @@ export class SearchHighlighter {
             console.log('Returning existing instance');
             return SearchHighlighter.instance;
         }
+        
         console.log('Creating new SearchHighlighter instance');
         SearchHighlighter.instance = this;
         
