@@ -3,7 +3,15 @@
 abstract class Crud extends PDO{
 
     public function __construct(){
-        parent::__construct('mysql:host=localhost; dbname=tag; port=8889; charset=utf8', 'root', '');
+        $host = getenv('DB_HOST') ?: 'localhost';
+        $dbname = getenv('DB_NAME') ?: 'tag';
+        $port = getenv('DB_PORT') ?: '8889';
+        $charset = getenv('DB_CHARSET') ?: 'utf8';
+        $user = getenv('DB_USER') ?: 'root';
+        $password = getenv('DB_PASSWORD') ?: '';
+        
+        $dsn = "mysql:host={$host}; dbname={$dbname}; port={$port}; charset={$charset}";
+        parent::__construct($dsn, $user, $password);
     }
     
     //this is only being called by writer, at the moment, but it's so general I hesitate to put it in the writer model
