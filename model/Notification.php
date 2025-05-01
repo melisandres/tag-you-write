@@ -33,6 +33,14 @@
         return $stmt->fetchAll();
     }
 
+    /**
+     * Get notifications created after a specific timestamp
+     * Used by the polling system and SSE to check for new notifications
+     * Handles timezone conversions between client and server
+     * 
+     * @param string|null $lastCheck Timestamp to check for new notifications
+     * @return array Array of notifications created after lastCheck
+     */
     public function getNewNotifications($lastCheck = null) {
         $writer_id = $_SESSION['writer_id'];
         $sql = "SELECT n.*, g.root_text_id, t.title as game_title, 
@@ -63,6 +71,14 @@
         return $stmt->fetchAll();
     }
 
+    /**
+     * Get notifications that haven't been marked as seen
+     * Used specifically for checking game state changes (e.g., game end)
+     * 
+     * @param int $writer_id The ID of the writer
+     * @param int|null $game_id Optional game ID to filter notifications
+     * @return array Array of unseen notifications
+     */
     public function getUnseenNotifications($writer_id, $game_id = NULL) {
         $sql = "SELECT n.*, g.root_text_id, t.title as game_title, 
                 wt.title as winning_title 

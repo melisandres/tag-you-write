@@ -98,7 +98,10 @@ export class DataManager {
 
     // To keep track of the currently viewed root story id
     setCurrentViewedRootStoryId(rootStoryId) {
-        /* this.currentViewedRootStoryId = rootStoryId; */
+        // Only proceed if the value has actually changed
+        if (this.cache.currentViewedRootId === rootStoryId) {
+            return;
+        }
         
         // Ensure tree exists in cache
         if (!this.cache.trees.has(rootStoryId)) {
@@ -107,8 +110,13 @@ export class DataManager {
                 timestamp: Date.now()
             });
         }
+        
+        // Update the value
         this.cache.currentViewedRootId = rootStoryId;
         this.saveCache();
+        
+        // Emit event with the new value
+        eventBus.emit('currentViewedRootStoryIdChanged', rootStoryId);
     }
 
     getCurrentViewedRootStoryId() {
@@ -191,6 +199,8 @@ export class DataManager {
 
     // This creates the recently modified games list
     handleUpdateResponse(response, currentlyViewedRootId) {
+        console.log('handleUpdateResponse called with:', response);
+        
         const { modifiedGames, modifiedNodes, searchResults } = response;
         let hasUpdates = false;
         let hasTreeUpdates = false;
@@ -670,6 +680,12 @@ export class DataManager {
 
     getGame(gameId) {
         return this.cache.games.get(String(gameId));
+    }
+
+    getGameRootId(gameId) {
+        const game = this.getGame(gameId);
+        if (!game) return null;
+        return game.data.text_id;
     }
 
     getPaginatedData() {

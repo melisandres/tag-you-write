@@ -225,7 +225,7 @@ class ControllerText extends Controller{
     }
 
     // This works hand in hand with the library/permissions.php. I can't remember why it isn't included in this system... I think it just works a little differently, and so it's easier to keep it here (?)
-    private function addPermissions(&$node, $currentUserId, $hierarchy = []) {
+/*     private function addPermissions(&$node, $currentUserId, $hierarchy = []) {
         // selectTexts adds hasContributed, isWinner, and openForChanges, but 
         // the front end works better if these are just true/false instead of 0/1
         $node['hasContributed'] = $node['hasContributed'] == 1;
@@ -239,7 +239,7 @@ class ControllerText extends Controller{
                 $this->addPermissions($child, $currentUserId, $hierarchy);
             }
         }
-    }
+    } */
 
     //show the page from which someone can write a new text
     public function create(){

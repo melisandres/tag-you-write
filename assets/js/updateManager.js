@@ -3,23 +3,25 @@ import { eventBus } from './eventBus.js';
 
 export class UpdateManager {
     constructor() {
-        this.preferSSE = false;
+        this.preferSSE = true; // Enable SSE by default for testing
+        this.currentFilters = new Set(); // Initialize filters set
 
         // Listen for success/failure of SSE
         eventBus.on('sseConnected', () => this.handleSSESuccess());
         eventBus.on('sseFailed', () => this.handleSSEFailure());
+        
+        console.log('UpdateManager created with SSE preference:', this.preferSSE);
     }
 
     // Called by main.js to ensure other managers set up their event listeners first, and ensures that the DOM is ready. (?)
     initialize() {
         console.log('UpdateManager initialized');
-        //this.updateVisibleGameIds();
         window.addEventListener('beforeunload', () => this.cleanup());
 
         if (this.preferSSE) {
-            console.log('Attempting SSE connection');
+            console.log('Attempting SSE connection with filters:', Array.from(this.currentFilters));
             eventBus.emit('startSSE', {
-                filters: Array.from(this.currentFilters)
+                gameIds: Array.from(this.currentFilters)
             });
         } else {
             console.log('Initializing polling from UpdateManager');
@@ -27,19 +29,21 @@ export class UpdateManager {
         }
     }
 
-    handleSSEFailure() {
-        console.log('SSE failed, falling back to polling');
+    handleSSEFailure(error) {
+        console.error('SSE failed:', error);
+        console.log('Falling back to polling');
         this.preferSSE = false;
         eventBus.emit('initializePolling');
     }
 
     handleSSESuccess() {
-        console.log('SSE connected, stopping polling');
+        console.log('SSE connected successfully, stopping polling');
         this.preferSSE = true;
         eventBus.emit('stopPolling');
     }
 
     cleanup() {
+        console.log('UpdateManager cleanup - stopping SSE and polling');
         eventBus.emit('stopSSE');
         eventBus.emit('stopPolling');
     }

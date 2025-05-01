@@ -146,7 +146,7 @@ class ControllerGame extends Controller {
         }
     }
 
-    private function addPermissions(&$node, $currentUserId, $hierarchy = []) {
+/*     private function addPermissions(&$node, $currentUserId, $hierarchy = []) {
         // Convert integer values to boolean
         $node['hasContributed'] = $node['hasContributed'] == 1;
         $node['isWinner'] = $node['isWinner'] == 1;
@@ -159,7 +159,7 @@ class ControllerGame extends Controller {
                 $this->addPermissions($child, $currentUserId, $hierarchy);
             }
         }
-    }
+    } */
 
     // This works hand in hand with the library/permissions.php. It is a non recursive version of the addPermission in the controllerText class.
    /*  public function addPermissions ($nodes, $currentUserId) {

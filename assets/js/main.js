@@ -139,6 +139,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Initialize managers independently
   console.log('Initializing managers');
   const pollingManager = new PollingManager();
+  const sseManager = new SSEManager();
+  console.log('SSEManager instance created:', sseManager);
   const updateManager = new UpdateManager();
   updateManager.initialize();
   

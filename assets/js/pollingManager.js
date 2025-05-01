@@ -11,13 +11,13 @@ export class PollingManager {
 
         // Event listeners
         eventBus.on('initializePolling', () => this.handleInitializePolling());
-        eventBus.on('stopPolling', () => this.stopPolling());
+        eventBus.on('stopPolling', () => this.stopAllPolling());
     }
 
     registerDefaultTasks() {
         // Game list polling
         this.registerTask('gameList', {
-            interval: 10000,
+            interval: this.defaultInterval,
             handler: async () => {
                 try {
                     await this.dataManager.checkForUpdates();
@@ -29,7 +29,7 @@ export class PollingManager {
 
         // General notifications polling
         this.registerTask('notifications', {
-            interval: 15000,
+            interval: this.defaultInterval,
             handler: async () => {
                 try {
                     eventBus.emit('checkForNotifications');
