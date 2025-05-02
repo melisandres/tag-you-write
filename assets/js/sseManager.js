@@ -12,32 +12,31 @@ export class SSEManager {
         console.log('SSEManager constructor called');
 
         // Listen for control events
-        eventBus.on('startSSE', ({gameIds}) => {
-            console.log('SSE: Received startSSE event with gameIds:', gameIds);
-            this.connect(gameIds);
+        eventBus.on('startSSE', () => {
+            console.log('SSE: Received startSSE event');
+            this.connect();
         });
         eventBus.on('stopSSE', () => {
             console.log('SSE: Received stopSSE event');
             this.disconnect();
         });
 
-        // Listen for root story ID changes
-        eventBus.on('currentViewedRootStoryIdChanged', (rootStoryId) => {
-            this.updateRootStoryIdOnServer(rootStoryId);
+        // Listen for parameter changes
+        eventBus.on('sseParametersChanged', (param) => {
+            console.log('SSE: Parameter changed:', param);
+            this.handleParameterChange(param);
         });
     }
 
-    async connect(gameIds = []) {
+    async connect() {
         try {
-            console.log('SSE: Attempting to connect with gameIds:', gameIds);
+            console.log('SSE: Attempting to connect');
             
             // Close existing connection if any
             if (this.eventSource) {
                 console.log('SSE: Closing existing connection');
                 this.disconnect();
             }
-
-            //TODO: consider getting some of this differently... like from the URL... if that is the source of truth
 
             // Get current state from DataManager
             const rootId = this.dataManager.getCurrentViewedRootStoryId();
@@ -52,8 +51,7 @@ export class SSEManager {
                 filters: JSON.stringify(filters),
                 search: search,
                 rootStoryId: rootId,
-                lastTreeCheck: lastTreeCheck,
-                gameIds: gameIds.join(',')
+                lastTreeCheck: lastTreeCheck
             });
 
             const endpoint = `sse/stream?${params.toString()}`;
@@ -99,6 +97,11 @@ export class SSEManager {
                 const data = JSON.parse(event.data);
                 console.log('SSE: Update event data:', data);
                 
+                // Get the root ID from the first modified node if available
+                const gameId = data.modifiedNodes?.[0]?.game_id;
+                const rootId = this.dataManager.getCurrentViewedRootStoryId();
+                console.log('SSE: game ID from update:', gameId, 'Current root ID:', rootId);
+                
                 // Process modified games
                 if (data.modifiedGames && data.modifiedGames.length > 0) {
                     console.log('SSE: Processing modified games:', data.modifiedGames);
@@ -113,11 +116,6 @@ export class SSEManager {
                 if (data.searchResults && data.searchResults.length > 0) {
                     console.log('SSE: Processing search results:', data.searchResults);
                 }
-                
-                // Get the root ID from the first modified node if available
-                const gameId = data.modifiedNodes?.[0]?.game_id;
-                const rootId = this.dataManager.getGameRootId(gameId);
-                console.log('SSE: Using rootId for update:', rootId);
                 
                 // Handle the update response
                 this.dataManager.handleUpdateResponse(data, rootId);
@@ -167,26 +165,29 @@ export class SSEManager {
     }
 
     /**
-     * Update the root story ID on the server
-     * @param {string|null} rootStoryId The ID of the root story being viewed
+     * Handle changes to SSE parameters by restarting the connection
+     * @param {Object} param The parameter that changed
+     * @param {string} param.type The type of parameter ('rootStoryId', 'filters', 'search')
+     * @param {any} param.value The new value
      */
-    async updateRootStoryIdOnServer(rootStoryId) {
+    async handleParameterChange(param) {
         if (!this.isConnected) {
-            console.log('SSE not connected, skipping root story ID update');
+            console.log('SSE not connected, skipping parameter update');
             return;
         }
 
         try {
-            const endpoint = window.i18n.createUrl(`sse/updateRootStoryId/${rootStoryId || 'null'}`);
-            const response = await fetch(endpoint);
+            console.log('SSE: Restarting connection due to parameter change:', param.type);
             
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
+            // Disconnect current connection
+            this.disconnect();
             
-            console.log('Root story ID updated on server:', rootStoryId);
+            // Create new connection with updated parameters
+            await this.connect();
+            
+            console.log('SSE: Connection restarted with new parameters');
         } catch (error) {
-            console.error('Error updating root story ID:', error);
+            console.error('Error updating SSE parameters:', error);
         }
     }
 }

@@ -50,6 +50,7 @@ class ControllerSSE extends Controller {
         $watchedGameIds = isset($_GET['gameIds']) ? 
             explode(',', $_GET['gameIds']) : 
             [];
+        $rootStoryId = isset($_GET['rootStoryId']) ? $_GET['rootStoryId'] : null;
         
         // 5. Initialize models
         $game = new Game();
@@ -71,17 +72,21 @@ class ControllerSSE extends Controller {
                     error_log("SSE: Updated lastGamesCheck to: {$lastGamesCheck}");
                 }
                 
-                // Get modified nodes if rootStoryId is provided in session
+                // Get modified nodes if rootStoryId is provided
                 $modifiedNodes = [];
-                $rootStoryId = $_SESSION['current_viewed_root_story_id'] ?? null;
+                error_log("SSE: Current rootStoryId: {$rootStoryId}, LastTreeCheck: {$lastTreeCheck}");
+                
                 if ($rootStoryId && $lastTreeCheck) {
                     $gameId = $game->selectGameId($rootStoryId);
+                    error_log("SSE: Fetching nodes for gameId: {$gameId}");
                     $modifiedNodes = $text->selectTexts($currentUserId, $gameId, true, $lastTreeCheck);
                     if (!empty($modifiedNodes)) {
                         error_log("SSE: Found modified nodes for rootStoryId {$rootStoryId}: " . json_encode($modifiedNodes));
                         // Update lastTreeCheck to prevent duplicate node updates
                         $lastTreeCheck = date('Y-m-d H:i:s');
                         error_log("SSE: Updated lastTreeCheck to: {$lastTreeCheck}");
+                    } else {
+                        error_log("SSE: No modified nodes found for rootStoryId {$rootStoryId} with lastTreeCheck {$lastTreeCheck}");
                     }
                     
                     // Add permissions to the modified nodes
@@ -90,6 +95,8 @@ class ControllerSSE extends Controller {
                             $this->addPermissions($node, $currentUserId, $modifiedNodes);
                         }
                     }
+                } else {
+                    error_log("SSE: Skipping node check - rootStoryId: {$rootStoryId}, lastTreeCheck: {$lastTreeCheck}");
                 }
                 
                 // Get search results if search term is provided and we have a root story ID

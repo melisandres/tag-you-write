@@ -8,12 +8,13 @@ export class DataManager {
         }
         return DataManager.instance;
     }
+
     constructor() {
         if (DataManager.instance) {
             return DataManager.instance;
         }
         
-        this.currentViewedRootStoryId = null;
+        /* this.currentViewedRootStoryId = null; */
         const userIdMeta = document.querySelector('meta[name="user"]');
         this.currentUserId = userIdMeta.getAttribute('data-user-id') !== 'null' ? userIdMeta.getAttribute('data-user-id') : null;
         this.cache = this.loadCache() || {
@@ -116,7 +117,10 @@ export class DataManager {
         this.saveCache();
         
         // Emit event with the new value
-        eventBus.emit('currentViewedRootStoryIdChanged', rootStoryId);
+        eventBus.emit('sseParametersChanged', { 
+            type: 'rootStoryId',
+            value: rootStoryId 
+        });
     }
 
     getCurrentViewedRootStoryId() {
@@ -295,30 +299,17 @@ export class DataManager {
         let rootNode = this.cache.nodesMap.get(String(rootId)) || 
                       this.cache.nodesMap.get(Number(rootId));
 
-/*         console.log('Root node lookup:', {
+        console.log('Root node lookup:', {
             searchId: rootId,
             foundWithString: this.cache.nodesMap.get(String(rootId)),
             foundWithNumber: this.cache.nodesMap.get(Number(rootId)),
             finalRootNode: rootNode
-        }); */
+        });
 
-        /* console.log('Cache keys:', Array.from(this.cache.nodesMap.keys())); */
-        
-        // Log each cache entry separately
-/*         console.log('Cache entries:');
-        this.cache.nodesMap.forEach((value, key) => {
-            console.log(`Key: "${key}" (${typeof key})`, {
-                value,
-                hasPlayerCount: value?.hasOwnProperty('playerCount'),
-                playerCount: value?.playerCount
-            });
-        }); */
-
-/*         console.log('Root node details:', {
-            rootNode,
-            rootNodeKeys: rootNode ? Object.keys(rootNode) : null,
-            playerCountValue: rootNode ? rootNode.playerCount : 'undefined'
-        }); */
+        if (!rootNode) {
+            console.error('Root node not found for ID:', rootId);
+            return;
+        }
 
         if (!modifiedNodes?.length) return;
         let newNodesAdded = false;
@@ -752,12 +743,23 @@ export class DataManager {
     }
 
     setFilters(filters) {
-        /* console.log('setFilters', filters); */
+
         this.cache.filters = {
             hasContributed: filters.hasContributed ?? null,
             gameState: filters.gameState ?? 'all'
         };
         this.saveCache();
+
+        // Only proceed if the value has actually changed
+        if (JSON.stringify(this.cache.filters) === JSON.stringify(filters)) {
+            return;
+        }
+
+        // Emit event with the new value
+        eventBus.emit('sseParametersChanged', { 
+            type: 'filters',
+            value: filters 
+        });
     }
 
     getFilters() {
@@ -765,14 +767,24 @@ export class DataManager {
     }
 
     getSearch() {
-        console.log('Getting search term from cache:', this.cache.search);
         return this.cache.search;
     }
 
     setSearch(search) {
-        console.log('Setting search in cache:', search);
+        // Only proceed if the value has actually changed
+        if (this.cache.search === search) {
+            return;
+        }
+        
+        // Update the value
         this.cache.search = search;
         this.saveCache();
+        
+        // Emit event with the new value
+        eventBus.emit('sseParametersChanged', { 
+            type: 'search',
+            value: search 
+        });
     }
 
      // For full list updates (filters, page refresh)

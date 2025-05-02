@@ -161,7 +161,7 @@ export class FilterManager {
                 this.updateFilterButton(newState);
                 eventBus.emit('filterApplied');
                 eventBus.emit('refreshGames');
-                });
+            });
         }       
 
         // Game state filter button event

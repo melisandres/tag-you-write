@@ -72,6 +72,7 @@ export class ModalUpdateManager {
 
       // translate the "titles"
       const iterateTitle = window.i18n.translate('general.iterate');
+      const noteTitle = window.i18n.translate('general.add_note');
 
       if (modalBtns) {
         const editAction = window.i18n.createUrl('text/edit');
@@ -174,9 +175,14 @@ export class ModalUpdateManager {
     const playerCountMinusOne = data.playerCountMinusOne || data.playerCount - 1;
 
     // Update vote button state
-    if (data.hasVoted) {
+    if (data.hasVoted === "1" || 
+        data.hasVoted === 1 ||
+        data.hasVoted === true) {
       if (button) button.classList.add('voted');
-    } else {
+    }
+    if (data.hasVoted === "0" || 
+        data.hasVoted === 0 ||
+        data.hasVoted === false) {
       if (button) button.classList.remove('voted');
     }
 

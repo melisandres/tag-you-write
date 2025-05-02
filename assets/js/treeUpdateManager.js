@@ -217,18 +217,50 @@ export class TreeUpdateManager {
     this.treeVisualizer.updateTree();
   }
 
-  handleNodeTextContentUpdate(changes) {
-    console.log("1. handleNodeTextContentUpdate START:", changes);
+  handleNodeTextContentUpdate(nodeData) {
+    console.log("1. handleNodeTextContentUpdate START:", nodeData);
     const container = document.querySelector('#showcase[data-showcase="tree"]');
     if (!container) return;
 
     // Emit event for TreeVisualizer to handle title update
-    if (changes.data.changes.title) {
+    if (nodeData.data.changes.title) {
         console.log("2. About to emit updateTreeNodeTitle");
         eventBus.emit('updateTreeNodeTitle', {
-            nodeId: changes.data.id,
-            title: changes.data.changes.title
+            nodeId: nodeData.data.id,
+            title: nodeData.data.changes.title
         });
+    }
+
+    // Let's just update the "read" status... but only if the node is not owned by the current user
+    if (nodeData.data.changes.note_date) {
+      console.log("3. mark the node as unread");
+
+      // Get the node id
+      const id = nodeData.data.id;
+
+      // Get the user id
+      const userMeta = document.querySelector('meta[name="user"]');
+      const userId = userMeta ? userMeta.getAttribute('data-user-id') : null;
+      console.log("userId", userId);
+
+      // Get the node data
+      const nodeInfo = this.dataManager.getNode(id);
+      const nodeWriterId = nodeInfo.writer_id;
+
+      // If the node is not owned by the current user, mark it as unread
+      if (userId === nodeWriterId) {
+        console.log("4. node is owned by the current user, do nothing");
+        return;
+      }
+
+      // Get the node
+      const node = container.querySelector(`.node path[data-id="${id}"]`);
+
+      // If the node is read, mark it as unread
+      if (node.classList.contains('read')) {
+        node.classList.remove('read');
+        node.classList.add('unread');
+      }
     }
 
     // Apply search highlighting for the specific updated node
@@ -236,7 +268,7 @@ export class TreeUpdateManager {
     if (searchTerm) {
         console.log("3. Before updateSingleNodeSearchHighlight, current search results:", 
             this.dataManager.getSearchResults());
-        this.updateSingleNodeSearchHighlight(changes.data.id);
+        this.updateSingleNodeSearchHighlight(nodeData.data.id);
     }
   }
 

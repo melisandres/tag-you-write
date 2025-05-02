@@ -4,7 +4,6 @@ import { eventBus } from './eventBus.js';
 export class UpdateManager {
     constructor() {
         this.preferSSE = true; // Enable SSE by default for testing
-        this.currentFilters = new Set(); // Initialize filters set
 
         // Listen for success/failure of SSE
         eventBus.on('sseConnected', () => this.handleSSESuccess());
@@ -19,10 +18,8 @@ export class UpdateManager {
         window.addEventListener('beforeunload', () => this.cleanup());
 
         if (this.preferSSE) {
-            console.log('Attempting SSE connection with filters:', Array.from(this.currentFilters));
-            eventBus.emit('startSSE', {
-                gameIds: Array.from(this.currentFilters)
-            });
+            console.log('Attempting SSE connection');
+            eventBus.emit('startSSE');
         } else {
             console.log('Initializing polling from UpdateManager');
             eventBus.emit('initializePolling');
