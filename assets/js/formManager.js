@@ -280,7 +280,8 @@ export class FormManager {
             "warning.publish",
             () => {
                 this.statusField.value = 'published';
-                const endpoint = 'text/update';
+                const idValue = this.form.querySelector('input[name="id"]').value;
+                const endpoint = idValue === '' ? 'text/store' : 'text/update';
                 const actionUrl = window.i18n.createUrl(endpoint);
                 this.submitForm(actionUrl);
             },
@@ -294,7 +295,8 @@ export class FormManager {
             "warning.new_game",
             () => {
                 this.statusField.value = 'published';
-                const endpoint = 'text/update';
+                const idValue = this.form.querySelector('input[name="id"]').value;
+                const endpoint = idValue === '' ? 'text/store' : 'text/update';
                 const actionUrl = window.i18n.createUrl(endpoint);
                 this.submitForm(actionUrl);
             },
@@ -372,6 +374,8 @@ export class FormManager {
                 data[key] = typeof value === 'string' ? value.trim() : value;
             });
             
+            // Debug logging for text_status
+            console.log('text_status being sent:', data.text_status);
             console.log('Form data being sent:', data);
             console.log('Form type:', this.formType);
 

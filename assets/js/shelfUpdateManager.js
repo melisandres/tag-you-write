@@ -18,6 +18,7 @@ export class ShelfUpdateManager {
     eventBus.on('nodeTextContentUpdate', this.handleNodeTextContentUpdate.bind(this));
     eventBus.on('searchApplied', this.handleSearchUpdate.bind(this));
     eventBus.on('updateNodeWinner', this.handleChooseWinnerFromPolling.bind(this));
+    eventBus.on('nodePermissionsChanged', this.handlePermissionsChanged.bind(this));
 
     //TODO: can the following two be cleaned up? so that they point to methods? 
     eventBus.on('searchChanged', ({ searchTerm }) => {
@@ -184,7 +185,7 @@ export class ShelfUpdateManager {
   handleChooseWinner({ textId }) {
     const container = document.querySelector('#showcase[data-showcase="shelf"]');
     if (container) {
-      const drawers = container.querySelectorAll('li');
+      const drawers = container.querySelectorAll('li.node');
       if (drawers) {
         drawers.forEach(drawer => {
             const nodeButtons = drawer.querySelector('.node-buttons');
@@ -201,19 +202,18 @@ export class ShelfUpdateManager {
               drawer.querySelector('.writing').classList.add('isWinner');
 
               // Add the winner status span
-              const statusSpan = document.createElement('span');
+              const statusSpan = drawer.querySelector('.status');
               const statusText = window.i18n ? window.i18n.translate("general.winner") : "WINNER";
-              statusSpan.className = 'status';
               statusSpan.innerHTML = `
                 <span data-status="" class="status winner" data-i18n="general.winner">
                   ${statusText}
                 </span>
               `;
-              drawer.querySelector('.node-headline').appendChild(statusSpan);
 
               // Update the shelf heart to a star, and color it
-              const shelfHeart = drawer.querySelector('.shelf-heart');
+              const shelfHeart = drawer.querySelector('.shelf-heart .votes i');
               if (shelfHeart) {
+                console.log("shelfHeart", shelfHeart)
                 shelfHeart.innerHTML = SVGManager.starSVG;
                 const colorScale = createColorScale(1);
                 const fillColor = colorScale(1);
@@ -230,6 +230,7 @@ export class ShelfUpdateManager {
     if ( data.id) {
       const playerCountMinusOne = data.playerCountMinusOne || data.playerCount - 1;
       const shelfNode = document.querySelector(`.node[data-story-id="${data.id}"]`);
+      console.log("shelfNode", shelfNode)
       if (shelfNode) {
             // Need to update vote count display to match new structure
             const votesDiv = shelfNode.querySelector('.votes');
@@ -237,6 +238,7 @@ export class ShelfUpdateManager {
                 const voteCountSpan = votesDiv.querySelector('.vote-count');
                 voteCountSpan.textContent = `${data.voteCount}/${playerCountMinusOne} votes`;
                 voteCountSpan.setAttribute('data-vote-count', data.voteCount);
+                console.log("voteCountSpan", voteCountSpan)
                 
                 // Need to update color scale
                 const maxVotes = playerCountMinusOne;
@@ -254,9 +256,10 @@ export class ShelfUpdateManager {
             const shelfResultsSpan = shelfNode.querySelector('[data-vote-count]');
             const shelfVoteButton = shelfNode.querySelector(`.vote[data-vote="${data.id}"]`);
 
-            if (data.hasVoted) {
+            if (data.hasVoted === "1" || data.hasVoted === 1 || data.hasVoted === true) {
                 if (shelfVoteButton) shelfVoteButton.classList.add('voted');
-            } else {
+            } 
+            if (data.hasVoted === "0" || data.hasVoted === 0 || data.hasVoted === false) {
                 if (shelfVoteButton) shelfVoteButton.classList.remove('voted');
             }
         }
@@ -366,12 +369,40 @@ export class ShelfUpdateManager {
                 break;
             case 'note':
                 const noteDiv = nodeElement.querySelector('.note');
-                if (noteDiv) noteDiv.innerHTML = `<p>P.S... </p>${value}`;
+                if (noteDiv) {
+                    noteDiv.innerHTML = `<p>P.S... </p>${value}`;
+                } else {
+                    // If note element doesn't exist, create it
+                    const writingDiv = nodeElement.querySelector('.writing');
+                    if (writingDiv) {
+                        const newNoteDiv = document.createElement('div');
+                        newNoteDiv.className = 'note';
+                        newNoteDiv.innerHTML = `<p>P.S... </p>${value}`;
+                        writingDiv.appendChild(newNoteDiv);
+                        
+                        // Add note date if it exists in changes
+                        if (changes.note_date) {
+                            const noteDateSpan = document.createElement('span');
+                            noteDateSpan.className = 'date';
+                            noteDateSpan.textContent = `${changes.note_date}   (just edited)`;
+                            writingDiv.appendChild(noteDateSpan);
+                        }
+                    }
+                }
                 break;
             case 'note_date':
                 const noteDateSpan = nodeElement.querySelector('.note + .date');
                 if (noteDateSpan) {
                     noteDateSpan.textContent = `${value}   (just edited)`;
+                } else if (nodeElement.querySelector('.note')) {
+                    // If note exists but date span doesn't, create it
+                    const writingDiv = nodeElement.querySelector('.writing');
+                    if (writingDiv) {
+                        const newDateSpan = document.createElement('span');
+                        newDateSpan.className = 'date';
+                        newDateSpan.textContent = `${value}   (just edited)`;
+                        writingDiv.appendChild(newDateSpan);
+                    }
                 }
                 break;
         }
@@ -468,6 +499,118 @@ export class ShelfUpdateManager {
           <span data-i18n="general.closed">${closedText}</span>`;
       }
     } */
+  }
+
+  handlePermissionsChanged({ textId, data }) {
+    console.log('Handling permissions change for node in shelf view:', textId);
+    
+    const nodeElement = document.querySelector(`li[data-story-id="${textId}"]`);
+    if (!nodeElement) return;
+
+    const nodeButtons = nodeElement.querySelector('.node-buttons');
+    if (!nodeButtons) return;
+
+    // Clear existing buttons
+    nodeButtons.innerHTML = '';
+
+    // Add buttons based on new permissions
+    if (data.permissions.canIterate) {
+      nodeButtons.innerHTML += this.getIterateForm(data);
+    }
+    if (data.permissions.canEdit) {
+      nodeButtons.innerHTML += this.getEditForm(data);
+    }
+    if (data.permissions.canAddNote) {
+      nodeButtons.innerHTML += this.getNoteForm(data);
+    }
+    if (data.permissions.canVote) {
+      nodeButtons.innerHTML += this.getVoteButton(data);
+    }
+    if (data.permissions.canPublish) {
+      nodeButtons.innerHTML += this.getPublishForm(data);
+    }
+    if (data.permissions.canDelete) {
+      nodeButtons.innerHTML += this.getDeleteForm(data);
+    }
+  }
+
+  // Helper methods to generate button HTML, copied from ShelfVisualizer
+  getIterateForm(node) {
+    const endpoint = `text/iterate`;
+    const actionUrl = window.i18n.createUrl(endpoint);
+    const iterateTitle = window.i18n.translate('general.iterate');
+
+    return `
+    <form action="${actionUrl}" method="POST">
+      <input type="hidden" name="id" value="${node.id}">
+      <button type="submit" class="iterate" data-i18n-title="general.iterate" title="${iterateTitle}">
+        ${SVGManager.iterateSVG}
+      </button>
+    </form>
+    `;
+  }
+
+  getEditForm(node) {
+    const endpoint = `text/edit`;
+    const actionUrl = window.i18n.createUrl(endpoint);
+    const editTitle = window.i18n.translate('general.edit');
+
+    return `
+      <form action="${actionUrl}" method="POST">
+        <input type="hidden" name="id" value="${node.id}">
+        <input type="hidden" name="parent_id" value="${node.parent_id}">
+        <button type="submit" class="edit" value="Edit" data-i18n-title="general.edit" title="${editTitle}">
+          ${SVGManager.editSVG}
+        </button>
+      </form>
+    `;
+  }
+
+  getNoteForm(node) {
+    const endpoint = `text/edit`;
+    const actionUrl = window.i18n.createUrl(endpoint);
+    const addNoteTitle = window.i18n.translate('general.add_note');
+
+    return `
+      <form action="${actionUrl}" method="POST">
+        <input type="hidden" name="id" value="${node.id}">
+        <button type="submit" class="note" value="Edit" data-i18n-title="general.add_note" title="${addNoteTitle}">
+          ${SVGManager.addNoteSVG}
+        </button>
+      </form>
+    `;
+  }
+
+  getVoteButton(node) {
+    const voteTitle = window.i18n.translate('general.vote');
+
+    return `
+      <button class="vote ${node.hasVoted == 1 ? 'voted' : ''}" data-vote=${node.id} data-i18n-title="general.vote" title="${voteTitle}">
+        ${SVGManager.voteSVG}
+      </button>
+    `;
+  }
+
+  getPublishForm(node) {
+    const publishTitle = window.i18n.translate('general.publish');
+
+    return `
+        <button data-text-id="${node.id}" 
+        data-insta-publish-button class="publish" data-i18n-title="general.publish" title="${publishTitle}">
+          ${SVGManager.publishSVG}
+        </button>
+    `;
+  }
+
+  getDeleteForm(node) {
+    const deleteTitle = window.i18n.translate('general.delete');
+
+    return `
+      <button
+      data-insta-delete-button data-text-id="${node.id}" class="delete" data-i18n-title="general.delete" title="${deleteTitle}">
+        ${SVGManager.deleteSVG}
+      </button>
+    `;
   }
 
 }

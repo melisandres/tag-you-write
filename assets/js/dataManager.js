@@ -789,11 +789,30 @@ export class DataManager {
 
      // For full list updates (filters, page refresh)
      replaceAll(games) {
+        // Check for any games that were open and are now closed
+        // Also check for games where hasJoined was false and is now true
+        games.forEach(game => {
+            const gameId = String(game.game_id);
+            const normalized = this.normalizeGameData(game);
+            const existingGame = this.cache.games.get(gameId);
+            
+            if (existingGame) {
+                const wasJoined = existingGame.data.hasJoined;
+                const isNowJoined = normalized.hasJoined;
+                const wasOpen = String(existingGame.data.openForChanges) === '1';
+                const isNowClosed = String(normalized.openForChanges) === '0';
+                if (wasOpen && isNowClosed || !wasJoined && isNowJoined) {
+                    console.log(`Game ${normalized.text_id} was closed or joined, requesting full tree update`);
+                    this.handleEntireTreeUpdate(gameId, normalized.text_id);
+                }
+            }
+        });
+
+        // Now clear and update the cache
         this.cache.games.clear();
         games.forEach(game => {
             // Always use string ID for the key
             const gameId = String(game.game_id);
-            
             this.cache.games.set(gameId, {
                 data: this.normalizeGameData(game),
                 timestamp: Date.now()
@@ -824,6 +843,22 @@ export class DataManager {
             });
             
             if (existingGame) {
+                // Convert values to strings and compare
+                const wasOpen = existingGame.data.open_for_changes;
+                const isNowClosed = normalized.open_for_changes;
+                const wasJoined = existingGame.data.hasJoined;
+                const isNowJoined = normalized.hasJoined;
+
+                console.log('wasOpen', wasOpen);
+                console.log('isNowClosed', isNowClosed);
+                console.log('wasJoined', wasJoined);
+                console.log('isNowJoined', isNowJoined);
+                
+                if ((wasOpen && !isNowClosed) || (!wasJoined && isNowJoined)) {
+                    // Game was just closed - or user joined a game : update the entire tree
+                    this.handleEntireTreeUpdate(gameId, normalized.text_id);
+                }
+                
                 // Game exists - emit gameModified event with old and new game data
                 console.log(`Emitting gameModified for ${gameId}`);
                 eventBus.emit('gameModified', { newGame: normalized, oldGame: existingGame.data });
@@ -839,6 +874,69 @@ export class DataManager {
                 timestamp: Date.now()
             });
         });
+    }
+
+    // Handle game closure by requesting full tree update
+    async handleEntireTreeUpdate(gameId, rootId) {
+        console.log(`handleEntireTreeUpdate called for game ${gameId}, root ${rootId}`);
+        
+        // Check if this tree is currently being viewed
+        const isCurrentlyViewed = this.cache.currentViewedRootId === rootId;
+        
+        // Check if we have this tree in cache
+        const hasTreeInCache = this.cache.trees.has(rootId);
+        
+        if (!isCurrentlyViewed) {
+            console.log(`Tree ${rootId} is not currently viewed, removing from cache`);
+            // If not being viewed, just remove from cache
+            this.cache.trees.delete(rootId);
+            this.clearTreeNodes(rootId);
+            this.saveCache();
+            return;
+        }
+        
+        if (!hasTreeInCache) {
+            console.log(`Tree ${rootId} not found in cache, no update needed`);
+            return;
+        }
+
+        // Get the old tree from cache
+        const oldTree = this.cache.trees.get(rootId);
+
+        try {
+            // Request full tree update
+            const response = await fetch(`text/getTree/${rootId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                console.error('Failed to fetch full tree:', response.status, response.statusText);
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const treeData = await response.json();
+            console.log("Full update for tree:", treeData);
+            
+            if (!treeData || !treeData[0]) {
+                console.error('No tree data received from server');
+                return;
+            }
+            
+            // Update the tree with new permissions
+            this.setFullTree(rootId, treeData[0]);
+            
+            // Emit event to notify UI
+            console.log('oldTree', oldTree.data);
+            console.log('newTree', treeData[0]);
+            eventBus.emit('treeFullyUpdated', { oldTree: oldTree.data, newTree: treeData[0] });
+            
+            console.log('Full tree update completed');
+        } catch (error) {
+            console.error('Error in handleEntireTreeUpdate:', error);
+        }
     }
 
 /*     //update one game with incomplete data
@@ -870,6 +968,9 @@ export class DataManager {
             hasContributed: game.hasContributed === '1' || 
                            game.hasContributed === true || 
                            game.hasContributed === 1,
+            hasJoined: game.hasJoined === '1' || 
+                      game.hasJoined === true || 
+                      game.hasJoined === 1,
             text_count: parseInt(game.text_count) || 0,
             seen_count: parseInt(game.seen_count) || 0,
             unseen_count: parseInt(game.unseen_count) || 0,

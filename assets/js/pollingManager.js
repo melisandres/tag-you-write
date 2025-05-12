@@ -27,12 +27,15 @@ export class PollingManager {
             }
         });
 
-        // General notifications polling
+        // General notifications polling - separate from node updates
         this.registerTask('notifications', {
             interval: this.defaultInterval,
             handler: async () => {
                 try {
-                    eventBus.emit('checkForNotifications');
+                    // Only emit notification check if we have a notifications menu
+                    if (document.querySelector('.notifications-menu')) {
+                        eventBus.emit('checkForNotifications');
+                    }
                 } catch (error) {
                     console.error('Notification polling error:', error);
                 }

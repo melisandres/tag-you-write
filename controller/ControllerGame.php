@@ -3,6 +3,7 @@ RequirePage::model('Text');
 RequirePage::model('Game');
 RequirePage::controller('ControllerNotification');
 RequirePage::controller('ControllerText');
+RequirePage::model('Event');
 
 class ControllerGame extends Controller {
 
@@ -24,6 +25,7 @@ class ControllerGame extends Controller {
     public function closeGame($textId){
         $text = new Text;
         $game = new Game;
+        $event = new Event;
         $gameId = $text->selectGameId($textId);         
         $gameData = [
                     'id' => $gameId,
@@ -31,36 +33,54 @@ class ControllerGame extends Controller {
                     'open_for_changes' => 0,
                     'modified_at' => date('Y-m-d H:i:s')
                     ];
-        error_log("ControllerGame::closeGame - Updating game: " . print_r($gameData, true));
+
         $game->update($gameData);
 
-        $players = $game->getPlayers($gameId);
-        error_log("ControllerGame::closeGame - Found " . count($players) . " players for game $gameId");
-        
+        // Get the root_text_id
+        $root_text_id = $game->getRootText($gameId);
 
-        // Get the winning player, text, and game -- to construct the message
+        // Get text data for the event
+        $textData = $text->selectTexts($_SESSION['writer_id'], $textId);
+        $isRoot = empty($textData['parent_id']);
+        $textTitle = $textData['title'] ?? 'Unknown Title';
+
+        // Use the Controller's createEvents method for consistent event creation
+        // Special GAME_CLOSED event type for game closures
+        $this->createEvents('GAME_CLOSED', [
+            'textId' => $textId,
+            'gameId' => $gameId,
+            'title' => $textTitle,
+            'isRoot' => $isRoot
+        ], 'game_closure');
+
+        // Get all players -- to create notifications for each player
+        $players = $game->getPlayers($gameId);
         $winning_player = $text->selectWriterId($textId, 'writer_id');
-        $winning_text = $text->selectId($textId);
-        $winning_game = $game->selectId($gameId);
-        $root_text = $text->selectId($winning_game['root_text_id']);
-        
-        error_log("ControllerGame::closeGame - Winning player: " . print_r($winning_player, true));
         
         // Create notifications for each player
         $notification = new ControllerNotification;
         foreach ($players as $player) {
-            error_log("ControllerGame::closeGame - Creating notification for player: " . print_r($player, true));
             $notification_type = ($player['writer_id'] == $winning_player['writer_id']) 
                 ? 'game_won' 
                 : 'game_closed';
 
-            $notification->create(
+            $notification_id = $notification->create(
                 $player['writer_id'], 
                 $gameId, 
                 $notification_type,
                 null  // No message needed, will be constructed in template
             );
-            error_log("ControllerGame::closeGame - Created notification: writer_id={$player['writer_id']}, game_id={$gameId}, type={$notification_type}");
+
+            // Create a notification event using the createEvents method
+            $this->createEvents('NOTIFICATION_CREATED', [
+                'notificationId' => $notification_id,
+                'recipientId' => $player['writer_id'],
+                'notificationType' => $notification_type,
+                'textId' => $textId, // Include the winning text ID for context
+                'gameId' => $gameId, // Include the game ID
+                'rootTextId' => $root_text_id, // Add the root_text_id explicitly
+                'info' => "notification for $notification_type"
+            ], 'game_closure');
         }
         
         return;
@@ -88,17 +108,12 @@ class ControllerGame extends Controller {
     public function modifiedSince() {
         try {
             $data = json_decode(file_get_contents('php://input'), true);
-            
-            // Add debug logging for incoming data
-            //error_log("modifiedSince received data: " . json_encode($data));
 
             $currentUserId = $_SESSION['writer_id'] ?? null;
             
             // Convert timestamp to datetime
             $lastTreeCheck = date('Y-m-d H:i:s', (int)($data['lastTreeCheck'] / 1000));
             $lastGamesCheck = date('Y-m-d H:i:s', (int)($data['lastGamesCheck'] / 1000));
-            
-            //error_log("Converted timestamps - Tree: $lastTreeCheck, Games: $lastGamesCheck");
 
             // Get the search term, filters and the rootStoryId
             $searchTerm = $data['search'] ?? null;
@@ -111,6 +126,13 @@ class ControllerGame extends Controller {
             // Get the modified games with search term
             $modifiedGames = $game->getModifiedSince($lastGamesCheck, $filters, $searchTerm);
 
+/*             // Process the modified games data to ensure boolean fields are properly formatted
+            foreach ($modifiedGames as &$game) {
+                $game['hasContributed'] = (bool)$game['hasContributed'];
+                $game['hasJoined'] = (bool)$game['hasJoined'];
+                $game['openForChanges'] = (bool)$game['openForChanges'];
+            }
+ */
             // Get the modified nodes
             $gameId = $game->selectGameId($rootStoryId);
             $modifiedNodes = $text->selectTexts($currentUserId, $gameId, true, $lastTreeCheck);

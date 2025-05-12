@@ -22,6 +22,7 @@ export class ModalUpdateManager {
     eventBus.on('searchApplied', this.handleSearchApplied.bind(this));
     eventBus.on('nodeTextContentUpdate', this.handleNodeTextContentUpdate.bind(this));
     eventBus.on('updateNodeWinner', this.handleChooseWinner.bind(this));
+    eventBus.on('nodePermissionsChanged', this.handlePermissionsChanged.bind(this));
   }
 
   handleSearchApplied(searchTerm) {
@@ -426,103 +427,75 @@ export class ModalUpdateManager {
         return text;
     }
   }
-/* 
-  handleUpdateNodeWinner(nodeData) {
-    const container = document.querySelector('[data-tree-modal="visible"]');
-    if (!container) return;
 
-    // Check if this is the game being displayed in the modal
-    const showCaseGameId = container.getAttribute('data-game-id');
+  handlePermissionsChanged({ textId, data }) {
+    console.log('Handling permissions change for node in modal view:', textId);
     
-    // Convert both to strings for comparison to avoid type issues
-    if (String(showCaseGameId) !== String(nodeData.data.game_id)) {
-      return;
-    }
+    const modal = document.querySelector(`.modal-background[data-text-id='${textId}'][data-tree-modal="visible"]`);
+    if (!modal) return;
 
-    if (nodeData.data.isWinner) {
-      console.log('I WILL UPDATE THE MODAL WINNER 1');
-      const topInfo = container.querySelector('.top-info');
-      if (topInfo) {
-        // Add winner class
-        topInfo.classList.add('winner');
-        
-        // Add winner status span with localization
-        const winnerTitle = window.i18n.translate('general.winner');
-        const statusSpan = topInfo.querySelector('.status') || document.createElement('span');
-        statusSpan.className = 'status winner';
-        statusSpan.setAttribute('data-i18n', 'general.winner');
-        statusSpan.textContent = winnerTitle;
-        
-        // Only append if it doesn't already exist
-        if (!topInfo.querySelector('.status.winner')) {
-          topInfo.appendChild(statusSpan);
-        }
-        
-        // Replace the votes SVG with the star SVG
-        const votesIcon = topInfo.querySelector('.votes i');
-        if (votesIcon) {
-          votesIcon.innerHTML = SVGManager.starSVG;
-          
-            // Set the fill color for the star
-            const svgPath = votesIcon.querySelector('svg path');
-            if (svgPath) {
-              // Use the same color scale as in the modal.js getNumberOfVotes method
-              const maxVotes = parseInt(container.querySelector('.vote-count')?.dataset.playerCount || 1);
-              const voteCount = parseInt(container.querySelector('.vote-count')?.dataset.voteCount || 0);
-              const colorScale = createColorScale(maxVotes);
-              const fillColor = colorScale(voteCount);
-              
-              svgPath.setAttribute('fill', fillColor);
-            } 
-        }
-      }
-    }
-    
-    // Update permissions and remove buttons that are not allowed
-    const modalBtns = container.querySelector('.modal-dynamic-btns');
-    console.log('MODAL UPDATE MANAGER modalBtns', modalBtns);
-    console.log('MODAL UPDATE MANAGER nodeData.data.permissions', nodeData.data.permissions);
-    if (modalBtns && nodeData.data.permissions) {
-      console.log('nodeData.data.permissions', nodeData.data.permissions);
-      console.log('nodeData.data.permissions.canIterate', nodeData.data.permissions.canIterate);
-      // Remove buttons based on permissions
-      if (!nodeData.data.permissions.canIterate) {
-        console.log('I WILL REMOVE THE ITERATE FORM');
-        const iterateForm = modalBtns.querySelector('.iterate-form');
-        if (iterateForm) iterateForm.remove();
-      }
-      
-      if (!nodeData.data.permissions.canEdit) {
-        console.log('I WILL REMOVE THE EDIT FORM');
-        const editForm = modalBtns.querySelector('.edit-form');
-        if (editForm) editForm.remove();
-      }
-      
-      if (!nodeData.data.permissions.canAddNote) {
-        console.log('I WILL REMOVE THE NOTE FORM');
-        const noteForm = modalBtns.querySelector('.note-form');
-        if (noteForm) noteForm.remove();
-      }
-      
-      if (!nodeData.data.permissions.canPublish) {
-        console.log('I WILL REMOVE THE PUBLISH BUTTON');
-        const publishBtn = modalBtns.querySelector('[data-insta-publish-button]');
-        if (publishBtn) publishBtn.remove();
-      }
-      
-      if (!nodeData.data.permissions.canDelete) {
-        console.log('I WILL REMOVE THE DELETE BUTTON');
-        const deleteBtn = modalBtns.querySelector('[data-insta-delete-button]');
-        if (deleteBtn) deleteBtn.remove();
-      }
-      
-      if (!nodeData.data.permissions.canVote) {
-        console.log('I WILL REMOVE THE VOTE BUTTON');
-        const voteBtn = modalBtns.querySelector('.vote');
-        if (voteBtn) voteBtn.remove();
-      }
-    }
+    const modalBtns = modal.querySelector('.modal-dynamic-btns');
+    if (!modalBtns) return;
 
-    // TODO: This begs a question... what happens to the data when a game is closed... like... the data that says you can edit, can't vote, etc... is this data updated? if not... when you refresh the page, the buttons will be available... no? 
-  } */
+    // Get the edit endpoint with Language
+    const iterateAction = window.i18n.createUrl('text/iterate');
+    const editAction = window.i18n.createUrl('text/edit');
+    const noteAction = window.i18n.createUrl('text/edit');
+
+    // translate the "titles"
+    const iterateTitle = window.i18n.translate('general.iterate');
+    const editTitle = window.i18n.translate('general.edit');
+    const noteTitle = window.i18n.translate('general.add_note');
+    const publishTitle = window.i18n.translate('general.publish');
+    const deleteTitle = window.i18n.translate('general.delete');
+    const voteTitle = window.i18n.translate('general.vote');
+
+    // Clear existing buttons and rebuild based on new permissions
+    modalBtns.innerHTML = `
+      ${data.permissions.canIterate ? `
+        <form action="${iterateAction}" method="POST" class="iterate-form">
+          <input type="hidden" name="id" value="${data.id}">
+          <button type="submit" class="iterate" data-i18n-title="general.iterate" title="${iterateTitle}">
+            ${SVGManager.iterateSVG}
+          </button>
+        </form>
+      ` : ''}
+
+      ${data.permissions.canEdit ? `
+        <form action="${editAction}" method="POST" class="edit-form">
+          <input type="hidden" name="id" value="${data.id}">
+          <button type="submit" class="edit" data-i18n-title="general.edit" title="${editTitle}">
+            ${SVGManager.editSVG}
+          </button>
+        </form>
+      ` : ''}
+
+      ${data.permissions.canAddNote ? `
+        <form action="${noteAction}" method="POST" class="note-form">
+          <input type="hidden" name="id" value="${data.id}">
+          <button type="submit" class="note" data-i18n-title="general.add_note" title="${noteTitle}">
+            ${SVGManager.addNoteSVG}
+          </button>
+        </form>
+      ` : ''}
+
+       ${data.permissions.canPublish ? `
+        <button data-text-id="${data.id}" data-insta-publish-button class="publish" data-i18n-title="general.publish" title="${publishTitle}">
+          ${SVGManager.publishSVG}
+        </button>
+      ` : ''}
+
+      ${data.permissions.canDelete ? `
+        <button data-insta-delete-button data-text-id="${data.id}" class="delete" data-i18n-title="general.delete" title="${deleteTitle}">
+          ${SVGManager.deleteSVG}
+        </button>
+      ` : ''}
+
+      ${data.permissions.canVote ? `
+        <button class="vote ${data.hasVoted == 1 ? 'voted' : ''}" data-vote=${data.id} data-i18n-title="general.vote" title="${voteTitle}">
+          ${SVGManager.voteSVG}
+        </button>
+      ` : ''}
+    `;
+  }
 }

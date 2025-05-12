@@ -164,7 +164,7 @@ export class NotificationsMenuManager {
 
     /* TODO: handle new notifications comming in via polling */
     addNewNotification(notification) {
-        console.log('addNewNotification notification is:', notification);
+        //console.log('addNewNotification notification is:', notification);
         const isRead = notification.read_at !== null;
         const isSeen = notification.seen_at !== null;
         const notificationElement = document.createElement('article');

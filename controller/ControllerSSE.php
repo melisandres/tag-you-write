@@ -2,26 +2,21 @@
 RequirePage::model('Game');
 RequirePage::model('Text');
 RequirePage::model('Notification');
+RequirePage::model('Event');
 
 class ControllerSSE extends Controller {
+    private $game;
+    private $text;
+    private $notification;
+    private $event;
+    private $currentUserId;
+    private $filters;
+    private $search;
+    private $rootStoryId;
+    private $lastEventId;
+
     public function index() {
         // No implementation needed
-    }
-
-    /**
-     * Update the root story ID for the current SSE connection
-     * 
-     * @param string $rootStoryId The ID of the root story being viewed
-     */
-    public function updateRootStoryId($rootStoryId) {
-        if (!isset($_SESSION['writer_id'])) {
-            return json_encode(['status' => 'notLoggedin']);
-        }
-        
-        // Store the root story ID in the session
-        $_SESSION['current_viewed_root_story_id'] = $rootStoryId === 'null' ? null : $rootStoryId;
-        
-        return json_encode(['status' => 'ok']);
     }
 
     public function stream() {
@@ -36,128 +31,19 @@ class ControllerSSE extends Controller {
         header('Cache-Control: no-cache');
         header('Connection: keep-alive');
         
-        // 3. Get initial parameters
-        $lastGamesCheck = isset($_GET['lastGamesCheck']) ? 
-            date('Y-m-d H:i:s', intval($_GET['lastGamesCheck']) / 1000) : 
-            date('Y-m-d H:i:s');
-            
-        // 4. Get additional parameters
-        $filters = isset($_GET['filters']) ? json_decode($_GET['filters'], true) : [];
-        $search = isset($_GET['search']) ? $_GET['search'] : '';
-        $lastTreeCheck = isset($_GET['lastTreeCheck']) ? 
-            date('Y-m-d H:i:s', intval($_GET['lastTreeCheck']) / 1000) : 
-            null;
-        $watchedGameIds = isset($_GET['gameIds']) ? 
-            explode(',', $_GET['gameIds']) : 
-            [];
-        $rootStoryId = isset($_GET['rootStoryId']) ? $_GET['rootStoryId'] : null;
+        // 3. Initialize properties
+        $this->initializeProperties();
         
-        // 5. Initialize models
-        $game = new Game();
-        $text = new Text();
-        $notification = new Notification();
-        $currentUserId = $_SESSION['writer_id'] ?? null;
-        
-        error_log("SSE: Stream started for user {$currentUserId} with lastGamesCheck: {$lastGamesCheck}");
-        
-        // 6. Enter the event stream loop
+        // 4. Enter the event stream loop
         while (true) {
             try {
-                // Get modified games
-                $modifiedGames = $game->getModifiedSince($lastGamesCheck, $filters, $search);
-                if (!empty($modifiedGames)) {
-                    error_log("SSE: Found modified games: " . json_encode($modifiedGames));
-                    // Update lastGamesCheck to prevent duplicate game updates
-                    $lastGamesCheck = date('Y-m-d H:i:s');
-                    error_log("SSE: Updated lastGamesCheck to: {$lastGamesCheck}");
-                }
-                
-                // Get modified nodes if rootStoryId is provided
-                $modifiedNodes = [];
-                error_log("SSE: Current rootStoryId: {$rootStoryId}, LastTreeCheck: {$lastTreeCheck}");
-                
-                if ($rootStoryId && $lastTreeCheck) {
-                    $gameId = $game->selectGameId($rootStoryId);
-                    error_log("SSE: Fetching nodes for gameId: {$gameId}");
-                    $modifiedNodes = $text->selectTexts($currentUserId, $gameId, true, $lastTreeCheck);
-                    if (!empty($modifiedNodes)) {
-                        error_log("SSE: Found modified nodes for rootStoryId {$rootStoryId}: " . json_encode($modifiedNodes));
-                        // Update lastTreeCheck to prevent duplicate node updates
-                        $lastTreeCheck = date('Y-m-d H:i:s');
-                        error_log("SSE: Updated lastTreeCheck to: {$lastTreeCheck}");
-                    } else {
-                        error_log("SSE: No modified nodes found for rootStoryId {$rootStoryId} with lastTreeCheck {$lastTreeCheck}");
-                    }
-                    
-                    // Add permissions to the modified nodes
-                    if (!empty($modifiedNodes)) {
-                        foreach ($modifiedNodes as &$node) {
-                            $this->addPermissions($node, $currentUserId, $modifiedNodes);
-                        }
-                    }
-                } else {
-                    error_log("SSE: Skipping node check - rootStoryId: {$rootStoryId}, lastTreeCheck: {$lastTreeCheck}");
-                }
-                
-                // Get search results if search term is provided and we have a root story ID
-                $searchResults = [];
-                if ($search && $rootStoryId) {
-                    $gameId = $game->selectGameId($rootStoryId);
-                    $searchResults = $text->searchNodesByTerm($search, $gameId, $currentUserId, $lastTreeCheck);
-                    if (!empty($searchResults)) {
-                        error_log("SSE: Found search results for term '{$search}': " . json_encode($searchResults));
-                        // Update lastTreeCheck for search results as well
-                        $lastTreeCheck = date('Y-m-d H:i:s');
-                        error_log("SSE: Updated lastTreeCheck for search results to: {$lastTreeCheck}");
-                    }
-                }
-                
-                // Get new notifications
-                $newNotifications = $notification->getNewNotifications($lastGamesCheck);
-                if (!empty($newNotifications)) {
-                    error_log("SSE: Found new notifications: " . json_encode($newNotifications));
-                    // Update lastGamesCheck for notifications
-                    $lastGamesCheck = date('Y-m-d H:i:s');
-                    error_log("SSE: Updated lastGamesCheck for notifications to: {$lastGamesCheck}");
-                }
-                
-                // Send game updates if any
-                if (!empty($modifiedGames) || !empty($modifiedNodes) || !empty($searchResults)) {
-                    $updateData = [
-                        'modifiedGames' => $modifiedGames,
-                        'modifiedNodes' => $modifiedNodes,
-                        'searchResults' => $searchResults
-                    ];
-                    error_log("SSE: Sending update event with data: " . json_encode($updateData));
-                    echo "event: update\n";
-                    echo "data: " . json_encode($updateData) . "\n\n";
-                }
-                
-                // Keep notifications separate
-                if (!empty($newNotifications)) {
-                    error_log("SSE: Sending notification update event");
-                    echo "event: notificationUpdate\n";
-                    echo "data: " . json_encode($newNotifications) . "\n\n";
-                }
-                
-                // Send keepalive if no updates
-                if (empty($modifiedGames) && 
-                    empty($modifiedNodes) && 
-                    empty($searchResults) && 
-                    empty($newNotifications)) {
-                    echo ": keepalive " . date('H:i:s') . "\n\n";
-                }
-                
-                // Force flush the output buffer
-                ob_flush();
-                flush();
+                $this->processEvents();
                 
                 // Sleep to prevent overwhelming the server
                 sleep(2);
                 
                 // Check if client is still connected
                 if (connection_aborted()) {
-                    error_log("SSE: Client connection aborted");
                     exit();
                 }
             } catch (Exception $e) {
@@ -170,5 +56,166 @@ class ControllerSSE extends Controller {
                 sleep(5); // Wait before retrying
             }
         }
+    }
+
+    private function initializeProperties() {
+        // Initialize models
+        $this->game = new Game();
+        $this->text = new Text();
+        $this->notification = new Notification();
+        $this->event = new Event();
+        
+        // Get parameters
+        $this->currentUserId = $_SESSION['writer_id'] ?? null;
+        $this->filters = isset($_GET['filters']) ? json_decode($_GET['filters'], true) : [];
+        $this->search = isset($_GET['search']) ? $_GET['search'] : '';
+        $this->rootStoryId = isset($_GET['rootStoryId']) ? $_GET['rootStoryId'] : null;
+        $this->lastEventId = isset($_GET['lastEventId']) ? intval($_GET['lastEventId']) : null;
+    }
+
+    private function processEvents() {        
+        // Get new events
+        $events = $this->event->getFilteredEvents(
+            $this->lastEventId,
+            $this->currentUserId,
+            $this->rootStoryId
+        );
+
+        if (empty($events)) {
+            // Send keepalive if no updates
+            echo ": keepalive " . date('H:i:s') . "\n\n";
+            ob_flush();
+            flush();
+            return;
+        }
+        
+        // Update lastEventId
+        $this->lastEventId = end($events)['id'];
+
+        // Process events and collect updates
+        $updates = $this->collectUpdates($events);
+
+        // Send updates if any
+        if (!empty($updates)) {
+            echo "event: update\n";
+            echo "data: " . json_encode($updates) . "\n\n";
+            ob_flush();
+            flush();
+        }
+    }
+
+    private function collectUpdates($events) {
+        // Initialize the updates array
+        $updates = [
+            'modifiedGames' => [],
+            'modifiedNodes' => [],
+            'searchResults' => []
+        ];
+
+        // Process each event
+        foreach ($events as $event) {            
+            switch ($event['related_table']) {
+                case 'game':
+                    $gameUpdates = $this->getGameUpdates($event);
+                    if (!empty($gameUpdates)) {
+                        $updates['modifiedGames'] = array_merge($updates['modifiedGames'], $gameUpdates);
+                    }
+                    break;
+
+                case 'text':
+                    $nodeUpdates = $this->getNodeUpdates($event);
+                    if (!empty($nodeUpdates)) {
+                        $updates['modifiedNodes'] = array_merge($updates['modifiedNodes'], $nodeUpdates);
+                    }
+                    break;
+
+                case 'notification':
+                    $notificationUpdates = $this->getNotificationUpdates($event);
+                    if (!empty($notificationUpdates)) {
+                        // Send notifications as a separate event
+                        echo "event: notificationUpdate\n";
+                        echo "data: " . json_encode($notificationUpdates) . "\n\n";
+                        ob_flush();
+                        flush();
+                    }
+                    break;
+            }
+        }
+
+        // Add search results if needed
+        if ($this->search && $this->rootStoryId && !empty($updates['modifiedNodes'])) {
+            $updates['searchResults'] = $this->getSearchResults();
+        }
+
+        return $updates;
+    }
+
+    // Get game updates
+    private function getGameUpdates($event) {
+        $gameId = $event['related_id'];
+        return $this->game->getGames(null, $this->filters, $gameId, $this->search);
+    }
+
+    // Get node updates
+    private function getNodeUpdates($event) {
+        if (!$this->rootStoryId) {
+            return [];
+        }
+
+        // Get the game ID from the root story ID
+        $gameId = $this->game->selectGameId($this->rootStoryId);
+
+        // Get the specific text by ID (idIsGameId = false)
+        $nodes = $this->text->selectTexts($this->currentUserId, $event['related_id'], false);
+        
+        // Add permissions to the node
+        if ($nodes) {
+            $this->addPermissions($nodes, $this->currentUserId, [$nodes]);
+            return [$nodes]; // Return as array since that's what the rest of the code expects
+        }
+
+        return [];
+    }
+
+    // Get notification updates
+    private function getNotificationUpdates($event) {
+        // Get the specific notification by ID
+        $notificationId = $event['related_id'];
+        
+        error_log("SSE: Getting notification with ID: $notificationId for user: {$this->currentUserId}");
+        
+        // Get the notification directly - the Event filtering already ensured it's for this user
+        $sql = "SELECT n.*, g.root_text_id, t.title as game_title, 
+                wt.title as winning_title 
+                FROM notification n
+                JOIN game g ON n.game_id = g.id
+                JOIN text t ON g.root_text_id = t.id
+                LEFT JOIN text wt ON g.winner = wt.id
+                WHERE n.id = :id
+                AND n.deleted_at IS NULL";
+        
+        $stmt = $this->notification->prepare($sql);
+        $stmt->bindValue(':id', $notificationId);
+        $stmt->execute();
+        $notification = $stmt->fetch();
+        
+        // Check if notification was found
+        if ($notification) {
+            error_log("SSE: Found notification with ID: $notificationId, type: {$notification['notification_type']}");
+            return [$notification]; // Return as array for consistency
+        } else {
+            error_log("SSE: No notification found with ID: $notificationId");
+            return [];
+        }
+    }
+
+    // Get search results
+    private function getSearchResults() {
+        if (!$this->search || !$this->rootStoryId) {
+            return [];
+        }
+
+        $gameId = $this->game->selectGameId($this->rootStoryId);
+        return $this->text->searchNodesByTerm($this->search, $gameId, $this->currentUserId);
     }
 }

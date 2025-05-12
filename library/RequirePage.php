@@ -13,6 +13,10 @@ class RequirePage{
         return require_once('library/'.$page.'.php');
     }
 
+    static public function service($page) {
+        return require_once('services/' . $page . '.php');
+    }
+
     static public function redirect($page){
         $lang = defined('CURRENT_LANGUAGE') ? CURRENT_LANGUAGE : 'en';
         

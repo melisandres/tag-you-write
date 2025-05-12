@@ -32,10 +32,11 @@ export class GamesModifiedHandler {
             eventBus.emit('gameStatusChanged', newGame);
         }
         
-        // Check if any of the count properties have changed
+        // Check if any of the count properties have changed OR if the unseen count is greater than 0... because oldGame... the dataManager is not getting updated as the user "sees" texts... so that's it. 
         if (newGame.text_count !== oldGame.text_count || 
             newGame.seen_count !== oldGame.seen_count || 
-            newGame.unseen_count !== oldGame.unseen_count) {
+            newGame.unseen_count !== oldGame.unseen_count ||
+            newGame.unseen_count > 0) {
             console.log(`Game ${newGame.game_id} counts changed:`, {
                 old: {
                     text_count: oldGame.text_count,

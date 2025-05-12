@@ -41,8 +41,12 @@
      * @param string|null $lastCheck Timestamp to check for new notifications
      * @return array Array of notifications created after lastCheck
      */
-    public function getNewNotifications($lastCheck = null) {
-        $writer_id = $_SESSION['writer_id'];
+    public function getNewNotifications($lastCheck = null, $id = null) {
+        $writer_id = $_SESSION['writer_id'] ?? null;
+        if ($writer_id === null) {
+            return []; // Return an empty array if the user isn't logged in
+        }
+
         $sql = "SELECT n.*, g.root_text_id, t.title as game_title, 
                 wt.title as winning_title 
                 FROM $this->table n
@@ -59,6 +63,10 @@
             // Use direct timestamp comparison in SQL
             $sql .= " AND n.created_at > :lastCheck";
         }
+
+        if ($id !== null) {
+            $sql .= " AND n.id = :id";
+        }
         
         $sql .= " ORDER BY n.created_at ASC";
         
@@ -66,6 +74,9 @@
         $stmt->bindValue(':writer_id', $writer_id);
         if ($lastCheck !== null) {
             $stmt->bindValue(':lastCheck', $dbLastCheck);
+        }
+        if ($id !== null) {
+            $stmt->bindValue(':id', $id);
         }
         $stmt->execute();
         return $stmt->fetchAll();

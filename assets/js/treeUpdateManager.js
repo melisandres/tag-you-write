@@ -18,7 +18,6 @@ export class TreeUpdateManager {
     eventBus.on('nodeTextContentUpdate', this.handleNodeTextContentUpdate.bind(this));
     eventBus.on('searchApplied', this.handleSearchUpdate.bind(this));
     eventBus.on('updateNodeWinner', this.handleChooseWinnerFromPolling.bind(this));
-    //eventBus.on('updateWinnerOnTree', this.handleChooseWinner.bind(this));
   }
 
   handleInstaPublish({ textId, newStatus }) {

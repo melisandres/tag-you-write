@@ -8,6 +8,7 @@ export class NodesModifiedHandler {
   initEventListeners() {
     eventBus.on('nodeUpdated', this.handleNodeUpdate.bind(this));
     eventBus.on('nodesAdded', this.handleNodesAdded.bind(this));
+    eventBus.on('treeFullyUpdated', this.handleTreeFullyUpdated.bind(this));
   }
 
   handleNodeUpdate({ oldNode, newNode }) {
@@ -42,7 +43,7 @@ export class NodesModifiedHandler {
     // TODO: you need a whole flow for updates on search results. 
 
     // Check if winner status or permissions have changed
-    if (oldNode?.isWinner !== newNode?.isWinner || 
+    if (oldNode?.isWinner !== newNode?.isWinner ||
         JSON.stringify(oldNode?.permissions) !== JSON.stringify(newNode?.permissions)) {
         console.log('Winner status or permissions changed:', {
             oldIsWinner: oldNode?.isWinner,
@@ -50,7 +51,16 @@ export class NodesModifiedHandler {
             oldPermissions: oldNode?.permissions,
             newPermissions: newNode?.permissions
         });
-        eventBus.emit('updateNodeWinner', { textId: newNode.id, data: newNode });
+        
+        // Split the logic: emit different events based on what changed
+        if (oldNode?.isWinner !== newNode?.isWinner && newNode?.isWinner) {
+            // Only emit updateNodeWinner if it's actually becoming a winner
+            eventBus.emit('updateNodeWinner', { textId: newNode.id, data: newNode });
+        } else if (JSON.stringify(oldNode?.permissions) !== JSON.stringify(newNode?.permissions)) {
+            console.log('nodePermissionsChanged', { textId: newNode.id, data: newNode });
+            // Emit a more appropriate event for permission changes
+            eventBus.emit('nodePermissionsChanged', { textId: newNode.id, data: newNode });
+        }
     }
   }
 
@@ -61,6 +71,54 @@ export class NodesModifiedHandler {
         children: node.children || []
     }));
     eventBus.emit('newNodesDiscovered', normalizedNodes);
+  }
+
+  handleTreeFullyUpdated({ oldTree, newTree }) {
+    console.log('Processing full tree update');
+    
+    // Helper function to flatten tree into array of nodes
+    const flattenTree = (node, nodes = []) => {
+      if (!node) return nodes;
+      nodes.push(node);
+      if (node.children) {
+        node.children.forEach(child => flattenTree(child, nodes));
+      }
+      return nodes;
+    };
+
+    // Get arrays of nodes from both trees
+    const oldNodes = oldTree ? flattenTree(oldTree) : [];
+    const newNodes = flattenTree(newTree);
+
+    // Create a map of old nodes for quick lookup
+    const oldNodesMap = new Map(oldNodes.map(node => [node.id, node]));
+
+    // Process each new node
+    newNodes.forEach(newNode => {
+      const oldNode = oldNodesMap.get(newNode.id);
+      
+      // If node exists in old tree, compare and update if needed
+      if (oldNode) {
+        console.log('oldNode', oldNode);
+        console.log('newNode', newNode);
+        // Only process if permissions have changed
+        if (JSON.stringify(oldNode.permissions) !== JSON.stringify(newNode.permissions)) {
+          this.handleNodeUpdate({ oldNode, newNode });
+        }
+      } else {
+        // New node discovered
+        this.handleNodesAdded([newNode]);
+      }
+    });
+
+    // Check for nodes that were removed
+    const newNodesMap = new Map(newNodes.map(node => [node.id, node]));
+    oldNodes.forEach(oldNode => {
+      if (!newNodesMap.has(oldNode.id)) {
+        // Node was removed - handle if needed
+        console.log(`Node ${oldNode.id} was removed from tree`);
+      }
+    });
   }
 
 

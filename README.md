@@ -58,6 +58,38 @@ The project follows a Model-View-Controller (MVC) architecture:
 
 ### Backend Components
 
+#### Event System
+The application uses a configuration-driven event system to track and manage various actions:
+
+1. **Event Types**
+   - `ROOT_PUBLISH`: When a root text is published
+   - `CONTRIB_PUBLISH`: When a contribution is published
+   - `NOTE_ADD`: When a note is added to a text
+   - `VOTE_TOGGLE`: When a vote is added or removed
+   - `WINNING_VOTE`: When a text wins a vote
+   - `GAME_CLOSED`: When a game is closed
+   - `NOTIFICATION_CREATED`: When a notification is generated
+
+2. **Event Structure**
+   - Configuration-driven using `EventConfig`
+   - Flexible payload system for event-specific data
+   - Automatic root text tracking
+   - Context-aware event creation
+
+3. **Event Flow**
+```
+┌─────────────┐     ┌───────────────┐     ┌─────────────┐
+│             │     │               │     │             │
+│  Controller │────▶│  EventService │───▶ │  Event Model│
+│             │     │               │     │             │
+└─────────────┘     └───────────────┘     └─────────────┘
+```
+
+4. **Adding New Events**
+   - Define event type in `EventConfig`
+   - Add event handling in `EventService`
+   - Implement event creation in relevant controller
+
 #### Controllers
 - `ControllerText`: Handles text creation and management
 - `ControllerGame`: Manages game-related functionality

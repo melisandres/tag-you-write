@@ -321,8 +321,6 @@ abstract class Crud extends PDO{
     
         return $stmt->execute();
     }
-    
-    
 
 }
 

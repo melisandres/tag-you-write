@@ -17,6 +17,12 @@ export class NotificationManager {
             this.fetchNotifications();
         });
 
+        // Listen for SSE notification updates
+        eventBus.on('notificationsReceived', (notifications) => {
+            console.log('Received notifications from SSE:', notifications);
+            this.processNotifications(notifications);
+        });
+
         eventBus.on('notification-clicked', (data) => {
             // Handle both old format (just ID) and new format (object with ID and linkHref)
             const notificationId = typeof data === 'object' ? data.notificationId : data;
@@ -88,6 +94,12 @@ export class NotificationManager {
         notifications.forEach(notification => {
             // Skip if we already have this notification
             if (this.notifications.some(n => n.id === notification.id)) {
+                return;
+            }
+
+            // Skip if this is not a notification object
+            if (!notification.notification_type) {
+                console.warn('Received non-notification object:', notification);
                 return;
             }
 

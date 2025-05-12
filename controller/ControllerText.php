@@ -11,6 +11,7 @@ RequirePage::model('TextStatus');
 RequirePage::model('Seen');
 RequirePage::controller('ControllerGame');
 RequirePage::model('Notification');
+RequirePage::model('Event');
 
 class ControllerText extends Controller{
 
@@ -306,17 +307,18 @@ class ControllerText extends Controller{
             $this->sendJsonResponse(false, 'toast.text.no_input');
         }
 
+        // Initialize models
         $text = new Text;
         $keyWord = new Keyword;
         $textStatus = new TextStatus;
-        $parentId = $input['parent_id'] == '' ? null : $input['parent_id'];
-        $isRootText = !$input['game_id'] && !$parentId;
-        $currentWriterId = $_SESSION['writer_id'];
-        // an empty field created in create form to catch the textId returned by the autoSave
-/*         unset($input['id']);
-        unset($input['lastKeywords']);
-        unset($input['parentWriting']); */
 
+        // Get the parent ID and check if this is a root text   
+        $parentId = $input['parent_id'] == '' ? null : $input['parent_id'];
+        // This represents a FIRST save... so it won't have a game_id yet
+        $isRootText = !$input['game_id'] && !$parentId;
+
+        // Get the current writer ID
+        $currentWriterId = $_SESSION['writer_id'];
 
         // Check if this is an iteration, if so, check permissions
         if (!$isRootText) {
@@ -341,10 +343,9 @@ class ControllerText extends Controller{
 
         // Create a new game if this is a root text (no game_id && no parent_id
         if ($isRootText) {
-            //error_log("line 616 isRootText: " . $isRootText);
             $gameController = new ControllerGame;
             $gameId = $gameController->createGame($input);
-            //error_log("line 618 gameId: " . $gameId);
+
             if ($gameId === false) {
                 $this->sendJsonResponse(false, 'toast.text.failed_create_game');
             }
@@ -355,20 +356,8 @@ class ControllerText extends Controller{
         // Get the keywords from POST
         $keywords = $input['keywords'];
 
-        // Remove the keywords and redirectPage reference from POST
-/*         unset($input['keywords']);
-        unset($input['currentPage']);
-
-        // Remove the other extra values from POST so that you can send off your POST to insert
-        unset($input['firstName']);
-        unset($input['lastName']);
-        unset($input['parentTitle']);
-        unset($input['parentWriting']);
-        unset($input['prompt']);
-        unset($input['parent_text_id']);
- */
+       
         // Translate ['text_status'] into its 'id' in order to save it with the text
-/*         unset($input['text_status']); */
         $input['status_id'] = $textStatus->selectStatus($status);
 
         // Send what's left of the input (text info) to CRUD
@@ -383,12 +372,7 @@ class ControllerText extends Controller{
             'modified_at' => date('Y-m-d H:i:s')
         ];
 
-        // Modified_at is to refresh the UI... so only when published
-
-        // TODO: I'm replacing this righ now to add the modified_at to all stores and updates.
-/*         if ($status == 'published') {
-            $textToSave['modified_at'] = date('Y-m-d H:i:s');
-        } */
+        // Modified_at currentlyrefresh the UI... so it permits the writer of the text to retrieve it when they return to the page, and the Modified_since endpoint retrieves it... only for them. 
 
         //save the text
         $textIdFromInsert = $text->insert($textToSave);
@@ -413,16 +397,12 @@ class ControllerText extends Controller{
             ]);
         }
 
-        // Update the game's modified_at--if this store is for a published text
-        // Which should basically never happen, but it's here if it does.
-/*         if ($status == 'published') { */
-        // TODO: I'm trying this here for all stores, not only published
-            $game = new Game;
-            $game->update([
-                'id' => $input['game_id'], 
-                'modified_at' => date('Y-m-d H:i:s')
-            ]);
-/*         } */
+        // Update the game's modified_at--so that the creator can see the game, be it published or not. 
+        $game = new Game;
+        $game->update([
+            'id' => $input['game_id'], 
+            'modified_at' => date('Y-m-d H:i:s')
+        ]);
 
         // Handle keywords
         $prep = new Prep;
@@ -451,9 +431,27 @@ class ControllerText extends Controller{
             }
         }
 
+        // EVENTS! But only when a text is published. And if the text is a root, Two events: game and text--because this is "Store" not "update".
+
+        // NOTE: This is assuming that the writer does not need to see their draft on a representation of the game while editing, and that leaving the form page to return to the game page will go through the modifiedSince endpoint, and bypass the events system, which will not carry any events for drafts but only for publishing. 
+        if ($status == 'published') {
+            // Create events for the published text
+            $eventType = $isRootText ? 'ROOT_PUBLISH' : 'CONTRIB_PUBLISH';
+            $this->createEvents($eventType, [
+                'textId' => $textIdFromInsert,
+                'gameId' => $input['game_id'],
+                'title' => $input['title'],
+                'isRoot' => $isRootText
+            ], 'form_submit');
+        }
+
         // Same action in both cases. Not an autosave, doing it here, Yes an autosave, doing it in the autosave method.
         if ($autoSaveInput == null) {
-            $this->sendJsonResponse(true, 'toast.text.success', ['textId' => $textIdFromInsert]);
+            if ($status == 'published') {
+                $this->sendJsonResponse(true, 'toast.text.publish_success', 'text');
+            } else {
+                $this->sendJsonResponse(true, 'toast.text.success', ['textId' => $textIdFromInsert]);
+            }
         }else{
             // Return the new text ID
             return $textIdFromInsert;
@@ -601,8 +599,7 @@ class ControllerText extends Controller{
         $statusData = $textStatus->selectStatusByName('published');
         $statusId = $statusData['id'];
 
-
-        // Prepare the data for update
+        // Prepare the Text data for update
         $data = [
             'id' => $textId,
             'status_id' => $statusId, // Dynamically retrieved 'published' status_id
@@ -641,11 +638,22 @@ class ControllerText extends Controller{
                 'modified_at' => date('Y-m-d H:i:s')
             ]);
 
+            // Determine if this is a root text
+            $isRoot = $textData['parent_id'] == '' ? true : false;
+            
+            // Create events for the published text
+            $eventType = $isRoot ? 'ROOT_PUBLISH' : 'CONTRIB_PUBLISH';
+            $this->createEvents($eventType, [
+                'textId' => $textId,
+                'gameId' => $gameId,
+                'title' => $textData['title'],
+                'isRoot' => $isRoot
+            ], 'insta_publish');
+
             $gameData = $game->getGames(null, [], $gameId);
             $gameData[0]['isNewPlayer'] = !$existingPlayer; 
         }
 
-    
         $this->sendJsonResponse(
             $success, 
             $success ? 'toast.text.publish_success' : 'toast.text.publish_failed',
@@ -675,19 +683,30 @@ class ControllerText extends Controller{
             $this->sendJsonResponse(false, 'toast.text.no_input');
         }
 
+        // Initialize models
         $text = new Text;
         $keyword = new Keyword;
         $textHasKeyword = new TextHasKeyword;
+        $game = new Game;
+
         $prep = new Prep;
 
+        // Get the current writer's ID
         $currentWriterId = $_SESSION['writer_id'];
+
+        // Get the text ID
         $textId = $input['id'];
+
+        // Get the text data
         $textData = $text->selectTexts($currentWriterId, $textId);
         $isRoot = $textData['parent_id'] == '' ? true : false;
+
+        // Get the game ID
         $gameId = $text->selectGameId($textId);
 
+        // Add permissions
         $this->addPermissions($textData, $currentWriterId);
-
+    
         // Check user's permission to edit (myText && openForChanges)
         if (!Permissions::canEdit($textData, $currentWriterId) && !Permissions::canAddNote($textData, $currentWriterId)) {
             $this->sendJsonResponse(false, 'toast.text.permission_denied_edit');   
@@ -697,9 +716,7 @@ class ControllerText extends Controller{
         $currentPage = $input['currentPage'];
 
         // get the intended status from the form data
-/*         $textStatus = new TextStatus; */
         $status = $input['text_status'];
-/*         unset($input['text_status']); */
 
         // Choose the validation method 
         // For a note, validate, update, and exit.
@@ -716,19 +733,29 @@ class ControllerText extends Controller{
 
             $update = $text->update($updateNote);
 
-            //Update the game's modified_at, so that you can show the "unseen" count
+            // Update the game's modified_at, so that you can show the "unseen" count
             if ($update) {
-                $game = new Game;
                 $game->update([
                     'id' => $gameId, 
                     'modified_at' => date('Y-m-d H:i:s')
                 ]);
+                
+                // Determine if this is a root text
+                $isRoot = $textData['parent_id'] == '' ? true : false;
+                
+                // Create events for the note update
+                $this->createEvents('NOTE_ADD', [
+                    'textId' => $textId,
+                    'gameId' => $gameId,
+                    'title' => $textData['title'],
+                    'isRoot' => $isRoot
+                ], 'note_edit');
             }
 
             $this->sendJsonResponse($update, $update ? 'toast.text.note_success' : 'toast.text.note_failed', 'text');  
             exit;
         }else{
-            // Your validation may change the status, if the text isnt instaPublish ready
+            // Your validation may change the status, if the text isn't instaPublish ready
             $status = $this->validateText($input, $isRoot, $status);
         }
 
@@ -740,39 +767,23 @@ class ControllerText extends Controller{
 
         // Root texts need to update the game prompt
         if ($isRoot) {
-            $game = new Game;
             $game->update([
                 'id' => $gameId, 
                 'prompt' => $input['prompt']
             ]);
-/*             unset($input['prompt']);
-            unset($input['parent_id']);
-            unset($input['writer_id']); */
         }
 
         // you'll need the text-status-id in order to save the text
         $textStatus = new TextStatus;
         $input['status_id'] = $textStatus->selectStatus($status);
 
-        //although I am not keeping the functionality of editing keywords,
-        //I'm keeping the code here, because I remember it was a little 
-        //complicated to work out, and ultimately, editing keywords is fine--
-        //I could decide to make the functionality available again.
-
-        //get the new keywords from POST, copy, and remove
+        //get the new keywords from POST
         $keywords = $input['keywords'];
-/*         unset($input['keywords']);
-        unset($input['currentPage']);
-        unset($input['parentFirstName']);
-        unset($input['parentLastName']);
-        unset($input['parentTitle']);
-        unset($input['parentWriting']); */
 
-        //get the previous keywords from POST, also remove
+        //get the previous keywords from POST
         $lastKeywords = $input['lastKeywords'];
-/*         unset($input['lastKeywords']);  */
 
-        // TODO: HERE would be the place to add an "editing" table... 
+        // TODO: HERE might be where you add a "current_activity" table entry... 
         $newText = [
             'id' => $textId,
             'status_id' => $input['status_id'],
@@ -781,12 +792,6 @@ class ControllerText extends Controller{
             'date' => date('Y-m-d H:i:s'),
             'modified_at' => date('Y-m-d H:i:s')
         ];
-
-        // TODO: moving the modified_at to all updates, not only published
-        // Modified_at is to refresh the UI... so only when published
-/*         if ($status == 'published') {
-            $textToSave['modified_at'] = date('Y-m-d H:i:s');
-        } */
 
         $update = $text->update($newText);
 
@@ -806,57 +811,68 @@ class ControllerText extends Controller{
                     'active' => 1
                 ];
                 $gameHasPlayer->insert($gameHasPlayerData);
-            }          
+            }
         }
 
-        // I'm trying this here for all updates, not only published
-        $game = new Game;
+        // All updates (not only published) update the game's modified_at
         $game->update([
             'id' => $gameId, 
             'modified_at' => date('Y-m-d H:i:s')
         ]);
 
 
-        //using class Prep to prepare keywords arrays... 
-        //words come in as strings, come out a clean arrays
+        // Using class Prep to prepare keywords arrays... 
+        // Words come in as strings, come out a clean arrays
         $cleanedKeywords = $prep->keywords($keywords);
         $cleanedLastKeywords = $prep->keywords($lastKeywords);
         $wordsToCheck = array_diff($cleanedLastKeywords, $cleanedKeywords);
 
         //each keyword needs to be treated:
         foreach ($cleanedKeywords as $word) {
-            //they have been cleaned of spaces in Prep
+            // They have been cleaned of spaces in Prep
             //$assArr = ['word' => trim($word)];
             $assArr = ['word' => $word];
 
-            //inserted into the keywords table, (if it isn't already there)
+            // Inserted into the keywords table, (if it isn't already there)
             $keyword->insert($assArr, true);
 
-            //we need that keyword's id: but we must remember that it comes as an array
+            // We need that keyword's id: but we must remember that it comes as an array
             $keywordIdFromInsert = $keyword->selectWordId($assArr);
 
-            //with that id, we can build an associative array to send to text_has_keyword
+            // With that id, we can build an associative array to send to text_has_keyword
             $textHasKeywordArray = ['text_id' => $input['id'], 'keyword_id' => $keywordIdFromInsert['id']];
 
-            //now we can insert this keyword into text_has_keyword
+            // Now we can insert this keyword into text_has_keyword
             $textHasKeyword->insertTextHasKeyWord($textHasKeywordArray);
         }
 
-        //earlier, previous keywords was compared to current keywords 
-        //the difference was placed in $wordsToCheck
+        // Earlier, previous keywords was compared to current keywords 
+        // The difference was placed in $wordsToCheck
         if(isset($wordsToCheck) && !empty($wordsToCheck)){
             foreach($wordsToCheck as $word){
-                //delete text_has_id lines for keywords no longer used
+                // Delete text_has_id lines for keywords no longer used
                 $textHasKeyword->deleteTextHasKeyword($word, $input['id']);
 
-                //get an associative array with the whole keyword line
+                // Get an associative array with the whole keyword line
                 $keywordInfos = $keyword->selectId($word, 'word');
 
-                //with the id, check if the key is being used elsewhere, if not, delete from keywords
+                // With the id, check if the key is being used elsewhere, if not, delete from keywords
                 $keyword->deleteUnusedKeywords($keywordInfos['id']);
             }   
         }
+
+        // Final events and messages
         if ($status == "published"){
+            // Create events for the published text
+            $eventType = $isRoot ? 'ROOT_PUBLISH' : 'CONTRIB_PUBLISH';
+            $this->createEvents($eventType, [
+                'textId' => $textId,
+                'gameId' => $gameId,
+                'title' => $input['title'],
+                'isRoot' => $isRoot
+            ], 'update');
+
+            // Send a success message
             $this->sendJsonResponse(true, 'toast.text.publish_success', 'text');
         }else{
             // give a "autosaved" message if it's an autosave
@@ -1013,6 +1029,9 @@ class ControllerText extends Controller{
     private function validateText($data, $isRoot, $intended_status, $autoSave = false){
         RequirePage::library('Validation');
         $val = new Validation;
+
+        // Debug initial status
+        error_log("validateText called with intended_status: " . $intended_status);
 
         // Create clean versions of rich text fields for validation
         $cleanWriting = strip_tags($data["writing"]);

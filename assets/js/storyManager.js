@@ -97,6 +97,7 @@ export class StoryManager {
 
   // TODO: It might be nice to check in the dataManager.cache... to see if it exists there before fetching it from the server. 
   async fetchStoryNode(id){
+    // this is being called by the tree modal... so the tree modal always shows fresh data, rather than cached data... which is fine for now. 
     const endpoint = `text/getStoryNode/${id}`;
     const url = window.i18n.createUrl(endpoint);
     const response = await fetch(url);

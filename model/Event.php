@@ -1,0 +1,104 @@
+<?php
+
+require_once('Crud.php');
+require_once('Game.php');
+
+class Event extends Crud {
+    public $table = 'event';
+    public $primaryKey = 'id';
+
+    public $fillable = [
+        'id',
+        'event_type',
+        'related_table',
+        'related_id',
+        'root_text_id',
+        'writer_id',
+        'payload',
+        'created_at'
+    ];
+
+        /**
+     * Create a new event with default timestamps and JSON encoding for payload
+     * 
+     * @param array $eventData Associative array of event data
+     * @return int|array The ID of the inserted event or error information
+     */
+    public function createEvent($eventData) {
+        // Ensure payload is JSON encoded if it's an array
+        if (isset($eventData['payload']) && is_array($eventData['payload'])) {
+            $eventData['payload'] = json_encode($eventData['payload']);
+        }
+        
+        // Add timestamp if not provided
+        if (!isset($eventData['created_at'])) {
+            $eventData['created_at'] = date('Y-m-d H:i:s');
+        }
+        
+        return $this->insert($eventData);
+    }
+
+    public function getEvents($lastEventId = null) {
+        $sql = "SELECT * FROM event";
+        if ($lastEventId) {
+            $sql .= " WHERE id > :lastEventId";
+        }
+        $sql .= " ORDER BY id ASC";
+            $stmt = $this->prepare($sql);
+        if ($lastEventId) {
+            $stmt->bindParam(':lastEventId', $lastEventId);
+        }
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Get events with filtering capabilities for SSE
+     * 
+     * @param int|null $lastEventId Last event ID processed
+     * @param int|null $currentUserId Current user ID for filtering
+     * @param int|null $rootStoryId Root story ID for filtering
+     * @return array Array of filtered events
+     */
+    public function getFilteredEvents($lastEventId = null, $currentUserId = null, $rootStoryId = null) {
+
+        // Get all events
+        $sql = "SELECT * FROM event WHERE 1=1";
+        $params = [];
+
+        if ($lastEventId) {
+            $sql .= " AND id > :lastEventId";
+            $params[':lastEventId'] = $lastEventId;
+        }
+
+        // Filter notifications by user
+        if ($currentUserId) {
+            $sql .= " AND (related_table != 'notification' OR writer_id = :currentUserId)";
+            $params[':currentUserId'] = $currentUserId;
+        }
+
+        // Filter texts by game
+        if ($rootStoryId) {
+            // Get the game ID for this root story
+            $game = new Game();
+            $gameId = $game->selectGameId($rootStoryId);
+            
+            if ($gameId) {
+                $sql .= " AND (related_table != 'text' OR root_text_id = :rootStoryId)";
+                $params[':rootStoryId'] = $rootStoryId;
+            }
+        }
+
+        $sql .= " ORDER BY id ASC";
+        
+        $stmt = $this->prepare($sql);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+        
+        $stmt->execute();
+        $results = $stmt->fetchAll();
+        
+        return $results;
+    }
+}

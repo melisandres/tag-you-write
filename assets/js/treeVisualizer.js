@@ -1005,6 +1005,12 @@ export class TreeVisualizer {
             return;
         }
         
+        // Check if this.svg exists - if not, the tree view is not active
+        if (!this.svg) {
+            console.warn('Tree visualization not initialized (this.svg is null) - likely not in tree view mode');
+            return;
+        }
+        
         // Recalculate the layout
         const treeDataToUse = this.treeData.data || this.treeData;
         
@@ -1277,7 +1283,7 @@ export class TreeVisualizer {
         console.log('SEARCH TERM:', searchTerm);
         const searchResults = this.dataManager.getSearchResults();
         console.log('SEARCH RESULTS:', searchResults);
-        console.log('Search results structure:', JSON.stringify(searchResults, null, 2));
+        //console.log('Search results structure:', JSON.stringify(searchResults, null, 2));
 
         if (!searchTerm || !searchResults || !searchResults.nodes) {
             console.log('Exiting early - missing data:', {
@@ -1340,7 +1346,7 @@ export class TreeVisualizer {
             return;
         }
 
-        console.log('Highlighting title for node:', nodeId, 'with term:', searchTerm, 'found node:', !nodeGroup.empty());
+        //console.log('Highlighting title for node:', nodeId, 'with term:', searchTerm, 'found node:', !nodeGroup.empty());
 
         // Handle title text
         const titleGroup = nodeGroup.select('.title-group');

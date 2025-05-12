@@ -99,7 +99,7 @@
 
         <input type="hidden" name="writer_id" value="{{ session.writer_id }}"> 
         <input type="hidden" name="currentPage" value="{{ data.id ? 'text-draft-edit.php' : 'text-create.php' }}">
-        <input type="hidden" name="text_status" data-text-status value="{{ data.id ? 'draft' : '' }}">
+        <input type="hidden" name="text_status" data-text-status value="{{ data.id ? 'draft' : 'draft' }}">
         <input type="hidden" name="game_id" value="{{ data.game_id|default('') }}">
         <input type="hidden" name="parent_id" value="{{ data.parent_id|default('') }}">
         <input type="hidden" data-id name="id" value="{{ data.id|default('') }}">

@@ -128,9 +128,17 @@ export class SSEManager {
         this.eventSource.addEventListener('notificationUpdate', (event) => {
             try {
                 console.log('SSE: Received notification update event');
+                console.log('SSE: Raw event data:', event.data);
+                
                 const notifications = JSON.parse(event.data);
-                console.log('SSE: Notification update data:', notifications);
-                eventBus.emit('notificationsReceived', notifications);
+                console.log('SSE: Parsed notification data:', notifications);
+                console.log('SSE: Number of notifications:', Array.isArray(notifications) ? notifications.length : 'not an array');
+                
+                if (Array.isArray(notifications) && notifications.length > 0) {
+                    eventBus.emit('notificationsReceived', notifications);
+                } else {
+                    console.warn('SSE: Empty or invalid notifications array received');
+                }
             } catch (error) {
                 console.error('SSE: Error processing notification update:', error);
             }
