@@ -1,19 +1,20 @@
 <?php
- require_once('Crud.php');
- require_once('config/timezone_config.php');
+require_once('Crud.php');
+// Use an absolute path to find the config file regardless of where it's included from
+require_once(dirname(__FILE__) . '/../config/timezone_config.php');
 
- class Notification extends Crud{
-   public $table = 'notification';
-   public $primaryKey = 'id';
-   public $fillable =  ['game_id',
-                        'writer_id', 
-                        'notification_type', 
-                        'seen_at',
-                        'read_at',
-                        'created_at',
-                        'message',
-                        'deleted_at'
-                        ];
+class Notification extends Crud{
+  public $table = 'notification';
+  public $primaryKey = 'id';
+  public $fillable =  ['game_id',
+                       'writer_id', 
+                       'notification_type', 
+                       'seen_at',
+                       'read_at',
+                       'created_at',
+                       'message',
+                       'deleted_at'
+                       ];
 
     public function getNotifications($order = 'DESC') {
         $writer_id = $_SESSION['writer_id'];

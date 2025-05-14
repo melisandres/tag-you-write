@@ -12,5 +12,18 @@ class ControllerEvent extends Controller {
         //var_dump($newEvents);
         return $newEvents;
     }  
+    
+    public function getFilteredEvents() {
+        $lastEventId = isset($_GET['lastEventId']) ? intval($_GET['lastEventId']) : null;
+        $currentUserId = $_SESSION['writer_id'] ?? null;
+        $rootStoryId = isset($_GET['rootStoryId']) ? $_GET['rootStoryId'] : null;
+        
+        $eventModel = new Event();
+        $events = $eventModel->getFilteredEvents($lastEventId, $currentUserId, $rootStoryId);
+        
+        // Return the events as JSON
+        header('Content-Type: application/json');
+        echo json_encode($events);
+    }
 }
 ?>

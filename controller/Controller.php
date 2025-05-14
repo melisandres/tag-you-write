@@ -8,18 +8,8 @@ abstract class Controller{
     }
 
     protected function addPermissions(&$node, $currentUserId, $hierarchy = []) {
-        // Convert integer values to boolean
-        $node['hasContributed'] = isset($node['hasContributed']) ? $node['hasContributed'] == 1 : false;
-        $node['isWinner'] = isset($node['isWinner']) ? $node['isWinner'] == 1 : false;
-        $node['openForChanges'] = isset($node['openForChanges']) ? $node['openForChanges'] == 1 : true;
-
-        RequirePage::library('Permissions');
-        $node = Permissions::aggregatePermissions($node, $currentUserId);
-        if (!empty($node['children'])) {
-            foreach ($node['children'] as &$child) {
-                $this->addPermissions($child, $currentUserId, $hierarchy);
-            }
-        }
+        RequirePage::service('PermissionsService');
+        return PermissionsService::addPermissions($node, $currentUserId, $hierarchy);
     }
 
     /**

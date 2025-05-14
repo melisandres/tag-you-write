@@ -19,9 +19,55 @@ class ControllerSSE extends Controller {
         // No implementation needed
     }
 
+    /**
+     * Simple debug endpoint to test SSE functionality
+     */
+    public function debug() {
+        // Disable error output
+        ini_set('display_errors', 'off');
+        error_reporting(0);
+        
+        // Clear output buffers
+        if (ob_get_level()) ob_end_clean();
+        
+        // Set headers
+        header('Content-Type: text/event-stream');
+        header('Cache-Control: no-cache');
+        header('Connection: keep-alive');
+        header('X-Accel-Buffering: no');
+        
+        // Send initial comment
+        echo ": SSE debug connection established\n\n";
+        flush();
+        
+        // Send 10 test events and exit
+        for ($i = 0; $i < 10; $i++) {
+            // Send event
+            echo "event: debug\n";
+            echo "data: " . json_encode(['iteration' => $i, 'time' => time()]) . "\n\n";
+            flush();
+            
+            // Wait 1 second between events
+            sleep(1);
+        }
+        
+        // Send completed event
+        echo "event: complete\n";
+        echo "data: " . json_encode(['message' => 'Debug complete']) . "\n\n";
+        flush();
+        exit();
+    }
+
     public function stream() {
+        // Disable error output to prevent breaking SSE format
+        ini_set('display_errors', 'off');
+        error_reporting(0);
+        
         // Remove execution time limit for this endpoint
         set_time_limit(0);
+        
+        // Make sure we have no previous output
+        if (ob_get_level()) ob_end_clean();
         
         // 1. Close session to prevent blocking other requests
         session_write_close();
@@ -30,9 +76,21 @@ class ControllerSSE extends Controller {
         header('Content-Type: text/event-stream');
         header('Cache-Control: no-cache');
         header('Connection: keep-alive');
+        header('X-Accel-Buffering: no'); // Disable Nginx buffering
+        
+        // Send a comment to start the connection and test headers
+        echo ": SSE connection established\n\n";
+        flush();
         
         // 3. Initialize properties
-        $this->initializeProperties();
+        try {
+            $this->initializeProperties();
+        } catch (Exception $e) {
+            echo "event: error\n";
+            echo "data: " . json_encode(['message' => 'Failed to initialize: ' . $e->getMessage()]) . "\n\n";
+            flush();
+            exit();
+        }
         
         // 4. Enter the event stream loop
         while (true) {
@@ -51,7 +109,6 @@ class ControllerSSE extends Controller {
                 error_log("SSE Error: " . $e->getMessage());
                 echo "event: error\n";
                 echo "data: " . json_encode(['message' => 'Server error occurred']) . "\n\n";
-                ob_flush();
                 flush();
                 sleep(5); // Wait before retrying
             }
@@ -83,8 +140,8 @@ class ControllerSSE extends Controller {
 
         if (empty($events)) {
             // Send keepalive if no updates
-            echo ": keepalive " . date('H:i:s') . "\n\n";
-            ob_flush();
+            echo "event: keepalive\n";
+            echo "data: " . json_encode(['timestamp' => time()]) . "\n\n";
             flush();
             return;
         }
@@ -99,7 +156,6 @@ class ControllerSSE extends Controller {
         if (!empty($updates)) {
             echo "event: update\n";
             echo "data: " . json_encode($updates) . "\n\n";
-            ob_flush();
             flush();
         }
     }
@@ -135,7 +191,6 @@ class ControllerSSE extends Controller {
                         // Send notifications as a separate event
                         echo "event: notificationUpdate\n";
                         echo "data: " . json_encode($notificationUpdates) . "\n\n";
-                        ob_flush();
                         flush();
                     }
                     break;

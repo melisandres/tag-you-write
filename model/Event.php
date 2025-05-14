@@ -101,4 +101,19 @@ class Event extends Crud {
         
         return $results;
     }
+
+    /**
+     * Get the maximum event ID from the database
+     * 
+     * @return int|null The maximum event ID, or null if no events exist
+     */
+    public function getMaxEventId() {
+        $sql = "SELECT MAX(id) FROM $this->table";
+        $stmt = $this->prepare($sql);
+        $stmt->execute();
+        $maxId = $stmt->fetchColumn();
+        
+        // Return as integer or null if no events
+        return $maxId ? intval($maxId) : null;
+    }
 }

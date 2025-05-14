@@ -8,8 +8,10 @@ export class SSEManager {
         this.retryDelay = 5000; // 5 seconds
         this.isConnected = false;
         this.dataManager = window.dataManager;
+        this.baseUrl = this.detectBaseUrl();
 
         console.log('SSEManager constructor called');
+        console.log('SSE: Base URL detected as:', this.baseUrl);
 
         // Listen for control events
         eventBus.on('startSSE', () => {
@@ -26,6 +28,20 @@ export class SSEManager {
             console.log('SSE: Parameter changed:', param);
             this.handleParameterChange(param);
         });
+    }
+    
+    /**
+     * Get the base URL for SSE connections from the meta tag
+     */
+    detectBaseUrl() {
+        const baseUrlMeta = document.querySelector('meta[name="base-url"]');
+        if (baseUrlMeta && baseUrlMeta.dataset.baseUrl) {
+            return `${baseUrlMeta.dataset.baseUrl}public/sse/`;
+        }
+        
+        // Simple fallback if no meta tag (shouldn't happen in proper setup)
+        console.warn('SSE: No base-url meta tag found, using default path');
+        return '/public/sse/';
     }
 
     async connect() {
@@ -44,7 +60,11 @@ export class SSEManager {
             const filters = this.dataManager.cache.filters || {};
             const search = this.dataManager.cache.search || '';
             const lastTreeCheck = this.dataManager.cache.trees.get(rootId)?.timestamp || 0;
-
+            
+            // Send last event ID if we have one from a previous connection
+            // Otherwise, let the server determine the appropriate starting point
+            const lastEventId = this.lastEventId || null;
+            
             // Build the URL with parameters
             const params = new URLSearchParams({
                 lastGamesCheck: lastGamesCheck,
@@ -53,9 +73,44 @@ export class SSEManager {
                 rootStoryId: rootId,
                 lastTreeCheck: lastTreeCheck
             });
+            
+            // Only add lastEventId if it's not null (let server handle initial value)
+            // This parameter is necessary for resuming the event stream from where we left off
+            if (lastEventId !== null) {
+                params.append('lastEventId', lastEventId);
+                console.log('SSE: Including lastEventId:', lastEventId);
+            } else {
+                console.log('SSE: No lastEventId, server will determine starting point');
+            }
+            
+            // Get writer_id from session or localStorage as a fallback for session issues
+            // SECURITY NOTE: The server will prioritize the session-based writer_id over this parameter
+            // We include this as a redundant approach in case of cookie/session issues
+            if (window.WriterID) {
+                params.append('writer_id', window.WriterID);
+                console.log('SSE: Including writer_id from global WriterID:', window.WriterID);
+            } else {
+                // Try to get writer_id from user meta tag first (already in the header)
+                const userMeta = document.querySelector('meta[name="user"]');
+                if (userMeta && userMeta.dataset.userId && userMeta.dataset.userId !== 'null') {
+                    params.append('writer_id', userMeta.dataset.userId);
+                    console.log('SSE: Including writer_id from meta tag:', userMeta.dataset.userId);
+                } else {
+                    // Fall back to cookie check
+                    const cookies = document.cookie.split(';');
+                    for (let cookie of cookies) {
+                        const [name, value] = cookie.trim().split('=');
+                        if (name === 'writer_id') {
+                            params.append('writer_id', value);
+                            console.log('SSE: Including writer_id from cookie:', value);
+                            break;
+                        }
+                    }
+                }
+            }
 
-            const endpoint = `sse/stream?${params.toString()}`;
-            const url = window.i18n.createUrl(endpoint);
+            // Direct access to the simple SSE implementation
+            const url = `${this.baseUrl}events.php?${params.toString()}`;
             console.log('SSE: Connecting to URL:', url);
             
             this.eventSource = new EventSource(url);
@@ -144,15 +199,31 @@ export class SSEManager {
             }
         });
 
+        // Keep alive event
+        this.eventSource.addEventListener('keepalive', (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                console.debug('SSE: Keepalive received:', data);
+            } catch (error) {
+                console.debug('SSE: Keepalive received (unparsed):', event.data);
+            }
+        });
+        
+        // Timeout event
+        this.eventSource.addEventListener('timeout', (event) => {
+            try {
+                console.log('SSE: Timeout event received, reconnecting...');
+                this.disconnect();
+                setTimeout(() => this.connect(), 1000); // Reconnect after 1 second
+            } catch (error) {
+                console.error('SSE: Error handling timeout event:', error);
+            }
+        });
+
         // Error event
         this.eventSource.addEventListener('error', (event) => {
             console.error('SSE: Error event received:', event);
             this.handleConnectionError(event);
-        });
-
-        // Keepalive event
-        this.eventSource.addEventListener('keepalive', (event) => {
-            console.debug('SSE: Keepalive received:', event.data);
         });
     }
 
@@ -174,6 +245,11 @@ export class SSEManager {
 
     /**
      * Handle changes to SSE parameters by restarting the connection
+     * 
+     * Note: We must reconnect when parameters change because SSE connections are persistent 
+     * and one-way. The server can't listen for parameter changes on an existing connection,
+     * so we need to establish a new connection with updated parameters.
+     * 
      * @param {Object} param The parameter that changed
      * @param {string} param.type The type of parameter ('rootStoryId', 'filters', 'search')
      * @param {any} param.value The new value
