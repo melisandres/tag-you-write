@@ -1,6 +1,7 @@
 {
     "require": {
         "twig/twig": "^3.7",
-        "phpmailer/phpmailer": "^6.8"
+        "phpmailer/phpmailer": "^6.8",
+        "predis/predis": "^3.0"
     }
 }

@@ -9,6 +9,7 @@ export class SSEManager {
         this.isConnected = false;
         this.dataManager = window.dataManager;
         this.baseUrl = this.detectBaseUrl();
+        this.lastEventId = this.dataManager.getLastEventId();
 
         console.log('SSEManager constructor called');
         console.log('SSE: Base URL detected as:', this.baseUrl);
@@ -54,38 +55,23 @@ export class SSEManager {
                 this.disconnect();
             }
 
-            // Get current state from DataManager
-            const rootId = this.dataManager.getCurrentViewedRootStoryId();
-            const lastGamesCheck = this.dataManager.cache.lastGamesCheck || 0;
-            const filters = this.dataManager.cache.filters || {};
-            const search = this.dataManager.cache.search || '';
-            const lastTreeCheck = this.dataManager.cache.trees.get(rootId)?.timestamp || 0;
+            // Get all SSE parameters from DataManager
+            const params = new URLSearchParams();
+            const sseParams = this.dataManager.getSSEParameters();
             
-            // Send last event ID if we have one from a previous connection
-            // Otherwise, let the server determine the appropriate starting point
-            const lastEventId = this.lastEventId || null;
-            
-            // Build the URL with parameters
-            const params = new URLSearchParams({
-                lastGamesCheck: lastGamesCheck,
-                filters: JSON.stringify(filters),
-                search: search,
-                rootStoryId: rootId,
-                lastTreeCheck: lastTreeCheck
+            // Add all parameters to URLSearchParams
+            Object.entries(sseParams).forEach(([key, value]) => {
+                if (value !== null && value !== undefined) {
+                    if (key === 'filters') {
+                        params.append(key, JSON.stringify(value));
+                    } else {
+                        params.append(key, value);
+                    }
+                }
             });
-            
-            // Only add lastEventId if it's not null (let server handle initial value)
-            // This parameter is necessary for resuming the event stream from where we left off
-            if (lastEventId !== null) {
-                params.append('lastEventId', lastEventId);
-                console.log('SSE: Including lastEventId:', lastEventId);
-            } else {
-                console.log('SSE: No lastEventId, server will determine starting point');
-            }
             
             // Get writer_id from session or localStorage as a fallback for session issues
             // SECURITY NOTE: The server will prioritize the session-based writer_id over this parameter
-            // We include this as a redundant approach in case of cookie/session issues
             if (window.WriterID) {
                 params.append('writer_id', window.WriterID);
                 console.log('SSE: Including writer_id from global WriterID:', window.WriterID);
@@ -150,12 +136,22 @@ export class SSEManager {
             try {
                 console.log('SSE: Received update event');
                 const data = JSON.parse(event.data);
-                console.log('SSE: Update event data:', data);
+                
+                // Update lastEventId if present in the data
+                if (data.id) {
+                    this.lastEventId = data.id;
+                    this.dataManager.setLastEventId(data.id);
+                }
                 
                 // Get the root ID from the first modified node if available
                 const gameId = data.modifiedNodes?.[0]?.game_id;
                 const rootId = this.dataManager.getCurrentViewedRootStoryId();
                 console.log('SSE: game ID from update:', gameId, 'Current root ID:', rootId);
+                
+                // Log for debug monitor if available
+                if (window.logRedisMessage) {
+                    window.logRedisMessage('update', data);
+                }
                 
                 // Process modified games
                 if (data.modifiedGames && data.modifiedGames.length > 0) {
@@ -165,11 +161,17 @@ export class SSEManager {
                 // Process modified nodes
                 if (data.modifiedNodes && data.modifiedNodes.length > 0) {
                     console.log('SSE: Processing modified nodes:', data.modifiedNodes);
+                    console.log('SSE: Processing modified nodes:', data.modifiedNodes);
                 }
                 
                 // Process search results
                 if (data.searchResults && data.searchResults.length > 0) {
                     console.log('SSE: Processing search results:', data.searchResults);
+                }
+                
+                // Database message logging for debug monitor
+                if (window.logDatabaseMessage) {
+                    window.logDatabaseMessage('database', data);
                 }
                 
                 // Handle the update response

@@ -79,7 +79,7 @@ class Permissions {
                 && $isDraft;
     }
 
-    public static function aggregatePermissions($data, $currentUserId) {
+    public static function aggregatePermissions($data, $currentUserId) { 
         $data['permissions'] = [
             'canEdit' => self::canEdit($data, $currentUserId),
             'canAddNote' => self::canAddNote($data, $currentUserId),

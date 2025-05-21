@@ -23,6 +23,8 @@ class ComposerStaticInit59564769586446085a64cf3c26a53821
         ),
         'P' => 
         array (
+            'Psr\\Http\\Message\\' => 17,
+            'Predis\\' => 7,
             'PHPMailer\\PHPMailer\\' => 20,
         ),
     );
@@ -39,6 +41,14 @@ class ComposerStaticInit59564769586446085a64cf3c26a53821
         'Symfony\\Polyfill\\Ctype\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-ctype',
+        ),
+        'Psr\\Http\\Message\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/psr/http-message/src',
+        ),
+        'Predis\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/predis/predis/src',
         ),
         'PHPMailer\\PHPMailer\\' => 
         array (

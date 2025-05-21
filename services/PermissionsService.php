@@ -62,7 +62,7 @@ class PermissionsService {
         $node['openForChanges'] = isset($node['openForChanges']) ? $node['openForChanges'] == 1 : true;
         
         // Other boolean fields that might need normalization
-        $booleanFields = ['hasVoted', 'text_seen', 'is_winner'];
+        $booleanFields = ['hasVoted', 'is_winner'];
         foreach ($booleanFields as $field) {
             if (isset($node[$field])) {
                 $node[$field] = (bool)$node[$field];

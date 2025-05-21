@@ -3,6 +3,7 @@
 require_once(__DIR__ . '/../model/Event.php');
 require_once(__DIR__ . '/../model/Game.php');
 require_once(__DIR__ . '/config/EventConfig.php');
+require_once(__DIR__ . '/RedisService.php');
 
 class EventService {
     private $eventConfig;
@@ -35,6 +36,13 @@ class EventService {
 
         // Create events based on configuration
         $success = true;
+        $redisService = null;
+        
+        // Only initialize RedisService if needed
+        if (class_exists('RedisService')) {
+            $redisService = new RedisService();
+        }
+        
         foreach ($config['events'] as $eventConfig) {
             $eventData = $this->prepareEventData($eventConfig, $data, $context, $root_text_id);
             $result = $this->eventModel->createEvent($eventData);
@@ -46,6 +54,13 @@ class EventService {
             } elseif (!$result) {
                 error_log("Failed to create event");
                 $success = false;
+            } else {
+                // Event created successfully, publish to Redis
+                if ($redisService && $redisService->isAvailable()) {
+                    // Add the event ID to the data
+                    $eventData['id'] = $result;
+                    $redisService->publishEvent($eventData);
+                }
             }
         }
 
