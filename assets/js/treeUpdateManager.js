@@ -214,6 +214,19 @@ export class TreeUpdateManager {
     
     // Now update the visualization
     this.treeVisualizer.updateTree();
+    
+    // Check if search is active and explicitly apply search highlighting
+    const searchTerm = this.dataManager.getSearch();
+    if (searchTerm) {
+      console.log('Search is active with term:', searchTerm);
+      // Apply search highlighting again to ensure new nodes are highlighted
+      const searchResults = this.dataManager.getSearchResults();
+      if (searchResults && searchResults.nodes) {
+        console.log('Reapplying search highlighting after tree update');
+        // Manually trigger search update to ensure newly added nodes get highlighted
+        this.handleSearchUpdate(searchTerm);
+      }
+    }
   }
 
   handleNodeTextContentUpdate(nodeData) {

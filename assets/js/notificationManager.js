@@ -12,14 +12,9 @@ export class NotificationManager {
     init() {
         console.log('NotificationManager initialized');
         
-        // Listen for notification events from PollingManager
-        eventBus.on('checkForNotifications', () => {
-            this.fetchNotifications();
-        });
-
-        // Listen for SSE notification updates
+        // Listen for SSE or polling notification updates
         eventBus.on('notificationsReceived', (notifications) => {
-            console.log('Received notifications from SSE:', notifications);
+            console.log('Received notifications:', notifications);
             this.processNotifications(notifications);
         });
 
@@ -41,39 +36,6 @@ export class NotificationManager {
             this.markNotificationAsDeleted(notificationId);
         });
     }
-
-    async fetchNotifications() {
-        if (!document.querySelector('.notifications-menu')){
-            console.error('Notifications menu not found');
-            return;
-        }
-        
-        try {
-            // Set lastCheck to 5 seconds before the current time to ensure we don't miss any notifications
-            const currentTime = Date.now();
-            
-            const endpoint = window.i18n.createUrl(`/notification/getNewNotifications${this.lastCheck ? "/" + this.lastCheck : ''}`);
-            const response = await fetch(endpoint);
-            
-            if (!response.ok) {
-                console.error('Error fetching notifications:', response.status, response.statusText);
-                return; // Don't update lastCheck if there was an error
-            }
-            
-            const newNotifications = await response.json();
-            
-            if (newNotifications && newNotifications.length > 0) {
-                // Process the new notifications
-                this.processNotifications(newNotifications);
-                // Only update lastCheck after successfully processing notifications
-                this.lastCheck = currentTime;
-            }
-        } catch (error) {
-            console.error('Error fetching notifications:', error);
-            // Don't update lastCheck if there was an error
-        }
-    }
-    
 
     /**
      * Process a batch of notifications

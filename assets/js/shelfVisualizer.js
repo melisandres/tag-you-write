@@ -1,6 +1,7 @@
 import { SVGManager } from './svgManager.js';
 import { SeenManager } from './seenManager.js';
 import { createColorScale } from './createColorScale.js'; // Import the utility function
+import { eventBus } from './eventBus.js';
 
 export class ShelfVisualizer {
   constructor(container) {
@@ -43,9 +44,19 @@ export class ShelfVisualizer {
     // Append the new node to the children's list
     childrenOl.appendChild(newNodeElement);
 
+    // Get the actually inserted element from the DOM
+    const insertedNode = childrenOl.querySelector(`li[data-story-id="${newNode.id}"]`);
+    
+    // Apply search highlighting if there's an active search
+    const searchTerm = window.dataManager?.getSearch();
+    if (searchTerm && insertedNode) {
+        // Trigger the search highlighting for this specific node
+        eventBus.emit('shelfDrawComplete', insertedNode);
+    }
+
     // Re-apply event listeners and colors
     this.addEventListeners();
-    this.applySVGColors(this.container);
+    this.applySVGColors(insertedNode);
   }
 
   drawShelf(data) {
@@ -88,8 +99,6 @@ export class ShelfVisualizer {
     drawerHTML += '</li>';
     return drawerHTML;
   }
-
-
 
   drawSingleNode(node, depth) {
     const isWinner = node.isWinner ? "isWinner" : "";
@@ -321,6 +330,15 @@ export class ShelfVisualizer {
   }
   
   addEventListeners() {
+    // First, remove existing event listeners to prevent duplicates
+    const oldTitles = this.container.querySelectorAll('.node-headline');
+    oldTitles.forEach(title => {
+      // Clone and replace only the node-headline, not any SVG content inside buttons
+      const clone = title.cloneNode(true);
+      title.parentNode.replaceChild(clone, title);
+    });
+    
+    // Now add fresh event listeners
     const titles = this.container.querySelectorAll('.node-headline');
     titles.forEach(title => {
       title.addEventListener('click', () => {
@@ -348,6 +366,9 @@ export class ShelfVisualizer {
         }
       });
     });
+    
+    // Re-apply SVG colors to ensure proper rendering
+    this.applySVGColors(this.container);
   }
 }
 

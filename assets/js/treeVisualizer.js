@@ -1021,6 +1021,7 @@ export class TreeVisualizer {
 
          // Get search results from the data manager
         const searchResults = this.dataManager.getSearchResults() || { nodes: {} };
+        console.log('searchResults were retrieved by the treeVisualizer on updateTree: ', searchResults);
 
         // Calculate maxDepth and depthCounts
         const maxDepth = d3.max(root.descendants(), d => d.depth);

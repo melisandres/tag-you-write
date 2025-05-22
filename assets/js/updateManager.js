@@ -12,7 +12,7 @@ export class UpdateManager {
         console.log('UpdateManager created with SSE preference:', this.preferSSE);
     }
 
-    // Called by main.js to ensure other managers set up their event listeners first, and ensures that the DOM is ready. (?)
+    // Called by main.js to ensure other managers set up their event listeners first, and ensures that the DOM is ready
     initialize() {
         console.log('UpdateManager initialized');
         window.addEventListener('beforeunload', () => this.cleanup());

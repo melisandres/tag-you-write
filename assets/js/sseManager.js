@@ -161,7 +161,6 @@ export class SSEManager {
                 // Process modified nodes
                 if (data.modifiedNodes && data.modifiedNodes.length > 0) {
                     console.log('SSE: Processing modified nodes:', data.modifiedNodes);
-                    console.log('SSE: Processing modified nodes:', data.modifiedNodes);
                 }
                 
                 // Process search results

@@ -51,6 +51,9 @@ class EventHandler {
     private $redisMessageCount = 0;
     private $databaseMessageCount = 0;
     
+    // New polling service
+    private $pollingService;
+    
     /**
      * Constructor
      * 
@@ -129,6 +132,7 @@ class EventHandler {
             
             // Load services
             require_once('../../services/PermissionsService.php');
+            require_once('../../services/EventPollingService.php');
             
             // Load Redis manager if it exists
             if (file_exists('../../services/RedisManager.php')) {
@@ -140,6 +144,9 @@ class EventHandler {
             $this->gameModel = new Game();
             $this->textModel = new Text();
             $this->notificationModel = new Notification();
+            
+            // Initialize polling service
+            $this->pollingService = new EventPollingService();
             
         } catch (\Exception $e) {
             $this->sendErrorEvent("Failed to load dependencies: " . $e->getMessage());
@@ -326,72 +333,46 @@ class EventHandler {
                 // Process based on channel
                 switch ($channel) {
                     case 'games:updates':
-                        error_log("SSE Redis: Processing game update");
                         if (isset($data['related_id'])) {
                             $gameId = $data['related_id'];
-                            error_log("SSE Redis: Fetching game data for ID: $gameId");
-                            $gameUpdates = $this->gameModel->getGames(
-                                null, 
-                                $this->filters, 
-                                $gameId, 
-                                $this->search
-                            );
+                            $gameUpdates = $this->pollingService->fetchGameData($gameId, $this->filters, $this->search);
                             
                             if (!empty($gameUpdates)) {
-                                error_log("SSE Redis: Found game data, sending update");
                                 $this->sendEvent('update', [
                                     'modifiedGames' => $gameUpdates, 
                                     'modifiedNodes' => [],
                                     'searchResults' => []
                                 ]);
-                            } else {
-                                error_log("SSE Redis: Could not find game data for ID: $gameId");
                             }
                         }
                         break;
                         
                     case 'texts:' . $this->rootStoryId:
-                        error_log("SSE Redis: Processing text update");
                         if (isset($data['related_id'])) {
                             $textId = $data['related_id'];
-                            error_log("SSE Redis: Attempting to fetch text data for ID: $textId");
-                            error_log("SSE Redis: Using writer ID: " . ($this->writerId ?? 'null'));
-                            
-                            $nodeData = $this->textModel->selectTexts($this->writerId, $textId, false);
+                            $nodeData = $this->pollingService->fetchTextData($textId, $this->writerId);
                             
                             if ($nodeData) {
-                                error_log("SSE Redis: Successfully found text data");
-                                // Apply permissions to the node
-                                if (class_exists('PermissionsService')) {
-                                    PermissionsService::addPermissions($nodeData, $this->writerId);
-                                }
-                                
+                                $searchResults = $this->search ? 
+                                    $this->pollingService->fetchSearchResults($this->search, $this->rootStoryId, $this->writerId) : 
+                                    [];
+                                    
                                 $this->sendEvent('update', [
                                     'modifiedGames' => [], 
                                     'modifiedNodes' => [$nodeData],
-                                    'searchResults' => $this->search ? $searchResults : []
+                                    'searchResults' => $searchResults
                                 ]);
-                                error_log("SSE Redis: Sent update event to client");
-                            } else {
-                                error_log("SSE Redis: Could not find text data for text_id=$textId (event_id=" . $data['id'] . ")");
                             }
-                        } else {
-                            error_log("SSE Redis: Missing related_id in message: " . json_encode($data));
                         }
                         break;
                         
                     case 'notifications:' . $this->writerId:
-                        error_log("SSE Redis: Processing notification update");
                         if (isset($data['related_id'])) {
                             $notificationId = $data['related_id'];
-                            error_log("SSE Redis: Fetching notification data for ID: $notificationId");
-                            $notificationUpdates = $this->notificationModel->getNewNotifications(null, $notificationId);
+                            $notificationUpdates = $this->pollingService->fetchNotificationData($notificationId);
                             
                             if (!empty($notificationUpdates)) {
-                                error_log("SSE Redis: Found notification data, sending update");
                                 $this->sendEvent('notificationUpdate', $notificationUpdates);
-                            } else {
-                                error_log("SSE Redis: Could not find notification data for ID: $notificationId");
                             }
                         }
                         break;
@@ -420,20 +401,36 @@ class EventHandler {
      */
     private function checkMissedEvents() {
         try {
-            // Get events since last event ID
-            $events = $this->eventModel->getFilteredEvents(
-                $this->lastEventId, 
+            error_log("SSE: Checking for missed events since lastEventId=" . $this->lastEventId);
+            
+            // Get updates directly using the polling service
+            $updates = $this->pollingService->getUpdates(
+                $this->lastEventId,
                 $this->writerId, 
-                $this->rootStoryId
+                $this->rootStoryId,
+                $this->filters,
+                $this->search
             );
             
-            if (!empty($events)) {
-                // Update lastEventId to the most recent event
-                $this->lastEventId = end($events)['id'];
-                
-                // Process events
-                $this->processEvents($events);
+            // Send notification updates if any
+            if (!empty($updates['notifications'])) {
+                $this->sendEvent('notificationUpdate', $updates['notifications']);
             }
+            
+            // Send other updates if any
+            if (!empty($updates['modifiedGames']) || !empty($updates['modifiedNodes'])) {
+                $this->sendEvent('update', [
+                    'modifiedGames' => $updates['modifiedGames'],
+                    'modifiedNodes' => $updates['modifiedNodes'],
+                    'searchResults' => $updates['searchResults']
+                ]);
+            }
+            
+            // Update lastEventId
+            if (isset($updates['lastEventId'])) {
+                $this->lastEventId = $updates['lastEventId'];
+            }
+            
         } catch (\Exception $e) {
             error_log("SSE: Error checking missed events: " . $e->getMessage());
         }
@@ -468,19 +465,32 @@ class EventHandler {
                     $lastKeepaliveTime = time();
                 }
                 
-                // Get new events using the Event model directly
-                $events = $this->eventModel->getFilteredEvents(
-                    $this->lastEventId, 
+                // Get updates directly using the polling service
+                $updates = $this->pollingService->getUpdates(
+                    $this->lastEventId,
                     $this->writerId, 
-                    $this->rootStoryId
+                    $this->rootStoryId,
+                    $this->filters,
+                    $this->search
                 );
                 
-                if (!empty($events)) {
-                    // Update lastEventId to the most recent event
-                    $this->lastEventId = end($events)['id'];
-                    
-                    // Process events
-                    $this->processEvents($events);
+                // Send notification updates if any
+                if (!empty($updates['notifications'])) {
+                    $this->sendEvent('notificationUpdate', $updates['notifications']);
+                }
+                
+                // Send other updates if any
+                if (!empty($updates['modifiedGames']) || !empty($updates['modifiedNodes'])) {
+                    $this->sendEvent('update', [
+                        'modifiedGames' => $updates['modifiedGames'],
+                        'modifiedNodes' => $updates['modifiedNodes'],
+                        'searchResults' => $updates['searchResults']
+                    ]);
+                }
+                
+                // Update lastEventId if present
+                if (isset($updates['lastEventId'])) {
+                    $this->lastEventId = $updates['lastEventId'];
                 }
                 
                 // Sleep for the poll interval
@@ -497,7 +507,7 @@ class EventHandler {
             
             // Database message counter
             $this->databaseMessageCount++;
-            error_log("Database (database polling) events received: " . $this->databaseMessageCount);
+            error_log("SSE: Database polling events received: " . $this->databaseMessageCount);
         }
     }
     
@@ -507,71 +517,33 @@ class EventHandler {
      * @param array $events Events to process
      */
     private function processEvents($events) {
-        // Initialize updates array
-        $updates = [
-            'modifiedGames' => [],
-            'modifiedNodes' => [],
-            'searchResults' => []
-        ];
+        // We actually want to reuse the polling service with the lastEventId
+        // rather than passing in events directly
+        $updates = $this->pollingService->getUpdates(
+            $this->lastEventId,
+            $this->writerId, 
+            $this->rootStoryId,
+            $this->filters,
+            $this->search
+        );
         
-        // Pre-filter events to get unique IDs per table
-        $uniqueEvents = [];
-        foreach ($events as $event) {
-            $table = $event['related_table'];
-            $id = $event['related_id'];
-            
-            // For notifications, we need to check writer_id
-            if ($table === 'notification' && $event['writer_id'] !== $this->writerId) {
-                continue;
-            }
-            
-            // Keep only the first occurrence of each ID per table
-            if (!isset($uniqueEvents[$table][$id])) {
-                $uniqueEvents[$table][$id] = $event;
-            }
+        // Send notification updates if any
+        if (!empty($updates['notifications'])) {
+            $this->sendEvent('notificationUpdate', $updates['notifications']);
         }
         
-        // Process unique events
-        foreach ($uniqueEvents as $table => $tableEvents) {
-            foreach ($tableEvents as $id => $event) {
-                switch ($table) {
-                    case 'game':
-                        $gameUpdates = $this->gameModel->getGames(null, $this->filters, $id, $this->search);
-                        if (!empty($gameUpdates)) {
-                            $updates['modifiedGames'] = array_merge($updates['modifiedGames'], $gameUpdates);
-                        }
-                        break;
-                        
-                    case 'text':
-                        if ($this->rootStoryId) {
-                            $nodeData = $this->textModel->selectTexts($this->writerId, $id, false);
-                            if ($nodeData) {
-                                PermissionsService::addPermissions($nodeData, $this->writerId);
-                                $updates['modifiedNodes'][] = $nodeData;
-                            }
-                        }
-                        break;
-                        
-                    case 'notification':
-                        if ($this->writerId) {
-                            $notificationUpdates = $this->notificationModel->getNewNotifications(null, $id);
-                            if (!empty($notificationUpdates)) {
-                                $this->sendEvent('notificationUpdate', $notificationUpdates);
-                            }
-                        }
-                        break;
-                }
-            }
-        }
-        
-        // Add search results if needed
-        if ($this->search && $this->rootStoryId && (!empty($updates['modifiedNodes']) || !empty($updates['modifiedGames']))) {
-            $updates['searchResults'] = $this->getSearchResults();
-        }
-        
-        // Send update event if we have any updates
+        // Send other updates if any
         if (!empty($updates['modifiedGames']) || !empty($updates['modifiedNodes'])) {
-            $this->sendEvent('update', $updates);
+            $this->sendEvent('update', [
+                'modifiedGames' => $updates['modifiedGames'],
+                'modifiedNodes' => $updates['modifiedNodes'],
+                'searchResults' => $updates['searchResults']
+            ]);
+        }
+        
+        // Update lastEventId
+        if (isset($updates['lastEventId'])) {
+            $this->lastEventId = $updates['lastEventId'];
         }
     }
 

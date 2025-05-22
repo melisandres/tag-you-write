@@ -211,8 +211,11 @@ export class DataManager {
         let hasTreeUpdates = false;
 
         // search results first so that they are ready for other updates to consult
-        if (searchResults.length > 0) {
+        if (searchResults && searchResults.length > 0) {
+            console.log('Processing search results first:', searchResults.length, 'results');
             this.updateSearchResults(searchResults, currentlyViewedRootId, false);
+        } else {
+            console.log('No search results to process');
         }
 
         if (modifiedGames?.length > 0) {
@@ -224,6 +227,12 @@ export class DataManager {
         }
 
         if (modifiedNodes?.length > 0) {
+            console.log('Processing modifiedNodes with search context:', {
+                nodesCount: modifiedNodes.length,
+                hasSearchResults: !!this.cache.searchResults.nodes,
+                searchResultsCount: Object.keys(this.cache.searchResults.nodes || {}).length
+            });
+            
             this.updateTreeData(modifiedNodes, currentlyViewedRootId, false);
             // NOTHING SEEMS TO BE LISTENING FOR THIS EVENT
             //eventBus.emit('treeNodesModified', modifiedNodes);

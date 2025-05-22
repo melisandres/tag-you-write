@@ -54,46 +54,77 @@ export class ShelfUpdateManager {
 
   highlightShelfContent(container, searchTerm) {
     const searchResults = this.dataManager.getSearchResults();
-    if (!searchResults) return;
-
-    const nodes = container.querySelectorAll('.node');
-    console.log('nodes:', nodes);
+    if (!searchResults || !searchResults.nodes) return;
+    
+    // Handle both single node and multiple node containers
+    let nodes;
+    if (container.classList.contains('node')) {
+      nodes = [container];
+    } else {
+      nodes = container.querySelectorAll('.node');
+    }
+    
     nodes.forEach(node => {
-        const storyId = node.dataset.storyId;
-        const nodeData = searchResults.nodes?.[storyId];
-        
-        if (nodeData?.matches) {
-          if (nodeData.writingMatches || nodeData.noteMatches) {
-            node.classList.add('has-search-match');
-          }
-
-            // Highlight title if it matches
-            if (nodeData.titleMatches) {
-                const titleElement = node.querySelector('.title');
-                if (titleElement) {
-                    titleElement.innerHTML = this.highlightText(titleElement.textContent, searchTerm);
-                }
-            }
-
-            // Highlight writing or note if they match
-            if (nodeData.writingMatches || nodeData.noteMatches) {
-                const writingElement = node.querySelectorAll('.writing p');
-                if (writingElement.length > 0) {
-                    for (let i = 0; i < writingElement.length; i++) {
-                        writingElement[i].innerHTML = this.highlightText(writingElement[i].textContent, searchTerm);
-                    }
-                }
-            }
-
-            // Highlight if author matches
-            if (nodeData.writerMatches) {
-                const authorElement = node.querySelector('.author');
-                console.log("authorElement", authorElement)
-                if (authorElement) {
-                    authorElement.innerHTML = this.highlightText(authorElement.textContent, searchTerm);
-                }
-            }
+      const storyId = node.dataset.storyId;
+      const nodeData = searchResults.nodes?.[storyId];
+      
+      if (nodeData) {
+        // Add search match class
+        if (nodeData.writingMatches || nodeData.noteMatches) {
+          node.classList.add('has-search-match');
+        } else {
+          node.classList.remove('has-search-match');
         }
+
+        // Highlight title if it matches
+        if (nodeData.titleMatches) {
+          const titleElement = node.querySelector('.title');
+          if (titleElement) {
+            titleElement.innerHTML = this.highlightText(titleElement.textContent, searchTerm);
+          }
+        }
+
+        // Highlight writing if it matches
+        if (nodeData.writingMatches) {
+          // This is the critical part - filter out buttons and SVGs
+          const writingElement = node.querySelector('.writing');
+          if (writingElement) {
+            const paragraphs = Array.from(writingElement.querySelectorAll('p'))
+              .filter(p => !p.closest('button') && !p.closest('svg'));
+            
+            paragraphs.forEach(p => {
+              p.innerHTML = this.highlightText(p.textContent, searchTerm);
+            });
+          }
+        }
+        
+        // The note handling can also be simplified but keep the button exclusion
+        if (nodeData.noteMatches) {
+          const noteElement = node.querySelector('.note');
+          if (noteElement && !noteElement.closest('button')) {
+            const psPrefix = noteElement.querySelector('p');
+            const noteContent = noteElement.textContent.replace('P.S... ', '');
+            
+            noteElement.innerHTML = '';
+            
+            const newPsPrefix = document.createElement('p');
+            newPsPrefix.textContent = 'P.S... ';
+            noteElement.appendChild(newPsPrefix);
+            
+            const contentElement = document.createElement('span');
+            contentElement.innerHTML = this.highlightText(noteContent, searchTerm);
+            noteElement.appendChild(contentElement);
+          }
+        }
+
+        // Highlight author if it matches
+        if (nodeData.writerMatches) {
+          const authorElement = node.querySelector('.author');
+          if (authorElement) {
+            authorElement.innerHTML = this.highlightText(authorElement.textContent, searchTerm);
+          }
+        }
+      }
     });
   }
 
@@ -418,50 +449,110 @@ export class ShelfUpdateManager {
   // New method specifically for highlighting updated content
   highlightUpdatedContent(nodeElement, changes, searchTerm) {
     Object.entries(changes).forEach(([prop, value]) => {
-        let element;
-        switch(prop) {
-            case 'title':
-                element = nodeElement.querySelector('.title');
-                if (element) {
-                    element.innerHTML = this.highlightText(value, searchTerm);
-                }
-                break;
-            case 'writing':
-                const writingElements = nodeElement.querySelectorAll('.writing p');
-                writingElements.forEach(el => {
-                    el.innerHTML = this.highlightText(el.textContent, searchTerm);
-                });
-                break;
-            case 'note':
-                element = nodeElement.querySelector('.note');
-                if (element) {
-                    element.innerHTML = `<p>P.S... </p>${this.highlightText(value, searchTerm)}`;
-                }
-                break;
-        }
+      let element;
+      switch(prop) {
+        case 'title':
+          element = nodeElement.querySelector('.title');
+          if (element) {
+            element.innerHTML = this.highlightText(value, searchTerm);
+          }
+          break;
+        case 'writing':
+          // Keep this critical filtering logic
+          const writingElement = nodeElement.querySelector('.writing');
+          if (writingElement) {
+            const paragraphs = Array.from(writingElement.querySelectorAll('p'))
+              .filter(p => !p.closest('button') && !p.closest('svg'));
+            
+            paragraphs.forEach(el => {
+              el.innerHTML = this.highlightText(el.textContent, searchTerm);
+            });
+          }
+          break;
+        case 'note':
+          element = nodeElement.querySelector('.note');
+          if (element && !element.closest('button')) {
+            // Use a safer DOM-building approach
+            element.innerHTML = '';
+            
+            const psElement = document.createElement('p');
+            psElement.textContent = 'P.S... ';
+            element.appendChild(psElement);
+            
+            const contentElement = document.createElement('span');
+            contentElement.innerHTML = this.highlightText(value, searchTerm);
+            element.appendChild(contentElement);
+          }
+          break;
+      }
     });
   }
 
-  // TODO: This was suggested. Not sure why... look into it. 
   handleSearchUpdate(searchData) {
-    console.log("a method was suggested here... for applying search to shelf... but I think it's already being handled... I just need to make sure... so if you read this, and you see search isn't being updated.... what does that mean? it means you have a shelf open... and it has been changed... a text has been updated via polling, and some of the new text added corresponds to an active search term... then the newly added text would need to be highlighted where it matches, righ? ")
-    /* const container = document.querySelector('#showcase[data-showcase="shelf"]');
+    const container = document.querySelector('#showcase[data-showcase="shelf"]');
     if (!container) return;
 
-    const searchTerm = searchData.searchTerm;
+    const searchTerm = searchData.searchTerm || this.dataManager.getSearch();
     if (!searchTerm) {
-        eventBus.emit('removeSearchHighlights', container);
+        // Clear all search highlights if search term is empty
+        const nodes = container.querySelectorAll('.node');
+        nodes.forEach(node => {
+            node.classList.remove('has-search-match');
+            
+            // Reset any highlighted titles
+            const title = node.querySelector('.title');
+            if (title && title.innerHTML.includes('<mark>')) {
+                title.textContent = title.textContent;
+            }
+            
+            // Reset any highlighted content - carefully avoid buttons and SVG content
+            const writingElement = node.querySelector('.writing');
+            if (writingElement) {
+                // Only process paragraphs that aren't inside buttons or SVGs
+                const paragraphs = Array.from(writingElement.querySelectorAll('p'))
+                    .filter(p => !p.closest('button') && !p.closest('svg'));
+                
+                paragraphs.forEach(p => {
+                    if (p.innerHTML.includes('<mark>')) {
+                        p.textContent = p.textContent;
+                    }
+                });
+            }
+            
+            // Reset any highlighted notes, but skip any in buttons
+            const note = node.querySelector('.note:not(button .note)');
+            if (note && !note.closest('button') && note.innerHTML.includes('<mark>')) {
+                // Preserve the P.S... format
+                const psText = note.querySelector('p')?.textContent || 'P.S... ';
+                const noteContent = note.textContent.replace(psText, '');
+                
+                // Clear the note element content
+                while (note.firstChild) {
+                    note.removeChild(note.firstChild);
+                }
+                
+                // Rebuild the note structure properly
+                const psElement = document.createElement('p');
+                psElement.textContent = psText;
+                note.appendChild(psElement);
+                
+                // Add the note content without highlighting
+                const contentElement = document.createElement('span');
+                contentElement.textContent = noteContent;
+                note.appendChild(contentElement);
+            }
+            
+            // Reset any highlighted authors
+            const author = node.querySelector('.author');
+            if (author && author.innerHTML.includes('<mark>')) {
+                author.textContent = author.textContent;
+            }
+        });
         return;
     }
 
-    // Wait for search results before highlighting
-    const searchResults = this.dataManager.getSearchResults();
-    if (searchResults) {
-        eventBus.emit('highlightSearchMatches', {
-            container,
-            searchTerm
-        });
-    } */
+    // Apply search highlighting to all nodes
+    this.highlightShelfContent(container, searchTerm);
   }
 
   handleShelfGameUpdate(gameData) {

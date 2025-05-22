@@ -1,35 +1,86 @@
 # Event System Documentation
 
 ## Overview
-The event system is designed to track and broadcast various actions that occur within the application. It uses a combination of database storage and Redis for real-time event broadcasting.
+The event system tracks and broadcasts actions within the application using a three-tiered approach for real-time updates:
+
+1. **Redis Pub/Sub** (Primary method)
+2. **Server-Sent Events (SSE) Polling** (First fallback)
+3. **Frontend AJAX Polling** (Second fallback)
 
 ## Architecture
-- `EventService.php`: Main service class that handles event creation and processing
-- `EventConfig.php`: Configuration file that defines event types and their requirements
-- `RedisService.php`: Handles real-time event broadcasting through Redis
 
-## How Events Work
-1. An event is triggered by calling `EventService::createEvents()`
-2. The service validates the event data against configuration
-3. Events are stored in the database
-4. Events are published to Redis for real-time updates
+### Core Components
+- `EventService`: Creates events in the database and publishes to Redis
+- `EventConfig`: Defines event types and their configurations
+- `RedisManager`: Handles Redis connections and pub/sub operations
+- `RedisService`: Publishes events to appropriate Redis channels
+- `EventPollingService`: Shared service for both SSE and controller endpoints
+
+### Data Flow
+1. Controller action occurs (vote, publish, etc.)
+2. `EventService` creates database record(s) with:
+   - `related_table` (game, text, notification)
+   - `related_id` (specific record ID)
+   - `event_type` (descriptive label)
+3. If Redis available, event is published to appropriate channel
+4. Clients receive updates through one of three methods:
+   - Redis pub/sub subscription
+   - SSE polling fallback
+   - Frontend AJAX polling fallback
+
+## How Updates Are Processed
+
+### Key Concept: Table-Based Processing
+
+**Important**: While event types (ROOT_PUBLISH, VOTE_TOGGLE, etc.) provide context about what happened, the system actually processes updates based on:
+
+1. `related_table` - Which table was affected (game, text, notification)
+2. `related_id` - Which specific record to fetch
+
+This approach allows for efficient database queries and targeted updates.
+
+### Processing Flow
+1. Event created with related_table and related_id
+2. Client receives event through Redis or polling
+3. Client queries the specific related record using related_id
+4. UI updates with fresh data
+
+## Update Delivery Methods
+
+### 1. Redis Pub/Sub (Primary)
+- Real-time updates through persistent connection
+- Clients subscribe to specific channels:
+  - `games:updates`
+  - `texts:{rootStoryId}`
+  - `notifications:{writerId}`
+- `RedisManager` publishes events to these channels
+- No polling or database queries except on initial connection
+
+### 2. SSE Polling (First Fallback)
+- Used when Redis is unavailable
+- `EventPollingService` queries the events table first
+- Then selectively fetches related records only as needed
+- Long-running connection with periodic polls
+- Managed by `events.php`
+
+### 3. Frontend Polling (Second Fallback)
+- Used if SSE connection fails
+- Regular AJAX calls to controller endpoints
+- Uses the same `EventPollingService` as SSE
+- Configurable polling intervals
 
 ## Adding a New Event Type
 
 ### Step 1: Define Event Configuration
-Add your new event type to `EventConfig.php`. Each event type needs:
-- Required fields
-- Event definitions (what events to create)
-- Payload fields
+Add your new event type to `EventConfig.php`:
 
-Example:
 ```php
 'NEW_EVENT_TYPE' => [
     'required_fields' => ['field1', 'field2'],
     'events' => [
-        'table_name' => [
+        [
             'type' => 'event_type_name',
-            'table' => 'related_table',
+            'table' => 'related_table',  // Important! Determines how event is processed
             'payload_fields' => ['field1', 'field2']
         ]
     ]
@@ -37,44 +88,46 @@ Example:
 ```
 
 ### Step 2: Create Event
-To create your new event, call:
 ```php
 $eventService = new EventService();
 $eventService->createEvents('NEW_EVENT_TYPE', [
     'field1' => 'value1',
     'field2' => 'value2'
-], [
-    'user_id' => $userId,
-    'action' => 'action_name'
 ]);
 ```
 
-### Step 3: Handle Event (Optional)
-If you need to handle the event in real-time:
-1. Subscribe to Redis events
-2. Process the event payload
-3. Update your application state
-
 ## Event Types Reference
 
-### Current Event Types
-- `ROOT_PUBLISH`: When a root text is published
-- `CONTRIB_PUBLISH`: When a contribution is published
-- `NOTE_ADD`: When a note is added to text
-- `VOTE_TOGGLE`: When a vote is added/removed
-- `WINNING_VOTE`: When a text wins voting
-- `GAME_CLOSED`: When a game is closed
-- `NOTIFICATION_CREATED`: When a notification is created
+Current event types are primarily for logging and context, not for routing updates:
 
-### Event Payload Structure
-Each event contains:
-- `event_type`: Type of event
-- `related_table`: Table the event relates to
-- `related_id`: ID of the related record
-- `root_text_id`: ID of the root text
-- `writer_id`: ID of the user who triggered the event
-- `payload`: Event-specific data
-- `created_at`: Timestamp
+- `ROOT_PUBLISH`: Root text published
+- `CONTRIB_PUBLISH`: Contribution published
+- `NOTE_ADD`: Note added
+- `VOTE_TOGGLE`: Vote added/removed
+- `WINNING_VOTE`: Text won voting
+- `GAME_CLOSED`: Game closed
+- `NOTIFICATION_CREATED`: Notification created
+
+## Testing & Troubleshooting
+
+### Toggle Redis for Testing
+To test the fallback mechanisms, you can disable Redis:
+
+```php
+// In RedisManager.php
+RedisManager::$USE_REDIS = false;
+```
+
+### Common Issues
+- Redis connection failures
+- Missing event records
+- Updates appearing for one client but not others
+
+### Debugging
+Check error logs for:
+- "SSE:" prefix for SSE-related logs
+- "Redis:" prefix for Redis-related logs
+- "EventPollingService:" for polling-related logs
 
 ## Best Practices
 1. Always validate required fields before creating events
