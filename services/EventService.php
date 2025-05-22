@@ -17,6 +17,9 @@ class EventService {
     }
     
     public function createEvents($eventType, $data, $context) {
+        error_log("EventService: Starting event creation for type: $eventType");
+        error_log("EventService: Input data: " . json_encode($data));
+        
         $config = $this->eventConfig->getConfig($eventType);
         if (!$config) {
             error_log("Unknown event type: $eventType");
@@ -33,6 +36,7 @@ class EventService {
 
         // Get root_text_id
         $root_text_id = $this->getRootTextId($data, $eventType);
+        error_log("EventService: Root text ID: $root_text_id");
 
         // Create events based on configuration
         $success = true;
@@ -41,11 +45,17 @@ class EventService {
         // Only initialize RedisService if needed
         if (class_exists('RedisService')) {
             $redisService = new RedisService();
+            error_log("EventService: RedisService initialized");
         }
         
         foreach ($config['events'] as $eventConfig) {
+            error_log("EventService: Processing event config: " . json_encode($eventConfig));
+            
             $eventData = $this->prepareEventData($eventConfig, $data, $context, $root_text_id);
+            error_log("EventService: Prepared event data: " . json_encode($eventData));
+            
             $result = $this->eventModel->createEvent($eventData);
+            error_log("EventService: Database insert result: " . json_encode($result));
             
             // Check if result is an error array or false
             if (is_array($result) && isset($result['error'])) {
@@ -59,6 +69,8 @@ class EventService {
                 if ($redisService && $redisService->isAvailable()) {
                     // Add the event ID to the data
                     $eventData['id'] = $result;
+                    error_log("EventService: Publishing to Redis with event ID: $result");
+                    error_log("EventService: Full event data for Redis: " . json_encode($eventData));
                     $redisService->publishEvent($eventData);
                 }
             }

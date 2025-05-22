@@ -7,11 +7,6 @@
  * proper MIME type handling.
  */
 
-// TODO: Remove this once we have a proper debug system
-// Include debug hooks (if debug mode is enabled)
-if (isset($_GET['redis_debug']) && $_GET['redis_debug'] === '1') {
-    require_once(__DIR__ . '/../debug/redis-hooks.php');
-}
 
 // Start session before any output - this is critical for session continuation
 session_start();
@@ -207,29 +202,22 @@ class EventHandler {
      * @param mixed $data Event data (will be JSON encoded)
      */
     private function sendEvent($event, $data) {
-        // Generate or extract message ID
-        $messageId = null;
+        // Use event ID for duplicate prevention if available
+        $messageId = is_array($data) && isset($data['id']) ? $data['id'] : null;
         
-        // Extract message ID if it exists
-        if (is_array($data) && isset($data['id'])) {
-            $messageId = $data['id'];
-        } else {
-            // Generate an ID based on event type and related ID if available
-            $relatedId = is_array($data) && isset($data['related_id']) ? $data['related_id'] : '';
-            $messageId = $event . '_' . $relatedId . '_' . microtime(true);
+        if ($messageId && in_array($messageId, $this->sentMessageIds)) {
+            error_log("SSE: Skipping duplicate event ID: " . $messageId);
+            return;
         }
         
-        // Check if we've already sent this message to this client
-        if (in_array($messageId, $this->sentMessageIds)) {
-            return; // Skip sending duplicate
-        }
-        
-        // Add to sent messages
-        $this->sentMessageIds[] = $messageId;
-        
-        // Limit array size to prevent memory issues
-        if (count($this->sentMessageIds) > 1000) {
-            array_splice($this->sentMessageIds, 0, 500);
+        // Add to sent messages if we have an ID
+        if ($messageId) {
+            $this->sentMessageIds[] = $messageId;
+            
+            // Limit array size to prevent memory issues
+            if (count($this->sentMessageIds) > 1000) {
+                array_splice($this->sentMessageIds, 0, 500);
+            }
         }
         
         echo "event: $event\n";
@@ -303,15 +291,31 @@ class EventHandler {
         // Subscribe to channels - this is blocking and will run until connection is closed
         $this->redisManager->subscribe($channels, function($redis, $channel, $message) {
             try {
+                error_log("SSE Redis: Received message on channel: $channel with message: " . substr($message, 0, 100));
+                
                 // Process the received message
                 $data = json_decode($message, true);
                 if (!$data) {
-                    error_log("Invalid JSON: " . $message);
-                  }
-                
-                if (!$data) {
                     error_log("SSE Redis: Invalid JSON received: $message");
                     return;
+                }
+                
+                error_log("SSE Redis: Decoded message data: " . json_encode($data));
+                error_log("SSE Redis: IMPORTANT - Message contains id: " . ($data['id'] ?? 'none') . ", related_id: " . ($data['related_id'] ?? 'none'));
+                
+                // Use the event ID for duplicate prevention
+                $messageId = $data['id'];
+                
+                // Check if we've already processed this message
+                if (in_array($messageId, $this->sentMessageIds)) {
+                    error_log("SSE Redis: SKIPPING duplicate message ID: $messageId");
+                    return;
+                }
+                
+                // Add to processed messages
+                $this->sentMessageIds[] = $messageId;
+                if (count($this->sentMessageIds) > 1000) {
+                    array_splice($this->sentMessageIds, 0, 500);
                 }
 
                 $searchResults = [];
@@ -322,11 +326,9 @@ class EventHandler {
                 // Process based on channel
                 switch ($channel) {
                     case 'games:updates':
-                        error_log("SSE Redis: Received game update on channel: $channel");
-                        error_log("SSE Redis: Raw message data: " . json_encode($data));
-                        // Fetch complete game data using the received game ID
-                        if (isset($data['id'])) {
-                            $gameId = $data['id'];
+                        error_log("SSE Redis: Processing game update");
+                        if (isset($data['related_id'])) {
+                            $gameId = $data['related_id'];
                             error_log("SSE Redis: Fetching game data for ID: $gameId");
                             $gameUpdates = $this->gameModel->getGames(
                                 null, 
@@ -345,18 +347,20 @@ class EventHandler {
                             } else {
                                 error_log("SSE Redis: Could not find game data for ID: $gameId");
                             }
-                        } else {
-                            error_log("SSE Redis: Received game update without ID: " . json_encode($data));
                         }
                         break;
                         
                     case 'texts:' . $this->rootStoryId:
-                        // Fetch complete text data using the received text ID
-                        if (isset($data['id'])) {
-                            $textId = $data['id'];
+                        error_log("SSE Redis: Processing text update");
+                        if (isset($data['related_id'])) {
+                            $textId = $data['related_id'];
+                            error_log("SSE Redis: Attempting to fetch text data for ID: $textId");
+                            error_log("SSE Redis: Using writer ID: " . ($this->writerId ?? 'null'));
+                            
                             $nodeData = $this->textModel->selectTexts($this->writerId, $textId, false);
                             
                             if ($nodeData) {
+                                error_log("SSE Redis: Successfully found text data");
                                 // Apply permissions to the node
                                 if (class_exists('PermissionsService')) {
                                     PermissionsService::addPermissions($nodeData, $this->writerId);
@@ -367,48 +371,46 @@ class EventHandler {
                                     'modifiedNodes' => [$nodeData],
                                     'searchResults' => $this->search ? $searchResults : []
                                 ]);
+                                error_log("SSE Redis: Sent update event to client");
                             } else {
-                                error_log("SSE Redis: Could not find text data for ID: $textId");
+                                error_log("SSE Redis: Could not find text data for text_id=$textId (event_id=" . $data['id'] . ")");
                             }
                         } else {
-                            error_log("SSE Redis: Received text update without ID: " . json_encode($data));
+                            error_log("SSE Redis: Missing related_id in message: " . json_encode($data));
                         }
                         break;
                         
                     case 'notifications:' . $this->writerId:
-                        // Notification for current user
-                        // $data should contain at least the notification id
-                        if (isset($data['id'])) {
-                            $notificationId = $data['id'];
-                            // Fetch the complete notification data with all joins
+                        error_log("SSE Redis: Processing notification update");
+                        if (isset($data['related_id'])) {
+                            $notificationId = $data['related_id'];
+                            error_log("SSE Redis: Fetching notification data for ID: $notificationId");
                             $notificationUpdates = $this->notificationModel->getNewNotifications(null, $notificationId);
                             
                             if (!empty($notificationUpdates)) {
+                                error_log("SSE Redis: Found notification data, sending update");
                                 $this->sendEvent('notificationUpdate', $notificationUpdates);
                             } else {
                                 error_log("SSE Redis: Could not find notification data for ID: $notificationId");
                             }
-                        } else {
-                            error_log("SSE Redis: Received notification without ID: " . json_encode($data));
-                            $this->sendEvent('notificationUpdate', [$data]); // Fallback to sending original data
                         }
                         break;
-                        
-                    default:
-                        error_log("SSE Redis: Received message on unexpected channel: $channel");
                 }
+                
+                // Update last event ID if present in the message
+                if (isset($data['id'])) {
+                    $this->lastEventId = $data['id'];
+                    error_log("SSE Redis: Updated lastEventId to: " . $this->lastEventId);
+                }
+                
+                // Redis message counter
+                $this->redisMessageCount++;
+                error_log("SSE Redis: Total messages received: " . $this->redisMessageCount);
+                
             } catch (\Exception $e) {
                 error_log("SSE Redis: Error processing message: " . $e->getMessage());
+                error_log("SSE Redis: Error trace: " . $e->getTraceAsString());
             }
-            
-            // Update last event ID if present in the message
-            if (isset($data['id'])) {
-                $this->lastEventId = $data['id'];
-            }
-            
-            // Redis message counter
-            $this->redisMessageCount++;
-            error_log("Redis messages received: " . $this->redisMessageCount);
         });
     }
     
@@ -512,59 +514,57 @@ class EventHandler {
             'searchResults' => []
         ];
         
-        // Process each event
-        foreach ($events as $eventData) {
-            // Process based on the event's related table
-            switch ($eventData['related_table']) {
-                case 'game':
-                    // Get game data using Game model
-                    $gameId = $eventData['related_id'];
-                    
-                    $gameUpdates = $this->gameModel->getGames(null, $this->filters, $gameId, $this->search);
-                    if (!empty($gameUpdates)) {
-                        $updates['modifiedGames'] = array_merge($updates['modifiedGames'], $gameUpdates);
-                    }
-                    break;
-                    
-                case 'text':
-                    // Get text/node data using Text model
-                    if ($this->rootStoryId) {
-                        $textId = $eventData['related_id'];
-                        
-                        $nodeData = $this->textModel->selectTexts($this->writerId, $textId, false);
-                        if ($nodeData) {
-                            // Apply permissions to the node
-                            PermissionsService::addPermissions($nodeData, $this->writerId);
-                            $updates['modifiedNodes'][] = $nodeData;
-                        }
-                    }
-                    break;
-                    
-                case 'notification':
-                    // Skip notification processing entirely for anonymous users
-                    if (!$this->writerId) {
-                        break;
-                    }
-                    
-                    // Get notification data directly from its ID
-                    $notificationId = $eventData['related_id'];
-                    $eventWriterId = $eventData['writer_id'];
-                    
-                    // SECURITY: Only process notifications meant for the authenticated user
-                    // Always use the session user ID, never trust event writer_id alone
-                    if ($eventWriterId == $this->writerId) {
-                        // This should get the notification if it exists
-                        $notificationUpdates = $this->notificationModel->getNewNotifications(null, $notificationId);
-                        
-                        if (!empty($notificationUpdates)) {
-                            $this->sendEvent('notificationUpdate', $notificationUpdates);
-                        }
-                    }
-                    break;
+        // Pre-filter events to get unique IDs per table
+        $uniqueEvents = [];
+        foreach ($events as $event) {
+            $table = $event['related_table'];
+            $id = $event['related_id'];
+            
+            // For notifications, we need to check writer_id
+            if ($table === 'notification' && $event['writer_id'] !== $this->writerId) {
+                continue;
+            }
+            
+            // Keep only the first occurrence of each ID per table
+            if (!isset($uniqueEvents[$table][$id])) {
+                $uniqueEvents[$table][$id] = $event;
             }
         }
         
-        // Add search results if there's an active search term and we have node updates
+        // Process unique events
+        foreach ($uniqueEvents as $table => $tableEvents) {
+            foreach ($tableEvents as $id => $event) {
+                switch ($table) {
+                    case 'game':
+                        $gameUpdates = $this->gameModel->getGames(null, $this->filters, $id, $this->search);
+                        if (!empty($gameUpdates)) {
+                            $updates['modifiedGames'] = array_merge($updates['modifiedGames'], $gameUpdates);
+                        }
+                        break;
+                        
+                    case 'text':
+                        if ($this->rootStoryId) {
+                            $nodeData = $this->textModel->selectTexts($this->writerId, $id, false);
+                            if ($nodeData) {
+                                PermissionsService::addPermissions($nodeData, $this->writerId);
+                                $updates['modifiedNodes'][] = $nodeData;
+                            }
+                        }
+                        break;
+                        
+                    case 'notification':
+                        if ($this->writerId) {
+                            $notificationUpdates = $this->notificationModel->getNewNotifications(null, $id);
+                            if (!empty($notificationUpdates)) {
+                                $this->sendEvent('notificationUpdate', $notificationUpdates);
+                            }
+                        }
+                        break;
+                }
+            }
+        }
+        
+        // Add search results if needed
         if ($this->search && $this->rootStoryId && (!empty($updates['modifiedNodes']) || !empty($updates['modifiedGames']))) {
             $updates['searchResults'] = $this->getSearchResults();
         }
