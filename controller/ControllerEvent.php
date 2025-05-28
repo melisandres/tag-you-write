@@ -3,7 +3,7 @@ RequirePage::model('Event');
 RequirePage::model('Game');
 RequirePage::model('Text');
 RequirePage::model('Notification');
-RequirePage::service('EventPollingService');
+RequirePage::service('DataFetchService');
 
 class ControllerEvent extends Controller {
 
@@ -45,7 +45,7 @@ class ControllerEvent extends Controller {
         error_log("ControllerEvent: lastTreeCheck=$lastTreeCheck, lastGameCheck=$lastGameCheck");
         
         // Use the service to get updates
-        $pollingService = new EventPollingService();
+        $pollingService = new DataFetchService();
         $updates = $pollingService->getUpdates(
             $lastEventId,
             $currentUserId,
