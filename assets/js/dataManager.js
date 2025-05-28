@@ -832,15 +832,10 @@ export class DataManager {
             const normalized = this.normalizeGameData(game);
             const existingGame = this.cache.games.get(gameId);
             
-            if (existingGame) {
-                const wasJoined = existingGame.data.hasJoined;
-                const isNowJoined = normalized.hasJoined;
-                const wasOpen = String(existingGame.data.openForChanges) === '1';
-                const isNowClosed = String(normalized.openForChanges) === '0';
-                if (wasOpen && isNowClosed || !wasJoined && isNowJoined) {
-                    console.log(`Game ${normalized.text_id} was closed or joined, requesting full tree update`);
-                    this.handleEntireTreeUpdate(gameId, normalized.text_id);
-                }
+            const updateReason = this.checkForPermissionUpdates(existingGame, normalized);
+            if (updateReason) {
+                console.log(`Game ${normalized.text_id} ${updateReason}, requesting permission update`);
+                this.handleEntireTreeUpdate(gameId, normalized.text_id);
             }
         });
 
@@ -879,19 +874,9 @@ export class DataManager {
             });
             
             if (existingGame) {
-                // Convert values to strings and compare
-                const wasOpen = existingGame.data.open_for_changes;
-                const isNowClosed = normalized.open_for_changes;
-                const wasJoined = existingGame.data.hasJoined;
-                const isNowJoined = normalized.hasJoined;
-
-                console.log('wasOpen', wasOpen);
-                console.log('isNowClosed', isNowClosed);
-                console.log('wasJoined', wasJoined);
-                console.log('isNowJoined', isNowJoined);
-                
-                if ((wasOpen && !isNowClosed) || (!wasJoined && isNowJoined)) {
-                    // Game was just closed - or user joined a game : update the entire tree
+                const updateReason = this.checkForPermissionUpdates(existingGame, normalized);
+                if (updateReason) {
+                    console.log(`Game ${normalized.text_id} ${updateReason}, requesting permission update`);
                     this.handleEntireTreeUpdate(gameId, normalized.text_id);
                 }
                 
@@ -1258,5 +1243,26 @@ export class DataManager {
         
         // Fallback to default
         return 'en';
+    }
+
+    /**
+     * Check if game state changes require permission updates
+     * Returns the reason for update if needed, null otherwise
+     */
+    checkForPermissionUpdates(existingGame, newGameData) {
+        if (!existingGame) return null;
+        
+        const wasJoined = existingGame.data.hasJoined;
+        const isNowJoined = newGameData.hasJoined;
+        const wasOpen = String(existingGame.data.openForChanges) === '1';
+        const isNowClosed = String(newGameData.openForChanges) === '0';
+        
+        if (wasOpen && isNowClosed) {
+            return 'game closed';
+        } else if (!wasJoined && isNowJoined) {
+            return 'user joined game';
+        }
+        
+        return null;
     }
 }
