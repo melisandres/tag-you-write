@@ -22,7 +22,7 @@ class Writer extends Crud{
 
         $sql = "SELECT * FROM $this->table WHERE email = :$email";
 
-        $stmt = $this->prepare($sql);
+        $stmt = $this->pdo->prepare($sql);
         $stmt->bindValue(":$email", $email);
         $stmt->execute();
 
@@ -36,7 +36,7 @@ class Writer extends Crud{
 
     public function checkWriter($email, $password){
         $sql = "SELECT * FROM $this->table WHERE email = ?";
-        $stmt = $this->prepare($sql);
+        $stmt = $this->pdo->prepare($sql);
         try {
             $stmt->execute(array($email));
         } catch (PDOException $e) {

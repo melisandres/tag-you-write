@@ -134,7 +134,7 @@
          $sql .= " ORDER BY hasContributed DESC";
      }
       
-      $stmt = $this->prepare($sql);
+      $stmt = $this->pdo->prepare($sql);
       $stmt->bindValue(':loggedInWriterId', $loggedInWriterId);
 
       if ($searchTerm) {
@@ -164,7 +164,7 @@
       $sql = "SELECT DISTINCT writer_id 
                FROM text 
                WHERE game_id = :game_id";
-      $stmt = $this->prepare($sql);
+      $stmt = $this->pdo->prepare($sql);
       $stmt->bindValue(':game_id', $game_id);
       $stmt->execute();
       return $stmt->fetchAll();
@@ -274,7 +274,7 @@
 
       //TODO: I changed the lastCheck verification from = to >=... and we need to see if this solves the issue of sometimes receiving a changed game that is 'open for changes' when it should be closed... possibly because the last vote is registering a change within a millisecond from the closing of the game, in another sql query... if they clock at the same time... then this will fix it... if they don't... I may have to combine the queries, so that ending a game executes all of the changes at once, ensuring that polling won't load just half a change... or I need to fingure out another solution. 
 
-      $stmt = $this->prepare($sql);
+      $stmt = $this->pdo->prepare($sql);
       $stmt->bindValue(':lastCheck', $lastCheck);
       if ($searchTerm) {
          $stmt->bindValue(':searchTerm', '%' . $searchTerm . '%');
@@ -295,95 +295,16 @@
 
    public function selectGameId($rootId) {
       $sql = "SELECT game_id FROM text WHERE id = :rootId";
-      $stmt = $this->prepare($sql);
+      $stmt = $this->pdo->prepare($sql);
       $stmt->bindValue(':rootId', $rootId);
       $stmt->execute();
       $result = $stmt->fetchColumn();
       return $result;
    }
 
-  /* public function getModifiedSince($lastCheck) {
-   // Debug timestamp comparison
-   $debugSql = "SELECT g.id, 
-          g.modified_at,
-          :lastCheck as check_time,
-          CASE 
-              WHEN CAST(g.modified_at AS DATETIME) > CAST(:lastCheck AS DATETIME) THEN 'YES'
-              ELSE 'NO'
-          END as is_newer,
-          TIMESTAMPDIFF(SECOND, CAST(:lastCheck AS DATETIME), CAST(g.modified_at AS DATETIME)) as seconds_diff
-          FROM game g
-          WHERE g.modified_at IS NOT NULL";
-   
-   $debugStmt = $this->prepare($debugSql);
-   $debugStmt->bindValue(':lastCheck', $lastCheck);
-   $debugStmt->execute();
-   error_log("Timestamp comparison debug: " . print_r($debugStmt->fetchAll(PDO::FETCH_ASSOC), true));
-
-   // Debug the basic game query first
-   $basicSql = "SELECT g.id, g.prompt, g.modified_at
-                FROM game g
-                WHERE CAST(g.modified_at AS DATETIME) > CAST(:lastCheck AS DATETIME)";
-   
-   $basicStmt = $this->prepare($basicSql);
-   $basicStmt->bindValue(':lastCheck', $lastCheck);
-   $basicStmt->execute();
-   error_log("Basic game query results: " . print_r($basicStmt->fetchAll(PDO::FETCH_ASSOC), true));
-
-   // Now try with the text join
-   $sql = "SELECT g.id, g.prompt, g.modified_at, g.open_for_changes,
-           t.id as text_id, t.title, t.writer_id
-           FROM game g
-           LEFT JOIN text t ON g.id = t.game_id AND t.parent_id IS NULL
-           WHERE CAST(g.modified_at AS DATETIME) > CAST(:lastCheck AS DATETIME)";
-   
-   error_log("Full SQL query: " . $sql);
-   error_log("lastCheck value: " . $lastCheck);
-   
-   $stmt = $this->prepare($sql);
-   $stmt->bindValue(':lastCheck', $lastCheck);
-   $stmt->execute();
-   
-   $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-   
-   if (!empty($results)) {
-       foreach ($results as &$game) {
-           if ($game['text_id']) {
-               // Get text count
-               $textCountSql = "SELECT COUNT(*) FROM text WHERE parent_id = :text_id";
-               $textStmt = $this->prepare($textCountSql);
-               $textStmt->bindValue(':text_id', $game['text_id']);
-               $textStmt->execute();
-               $game['text_count'] = (int)$textStmt->fetchColumn();
-
-               // Get seen count
-               $seenCountSql = "SELECT COUNT(*) 
-                               FROM text_seen ts 
-                               INNER JOIN text child ON child.parent_id = :text_id 
-                               WHERE ts.text_id = child.id
-                               AND ts.writer_id = :writer_id";
-               $seenStmt = $this->prepare($seenCountSql);
-               $seenStmt->bindValue(':text_id', $game['text_id']);
-               $seenStmt->bindValue(':writer_id', isset($_SESSION['writer_id']) ? $_SESSION['writer_id'] : 0);
-               $seenStmt->execute();
-               $game['seen_count'] = (int)$textStmt->fetchColumn();
-               // Calculate unseen count
-               $game['unseen_count'] = $game['text_count'] - $game['seen_count'];
-            } else {
-               $game['text_count'] = 0;
-               $game['seen_count'] = 0;
-               $game['unseen_count'] = 0;
-            }
-      }
-   }
-   error_log("Final results: " . print_r($results, true));
-   return $results;
-} */
-
-
    public function getRootText($game_id) {
       $sql = "SELECT root_text_id FROM game WHERE id = :game_id";
-      $stmt = $this->prepare($sql);
+      $stmt = $this->pdo->prepare($sql);
       $stmt->bindValue(':game_id', $game_id);
       $stmt->execute();
       return $stmt->fetchColumn();

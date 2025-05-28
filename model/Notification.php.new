@@ -26,7 +26,7 @@ class Notification extends Crud {
                 WHERE n.writer_id = :writer_id
                 ORDER BY n.created_at $order";
                 
-        $stmt = $this->prepare($sql);
+        $stmt = $this->pdo->prepare($sql);
         $stmt->bindValue(':writer_id', $writer_id);
         $stmt->execute();
         $results = $stmt->fetchAll();
@@ -60,7 +60,7 @@ class Notification extends Crud {
         
         $sql .= " ORDER BY n.created_at ASC";
         
-        $stmt = $this->prepare($sql);
+        $stmt = $this->pdo->prepare($sql);
         $stmt->bindValue(':writer_id', $writer_id);
         if ($lastCheck !== null) {
             $stmt->bindValue(':lastCheck', $lastCheck);
@@ -91,7 +91,7 @@ class Notification extends Crud {
             $sql .= " AND n.game_id = :game_id";
         }
         
-        $stmt = $this->prepare($sql);
+        $stmt = $this->pdo->prepare($sql);
         $stmt->bindValue(':writer_id', $writer_id);
     
         if ($game_id !== NULL) {
@@ -114,7 +114,7 @@ class Notification extends Crud {
     public function markNotificationAsSeen($user_id, $game_id) {
         $sql = "UPDATE $this->table SET seen_at = :seen_at 
                 WHERE writer_id = :writer_id AND game_id = :game_id ";
-        $stmt = $this->prepare($sql);
+        $stmt = $this->pdo->prepare($sql);
         $stmt->bindValue(':writer_id', $user_id);
         $stmt->bindValue(':game_id', $game_id);
         $stmt->bindValue(':seen_at', date('Y-m-d H:i:s'));

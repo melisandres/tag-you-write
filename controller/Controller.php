@@ -7,6 +7,22 @@ abstract class Controller{
         // No need to require EventManager anymore
     }
 
+    /**
+     * Get notifications for the current user
+     * Helper method for controllers that render templates with headers
+     * 
+     * @return array Array of notifications for the current user
+     */
+    protected function getNotifications() {
+        $currentUserId = $_SESSION['writer_id'] ?? null;
+        if ($currentUserId) {
+            RequirePage::model('Notification');
+            $notification = new Notification;
+            return $notification->getNotifications();
+        }
+        return [];
+    }
+
     protected function addPermissions(&$node, $currentUserId, $hierarchy = []) {
         RequirePage::service('PermissionsService');
         return PermissionsService::addPermissions($node, $currentUserId, $hierarchy);

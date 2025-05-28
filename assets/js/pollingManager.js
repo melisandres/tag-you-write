@@ -40,6 +40,8 @@ export class PollingManager {
             const rootStoryId = this.dataManager.getCurrentViewedRootStoryId();
             const filters = this.dataManager.getFilters();
             const search = this.dataManager.getSearch();
+            const lastTreeCheck = this.dataManager.getLastTreeCheck();
+            const lastGameCheck = this.dataManager.getLastGameCheck();
             
             // Use the correct route format for your controller
             const endpoint = window.i18n.createUrl('event/getUpdates');
@@ -53,6 +55,7 @@ export class PollingManager {
             if (rootStoryId) url.searchParams.append('rootStoryId', rootStoryId);
             if (search) url.searchParams.append('search', search);
             if (filters) url.searchParams.append('filters', JSON.stringify(filters));
+            if (lastGameCheck) url.searchParams.append('lastGameCheck', lastGameCheck);
             
             // Add lastTreeCheck parameter to limit search results to newer nodes
             const cachedTree = this.dataManager.getTree(rootStoryId);

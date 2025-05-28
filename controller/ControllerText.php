@@ -35,13 +35,7 @@ class ControllerText extends Controller{
         $allGames = $game->getGames($sort, $filters);
 
         // Get the notifications
-        $currentUserId = $_SESSION['writer_id'] ?? null;
-        if ($currentUserId){
-            $notification = new Notification;
-            $notifications = $notification->getNotifications();
-        }else{
-            $notifications = [];
-        }
+        $notifications = $this->getNotifications();
 
         // Send both the rendered data and the complete dataset
         Twig::render('text-index.php', [
@@ -55,7 +49,12 @@ class ControllerText extends Controller{
 
     public function collab($rootId = null) {
         if ($rootId === null) {
-            Twig::render('home-error.php', ['message' => "error.no_game_specified"]);
+            $notifications = $this->getNotifications();
+            Twig::render('home-error.php', [
+                'message' => "error.no_game_specified",
+                'notifications' => $notifications,
+                'notificationsData' => json_encode($notifications)
+            ]);
             exit();
         }
 
@@ -64,7 +63,12 @@ class ControllerText extends Controller{
         $gameId = $text->selectGameId($rootId);
 
         if (!$gameId) {
-            Twig::render('home-error.php', ['message' => "error.text_not_found"]);
+            $notifications = $this->getNotifications();
+            Twig::render('home-error.php', [
+                'message' => "error.text_not_found",
+                'notifications' => $notifications,
+                'notificationsData' => json_encode($notifications)
+            ]);
             exit();
         }
 
@@ -74,7 +78,12 @@ class ControllerText extends Controller{
         $gameData = $game->getGames(null, $filters, $gameId);
 
         if (empty($gameData)) {
-            Twig::render('home-error.php', ['message' => "error.game_not_found"]);
+            $notifications = $this->getNotifications();
+            Twig::render('home-error.php', [
+                'message' => "error.game_not_found",
+                'notifications' => $notifications,
+                'notificationsData' => json_encode($notifications)
+            ]);
             exit();
         }
 
@@ -82,8 +91,7 @@ class ControllerText extends Controller{
         $treeData = $this->getTree($rootId);
 
         // Get the notifications
-        $notification = new Notification;
-        $notifications = $notification->getNotifications();
+        $notifications = $this->getNotifications();
 
         // Render the collaboration view
         Twig::render('text-collab.php', [
@@ -246,7 +254,12 @@ class ControllerText extends Controller{
     public function create(){
         //available only to those logged in (ie: writers)
         CheckSession::sessionAuth();
-        Twig::render('text-create.php', ['data' => []]);
+        $notifications = $this->getNotifications();
+        Twig::render('text-create.php', [
+            'data' => [],
+            'notifications' => $notifications,
+            'notificationsData' => json_encode($notifications)
+        ]);
 
         // TODO: it's ok to have access to all the writers... for when writers can choose who to play with.
 /*         $writer = new Writer;
@@ -471,7 +484,12 @@ class ControllerText extends Controller{
 
         //here, you check if the id doesn't exist, or if it's null
         if($id == null || !$selectId){
-            Twig::render('home-error.php', ['message'=> "error.game_does_not_exist"]);
+            $notifications = $this->getNotifications();
+            Twig::render('home-error.php', [
+                'message'=> "error.game_does_not_exist",
+                'notifications' => $notifications,
+                'notificationsData' => json_encode($notifications)
+            ]);
             exit;
         }
 
@@ -487,7 +505,14 @@ class ControllerText extends Controller{
             $isParent = true;
         }
 
-        Twig::render('text-show.php', ['text' => $selectId, 'keywords'=> $keywords, 'isParent' => $isParent]);
+        $notifications = $this->getNotifications();
+        Twig::render('text-show.php', [
+            'text' => $selectId, 
+            'keywords'=> $keywords, 
+            'isParent' => $isParent,
+            'notifications' => $notifications,
+            'notificationsData' => json_encode($notifications)
+        ]);
     }
 
 
@@ -509,7 +534,12 @@ class ControllerText extends Controller{
         $textId = $_POST['id'] ?? $_GET['id'] ?? null;
         
         if (!$textId) {
-            Twig::render('home-error.php', ['message'=> "error.no_text_id_provided"]);
+            $notifications = $this->getNotifications();
+            Twig::render('home-error.php', [
+                'message'=> "error.no_text_id_provided",
+                'notifications' => $notifications,
+                'notificationsData' => json_encode($notifications)
+            ]);
             exit();
         }
 
@@ -519,7 +549,12 @@ class ControllerText extends Controller{
         
         // Check if text data was found
         if (!$textData) {
-            Twig::render('home-error.php', ['message'=> "error.text_not_found"]);
+            $notifications = $this->getNotifications();
+            Twig::render('home-error.php', [
+                'message'=> "error.text_not_found",
+                'notifications' => $notifications,
+                'notificationsData' => json_encode($notifications)
+            ]);
             exit();
         }
         
@@ -528,7 +563,12 @@ class ControllerText extends Controller{
 
         // Check user's permission to edit (myText && openForChanges && (draft || incomplete_draft)) 
         if (!Permissions::canEdit($textData, $currentWriterId) && !Permissions::canAddNote($textData, $currentWriterId)) {
-            Twig::render('home-error.php', ['message'=> "error.permission_denied_edit"]);
+            $notifications = $this->getNotifications();
+            Twig::render('home-error.php', [
+                'message'=> "error.permission_denied_edit",
+                'notifications' => $notifications,
+                'notificationsData' => json_encode($notifications)
+            ]);
             exit();
         }
 
@@ -547,9 +587,16 @@ class ControllerText extends Controller{
         $textData["keywords"] = $cleanKeywordString;
         $textData["lastKeywords"] = $cleanKeywordString;
 
+        $notifications = $this->getNotifications();
+
         if ($status == 'published') {
             // Render the view for adding notes to published texts
-            Twig::render('text-note-edit.php', ['data' => $textData, 'keywords' => $keywords]);
+            Twig::render('text-note-edit.php', [
+                'data' => $textData, 
+                'keywords' => $keywords,
+                'notifications' => $notifications,
+                'notificationsData' => json_encode($notifications)
+            ]);
 
         }elseif($status == 'draft' || $status == 'incomplete_draft'){
             // Get the some parent data, IF this is not a root text
@@ -563,7 +610,11 @@ class ControllerText extends Controller{
             }
 
             // Send it all to the form
-            Twig::render('text-create.php', ['data' => $textData]);
+            Twig::render('text-create.php', [
+                'data' => $textData,
+                'notifications' => $notifications,
+                'notificationsData' => json_encode($notifications)
+            ]);
         }
     }
 
@@ -983,7 +1034,12 @@ class ControllerText extends Controller{
 
         // Check user's permission to iterate (myText && openForChange && !isDraft)
         if (!Permissions::canIterate($parentData, $currentWriterId)) {
-            Twig::render('home-error.php', ['message'=> "error.permission_denied_iterate"]);
+            $notifications = $this->getNotifications();
+            Twig::render('home-error.php', [
+                'message'=> "error.permission_denied_iterate",
+                'notifications' => $notifications,
+                'notificationsData' => json_encode($notifications)
+            ]);
             exit();
         }
 
@@ -1020,8 +1076,13 @@ class ControllerText extends Controller{
             'game_title' => $parentData['game_title']
         ];
 
+        $notifications = $this->getNotifications();
         // Send it all to the form
-        Twig::render('text-create.php', ['data' => $data]);
+        Twig::render('text-create.php', [
+            'data' => $data,
+            'notifications' => $notifications,
+            'notificationsData' => json_encode($notifications)
+        ]);
     }
 
     // Validate the text data 

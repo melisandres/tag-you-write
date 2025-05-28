@@ -9,7 +9,7 @@ class TextStatus extends Crud{
 
     public function selectStatusByName($statusName) {
         $sql = "SELECT id FROM $this->table WHERE status = :name";
-        $stmt = $this->prepare($sql);
+        $stmt = $this->pdo->prepare($sql);
         $stmt->bindValue(':name', $statusName);
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);

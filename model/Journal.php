@@ -19,7 +19,7 @@
                 ON $this->table.writer_id = writer.id
                 ORDER BY journal.date DESC";
 
-        $stmt = $this->query($sql);
+        $stmt = $this->pdo->query($sql);
         $stmt->execute();
 
         return $stmt->fetchAll();

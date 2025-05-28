@@ -10,11 +10,20 @@ class ControllerProduit extends Controller {
     public function create(){
         if(isSet($_SESSION['fingerPrint'])){
             if($_SESSION['privilege'] == 1 || $_SESSION['privilege'] == 2){
-                Twig::render('produit-create.php');
+                $notifications = $this->getNotifications();
+                Twig::render('produit-create.php', [
+                    'notifications' => $notifications,
+                    'notificationsData' => json_encode($notifications)
+                ]);
                 return;
             }
         } else{
-            Twig::render('login.php', ['message'=> "You must be logged in to access this area"]);
+            $notifications = $this->getNotifications();
+            Twig::render('login.php', [
+                'message'=> "You must be logged in to access this area",
+                'notifications' => $notifications,
+                'notificationsData' => json_encode($notifications)
+            ]);
             return;
         }
     }
@@ -37,7 +46,13 @@ class ControllerProduit extends Controller {
             RequirePage::redirect('produit/create');
         }else{
             $errors = $val->displayErrors();
-            Twig::render('produit-create.php', ['errors' => $errors, 'data'=>$_POST]);
+            $notifications = $this->getNotifications();
+            Twig::render('produit-create.php', [
+                'errors' => $errors, 
+                'data'=>$_POST,
+                'notifications' => $notifications,
+                'notificationsData' => json_encode($notifications)
+            ]);
         };
 
     }

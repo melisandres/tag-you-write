@@ -23,7 +23,7 @@ class TextHasKeyword extends Crud{
             keyword_id = VALUES(keyword_id),
             text_id = VALUES(text_id);";
 
-        $stmt = $this->prepare($sql);
+        $stmt = $this->pdo->prepare($sql);
 
         foreach ($data as $key => $value) {
             $stmt->bindValue(":$key", $value);
@@ -31,7 +31,7 @@ class TextHasKeyword extends Crud{
         $stmt->bindValue(":$key", $value);
 
         if($stmt->execute()){
-            return $this->lastInsertId();
+            return $this->pdo->lastInsertId();
         }else{
             print_r($stmt->errorInfo());
         }
@@ -45,7 +45,7 @@ class TextHasKeyword extends Crud{
                     WHERE word = :word;
                     AND text_has_keyword.text_id = :id;";
     
-            $stmt = $this->prepare($sql); 
+            $stmt = $this->pdo->prepare($sql); 
             $stmt->bindValue(":word", $word);
             $stmt->bindValue(":id", $id);
             $stmt->execute(); 

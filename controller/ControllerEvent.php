@@ -37,9 +37,12 @@ class ControllerEvent extends Controller {
         $rootStoryId = isset($_GET['rootStoryId']) ? $_GET['rootStoryId'] : null;
         $filters = isset($_GET['filters']) ? json_decode($_GET['filters'], true) : [];
         $search = isset($_GET['search']) ? $_GET['search'] : '';
+        $lastTreeCheck = isset($_GET['lastTreeCheck']) ? $_GET['lastTreeCheck'] : null;
+        $lastGameCheck = isset($_GET['lastGameCheck']) ? $_GET['lastGameCheck'] : null;
         
         // Log parameters for debugging
         error_log("ControllerEvent: getUpdates parameters - lastEventId=$lastEventId, currentUserId=$currentUserId, rootStoryId=$rootStoryId, search=$search");
+        error_log("ControllerEvent: lastTreeCheck=$lastTreeCheck, lastGameCheck=$lastGameCheck");
         
         // Use the service to get updates
         $pollingService = new EventPollingService();
@@ -48,7 +51,9 @@ class ControllerEvent extends Controller {
             $currentUserId,
             $rootStoryId,
             $filters,
-            $search
+            $search,
+            $lastTreeCheck,
+            $lastGameCheck
         );
         
         // Return the updates as JSON

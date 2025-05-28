@@ -6,6 +6,13 @@
     <meta name="user" data-user-id="{{ session.writer_id ? session.writer_id : 'null' }}" data-guest="{{ guest ? 'true' : 'false' }}">
     <meta name="base-url" data-base-url="{{ path }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    {% if not guest %}
+        <!-- Store the notifications data for initial load -->
+        <script type="application/json" id="notifications-data">
+            {{ notificationsData|raw }}
+        </script>
+    {% endif %}
     
     {% if title_key is defined %}
         <title data-i18n-title="{{ title_key }}">{{ translate(title_key) }}</title>
@@ -131,39 +138,35 @@
     {% if not guest %}
         <div class="notifications-container">
             <div class="notifications-menu display-none">
+                {% if notifications and notifications|length > 0 %}
+                    {% for n in notifications %}
+                    <article class="notification{% if not n.read_at %} unread{% endif %}{% if not n.seen_at %} unseen{% endif %}" data-notification-id="{{ n.id }}">
+                        <button class="notification-delete" aria-label="Delete notification">&times;</button>
+                        <h3 data-i18n="notifications.notification_{{ n.notification_type }}">
+                            {{ translate('notifications.notification_' ~ n.notification_type) }}
+                        </h3>
+                        <p data-i18n="notifications.notification_{{ n.notification_type }}_text" 
+                           data-i18n-html="true"
+                           data-i18n-params="{{ {
+                               'game_title_link': '<a href=\"' ~ langUrl('text/collab/' ~ n.root_text_id) ~ '\">' ~ n.game_title ~ '</a>',
+                               'winning_title': n.winning_title
+                           }|json_encode }}">
+                            {{ translate('notifications.notification_' ~ n.notification_type ~ '_text', {
+                                'game_title_link': '<a href="' ~ langUrl('text/collab/' ~ n.root_text_id) ~ '">' ~ n.game_title ~ '</a>',
+                                'winning_title': n.winning_title
+                            }, true) }}
+                        </p>
+                        <time>{{ n.created_at|date('Y-m-d H:i:s') }}</time>
+                    </article>
+                    {% endfor %}
+                {% else %}
+                    <p class="no-notifications-message" data-i18n="notifications.no_notifications">
+                        {{ translate('notifications.no_notifications') }}
+                    </p>
+                {% endif %}
             </div>
         </div>
     {% endif %}
-
-    {# Since the messages are constructed similarly for game_won and game_closed, we can target them by using the same code, but just targetting the desired message by concatenating. Future notifications that follow this pattern should be added in the language files in the notification object, as notification_{notification_type} (for the title) and notification_{notification_type}_text (for the content) #}
-
-<!--         {% if notifications %}
-            <div class="notifications-container">
-                <div class="notifications-menu display-none">
-                    {% for n in notifications %}
-                    <article class="notification">
-
-                        {% if n.notification_type == 'game_won' or n.notification_type == 'game_closed' %}
-                            <h3 data-i18n="notifications.notification_{{ n.notification_type }}">
-                                {{ translate('notifications.notification_' ~ n.notification_type) }}
-                            </h3>
-                            <p data-i18n="notifications.notification_{{ n.notification_type }}_text" 
-                            data-i18n-params="{{ {
-                                'game_title_link': '<a href=\"' ~ langUrl('text/collab/' ~ n.root_text_id) ~ '\">' ~ n.game_title ~ '</a>',
-                                'winning_title': n.winning_title
-                            }|json_encode }}">
-                                {{ translate('notifications.notification_' ~ n.notification_type ~ '_text', {
-                                    'game_title_link': '<a href="' ~ langUrl('text/collab/' ~ n.root_text_id) ~ '">' ~ n.game_title ~ '</a>',
-                                    'winning_title': n.winning_title
-                                }, true) }}
-                            </p>
-                        {% endif %}
-                        <time>{{ n.created_at }}</time>
-                    </article>
-                    {% endfor %}
-                </div>
-            </div>
-        {% endif %} -->
 
     <!-- a modal for the showcase area (selected text) -->
     <div class="modal-background display-none" data-tree-modal="hidden" data-text-id="">

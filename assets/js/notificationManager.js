@@ -6,35 +6,54 @@ export class NotificationManager {
         this.activeNotifications = new Set(); // Track active notifications
         this.notifications = [];
         this.lastCheck = null;
+        this.eventBus = eventBus;
         this.init();
     }
 
     init() {
         console.log('NotificationManager initialized');
         
-        // Listen for SSE or polling notification updates
-        eventBus.on('notificationsReceived', (notifications) => {
-            console.log('Received notifications:', notifications);
+        // Temporarily comment out to test server-side rendering
+        // this.loadInitialNotifications();
+        
+        // Set up event listeners
+        this.eventBus.on('notificationsReceived', (notifications) => {
             this.processNotifications(notifications);
         });
 
-        eventBus.on('notification-clicked', (data) => {
-            // Handle both old format (just ID) and new format (object with ID and linkHref)
-            const notificationId = typeof data === 'object' ? data.notificationId : data;
-            const linkHref = typeof data === 'object' ? data.linkHref : null;
-            
-            this.markNotificationAsRead(notificationId, linkHref);
+        this.eventBus.on('notification-clicked', (notificationId) => {
+            this.markNotificationAsSeen(notificationId);
         });
-        
-        // Listen for marking all notifications as seen
-        eventBus.on('mark-all-notifications-seen', (notificationIds) => {
-            this.markAllNotificationsAsSeen(notificationIds);
+
+        this.eventBus.on('mark-all-notifications-seen', () => {
+            this.markAllNotificationsAsSeen();
         });
-        
-        // Listen for notification deletion
-        eventBus.on('notification-deleted', (notificationId) => {
-            this.markNotificationAsDeleted(notificationId);
+
+        this.eventBus.on('notification-deleted', (notificationId) => {
+            this.deleteNotification(notificationId);
         });
+    }
+
+    /**
+     * Load initial notifications from server data
+     */
+    loadInitialNotifications() {
+        try {
+            const notificationsDataElement = document.getElementById('notifications-data');
+            if (notificationsDataElement) {
+                const notificationsData = JSON.parse(notificationsDataElement.textContent);
+                if (Array.isArray(notificationsData) && notificationsData.length > 0) {
+                    console.log('Loading initial notifications from server:', notificationsData);
+                    this.processNotifications(notificationsData);
+                } else {
+                    console.log('No initial notifications found');
+                }
+            } else {
+                console.log('No notifications-data element found');
+            }
+        } catch (error) {
+            console.error('Error loading initial notifications:', error);
+        }
     }
 
     /**

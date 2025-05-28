@@ -25,7 +25,7 @@ class Keyword extends Crud{
                     FROM text_has_keyword
                     WHERE keyword_id = :$this->primaryKey
                     );";
-        $stmt = $this->prepare($sql); 
+        $stmt = $this->pdo->prepare($sql); 
         $stmt->bindValue(":$this->primaryKey", $value);
         if ($stmt->execute()){
             return true;
@@ -43,7 +43,7 @@ class Keyword extends Crud{
         FROM text_has_keyword
         WHERE text_id = :$this->primaryKey;";
 
-        $stmt = $this->prepare($sql);
+        $stmt = $this->pdo->prepare($sql);
         $stmt->bindValue(":$this->primaryKey", $id);
         $stmt->execute();
 
@@ -61,7 +61,7 @@ class Keyword extends Crud{
         $value = $assArr['word'];
         $sql = "SELECT id FROM keyword WHERE word = :word;";
 
-        $stmt = $this->prepare($sql);
+        $stmt = $this->pdo->prepare($sql);
         $stmt->bindValue(":word", $value);
         $stmt->execute();
 

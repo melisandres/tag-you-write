@@ -12,8 +12,13 @@ class ControllerUser extends Controller {
     public function create(){
         $privilege = new Privilege;
         $select = $privilege->select();
+        $notifications = $this->getNotifications();
 
-        Twig::render('user-create.php', ['privilege' => $select]);
+        Twig::render('user-create.php', [
+            'privilege' => $select,
+            'notifications' => $notifications,
+            'notificationsData' => json_encode($notifications)
+        ]);
     }
 
 
@@ -47,7 +52,11 @@ class ControllerUser extends Controller {
         $passwordHash = password_hash($password, PASSWORD_BCRYPT, $options);
         $_POST['password']= $passwordHash;
         $insert = $user->insert($_POST);
-        Twig::render('writer-index.php');
+        $notifications = $this->getNotifications();
+        Twig::render('writer-index.php', [
+            'notifications' => $notifications,
+            'notificationsData' => json_encode($notifications)
+        ]);
     }
 
     public function validateUser($data){
@@ -66,7 +75,14 @@ class ControllerUser extends Controller {
             $errors = $val->displayErrors();
             $privilege = new Privilege;
             $select = $privilege->select();
-            Twig::render('user-create.php', ['privileges' => $select, 'errors' => $errors, 'data' => $_POST]);
+            $notifications = $this->getNotifications();
+            Twig::render('user-create.php', [
+                'privileges' => $select, 
+                'errors' => $errors, 
+                'data' => $_POST,
+                'notifications' => $notifications,
+                'notificationsData' => json_encode($notifications)
+            ]);
         };
     }
 }

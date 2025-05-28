@@ -100,6 +100,7 @@ class RedisService {
                         // Create minimal data object for publishing
                         $publishData = [
                             'id' => $eventData['id'],  // Use event ID
+                            'related_id' => $notificationId,  // Notification ID for callback processing
                             'writer_id' => $recipientId
                         ];
                     } else {

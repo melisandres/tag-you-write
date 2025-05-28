@@ -5,7 +5,7 @@ export class SSEManager {
         this.eventSource = null;
         this.retryCount = 0;
         this.maxRetries = 5;
-        this.retryDelay = 5000; // 5 seconds
+        this.retryDelay = 2000;
         this.isConnected = false;
         this.dataManager = window.dataManager;
         this.baseUrl = this.detectBaseUrl();
@@ -13,6 +13,22 @@ export class SSEManager {
 
         console.log('SSEManager constructor called');
         console.log('SSE: Base URL detected as:', this.baseUrl);
+
+        // Bind methods to preserve context
+        this.handleParameterChange = this.handleParameterChange.bind(this);
+        this.handleBeforeUnload = this.handleBeforeUnload.bind(this);
+        
+        // Add beforeunload listener to clean up connections
+        window.addEventListener('beforeunload', this.handleBeforeUnload);
+        
+        // Also listen for page visibility changes
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                console.log('SSE: Page hidden, maintaining connection');
+            } else {
+                console.log('SSE: Page visible');
+            }
+        });
 
         // Listen for control events
         eventBus.on('startSSE', () => {
@@ -53,6 +69,8 @@ export class SSEManager {
             if (this.eventSource) {
                 console.log('SSE: Closing existing connection');
                 this.disconnect();
+                // Brief delay to ensure the connection is fully closed
+                await new Promise(resolve => setTimeout(resolve, 100));
             }
 
             // Get all SSE parameters from DataManager
@@ -119,7 +137,19 @@ export class SSEManager {
     disconnect() {
         if (this.eventSource) {
             console.log('SSE: Disconnecting');
-            this.eventSource.close();
+            
+            // Set readyState to CLOSED immediately to prevent further events
+            try {
+                this.eventSource.close();
+            } catch (error) {
+                console.warn('SSE: Error closing EventSource:', error);
+            }
+            
+            // Remove all event listeners to prevent memory leaks
+            this.eventSource.onopen = null;
+            this.eventSource.onmessage = null;
+            this.eventSource.onerror = null;
+            
             this.eventSource = null;
             this.isConnected = false;
         }
@@ -148,11 +178,6 @@ export class SSEManager {
                 const rootId = this.dataManager.getCurrentViewedRootStoryId();
                 console.log('SSE: game ID from update:', gameId, 'Current root ID:', rootId);
                 
-                // Log for debug monitor if available
-                if (window.logRedisMessage) {
-                    window.logRedisMessage('update', data);
-                }
-                
                 // Process modified games
                 if (data.modifiedGames && data.modifiedGames.length > 0) {
                     console.log('SSE: Processing modified games:', data.modifiedGames);
@@ -166,11 +191,6 @@ export class SSEManager {
                 // Process search results
                 if (data.searchResults && data.searchResults.length > 0) {
                     console.log('SSE: Processing search results:', data.searchResults);
-                }
-                
-                // Database message logging for debug monitor
-                if (window.logDatabaseMessage) {
-                    window.logDatabaseMessage('database', data);
                 }
                 
                 // Handle the update response
@@ -267,12 +287,36 @@ export class SSEManager {
             // Disconnect current connection
             this.disconnect();
             
+            // Wait a moment for the connection to fully close on the server side
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
             // Create new connection with updated parameters
             await this.connect();
             
             console.log('SSE: Connection restarted with new parameters');
         } catch (error) {
             console.error('Error updating SSE parameters:', error);
+        }
+    }
+
+    /**
+     * Handle page unload - ensure SSE connection is properly closed
+     */
+    handleBeforeUnload() {
+        console.log('SSE: Page unloading, closing connection');
+        this.forceDisconnect();
+    }
+    
+    /**
+     * Force disconnect without any reconnection attempts
+     */
+    forceDisconnect() {
+        if (this.eventSource) {
+            console.log('SSE: Force disconnecting');
+            this.eventSource.close();
+            this.eventSource = null;
+            this.isConnected = false;
+            this.retryCount = 0;
         }
     }
 }

@@ -4,7 +4,11 @@ RequirePage::model('Writer');
 class ControllerLogin extends Controller {
 
     public function index(){
-        Twig::render('login.php');
+        $notifications = $this->getNotifications();
+        Twig::render('login.php', [
+            'notifications' => $notifications,
+            'notificationsData' => json_encode($notifications)
+        ]);
      }
 
     public function auth(){
@@ -54,7 +58,13 @@ class ControllerLogin extends Controller {
                 if (strpos($contentType, 'application/json') !== false) {
                     $this->sendJsonResponse(false, 'auth.no_match');
                 } else {
-                    Twig::render('login.php', ["errors"=>"auth.no_match", "data"=>$_POST]);
+                    $notifications = $this->getNotifications();
+                    Twig::render('login.php', [
+                        "errors"=>"auth.no_match", 
+                        "data"=>$_POST,
+                        'notifications' => $notifications,
+                        'notificationsData' => json_encode($notifications)
+                    ]);
                 }
             }
         } else {
@@ -62,7 +72,13 @@ class ControllerLogin extends Controller {
             if (strpos($contentType, 'application/json') !== false) {
                 $this->sendJsonResponse(false, 'auth.validation_failed', ['errors' => $errors]);
             } else {
-                Twig::render('login.php', ['errors' => $errors, 'data'=>$_POST]);
+                $notifications = $this->getNotifications();
+                Twig::render('login.php', [
+                    'errors' => $errors, 
+                    'data'=>$_POST,
+                    'notifications' => $notifications,
+                    'notificationsData' => json_encode($notifications)
+                ]);
             }
         }
     }
@@ -73,7 +89,11 @@ class ControllerLogin extends Controller {
     }
 
     public function forgotPassword() {
-        Twig::render('forgot-password.php');
+        $notifications = $this->getNotifications();
+        Twig::render('forgot-password.php', [
+            'notifications' => $notifications,
+            'notificationsData' => json_encode($notifications)
+        ]);
     }
     
     public function sendResetLink() {
@@ -141,7 +161,12 @@ class ControllerLogin extends Controller {
                     if (strpos($contentType, 'application/json') !== false) {
                         $this->sendJsonResponse(true, 'auth.password_reset.email_sent');
                     } else {
-                        Twig::render('login.php', ['message' => 'auth.password_reset.email_sent']);
+                        $notifications = $this->getNotifications();
+                        Twig::render('login.php', [
+                            'message' => 'auth.password_reset.email_sent',
+                            'notifications' => $notifications,
+                            'notificationsData' => json_encode($notifications)
+                        ]);
                     }
                 } catch (Exception $e) {
                     error_log("Email sending error: " . $e->getMessage());
@@ -150,14 +175,25 @@ class ControllerLogin extends Controller {
                     if (strpos($contentType, 'application/json') !== false) {
                         $this->sendJsonResponse(true, 'auth.password_reset.email_sent');
                     } else {
-                        Twig::render('login.php', ['message' => 'auth.password_reset.email_sent']);
+                        $notifications = $this->getNotifications();
+                        Twig::render('login.php', [
+                            'message' => 'auth.password_reset.email_sent',
+                            'notifications' => $notifications,
+                            'notificationsData' => json_encode($notifications)
+                        ]);
                     }
                 }
             } else {
                 if (strpos($contentType, 'application/json') !== false) {
                     $this->sendJsonResponse(false, 'auth.password_reset.email_not_found');
                 } else {
-                    Twig::render('forgot-password.php', ['errors' => 'auth.password_reset.email_not_found', 'data' => $_POST]);
+                    $notifications = $this->getNotifications();
+                    Twig::render('forgot-password.php', [
+                        'errors' => 'auth.password_reset.email_not_found', 
+                        'data' => $_POST,
+                        'notifications' => $notifications,
+                        'notificationsData' => json_encode($notifications)
+                    ]);
                 }
             }
         } else {
@@ -165,7 +201,13 @@ class ControllerLogin extends Controller {
             if (strpos($contentType, 'application/json') !== false) {
                 $this->sendJsonResponse(false, 'auth.password_reset.validation_failed', ['errors' => $errors]);
             } else {
-                Twig::render('forgot-password.php', ['errors' => $errors, 'data' => $_POST]);
+                $notifications = $this->getNotifications();
+                Twig::render('forgot-password.php', [
+                    'errors' => $errors, 
+                    'data' => $_POST,
+                    'notifications' => $notifications,
+                    'notificationsData' => json_encode($notifications)
+                ]);
             }
         }
     }
@@ -175,11 +217,21 @@ class ControllerLogin extends Controller {
         $writerData = $writer->selectId($token, "reset_token");
     
         if(!$writerData || strtotime($writerData['reset_expiry']) < time()) {
-            Twig::render('home-error.php', ['message' => 'auth.password_reset.invalid_or_expired_reset_link']);
+            $notifications = $this->getNotifications();
+            Twig::render('home-error.php', [
+                'message' => 'auth.password_reset.invalid_or_expired_reset_link',
+                'notifications' => $notifications,
+                'notificationsData' => json_encode($notifications)
+            ]);
             return;
         }
     
-        Twig::render('reset-password.php', ['token' => $token]);
+        $notifications = $this->getNotifications();
+        Twig::render('reset-password.php', [
+            'token' => $token,
+            'notifications' => $notifications,
+            'notificationsData' => json_encode($notifications)
+        ]);
     }
     
     public function updatePassword() {

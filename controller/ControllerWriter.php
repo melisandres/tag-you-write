@@ -12,7 +12,12 @@ class ControllerWriter extends Controller{
 
         $writer = new Writer;
         $select = $writer->select();
-        Twig::render('writer-index.php', ['writers'=>$select]);
+        $notifications = $this->getNotifications();
+        Twig::render('writer-index.php', [
+            'writers'=>$select,
+            'notifications' => $notifications,
+            'notificationsData' => json_encode($notifications)
+        ]);
     }
 
     public function create(){
@@ -22,14 +27,24 @@ class ControllerWriter extends Controller{
         //you could build another CheckSession::sessionAuth, that
         //basically does the opposite... it would live better there.
         if(isSet($_SESSION['fingerPrint'])){
-            Twig::render('home-error.php', ['message'=> "error.already_logged_in"]);
+            $notifications = $this->getNotifications();
+            Twig::render('home-error.php', [
+                'message'=> "error.already_logged_in",
+                'notifications' => $notifications,
+                'notificationsData' => json_encode($notifications)
+            ]);
             return;
         }
 
         $privilege = new Privilege;
         $select = $privilege->select();
+        $notifications = $this->getNotifications();
 
-        Twig::render('writer-create.php', ['privilege' => $select]);
+        Twig::render('writer-create.php', [
+            'privilege' => $select,
+            'notifications' => $notifications,
+            'notificationsData' => json_encode($notifications)
+        ]);
     }
 
     public function store(){
@@ -125,9 +140,19 @@ class ControllerWriter extends Controller{
 
         //error page if id doesn't exist, or if it's null
         if($id == null || !$selectId){
-            Twig::render('home-error.php', ['message'=> "error.something_went_wrong"]);
+            $notifications = $this->getNotifications();
+            Twig::render('home-error.php', [
+                'message'=> "error.something_went_wrong",
+                'notifications' => $notifications,
+                'notificationsData' => json_encode($notifications)
+            ]);
         }else{
-            Twig::render('writer-show.php', ['writer' => $selectId]);
+            $notifications = $this->getNotifications();
+            Twig::render('writer-show.php', [
+                'writer' => $selectId,
+                'notifications' => $notifications,
+                'notificationsData' => json_encode($notifications)
+            ]);
         }
     }
 
@@ -145,7 +170,13 @@ class ControllerWriter extends Controller{
         $select = $privilege->select();
         $writer = new Writer;
         $selectId = $writer->selectId($_POST['id']);
-        Twig::render('writer-edit.php', ['data' => $selectId, 'privilege' => $select]);
+        $notifications = $this->getNotifications();
+        Twig::render('writer-edit.php', [
+            'data' => $selectId, 
+            'privilege' => $select,
+            'notifications' => $notifications,
+            'notificationsData' => json_encode($notifications)
+        ]);
     }
 
     public function update(){

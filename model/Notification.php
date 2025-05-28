@@ -28,7 +28,7 @@ class Notification extends Crud{
                 AND n.deleted_at IS NULL
                 ORDER BY n.created_at $order";
                 
-        $stmt = $this->prepare($sql);
+        $stmt = $this->pdo->prepare($sql);
         $stmt->bindValue(':writer_id', $writer_id);
         $stmt->execute();
         return $stmt->fetchAll();
@@ -42,8 +42,13 @@ class Notification extends Crud{
      * @param string|null $lastCheck Timestamp to check for new notifications
      * @return array Array of notifications created after lastCheck
      */
-    public function getNewNotifications($lastCheck = null, $id = null) {
-        $writer_id = $_SESSION['writer_id'] ?? null;
+    public function getNewNotifications($lastCheck = null, $id = null, $writerId = null) {
+        // When calling this from the polling system, I send over the writerId--I can't get it from the session
+        if ($writerId === null) {
+            $writer_id = $_SESSION['writer_id'] ?? null;
+        } else {
+            $writer_id = $writerId;
+        }
         if ($writer_id === null) {
             return []; // Return an empty array if the user isn't logged in
         }
@@ -71,7 +76,7 @@ class Notification extends Crud{
         
         $sql .= " ORDER BY n.created_at ASC";
         
-        $stmt = $this->prepare($sql);
+        $stmt = $this->pdo->prepare($sql);
         $stmt->bindValue(':writer_id', $writer_id);
         if ($lastCheck !== null) {
             $stmt->bindValue(':lastCheck', $dbLastCheck);
@@ -105,7 +110,7 @@ class Notification extends Crud{
             $sql .= " AND n.game_id = :game_id";
         }
         
-        $stmt = $this->prepare($sql);
+        $stmt = $this->pdo->prepare($sql);
         $stmt->bindValue(':writer_id', $writer_id);
     
         if ($game_id !== NULL) {
@@ -119,10 +124,36 @@ class Notification extends Crud{
     public function markNotificationAsSeen($user_id, $game_id) {
         $sql = "UPDATE $this->table SET seen_at = :seen_at 
                 WHERE writer_id = :writer_id AND game_id = :game_id ";
-        $stmt = $this->prepare($sql);
+        $stmt = $this->pdo->prepare($sql);
         $stmt->bindValue(':writer_id', $user_id);
         $stmt->bindValue(':game_id', $game_id);
         $stmt->bindValue(':seen_at', date('Y-m-d H:i:s'));
         $stmt->execute();
+    }
+
+    /**
+     * Get a specific notification by ID and writer_id
+     * Used by EventPollingService when we have explicit writer_id parameter
+     * 
+     * @param int $notificationId The notification ID
+     * @param int $writerId The writer ID
+     * @return array|false The notification data or false if not found
+     */
+    public function getNotificationById($notificationId, $writerId) {
+        $sql = "SELECT n.*, g.root_text_id, t.title as game_title, 
+                wt.title as winning_title 
+                FROM $this->table n
+                JOIN game g ON n.game_id = g.id
+                JOIN text t ON g.root_text_id = t.id
+                LEFT JOIN text wt ON g.winner = wt.id
+                WHERE n.id = :id 
+                AND n.writer_id = :writer_id
+                AND n.deleted_at IS NULL";
+        
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':id', $notificationId);
+        $stmt->bindValue(':writer_id', $writerId);
+        $stmt->execute();
+        return $stmt->fetch();
     }
 }

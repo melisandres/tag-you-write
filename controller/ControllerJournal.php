@@ -7,7 +7,12 @@ class ControllerJournal extends Controller{
     public function index(){
         $journal = new Journal;
         $select = $journal->selectJournal();
-        Twig::render('journal.php', ['data'=>$select]);
+        $notifications = $this->getNotifications();
+        Twig::render('journal.php', [
+            'data'=>$select,
+            'notifications' => $notifications,
+            'notificationsData' => json_encode($notifications)
+        ]);
     }
     public function addToJournal(){
         $ip = $_SERVER['REMOTE_ADDR'];

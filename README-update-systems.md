@@ -11,7 +11,8 @@ This document provides comprehensive information about the real-time update syst
 5. [Backend Polling System](#backend-polling-system)
 6. [Update Tracking Mechanisms](#update-tracking-mechanisms)
 7. [Failover Mechanisms](#failover-mechanisms)
-8. [Data Flow Diagram](#data-flow-diagram)
+8. [Server-Side Rendering](#server-side-rendering)
+9. [Data Flow Diagram](#data-flow-diagram)
 
 ## Architecture Overview
 
@@ -19,7 +20,8 @@ The application employs a multi-layered approach to handle real-time updates:
 
 1. **Primary System**: Redis Pub/Sub for real-time event broadcasting
 2. **Transport Layer**: Server-Sent Events (SSE) for delivering updates to the client
-3. **Fallback Systems**: 
+3. **Server-Side Rendering**: Initial notifications and game state rendered with the page
+4. **Fallback Systems**: 
    - Backend polling when Redis is unavailable
    - Frontend polling when SSE connection fails
 
@@ -59,7 +61,7 @@ These systems work together to provide a resilient update mechanism that can han
 3. **Server Processing**: The `EventHandler` on the backend:
    - Connects to Redis if available
    - Subscribes to relevant channels
-   - Processes messages and sends updates to the client
+   - Delegates all model operations to `DataFetchService`
    - Falls back to database polling if Redis is unavailable
 
 4. **Event Types**: The SSE connection streams different event types:
@@ -72,8 +74,9 @@ These systems work together to provide a resilient update mechanism that can han
 ### Key Components
 
 - **SSEManager.js**: Frontend component that manages the EventSource connection
-- **events.php**: Backend endpoint that streams events
+- **events.php**: Backend endpoint that streams events (simplified to use DataFetchService)
 - **EventHandler**: Backend class that processes events and sends them to the client
+- **DataFetchService**: Centralized service that handles all database operations and data fetching
 
 ## Frontend Polling System
 
@@ -87,7 +90,7 @@ These systems work together to provide a resilient update mechanism that can han
 ### Default Polling Tasks
 
 - **Game List Polling**: Checks for updates to the game list (`checkForUpdates()`)
-- **Notification Polling**: Checks for new notifications
+- **Notification Polling**: Checks for new notifications (supplementary to SSE)
 
 ### Key Components
 
@@ -100,15 +103,16 @@ These systems work together to provide a resilient update mechanism that can han
 ### How It Works
 
 1. **Initialization**: If Redis is unavailable, the SSE handler falls back to database polling
-2. **Regular Queries**: Every 2 seconds, it queries the database for new events
-3. **Event Processing**: Events are processed similarly to Redis messages
+2. **Regular Queries**: Every 2 seconds, it queries the database for new events via `DataFetchService`
+3. **Event Processing**: Events are processed by `DataFetchService.getUpdates()`
 4. **Keepalive**: Every 30 seconds, a keepalive message is sent to maintain the connection
 
 ### Key Components
 
 - **EventHandler.runDatabasePolling()**: Manages the polling loop
+- **DataFetchService**: Centralized service that handles event processing, database queries, and data fetching
 - **Event.getFilteredEvents()**: Retrieves events from the database
-- **EventHandler.processEvents()**: Processes events and sends updates
+- **Connection Recovery**: Automatic model recreation and connection refresh on database timeouts
 
 ## Update Tracking Mechanisms
 
@@ -141,6 +145,27 @@ The system uses several mechanisms to track updates:
 - This ensures a consistent "last known good state" for failover between systems
 - Prevents duplicate processing of updates when switching between update mechanisms
 
+## Server-Side Rendering
+
+### Notifications
+
+**Implementation**: All controllers now include notifications in their initial page render using the `getNotifications()` method from the base `Controller` class.
+
+**Benefits**:
+- **Faster Initial Load**: Notifications appear immediately with the page
+- **Better UX**: No Flash of Unstyled Content (FOUC)
+- **Improved SEO**: Notifications are part of the initial HTML
+- **Architectural Simplicity**: Single source of truth for initial state
+
+**Components**:
+- **Controller.getNotifications()**: Base method that fetches notifications for any logged-in user
+- **header.php**: Renders notifications in the UI and embeds JSON data for JavaScript
+- **NotificationManager**: Processes real-time updates but no longer loads initial data
+
+### Game State
+
+Initial game lists and tree data are also server-side rendered, providing immediate content visibility and better performance.
+
 ## Failover Mechanisms
 
 ### 1. Redis Unavailable → Backend Polling
@@ -155,7 +180,13 @@ The system uses several mechanisms to track updates:
 - **Action**: Emits `sseFailed` event, triggering `UpdateManager.handleSSEFailure()`
 - **Recovery**: `PollingManager` activates, max retries for SSE (5 attempts)
 
-### 3. Missed Redis Events
+### 3. Database Connection Issues
+
+- **Protection**: `DataFetchService.executeWithRetry()` handles connection timeouts
+- **Action**: Automatic model recreation and connection refresh
+- **Recovery**: Up to 3 retry attempts with fresh database connections
+
+### 4. Missed Redis Events
 
 - **Protection**: `checkMissedEvents()` runs when the SSE connection starts
 - **Action**: Queries database for events since `lastEventId`
@@ -170,14 +201,19 @@ The system uses several mechanisms to track updates:
                                                    │
                                                    ▼
 ┌────────────────┐     ┌─────────────┐     ┌────────────────┐
-│ Frontend Cache │◀────│ SSE Handler │◀────│ Event Handler  │
+│ Frontend Cache │◀────│ SSE Handler │◀────│ DataFetchServ  │
 └────────────────┘     └─────────────┘     └────────────────┘
-       ▲                                            ▲
-       │                                            │
-       │                                            │
-┌────────────────┐                         ┌────────────────┐
-│ Polling AJAX   │─────────────────────────│ Database Poll  │
-└────────────────┘   (Fallback Paths)      └────────────────┘
+       ▲                                           ▲
+       │                                           │
+       │                ┌─────────────────┐        │
+┌────────────────┐      │ Server-Side     │        │
+│ Polling AJAX   │◀─────│ Rendering       │        │
+└────────────────┘      └─────────────────┘        │
+                                                   │
+                        ┌─────────────────┐        │
+                        │ Database Poll   │────────┘
+                        └─────────────────┘
+                          (Fallback Path)
 ```
 
-This architecture provides multiple paths for updates to reach the client, ensuring system resilience while maintaining real-time performance when possible. 
+This architecture provides multiple paths for updates to reach the client, with server-side rendering ensuring immediate content availability and centralized data processing through DataFetchService for consistency and maintainability. 

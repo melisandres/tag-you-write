@@ -16,7 +16,7 @@ class User extends Crud{
 
     public function checkUser($username, $password){
             $sql = "SELECT * FROM $this->table WHERE username = ?";
-            $stmt = $this->prepare($sql);
+            $stmt = $this->pdo->prepare($sql);
             $stmt->execute(array($username));
 
             $count = $stmt->rowCount();

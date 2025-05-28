@@ -3,11 +3,21 @@
 class ControllerHome extends Controller {
 
     public function index(){
-        Twig::render('home-index.php', ['name' => 'greeting']);
+        $notifications = $this->getNotifications();
+
+        Twig::render('home-index.php', [
+            'name' => 'greeting',
+            'notifications' => $notifications,
+            'notificationsData' => json_encode($notifications)
+        ]);
      }
 
     public function error(){
-       Twig::render('home-error.php');
+        $notifications = $this->getNotifications();
+        Twig::render('home-error.php', [
+            'notifications' => $notifications,
+            'notificationsData' => json_encode($notifications)
+        ]);
     }
 }
 

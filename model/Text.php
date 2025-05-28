@@ -115,7 +115,7 @@ class Text extends Crud{
         // Log the SQL query and parameters
         //error_log("Executing selectTexts with SQL: " . $sql);
 
-        $stmt = $this->prepare($sql);
+        $stmt = $this->pdo->prepare($sql);
         
         // Bind the current writer ID if it's provided
         if ($current_writer) {
@@ -157,7 +157,7 @@ class Text extends Crud{
                 ON text.game_id = game.id
                 WHERE $table.$primaryKey = :$primaryKey;";
         
-        $stmt = $this->prepare($sql);
+        $stmt = $this->pdo->prepare($sql);
         $stmt->bindValue(":$primaryKey", $idValue);
         $stmt->execute();
 
@@ -175,7 +175,7 @@ class Text extends Crud{
         $sql =  "SELECT game_id 
                 FROM $table 
                 WHERE $table.$primaryKey = :$primaryKey;";
-        $stmt = $this->prepare($sql);
+        $stmt = $this->pdo->prepare($sql);
 
         $stmt->bindValue(":$primaryKey", $id);
         $stmt->execute();
@@ -194,7 +194,7 @@ class Text extends Crud{
                 FROM $this->table 
                 WHERE id = :id";
     
-        $stmt = $this->prepare($sql);
+        $stmt = $this->pdo->prepare($sql);
         $stmt->bindValue(":id", $textId);
         $stmt->execute();
     
@@ -225,7 +225,7 @@ class Text extends Crud{
                 $sql .= " AND text.modified_at > :lastTreeCheck";
             }
 
-            $stmt = $this->prepare($sql);
+            $stmt = $this->pdo->prepare($sql);
             $stmt->bindValue(':term', '%' . $term . '%', PDO::PARAM_STR);
             $stmt->bindValue(':gameId', (int)$gameId, PDO::PARAM_INT);
             $stmt->bindValue(':currentWriterId', (int)$currentWriterId, PDO::PARAM_INT);

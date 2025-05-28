@@ -199,4 +199,17 @@ class RedisManager {
             }
         }
     }
+    
+    /**
+     * Get the Redis client instance for advanced operations
+     * 
+     * @return \Predis\Client|null The Redis client or null if not available
+     */
+    public function getRedis() {
+        if (!$this->isAvailable()) {
+            return null;
+        }
+        
+        return $this->redis;
+    }
 } 
