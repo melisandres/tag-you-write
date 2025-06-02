@@ -23,7 +23,6 @@ export class DataManager {
             nodesMap: new Map(), // A flat structure to make updates easier
             lastGamesCheck: null,
             currentViewedRootId: null,
-            lastEventId: null, // Track the last processed event ID
             pagination: {
                 currentPage: 1,
                 itemsPerPage: 10,
@@ -606,7 +605,6 @@ export class DataManager {
                     nodesMap: new Map(parsed.nodesMap || []),
                     lastGamesCheck: parsed.lastGamesCheck || Date.now(),
                     currentViewedRootId: parsed.currentViewedRootId,
-                    lastEventId: parsed.lastEventId,
                     pagination: parsed.pagination,
                     search: parsed.search || '',
                     searchResults: {
@@ -640,7 +638,6 @@ export class DataManager {
             nodesMap: Array.from(this.cache.nodesMap.entries()),
             lastGamesCheck: this.cache.lastGamesCheck,
             currentViewedRootId: this.cache.currentViewedRootId,
-            lastEventId: this.cache.lastEventId,
             pagination: this.cache.pagination,
             search: this.cache.search,
             searchResults: {
@@ -749,17 +746,6 @@ export class DataManager {
         return this.currentUserId;
     }
 
-    // Add getter for lastEventId
-    getLastEventId() {
-        return this.cache.lastEventId;
-    }
-
-    // Add setter for lastEventId
-    setLastEventId(eventId) {
-        this.cache.lastEventId = eventId;
-        this.saveCache();
-    }
-
     // Add getter for SSE parameters
     getSSEParameters() {
         const rootId = this.getCurrentViewedRootStoryId();
@@ -769,7 +755,6 @@ export class DataManager {
             search: this.cache.search || '',
             rootStoryId: rootId,
             lastTreeCheck: this.cache.trees.get(rootId)?.timestamp || 0,
-            lastEventId: this.getLastEventId()
         };
     }
 

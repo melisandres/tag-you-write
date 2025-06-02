@@ -1,0 +1,250 @@
+/* Activity Indicator - Bottom Right Corner */
+.activity-indicator {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Toggle Button */
+.activity-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #ffffff;
+    border: 1px solid #e1e5e9;
+    border-radius: 24px;
+    padding: 8px 12px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.activity-toggle:hover {
+    background: #f8f9fa;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+.activity-toggle.has-activity {
+    background: #e8f5e8;
+    border-color: #4caf50;
+}
+
+.activity-toggle.has-activity .activity-icon {
+    animation: pulse 2s infinite;
+}
+
+.activity-icon {
+    font-size: 16px;
+    line-height: 1;
+}
+
+.activity-count {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    min-width: 16px;
+    text-align: center;
+}
+
+/* Panel */
+.activity-panel {
+    position: absolute;
+    bottom: 100%;
+    right: 0;
+    margin-bottom: 8px;
+    background: #ffffff;
+    border: 1px solid #e1e5e9;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    min-width: 280px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px) scale(0.95);
+    transition: all 0.2s ease;
+    pointer-events: none;
+}
+
+.activity-indicator.open .activity-panel {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+/* Panel Header */
+.activity-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 16px 12px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.activity-header h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+}
+
+.activity-close {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #666;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.activity-close:hover {
+    background: #f0f0f0;
+    color: #333;
+}
+
+/* Panel Content */
+.activity-content {
+    padding: 16px;
+}
+
+.activity-summary {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.activity-stat {
+    flex: 1;
+    text-align: center;
+}
+
+.stat-label {
+    display: block;
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 4px;
+}
+
+.stat-value {
+    display: block;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+}
+
+.active-count {
+    color: #4caf50;
+}
+
+.idle-count {
+    color: #ff9800;
+}
+
+/* Activity Breakdown */
+.activity-breakdown {
+    margin-bottom: 12px;
+}
+
+.activity-type {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    font-size: 14px;
+}
+
+.type-label {
+    color: #666;
+}
+
+.type-count {
+    font-weight: 600;
+    color: #333;
+    background: #f8f9fa;
+    padding: 2px 8px;
+    border-radius: 12px;
+    min-width: 24px;
+    text-align: center;
+}
+
+/* Footer */
+.activity-footer {
+    text-align: center;
+    color: #999;
+    font-size: 12px;
+    margin-top: 8px;
+}
+
+/* Error State */
+.activity-indicator.error .activity-toggle {
+    background: #ffebee;
+    border-color: #f44336;
+}
+
+.activity-indicator.error .activity-count {
+    color: #f44336;
+}
+
+/* Animations */
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .activity-indicator {
+        bottom: 16px;
+        right: 16px;
+    }
+    
+    .activity-panel {
+        min-width: 260px;
+        right: -20px;
+    }
+    
+    .activity-summary {
+        flex-direction: column;
+        gap: 8px;
+    }
+}
+
+/* Dark mode support (if needed) */
+@media (prefers-color-scheme: dark) {
+    .activity-toggle {
+        background: #2d3748;
+        border-color: #4a5568;
+        color: #e2e8f0;
+    }
+    
+    .activity-toggle:hover {
+        background: #4a5568;
+    }
+    
+    .activity-panel {
+        background: #2d3748;
+        border-color: #4a5568;
+    }
+    
+    .activity-header h4,
+    .stat-value,
+    .type-count {
+        color: #e2e8f0;
+    }
+    
+    .activity-close:hover {
+        background: #4a5568;
+        color: #e2e8f0;
+    }
+} 

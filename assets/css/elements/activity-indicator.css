@@ -1,0 +1,139 @@
+.activity-indicator {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 4px;
+    margin-left: auto;
+    margin-right: 1rem;
+}
+
+.activity-indicator:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.activity-content {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.activity-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    color: var(--color-grey-light);
+    transition: color 0.3s ease;
+}
+
+.activity-indicator.has-activity .activity-icon {
+    color: var(--color-success);
+}
+
+.activity-indicator.no-activity .activity-icon {
+    color: var(--color-grey-dark);
+    opacity: 0.5;
+}
+
+.activity-stats {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--color-white);
+    font-size: 0.75rem;
+}
+
+.activity-count {
+    font-weight: 600;
+    min-width: 1rem;
+    text-align: center;
+}
+
+.activity-count.total {
+    color: var(--color-white);
+}
+
+.activity-count.editing {
+    color: var(--color-primary);
+}
+
+.activity-separator {
+    color: var(--color-grey-light);
+    opacity: 0.7;
+}
+
+.activity-label {
+    color: var(--color-grey-light);
+    font-size: 0.7rem;
+}
+
+/* Expanded state */
+.activity-indicator.expanded {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Hide when no activity */
+.activity-indicator.no-activity {
+    opacity: 0.6;
+}
+
+.activity-indicator.no-activity .activity-stats {
+    opacity: 0.5;
+}
+
+/* Animation for activity icon */
+.activity-indicator.has-activity .activity-icon svg {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .activity-indicator {
+        margin-right: 0.5rem;
+    }
+    
+    .activity-content {
+        gap: 0.25rem;
+    }
+    
+    .activity-label {
+        display: none;
+    }
+    
+    .activity-stats {
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .activity-indicator {
+        padding: 0.25rem;
+    }
+    
+    .activity-icon {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .activity-icon svg {
+        width: 14px;
+        height: 14px;
+    }
+} 

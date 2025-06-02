@@ -25,6 +25,11 @@ class Event extends Crud {
         parent::__construct();
         $this->table = 'event';
         
+        // Define ROOT_DIR if not already defined
+        if (!defined('ROOT_DIR')) {
+            define('ROOT_DIR', dirname(__DIR__));
+        }
+        
         // Try to load RedisManager if it exists
         if (file_exists('services/RedisManager.php')) {
             require_once('services/RedisManager.php');

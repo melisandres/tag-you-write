@@ -9,7 +9,7 @@ export class SSEManager {
         this.isConnected = false;
         this.dataManager = window.dataManager;
         this.baseUrl = this.detectBaseUrl();
-        this.lastEventId = this.dataManager.getLastEventId();
+        // Session-based tracking handles lastEventId on the server
 
         console.log('SSEManager constructor called');
         console.log('SSE: Base URL detected as:', this.baseUrl);
@@ -167,11 +167,11 @@ export class SSEManager {
                 console.log('SSE: Received update event');
                 const data = JSON.parse(event.data);
                 
-                // Update lastEventId if present in the data
-                if (data.id) {
-                    this.lastEventId = data.id;
-                    this.dataManager.setLastEventId(data.id);
-                }
+                // Remove lastEventId update since we're using server-side tracking
+                // if (data.id) {
+                //     this.lastEventId = data.id;
+                //     this.dataManager.setLastEventId(data.id);
+                // }
                 
                 // Get the root ID from the first modified node if available
                 const gameId = data.modifiedNodes?.[0]?.game_id;

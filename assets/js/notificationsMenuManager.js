@@ -10,6 +10,7 @@ export class NotificationsMenuManager {
         this.unseenCount = 0;
         this.unseenCountElement = this.createUnseenCountElement();
         this.initEventListeners();
+        this.initializeUnseenCount(); // Initialize count from existing DOM notifications
         this.updateNavLink();
         this.checkEmptyNotifications();
     }
@@ -165,6 +166,14 @@ export class NotificationsMenuManager {
     /* TODO: handle new notifications comming in via polling */
     addNewNotification(notification) {
         //console.log('addNewNotification notification is:', notification);
+        
+        // Check if notification already exists in the DOM
+        const existingNotification = this.notificationsMenu.querySelector(`.notification[data-notification-id="${notification.id}"]`);
+        if (existingNotification) {
+            console.log(`Notification ${notification.id} already exists in DOM, skipping duplicate`);
+            return;
+        }
+        
         const isRead = notification.read_at !== null;
         const isSeen = notification.seen_at !== null;
         const notificationElement = document.createElement('article');
@@ -237,5 +246,11 @@ export class NotificationsMenuManager {
         
         // Check if we need to update the empty notifications message
         this.checkEmptyNotifications();
+    }
+
+    initializeUnseenCount() {
+        // Count existing unseen notifications in the DOM
+        const unseenNotifications = this.notificationsMenu.querySelectorAll('.notification.unseen');
+        this.updateUnseenCount(unseenNotifications.length);
     }
 }

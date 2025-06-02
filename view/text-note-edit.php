@@ -44,6 +44,7 @@
         <input type="hidden" name="writing" value="{{ data.writing }}">
         <input type="hidden" name="currentPage" value="text-note-edit.php">
         <input type="hidden" name="text_status" data-text-status value="">
+        <input type="hidden" name="game_id" value="{{ data.game_id|default('') }}">
 
         <div class="form-btns">
             <button class="publish" type="button" data-status="published"  data-i18n-title="{{ data.note ? 'note-edit.change_note_tooltip' : 'note-edit.add_note_tooltip' }}" title="{{ data.note ? translate('note-edit.change_note_tooltip') : translate('note-edit.add_note_tooltip') }}">

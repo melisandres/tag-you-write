@@ -18,6 +18,9 @@ export class Modal {
       this.modalElement.dataset.textId = data.id;
       this.modalElement.dataset.gameId = data.game_id;
 
+      // Emit modal opened event for activity tracking
+      eventBus.emit('modalOpened', data.id);
+
       // translate some strings
       let ps = window.i18n ? window.i18n.translate("modal.ps") : "P.S...";
       let draft = window.i18n ? window.i18n.translate("modal.draft") : "DRAFT";
@@ -154,5 +157,8 @@ export class Modal {
     this.modalElement.dataset.textId = '';
     this.modalContent.innerHTML = '';
     this.modalBtns.innerHTML = '';
+
+    // Emit modal closed event for activity tracking
+    eventBus.emit('modalClosed');
   }
 }

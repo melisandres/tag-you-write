@@ -35,38 +35,26 @@ export class PollingManager {
     // Fetch all updates using the combined endpoint
     async fetchUpdates() {
         try {
-            const lastEventId = this.dataManager.getLastEventId();
-            const currentUserId = this.dataManager.getCurrentUserId();
-            const rootStoryId = this.dataManager.getCurrentViewedRootStoryId();
-            const filters = this.dataManager.getFilters();
-            const search = this.dataManager.getSearch();
-            const lastTreeCheck = this.dataManager.getLastTreeCheck();
-            const lastGameCheck = this.dataManager.getLastGameCheck();
+            const endpoint = 'event/getUpdates';
+            const urlString = window.i18n.createUrl(endpoint);
+            const url = new URL(urlString, window.location.origin);
             
-            // Use the correct route format for your controller
-            const endpoint = window.i18n.createUrl('event/getUpdates');
+            // Get parameters from DataManager (same as SSE)
+            const params = this.dataManager.getSSEParameters();
             
-            console.log('Polling: Fetching updates from:', endpoint);
+            // Build URL with parameters
+            Object.keys(params).forEach(key => {
+                if (params[key] !== null && params[key] !== undefined) {
+                    if (typeof params[key] === 'object') {
+                        url.searchParams.append(key, JSON.stringify(params[key]));
+                    } else {
+                        url.searchParams.append(key, params[key]);
+                    }
+                }
+            });
+
+            console.log('Polling: Fetching updates from:', url.toString());
             
-            // Add query parameters
-            const url = new URL(endpoint, window.location.origin);
-            
-            if (lastEventId) url.searchParams.append('lastEventId', lastEventId);
-            if (rootStoryId) url.searchParams.append('rootStoryId', rootStoryId);
-            if (search) url.searchParams.append('search', search);
-            if (filters) url.searchParams.append('filters', JSON.stringify(filters));
-            if (lastGameCheck) url.searchParams.append('lastGameCheck', lastGameCheck);
-            
-            // Add lastTreeCheck parameter to limit search results to newer nodes
-            const cachedTree = this.dataManager.getTree(rootStoryId);
-            if (cachedTree && cachedTree.timestamp) {
-                url.searchParams.append('lastTreeCheck', new Date(cachedTree.timestamp).toISOString());
-                console.log('Polling: Added lastTreeCheck:', new Date(cachedTree.timestamp).toISOString());
-            }
-            
-            console.log('Polling: Full URL with params:', url.toString());
-            
-            // Include proper headers for JSON request
             const response = await fetch(url, {
                 method: 'GET',
                 headers: {
@@ -76,20 +64,8 @@ export class PollingManager {
                 credentials: 'same-origin' // Include cookies for session
             });
             
-            // If response is not JSON, log the text for debugging
             if (!response.ok) {
-                const text = await response.text();
-                console.error('Error response from server:', text);
                 throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            
-            // Check content type
-            const contentType = response.headers.get('content-type');
-            if (!contentType || !contentType.includes('application/json')) {
-                const text = await response.text();
-                console.error('Unexpected content type:', contentType, 'Response:', text);
-                this.handlePollingError();
-                throw new Error(`Expected JSON but got ${contentType}`);
             }
             
             const updates = await response.json();
@@ -127,10 +103,8 @@ export class PollingManager {
 
     // Process updates similar to how SSEManager does
     processUpdates(updates) {
-        // Update lastEventId
-        if (updates.lastEventId) {
-            this.dataManager.setLastEventId(updates.lastEventId);
-        }
+        // Session-based tracking handles lastEventId automatically on the server
+        // No need to update it on the frontend
         
         // Process notifications
         if (updates.notifications && updates.notifications.length > 0) {

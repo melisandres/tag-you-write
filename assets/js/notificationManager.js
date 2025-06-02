@@ -13,7 +13,7 @@ export class NotificationManager {
     init() {
         console.log('NotificationManager initialized');
         
-        // Temporarily comment out to test server-side rendering
+        // Load initial notifications from server-rendered data
         // this.loadInitialNotifications();
         
         // Set up event listeners
@@ -21,12 +21,19 @@ export class NotificationManager {
             this.processNotifications(notifications);
         });
 
-        this.eventBus.on('notification-clicked', (notificationId) => {
-            this.markNotificationAsSeen(notificationId);
+        this.eventBus.on('notification-clicked', (data) => {
+            // Handle both old format (just notificationId) and new format (object with notificationId and linkHref)
+            if (typeof data === 'object' && data.notificationId) {
+                // New format: { notificationId, linkHref }
+                this.markNotificationAsRead(data.notificationId, data.linkHref);
+            } else {
+                // Old format: just the notificationId
+                this.markNotificationAsRead(data);
+            }
         });
 
-        this.eventBus.on('mark-all-notifications-seen', () => {
-            this.markAllNotificationsAsSeen();
+        this.eventBus.on('mark-all-notifications-seen', (notificationIds) => {
+            this.markAllNotificationsAsSeen(notificationIds);
         });
 
         this.eventBus.on('notification-deleted', (notificationId) => {

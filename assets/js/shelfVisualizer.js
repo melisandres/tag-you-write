@@ -356,6 +356,9 @@ export class ShelfVisualizer {
           // Handle marking as "read"
           this.SeenManager.markAsSeen(text_id);
           this.SeenManager.updateReadStatus(text_id);
+          
+          // Emit shelf node opened event for activity tracking
+          eventBus.emit('shelfNodeOpened', text_id);
         } else {
           writingDiv.classList.add('hidden');
           writingDiv.classList.remove('visible');
@@ -363,6 +366,9 @@ export class ShelfVisualizer {
           arrow.classList.add('closed');
           arrow.classList.remove('arrow-down');
           arrow.classList.add('arrow-right');
+          
+          // Emit shelf node closed event for activity tracking
+          eventBus.emit('shelfNodeClosed', text_id);
         }
       });
     });

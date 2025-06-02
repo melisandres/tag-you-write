@@ -1,4 +1,10 @@
 {
+  "activity": {
+    "tooltip": "Nombre d'utilisateurs en ligne",
+    "total_users": "Nombre d'Utilisateurs",
+    "users_editing": "Utilisateurs qui écrivent",
+    "editing": "Écrivant"
+  },
   "nav": {
     "home": "Accueil",
     "home_tooltip": "accueil",

@@ -34,7 +34,7 @@
 @import url(./elements/menu.css);
 @import url(./elements/home-container.css);
 @import url(./elements/notifications-menu.css);
-
+@import url(./elements/activity-indicator.css);
 
 /* general: a catch-all  */
 @import url(./general/general.css);

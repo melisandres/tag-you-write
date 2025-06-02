@@ -36,6 +36,8 @@ import { NodesModifiedHandler } from './NodesModifiedHandler.js';
 import { NotificationsMenuManager } from './notificationsMenuManager.js';
 import { Localization } from './localization.js';
 import { TooltipManager } from './tooltipManager.js';
+import { CurrentActivityManager } from './currentActivityManager.js';
+import { ActivityIndicator } from './activityIndicator.js';
 
 // Make eventBus globally available immediately
 window.eventBus = eventBus;
@@ -150,6 +152,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   const filterManager = new FilterManager();
   window.searchHighlighter = new SearchHighlighter();
   const searchManager = new SearchManager();
+
+  // Initialize CurrentActivityManager
+  window.currentActivityManager = new CurrentActivityManager();
+
+  // Initialize ActivityIndicator
+  window.activityIndicator = new ActivityIndicator();
 
   // No need for separate handleInitialState
 

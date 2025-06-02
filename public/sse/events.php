@@ -105,12 +105,59 @@ class EventHandler {
      * Parse parameters from the request
      */
     private function parseRequestParameters() {
-        $this->lastEventId = isset($_GET['lastEventId']) ? intval($_GET['lastEventId']) : null;
+        // Remove lastEventId from URL parameters - we'll use session tracking
+        // $this->lastEventId = isset($_GET['lastEventId']) ? intval($_GET['lastEventId']) : null;
         $this->rootStoryId = isset($_GET['rootStoryId']) ? $_GET['rootStoryId'] : null;
         $this->filters = isset($_GET['filters']) ? json_decode($_GET['filters'], true) : [];
         $this->search = isset($_GET['search']) ? $_GET['search'] : '';
         $this->lastTreeCheck = isset($_GET['lastTreeCheck']) ? $_GET['lastTreeCheck'] : null;
         $this->lastGameCheck = isset($_GET['lastGameCheck']) ? $_GET['lastGameCheck'] : null;
+        
+        // Initialize session-based lastEventId
+        $this->initializeSessionEventId();
+    }
+    
+    /**
+     * Initialize session-based event ID tracking
+     */
+    private function initializeSessionEventId() {
+        $sessionKey = 'lastEventId_' . ($this->writerId ?? 'guest');
+        $this->lastEventId = $_SESSION[$sessionKey] ?? null;
+        
+        if ($this->lastEventId === null) {
+            try {
+                // Get the actual maximum event ID to avoid processing historical events
+                require_once(__DIR__ . '/../../model/Event.php');
+                $eventModel = new Event();
+                $maxEventId = $eventModel->getMaxEventId();
+                
+                if ($maxEventId !== null) {
+                    $this->lastEventId = $maxEventId;
+                    $_SESSION[$sessionKey] = $maxEventId;
+                    error_log("SSE: Initialized session lastEventId to current maximum: $maxEventId for user {$this->writerId}");
+                } else {
+                    $this->lastEventId = 0;
+                    $_SESSION[$sessionKey] = 0;
+                    error_log("SSE: No events found, initialized session lastEventId to 0 for user {$this->writerId}");
+                }
+            } catch (\Exception $e) {
+                error_log("SSE: Error initializing session event ID: " . $e->getMessage());
+                $this->lastEventId = 0;
+                $_SESSION[$sessionKey] = 0;
+            }
+        } else {
+            error_log("SSE: Using existing session lastEventId: {$this->lastEventId} for user {$this->writerId}");
+        }
+    }
+    
+    /**
+     * Update session-based lastEventId
+     */
+    private function updateSessionEventId($newEventId) {
+        $sessionKey = 'lastEventId_' . ($this->writerId ?? 'guest');
+        $this->lastEventId = $newEventId;
+        $_SESSION[$sessionKey] = $newEventId;
+        error_log("SSE: Updated session lastEventId to $newEventId for user {$this->writerId}");
     }
     
     /**
@@ -183,26 +230,6 @@ class EventHandler {
     }
     
     /**
-     * Initialize the event ID if needed
-     * 
-     * If lastEventId is 0 or null, get the current max event ID
-     * to avoid processing historical events
-     */
-    private function initializeEventId() {
-        if ($this->lastEventId === null || $this->lastEventId === 0) {
-            try {
-                // Use DataFetchService to get initial state - it handles the max event ID internally
-                // We can safely set this to 0 and let the data fetch service determine the right starting point
-                $this->lastEventId = 0;
-                error_log("SSE: Initialized lastEventId to 0, DataFetchService will handle event filtering");
-            } catch (\Exception $e) {
-                error_log("SSE: Error initializing event ID: " . $e->getMessage());
-                // Keep lastEventId as is if there's an error
-            }
-        }
-    }
-    
-    /**
      * Send an event to the client with duplicate checking
      * 
      * @param string $event Event name
@@ -249,9 +276,6 @@ class EventHandler {
             echo ": " . str_repeat(" ", 2048) . "\n"; // Padding for IE
             echo ": SSE connection established\n\n";
             flush();
-            
-            // Initialize event ID if needed
-            $this->initializeEventId();
             
             // Track time for keepalive and max execution
             $startTime = time();
@@ -395,7 +419,7 @@ class EventHandler {
                     
                     // Update last event ID if present in the message
                     if (isset($data['id'])) {
-                        $this->lastEventId = $data['id'];
+                        $this->updateSessionEventId($data['id']);
                     }
                     
                 } catch (\Exception $e) {
@@ -445,7 +469,7 @@ class EventHandler {
             
             // Update lastEventId
             if (isset($updates['lastEventId'])) {
-                $this->lastEventId = $updates['lastEventId'];
+                $this->updateSessionEventId($updates['lastEventId']);
             }
             
         } catch (\Exception $e) {
@@ -515,7 +539,7 @@ class EventHandler {
                 
                 // Update lastEventId if present
                 if (isset($updates['lastEventId'])) {
-                    $this->lastEventId = $updates['lastEventId'];
+                    $this->updateSessionEventId($updates['lastEventId']);
                 }
                 
                 // Sleep for the poll interval

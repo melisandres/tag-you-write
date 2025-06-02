@@ -1,5 +1,11 @@
 {
   "greeting": "Hello, {name}!",
+  "activity": {
+    "tooltip": "Number of users online",
+    "total_users": "Total Users",
+    "users_editing": "Users Editing",
+    "editing": "Editing"
+  },
     "nav": {
         "home": "Home",
         "home_tooltip": "home",
