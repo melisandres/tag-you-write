@@ -168,17 +168,17 @@ export class UIManager {
   }
 
   // To be accessed while doing automatic refreshes
-  createShowcaseContainer(rootStoryId) {
+  createShowcaseContainer(rootStoryId, clearExisting = true) {
     let container = document.querySelector('#showcase');
     const story = document.querySelector(`.story[data-text-id="${rootStoryId}"]`);
 
-    if (container) {
+    if (container && clearExisting) {
       container.remove();
       this.dataManager.setCurrentViewedRootStoryId(null);
       eventBus.emit('showcaseChanged', null);
     }
 
-    if (story) {
+    if (story && !container) {
       story.innerHTML += '<div id="showcase"></div>';
       container = document.querySelector('#showcase');
       
@@ -191,6 +191,14 @@ export class UIManager {
       }
       
       eventBus.emit('showcaseChanged', rootStoryId);
+    } else if (container && !clearExisting) {
+      // Container exists and we're not clearing - just ensure the rootStoryId is set
+      this.dataManager.setCurrentViewedRootStoryId(rootStoryId);
+      
+      const { type } = this.showcaseManager.getShowcaseParams();
+      if (type) {
+          container.dataset.showcase = type;
+      }
     }
 
     return container;

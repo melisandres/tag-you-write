@@ -66,16 +66,25 @@ export class RefreshManager {
     }
 
     init() {    
+        console.log('=== REFRESH MANAGER INIT START ===');
+        console.log('initialized:', this.initialized);
+        
         if (this.initialized) return;
         this.initialized = true;
 
-        // Prevent default refresh for games page
-        window.addEventListener('load', () => {
-            //if (this.isStoriesPage() /* && this.isPageRefresh() */) {
-                // Prevent the default refresh behavior
+        // Handle both cases: document still loading and document already loaded
+        if (document.readyState === 'loading') {
+            // Document still loading, wait for DOMContentLoaded
+            document.addEventListener('DOMContentLoaded', () => {
+                console.log('=== DOM CONTENT LOADED EVENT FIRED ===');
                 this.handleInitialLoad();
-            //}
-        }, { once: true });
+            }, { once: true });
+        } else {
+            // Document already loaded, call immediately
+            console.log('=== DOCUMENT ALREADY LOADED, CALLING IMMEDIATELY ===');
+            // Use setTimeout to ensure this runs after current execution stack
+            setTimeout(() => this.handleInitialLoad(), 0);
+        }
 
         window.addEventListener('beforeunload', (e) => {
             if (this.isStoriesPage() && !this.shouldRefreshGames) {
@@ -84,9 +93,14 @@ export class RefreshManager {
                 this.saveCurrentPageUrl();
             }
         });
+        
+        console.log('=== REFRESH MANAGER INIT END ===');
     }
 
     async handleInitialLoad() {
+        console.log('=== HANDLE INITIAL LOAD START ===');
+        console.log('isRefreshing:', this.isRefreshing);
+        
         if (this.isRefreshing) {
             console.log('Refresh already in progress, skipping...');
             return;
@@ -96,11 +110,14 @@ export class RefreshManager {
 
         try {
             document.body.classList.add('refreshing');
+            console.log('About to call restoreState...');
             // Single state restoration
             await this.restoreState();
+            console.log('restoreState completed');
         } finally {
             document.body.classList.remove('refreshing');
             this.isRefreshing = false;
+            console.log('=== HANDLE INITIAL LOAD END ===');
         }
     }
 
@@ -506,31 +523,39 @@ export class RefreshManager {
                     console.log('No root story ID found, skipping showcase container creation');
                     return;
                 }
-                const container = this.uiManager.createShowcaseContainer(priorityRootStoryId);
+                const container = this.uiManager.createShowcaseContainer(priorityRootStoryId, false);
                 if (container) {
-                    console.log('container exists');
+                    console.log('container exists, drawing showcase content');
+                    console.log('priorityShowcaseType:', priorityShowcaseType);
                     if (priorityShowcaseType === 'shelf') {
                         console.log('Restoring shelf view');
                         await this.uiManager.drawShelf(priorityRootStoryId, container);
                         this.restoreDrawers(savedState);
                     } else if (priorityShowcaseType === 'tree') {
-                        // The transform will be handled directly in drawTree
+                        console.log('Restoring tree view');
+                        await this.uiManager.drawTree(priorityRootStoryId, container);
+                    } else {
+                        // Default to tree view if no type specified
+                        console.log('No showcase type specified, defaulting to tree view');
                         await this.uiManager.drawTree(priorityRootStoryId, container);
                     }
+                } else {
+                    console.warn('Failed to create showcase container for rootStoryId:', priorityRootStoryId);
                 }
 
-            // Restore modal state
-            if (savedState.modal.isOpen && savedState.modal.textId) {
-                await this.storyManager.showStoryInModal(savedState.modal.textId);
-            }
+                // Restore modal state (only on stories pages)
+                if (savedState.modal.isOpen && savedState.modal.textId) {
+                    await this.storyManager.showStoryInModal(savedState.modal.textId);
+                }
 
-            // Restore scroll position
-            if (savedState.scroll) {
-                setTimeout(() => {
-                    window.scrollTo(savedState.scroll.x, savedState.scroll.y);
-                }, 100);
+                // Restore scroll position (only on stories pages)
+                if (savedState.scroll) {
+                    setTimeout(() => {
+                        window.scrollTo(savedState.scroll.x, savedState.scroll.y);
+                    }, 100);
+                }
             }
-        } } catch (error) {
+        } catch (error) {
             console.error('Error restoring state:', error);
         } finally {
             this.isRestoring = false;

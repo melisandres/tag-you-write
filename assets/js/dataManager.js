@@ -79,6 +79,18 @@ export class DataManager {
 
         // TODO: help with testing
         //this.clearCache();
+
+        this.initializeCurrentViewedRootIdFromUrl();
+    }
+
+    initializeCurrentViewedRootIdFromUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlRootStoryId = urlParams.get('rootStoryId');
+        
+        if (urlRootStoryId) {
+            console.log('DataManager: Setting currentViewedRootId from URL:', urlRootStoryId);
+            this.setCurrentViewedRootStoryId(urlRootStoryId);
+        }
     }
 
     initAuthState() {
