@@ -9,6 +9,7 @@ A collaborative writing platform that allows users to create, share, and interac
 - **Text Collaboration**: Create and share text content
 - **Gamification**: Voting system and game mechanics
 - **Real-time Notifications**: Server-Sent Events (SSE) for live updates
+- **Activity Tracking**: Intelligent user activity monitoring and analytics
 - **Email Notifications**: PHPMailer integration for user communications
 
 ## 🏗️ Architecture
@@ -197,6 +198,23 @@ The front-end is built with vanilla JavaScript, implementing a Single Page Appli
    - Progressive messages
    - Severity-based alerts
    - Contextual help
+
+### Activity Tracking System
+
+The application includes a sophisticated user activity tracking system that monitors engagement and provides analytics for collaborative writing sessions.
+
+**Key Features:**
+- Dual idle detection (timer-based + engagement-based)
+- Context-aware tracking (page type, game context, text focus)
+- Intelligent heartbeat system with automatic idle detection
+- Performance-optimized with minimal network overhead
+
+**Components:**
+- `CurrentActivityManager` (`assets/js/currentActivityManager.js`): Core tracking system
+- `ControllerWriterActivity`: Backend API for activity data
+- `WriterActivity` Model: Database operations and analytics
+
+**Documentation:** See [README-activity-tracking.md](README-activity-tracking.md) for comprehensive documentation including architecture, usage examples, and troubleshooting.
 
 ## 🌐 Multi-language Support
 
