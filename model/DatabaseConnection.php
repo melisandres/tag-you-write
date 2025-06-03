@@ -8,6 +8,15 @@ class DatabaseConnection {
     private static $lastCleanup = 0;
     private static $cleanupInterval = 60; // Clean up every minute
     
+    // Enhanced debugging - track connection usage
+    private static $connectionStats = [
+        'total_created' => 0,
+        'total_released' => 0,
+        'total_failed_tests' => 0,
+        'current_active' => 0,
+        'peak_usage' => 0
+    ];
+    
     private function __construct() {}
     
     /**
@@ -111,7 +120,14 @@ class DatabaseConnection {
             $connection->exec("SET SESSION wait_timeout=" . self::$connectionTimeout);
             $connection->exec("SET SESSION interactive_timeout=" . self::$connectionTimeout);
             
-            error_log("DatabaseConnection: Created new connection");
+            // Update statistics
+            self::$connectionStats['total_created']++;
+            self::$connectionStats['current_active']++;
+            self::$connectionStats['peak_usage'] = max(self::$connectionStats['peak_usage'], self::$connectionStats['current_active']);
+            
+            error_log("DatabaseConnection: Created new connection (Total: " . self::$connectionStats['total_created'] . 
+                     ", Active: " . self::$connectionStats['current_active'] . 
+                     ", Peak: " . self::$connectionStats['peak_usage'] . ")");
             return $connection;
         } catch (PDOException $e) {
             error_log("Database connection error: " . $e->getMessage());
@@ -135,13 +151,30 @@ class DatabaseConnection {
                     
                     // Add to pool
                     self::$connections[] = $connection;
-                    error_log("DatabaseConnection: Released connection back to pool");
+                    
+                    // Update statistics
+                    self::$connectionStats['total_released']++;
+                    self::$connectionStats['current_active']--;
+                    
+                    error_log("DatabaseConnection: Released connection back to pool (Active: " . 
+                             self::$connectionStats['current_active'] . 
+                             ", Pool size: " . count(self::$connections) . ")");
                 } else {
-                    error_log("DatabaseConnection: Connection failed test, not returning to pool");
+                    // Update statistics for failed test
+                    self::$connectionStats['total_failed_tests']++;
+                    self::$connectionStats['current_active']--;
+                    
+                    error_log("DatabaseConnection: Connection failed test, not returning to pool (Active: " . 
+                             self::$connectionStats['current_active'] . 
+                             ", Failed tests: " . self::$connectionStats['total_failed_tests'] . ")");
                     $connection = null; // Ensure connection is closed
                 }
             } catch (PDOException $e) {
-                error_log("Failed to release connection: " . $e->getMessage());
+                // Update statistics for release failure
+                self::$connectionStats['current_active']--;
+                
+                error_log("Failed to release connection: " . $e->getMessage() . 
+                         " (Active: " . self::$connectionStats['current_active'] . ")");
                 $connection = null; // Ensure connection is closed
             }
         }
@@ -211,7 +244,20 @@ class DatabaseConnection {
         return [
             'active_connections' => count(self::$connections),
             'max_connections' => self::$maxConnections,
-            'connection_timeout' => self::$connectionTimeout
+            'connection_timeout' => self::$connectionTimeout,
+            'total_created' => self::$connectionStats['total_created'],
+            'total_released' => self::$connectionStats['total_released'],
+            'total_failed_tests' => self::$connectionStats['total_failed_tests'],
+            'current_active' => self::$connectionStats['current_active'],
+            'peak_usage' => self::$connectionStats['peak_usage']
         ];
+    }
+
+    /**
+     * Log current connection statistics
+     */
+    public static function logStats() {
+        $stats = self::getStats();
+        error_log("DatabaseConnection Stats: " . json_encode($stats));
     }
 } 

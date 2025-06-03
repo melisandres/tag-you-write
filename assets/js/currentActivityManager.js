@@ -2,19 +2,8 @@ import { eventBus } from './eventBus.js';
 import { PageTypeManager } from './pageTypeManager.js';
 
 /**
- * CurrentActivityManager - Simplified Version
- * 
- * SIMPLIFICATION NOTES:
- * - Consolidated 3 redundant game context methods into 1 unified resolver
- * - Fixed the gameId vs rootStoryId parameter confusion
- * - Eliminated duplicate fallback logic
- * - Made context resolution more predictable and debuggable
- * 
- * CONTEXT RESOLUTION STRATEGY:
- * 1. DOM lookup (most reliable) - looks for [data-text-id] elements
- * 2. dataManager.getGame() with proper gameId
- * 3. Manual cache search as fallback
- * 4. Partial resolution (text_id only) if all else fails
+ * CurrentActivityManager 
+
  */
 
 export class CurrentActivityManager {
@@ -27,10 +16,9 @@ export class CurrentActivityManager {
             activity_type: null,
             game_id: null,
             text_id: null,
-            parent_d: null
+            parent_d: null,
+            activity_level: 'active'
         };
-
-        this.currentActivity.activity_level = 'active';
 
         // Initialization flag to prevent premature heartbeats
         this.isInitializing = true;
@@ -38,14 +26,18 @@ export class CurrentActivityManager {
         // Array to track open shelf nodes (most recent first)
         this.openShelfNodes = [];
 
+        // ACTIVITY-BASED HEARTBEAT SYSTEM
         this.heartbeatInterval = 30000; // 30 seconds
-        this.idleTimeout = 30000;      // 30 seconds
         this.heartbeatTimer = null;
+        this.hasActivitySinceLastHeartbeat = false; // Simple boolean to track user engagement
+        this.isCurrentlyIdle = false; // Track if we're in idle state
+        
+        // Idle detection (separate from heartbeat system)
+        this.idleTimeout = 30000;      // 30 seconds to detect idle
         this.idleTimer = null;
         this.lastActivity = Date.now();
-        this.isIdle = false;
 
-        // User engagement tracking
+        // User engagement tracking (simplified)
         this.engagementMetrics = {
             mouseMovements: 0,
             keystrokes: 0,
@@ -67,6 +59,7 @@ export class CurrentActivityManager {
 
     init() {
         console.log('🎯 CurrentActivityManager: Starting initialization');
+        console.log('🔍 TRACE: Initial activity_level:', this.currentActivity.activity_level);
         
         // Phase 1: Detect page and activity types (determines what context we need)
         this.detectPageAndActivityTypes();
@@ -76,14 +69,22 @@ export class CurrentActivityManager {
         
         // Initialization complete - now we can send heartbeats
         this.isInitializing = false;
+        console.log('🔍 TRACE: After initialization, isInitializing:', this.isInitializing);
         
         // Set up event listeners
         this.setupEventListeners();
+        
+        // IMPORTANT: Treat page loading as user activity
+        // This ensures the first heartbeat will be marked as 'active'
+        this.hasActivitySinceLastHeartbeat = true;
+        this.lastActivity = Date.now();
+        console.log('🔍 TRACE: Set hasActivitySinceLastHeartbeat to true, activity_level:', this.currentActivity.activity_level);
         
         // Start activity tracking
         this.startTracking();
         
         console.log('🎯 CurrentActivityManager: Initialized with activity:', this.currentActivity);
+        console.log('🔍 TRACE: Final activity_level after init:', this.currentActivity.activity_level);
     }
 
     /**
@@ -191,8 +192,9 @@ export class CurrentActivityManager {
         
         if (this.currentActivity.text_id !== textId) {
             this.currentActivity.text_id = textId;
+            // Reset heartbeat timer on text context change
             if (!this.isInitializing) {
-                this.sendHeartbeat();
+                this.sendHeartbeatAndResetTimer();
             }
         }
     }
@@ -274,10 +276,10 @@ export class CurrentActivityManager {
         console.log('🎯 CurrentActivityManager: Setting up event listeners');
         
         // Enhanced user activity tracking with engagement metrics
-        document.addEventListener('mousemove', this.handleMouseMove.bind(this), { passive: true });
-        document.addEventListener('keydown', this.handleKeydown.bind(this), { passive: true });
-        document.addEventListener('scroll', this.handleScroll.bind(this), { passive: true });
-        document.addEventListener('click', this.handleClick.bind(this), { passive: true });
+        document.addEventListener('mousemove', () => this.handleMouseMove('mousemove'), { passive: true });
+        document.addEventListener('keydown', () => this.handleKeydown('keydown'), { passive: true });
+        document.addEventListener('scroll', () => this.handleScroll('scroll'), { passive: true });
+        document.addEventListener('click', () => this.handleClick('click'), { passive: true });
         
         // Page visibility changes (browser tab switching)
         document.addEventListener('visibilitychange', this.handleVisibilityChange.bind(this));
@@ -285,16 +287,20 @@ export class CurrentActivityManager {
         // 3. Modal interactions (text viewing inflection points)
         eventBus.on('modalOpened', (textId) => {
             console.log('🎯 CurrentActivityManager: INFLECTION - Modal opened for text:', textId);
-            this.setTextId(textId);
-            this.sendHeartbeat();
+            this.currentActivity.text_id = textId;
+            this.currentActivity.activity_level = 'active';
+            this.markUserActivity('modalOpened'); // Ensure activity flags are set
+            this.sendHeartbeatAndResetTimer();
             //this.setActivityType('browsing'); // viewing text content
         });
 
         eventBus.on('modalClosed', () => {
             console.log('🎯 CurrentActivityManager: INFLECTION - Modal closed, returning to shelf browsing');
             // Re-extract text_id from any open shelf nodes
-            this.setTextId(null);
-            this.sendHeartbeat();
+            this.currentActivity.text_id = null;
+            this.currentActivity.activity_level = 'active';
+            this.markUserActivity('modalClosed'); // Ensure activity flags are set
+            this.sendHeartbeatAndResetTimer();
             //this.setActivityType('browsing');
         });
 
@@ -302,8 +308,10 @@ export class CurrentActivityManager {
         eventBus.on('shelfNodeOpened', (textId) => {
             console.log('🎯 CurrentActivityManager: INFLECTION - Shelf node opened for text:', textId);
             this.addToShelfNodes(textId);
-            this.setTextId(textId);
-            this.sendHeartbeat();
+            this.currentActivity.text_id = textId;
+            this.currentActivity.activity_level = 'active';
+            this.markUserActivity('shelfNodeOpened'); // Ensure activity flags are set
+            this.sendHeartbeatAndResetTimer ();
         });
 
         eventBus.on('shelfNodeClosed', (textId) => {
@@ -313,9 +321,11 @@ export class CurrentActivityManager {
             // If the closed node was the current text_id, update to the most recent open shelf node
             if (this.currentActivity.text_id === textId) {
                 const lastShelfNode = this.getLastShelfNode();
-                this.setTextId(lastShelfNode); // Will be null if no shelf nodes are open
+                this.currentActivity.text_id = lastShelfNode; // Will be null if no shelf nodes are open
             }
-            this.sendHeartbeat();
+            this.currentActivity.activity_level = 'active';
+            this.markUserActivity('shelfNodeClosed'); // Ensure activity flags are set
+            this.sendHeartbeatAndResetTimer();
         });
 
 
@@ -326,8 +336,10 @@ export class CurrentActivityManager {
                 // When game context changes, update game_id and clear text_id and shelf nodes
                 this.extractGameId(params.value);
                 this.clearShelfNodes(); // Clear shelf nodes array when game changes
-                this.setTextId(null); // Clear text_id since we're viewing a new game
-                this.sendHeartbeat();
+                this.currentActivity.text_id = null; // Clear text_id since we're viewing a new game
+                this.currentActivity.activity_level = 'active';
+                this.markUserActivity('sseParametersChanged'); // Ensure activity flags are set
+                this.sendHeartbeatAndResetTimer();
             }
         });
 
@@ -335,57 +347,88 @@ export class CurrentActivityManager {
         eventBus.on('showcaseTypeChanged', ({ type, rootStoryId }) => {
             console.log('🎯 CurrentActivityManager: INFLECTION - Showcase type changed to:', type, 'for game:', rootStoryId);
             this.clearShelfNodes(); // Clear shelf nodes array when showcase type changes
-            this.setTextId(null); // Clear text_id since we're changing view types
+            this.currentActivity.activity_level = 'active';
+            this.currentActivity.text_id = null; // Clear text_id since we're changing view types
+            this.markUserActivity('showcaseTypeChanged'); // Ensure activity flags are set
+            this.sendHeartbeatAndResetTimer();
         });
 
         // TODO: DO i need this, or is the initialization process enough? 
         // 6. Page navigation inflection points
         window.addEventListener('beforeunload', () => {
             console.log('🎯 CurrentActivityManager: INFLECTION - Page unloading, stopping tracking');
-            this.setActivityLevel('idle'); // Mark as idle before leaving
+            this.setActivityLevel('idle'); // Mark as idle before leaving?
             this.stopTracking();
         });
     }
 
     // Enhanced engagement tracking methods
-    handleMouseMove() {
+    handleMouseMove(eventName = 'mousemove') {
         this.engagementMetrics.mouseMovements++;
-        this.handleUserActivity();
+        this.markUserActivity(eventName);
     }
 
-    handleKeydown() {
+    handleKeydown(eventName = 'keydown') {
         this.engagementMetrics.keystrokes++;
-        this.handleUserActivity();
+        this.markUserActivity(eventName);
     }
 
-    handleScroll() {
+    handleScroll(eventName = 'scroll') {
         this.engagementMetrics.scrolls++;
-        this.handleUserActivity();
+        this.markUserActivity(eventName);
     }
 
-    handleClick() {
+    handleClick(eventName = 'click') {
         this.engagementMetrics.clicks++;
-        this.handleUserActivity();
+        this.markUserActivity(eventName);
     }
 
     handleVisibilityChange() {
+        console.log('🔍 TRACE: handleVisibilityChange called');
+        console.log('🔍 TRACE: document.hidden:', document.hidden);
+        console.log('🔍 TRACE: document.visibilityState:', document.visibilityState);
+        
         if (document.hidden) {
-            console.log('🎯 CurrentActivityManager: INFLECTION - Page hidden, setting to idle');
-            this.setActivityLevel('idle');
+            console.log('🎯 CurrentActivityManager: INFLECTION - Page hidden, but NOT immediately setting to idle');
+            console.log('🔍 TRACE: Page hidden - letting normal idle timer handle it');
+            // Don't immediately set to idle - let the normal idle detection handle it
+            // this.setActivityLevel('idle'); // ← REMOVED: This was too aggressive
         } else {
             console.log('🎯 CurrentActivityManager: INFLECTION - Page visible, resuming activity');
-            this.handleUserActivity();
+            console.log('🔍 TRACE: About to call markUserActivity from visibility change');
+            this.markUserActivity(); // This will set back to active if we were idle
         }
     }
 
-    handleUserActivity() {
-        const wasIdle = this.isIdle;
+    /**
+     * Mark user activity - sets the engagement flag and handles idle state recovery
+     */
+    markUserActivity(eventName = null) {
+        console.log('🔍 TRACE: markUserActivity called' + (eventName ? ' by ' + eventName : ''));
+        console.log('🔍 TRACE: hasActivitySinceLastHeartbeat BEFORE:', this.hasActivitySinceLastHeartbeat);
+        const wasIdle = this.isCurrentlyIdle;
         this.lastActivity = Date.now();
         
-        if (this.isIdle) {
-            this.isIdle = false;
-            this.setActivityLevel('active');
+        // Only log when the activity flag changes from false to true (reduces console flooding)
+        const wasActivityFlagSet = this.hasActivitySinceLastHeartbeat;
+        
+        // Set the activity flag for the next heartbeat
+        this.hasActivitySinceLastHeartbeat = true;
+        console.log('🔍 TRACE: hasActivitySinceLastHeartbeat AFTER:', this.hasActivitySinceLastHeartbeat);
+        
+        // Only log when the flag actually changes
+        if (!wasActivityFlagSet) {
+            console.log('🎯 CurrentActivityManager: Activity flag set to true');
+        }
+        
+        // If we were idle, send immediate heartbeat and restart timer
+        if (this.isCurrentlyIdle) {
+            this.isCurrentlyIdle = false;
+            this.setActivityLevel('active', false); // Don't trigger heartbeat here
             console.log('🎯 CurrentActivityManager: User activity detected - resuming from idle');
+            
+            // Send immediate "back to active" heartbeat and restart timer
+            this.sendHeartbeatAndResetTimer();
         }
 
         // Reset idle timer with enhanced engagement checking
@@ -411,10 +454,13 @@ export class CurrentActivityManager {
             // 1. Enough time has passed since last activity
             // 2. Low engagement score (less than 5 interactions)
             // 3. Page is not hidden (already handled by visibility change)
-            if (timeSinceActivity >= this.idleTimeout && engagementScore < 5 && !document.hidden) {
+            if (timeSinceActivity >= this.idleTimeout && engagementScore < 5) {
                 console.log('🎯 CurrentActivityManager: Idle timeout reached - setting to idle');
-                this.setActivityLevel('idle');
-                this.isIdle = true;
+                this.setActivityLevel('idle', false); // Don't trigger heartbeat here
+                this.isCurrentlyIdle = true;
+                
+                // Send "going idle" heartbeat and stop timer
+                this.sendHeartbeatAndStopTimer();
             } else {
                 console.log('🎯 CurrentActivityManager: User still engaged, not marking as idle');
             }
@@ -446,9 +492,9 @@ export class CurrentActivityManager {
         
         if (this.currentActivity.activity_type !== type) {
             this.currentActivity.activity_type = type;
-            // Only send heartbeat if initialization is complete
+            // Reset heartbeat timer on activity change
             if (!this.isInitializing) {
-                this.sendHeartbeat();
+                this.sendHeartbeatAndResetTimer();
             }
         }
     }
@@ -458,21 +504,33 @@ export class CurrentActivityManager {
         
         if (this.currentActivity.page_type !== type) {
             this.currentActivity.page_type = type;
-            // Only send heartbeat if initialization is complete
+            // Reset heartbeat timer on page type change
             if (!this.isInitializing) {
-                this.sendHeartbeat();
+                this.sendHeartbeatAndResetTimer();
             }
         }
     }   
 
-    setActivityLevel(level) {
+    setActivityLevel(level, triggerHeartbeat = true) {
+        console.log('🔍 TRACE: setActivityLevel called with level:', level);
+        console.log('🔍 TRACE: setActivityLevel - current level:', this.currentActivity.activity_level);
+        console.log('🔍 TRACE: setActivityLevel - triggerHeartbeat:', triggerHeartbeat);
+        console.log('🔍 TRACE: setActivityLevel - call stack:', new Error().stack);
+        
         console.log('🎯 CurrentActivityManager: Setting activity level from', this.currentActivity.activity_level, 'to', level);
         
         if (this.currentActivity.activity_level !== level) {
             this.currentActivity.activity_level = level;
-            // Only send heartbeat if initialization is complete
-            if (!this.isInitializing) {
-                this.sendHeartbeat();
+            
+            // Emit event for UI updates
+            eventBus.emit('activityLevelChanged', {
+                level: level,
+                timestamp: Date.now()
+            });
+            
+            // Only trigger heartbeat if explicitly requested (prevents double heartbeats)
+            if (triggerHeartbeat && !this.isInitializing) {
+                this.sendHeartbeatAndResetTimer();
             }
         }
     }
@@ -481,25 +539,23 @@ export class CurrentActivityManager {
     // TODO: ok... we only track if there's a userID... that makes sense... set up the regular heartbeat... so... wait... if we send a heartbeat at an inflexion change... OR after a certain amount of time has passed... do both systems have to be aware of each other, or do they run concurrently? 
     startTracking() {
         console.log('🎯 CurrentActivityManager: Starting tracking for user:', this.currentUserId);
+        console.log('🔍 TRACE: startTracking - activity_level before first heartbeat:', this.currentActivity.activity_level);
+        console.log('🔍 TRACE: startTracking - hasActivitySinceLastHeartbeat:', this.hasActivitySinceLastHeartbeat);
         
         if (!this.currentUserId) {
             console.log('🎯 CurrentActivityManager: No user ID found, skipping activity tracking');
             return;
         }
 
-        // Send initial heartbeat
-        this.sendHeartbeat();
-        
-        // Set up regular heartbeat
-        this.heartbeatTimer = setInterval(() => {
-            console.log('🎯 CurrentActivityManager: Regular heartbeat interval triggered');
-            this.sendHeartbeat();
-        }, this.heartbeatInterval);
+        // Send initial heartbeat and start timer
+        console.log('🔍 TRACE: About to send initial heartbeat...');
+        this.sendHeartbeatAndResetTimer();
 
         // Start idle detection
-        this.handleUserActivity();
+        this.markUserActivity();
         
         console.log('🎯 CurrentActivityManager: Tracking started with', this.heartbeatInterval + 'ms interval');
+        console.log('🔍 TRACE: startTracking - activity_level after setup:', this.currentActivity.activity_level);
     }
 
     // TODO: ok... this is good I think... I see an idle time, and a heartbeattimer... something to study... 
@@ -517,12 +573,128 @@ export class CurrentActivityManager {
         }
     }
 
-    async sendHeartbeat() {
+    /**
+     * Send heartbeat and reset the timer - core method for activity-based system
+     */
+    sendHeartbeatAndResetTimer() {
+        console.log('🔍 TRACE: sendHeartbeatAndResetTimer called');
+        console.log('🔍 TRACE: Current activity_level:', this.currentActivity.activity_level);
+        console.log('🔍 TRACE: hasActivitySinceLastHeartbeat:', this.hasActivitySinceLastHeartbeat);
+        
         if (!this.currentUserId) {
             console.log('🎯 CurrentActivityManager: Skipping heartbeat - no user ID');
             return;
         }
 
+        // Send the heartbeat immediately
+        console.log('🔍 TRACE: About to execute heartbeat...');
+        this.executeHeartbeat();
+
+        // Reset the timer
+        console.log('🔍 TRACE: About to reset heartbeat timer...');
+        this.resetHeartbeatTimer();
+    }
+
+    /**
+     * Send heartbeat and stop the timer (for going idle)
+     */
+    sendHeartbeatAndStopTimer() {
+        if (!this.currentUserId) {
+            console.log('🎯 CurrentActivityManager: Skipping heartbeat - no user ID');
+            return;
+        }
+
+        // Send the heartbeat immediately
+        this.executeHeartbeat();
+
+        // Stop the timer since we're going idle
+        if (this.heartbeatTimer) {
+            clearInterval(this.heartbeatTimer);
+            this.heartbeatTimer = null;
+            console.log('🎯 CurrentActivityManager: Stopped heartbeat timer (going idle)');
+        }
+    }
+
+    /**
+     * Reset the heartbeat timer
+     */
+    resetHeartbeatTimer() {
+        // Clear existing timer
+        if (this.heartbeatTimer) {
+            clearInterval(this.heartbeatTimer);
+        }
+
+        // Start new timer
+        this.heartbeatTimer = setInterval(() => {
+            console.log('🎯 CurrentActivityManager: Timer-based heartbeat triggered');
+            this.executeTimerBasedHeartbeat();
+        }, this.heartbeatInterval);
+
+        console.log('🎯 CurrentActivityManager: Heartbeat timer reset');
+    }
+
+    /**
+     * Execute heartbeat when timer expires - determines activity level based on engagement
+     */
+    executeTimerBasedHeartbeat() {
+        console.log('🔍 TRACE: executeTimerBasedHeartbeat called');
+        console.log('🔍 TRACE: Current activity_level before logic:', this.currentActivity.activity_level);
+        console.log('🔍 TRACE: hasActivitySinceLastHeartbeat:', this.hasActivitySinceLastHeartbeat);
+        console.log('🔍 TRACE: lastActivity timestamp:', this.lastActivity);
+        console.log('🔍 TRACE: isCurrentlyIdle:', this.isCurrentlyIdle);
+        console.log('🔍 TRACE: document.hidden:', document.hidden);
+        
+        // Determine activity level based on whether we detected activity since last heartbeat
+        // BUT: if we're currently marked as active and haven't been idle long enough, stay active
+        const timeSinceLastActivity = Date.now() - this.lastActivity;
+        console.log('🔍 TRACE: timeSinceLastActivity:', timeSinceLastActivity, 'ms');
+        console.log('🔍 TRACE: idleTimeout:', this.idleTimeout, 'ms');
+        
+        const activityLevel = (this.hasActivitySinceLastHeartbeat || timeSinceLastActivity < this.idleTimeout) ? 'active' : 'idle';
+        
+        console.log('🎯 CurrentActivityManager: Timer heartbeat - activity since last:', 
+                   this.hasActivitySinceLastHeartbeat, 'time since activity:', timeSinceLastActivity, 
+                   'should be idle:', activityLevel === 'idle', 'final level:', activityLevel);
+        console.log('🔍 TRACE: Calculated activityLevel:', activityLevel);
+
+        // Update activity level if it changed
+        if (this.currentActivity.activity_level !== activityLevel) {
+            console.log('🔍 TRACE: Activity level changing from', this.currentActivity.activity_level, 'to', activityLevel);
+            this.currentActivity.activity_level = activityLevel;
+        } else {
+            console.log('🔍 TRACE: Activity level staying the same:', activityLevel);
+        }
+
+        // If we're going idle, stop the timer after this heartbeat
+        if (activityLevel === 'idle') {
+            console.log('🔍 TRACE: Going idle - will stop timer after heartbeat');
+            this.isCurrentlyIdle = true;
+            this.executeHeartbeat();
+            
+            // Stop timer since we're now idle
+            if (this.heartbeatTimer) {
+                clearInterval(this.heartbeatTimer);
+                this.heartbeatTimer = null;
+                console.log('🎯 CurrentActivityManager: Stopped heartbeat timer (detected idle)');
+            }
+        } else {
+            console.log('🔍 TRACE: Staying active - sending heartbeat and continuing timer');
+            // Send heartbeat and reset timer for next cycle
+            this.executeHeartbeat();
+        }
+
+        // Reset the activity flag for the next cycle
+        console.log('🔍 TRACE: Resetting hasActivitySinceLastHeartbeat to false');
+        this.hasActivitySinceLastHeartbeat = false;
+    }
+
+    /**
+     * Actually execute the heartbeat request
+     */
+    async executeHeartbeat() {
+        console.log('🔍 TRACE: executeHeartbeat called');
+        console.log('🔍 TRACE: Current activity_level before payload creation:', this.currentActivity.activity_level);
+        
         // Prepare payload with writer_id
         const payload = {
             writer_id: this.currentUserId,
@@ -534,13 +706,14 @@ export class CurrentActivityManager {
             parent_id: this.currentActivity.parent_id
         };
 
-        console.log('🎯 CurrentActivityManager: Sending heartbeat with data:', payload);
+        console.log('🎯 CurrentActivityManager: Executing heartbeat with data:', payload);
+        console.log('🔍 TRACE: Payload activity_level is:', payload.activity_level);
 
         try {
-            const endpoint = 'writerActivity/storeOrUpdate'; // Use the correct endpoint
+            const endpoint = 'writerActivity/storeOrUpdate';
             const url = window.i18n.createUrl(endpoint);
             
-            console.log('🎯 CurrentActivityManager: Heartbeat URL:', url);
+            console.log('🔍 TRACE: Sending to URL:', url);
             
             const response = await fetch(url, {
                 method: 'POST',
@@ -551,15 +724,22 @@ export class CurrentActivityManager {
             });
 
             console.log('🎯 CurrentActivityManager: Heartbeat response status:', response.status);
+            console.log('🔍 TRACE: Response details:', {
+                ok: response.ok,
+                status: response.status,
+                statusText: response.statusText
+            });
             
             if (!response.ok) {
                 const errorText = await response.text();
                 console.error('🎯 CurrentActivityManager: Heartbeat failed:', response.status, errorText);
+                console.error('🔍 TRACE: Error response body:', errorText);
                 throw new Error(`HTTP ${response.status}: ${errorText}`);
             }
 
             const result = await response.json();
             console.log('🎯 CurrentActivityManager: Heartbeat successful:', result);
+            console.log('🔍 TRACE: Success response details:', result);
             
             // Emit event for activity indicator
             eventBus.emit('activityHeartbeat', {
@@ -569,21 +749,22 @@ export class CurrentActivityManager {
 
         } catch (error) {
             console.error('🎯 CurrentActivityManager: Heartbeat error:', error);
+            console.error('🔍 TRACE: Full error object:', error);
         }
     }
 
     // Helper methods for external use
-    updateActivity(updates) {
+/*     updateActivity(updates) {
         console.log('🎯 CurrentActivityManager: Updating activity with:', updates);
         Object.assign(this.currentActivity, updates);
-        this.sendHeartbeat();
-    }
+        this.sendHeartbeatAndResetTimer();
+    } */
 
     getCurrentActivity() {
         return { ...this.currentActivity };
     }
 
-    //TODO: where do I call this? 
+/*     //TODO: where do I call this? 
     startEditing(textId, parentId = null) {
         console.log('🎯 CurrentActivityManager: Starting editing for text:', textId);
        // this.setTextContext(textId, parentId);
@@ -598,18 +779,18 @@ export class CurrentActivityManager {
     startGame() {
         console.log('🎯 CurrentActivityManager: Starting game creation');
         this.setActivityType('starting_game');
-    }
+    } */
 
     // === TESTING METHODS ===
     // Public method to manually trigger page type detection for testing
-    redetectPageType() {
+/*     redetectPageType() {
         console.log('🎯 CurrentActivityManager: Manually triggering page type detection...');
         this.detectPageAndActivityTypes();
         return this.getCurrentActivity();
-    }
+    } */
 
     // Debug method to check what DOM elements are present for page type detection
-    debugPageElements() {
+/*     debugPageElements() {
         console.log('🔍 DEBUG: Checking page elements for detection...');
         console.log('🔍 [data-stories]:', document.querySelector('[data-stories]'));
         console.log('🔍 [data-form-type]:', document.querySelector('[data-form-type]'));
@@ -623,5 +804,5 @@ export class CurrentActivityManager {
         
         console.log('🔍 Current activity:', this.getCurrentActivity());
         return this.getCurrentActivity();
-    }
+    } */
 } 

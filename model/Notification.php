@@ -133,7 +133,7 @@ class Notification extends Crud{
 
     /**
      * Get a specific notification by ID and writer_id
-     * Used by EventPollingService when we have explicit writer_id parameter
+     * Used by dataFetchService when we have explicit writer_id parameter
      * 
      * @param int $notificationId The notification ID
      * @param int $writerId The writer ID

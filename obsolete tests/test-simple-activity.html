@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Activity Test</title>
+    <meta name="user" data-user-id="1">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        button {
+            background-color: #007cba;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover { background-color: #005a87; }
+        .status {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+        .console {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <!-- Simulate your DOM structure -->
+    <div data-stories style="display: none;">Game list page</div>
+    
+    <!-- Mock story element for testing context detection -->
+    <div class="story" data-game-id="305" data-text-id="718" style="display: none;">
+        Mock story element
+    </div>
+
+    <div class="test-container">
+        <h1>🎯 Simple Activity Manager Test</h1>
+        
+        <div class="section">
+            <h3>Current Status</h3>
+            <div id="status" class="status">Loading...</div>
+            <button onclick="updateStatus()">Refresh Status</button>
+        </div>
+
+        <div class="section">
+            <h3>Test Actions</h3>
+            <button onclick="testEditing()">Test Editing</button>
+            <button onclick="testBrowsing()">Test Browsing</button>
+            <button onclick="testIdle()">Test Idle</button>
+            <button onclick="testActive()">Test Active</button>
+            <button onclick="testGameContext()">Test Game Context</button>
+            <button onclick="sendHeartbeat()">Send Heartbeat</button>
+        </div>
+
+        <div class="section">
+            <h3>Engagement Test</h3>
+            <p>Move your mouse, type, or scroll to test engagement tracking:</p>
+            <textarea placeholder="Type here to test keystroke tracking..." style="width: 100%; height: 60px;"></textarea>
+            <div style="height: 100px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px;">
+                <p>Scroll this area to test scroll tracking...</p>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                <p>Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                <p>Ut enim ad minim veniam, quis nostrud exercitation.</p>
+                <p>Duis aute irure dolor in reprehenderit in voluptate.</p>
+                <p>Excepteur sint occaecat cupidatat non proident.</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Console Output</h3>
+            <button onclick="clearConsole()">Clear Console</button>
+            <div id="console" class="console"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Mock eventBus
+        window.eventBus = {
+            events: {},
+            on(event, callback) {
+                if (!this.events[event]) this.events[event] = [];
+                this.events[event].push(callback);
+            },
+            emit(event, data) {
+                console.log(`EventBus: ${event}`, data);
+                if (this.events[event]) {
+                    this.events[event].forEach(callback => callback(data));
+                }
+            }
+        };
+
+        // Mock i18n
+        window.i18n = {
+            createUrl(endpoint) {
+                return `http://localhost:8888/tag-you-write-repo/tag-you-write/en/${endpoint}`;
+            }
+        };
+
+        // Mock dataManager
+        window.dataManager = {
+            getCurrentViewedRootStoryId() {
+                return "718"; // Mock root story ID that matches our test element
+            },
+            storyCache: {
+                games: {
+                    "305": {
+                        data: {
+                            game_id: "305",
+                            text_id: "718",
+                            title: "Test Game"
+                        }
+                    }
+                }
+            }
+        };
+
+        // Console capture
+        const originalConsole = {
+            log: console.log,
+            error: console.error,
+            warn: console.warn
+        };
+
+        function captureConsole() {
+            ['log', 'error', 'warn'].forEach(method => {
+                console[method] = function(...args) {
+                    originalConsole[method].apply(console, args);
+                    
+                    const output = document.getElementById('console');
+                    const message = args.map(arg => 
+                        typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+                    ).join(' ');
+                    
+                    const timestamp = new Date().toLocaleTimeString();
+                    output.textContent += `[${timestamp}] ${message}\n`;
+                    output.scrollTop = output.scrollHeight;
+                };
+            });
+        }
+
+        // Initialize
+        captureConsole();
+
+        // Import and initialize the simple activity manager
+        import { CurrentActivityManager } from './assets/js/currentActivityManager-simple.js';
+        
+        let activityManager;
+        
+        try {
+            activityManager = new CurrentActivityManager();
+            console.log('✅ Simple Activity Manager initialized successfully');
+        } catch (error) {
+            console.error('❌ Failed to initialize Simple Activity Manager:', error);
+        }
+
+        // Global test functions
+        window.updateStatus = () => {
+            if (activityManager) {
+                const activity = activityManager.getCurrentActivity();
+                const status = document.getElementById('status');
+                status.textContent = JSON.stringify(activity, null, 2);
+            }
+        };
+
+        window.testEditing = () => {
+            console.log('🧪 Testing editing mode');
+            if (activityManager) activityManager.simulateEditing();
+        };
+
+        window.testBrowsing = () => {
+            console.log('🧪 Testing browsing mode');
+            if (activityManager) activityManager.simulateBrowsing();
+        };
+
+        window.testIdle = () => {
+            console.log('🧪 Testing idle state');
+            if (activityManager) activityManager.simulateIdle();
+        };
+
+        window.testActive = () => {
+            console.log('🧪 Testing active state');
+            if (activityManager) activityManager.simulateActive();
+        };
+
+        window.testGameContext = () => {
+            console.log('🧪 Testing game context change');
+            eventBus.emit('showcaseChanged', '718');
+        };
+
+        window.sendHeartbeat = () => {
+            console.log('🧪 Sending manual heartbeat');
+            if (activityManager) activityManager.sendHeartbeat();
+        };
+
+        window.clearConsole = () => {
+            document.getElementById('console').textContent = '';
+        };
+
+        // Auto-update status every 2 seconds
+        setInterval(() => {
+            updateStatus();
+        }, 2000);
+
+        // Initial status update
+        setTimeout(updateStatus, 1000);
+    </script>
+</body>
+</html> 

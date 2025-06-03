@@ -14,7 +14,7 @@ The event system tracks and broadcasts actions within the application using a th
 - `EventConfig`: Defines event types and their configurations
 - `RedisManager`: Handles Redis connections and pub/sub operations
 - `RedisService`: Publishes events to appropriate Redis channels
-- `EventPollingService`: Shared service for both SSE and controller endpoints
+- `DataFetchService`: Shared service for both SSE and controller endpoints
 
 ### Data Flow
 1. Controller action occurs (vote, publish, etc.)
@@ -58,7 +58,7 @@ This approach allows for efficient database queries and targeted updates.
 
 ### 2. SSE Polling (First Fallback)
 - Used when Redis is unavailable
-- `EventPollingService` queries the events table first
+- `DataFetchService` queries the events table first
 - Then selectively fetches related records only as needed
 - Long-running connection with periodic polls
 - Managed by `events.php`
@@ -66,7 +66,7 @@ This approach allows for efficient database queries and targeted updates.
 ### 3. Frontend Polling (Second Fallback)
 - Used if SSE connection fails
 - Regular AJAX calls to controller endpoints
-- Uses the same `EventPollingService` as SSE
+- Uses the same `DataFetchService` as SSE
 - Configurable polling intervals
 
 ## Adding a New Event Type
@@ -127,7 +127,7 @@ RedisManager::$USE_REDIS = false;
 Check error logs for:
 - "SSE:" prefix for SSE-related logs
 - "Redis:" prefix for Redis-related logs
-- "EventPollingService:" for polling-related logs
+- "DataFetchService:" for polling-related logs
 
 ## Best Practices
 1. Always validate required fields before creating events

@@ -30,6 +30,11 @@ class ControllerWriterActivity extends Controller {
      */
     public function storeOrUpdate() {
         try {
+            // Log connection stats periodically (every 10th request)
+            if (rand(1, 10) === 1) {
+                DatabaseConnection::logStats();
+            }
+            
             // Get JSON input
             $input = json_decode(file_get_contents('php://input'), true);
             
