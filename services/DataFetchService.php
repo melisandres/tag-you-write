@@ -15,17 +15,24 @@ if (!class_exists('PermissionsService')) {
     require_once __DIR__ . '/../services/PermissionsService.php';
 }
 
+// Ensure WriterActivity model is available
+if (!class_exists('WriterActivity')) {
+    require_once __DIR__ . '/../model/WriterActivity.php';
+}
+
 class DataFetchService {
     private $eventModel;
     private $gameModel;
     private $textModel;
     private $notificationModel;
+    private $writerActivityModel;
     
     public function __construct() {
         $this->eventModel = new Event();
         $this->gameModel = new Game();
         $this->textModel = new Text();
         $this->notificationModel = new Notification();
+        $this->writerActivityModel = new WriterActivity();
     }
     
     /**
@@ -51,6 +58,9 @@ class DataFetchService {
             'modifiedNodes' => [],
             'searchResults' => [],
             'notifications' => [],
+            'siteWideActivity' => null,
+            'gameActivity' => null,
+            'textActivity' => null,
             'lastEventId' => $lastEventId,
             'debug' => [
                 'lastEventId' => $lastEventId,
@@ -64,6 +74,30 @@ class DataFetchService {
         ];
         
         try {
+            // Fetch site-wide activity data
+            $siteWideActivity = $this->writerActivityModel->getSiteWideActivityCounts();
+            if ($siteWideActivity) {
+                $updates['siteWideActivity'] = $siteWideActivity;
+            }
+            
+            // Fetch game activity data
+            $gameActivity = $this->fetchGameActivityData();
+            if ($gameActivity) {
+                $updates['gameActivity'] = $gameActivity;
+            }
+            
+            // Fetch text activity data if we have a rootStoryId
+            if ($rootStoryId) {
+                // Get game ID from rootStoryId for text activities
+                $gameId = $this->gameModel->selectGameId($rootStoryId);
+                if ($gameId) {
+                    $textActivity = $this->fetchTextActivityData($gameId);
+                    if ($textActivity) {
+                        $updates['textActivity'] = $textActivity;
+                    }
+                }
+            }
+            
             // Get events since last event ID
             $events = $this->eventModel->getFilteredEvents($lastEventId, $writerId, $rootStoryId);
             error_log("DataFetchService: Found " . count($events) . " events since lastEventId=$lastEventId");
@@ -224,6 +258,46 @@ class DataFetchService {
     }
 
     /**
+     * Fetch site-wide activity counts
+     * 
+     * @return array|null Site-wide activity data or null on error
+     */
+    public function fetchSiteWideActivityData() {
+        return $this->executeWithRetry(function() {
+            return $this->writerActivityModel->getSiteWideActivityCounts();
+        });
+    }
+
+    /**
+     * Fetch game-specific activity counts
+     * 
+     * @return array|null Game activity data or null on error
+     */
+    public function fetchGameActivityData() {
+        return $this->executeWithRetry(function() {
+            return $this->writerActivityModel->getGameActivityCounts();
+        });
+    }
+
+    /**
+     * Fetch text-level activity data for a specific game
+     * 
+     * @param int|null $gameId Game ID to fetch text activities for
+     * @return array|null Text activity data or null on error
+     */
+    public function fetchTextActivityData($gameId = null) {
+        return $this->executeWithRetry(function() use ($gameId) {
+            if (!$gameId) {
+                return null;
+            }
+            
+            // Get individual user activities for the specified game
+            // This returns an array of individual activity records, not aggregated counts
+            return $this->writerActivityModel->getIndividualTextActivities($gameId);
+        });
+    }
+
+    /**
      * Log database connection statistics for debugging
      */
     public function logConnectionStats() {
@@ -313,6 +387,7 @@ class DataFetchService {
         $this->gameModel = new Game();
         $this->textModel = new Text();
         $this->notificationModel = new Notification();
+        $this->writerActivityModel = new WriterActivity();
         
         error_log("DataFetchService: Models recreated with fresh connections from pool");
     }

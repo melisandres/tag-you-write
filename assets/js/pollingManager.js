@@ -3,7 +3,7 @@ import { eventBus } from './eventBus.js';
 export class PollingManager {
     constructor() {
         this.pollingTasks = new Map();
-        this.defaultInterval = 10000;
+        this.defaultInterval = 5000;
         this.dataManager = window.dataManager;
         this.errorRetryCount = 0;
         this.maxErrorRetries = 5;
@@ -110,6 +110,24 @@ export class PollingManager {
         if (updates.notifications && updates.notifications.length > 0) {
             console.log('Polling: Processing notifications:', updates.notifications);
             eventBus.emit('notificationsReceived', updates.notifications);
+        }
+        
+        // Process site-wide activity data
+        if (updates.siteWideActivity) {
+            console.log('Polling: Processing site-wide activity:', updates.siteWideActivity);
+            eventBus.emit('siteActivityUpdate', updates.siteWideActivity);
+        }
+        
+        // Process game activity data
+        if (updates.gameActivity) {
+            console.log('Polling: Processing game activity:', updates.gameActivity);
+            eventBus.emit('gameActivityUpdate', updates.gameActivity);
+        }
+        
+        // Process text activity data
+        if (updates.textActivity) {
+            console.log('Polling: Processing text activity:', updates.textActivity);
+            eventBus.emit('textActivityUpdate', updates.textActivity);
         }
         
         // Process game/text updates

@@ -104,8 +104,11 @@ class ControllerWriterActivity extends Controller {
             $success = $writerActivity->storeOrUpdate($activityData);
 
             if ($success) {
-                // Publish to Redis if available - using existing pattern
-                $this->publishToRedis($activityData);
+                // PHASE 2: Use only the direct Redis method (no events table flooding)
+                $this->publishActivityUpdateDirect($activityData);
+                
+                // OLD METHOD DISABLED: Floods events table and causes race conditions
+                // $this->publishActivityUpdate($activityData);
                 
                 echo json_encode(['success' => true]);
             } else {
@@ -124,7 +127,7 @@ class ControllerWriterActivity extends Controller {
      * Get activities since a specific timestamp
      * Used by polling systems to fetch activity updates
      */
-    public function getActivitiesSince() {
+/*     public function getActivitiesSince() {
         try {
             $lastCheck = $_GET['lastCheck'] ?? null;
             $gameId = $_GET['gameId'] ?? null;
@@ -142,6 +145,31 @@ class ControllerWriterActivity extends Controller {
             error_log("WriterActivity getActivitiesSince error: " . $e->getMessage());
             http_response_code(500);
             echo json_encode(['error' => 'Internal server error']);
+        }
+    } */
+
+
+
+        /**
+     * Get site-wide activity counts (for initialization and Redis broadcasting)
+     * Returns simple tallies of browsing vs writing users across the entire site
+     * 
+     * NOTE: This is similar to getActivityCounts() but specifically designed for 
+     * site-wide broadcasting and uses a simplified data structure for efficiency.
+     * Eventually we may want to consolidate these methods.
+     */
+    public function getSiteWideActivityCounts() {
+        try {
+            $writerActivity = new WriterActivity();
+            $counts = $writerActivity->getSiteWideActivityCounts();
+            
+            header('Content-Type: application/json');
+            echo json_encode($counts);
+            
+        } catch (Exception $e) {
+            error_log("Error getting site-wide activity counts: " . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(['error' => 'Failed to get site-wide activity counts']);
         }
     }
 
@@ -175,7 +203,7 @@ class ControllerWriterActivity extends Controller {
     /**
      * Get activity counts for texts (for tree/shelf visualization)
      */
-    public function getTextActivityCounts() {
+/*     public function getTextActivityCounts() {
         try {
             $gameId = $_GET['gameId'] ?? null;
             
@@ -200,15 +228,15 @@ class ControllerWriterActivity extends Controller {
             http_response_code(500);
             echo json_encode(['error' => 'Internal server error']);
         }
-    }
+    } */
 
     /**
-     * Publish activity update to Redis for real-time updates
-     * Following the pattern used in other controllers
+     * NEW: Publish activity update directly to Redis (bypasses events table)
+     * This is the new approach that avoids flooding the events table with heartbeats
      */
-    private function publishToRedis($activityData) {
+    private function publishActivityUpdateDirect($activityData) {
         try {
-            // Load Redis manager if available
+            // Load RedisManager if available
             if (file_exists('services/RedisManager.php')) {
                 require_once('services/RedisManager.php');
                 
@@ -216,31 +244,82 @@ class ControllerWriterActivity extends Controller {
                     $redisManager = new RedisManager();
                     
                     if ($redisManager->isAvailable()) {
-                        // Publish to activity channels
-                        $message = json_encode([
-                            'type' => 'activity_update',
-                            'data' => $activityData,
-                            'timestamp' => time()
-                        ]);
+                        // Get fresh activity counts
+                        $writerActivity = new WriterActivity();
                         
-                        // Publish to general activity channel
-                        $redisManager->publish('activities:updates', $message);
+                        // 1. Site-wide activity counts
+                        $siteWideCounts = $writerActivity->getSiteWideActivityCounts();
+                        $siteWideMessage = [
+                            'type' => 'site_activity_update',
+                            'data' => $siteWideCounts,
+                            'source' => 'direct_activity',
+                            'timestamp' => time(),
+                            'writer_id' => $activityData['writer_id'] // For debugging
+                        ];
                         
-                        // Publish to game-specific channel if game_id exists
+                        // 2. Game-specific activity counts (scoped to current user's game)
+                        $gameActivities = null;
+                        $gameMessage = null;
                         if ($activityData['game_id']) {
-                            $redisManager->publish('activities:game:' . $activityData['game_id'], $message);
+                            $gameActivities = $writerActivity->getGameActivityCounts($activityData['game_id']);
+                            $gameMessage = [
+                                'type' => 'game_activity_update',
+                                'data' => $gameActivities,
+                                'source' => 'direct_activity',
+                                'timestamp' => time(),
+                                'writer_id' => $activityData['writer_id'] // For debugging
+                            ];
                         }
                         
-                        // Publish to text-specific channel if text_id exists
-                        if ($activityData['text_id']) {
-                            $redisManager->publish('activities:text:' . $activityData['text_id'], $message);
+                        // 3. Text-level activity (individual user activity for those viewing this game)
+                        $textMessage = null;
+                        if ($activityData['game_id'] && in_array($activityData['activity_type'], ['iterating', 'adding_note', 'starting_game'])) {
+                            $textMessage = [
+                                'type' => 'text_activity_update',
+                                'data' => [
+                                    'writer_id' => $activityData['writer_id'],
+                                    'activity_type' => $activityData['activity_type'],
+                                    'activity_level' => $activityData['activity_level'],
+                                    'text_id' => $activityData['text_id'],
+                                    'parent_id' => $activityData['parent_id'],
+                                    'timestamp' => time()
+                                ],
+                                'source' => 'direct_activity',
+                                'timestamp' => time(),
+                                'writer_id' => $activityData['writer_id'] // For debugging
+                            ];
                         }
+                        
+                        // Publish messages
+                        $siteResult = $redisManager->publish('activities:site', $siteWideMessage);
+                        $gameResult = $gameMessage ? $redisManager->publish('activities:games', $gameMessage) : 0;
+                        $textResult = $textMessage ? $redisManager->publish('activities:texts:' . $activityData['game_id'], $textMessage) : 0;
+                        
+                        // Log success (reduced logging - only log every 5th heartbeat)
+                        static $logCount = 0;
+                        $logCount++;
+                        
+                        if ($logCount % 5 === 0) {
+                            error_log("ActivityUpdate: Direct Redis publish successful for writer_id: " . $activityData['writer_id'] . 
+                                     " (site: $siteResult, game: $gameResult, text: $textResult subscribers)");
+                        }
+                        
+                        return ($siteResult > 0 || $gameResult > 0 || $textResult > 0);
+                    } else {
+                        error_log("ActivityUpdate: Redis not available for direct publishing");
+                        return false;
                     }
+                } else {
+                    error_log("ActivityUpdate: RedisManager class not found");
+                    return false;
                 }
+            } else {
+                error_log("ActivityUpdate: RedisManager.php not found");
+                return false;
             }
         } catch (Exception $e) {
-            // Log but don't fail the request if Redis publishing fails
-            error_log("Failed to publish activity update to Redis: " . $e->getMessage());
+            error_log("ActivityUpdate: Exception in publishActivityUpdateDirect: " . $e->getMessage());
+            return false;
         }
     }
 
@@ -270,7 +349,7 @@ class ControllerWriterActivity extends Controller {
      * Get activity counts for the current context
      * Used by the frontend activity indicator
      */
-    public function getActivityCounts() {
+/*     public function getActivityCounts() {
         try {
             $input = json_decode(file_get_contents('php://input'), true);
             
@@ -290,7 +369,9 @@ class ControllerWriterActivity extends Controller {
             http_response_code(500);
             echo json_encode(['error' => 'Failed to get activity counts']);
         }
-    }
+    } */
+
+
 
     /**
      * Test endpoint for activity manager testing (no authentication required)

@@ -81,13 +81,14 @@ class EventConfig {
                 ]
             ],
             'NOTIFICATION_CREATED' => [
-                'required_fields' => ['notificationId', 'recipientId', 'notificationType'],
+                'required_fields' => ['writerId', 'notificationType', 'relatedType', 'relatedId'],
                 'events' => [
                     'notification' => [
                         'type' => 'notification_created',
                         'table' => 'notification',
-                        'payload_fields' => ['notificationType', 'textId'],
-                        'writer_id_field' => 'recipientId'
+                        'payload_fields' => ['notificationType', 'relatedType', 'relatedId'],
+                        'writer_id_field' => 'writerId',
+                        'related_id_field' => 'notificationId'
                     ]
                 ]
             ]

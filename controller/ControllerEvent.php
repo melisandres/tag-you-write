@@ -3,6 +3,7 @@ RequirePage::model('Event');
 RequirePage::model('Game');
 RequirePage::model('Text');
 RequirePage::model('Notification');
+RequirePage::model('WriterActivity'); // Ensure WriterActivity model is available from the DataFetchService... 
 RequirePage::service('DataFetchService');
 
 class ControllerEvent extends Controller {

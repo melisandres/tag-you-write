@@ -62,7 +62,7 @@ The project follows a Model-View-Controller (MVC) architecture:
 #### Event System
 The application uses a configuration-driven event system to track and manage various actions:
 
-1. **Event Types**
+1. **Action Types**
    - `ROOT_PUBLISH`: When a root text is published
    - `CONTRIB_PUBLISH`: When a contribution is published
    - `NOTE_ADD`: When a note is added to a text
@@ -70,26 +70,34 @@ The application uses a configuration-driven event system to track and manage var
    - `WINNING_VOTE`: When a text wins a vote
    - `GAME_CLOSED`: When a game is closed
    - `NOTIFICATION_CREATED`: When a notification is generated
+   - `ACTIVITY_UPDATE`: When user activity state changes (*Note: Uses direct Redis publishing to avoid events table flooding*)
 
-2. **Event Structure**
+2. **Real-Time Features**
+   - **Content Updates**: Votes, publications, notes with instant synchronization
+   - **Activity Tracking**: User presence, engagement levels, and context awareness (*Direct Redis pattern*)
+   - **Notifications**: User-specific real-time message delivery
+   - **Collaborative Indicators**: Live user activity counts and real-time collaboration awareness
+
+3. **System Architecture**
    - Configuration-driven using `EventConfig`
-   - Flexible payload system for event-specific data
+   - Flexible payload system for action-specific data
    - Automatic root text tracking
-   - Context-aware event creation
+   - Context-aware action recording
+   - Three-tier delivery: Redis Pub/Sub → SSE → AJAX Polling
 
-3. **Event Flow**
+4. **Data Flow**
 ```
-┌─────────────┐     ┌───────────────┐     ┌─────────────┐
-│             │     │               │     │             │
-│  Controller │────▶│  EventService │───▶ │  Event Model│
-│             │     │               │     │             │
-└─────────────┘     └───────────────┘     └─────────────┘
+┌─────────────┐     ┌───────────────┐     ┌─────────────┐     ┌─────────────┐
+│             │     │               │     │             │     │             │
+│  Controller │────▶│  EventService │───▶ │ Event Model │───▶ │ Redis/SSE   │
+│             │     │               │     │             │     │             │
+└─────────────┘     └───────────────┘     └─────────────┘     └─────────────┘
 ```
 
-4. **Adding New Events**
-   - Define event type in `EventConfig`
-   - Add event handling in `EventService`
-   - Implement event creation in relevant controller
+5. **Adding New Actions**
+   - Define action type in `EventConfig`
+   - Add action handling in `EventService`
+   - Implement action creation in relevant controller
 
 #### Controllers
 - `ControllerText`: Handles text creation and management

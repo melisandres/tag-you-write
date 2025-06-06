@@ -79,7 +79,7 @@ class EventService {
         return $success;
     }
 
-    private function getRootTextId($data, $eventType) {
+    private function getRootTextId($data, $eventType) { 
         // Only check isRoot for publishing events
         if (in_array($eventType, ['ROOT_PUBLISH', 'CONTRIB_PUBLISH'])) {
             if ($data['isRoot']) {
@@ -135,10 +135,18 @@ class EventService {
             $writer_id = $data[$eventConfig['writer_id_field']];
         }
 
+        // Determine related_id - use custom field if specified, otherwise use table + 'Id' pattern
+        $related_id = null;
+        if (isset($eventConfig['related_id_field']) && isset($data[$eventConfig['related_id_field']])) {
+            $related_id = $data[$eventConfig['related_id_field']];
+        } else {
+            $related_id = $data[$eventConfig['table'] . 'Id'];
+        }
+
         return [
             'event_type' => $eventConfig['type'],
             'related_table' => $eventConfig['table'],
-            'related_id' => $data[$eventConfig['table'] . 'Id'],
+            'related_id' => $related_id,
             'root_text_id' => $root_text_id,
             'writer_id' => $writer_id,
             'payload' => $payload,

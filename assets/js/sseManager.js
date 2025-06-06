@@ -9,7 +9,7 @@ export class SSEManager {
         this.isConnected = false;
         this.dataManager = window.dataManager;
         this.baseUrl = this.detectBaseUrl();
-        // Session-based tracking handles lastEventId on the server
+        //this.lastEventId = this.dataManager.getLastEventId();
 
         console.log('SSEManager constructor called');
         console.log('SSE: Base URL detected as:', this.baseUrl);
@@ -217,6 +217,58 @@ export class SSEManager {
                 }
             } catch (error) {
                 console.error('SSE: Error processing notification update:', error);
+            }
+        });
+
+        // Site-wide activity update event
+        this.eventSource.addEventListener('siteActivityUpdate', (event) => {
+            try {
+                console.log('SSE: Received site-wide activity update event');
+                console.log('SSE: Raw site activity event data:', event.data);
+                const siteActivityData = JSON.parse(event.data);
+                console.log('SSE: Parsed site activity data:', siteActivityData);
+                console.log('SSE: About to emit siteActivityUpdate event to eventBus');
+                
+                // Emit the same event as polling manager for consistency
+                eventBus.emit('siteActivityUpdate', siteActivityData);
+                
+                console.log('SSE: Successfully emitted siteActivityUpdate event');
+            } catch (error) {
+                console.error('SSE: Error processing site activity update:', error);
+            }
+        });
+
+        // Game activity update event
+        this.eventSource.addEventListener('gameActivityUpdate', (event) => {
+            try {
+                console.log('SSE: Received game activity update event');
+                console.log('SSE: Raw game activity event data:', event.data);
+                const gameActivityData = JSON.parse(event.data);
+                console.log('SSE: Parsed game activity data:', gameActivityData);
+                
+                // Emit the same event as polling manager for consistency
+                eventBus.emit('gameActivityUpdate', gameActivityData);
+                
+                console.log('SSE: Successfully emitted gameActivityUpdate event');
+            } catch (error) {
+                console.error('SSE: Error processing game activity update:', error);
+            }
+        });
+
+        // Text activity update event
+        this.eventSource.addEventListener('textActivityUpdate', (event) => {
+            try {
+                console.log('SSE: Received text activity update event');
+                console.log('SSE: Raw text activity event data:', event.data);
+                const textActivityData = JSON.parse(event.data);
+                console.log('SSE: Parsed text activity data:', textActivityData);
+                
+                // Emit the same event as polling manager for consistency
+                eventBus.emit('textActivityUpdate', textActivityData);
+                
+                console.log('SSE: Successfully emitted textActivityUpdate event');
+            } catch (error) {
+                console.error('SSE: Error processing text activity update:', error);
             }
         });
 

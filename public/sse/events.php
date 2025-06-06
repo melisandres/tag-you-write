@@ -34,6 +34,9 @@ class EventHandler {
     private $search;
     private $lastTreeCheck;
     private $lastGameCheck;
+
+    // Get the game_id from the rootStoryId
+    private $gameId;
     
     // Configuration
     private $maxExecutionTime = 300; // 5 minutes
@@ -73,6 +76,9 @@ class EventHandler {
         
         // Load dependencies
         $this->loadDependencies();
+
+        // Set the game_id from the rootStoryId
+        $this->setGameIdFromRootStoryId();
         
         // Initialize Redis if available
         $this->initializeRedis();
@@ -186,6 +192,7 @@ class EventHandler {
             require_once('../../model/Game.php');
             require_once('../../model/Text.php');
             require_once('../../model/Notification.php');
+            require_once('../../model/WriterActivity.php');
             
             // Load services
             require_once('../../services/PermissionsService.php');
@@ -203,6 +210,16 @@ class EventHandler {
             $this->sendErrorEvent("Failed to load dependencies: " . $e->getMessage());
             exit;
         }
+    }
+
+    private function setGameIdFromRootStoryId() {
+        if (!$this->rootStoryId) {
+            $this->gameId = null;
+            return;
+        }
+        
+        $gameModel = new Game();
+        $this->gameId = $gameModel->selectGameId($this->rootStoryId);
     }
     
     /**
@@ -300,42 +317,81 @@ class EventHandler {
      */
     private function setupRedisSubscriptions() {
         // Define channels based on user context
-        $channels = ['games:updates']; // All clients get game updates
+        $channels = [
+            'games:updates',      // All clients get game updates
+            'activities:site',     // All clients get site-wide activity counts
+            'activities:games',    // All clients get game-specific activity counts
+        ];
         
         // Add user-specific notification channel if authenticated
         if ($this->writerId) {
             $channels[] = 'notifications:' . $this->writerId;
         }
         
-        // Add story-specific channel if viewing a story
+        // Add story-specific channels if viewing a story
         if ($this->rootStoryId) {
-            $channels[] = 'texts:' . $this->rootStoryId;
+            $channels[] = 'texts:' . $this->rootStoryId;        // Text updates
+            
+            // Add text activity subscriptions    
+            if ($this->gameId) {
+                $channels[] = 'activities:texts:' . $this->gameId; // Text-level activities (use game_id for consistency)
+                error_log("SSE: Subscribed to text activities for game_id: $this->gameId (from rootStoryId: {$this->rootStoryId})");
+            } else {
+                error_log("SSE: Could not find game_id for rootStoryId: {$this->rootStoryId}");
+            }
         }
         
         // Before subscribing, check for any missed events via database
         $this->checkMissedEvents();
         
-        // Subscribe to channels - this is blocking and will run until connection is closed
+        // Subscribe to channels with enhanced connection monitoring
         try {
+            error_log("SSE: Starting Redis subscription for connection ID: " . $this->connectionId . " | Writer: " . $this->writerId);
+            
             $this->redisManager->subscribe($channels, function($redis, $channel, $message) {
                 try {
-                    // Check if client disconnected
+                    // Check if client disconnected before processing
                     if (connection_aborted()) {
-                        error_log("SSE Redis: Client disconnected, exiting subscription");
+                        error_log("SSE Redis: Client disconnected (connection_aborted), exiting subscription - ID: " . $this->connectionId);
                         return false; // This should stop the subscription
                     }
+                    
+                    // Test if we can still write to the client
+                    if (!$this->testConnection()) {
+                        error_log("SSE Redis: Connection test failed, exiting subscription - ID: " . $this->connectionId);
+                        return false;
+                    }
+                    
+                    error_log("SSE Redis: Received message on channel '$channel' for connection " . $this->connectionId);
                     
                     // Process the received message
                     $data = json_decode($message, true);
                     if (!$data) {
+                        error_log("SSE Redis: Invalid JSON in message: " . $message);
                         return;
                     }
                     
-                    // Create a simple local deduplication key
-                    $messageKey = $channel . ':' . ($data['id'] ?? '') . ':' . $this->writerId . ':' . $this->connectionId;
+                    // Create appropriate deduplication key based on message type
+                    $messageKey = '';
+                    if ($channel === 'activities:site' || $channel === 'activities:games') {
+                        // For activity messages, use source and timestamp for uniqueness
+                        $timestamp = $data['timestamp'] ?? time();
+                        $source = $data['source'] ?? 'unknown';
+                        $messageKey = $channel . ':' . $source . ':' . $timestamp . ':' . $this->connectionId;
+                    } else if (strpos($channel, 'activities:texts:') === 0) {
+                        // For text activity messages, use writer_id and timestamp for uniqueness
+                        $timestamp = $data['timestamp'] ?? time();
+                        $writerId = $data['writer_id'] ?? 'unknown';
+                        $messageKey = $channel . ':activity:' . $writerId . ':' . $timestamp . ':' . $this->connectionId;
+                    } else {
+                        // For other events (votes, texts, etc.), use the event ID
+                        $eventId = $data['id'] ?? uniqid();
+                        $messageKey = $channel . ':' . $eventId . ':' . $this->writerId . ':' . $this->connectionId;
+                    }
                     
                     // Check if we've already processed this message locally
                     if (in_array($messageKey, $this->sentMessageIds)) {
+                        error_log("SSE Redis: Duplicate message detected for connection " . $this->connectionId . ", skipping");
                         return;
                     }
                     
@@ -348,8 +404,8 @@ class EventHandler {
                     }
 
                     // Process based on channel
-                    switch ($channel) {
-                        case 'games:updates':
+                    switch (true) {
+                        case $channel === 'games:updates':
                             if (isset($data['related_id'])) {
                                 $gameId = $data['related_id'];
                                 
@@ -369,8 +425,9 @@ class EventHandler {
                             }
                             break;
                             
-                        case 'texts:' . $this->rootStoryId:
+                        case $channel === 'texts:' . $this->rootStoryId:
                             if (isset($data['related_id'])) {
+                                // Traditional text update
                                 $textId = $data['related_id'];
                                 
                                 try {
@@ -393,7 +450,7 @@ class EventHandler {
                             }
                             break;
                             
-                        case 'notifications:' . $this->writerId:
+                        case $channel === 'notifications:' . $this->writerId:
                             if (isset($data['related_id'])) {
                                 $notificationId = $data['related_id'];
                                 
@@ -415,6 +472,64 @@ class EventHandler {
                                 error_log("SSE Redis: Notification message missing related_id. Data: " . json_encode($data));
                             }
                             break;
+                            
+                        case $channel === 'activities:site':
+                            // Site-wide activity counts - handle both old and new formats
+                            if (isset($data['data'])) {
+                                $activityData = $data['data'];
+                                $source = $data['source'] ?? 'unknown';
+                                
+                                try {
+                                    $this->sendEvent('siteActivityUpdate', $activityData);
+                                } catch (Exception $e) {
+                                    error_log("SSE Redis: ❌ Error sending site activity update to connection " . $this->connectionId . ": " . $e->getMessage());
+                                    return false; // Exit subscription on send error
+                                }
+                            } else {
+                                error_log("SSE Redis: Site activity message missing data. Full message: " . json_encode($data));
+                            }
+                            break;
+                            
+                        case $channel === 'activities:games':
+                            // Game-specific activity counts (global channel - all users)
+                            if (isset($data['data'])) {
+                                $gameActivityData = $data['data'];
+                                $source = $data['source'] ?? 'unknown';
+                                
+                                try {
+                                    $this->sendEvent('gameActivityUpdate', $gameActivityData);
+                                } catch (Exception $e) {
+                                    error_log("SSE Redis: ❌ Error sending game activity update to connection " . $this->connectionId . ": " . $e->getMessage());
+                                    return false; // Exit subscription on send error
+                                }
+                            } else {
+                                error_log("SSE Redis: Game activity message missing data. Full message: " . json_encode($data));
+                            }
+                            break;
+                            
+                        case strpos($channel, 'activities:texts:') === 0:
+                            // Text-level activity updates (individual user activities for current game viewers)
+                            if (isset($data['data'])) {
+                                $textActivityData = $data['data'];
+                                $source = $data['source'] ?? 'unknown';
+                                
+                                // Extract game_id from channel for logging
+                                $gameIdFromChannel = str_replace('activities:texts:', '', $channel);
+                                
+                                error_log("SSE Redis: Received text activity update on channel '$channel' for game_id: $gameIdFromChannel (connection: " . $this->connectionId . ")");
+                                error_log("SSE Redis: Text activity data: " . json_encode($textActivityData));
+                                
+                                try {
+                                    $this->sendEvent('textActivityUpdate', $textActivityData);
+                                    error_log("SSE Redis: ✅ Successfully sent textActivityUpdate event to client " . $this->connectionId . " (source: $source)");
+                                } catch (Exception $e) {
+                                    error_log("SSE Redis: ❌ Error sending text activity update to connection " . $this->connectionId . ": " . $e->getMessage());
+                                    return false; // Exit subscription on send error
+                                }
+                            } else {
+                                error_log("SSE Redis: Text activity message missing data. Full message: " . json_encode($data));
+                            }
+                            break;
                     }
                     
                     // Update last event ID if present in the message
@@ -423,16 +538,38 @@ class EventHandler {
                     }
                     
                 } catch (\Exception $e) {
-                    error_log("SSE Redis: Error processing message: " . $e->getMessage());
+                    error_log("SSE Redis: Error processing message for connection " . $this->connectionId . ": " . $e->getMessage());
+                    return false; // Exit subscription on processing error
                 }
             });
         } catch (\Exception $e) {
-            error_log("SSE: Redis subscription error: " . $e->getMessage());
+            error_log("SSE: Redis subscription error for connection " . $this->connectionId . ": " . $e->getMessage());
             $this->useRedis = false;
             // Fall back to database polling with fresh timing variables
             $startTime = time();
             $lastKeepaliveTime = time();
             $this->runDatabasePolling($startTime, $lastKeepaliveTime);
+        }
+    }
+    
+    /**
+     * Test if the SSE connection is still alive by attempting to send a comment
+     * @return bool True if connection is alive, false otherwise
+     */
+    private function testConnection() {
+        try {
+            // Send a comment line to test the connection without affecting the event stream
+            echo ": connection-test\n";
+            flush();
+            
+            // If flush doesn't throw an exception and we can detect broken pipes, check them
+            if (connection_status() !== CONNECTION_NORMAL) {
+                return false;
+            }
+            
+            return true;
+        } catch (\Exception $e) {
+            return false;
         }
     }
     
@@ -465,6 +602,48 @@ class EventHandler {
                     'modifiedNodes' => $updates['modifiedNodes'],
                     'searchResults' => $updates['searchResults']
                 ]);
+            }
+            
+            // Send text activity updates if any
+            if (!empty($updates['textActivity'])) {
+                $this->sendEvent('textActivityUpdate', $updates['textActivity']);
+            }
+            
+            // Fetch and send current site-wide activity data for initialization
+            try {
+                $siteActivityData = $this->pollingService->fetchSiteWideActivityData();
+                if ($siteActivityData) {
+                    $this->sendEvent('siteActivityUpdate', $siteActivityData);
+                }
+                
+                // Also fetch and send game activity data for initialization
+                $gameActivityData = $this->pollingService->fetchGameActivityData();
+                if ($gameActivityData) {
+                    $this->sendEvent('gameActivityUpdate', $gameActivityData);
+                }
+                
+                // Fetch and send text activity data for initialization if viewing a story
+                if ($this->rootStoryId) {
+                    try {
+                        require_once('../../model/Game.php');
+                        $gameModel = new Game();
+                        $gameId = $gameModel->selectGameId($this->rootStoryId);
+                        
+                        if ($gameId) {
+                            $textActivityData = $this->pollingService->fetchTextActivityData($gameId);
+                            if ($textActivityData) {
+                                $this->sendEvent('textActivityUpdate', $textActivityData);
+                                error_log("SSE: Sent initial text activity data for game_id: $gameId (" . count($textActivityData) . " activities)");
+                            } else {
+                                error_log("SSE: No initial text activity data for game_id: $gameId");
+                            }
+                        }
+                    } catch (Exception $e) {
+                        error_log("SSE: Error fetching initial text activity data: " . $e->getMessage());
+                    }
+                }
+            } catch (Exception $e) {
+                error_log("SSE: Error fetching activity data: " . $e->getMessage());
             }
             
             // Update lastEventId
@@ -537,6 +716,50 @@ class EventHandler {
                     ]);
                 }
                 
+                // Send text activity updates if any
+                if (!empty($updates['textActivity'])) {
+                    $this->sendEvent('textActivityUpdate', $updates['textActivity']);
+                }
+                
+                // Periodically fetch and send site-wide activity data (every 30 seconds)
+                static $lastActivityCheck = 0;
+                if ((time() - $lastActivityCheck) >= 30) {
+                    try {
+                        $siteActivityData = $this->pollingService->fetchSiteWideActivityData();
+                        if ($siteActivityData) {
+                            $this->sendEvent('siteActivityUpdate', $siteActivityData);
+                        }
+                        
+                        // Also fetch and send game activity data
+                        $gameActivityData = $this->pollingService->fetchGameActivityData();
+                        if ($gameActivityData) {
+                            $this->sendEvent('gameActivityUpdate', $gameActivityData);
+                        }
+                        
+                        // Also fetch and send text activity data if viewing a story
+                        if ($this->rootStoryId) {
+                            try {
+                                require_once('../../model/Game.php');
+                                $gameModel = new Game();
+                                $gameId = $gameModel->selectGameId($this->rootStoryId);
+                                
+                                if ($gameId) {
+                                    $textActivityData = $this->pollingService->fetchTextActivityData($gameId);
+                                    if ($textActivityData) {
+                                        $this->sendEvent('textActivityUpdate', $textActivityData);
+                                    }
+                                }
+                            } catch (Exception $e) {
+                                error_log("SSE: Error fetching text activity data during polling: " . $e->getMessage());
+                            }
+                        }
+                        
+                        $lastActivityCheck = time();
+                    } catch (Exception $e) {
+                        error_log("SSE: Error fetching activity data during polling: " . $e->getMessage());
+                    }
+                }
+
                 // Update lastEventId if present
                 if (isset($updates['lastEventId'])) {
                     $this->updateSessionEventId($updates['lastEventId']);

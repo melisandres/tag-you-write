@@ -119,7 +119,9 @@ class RedisService {
             
             // Publish to the determined channel if we have one
             if ($channel && $publishData) {
-                error_log("Redis: Publishing to channel: $channel with event ID: " . $publishData['id']);
+                // Get the event ID for logging (handle different key names)
+                $eventId = $publishData['id'] ?? $publishData['event_id'] ?? 'unknown';
+                error_log("Redis: Publishing to channel: $channel with event ID: " . $eventId);
                 $result = $this->publish($channel, $publishData);
                 error_log("Redis: Published to $channel, received by $result clients");
                 return $result > 0;
@@ -133,33 +135,12 @@ class RedisService {
     }
     
     /**
-     * Publish CurrentActivities log data
-     * TODO: this is for later--we need to build the system first 
+     * Publish message to Redis channel
      * 
-     * @param string $activity Activity description
-     * @param array $data Additional data
-     * @return bool Success status
+     * @param string $channel Channel name
+     * @param mixed $data Data to publish
+     * @return int Number of subscribers that received the message
      */
-    public function publishActivity($activity, $data = []) {
-        if (!$this->isAvailable) {
-            return false;
-        }
-        
-        try {
-            $publishData = [
-                'activity' => $activity,
-                'timestamp' => date('Y-m-d H:i:s'),
-                'data' => $data
-            ];
-            
-            $result = $this->publish('activity:logs', $publishData);
-            return $result > 0;
-        } catch (\Exception $e) {
-            error_log("Redis activity publish error: " . $e->getMessage());
-            return false;
-        }
-    }
-
     public function publish($channel, $data) {
         // Make sure we're sending JSON data
         $jsonData = is_string($data) ? $data : json_encode($data);

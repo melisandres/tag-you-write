@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Game Activities</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .log { background: #f5f5f5; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .site-activity { border-left: 4px solid #007cba; }
+        .game-activity { border-left: 4px solid #28a745; }
+        .error { border-left: 4px solid #dc3545; color: #dc3545; }
+    </style>
+</head>
+<body>
+    <h1>Game Activities Test</h1>
+    <div id="status">Connecting...</div>
+    <div id="logs"></div>
+
+    <script>
+        const logsDiv = document.getElementById('logs');
+        const statusDiv = document.getElementById('status');
+        
+        function addLog(message, type = 'info') {
+            const logDiv = document.createElement('div');
+            logDiv.className = `log ${type}`;
+            logDiv.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong>: ${message}`;
+            logsDiv.insertBefore(logDiv, logsDiv.firstChild);
+            
+            // Keep only last 20 logs
+            while (logsDiv.children.length > 20) {
+                logsDiv.removeChild(logsDiv.lastChild);
+            }
+        }
+        
+        // Test SSE connection for activity events
+        const eventSource = new EventSource('http://localhost:8888/tag-you-write-repo/tag-you-write/public/sse/events.php');
+        
+        eventSource.onopen = function(event) {
+            statusDiv.textContent = 'Connected to SSE';
+            addLog('SSE connection established');
+        };
+        
+        eventSource.onerror = function(event) {
+            statusDiv.textContent = 'SSE connection error';
+            addLog('SSE connection error', 'error');
+        };
+        
+        // Listen for site-wide activity updates
+        eventSource.addEventListener('siteActivityUpdate', function(event) {
+            const data = JSON.parse(event.data);
+            addLog(`Site Activity: ${data.browsing} browsing, ${data.writing} writing`, 'site-activity');
+        });
+        
+        // Listen for game-specific activity updates
+        eventSource.addEventListener('gameActivityUpdate', function(event) {
+            const data = JSON.parse(event.data);
+            const gameId = data.game_id;
+            const browsing = data.browsing || 0;
+            const writing = data.writing || 0;
+            const total = browsing + writing;
+            
+            let summary = `Game Activity (${gameId}): ${total} users (${browsing} browsing, ${writing} writing)`;
+            addLog(summary, 'game-activity');
+        });
+        
+        // Listen for text-level activity updates
+        eventSource.addEventListener('textActivityUpdate', function(event) {
+            const data = JSON.parse(event.data);
+            const writerId = data.writer_id;
+            const activityType = data.activity_type;
+            const textId = data.text_id || 'null';
+            const parentId = data.parent_id || 'null';
+            
+            let summary = `Text Activity: Writer ${writerId} ${activityType} on text ${textId} (parent: ${parentId})`;
+            addLog(summary, 'game-activity');
+        });
+        
+        // Listen for keepalive
+        eventSource.addEventListener('keepalive', function(event) {
+            addLog('Keepalive received');
+        });
+        
+        addLog('Starting SSE listener for activity events...');
+    </script>
+</body>
+</html> 

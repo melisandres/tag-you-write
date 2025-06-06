@@ -350,7 +350,9 @@ export class CurrentActivityManager {
 
         // Page navigation inflection points
         window.addEventListener('beforeunload', () => {
-            this.setActivityLevel('idle'); // Mark as idle before leaving - this will trigger a final heartbeat
+            // DON'T immediately mark as idle - this causes flickering during same-site navigation
+            // Let the natural idle detection handle it (29-30 second timeout)
+            // Only stop the tracking timers to prevent memory leaks
             this.stopTracking();
         });
     }
