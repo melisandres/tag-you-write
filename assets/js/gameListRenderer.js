@@ -139,6 +139,7 @@ export class GameListRenderer {
         const bookmarkTooltip = window.i18n.translate('general.bookmark_tooltip');
         const treeTooltip = window.i18n.translate('general.view_tree_tooltip');
         const shelfTooltip = window.i18n.translate('general.view_shelf_tooltip');
+        const activityTooltip = window.i18n.translate('activity.editingVsBrowsing');
 
         return `
             ${this.userLoggedIn ? `
@@ -146,6 +147,10 @@ export class GameListRenderer {
                     <span class="icon" data-svg="bookmark">${SVGManager.bookmarkSVG}</span>
                 </button>
             ` : ''}
+            <div class="game-activity-indicator ${this.getActivityState(game)}" data-i18n-title="activity.editingVsBrowsing" title="${activityTooltip}" data-game-id="${game.game_id}">
+                <span class="icon" data-svg="user">${SVGManager.userSVG}</span>
+                <div class="activity-numbers">${this.getActivityNumbers(game)}</div>
+            </div>
             <button data-refresh-tree data-text-id="${game.id || game.text_id}" class="story-btn" data-svg="tree" data-i18n-title="general.view_tree_tooltip" title="${treeTooltip}">
                 <span class="icon" data-svg="tree">${SVGManager.treeSVG}</span>
             </button>
@@ -186,6 +191,41 @@ export class GameListRenderer {
                 </p>
             </div>
         `;
+    }
+
+    getActivityState(game) {
+        // Get activity data from the activity data manager
+        const activityData = this.getGameActivityData(game.game_id);
+        const browsing = activityData?.browsing || 0;
+        const writing = activityData?.writing || 0;
+        
+        return (browsing > 0 || writing > 0) ? 'has-activity' : 'no-activity';
+    }
+
+    getActivityNumbers(game) {
+        // Get activity data from the activity data manager
+        const activityData = this.getGameActivityData(game.game_id);
+        const browsing = activityData?.browsing || 0;
+        const writing = activityData?.writing || 0;
+        
+        return `${browsing}:${writing}`;
+    }
+
+    getGameActivityData(gameId) {
+        // Try to get activity data from UserActivityDataManager (new system)
+        if (window.userActivityDataManagerInstance) {
+            const activity = window.userActivityDataManagerInstance.getGameActivity(gameId);
+            if (activity) {
+                console.log(`🎮 GameListRenderer: Got activity for game ${gameId}:`, activity);
+                return activity;
+            } else {
+                console.log(`🎮 GameListRenderer: No activity found for game ${gameId}`);
+            }
+        }
+        
+        // Final fallback to placeholder data
+        console.log(`🎮 GameListRenderer: Using placeholder data for game ${gameId}`);
+        return { browsing: 0, writing: 0 };
     }
 
     // Insert new game in correct position

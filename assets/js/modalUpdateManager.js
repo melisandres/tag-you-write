@@ -18,11 +18,15 @@ export class ModalUpdateManager {
         if (searchTerm) {
             this.highlightModalContent(container, textId, searchTerm);
         }
+        
+        // Apply current activity indicators after modal rendering
+        this.applyCurrentActivityIndicators(container, textId);
     });
     eventBus.on('searchApplied', this.handleSearchApplied.bind(this));
     eventBus.on('nodeTextContentUpdate', this.handleNodeTextContentUpdate.bind(this));
     eventBus.on('updateNodeWinner', this.handleChooseWinner.bind(this));
     eventBus.on('nodePermissionsChanged', this.handlePermissionsChanged.bind(this));
+    eventBus.on('textActivityChanged', this.handleTextActivityChanged.bind(this));
   }
 
   handleSearchApplied(searchTerm) {
@@ -497,5 +501,121 @@ export class ModalUpdateManager {
         </button>
       ` : ''}
     `;
+  }
+
+  // === Text Activity Indicator Methods ===
+
+  /**
+   * Handle text activity changes for modals
+   */
+  handleTextActivityChanged(activityData) {
+    const { textId, activity_type, user_id, source } = activityData;
+    
+    // Only handle user-centric events
+    if (source !== 'user-centric') return;
+    
+    // Check if the activity is for the currently visible modal
+    const modal = document.querySelector(`.modal-background[data-tree-modal="visible"]`);
+    if (!modal || modal.dataset.textId !== String(textId)) return;
+    
+    if (activity_type === 'adding_note') {
+        // Show adding note indicator in modal
+        this.showAddingNoteIndicator(modal, textId, user_id);
+    } else {
+        // Remove indicators if activity stopped
+        this.removeTextActivityIndicators(modal, textId);
+    }
+    
+    console.log(`📝 ModalUpdateManager: Handled text activity - textId: ${textId}, type: ${activity_type}, userId: ${user_id}`);
+  }
+
+  /**
+   * Show visual indicator that someone is adding a note
+   * Shows the pulsating dot and adds the activity text next to author name
+   */
+  showAddingNoteIndicator(modal, textId, userId) {
+    if (!modal) return;
+
+    // Add activity class and data attributes to modal
+    modal.classList.add('adding-note-activity');
+    modal.setAttribute('data-activity-user-id', userId);
+
+    // Find the author element
+    const authorElement = modal.querySelector('.author');
+    if (!authorElement) return;
+
+    // Add the activity text if it doesn't exist
+    let activityText = modal.querySelector('.activity-text');
+    if (!activityText) {
+      activityText = document.createElement('span');
+      activityText.className = 'activity-text';
+      activityText.textContent = 'adding a note';
+      // Append after the author text
+      authorElement.appendChild(activityText);
+    }
+
+    // Ensure the activity dot exists (always present but invisible by default)
+    let activityDot = modal.querySelector('.activity-dot');
+    if (!activityDot) {
+      activityDot = document.createElement('span');
+      activityDot.className = 'activity-dot';
+      // Insert before the activity text (so it appears between author and activity text)
+      authorElement.insertBefore(activityDot, activityText);
+    }
+
+    console.log(`📝 ModalUpdateManager: Added note indicator for text ${textId} by user ${userId}`);
+  }
+
+  /**
+   * Remove all text activity indicators for a given text in modal
+   * Cleans up when user stops editing
+   */
+  removeTextActivityIndicators(modal, textId) {
+    if (!modal) return;
+
+    // Remove adding note indicator with fade-out transition
+    if (modal.classList.contains('adding-note-activity')) {
+      // Add removing class for fade-out animation
+      modal.classList.add('removing');
+      
+      // Wait for animation to complete before removing classes and text
+      setTimeout(() => {
+        modal.classList.remove('adding-note-activity', 'removing');
+        modal.removeAttribute('data-activity-user-id');
+        
+        // Remove only the activity text (keep the dot for reuse)
+        const activityText = modal.querySelector('.activity-text');
+        if (activityText) {
+          activityText.remove();
+        }
+        
+        // Note: We keep the activity-dot element but it becomes invisible via CSS
+      }, 300); // Match CSS animation duration
+    }
+
+    console.log(`📝 ModalUpdateManager: Removed activity indicators for text ${textId}`);
+  }
+
+  /**
+   * Apply current activity indicators to newly rendered modal
+   * Similar to how search highlighting works and shelf activity application
+   */
+  applyCurrentActivityIndicators(modal, textId) {
+    console.log('🔍 ModalUpdateManager: applyCurrentActivityIndicators called for textId:', textId);
+    
+    if (!window.userActivityDataManager) {
+      console.log('❌ ModalUpdateManager: No userActivityDataManager found');
+      return;
+    }
+
+    // Get current text activity for this specific text
+    const textActivity = window.userActivityDataManager.getTextActivity(textId);
+    console.log('🔍 ModalUpdateManager: Found text activity:', textActivity);
+    
+    if (textActivity && textActivity.activity_type === 'adding_note' && textActivity.user_id) {
+      // Apply adding note indicator
+      this.showAddingNoteIndicator(modal, textId, textActivity.user_id);
+      console.log('📝 ModalUpdateManager: Applied adding note indicator for existing activity');
+    }
   }
 }

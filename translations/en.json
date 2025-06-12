@@ -4,7 +4,9 @@
     "tooltip": "Number of users online",
     "total_users": "Total Users",
     "users_editing": "Users Editing",
-    "editing": "Editing"
+    "editing": "Editing",
+    "browsing": "Browsing",
+    "editingVsBrowsing": "users editing : users browsing"
   },
     "nav": {
         "home": "Home",

@@ -3,7 +3,9 @@
     "tooltip": "Nombre d'utilisateurs en ligne",
     "total_users": "Nombre d'Utilisateurs",
     "users_editing": "Utilisateurs qui écrivent",
-    "editing": "Écrivant"
+    "editing": "Écrivant",
+    "browsing": "Explorateur",
+    "editingVsBrowsing": "ceux qui écrivent : ceux qui explorent"
   },
   "nav": {
     "home": "Accueil",

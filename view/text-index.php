@@ -23,11 +23,15 @@
                 <button data-bookmark-story data-text-id="{{ text.id }}" class="story-btn bookmark-btn" data-svg="bookmark" data-i18n-title="{{ 'general.bookmark_tooltip' }}" title="{{ translate('general.bookmark_tooltip') }}">
                 </button>
             {% endif %}
+            <div class="game-activity-indicator no-activity" data-i18n-title="activity.editingVsBrowsing" title="{{ translate('activity.editingVsBrowsing') }}" data-game-id="{{ text.game_id }}">
+                <span class="icon" data-svg="user"></span>
+                <div class="activity-numbers">0:0</div>
+            </div>
+
+
             <button data-refresh-tree data-text-id="{{ text.id }}" class="story-btn" data-svg="tree" data-i18n-title="{{ 'general.view_tree_tooltip' }}" title="{{ translate('general.view_tree_tooltip') }}">
-<!--                 <img class="refresh-tree" src="{{ path }}assets/imgs/icons/tree.svg" alt="view tree"> -->
             </button>
             <button data-refresh-shelf data-text-id="{{ text.id }}" class="story-btn" data-svg="shelf" data-i18n-title="{{ 'general.view_shelf_tooltip' }}" title="{{ translate('general.view_shelf_tooltip') }}">
-<!--                 <img class="refresh-shelf" src="{{ path }}assets/imgs/icons/shelf.svg" alt="view shelf">  -->
             </button>
         </div>
         <div class="story-writing">
@@ -38,7 +42,6 @@
             {% else %}
             <div class="game-status-indicator closed">
             {% endif %}
-
                 {% if text.pending %}
                     <p class="game-status">    
                         <span data-i18n="general.game">{{ translate('general.game') }}</span>

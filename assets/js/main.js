@@ -38,6 +38,8 @@ import { Localization } from './localization.js';
 import { TooltipManager } from './tooltipManager.js';
 import { CurrentActivityManager } from './currentActivityManager.js';
 import { ActivityIndicator } from './activityIndicator.js';
+import { ActivityDataManager } from './activityDataManager.js';
+import { UserActivityDataManager } from './userActivityDataManager.js';
 
 // Make eventBus globally available immediately
 window.eventBus = eventBus;
@@ -124,7 +126,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   new ShelfUpdateManager();
   new TreeUpdateManager(treeVisualizer);
   new ModalUpdateManager();
-  new GameListUpdateManager();
+  window.gameListUpdateManager = new GameListUpdateManager();
 
     // Initialize TooltipManager
     new TooltipManager();
@@ -155,6 +157,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Initialize CurrentActivityManager
   window.currentActivityManager = new CurrentActivityManager();
+
+          // Initialize ActivityDataManager (must be before ActivityIndicator)
+        //window.activityDataManager = new ActivityDataManager();
+
+        // Initialize UserActivityDataManager (Phase 1: Parallel system)
+        window.userActivityDataManager = new UserActivityDataManager();
 
   // Initialize ActivityIndicator
   window.activityIndicator = new ActivityIndicator();

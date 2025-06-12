@@ -321,6 +321,7 @@ class EventHandler {
             'games:updates',      // All clients get game updates
             'activities:site',     // All clients get site-wide activity counts
             'activities:games',    // All clients get game-specific activity counts
+            'users:activity',      // NEW: All clients get individual user activity updates
         ];
         
         // Add user-specific notification channel if authenticated
@@ -528,6 +529,26 @@ class EventHandler {
                                 }
                             } else {
                                 error_log("SSE Redis: Text activity message missing data. Full message: " . json_encode($data));
+                            }
+                            break;
+                            
+                        case $channel === 'users:activity':
+                            // NEW: Individual user activity updates (user-centric tracking)
+                            if (isset($data['data'])) {
+                                $userActivityData = $data['data'];
+                                $source = $data['source'] ?? 'unknown';
+                                
+                                error_log("SSE Redis: Received user activity update for writer_id: " . $userActivityData['writer_id'] . " (connection: " . $this->connectionId . ")");
+                                
+                                try {
+                                    $this->sendEvent('userActivityUpdate', $userActivityData);
+                                    error_log("SSE Redis: ✅ Successfully sent userActivityUpdate event to client " . $this->connectionId . " (source: $source)");
+                                } catch (Exception $e) {
+                                    error_log("SSE Redis: ❌ Error sending user activity update to connection " . $this->connectionId . ": " . $e->getMessage());
+                                    return false; // Exit subscription on send error
+                                }
+                            } else {
+                                error_log("SSE Redis: User activity message missing data. Full message: " . json_encode($data));
                             }
                             break;
                     }

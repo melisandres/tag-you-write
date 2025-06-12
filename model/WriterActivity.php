@@ -343,6 +343,43 @@ class WriterActivity extends Crud {
     } */
 
     /**
+     * Get all currently active users for initialization
+     * Returns array of user activity records matching the SSE userActivityUpdate format
+     * 
+     * @return array Array of user activity records
+     */
+    public function getAllActiveUsers() {
+        $sql = "SELECT 
+                    writer_id,
+                    activity_type,
+                    activity_level,
+                    page_type,
+                    game_id,
+                    text_id,
+                    parent_id,
+                    UNIX_TIMESTAMP(last_heartbeat) as timestamp
+                FROM $this->table
+                WHERE last_heartbeat >= DATE_SUB(NOW(), INTERVAL 5 MINUTE)
+                AND activity_level = 'active'
+                ORDER BY last_heartbeat DESC";
+        
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute();
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Convert to consistent format (strings for IDs, numbers for numeric fields)
+        foreach ($results as &$result) {
+            $result['writer_id'] = (string)$result['writer_id'];
+            $result['game_id'] = $result['game_id'] ? (string)$result['game_id'] : null;
+            $result['text_id'] = $result['text_id'] ? (string)$result['text_id'] : null;
+            $result['parent_id'] = $result['parent_id'] ? (string)$result['parent_id'] : null;
+            $result['timestamp'] = (int)$result['timestamp'];
+        }
+        
+        return $results;
+    }
+
+    /**
      * Get site-wide activity counts for broadcasting and initialization
      * Returns simplified tallies of browsing vs writing users across the entire site
      * 

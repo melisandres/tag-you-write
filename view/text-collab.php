@@ -32,6 +32,10 @@
                 <button data-bookmark-story data-text-id="{{ game.id }}" class="story-btn bookmark-btn" data-svg="bookmark"  data-i18n-title="general.bookmark_tooltip" title="{{ translate('general.bookmark_tooltip') }}">
                 </button>
             {% endif %}
+            <div class="game-activity-indicator no-activity" data-i18n-title="activity.editingVsBrowsing" title="{{ translate('activity.editingVsBrowsing') }}" data-game-id="{{ game.game_id }}">
+                <span class="icon" data-svg="user"></span>
+                <div class="activity-numbers">0:0</div>
+            </div>
             <button data-refresh-tree data-text-id="{{ game.id }}" class="story-btn active" data-svg="tree" data-i18n-title="general.tree_tooltip" title="{{ translate('general.tree_tooltip') }}">
             </button>
             <button data-refresh-shelf data-text-id="{{ game.id }}" class="story-btn" data-svg="shelf" data-i18n-title="general.shelf_tooltip" title="{{ translate('general.shelf_tooltip') }}">

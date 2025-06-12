@@ -27,6 +27,7 @@ export class GameListUpdateManager {
     eventBus.on('gameStatusChanged', this.handleGameStatusUpdate.bind(this));
     eventBus.on('gameCountsChanged', this.handleGameCountsUpdate.bind(this));
     eventBus.on('gameTitleChanged', this.handleGameTitleUpdate.bind(this));
+    eventBus.on('gameActivityChanged', this.handleGameActivityUpdate.bind(this));
   }
 
   makeTitlesShorter() {
@@ -267,6 +268,50 @@ export class GameListUpdateManager {
   }
 
   
+  // New method to handle game activity updates
+  handleGameActivityUpdate(activityData) {
+    console.log('🎮 GameListUpdateManager: handleGameActivityUpdate called with:', activityData);
+    
+    const { gameId, browsing, writing } = activityData;
+    const gameElement = document.querySelector(`.story[data-game-id="${gameId}"]`);
+    
+    console.log('🎮 GameListUpdateManager: Looking for game element with gameId:', gameId);
+    console.log('🎮 GameListUpdateManager: Found game element:', !!gameElement);
+    
+    if (!gameElement) {
+      console.warn('🎮 GameListUpdateManager: No game element found for gameId:', gameId);
+      return;
+    }
+    
+    const activityIndicator = gameElement.querySelector('.game-activity-indicator');
+    console.log('🎮 GameListUpdateManager: Found activity indicator:', !!activityIndicator);
+    
+    if (!activityIndicator) {
+      console.warn('🎮 GameListUpdateManager: No activity indicator found in game element');
+      return;
+    }
+    
+    // Update activity numbers
+    const activityNumbers = activityIndicator.querySelector('.activity-numbers');
+    console.log('🎮 GameListUpdateManager: Found activity numbers element:', !!activityNumbers);
+    
+    if (activityNumbers) {
+      const newText = `${browsing || 0}:${writing || 0}`;
+      console.log('🎮 GameListUpdateManager: Updating activity numbers from', activityNumbers.textContent, 'to', newText);
+      activityNumbers.textContent = newText;
+    }
+    
+    // Update activity state classes
+    const hasActivity = (browsing > 0 || writing > 0);
+    console.log('🎮 GameListUpdateManager: hasActivity:', hasActivity, 'browsing:', browsing, 'writing:', writing);
+    
+    activityIndicator.classList.toggle('has-activity', hasActivity);
+    activityIndicator.classList.toggle('no-activity', !hasActivity);
+    
+    console.log('🎮 GameListUpdateManager: Activity indicator classes after update:', Array.from(activityIndicator.classList));
+    console.log('🎮 GameListUpdateManager: Activity update completed for game:', gameId);
+  }
+
   // New method to reapply search highlighting after updates
   reapplySearchHighlighting() {
     const activeSearch = window.dataManager.getSearch();
@@ -276,5 +321,69 @@ export class GameListUpdateManager {
         searchTerm: activeSearch
       });
     }
+  }
+
+  // Test function for debugging activity updates
+  testActivityUpdate(gameId = null, browsing = 2, writing = 1) {
+    // If no gameId provided, use the first game found
+    if (!gameId) {
+      const firstGame = document.querySelector('[data-game-id]');
+      if (firstGame) {
+        gameId = firstGame.dataset.gameId;
+      } else {
+        console.error('No games found on page');
+        return;
+      }
+    }
+    
+    console.log('🧪 Testing activity update for game:', gameId);
+    console.log('🧪 Available games on page:', Array.from(document.querySelectorAll('[data-game-id]')).map(el => el.dataset.gameId));
+    console.log('🧪 Activity indicators on page:', document.querySelectorAll('.game-activity-indicator').length);
+    
+    // Test the event emission and handling
+    console.log('🧪 Testing via eventBus emission...');
+    eventBus.emit('gameActivityChanged', {
+      gameId: gameId,
+      browsing: browsing,
+      writing: writing
+    });
+    
+    // Also test direct method call for comparison
+    console.log('🧪 Testing via direct method call...');
+    this.handleGameActivityUpdate({
+      gameId: gameId,
+      browsing: browsing,
+      writing: writing
+    });
+    
+    console.log('🧪 Activity update test completed');
+  }
+  
+  // Test function to simulate SSE data
+  testSSEData(gameId = null, browsing = 2, writing = 1) {
+    if (!gameId) {
+      const firstGame = document.querySelector('[data-game-id]');
+      if (firstGame) {
+        gameId = firstGame.dataset.gameId;
+      } else {
+        console.error('No games found on page');
+        return;
+      }
+    }
+    
+    console.log('🧪 Testing SSE-style data flow for game:', gameId);
+    
+    // Simulate SSE data structure (like what you're seeing)
+    const sseData = {
+      game_id: gameId,  // Note: game_id not gameId
+      browsing: browsing,
+      writing: writing,
+      timestamp: Math.floor(Date.now() / 1000)
+    };
+    
+    console.log('🧪 Emitting gameActivityUpdate event with SSE-style data:', sseData);
+    eventBus.emit('gameActivityUpdate', sseData);
+    
+    console.log('🧪 SSE data test completed');
   }
 }

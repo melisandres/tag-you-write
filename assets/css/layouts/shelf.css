@@ -167,3 +167,130 @@ div.writing.visible{
     border-right: 5px solid transparent;
     border-top: 10px solid black; /* Down arrow color */
   }
+
+/* === Text Activity Indicators === */
+
+/* Iterating placeholder (ghost entry) */
+.iterating-placeholder {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-top: 10px;
+    opacity: 0.7;
+    border: 2px dashed var(--color-accent);
+    border-radius: 8px;
+    margin: 10px 0;
+    background-color: var(--color-accent-light, #fff3cd);
+}
+
+.iterating-placeholder .shelf-heart i {
+    animation: pulse-heart-fade 2s ease-in-out infinite;
+}
+
+.iterating-placeholder .shelf-heart i svg path {
+    fill: #ffffff !important;
+    stroke: #cccccc !important;
+    stroke-width: 3px !important;
+}
+
+@keyframes pulse-heart-fade {
+    0%, 100% {
+        opacity: 0.4;
+        transform: scale(0.95);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+}
+
+/* Adding note indicator (inline with author) */
+.adding-note-activity .activity-dot {
+    opacity: 1 !important; /* Force visible when activity is active */
+    animation: fade-in 0.3s ease-in-out forwards, pulse-note-dot 2s ease-in-out infinite;
+}
+
+.adding-note-activity.removing .activity-dot {
+    animation: fade-out 0.3s ease-in-out forwards;
+}
+
+.adding-note-activity .activity-text {
+    opacity: 1 !important; /* Force visible when activity is active */
+    animation: fade-in 0.3s ease-in-out forwards;
+}
+
+.adding-note-activity.removing .activity-text {
+    animation: fade-out 0.3s ease-in-out forwards;
+}
+
+.activity-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background-color: var(--color-love);
+    border-radius: 50%;
+    margin-left: -12px; /* Negative margin to not affect author alignment */
+    margin-right: 4px;
+    opacity: 0; /* Invisible by default */
+    transition: opacity 0.3s ease-in-out;
+    /* No pulsing animation by default - only when active */
+}
+
+.activity-text {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--color-love);
+    font-style: italic;
+    margin-left: 4px;
+    opacity: 0; /* Initially hidden */
+    transition: opacity 0.3s ease-in-out;
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes fade-out {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+}
+
+@keyframes pulse-note-dot {
+    0%, 100% {
+        opacity: 0.3;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+}
+
+/* Responsive behavior */
+@media (max-width: 768px) {
+    .adding-note-indicator {
+        font-size: 10px;
+        padding: 3px 6px;
+    }
+    
+    .activity-text {
+        font-size: 9px;
+    }
+    
+    .iterating-text {
+        font-size: 13px;
+    }
+}

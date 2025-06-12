@@ -18,6 +18,22 @@ export class TreeUpdateManager {
     eventBus.on('nodeTextContentUpdate', this.handleNodeTextContentUpdate.bind(this));
     eventBus.on('searchApplied', this.handleSearchUpdate.bind(this));
     eventBus.on('updateNodeWinner', this.handleChooseWinnerFromPolling.bind(this));
+    eventBus.on('textActivityChanged', this.handleTextActivityChanged.bind(this));
+  }
+
+  handleTextActivityChanged(activityData) {
+    const { textId, activity_type, parent_id, user_id } = activityData;
+    
+    if (activity_type === 'iterating') {
+        // Show ghost node positioned under parent_id
+        this.showIteratingGhostNode(textId, parent_id, user_id);
+    } else if (activity_type === 'adding_note') {
+        // Show "adding note" indicator on existing node
+        this.showAddingNoteIndicator(textId, user_id);
+    } else {
+        // activity_type is null - remove any indicators
+        this.removeTextActivityIndicators(textId);
+    }
   }
 
   handleInstaPublish({ textId, newStatus }) {
@@ -370,4 +386,33 @@ export class TreeUpdateManager {
         this.handleNodeHighlighting(nodeId, container);
     });
   }
+
+  // === Text Activity Indicator Methods ===
+  // Note: Tree view uses different visual approach than shelf view
+
+  /**
+   * Show ghost node for iterating activity in tree view
+   * Creates a placeholder node in the tree structure
+   */
+  showIteratingGhostNode(textId, parentId, userId) {
+    console.log(`🌳 TreeUpdateManager: Would show iterating ghost for text ${textId} (not yet implemented for tree view)`);
+    // TODO: Implement tree-specific ghost node visualization
+  }
+
+  /**
+   * Show visual indicator that someone is adding a note in tree view
+   */
+  showAddingNoteIndicator(textId, userId) {
+    console.log(`🌳 TreeUpdateManager: Would show adding note indicator for text ${textId} (not yet implemented for tree view)`);
+    // TODO: Implement tree-specific note indicator
+  }
+
+  /**
+   * Remove all text activity indicators for a given text in tree view
+   */
+  removeTextActivityIndicators(textId) {
+    console.log(`🌳 TreeUpdateManager: Would remove activity indicators for text ${textId} (not yet implemented for tree view)`);
+    // TODO: Implement tree-specific indicator removal
+  }
+
 } 

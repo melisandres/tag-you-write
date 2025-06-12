@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activity Data Manager - Phase 1 Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-buttons {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        .test-button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .test-button.primary { background: #007bff; color: white; }
+        .test-button.success { background: #28a745; color: white; }
+        .test-button.warning { background: #ffc107; color: black; }
+        .test-button.danger { background: #dc3545; color: white; }
+        
+        .status-panel {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .log-panel {
+            background: #000;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            padding: 15px;
+            border-radius: 4px;
+            height: 200px;
+            overflow-y: auto;
+            margin: 15px 0;
+        }
+        .data-display {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .data-display pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .section-title {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .connection-status {
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: inline-block;
+            margin: 5px 0;
+        }
+        .connected { background: #d4edda; color: #155724; }
+        .disconnected { background: #f8d7da; color: #721c24; }
+        .polling { background: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Activity Data Manager - Phase 1 Test</h1>
+            <p>Testing the basic functionality of the ActivityDataManager with mock data</p>
+            <div id="connectionStatus" class="connection-status disconnected">
+                Status: Initializing...
+            </div>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="test-section">
+            <h2 class="section-title">🎮 Test Controls</h2>
+            <div class="test-buttons">
+                <button class="test-button primary" onclick="initializeManager()">Initialize ActivityDataManager</button>
+                <button class="test-button danger" onclick="clearLogs()">Clear Logs</button>
+                <button class="test-button success" onclick="showCurrentData()">Show Current Data</button>
+            </div>
+        </div>
+
+        <!-- Site Activity Tests -->
+        <div class="test-section">
+            <h2 class="section-title">🌍 Site Activity Tests</h2>
+            <div class="test-buttons">
+                <button class="test-button primary" onclick="testSiteActivity({browsing: 5, writing: 3})">Test Site Activity (5 browsing, 3 writing)</button>
+                <button class="test-button primary" onclick="testSiteActivity({browsing: 10, writing: 2})">Test Site Activity (10 browsing, 2 writing)</button>
+                <button class="test-button primary" onclick="testSiteActivity({browsing: 5, writing: 3})">Test Same Data (No Change)</button>
+            </div>
+            <div class="data-display">
+                <strong>Current Site Activity:</strong>
+                <pre id="siteActivityDisplay">No data yet</pre>
+            </div>
+        </div>
+
+        <!-- Game Activity Tests -->
+        <div class="test-section">
+            <h2 class="section-title">🎲 Game Activity Tests</h2>
+            <div class="test-buttons">
+                <button class="test-button primary" onclick="testGameActivityArray()">Test Game Activity (Array)</button>
+                <button class="test-button success" onclick="testGameActivitySingle()">Test Single Game Update</button>
+                <button class="test-button warning" onclick="testGameActivityUpdate()">Test Game Update</button>
+            </div>
+            <div class="data-display">
+                <strong>Current Game Activities:</strong>
+                <pre id="gameActivityDisplay">No data yet</pre>
+            </div>
+        </div>
+
+        <!-- Text Activity Tests -->
+        <div class="test-section">
+            <h2 class="section-title">📝 Text Activity Tests</h2>
+            <div class="test-buttons">
+                <button class="test-button primary" onclick="testTextActivityArray()">Test Text Activity (Array)</button>
+                <button class="test-button success" onclick="testTextActivitySingle()">Test Single Text Update</button>
+                <button class="test-button warning" onclick="testTextActivityUpdate()">Test Text Update</button>
+            </div>
+            <div class="data-display">
+                <strong>Current Text Activities:</strong>
+                <pre id="textActivityDisplay">No data yet</pre>
+            </div>
+        </div>
+
+        <!-- Activity Data Changed Events -->
+        <div class="test-section">
+            <h2 class="section-title">📡 Activity Data Change Events</h2>
+            <div class="status-panel">
+                <strong>Event Log:</strong>
+                <div id="eventLog">No events yet</div>
+            </div>
+        </div>
+
+        <!-- Console Log -->
+        <div class="test-section">
+            <h2 class="section-title">📋 Console Output</h2>
+            <div class="log-panel" id="consoleLog">
+                Waiting for initialization...
+            </div>
+        </div>
+    </div>
+
+    <!-- Import modules and initialize -->
+    <script type="module">
+        // Import required modules
+        import { eventBus } from './assets/js/eventBus.js';
+        import { ActivityDataManager } from './assets/js/activityDataManager.js';
+
+        // Make eventBus globally available for testing
+        window.eventBus = eventBus;
+        window.ActivityDataManager = ActivityDataManager;
+
+        // Set up global variables
+        window.activityDataManager = null;
+
+        // Log function
+        window.log = function(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logElement = document.getElementById('consoleLog');
+            const color = {
+                'info': '#00ff00',
+                'warn': '#ffff00', 
+                'error': '#ff0000',
+                'success': '#00ff88'
+            }[type] || '#00ff00';
+            
+            logElement.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(`[${timestamp}] ${message}`);
+        };
+
+        // Initialize manager function
+        window.initializeManager = function() {
+            try {
+                log('🎯 Initializing ActivityDataManager...', 'info');
+                window.activityDataManager = new ActivityDataManager();
+                log('✅ ActivityDataManager initialized successfully', 'success');
+                updateConnectionStatus('initialized');
+            } catch (error) {
+                log(`❌ Failed to initialize ActivityDataManager: ${error.message}`, 'error');
+            }
+        };
+
+        // Show current data function
+        window.showCurrentData = function() {
+            if (!window.activityDataManager) {
+                log('❌ ActivityDataManager not initialized', 'error');
+                return;
+            }
+            
+            const data = window.activityDataManager.getActivityData();
+            log('📊 Current Activity Data:', 'info');
+            log(`Site: ${JSON.stringify(data.site)}`, 'info');
+            log(`Games: ${data.games.data.length} items`, 'info');
+            log(`Texts: ${data.texts.data.length} items`, 'info');
+        };
+
+        // Update connection status display
+        function updateConnectionStatus(status) {
+            const statusElement = document.getElementById('connectionStatus');
+            switch(status) {
+                case 'initialized':
+                    statusElement.textContent = 'Status: ActivityDataManager Ready';
+                    statusElement.className = 'connection-status connected';
+                    break;
+                default:
+                    statusElement.textContent = 'Status: Not Initialized';
+                    statusElement.className = 'connection-status disconnected';
+            }
+        }
+
+        // Test functions for site activity
+        window.testSiteActivity = function(data) {
+            log(`🌍 Testing site activity with data: ${JSON.stringify(data)}`, 'info');
+            eventBus.emit('siteActivityUpdate', data);
+        };
+
+        // Test functions for game activity
+        window.testGameActivityArray = function() {
+            const mockData = [
+                { game_id: 1, title: "Game Alpha", active_writers: 3, last_activity: "2024-01-01T12:00:00Z" },
+                { game_id: 2, title: "Game Beta", active_writers: 1, last_activity: "2024-01-01T11:30:00Z" },
+                { game_id: 3, title: "Game Gamma", active_writers: 5, last_activity: "2024-01-01T12:15:00Z" }
+            ];
+            log(`🎲 Testing game activity with array of ${mockData.length} games`, 'info');
+            eventBus.emit('gameActivityUpdate', mockData);
+        };
+
+        window.testGameActivitySingle = function() {
+            const mockData = { game_id: 4, title: "Game Delta", active_writers: 2, last_activity: "2024-01-01T12:30:00Z" };
+            log(`🎲 Testing single game activity update for game_id: ${mockData.game_id}`, 'info');
+            eventBus.emit('gameActivityUpdate', mockData);
+        };
+
+        window.testGameActivityUpdate = function() {
+            const mockUpdate = { game_id: 1, title: "Game Alpha Updated", active_writers: 7, last_activity: "2024-01-01T13:00:00Z" };
+            log(`🎲 Testing game update for existing game_id: ${mockUpdate.game_id}`, 'info');
+            eventBus.emit('gameActivityUpdate', mockUpdate);
+        };
+
+        // Test functions for text activity
+        window.testTextActivityArray = function() {
+            const mockData = [
+                { text_id: 101, title: "Story A", writer_name: "Alice", last_activity: "2024-01-01T12:00:00Z" },
+                { text_id: 102, title: "Story B", writer_name: "Bob", last_activity: "2024-01-01T11:45:00Z" },
+                { text_id: 103, title: "Story C", writer_name: "Charlie", last_activity: "2024-01-01T12:20:00Z" }
+            ];
+            log(`📝 Testing text activity with array of ${mockData.length} texts`, 'info');
+            eventBus.emit('textActivityUpdate', mockData);
+        };
+
+        window.testTextActivitySingle = function() {
+            const mockData = { text_id: 104, title: "Story D", writer_name: "Diana", last_activity: "2024-01-01T12:35:00Z" };
+            log(`📝 Testing single text activity update for text_id: ${mockData.text_id}`, 'info');
+            eventBus.emit('textActivityUpdate', mockData);
+        };
+
+        window.testTextActivityUpdate = function() {
+            const mockUpdate = { text_id: 101, title: "Story A Updated", writer_name: "Alice Updated", last_activity: "2024-01-01T13:05:00Z" };
+            log(`📝 Testing text update for existing text_id: ${mockUpdate.text_id}`, 'info');
+            eventBus.emit('textActivityUpdate', mockUpdate);
+        };
+
+        // Clear logs function
+        window.clearLogs = function() {
+            document.getElementById('consoleLog').innerHTML = '';
+            document.getElementById('eventLog').innerHTML = 'No events yet';
+            log('🧹 Logs cleared', 'info');
+        };
+
+        // Listen for activity data change events
+        eventBus.on('activityDataChanged', (event) => {
+            log(`📡 Activity data changed: ${event.type} (hasChanges: ${event.hasChanges})`, 'success');
+            
+            const eventLogElement = document.getElementById('eventLog');
+            const timestamp = new Date().toLocaleTimeString();
+            eventLogElement.innerHTML += `<div><strong>[${timestamp}]</strong> ${event.type} activity changed (hasChanges: ${event.hasChanges})</div>`;
+            
+            // Update displays
+            if (event.type === 'site') {
+                document.getElementById('siteActivityDisplay').textContent = JSON.stringify(event.data, null, 2);
+            } else if (event.type === 'games') {
+                document.getElementById('gameActivityDisplay').textContent = JSON.stringify(event.data, null, 2);
+            } else if (event.type === 'texts') {
+                document.getElementById('textActivityDisplay').textContent = JSON.stringify(event.data, null, 2);
+            }
+        });
+
+        // Auto-initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            log('🚀 Page loaded, ready for testing', 'info');
+            log('👆 Click "Initialize ActivityDataManager" to begin testing', 'warn');
+        });
+    </script>
+</body>
+</html> 

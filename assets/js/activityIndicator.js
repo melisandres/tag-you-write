@@ -72,6 +72,11 @@ export class ActivityIndicator {
     setupEventListeners() {
         console.log('🔔 ActivityIndicator: Setting up event listeners');
         
+        // Test if we can receive ANY events
+        eventBus.on('test-event', (data) => {
+            console.log('🔔 ActivityIndicator: Received test event:', data);
+        });
+        
         // Toggle panel
         const toggle = this.container.querySelector('.activity-toggle');
         toggle.addEventListener('click', () => {
@@ -96,8 +101,14 @@ export class ActivityIndicator {
 
         // Listen for site-wide activity updates from SSE/polling
         eventBus.on('siteActivityUpdate', (siteActivityData) => {
-            console.log('🔔 ActivityIndicator: Received site-wide activity update:', siteActivityData);
+            console.log('🔔 ActivityIndicator: ===== RECEIVED SITE ACTIVITY UPDATE =====');
+            console.log('🔔 ActivityIndicator: Timestamp:', new Date().toISOString());
+            console.log('🔔 ActivityIndicator: Data:', siteActivityData);
+            console.log('🔔 ActivityIndicator: Data source:', siteActivityData.source || 'unknown');
+            console.log('🔔 ActivityIndicator: Current activity data before update:', this.activityData);
             this.updateDisplay(siteActivityData);
+            console.log('🔔 ActivityIndicator: Current activity data after update:', this.activityData);
+            console.log('🔔 ActivityIndicator: ===== END SITE ACTIVITY UPDATE =====');
         });
 
         // Listen for SSE connection status to properly track update source
@@ -145,6 +156,8 @@ export class ActivityIndicator {
         const writing = data.writing || 0;
         const total = browsing + writing;
         
+        console.log('🔔 ActivityIndicator: Parsed values - Browsing:', browsing, 'Writing:', writing, 'Total:', total);
+        
         // Store the data
         this.activityData = {
             browsing: browsing,
@@ -154,15 +167,29 @@ export class ActivityIndicator {
 
         // Update toggle count (total active users)
         const toggleCount = this.container.querySelector('.activity-count');
+        const oldToggleCount = toggleCount.textContent;
         toggleCount.textContent = total;
+        console.log('🔔 ActivityIndicator: Updated toggle count from', oldToggleCount, 'to', total);
         
         // Update panel content
-        this.container.querySelector('.browsing-count').textContent = browsing;
-        this.container.querySelector('.writing-count').textContent = writing;
+        const browsingCountElement = this.container.querySelector('.browsing-count');
+        const writingCountElement = this.container.querySelector('.writing-count');
+        const oldBrowsingCount = browsingCountElement.textContent;
+        const oldWritingCount = writingCountElement.textContent;
+        
+        browsingCountElement.textContent = browsing;
+        writingCountElement.textContent = writing;
+        
+        console.log('🔔 ActivityIndicator: Updated panel - Browsing from', oldBrowsingCount, 'to', browsing, ', Writing from', oldWritingCount, 'to', writing);
 
         // Update toggle appearance based on activity
         const toggle = this.container.querySelector('.activity-toggle');
+        const hadActivity = toggle.classList.contains('has-activity');
         toggle.classList.toggle('has-activity', total > 0);
+        
+        if (hadActivity !== (total > 0)) {
+            console.log('🔔 ActivityIndicator: Activity state changed from', hadActivity, 'to', total > 0);
+        }
         
         console.log('🔔 ActivityIndicator: Display updated - Browsing:', browsing, 'Writing:', writing, 'Total:', total);
     }

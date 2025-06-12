@@ -118,7 +118,9 @@ export class ShelfVisualizer {
               ${node.title || untitledText}
             </h2>
             <p class="author">
+              <span class="activity-dot"></span>
               ${this.getAuthor(node)}
+              <span class="activity-text">(adding a note)</span>
             </p>
           </div>
           <span class="status">${(this.getStatus(node) || '')}</span>

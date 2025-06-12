@@ -19,6 +19,7 @@ export class ShelfUpdateManager {
     eventBus.on('searchApplied', this.handleSearchUpdate.bind(this));
     eventBus.on('updateNodeWinner', this.handleChooseWinnerFromPolling.bind(this));
     eventBus.on('nodePermissionsChanged', this.handlePermissionsChanged.bind(this));
+    eventBus.on('textActivityChanged', this.handleTextActivityChanged.bind(this));
 
     //TODO: can the following two be cleaned up? so that they point to methods? 
     eventBus.on('searchChanged', ({ searchTerm }) => {
@@ -43,13 +44,34 @@ export class ShelfUpdateManager {
 
     // Listen for shelf draw completion
     eventBus.on('shelfDrawComplete', (container) => {
+        console.log('🔍 ShelfUpdateManager: shelfDrawComplete event received with container:', container);
+        console.trace('🔍 Call stack for shelfDrawComplete:');
+        
         const searchTerm = this.dataManager.getSearch();
         if (searchTerm) {
             this.highlightShelfContent(container, searchTerm);
         }
+        
+        // Apply current activity indicators after shelf rendering
+        this.applyCurrentActivityIndicators(container);
     });
 
 
+  }
+
+  handleTextActivityChanged(activityData) {
+    const { textId, activity_type, parent_id, user_id } = activityData;
+    
+    if (activity_type === 'iterating') {
+        // Show placeholder/ghost entry in shelf
+        this.showIteratingPlaceholder(textId, parent_id, user_id);
+    } else if (activity_type === 'adding_note') {
+        // Show pulsing border or icon on shelf item
+        this.showAddingNoteIndicator(textId, user_id);
+    } else {
+        // Remove indicators
+        this.removeTextActivityIndicators(textId);
+    }
   }
 
   highlightShelfContent(container, searchTerm) {
@@ -702,6 +724,200 @@ export class ShelfUpdateManager {
         ${SVGManager.deleteSVG}
       </button>
     `;
+  }
+
+  // === Text Activity Indicator Methods ===
+
+  /**
+   * Show a placeholder/ghost entry for iterating activity
+   * Creates a visual indicator that someone is working on iterating a text
+   */
+  showIteratingPlaceholder(textId, parentId, userId) {
+    const container = document.querySelector('#showcase[data-showcase="shelf"]');
+    if (!container) return;
+
+    // Remove any existing placeholder for this text
+    this.removeIteratingPlaceholder(textId);
+
+    // Find the parent node to insert the placeholder after
+    const parentNode = container.querySelector(`li[data-story-id="${parentId}"]`);
+    if (!parentNode) return;
+
+    // Create the placeholder element
+    const placeholder = document.createElement('li');
+    placeholder.className = 'node iterating-placeholder';
+    placeholder.setAttribute('data-story-id', textId);
+    placeholder.setAttribute('data-parent-id', parentId);
+    placeholder.setAttribute('data-user-id', userId);
+
+    // Get user info for display
+    const userName = this.getUserName(userId) || 'Someone';
+    
+    placeholder.innerHTML = `
+      <div class="node-headline">
+        <div class="arrow closed arrow-right"></div>
+        <div class="shelf-heart">
+          <i>
+            ${SVGManager.votesSVG}
+          </i>
+        </div>
+        <div class="headline-content">
+          <h2 class="title">Someone is iterating...</h2>
+        </div>
+      </div>
+      <div class="node-buttons">
+        <!-- No buttons for placeholder -->
+      </div>
+    `;
+
+    // Insert the placeholder after the parent node
+    parentNode.insertAdjacentElement('afterend', placeholder);
+
+    console.log(`📝 ShelfUpdateManager: Added iterating placeholder for text ${textId} by user ${userId}`);
+  }
+
+  /**
+   * Show visual indicator that someone is adding a note
+   * Shows the always-present dot and adds the activity text
+   */
+  showAddingNoteIndicator(textId, userId) {
+    const container = document.querySelector('#showcase[data-showcase="shelf"]');
+    if (!container) return;
+
+    const nodeElement = container.querySelector(`li[data-story-id="${textId}"]`);
+    if (!nodeElement) return;
+
+    // Add activity class and data attributes
+    nodeElement.classList.add('adding-note-activity');
+    nodeElement.setAttribute('data-activity-user-id', userId);
+
+    // Find the author element
+    const authorElement = nodeElement.querySelector('.author');
+    if (!authorElement) return;
+
+    // Ensure the activity dot exists (always present)
+    let activityDot = nodeElement.querySelector('.activity-dot');
+    if (!activityDot) {
+      activityDot = document.createElement('span');
+      activityDot.className = 'activity-dot';
+      // Insert before the author text (but within the author element)
+      authorElement.insertBefore(activityDot, authorElement.firstChild);
+    }
+
+    // Add the activity text if it doesn't exist
+    let activityText = nodeElement.querySelector('.activity-text');
+    if (!activityText) {
+      activityText = document.createElement('span');
+      activityText.className = 'activity-text';
+      activityText.textContent = '(adding a note)';
+      // Append after the author text
+      authorElement.appendChild(activityText);
+    }
+
+    console.log(`📝 ShelfUpdateManager: Added note indicator for text ${textId} by user ${userId}`);
+  }
+
+  /**
+   * Remove all text activity indicators for a given text
+   * Cleans up when user stops editing
+   */
+  removeTextActivityIndicators(textId) {
+    const container = document.querySelector('#showcase[data-showcase="shelf"]');
+    if (!container) return;
+
+    // Remove iterating placeholder
+    this.removeIteratingPlaceholder(textId);
+
+    // Remove adding note indicator with fade-out transition
+    const nodeElement = container.querySelector(`li[data-story-id="${textId}"]`);
+    if (nodeElement && nodeElement.classList.contains('adding-note-activity')) {
+      // Add removing class for fade-out animation
+      nodeElement.classList.add('removing');
+      
+      // Wait for animation to complete before removing classes and text
+      setTimeout(() => {
+        nodeElement.classList.remove('adding-note-activity', 'removing');
+        nodeElement.removeAttribute('data-activity-user-id');
+        
+        // Remove only the activity text (keep the dot for reuse)
+        const activityText = nodeElement.querySelector('.activity-text');
+        if (activityText) {
+          activityText.remove();
+        }
+        
+        // Note: We keep the activity-dot element but it becomes invisible via CSS
+      }, 300); // Match CSS animation duration
+    }
+
+    console.log(`📝 ShelfUpdateManager: Removed activity indicators for text ${textId}`);
+  }
+
+  /**
+   * Remove iterating placeholder for a specific text
+   */
+  removeIteratingPlaceholder(textId) {
+    const container = document.querySelector('#showcase[data-showcase="shelf"]');
+    if (!container) return;
+
+    const placeholder = container.querySelector(`li.iterating-placeholder[data-story-id="${textId}"]`);
+    if (placeholder) {
+      placeholder.remove();
+      console.log(`📝 ShelfUpdateManager: Removed iterating placeholder for text ${textId}`);
+    }
+  }
+
+  /**
+   * Apply current activity indicators to newly rendered shelf
+   * Similar to how search highlighting works
+   */
+  applyCurrentActivityIndicators(container) {
+    console.log('🔍 ShelfUpdateManager: applyCurrentActivityIndicators called with container:', container);
+    
+    if (!window.userActivityDataManagerInstance) {
+      console.log('❌ ShelfUpdateManager: No userActivityDataManagerInstance found');
+      return;
+    }
+
+    // Get current text activities
+    const textActivities = window.userActivityDataManagerInstance.getDerivedTextActivities();
+    console.log('🔍 ShelfUpdateManager: Found text activities:', textActivities);
+    
+    // Also check diagnostic info
+    const diagnosticInfo = window.userActivityDataManagerInstance.getDiagnosticInfo();
+    console.log('🔍 ShelfUpdateManager: Diagnostic info:', diagnosticInfo);
+    
+    textActivities.forEach(activity => {
+      const { text_id, activity_type, user_id, parent_id } = activity;
+      console.log(`🔍 ShelfUpdateManager: Processing activity - textId: ${text_id}, type: ${activity_type}, userId: ${user_id}`);
+      
+      if (activity_type === 'adding_note') {
+        // Apply adding note indicator
+        this.showAddingNoteIndicator(text_id, user_id);
+      } else if (activity_type === 'iterating') {
+        // Apply iterating placeholder
+        this.showIteratingPlaceholder(text_id, parent_id, user_id);
+      }
+    });
+    
+    console.log('📝 ShelfUpdateManager: Applied current activity indicators for', textActivities.length, 'activities after shelf draw');
+  }
+
+  /**
+   * Helper method to get user name from user ID
+   * TODO: This should integrate with your user data system
+   */
+  getUserName(userId) {
+    // Try to get from user data manager or other sources
+    if (window.userActivityDataManagerInstance) {
+      const userActivities = window.userActivityDataManagerInstance.getUserActivities();
+      const user = userActivities.find(u => u.writer_id === userId);
+      if (user && user.name) {
+        return user.name;
+      }
+    }
+    
+    // Fallback to generic name
+    return `User ${userId}`;
   }
 
 }

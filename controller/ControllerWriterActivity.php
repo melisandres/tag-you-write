@@ -151,6 +151,25 @@ class ControllerWriterActivity extends Controller {
 
 
         /**
+     * Get all currently active users for UserActivityDataManager initialization
+     * Returns array of user activity records in the same format as SSE userActivityUpdate events
+     */
+    public function getAllActiveUsers() {
+        try {
+            $writerActivity = new WriterActivity();
+            $activeUsers = $writerActivity->getAllActiveUsers();
+            
+            header('Content-Type: application/json');
+            echo json_encode($activeUsers);
+            
+        } catch (Exception $e) {
+            error_log("Error getting all active users: " . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(['error' => 'Failed to get active users']);
+        }
+    }
+
+    /**
      * Get site-wide activity counts (for initialization and Redis broadcasting)
      * Returns simple tallies of browsing vs writing users across the entire site
      * 
@@ -290,10 +309,29 @@ class ControllerWriterActivity extends Controller {
                             ];
                         }
                         
+                        // 4. NEW: Individual user activity (always sent for user-centric tracking)
+                        $userActivityMessage = [
+                            'type' => 'user_activity_update',
+                            'data' => [
+                                'writer_id' => $activityData['writer_id'],
+                                'activity_type' => $activityData['activity_type'],
+                                'activity_level' => $activityData['activity_level'],
+                                'page_type' => $activityData['page_type'],
+                                'game_id' => $activityData['game_id'],
+                                'text_id' => $activityData['text_id'],
+                                'parent_id' => $activityData['parent_id'],
+                                'timestamp' => time()
+                            ],
+                            'source' => 'heartbeat',
+                            'timestamp' => time(),
+                            'writer_id' => $activityData['writer_id']
+                        ];
+                        
                         // Publish messages
                         $siteResult = $redisManager->publish('activities:site', $siteWideMessage);
                         $gameResult = $gameMessage ? $redisManager->publish('activities:games', $gameMessage) : 0;
                         $textResult = $textMessage ? $redisManager->publish('activities:texts:' . $activityData['game_id'], $textMessage) : 0;
+                        $userResult = $redisManager->publish('users:activity', $userActivityMessage);
                         
                         // Log success (reduced logging - only log every 5th heartbeat)
                         static $logCount = 0;
@@ -301,10 +339,10 @@ class ControllerWriterActivity extends Controller {
                         
                         if ($logCount % 5 === 0) {
                             error_log("ActivityUpdate: Direct Redis publish successful for writer_id: " . $activityData['writer_id'] . 
-                                     " (site: $siteResult, game: $gameResult, text: $textResult subscribers)");
+                                     " (site: $siteResult, game: $gameResult, text: $textResult, user: $userResult subscribers)");
                         }
                         
-                        return ($siteResult > 0 || $gameResult > 0 || $textResult > 0);
+                        return ($siteResult > 0 || $gameResult > 0 || $textResult > 0 || $userResult > 0);
                     } else {
                         error_log("ActivityUpdate: Redis not available for direct publishing");
                         return false;
@@ -377,7 +415,7 @@ class ControllerWriterActivity extends Controller {
      * Test endpoint for activity manager testing (no authentication required)
      * This is for development/testing purposes only
      */
-    public function testStore() {
+/*     public function testStore() {
         try {
             // Get JSON input
             $input = json_decode(file_get_contents('php://input'), true);
@@ -463,6 +501,6 @@ class ControllerWriterActivity extends Controller {
             http_response_code(500);
             echo json_encode(['error' => 'Internal server error: ' . $e->getMessage()]);
         }
-    }
+    } */
 }
 ?> 

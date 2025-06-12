@@ -100,6 +100,7 @@ export class SSEManager {
                     params.append('writer_id', userMeta.dataset.userId);
                     console.log('SSE: Including writer_id from meta tag:', userMeta.dataset.userId);
                 } else {
+                    // TODO: I think this is bullshit
                     // Fall back to cookie check
                     const cookies = document.cookie.split(';');
                     for (let cookie of cookies) {
@@ -221,18 +222,21 @@ export class SSEManager {
         });
 
         // Site-wide activity update event
+        // NOTE: Site activity is now derived from individual user activities in UserActivityDataManager
+        // This direct handling is kept for backward compatibility but may be removed in the future
         this.eventSource.addEventListener('siteActivityUpdate', (event) => {
             try {
-                console.log('SSE: Received site-wide activity update event');
-                console.log('SSE: Raw site activity event data:', event.data);
                 const siteActivityData = JSON.parse(event.data);
-                console.log('SSE: Parsed site activity data:', siteActivityData);
-                console.log('SSE: About to emit siteActivityUpdate event to eventBus');
+                console.log('SSE: Parsed site activity data (legacy):', siteActivityData);
                 
-                // Emit the same event as polling manager for consistency
-                eventBus.emit('siteActivityUpdate', siteActivityData);
-                
-                console.log('SSE: Successfully emitted siteActivityUpdate event');
+                // TEMPORARY: Only emit if we don't have UserActivityDataManager handling this
+                // This allows for gradual migration
+                if (!window.userActivityDataManagerInstance) {
+                    eventBus.emit('siteActivityUpdate', siteActivityData);
+                } else {
+                    console.log('SSE: Skipping legacy site activity - handled by UserActivityDataManager');
+                }
+
             } catch (error) {
                 console.error('SSE: Error processing site activity update:', error);
             }
@@ -241,15 +245,12 @@ export class SSEManager {
         // Game activity update event
         this.eventSource.addEventListener('gameActivityUpdate', (event) => {
             try {
-                console.log('SSE: Received game activity update event');
-                console.log('SSE: Raw game activity event data:', event.data);
                 const gameActivityData = JSON.parse(event.data);
                 console.log('SSE: Parsed game activity data:', gameActivityData);
                 
                 // Emit the same event as polling manager for consistency
                 eventBus.emit('gameActivityUpdate', gameActivityData);
-                
-                console.log('SSE: Successfully emitted gameActivityUpdate event');
+
             } catch (error) {
                 console.error('SSE: Error processing game activity update:', error);
             }
@@ -258,17 +259,28 @@ export class SSEManager {
         // Text activity update event
         this.eventSource.addEventListener('textActivityUpdate', (event) => {
             try {
-                console.log('SSE: Received text activity update event');
-                console.log('SSE: Raw text activity event data:', event.data);
                 const textActivityData = JSON.parse(event.data);
                 console.log('SSE: Parsed text activity data:', textActivityData);
                 
                 // Emit the same event as polling manager for consistency
                 eventBus.emit('textActivityUpdate', textActivityData);
                 
-                console.log('SSE: Successfully emitted textActivityUpdate event');
             } catch (error) {
                 console.error('SSE: Error processing text activity update:', error);
+            }
+        });
+
+        // NEW: Individual user activity update event
+        this.eventSource.addEventListener('userActivityUpdate', (event) => {
+            try {
+                const userActivityData = JSON.parse(event.data);
+                console.log('SSE: Parsed user activity data:', userActivityData);
+                
+                // Emit the same event as polling manager for consistency
+                eventBus.emit('userActivityUpdate', userActivityData);
+                
+            } catch (error) {
+                console.error('SSE: Error processing user activity update:', error);
             }
         });
 
