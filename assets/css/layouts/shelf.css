@@ -172,30 +172,36 @@ div.writing.visible{
 
 /* Iterating placeholder (ghost entry) */
 .iterating-placeholder {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    margin-top: 10px;
     opacity: 0.7;
     border: 2px dashed var(--color-accent);
     border-radius: 8px;
     margin: 10px 0;
     background-color: var(--color-accent-light, #fff3cd);
+    animation: pulse-background-fade 2s ease-in-out infinite;
+}
+
+.iterating-placeholder .node-headline{
+    padding-bottom: 5px;
+    padding-top: 5px;
+    display: flex;
+    align-content: center;
 }
 
 .iterating-placeholder .shelf-heart i {
+    display: flex;
+    align-items: center;
     animation: pulse-heart-fade 2s ease-in-out infinite;
 }
 
 .iterating-placeholder .shelf-heart i svg path {
-    fill: #ffffff !important;
+    fill: var(--color-white) !important;
     stroke: #cccccc !important;
     stroke-width: 3px !important;
 }
 
 @keyframes pulse-heart-fade {
     0%, 100% {
-        opacity: 0.4;
+        opacity: 0.4; 
         transform: scale(0.95);
     }
     50% {
@@ -204,22 +210,35 @@ div.writing.visible{
     }
 }
 
+/* Complementary background pulsing - opposite to heart */
+@keyframes pulse-background-fade {
+    0%, 100% {
+        background-color: rgba(255, 255, 255, 0.8);
+        opacity: 0.5;
+
+    }
+    50% {
+        background-color: var(--color-accent-light, #fff3cd);
+        opacity: 0.9;
+    }
+}
+
 /* Adding note indicator (inline with author) */
-.adding-note-activity .activity-dot {
+.adding-note-activity > .node-headline .activity-dot {
     opacity: 1 !important; /* Force visible when activity is active */
     animation: fade-in 0.3s ease-in-out forwards, pulse-note-dot 2s ease-in-out infinite;
 }
 
-.adding-note-activity.removing .activity-dot {
+.adding-note-activity.removing > .node-headline .activity-dot {
     animation: fade-out 0.3s ease-in-out forwards;
 }
 
-.adding-note-activity .activity-text {
+.adding-note-activity > .node-headline .activity-text {
     opacity: 1 !important; /* Force visible when activity is active */
     animation: fade-in 0.3s ease-in-out forwards;
 }
 
-.adding-note-activity.removing .activity-text {
+.adding-note-activity.removing > .node-headline .activity-text {
     animation: fade-out 0.3s ease-in-out forwards;
 }
 
@@ -227,7 +246,7 @@ div.writing.visible{
     display: inline-block;
     width: 8px;
     height: 8px;
-    background-color: var(--color-love);
+    background-color: var(--color-activity-adding-note);
     border-radius: 50%;
     margin-left: -12px; /* Negative margin to not affect author alignment */
     margin-right: 4px;
@@ -271,7 +290,7 @@ div.writing.visible{
 @keyframes pulse-note-dot {
     0%, 100% {
         opacity: 0.3;
-        transform: scale(1);
+        transform: scale(0.85);
     }
     50% {
         opacity: 1;

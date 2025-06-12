@@ -437,6 +437,9 @@ export class TreeVisualizer {
             .on("zoom", event => {
                 const transform = event.transform;
             
+                // Performance monitoring
+                const startTime = performance.now();
+            
                 // Log the zoom scale
                /*  console.log(`Zoom scale: ${transform.k}`); */
             
@@ -465,12 +468,44 @@ export class TreeVisualizer {
                 
                 child.attr("transform", transform);
 
-                // Update styles based on zoom level
-                this.updateStyles(child, transform.k);
+                // Update styles based on zoom level (throttled)
+                const now = performance.now();
+                if (now - this.lastStyleUpdate > this.styleUpdateThreshold) {
+                    const stylesStartTime = performance.now();
+                    this.updateStyles(child, transform.k);
+                    const stylesEndTime = performance.now();
+                    this.lastStyleUpdate = now;
+                    
+                    const totalTime = performance.now() - startTime;
+                    
+                    // Log performance if it's slow (over 16ms = 60fps threshold)
+                    if (totalTime > 16) {
+                        console.warn(`🐌 Slow zoom event: ${totalTime.toFixed(2)}ms total, updateStyles: ${(stylesEndTime - stylesStartTime).toFixed(2)}ms`);
+                    }
+                } else {
+                    const totalTime = performance.now() - startTime;
+                    if (totalTime > 5) {
+                        console.log(`⚡ Fast zoom event: ${totalTime.toFixed(2)}ms (styles skipped)`);
+                    }
+                }
+            })
+            .on("end", () => {
+                // Reapply search highlighting when zoom/drag ends
+                const searchTerm = this.dataManager.getSearch();
+                if (searchTerm) {
+                    console.log('🔍 Reapplying search highlights after zoom end');
+                    this.svg.selectAll('.node').each((d) => {
+                        this.handleTitleHighlight(d.data.id, searchTerm, true);
+                    });
+                }
             });
 
         // Store the zoom behavior
         this.zoom = zoom;
+        
+        // Add throttling for updateStyles
+        this.lastStyleUpdate = 0;
+        this.styleUpdateThreshold = 50; // Only update styles every 50ms
 
         // Apply zoom to SVG
         this.svg.call(this.zoom);
@@ -505,6 +540,11 @@ export class TreeVisualizer {
         this.applySearchMatches();
         console.log('After calling applySearchMatches');
         
+        // Apply current activity indicators after tree is drawn
+        if (window.treeUpdateManagerInstance) {
+            window.treeUpdateManagerInstance.applyCurrentActivityIndicators(this.container);
+        }
+        
         // Explicitly translate all "Untitled" nodes immediately after drawing the tree
         // TODO: This ensures that the "Untitled" text is always translated on first draw... which is not working otherwise... it's annoying. 
 /*         if (window.i18n) {
@@ -513,6 +553,9 @@ export class TreeVisualizer {
         }
         
         console.log('Tree drawing complete, translations applied'); */
+
+        // After drawing we want to add any activity indicators:
+        eventBus.emit('treeRendered', this.container);
     }
 
     
@@ -544,13 +587,14 @@ export class TreeVisualizer {
             { label: "legend.winner", type: "star"},
             { label: "legend.unread", type: "unread-heart" },
             { label: "legend.search", type: "search-match"},
-            { label: "legend.votes", type: "vote-gradient", maxVotes: maxVotes }
+            { label: "legend.adding_note", type: "adding-note" },
+            { label: "legend.votes", type: "vote-gradient", maxVotes: maxVotes } 
         ];
     
         const legend = self.svg.append("g")
             .attr("class", "legend")
             .classed("hidden", false)
-            .attr("transform", `translate(${self.containerWidth - 112}, ${self.containerHeight - 200})`)
+            .attr("transform", `translate(${self.containerWidth - 140}, ${self.containerHeight - 250})`)
             .style("cursor", "pointer")
             .on("click", () => {
                 self.toggleLegend();
@@ -563,8 +607,8 @@ export class TreeVisualizer {
             .attr("class", "legend-box")
             .attr("x", -legendBoxPadding)
             .attr("y", -legendBoxPadding)
-            .attr("width", 130)  // Adjust width based on content
-            .attr("height", legendData.length * 45 + legendBoxPadding * 2)  // Fixed height calculation
+            .attr("width", 160)  // Increased width to accommodate longer text
+            .attr("height", legendData.length * 45 + legendBoxPadding * 2)  // Height accounts for all items
             .attr("fill", "floralwhite")  // Set to non-transparent background
             .attr("stroke", "black")  // Optional border around the box
             .attr("rx", 5)  // Rounded corners
@@ -694,13 +738,26 @@ export class TreeVisualizer {
                     .attr("data-i18n", d.label)
                     .text(window.i18n ? window.i18n.translate(d.label) : d.label)
                     .style("font-size", "15px");
-            }  
+            } else if (d.type === "adding-note") {
+                // Draw a circle with the same class and animation
+                item.append("circle")
+                    .attr("cx", 2)
+                    .attr("cy", 0)
+                    .attr("r", 6)
+                    .attr("class", "activity-dot adding-note");
+                item.append("text")
+                    .attr("x", 20)
+                    .attr("y", 5)
+                    .attr("data-i18n", d.label)
+                    .text(window.i18n ? window.i18n.translate(d.label) : "Note in progress")
+                    .style("font-size", "15px");
+            }
         });
 
         // Add toggle button under the legend
         const toggleButton = self.svg.append("g")
             .attr("class", "legend-toggle")
-            .attr("transform", `translate(${self.containerWidth  - 95}, ${self.containerHeight - 30})`)
+            .attr("transform", `translate(${self.containerWidth  - 125}, ${self.containerHeight - 30})`)
             .style("cursor", "pointer")
             .style("display", "none") 
             .on("click", () => this.toggleLegend());
@@ -729,10 +786,10 @@ export class TreeVisualizer {
             .style("cursor", "pointer")
             .on("click", () => this.toggleLegend());
 
-        toggleLegend.append("rect")
+/*         toggleLegend.append("rect")
             .attr("width", 90)
             .attr("height", 25)
-            .attr("fill", "lightgray");
+            .attr("fill", "lightgray"); */
        
         this.legend = legend;
         this.legendToggle = toggleButton;
@@ -743,12 +800,12 @@ export class TreeVisualizer {
 
     updateLegendPosition() {
         if (this.legend) {
-            const newX = this.container.clientWidth - 112;
-            const newY = this.container.clientHeight - 200;
+            const newX = this.container.clientWidth - 140;
+            const newY = this.container.clientHeight - 250;
             this.legend.attr("transform", `translate(${newX}, ${newY})`);
             
             // Update toggle button position
-            const toggleX = this.container.clientWidth - 95;
+            const toggleX = this.container.clientWidth - 125;
             this.legendToggle.attr("transform", `translate(${toggleX}, ${this.container.clientHeight - 30})`);
 
             // Update visibility based on screen size
@@ -849,6 +906,12 @@ export class TreeVisualizer {
     }
 
     updateStyles(container, scale) {
+        // Cache calculations that don't change per node
+        const titleFontSize = this.calculateFontSize(scale, 'title');
+        const authorFontSize = this.calculateFontSize(scale, 'author');
+        const authorVisibility = this.calculateAuthorVisibility(scale);
+        const searchTerm = this.dataManager.getSearch();
+        
         container.selectAll(".node").each((d, i, nodes) => {
             if (!d || !d.data) {
                 console.error('Node data is undefined:', d);
@@ -858,27 +921,32 @@ export class TreeVisualizer {
             const titleGroup = node.select(".title-group");
             const author = node.select(".text-by");
 
-            const titleFontSize = this.calculateFontSize(scale, 'title');
-            const authorFontSize = this.calculateFontSize(scale, 'author');
-            const authorVisibility = this.calculateAuthorVisibility(scale);
-
-            // Use proper i18n for title fallback
-            const titleBottomPosition = this.updateTitle(
-                titleGroup, 
-                d => d.data.title || (window.i18n ? window.i18n.translate("general.untitled") : "Untitled"), 
-                titleFontSize
-            );
-
-            author
-                .attr("dy", `${titleBottomPosition + this.config.titleAuthorSpacing}px`)
-                .style("font-size", `${authorFontSize}px`)
-                .style("opacity", authorVisibility)
-                .text(d => this.formatAuthorName(d.data, authorFontSize));
-            
-            const searchTerm = this.dataManager.getSearch();   
-            if (searchTerm) {
-                this.handleTitleHighlight(d.data.id, searchTerm, true);
+            // Only update title if font size changed significantly (avoid expensive DOM operations)
+            const currentFontSize = parseFloat(titleGroup.select("text").style("font-size")) || 0;
+            if (Math.abs(currentFontSize - titleFontSize) > 1) {
+                const titleBottomPosition = this.updateTitle(
+                    titleGroup, 
+                    d => d.data.title || (window.i18n ? window.i18n.translate("general.untitled") : "Untitled"), 
+                    titleFontSize
+                );
+                
+                // Update author position based on new title
+                author.attr("dy", `${titleBottomPosition + this.config.titleAuthorSpacing}px`);
             }
+
+            // Update author styles (these are less expensive)
+            author
+                .style("font-size", `${authorFontSize}px`)
+                .style("opacity", authorVisibility);
+            
+            // Only update author text if font size changed significantly
+            const currentAuthorFontSize = parseFloat(author.style("font-size")) || 0;
+            if (Math.abs(currentAuthorFontSize - authorFontSize) > 1) {
+                author.text(d => this.formatAuthorName(d.data, authorFontSize));
+            }
+            
+            // Skip search highlighting during zoom for performance
+            // It will be reapplied when zoom ends
         });
     }
     

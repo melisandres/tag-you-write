@@ -405,7 +405,8 @@
     "votes": "# de votes",
     "not_enough_players_line1": "*Pas assez",
     "not_enough_players_line2": "de joueurs pour voter",
-    "show_legend": "Voir légende"
+    "show_legend": "Voir légende",
+    "adding_note": "note en cours"
   },
   "d3_visualization": {
     "unavailable_title": "Visualisation D3 Indisponible",

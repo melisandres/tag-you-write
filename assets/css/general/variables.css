@@ -70,7 +70,8 @@
     --color-love: rgba(243, 119, 225); 
     --color-success: rgba(127, 227, 127); 
     --color-error: rgba(238, 108, 108);
-    --color-critical: rgba(150, 30, 30); 
+    --color-critical: rgba(150, 30, 30);
+    --color-activity-adding-note: var(--color-success); 
 
     --color-warning: var(--color-secondary); 
     --color-info: var(--color-primary);

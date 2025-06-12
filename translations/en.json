@@ -406,7 +406,8 @@
       "votes": "# of votes",
       "not_enough_players_line1": "*Not enough",
       "not_enough_players_line2": "players for votes",
-      "show_legend": "Show Legend"
+      "show_legend": "Show Legend",
+      "adding_note": "note in progress"
     },
     "d3_visualization": {
       "unavailable_title": "D3 Visualization Unavailable",

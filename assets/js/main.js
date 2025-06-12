@@ -124,7 +124,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Initialize UpdateManagers
   new ShelfUpdateManager();
-  new TreeUpdateManager(treeVisualizer);
+  window.treeUpdateManagerInstance = new TreeUpdateManager(treeVisualizer);
   new ModalUpdateManager();
   window.gameListUpdateManager = new GameListUpdateManager();
 

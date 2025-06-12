@@ -63,3 +63,35 @@ path.tree-node-draft {
     stroke-width: 1px !important;
     opacity: 50% !important;
 }
+
+/* === Tree Activity Indicators === */
+
+/* Activity dot for adding note in tree view */
+.node circle.activity-dot.adding-note {
+    fill: var(--color-activity-adding-note);
+    /*stroke: var(--color-activity-adding-note);*/
+    stroke-width: 2px;
+    animation: pulse-note-dot 2s ease-in-out infinite;
+    opacity: 0.9;
+}
+
+/* Legend activity dot */
+.legend-item circle.activity-dot.adding-note {
+    fill: var(--color-activity-adding-note);
+    /*stroke: var(--color-activity-adding-note);*/
+    stroke-width: 1px;
+    animation: pulse-note-dot 2s ease-in-out infinite;
+    opacity: 0.9;
+}
+
+/* Pulsing animation for note activity dots */
+@keyframes pulse-note-dot {
+    0%, 100% {
+        opacity: 0.6;
+        r: 5.5;
+    }
+    50% {
+        opacity: 0.9;
+        r: 6.5;
+    }
+}

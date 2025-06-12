@@ -403,16 +403,81 @@ export class TreeUpdateManager {
    * Show visual indicator that someone is adding a note in tree view
    */
   showAddingNoteIndicator(textId, userId) {
-    console.log(`🌳 TreeUpdateManager: Would show adding note indicator for text ${textId} (not yet implemented for tree view)`);
-    // TODO: Implement tree-specific note indicator
+    const container = document.querySelector('#showcase[data-showcase="tree"]');
+    if (!container) return;
+
+    // Find the node group by data-id
+    const nodeGroup = container.querySelector(`.node path[data-id="${textId}"]`)?.parentNode;
+    if (!nodeGroup) return;
+
+    // Remove any existing indicator first
+    this.removeAddingNoteIndicator(textId);
+
+    // Get the heart/star's bounding box for positioning
+    const heart = nodeGroup.querySelector('path[data-id]');
+    if (!heart) return;
+    const bbox = heart.getBBox();
+
+    // Create the SVG circle
+    const ns = "http://www.w3.org/2000/svg";
+    const dot = document.createElementNS(ns, "circle");
+    dot.setAttribute("class", "activity-dot adding-note");
+    dot.setAttribute("cx", bbox.x + bbox.width - 22); //lower nums go left
+    dot.setAttribute("cy", bbox.y + 21); // higher numbers go down
+    dot.setAttribute("r", 6); // adjust as needed
+    dot.setAttribute("data-activity-user-id", userId);
+
+    // Tag for easy removal
+    dot.setAttribute("data-adding-note-indicator", textId);
+
+    nodeGroup.appendChild(dot);
+  }
+
+  removeAddingNoteIndicator(textId) {
+    const container = document.querySelector('#showcase[data-showcase="tree"]');
+    if (!container) return;
+    const dot = container.querySelector(`circle.activity-dot.adding-note[data-adding-note-indicator="${textId}"]`);
+    if (dot) dot.remove();
   }
 
   /**
    * Remove all text activity indicators for a given text in tree view
    */
   removeTextActivityIndicators(textId) {
-    console.log(`🌳 TreeUpdateManager: Would remove activity indicators for text ${textId} (not yet implemented for tree view)`);
-    // TODO: Implement tree-specific indicator removal
+    console.log(`�� TreeUpdateManager: Removing activity indicators for text ${textId}`);
+    this.removeAddingNoteIndicator(textId);
+  }
+
+  /**
+   * Apply current activity indicators to newly rendered tree
+   * Similar to how search highlighting works in shelf
+   */
+  applyCurrentActivityIndicators(container) {
+    console.log('🔍 TreeUpdateManager: applyCurrentActivityIndicators called with container:', container);
+    
+    if (!window.userActivityDataManagerInstance) {
+      console.log('❌ TreeUpdateManager: No userActivityDataManagerInstance found');
+      return;
+    }
+
+    // Get current text activities
+    const textActivities = window.userActivityDataManagerInstance.getDerivedTextActivities();
+    console.log('🔍 TreeUpdateManager: Found text activities:', textActivities);
+    
+    textActivities.forEach(activity => {
+      const { text_id, activity_type, user_id, parent_id } = activity;
+      console.log(`🔍 TreeUpdateManager: Processing activity - textId: ${text_id}, type: ${activity_type}, userId: ${user_id}`);
+      
+      if (activity_type === 'adding_note') {
+        // Apply adding note indicator
+        this.showAddingNoteIndicator(text_id, user_id);
+      } else if (activity_type === 'iterating') {
+        // Apply iterating placeholder (when implemented)
+        this.showIteratingGhostNode(text_id, parent_id, user_id);
+      }
+    });
+    
+    console.log('📝 TreeUpdateManager: Applied current activity indicators for', textActivities.length, 'activities after tree draw');
   }
 
 } 

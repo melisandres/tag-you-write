@@ -143,7 +143,7 @@ export class ShelfUpdateManager {
         if (nodeData.writerMatches) {
           const authorElement = node.querySelector('.author');
           if (authorElement) {
-            authorElement.innerHTML = this.highlightText(authorElement.textContent, searchTerm);
+            this.highlightAuthorText(authorElement, searchTerm, storyId);
           }
         }
       }
@@ -564,10 +564,10 @@ export class ShelfUpdateManager {
                 note.appendChild(contentElement);
             }
             
-            // Reset any highlighted authors
-            const author = node.querySelector('.author');
-            if (author && author.innerHTML.includes('<mark>')) {
-                author.textContent = author.textContent;
+            // Reset any highlighted authors - simple text replacement
+            const authorSpan = node.querySelector('.author span.author');
+            if (authorSpan && authorSpan.innerHTML.includes('<mark>')) {
+                authorSpan.textContent = authorSpan.textContent; // This removes HTML and keeps just text
             }
         });
         return;
@@ -918,6 +918,33 @@ export class ShelfUpdateManager {
     
     // Fallback to generic name
     return `User ${userId}`;
+  }
+
+  highlightAuthorText(authorElement, searchTerm, storyId) {
+    // Get node data to check if this is current user's text  
+    const nodeData = this.dataManager.getNode(storyId);
+    
+    // For "by you" - check if search matches user's actual name
+    if (nodeData?.permissions?.isMyText) {
+      const firstName = nodeData.firstName || '';
+      const lastName = nodeData.lastName || '';
+      const regex = new RegExp(`(${searchTerm})`, 'gi');
+      
+      if (firstName.match(regex) || lastName.match(regex)) {
+        // Find the author span and highlight just "you"
+        const authorSpan = authorElement.querySelector('span.author');
+        if (authorSpan && authorSpan.textContent.includes('you')) {
+          authorSpan.innerHTML = authorSpan.textContent.replace('you', '<mark>you</mark>');
+        }
+        return;
+      }
+    }
+    
+    // For other authors - simple text highlighting
+    const authorSpan = authorElement.querySelector('span.author');
+    if (authorSpan && authorSpan.textContent.toLowerCase().includes(searchTerm.toLowerCase())) {
+      authorSpan.innerHTML = this.highlightText(authorSpan.textContent, searchTerm);
+    }
   }
 
 }

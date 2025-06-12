@@ -120,21 +120,21 @@
 /* === Modal Text Activity Indicators === */
 
 /* Adding note indicator (inline with author) */
-.modal-background.adding-note-activity .activity-dot {
+.modal-background.adding-note-activity > .modal .author .activity-dot {
     opacity: 1 !important; /* Force visible when activity is active */
     animation: fade-in 0.3s ease-in-out forwards, pulse-note-dot 2s ease-in-out infinite;
 }
 
-.modal-background.adding-note-activity.removing .activity-dot {
+.modal-background.adding-note-activity.removing > .modal .author .activity-dot {
     animation: fade-out 0.3s ease-in-out forwards;
 }
 
-.modal-background.adding-note-activity .activity-text {
+.modal-background.adding-note-activity > .modal .author .activity-text {
     opacity: 1 !important; /* Force visible when activity is active */
     animation: fade-in 0.3s ease-in-out forwards;
 }
 
-.modal-background.adding-note-activity.removing .activity-text {
+.modal-background.adding-note-activity.removing > .modal .author .activity-text {
     animation: fade-out 0.3s ease-in-out forwards;
 }
 
@@ -142,7 +142,7 @@
     display: inline-block;
     width: 8px;
     height: 8px;
-    background-color: var(--color-love);
+    background-color: var(--color-activity-adding-note);
     border-radius: 50%;
     margin-left: 4px; /* Small margin to separate from author name */
     opacity: 0; /* Invisible by default */
