@@ -761,12 +761,20 @@ export class DataManager {
     // Add getter for SSE parameters
     getSSEParameters() {
         const rootId = this.getCurrentViewedRootStoryId();
+        
+        // Get game subscription parameters from GameSubscriptionManager
+        const subscriptionParams = window.gameSubscriptionManager?.getSubscriptionParams() || {
+            gameSubscriptionType: 'all_games'
+        };
+        
         return {
             lastGamesCheck: this.cache.lastGamesCheck || 0,
             filters: this.cache.filters || {},
             search: this.cache.search || '',
             rootStoryId: rootId,
             lastTreeCheck: this.cache.trees.get(rootId)?.timestamp || 0,
+            // Game subscription context from GameSubscriptionManager
+            gameSubscriptionType: subscriptionParams.gameSubscriptionType
         };
     }
 

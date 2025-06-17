@@ -41,9 +41,13 @@ class ControllerEvent extends Controller {
         $lastTreeCheck = isset($_GET['lastTreeCheck']) ? $_GET['lastTreeCheck'] : null;
         $lastGameCheck = isset($_GET['lastGameCheck']) ? $_GET['lastGameCheck'] : null;
         
+        // NEW: Game subscription type (simple approach)
+        $gameSubscriptionType = isset($_GET['gameSubscriptionType']) ? $_GET['gameSubscriptionType'] : 'all_games';
+        
         // Log parameters for debugging
         error_log("ControllerEvent: getUpdates parameters - lastEventId=$lastEventId, currentUserId=$currentUserId, rootStoryId=$rootStoryId, search=$search");
         error_log("ControllerEvent: lastTreeCheck=$lastTreeCheck, lastGameCheck=$lastGameCheck");
+        error_log("ControllerEvent: gameSubscriptionType=$gameSubscriptionType");
         
         // Use the service to get updates
         $pollingService = new DataFetchService();
@@ -57,9 +61,31 @@ class ControllerEvent extends Controller {
             $lastGameCheck
         );
         
+        // Apply simple game filtering post-query if needed
+        if ($gameSubscriptionType !== 'all_games' && !empty($updates['modifiedGames'])) {
+            $updates['modifiedGames'] = $this->filterGameUpdates($updates['modifiedGames'], $gameSubscriptionType, $rootStoryId);
+        }
+        
         // Return the updates as JSON
         header('Content-Type: application/json');
         echo json_encode($updates);
+    }
+    
+    /**
+     * Simple post-query filtering for game updates
+     */
+    private function filterGameUpdates($gameUpdates, $subscriptionType, $rootStoryId) {
+        switch ($subscriptionType) {
+            case 'single_game':
+                // Only include games that match the current rootStoryId
+                return array_filter($gameUpdates, function($game) use ($rootStoryId) {
+                    return isset($game['text_id']) && $game['text_id'] == $rootStoryId;
+                });
+            case 'none':
+                return []; // No game updates
+            default:
+                return $gameUpdates; // 'all_games' or unknown - return all
+        }
     }
 }
 ?>

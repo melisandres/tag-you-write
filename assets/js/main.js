@@ -41,6 +41,7 @@ import { ActivityIndicator } from './activityIndicator.js';
 import { UserActivityDataManager } from './userActivityDataManager.js';
 import { GhostTreeManager } from './GhostTreeManager.js';
 import { GameListRenderer } from './gameListRenderer.js';
+import { GameSubscriptionManager } from './gameSubscriptionManager.js';
 
 // Make eventBus globally available immediately
 window.eventBus = eventBus;
@@ -140,6 +141,9 @@ document.addEventListener("DOMContentLoaded", async () => {
        eventBus.emit('showToast', { message, type });
        localStorage.removeItem('pendingToast');
    }
+
+  // Initialize GameSubscriptionManager FIRST (before SSE/UpdateManager need it)
+  window.gameSubscriptionManager = new GameSubscriptionManager();
 
   // Initialize managers independently
   console.log('Initializing managers');

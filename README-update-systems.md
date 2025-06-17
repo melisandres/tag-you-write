@@ -12,7 +12,8 @@ This document provides comprehensive information about the real-time update syst
 6. [Update Tracking Mechanisms](#update-tracking-mechanisms)
 7. [Failover Mechanisms](#failover-mechanisms)
 8. [Server-Side Rendering](#server-side-rendering)
-9. [Data Flow Diagram](#data-flow-diagram)
+9. [Context-Aware Optimizations](#context-aware-optimizations)
+10. [Data Flow Diagram](#data-flow-diagram)
 
 ## Architecture Overview
 
@@ -24,6 +25,7 @@ The application employs a multi-layered approach to handle real-time updates:
 4. **Fallback Systems**: 
    - Backend polling when Redis is unavailable
    - Frontend polling when SSE connection fails
+5. **Optimizations**: Context-aware filtering to reduce unnecessary updates
 
 These systems work together to provide a resilient update mechanism that can handle various failure scenarios while maintaining real-time performance when possible.
 
@@ -32,12 +34,12 @@ These systems work together to provide a resilient update mechanism that can han
 ### How It Works
 
 1. **Event Creation**: When data changes occur (game updates, new text nodes, notifications), events are recorded in the `event` table
-2. **Redis Publishing**: The `RedisService` publishes these events to specific Redis channels:
-   - `games:updates` - For game state changes
-   - `texts:{rootStoryId}` - For text/node updates in a specific story
-   - `notifications:{writerId}` - For user-specific notifications
+2. **Redis Publishing**: The `RedisService` publishes these events to context-aware Redis channels:
+   - `games:updates` + `games:{rootTextId}` - Game updates (both general and story-specific channels)
+   - `texts:{rootStoryId}` - Text/node updates for specific stories only
+   - `notifications:{writerId}` - User-specific notifications only
 
-3. **Channel Subscription**: The SSE handler subscribes to relevant channels based on user context
+3. **Channel Subscription**: The SSE handler subscribes to context-appropriate channels based on user's current viewing context
 
 ### Key Components
 
@@ -57,10 +59,11 @@ These systems work together to provide a resilient update mechanism that can han
    - `search`: Current search term
    - `lastGamesCheck`: Timestamp of last game check
    - `lastTreeCheck`: Timestamp of last tree check
+   - `gameSubscriptionType`: Subscription type for filtering (`'all_games'`, `'single_game'`, `'none'`)
 
 3. **Server Processing**: The `EventHandler` on the backend:
    - Connects to Redis if available
-   - Subscribes to relevant channels
+   - Subscribes to relevant channels (with optional filtering optimization)
    - Delegates all model operations to `DataFetchService`
    - Falls back to database polling if Redis is unavailable
 
@@ -192,28 +195,81 @@ Initial game lists and tree data are also server-side rendered, providing immedi
 - **Action**: Queries database for events since `lastEventId`
 - **Recovery**: Processes any missed events before starting Redis subscription
 
+## Context-Aware Architecture
+
+### Overview
+
+The system uses context-aware channels to deliver only relevant updates based on the user's current viewing context. This applies to both text and game updates.
+
+### Context-Aware Text Updates (Core Feature)
+
+Text updates are inherently context-aware:
+- **Channel Pattern**: `texts:{rootStoryId}` - Only users viewing a specific story receive its text updates
+- **Implementation**: Built into the core Redis publishing and SSE subscription logic
+- **Benefit**: Users never receive text updates for stories they're not viewing
+
+### Context-Aware Game Updates (Performance Optimization)
+
+Game updates can be filtered by page context:
+- **Game List Page**: Receives ALL game updates (`'all_games'`)
+- **Collaboration Page**: Receives updates for the CURRENT game only (`'single_game'`)  
+- **Text Form Page**: Context-dependent - single game for edits, none for new games
+
+**Implementation**: The `GameSubscriptionManager` detects page type and works across all update systems:
+- **Redis**: Dual-channel publishing (`games:updates` + `games:{rootTextId}`)
+- **SSE**: Context-aware subscriptions based on `gameSubscriptionType`
+- **AJAX**: Post-query filtering for fallback scenarios
+
+### Benefits
+
+- **Network Efficiency**: Users only receive updates relevant to their current context
+- **Server Performance**: Reduced processing through targeted subscriptions and channels
+- **Architectural Consistency**: Both text and game updates follow context-aware patterns
+
 ## Data Flow Diagram
 
 ```
-┌────────────────┐     ┌─────────────┐     ┌────────────────┐
-│  Data Changes  │────▶│   Events    │────▶│  Redis Pub/Sub │
-└────────────────┘     └─────────────┘     └────────────────┘
-                                                   │
-                                                   ▼
-┌────────────────┐     ┌─────────────┐     ┌────────────────┐
-│ Frontend Cache │◀────│ SSE Handler │◀────│ DataFetchServ  │
-└────────────────┘     └─────────────┘     └────────────────┘
-       ▲                                           ▲
-       │                                           │
-       │                ┌─────────────────┐        │
-┌────────────────┐      │ Server-Side     │        │
-│ Polling AJAX   │◀─────│ Rendering       │        │
-└────────────────┘      └─────────────────┘        │
-                                                   │
-                        ┌─────────────────┐        │
-                        │ Database Poll   │────────┘
-                        └─────────────────┘
-                          (Fallback Path)
+┌────────────────┐     ┌─────────────┐     ┌────────────────────┐
+│  Data Changes  │────▶│   Events    │────▶│ Context-Aware      │
+└────────────────┘     └─────────────┘     │ Redis Publishing   │
+                                           │ • games:updates    │
+                                           │ • games:{textId}   │
+                                           └─────────┬──────────┘
+                                                     │
+                        ┌────────────────────────────┼─────────────────┐
+                        │                            ▼                 │
+                        │            ┌────────────────────────────┐     │
+                        │            │ Context-Aware              │     │
+                        │            │ SSE Subscriptions          │     │
+                        │            │ • GameSubscriptionManager  │     │
+                        │            │ • Channel Selection        │     │
+                        │            └──────────┬─────────────────┘     │
+                        │                       │                       │
+                        │                       ▼                       │
+┌────────────────┐     │┌─────────────┐     ┌────────────────┐          │
+│ Frontend Cache │◀────││ SSE Handler │◀────│ DataFetchServ  │          │
+└────────────────┘     │└─────────────┘     └────────────────┘          │
+       ▲               │                            ▲                   │
+       │               │                            │                   │
+       │               │┌─────────────────┐         │                   │
+┌────────────────┐     ││ Server-Side     │         │                   │
+│ Context-Aware  │◀────││ Rendering       │         │                   │
+│ AJAX Filtering │     │└─────────────────┘         │                   │
+└────────────────┘     │                            │                   │
+                       │┌─────────────────┐         │                   │
+                       ││ Database Poll   │─────────┘                   │
+                       │└─────────────────┘                             │
+                       │  (Fallback Path)                               │
+                       └────────────────────────────────────────────────┘
+                         Context-Aware Update Delivery System
 ```
 
-This architecture provides multiple paths for updates to reach the client, with server-side rendering ensuring immediate content availability and centralized data processing through DataFetchService for consistency and maintainability. 
+### System Benefits
+
+This architecture provides multiple paths for updates to reach the client with **context-aware optimizations**:
+
+- **Server-Side Rendering**: Immediate content availability on page load
+- **Context-Aware Subscriptions**: Users only receive relevant updates
+- **Progressive Enhancement**: Graceful degradation through multiple fallback layers
+- **Centralized Processing**: DataFetchService ensures consistency across all update mechanisms
+- **Network Efficiency**: Reduced bandwidth through targeted update delivery 

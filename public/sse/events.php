@@ -56,6 +56,9 @@ class EventHandler {
     // Unique connection ID
     private $connectionId;
     
+    // NEW: Game subscription type for simple filtering
+    private $gameSubscriptionType;
+    
     /**
      * Constructor
      * 
@@ -118,6 +121,9 @@ class EventHandler {
         $this->search = isset($_GET['search']) ? $_GET['search'] : '';
         $this->lastTreeCheck = isset($_GET['lastTreeCheck']) ? $_GET['lastTreeCheck'] : null;
         $this->lastGameCheck = isset($_GET['lastGameCheck']) ? $_GET['lastGameCheck'] : null;
+        
+        // NEW: Game subscription type for simple filtering
+        $this->gameSubscriptionType = isset($_GET['gameSubscriptionType']) ? $_GET['gameSubscriptionType'] : 'all_games';
         
         // Initialize session-based lastEventId
         $this->initializeSessionEventId();
@@ -316,13 +322,45 @@ class EventHandler {
      * Set up Redis channel subscriptions based on user context
      */
     private function setupRedisSubscriptions() {
-        // Define channels based on user context
+        // Define base channels that all clients get
         $channels = [
-            'games:updates',      // All clients get game updates
             'activities:site',     // All clients get site-wide activity counts
             'activities:games',    // All clients get game-specific activity counts
             'users:activity',      // NEW: All clients get individual user activity updates
         ];
+        
+        // Add context-aware game subscription based on gameSubscriptionType
+        switch ($this->gameSubscriptionType) {
+            case 'all_games':
+                // Subscribe to all game updates (game list page)
+                $channels[] = 'games:updates';
+                error_log("SSE: Subscribed to ALL game updates (game list context)");
+                break;
+                
+            case 'single_game':
+                // Subscribe to specific game updates using rootStoryId
+                if ($this->rootStoryId) {
+                    $channels[] = 'games:' . $this->rootStoryId;
+                    error_log("SSE: Subscribed to SINGLE game updates for rootStoryId: {$this->rootStoryId}");
+                } else {
+                    error_log("SSE: single_game subscription requested but no rootStoryId available");
+                }
+                break;
+                
+            case 'none':
+                // No game subscription (text form context - SIMPLIFIED)
+                // 
+                // FUTURE ENHANCEMENT: If you want users to receive updates on form pages:
+                // - Modify GameSubscriptionManager.js text_form case to return 'single_game' or 'all_games'
+                // - Then adjust the subscription logic here accordingly
+                error_log("SSE: NO game subscription (text form - simplified, no updates)");
+                break;
+                
+            default:
+                // Fallback to all games for unknown subscription types
+                $channels[] = 'games:updates';
+                error_log("SSE: Unknown gameSubscriptionType '{$this->gameSubscriptionType}', falling back to all games");
+        }
         
         // Add user-specific notification channel if authenticated
         if ($this->writerId) {
@@ -330,7 +368,8 @@ class EventHandler {
         }
         
         // Add story-specific channels if viewing a story
-        if ($this->rootStoryId) {
+        // BUT only if gameSubscriptionType is not 'none' (simplified logic for forms)
+        if ($this->rootStoryId && $this->gameSubscriptionType !== 'none') {
             $channels[] = 'texts:' . $this->rootStoryId;        // Text updates
             
             // Add text activity subscriptions    
@@ -340,6 +379,8 @@ class EventHandler {
             } else {
                 error_log("SSE: Could not find game_id for rootStoryId: {$this->rootStoryId}");
             }
+        } else if ($this->rootStoryId && $this->gameSubscriptionType === 'none') {
+            error_log("SSE: Skipping text subscriptions (gameSubscriptionType is 'none' - text form context)");
         }
         
         // Before subscribing, check for any missed events via database
@@ -407,6 +448,7 @@ class EventHandler {
                     // Process based on channel
                     switch (true) {
                         case $channel === 'games:updates':
+                            // Handle all games subscription (game list page)
                             if (isset($data['related_id'])) {
                                 $gameId = $data['related_id'];
                                 
@@ -422,6 +464,27 @@ class EventHandler {
                                     }
                                 } catch (Exception $e) {
                                     error_log("SSE Redis: Error fetching game data for ID $gameId: " . $e->getMessage());
+                                }
+                            }
+                            break;
+                            
+                        case strpos($channel, 'games:') === 0 && $channel !== 'games:updates':
+                            // Handle specific game subscription (single game context)
+                            if (isset($data['related_id'])) {
+                                $gameId = $data['related_id'];
+                                
+                                try {
+                                    $gameUpdates = $this->pollingService->fetchGameData($gameId, $this->filters, $this->search);
+                                    
+                                    if (!empty($gameUpdates)) {
+                                        $this->sendEvent('update', [
+                                            'modifiedGames' => $gameUpdates, 
+                                            'modifiedNodes' => [],
+                                            'searchResults' => []
+                                        ]);
+                                    }
+                                } catch (Exception $e) {
+                                    error_log("SSE Redis: Error fetching specific game data for ID $gameId: " . $e->getMessage());
                                 }
                             }
                             break;
@@ -616,6 +679,11 @@ class EventHandler {
                 $this->sendEvent('notificationUpdate', $updates['notifications']);
             }
             
+            // Apply game filtering if needed
+            if ($this->gameSubscriptionType !== 'all_games' && !empty($updates['modifiedGames'])) {
+                $updates['modifiedGames'] = $this->filterGameUpdates($updates['modifiedGames']);
+            }
+            
             // Send other updates if any
             if (!empty($updates['modifiedGames']) || !empty($updates['modifiedNodes'])) {
                 $this->sendEvent('update', [
@@ -744,6 +812,11 @@ class EventHandler {
                     $this->sendEvent('notificationUpdate', $updates['notifications']);
                 }
                 
+                // Apply game filtering if needed
+                if ($this->gameSubscriptionType !== 'all_games' && !empty($updates['modifiedGames'])) {
+                    $updates['modifiedGames'] = $this->filterGameUpdates($updates['modifiedGames']);
+                }
+                
                 // Send other updates if any
                 if (!empty($updates['modifiedGames']) || !empty($updates['modifiedNodes'])) {
                     $this->sendEvent('update', [
@@ -869,6 +942,23 @@ class EventHandler {
             $this->lastEventId = $updates['lastEventId'];
         }
     } */
+    
+    /**
+     * Simple post-query filtering for game updates
+     */
+    private function filterGameUpdates($gameUpdates) {
+        switch ($this->gameSubscriptionType) {
+            case 'single_game':
+                // Only include games that match the current rootStoryId
+                return array_filter($gameUpdates, function($game) {
+                    return isset($game['text_id']) && $game['text_id'] == $this->rootStoryId;
+                });
+            case 'none':
+                return []; // No game updates
+            default:
+                return $gameUpdates; // 'all_games' or unknown - return all
+        }
+    }
 }
 
 // Run the SSE handler if this file is accessed directly
