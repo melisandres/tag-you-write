@@ -91,13 +91,19 @@ class WriterActivity extends Crud {
     }
  */
     /**
-     * Get activity counts grouped by game for real-time game activity tracking
+     * DEPRECATED: Get activity counts grouped by game for real-time game activity tracking
      * Returns counts of active users per game for collaborative awareness
+     * 
+     * ⚠️ DEPRECATED: This method is no longer used by the frontend.
+     * The UI now uses user-centric tracking via UserActivityDataManager which derives
+     * game activities from individual user data automatically.
+     * 
+     * Kept for potential debugging/admin use only.
      * 
      * @param int|null $gameId Optional game ID to filter by specific game
      * @return array Structure with games array and timestamp
      */
-    public function getGameActivityCounts($gameId = null) {
+    /* public function getGameActivityCounts($gameId = null) {
         if ($gameId !== null) {
             // Scoped query for specific game only (used by heartbeat publishing)
             $sql = "SELECT 
@@ -133,92 +139,67 @@ class WriterActivity extends Crud {
             }
             
             return $gameActivities;
-        } else {
-            // Original query for all games (used by initialization/polling)
-            $sql = "SELECT 
-                        game_id,
-                        CASE 
-                            WHEN activity_type IN ('iterating', 'adding_note', 'starting_game') THEN 'writing'
-                            ELSE 'browsing'
-                        END as activity_category,
-                        COUNT(DISTINCT writer_id) as count
-                    FROM writer_activity 
-                    WHERE last_heartbeat >= DATE_SUB(NOW(), INTERVAL 5 MINUTE)
-                    AND activity_level = 'active'
-                    AND game_id IS NOT NULL
-                    GROUP BY game_id, activity_category";
-            
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute();
-            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
-            // Initialize structure for all games
-            $gameActivities = [
-                'games' => [],
-                'timestamp' => time()
-            ];
-            
-            // Process results and build per-game counts
-            foreach ($results as $row) {
-                $gameId = $row['game_id'];
-                $category = $row['activity_category'];
-                $count = (int)$row['count'];
-                
-                // Initialize game entry if not exists
-                if (!isset($gameActivities['games'][$gameId])) {
-                    $gameActivities['games'][$gameId] = [
-                        'browsing' => 0,
-                        'writing' => 0
-                    ];
-                }
-                
-                // Set the count for this category
-                $gameActivities['games'][$gameId][$category] = $count;
-            }
-            
-            return $gameActivities;
-        }
-    }
-
-    /**
-     * Get current activity for specific texts (for tree/shelf visualization)
-     * Returns aggregated counts per text_id
-     */
-   /*  public function getTextActivityCounts($gameId = null) {
-        $sql = "SELECT text_id,
-                       COUNT(*) as total_users,
-                       SUM(CASE WHEN activity_type = 'editing' THEN 1 ELSE 0 END) as editing_users,
-                       SUM(CASE WHEN activity_type = 'browsing' THEN 1 ELSE 0 END) as browsing_users,
-                       GROUP_CONCAT(CONCAT(COALESCE(w.firstName, 'Anonymous'), ' ', COALESCE(w.lastName, ''))) as user_names
-                FROM $this->table wa
-                LEFT JOIN writer w ON wa.writer_id = w.id
-                WHERE text_id IS NOT NULL 
-                AND last_heartbeat > DATE_SUB(NOW(), INTERVAL 5 MINUTE)";
-        
-        if ($gameId !== null) {
-            $sql .= " AND game_id = :gameId";
         }
         
-        $sql .= " GROUP BY text_id";
+        // Original query for all games (used by initialization/polling)
+        $sql = "SELECT 
+                    game_id,
+                    CASE 
+                        WHEN activity_type IN ('iterating', 'adding_note', 'starting_game') THEN 'writing'
+                        ELSE 'browsing'
+                    END as activity_category,
+                    COUNT(DISTINCT writer_id) as count
+                FROM writer_activity 
+                WHERE last_heartbeat >= DATE_SUB(NOW(), INTERVAL 5 MINUTE)
+                AND activity_level = 'active'
+                AND game_id IS NOT NULL
+                GROUP BY game_id, activity_category";
         
         $stmt = $this->pdo->prepare($sql);
+        $stmt->execute();
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        if ($gameId !== null) {
-            $stmt->bindValue(':gameId', $gameId);
+        // Initialize structure for all games
+        $gameActivities = [
+            'games' => [],
+            'timestamp' => time()
+        ];
+        
+        // Process results and build per-game counts
+        foreach ($results as $row) {
+            $gameId = $row['game_id'];
+            $category = $row['activity_category'];
+            $count = (int)$row['count'];
+            
+            // Initialize game entry if not exists
+            if (!isset($gameActivities['games'][$gameId])) {
+                $gameActivities['games'][$gameId] = [
+                    'browsing' => 0,
+                    'writing' => 0
+                ];
+            }
+            
+            // Set the count for this category
+            $gameActivities['games'][$gameId][$category] = $count;
         }
         
-        $stmt->execute();
-        return $stmt->fetchAll();
+        return $gameActivities;
     } */
 
     /**
-     * Get individual user activities for a specific game (for real-time activity tracking)
+     * DEPRECATED: Get individual user activities for a specific game (for real-time activity tracking)
      * Returns array of individual user activity records with consistent data structure
+     * 
+     * ⚠️ DEPRECATED: This method is no longer used by the frontend.
+     * The UI now uses user-centric tracking via UserActivityDataManager with getAllActiveUsers()
+     * which provides the same data but for all games simultaneously.
+     * 
+     * Kept for potential debugging/admin use only.
      * 
      * @param int|null $gameId Game ID to filter by
      * @return array Array of individual user activity records
      */
-    public function getIndividualTextActivities($gameId = null) {
+    /* public function getIndividualTextActivities($gameId = null) {
         $sql = "SELECT 
                     writer_id,
                     activity_type,
@@ -255,7 +236,7 @@ class WriterActivity extends Crud {
         }
         
         return $results;
-    }
+    } */
 
     /**
      * Clean up old activity records (run periodically)
@@ -380,12 +361,18 @@ class WriterActivity extends Crud {
     }
 
     /**
-     * Get site-wide activity counts for broadcasting and initialization
+     * DEPRECATED: Get site-wide activity counts for broadcasting and initialization
      * Returns simplified tallies of browsing vs writing users across the entire site
+     * 
+     * ⚠️ DEPRECATED: This method is no longer used by the frontend.
+     * The UI now uses user-centric tracking via UserActivityDataManager which derives
+     * site-wide counts from individual user data automatically.
+     * 
+     * Kept for potential debugging/admin use only.
      * 
      * @return array Simple structure with browsing, writing, and timestamp
      */
-    public function getSiteWideActivityCounts() {
+    /* public function getSiteWideActivityCounts() {
         $sql = "SELECT 
                     CASE 
                         WHEN activity_type IN ('iterating', 'adding_note', 'starting_game') THEN 'writing'
@@ -419,6 +406,6 @@ class WriterActivity extends Crud {
         }
         
         return $counts;
-    }
+    } */
 }
 ?> 

@@ -229,13 +229,9 @@ export class SSEManager {
                 const siteActivityData = JSON.parse(event.data);
                 console.log('SSE: Parsed site activity data (legacy):', siteActivityData);
                 
-                // TEMPORARY: Only emit if we don't have UserActivityDataManager handling this
-                // This allows for gradual migration
-                if (!window.userActivityDataManagerInstance) {
-                    eventBus.emit('siteActivityUpdate', siteActivityData);
-                } else {
-                    console.log('SSE: Skipping legacy site activity - handled by UserActivityDataManager');
-                }
+                // DEPRECATED: Legacy event - UI now uses user-centric tracking via UserActivityDataManager
+                // The UserActivityDataManager listens to userActivityUpdate and derives site activities automatically
+                console.log('SSE: Skipping legacy site activity - handled by UserActivityDataManager');
 
             } catch (error) {
                 console.error('SSE: Error processing site activity update:', error);
@@ -246,10 +242,10 @@ export class SSEManager {
         this.eventSource.addEventListener('gameActivityUpdate', (event) => {
             try {
                 const gameActivityData = JSON.parse(event.data);
-                console.log('SSE: Parsed game activity data:', gameActivityData);
+                console.log('SSE: Parsed game activity data (legacy):', gameActivityData);
                 
-                // Emit the same event as polling manager for consistency
-                eventBus.emit('gameActivityUpdate', gameActivityData);
+                // DEPRECATED: Legacy event - UI now uses user-centric tracking via UserActivityDataManager
+                console.log('SSE: Skipping legacy game activity - handled by UserActivityDataManager');
 
             } catch (error) {
                 console.error('SSE: Error processing game activity update:', error);
@@ -260,10 +256,10 @@ export class SSEManager {
         this.eventSource.addEventListener('textActivityUpdate', (event) => {
             try {
                 const textActivityData = JSON.parse(event.data);
-                console.log('SSE: Parsed text activity data:', textActivityData);
+                console.log('SSE: Parsed text activity data (legacy):', textActivityData);
                 
-                // Emit the same event as polling manager for consistency
-                eventBus.emit('textActivityUpdate', textActivityData);
+                // DEPRECATED: Legacy event - UI now uses user-centric tracking via UserActivityDataManager
+                console.log('SSE: Skipping legacy text activity - handled by UserActivityDataManager');
                 
             } catch (error) {
                 console.error('SSE: Error processing text activity update:', error);

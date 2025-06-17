@@ -112,22 +112,14 @@ export class PollingManager {
             eventBus.emit('notificationsReceived', updates.notifications);
         }
         
-        // Process site-wide activity data
-        if (updates.siteWideActivity) {
-            console.log('Polling: Processing site-wide activity:', updates.siteWideActivity);
-            eventBus.emit('siteActivityUpdate', updates.siteWideActivity);
-        }
+        // DEPRECATED: Legacy activity-centric events - UI now uses user-centric tracking via UserActivityDataManager
+        // The UserActivityDataManager listens to userActivityUpdate and derives site/game/text activities automatically
+        // This eliminates redundant processing and ensures consistent data flow
         
-        // Process game activity data
-        if (updates.gameActivity) {
-            console.log('Polling: Processing game activity:', updates.gameActivity);
-            eventBus.emit('gameActivityUpdate', updates.gameActivity);
-        }
-        
-        // Process text activity data
-        if (updates.textActivity) {
-            console.log('Polling: Processing text activity:', updates.textActivity);
-            eventBus.emit('textActivityUpdate', updates.textActivity);
+        // Process user activity data (user-centric tracking)
+        if (updates.userActivity) {
+            console.log('Polling: Processing user activity:', updates.userActivity);
+            eventBus.emit('userActivityUpdate', updates.userActivity);
         }
         
         // Process game/text updates

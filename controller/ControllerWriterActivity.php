@@ -11,10 +11,10 @@ class ControllerWriterActivity extends Controller {
     public function index() {
         try {
             $writerActivity = new WriterActivity();
-            $gameActivities = $writerActivity->getGameActivityCounts();
+            $userActivities = $writerActivity->getAllActiveUsers();
             
             echo json_encode([
-                'game_activities' => $gameActivities,
+                'user_activities' => $userActivities,
                 'timestamp' => time()
             ]);
         } catch (Exception $e) {
@@ -170,14 +170,18 @@ class ControllerWriterActivity extends Controller {
     }
 
     /**
-     * Get site-wide activity counts (for initialization and Redis broadcasting)
-     * Returns simple tallies of browsing vs writing users across the entire site
+     * DEPRECATED: Get site-wide activity counts for broadcasting
+     * 
+     * ⚠️ DEPRECATED: This endpoint is no longer used by the frontend.
+     * The UI now uses user-centric tracking via UserActivityDataManager.
+     * 
+     * Kept for potential debugging/admin use only.
      * 
      * NOTE: This is similar to getActivityCounts() but specifically designed for 
      * site-wide broadcasting and uses a simplified data structure for efficiency.
      * Eventually we may want to consolidate these methods.
      */
-    public function getSiteWideActivityCounts() {
+/*     public function getSiteWideActivityCounts() {
         try {
             $writerActivity = new WriterActivity();
             $counts = $writerActivity->getSiteWideActivityCounts();
@@ -190,12 +194,17 @@ class ControllerWriterActivity extends Controller {
             http_response_code(500);
             echo json_encode(['error' => 'Failed to get site-wide activity counts']);
         }
-    }
+    } */
 
     /**
-     * Get activity counts for games (for game list display)
+     * DEPRECATED: Get activity counts for games (for game list display)
+     * 
+     * ⚠️ DEPRECATED: This endpoint is no longer used by the frontend.
+     * The UI now uses user-centric tracking via UserActivityDataManager.
+     * 
+     * Kept for potential debugging/admin use only.
      */
-    public function getGameActivityCounts() {
+/*     public function getGameActivityCounts() {
         try {
             $writerActivity = new WriterActivity();
             $counts = $writerActivity->getGameActivityCounts();
@@ -217,7 +226,7 @@ class ControllerWriterActivity extends Controller {
             http_response_code(500);
             echo json_encode(['error' => 'Internal server error']);
         }
-    }
+    } */
 
     /**
      * Get activity counts for texts (for tree/shelf visualization)
@@ -266,48 +275,49 @@ class ControllerWriterActivity extends Controller {
                         // Get fresh activity counts
                         $writerActivity = new WriterActivity();
                         
-                        // 1. Site-wide activity counts
-                        $siteWideCounts = $writerActivity->getSiteWideActivityCounts();
-                        $siteWideMessage = [
-                            'type' => 'site_activity_update',
-                            'data' => $siteWideCounts,
-                            'source' => 'direct_activity',
-                            'timestamp' => time(),
-                            'writer_id' => $activityData['writer_id'] // For debugging
-                        ];
+                        // DEPRECATED: Legacy activity-centric events - Frontend now uses user-centric tracking only
+                        // The UserActivityDataManager derives these counts from user activity data automatically
+                        // Commenting out to reduce database queries and simplify data flow
                         
-                        // 2. Game-specific activity counts (scoped to current user's game)
-                        $gameActivities = null;
-                        $gameMessage = null;
-                        if ($activityData['game_id']) {
-                            $gameActivities = $writerActivity->getGameActivityCounts($activityData['game_id']);
-                            $gameMessage = [
-                                'type' => 'game_activity_update',
-                                'data' => $gameActivities,
-                                'source' => 'direct_activity',
-                                'timestamp' => time(),
-                                'writer_id' => $activityData['writer_id'] // For debugging
-                            ];
-                        }
+                        // $siteWideCounts = $writerActivity->getSiteWideActivityCounts();
+                        // $siteWideMessage = [
+                        //     'type' => 'site_activity_update',
+                        //     'data' => $siteWideCounts,
+                        //     'source' => 'direct_activity',
+                        //     'timestamp' => time(),
+                        //     'writer_id' => $activityData['writer_id']
+                        // ];
                         
-                        // 3. Text-level activity (individual user activity for those viewing this game)
-                        $textMessage = null;
-                        if ($activityData['game_id'] && in_array($activityData['activity_type'], ['iterating', 'adding_note', 'starting_game'])) {
-                            $textMessage = [
-                                'type' => 'text_activity_update',
-                                'data' => [
-                                    'writer_id' => $activityData['writer_id'],
-                                    'activity_type' => $activityData['activity_type'],
-                                    'activity_level' => $activityData['activity_level'],
-                                    'text_id' => $activityData['text_id'],
-                                    'parent_id' => $activityData['parent_id'],
-                                    'timestamp' => time()
-                                ],
-                                'source' => 'direct_activity',
-                                'timestamp' => time(),
-                                'writer_id' => $activityData['writer_id'] // For debugging
-                            ];
-                        }
+                        // $gameActivities = null;
+                        // $gameMessage = null;
+                        // if ($activityData['game_id']) {
+                        //     $gameActivities = $writerActivity->getGameActivityCounts($activityData['game_id']);
+                        //     $gameMessage = [
+                        //         'type' => 'game_activity_update',
+                        //         'data' => $gameActivities,
+                        //         'source' => 'direct_activity',
+                        //         'timestamp' => time(),
+                        //         'writer_id' => $activityData['writer_id']
+                        //     ];
+                        // }
+                        
+                        // $textMessage = null;
+                        // if ($activityData['game_id'] && in_array($activityData['activity_type'], ['iterating', 'adding_note', 'starting_game'])) {
+                        //     $textMessage = [
+                        //         'type' => 'text_activity_update',
+                        //         'data' => [
+                        //             'writer_id' => $activityData['writer_id'],
+                        //             'activity_type' => $activityData['activity_type'],
+                        //             'activity_level' => $activityData['activity_level'],
+                        //             'text_id' => $activityData['text_id'],
+                        //             'parent_id' => $activityData['parent_id'],
+                        //             'timestamp' => time()
+                        //         ],
+                        //         'source' => 'direct_activity',
+                        //         'timestamp' => time(),
+                        //         'writer_id' => $activityData['writer_id']
+                        //     ];
+                        // }
                         
                         // 4. NEW: Individual user activity (always sent for user-centric tracking)
                         $userActivityMessage = [
@@ -327,10 +337,10 @@ class ControllerWriterActivity extends Controller {
                             'writer_id' => $activityData['writer_id']
                         ];
                         
-                        // Publish messages
-                        $siteResult = $redisManager->publish('activities:site', $siteWideMessage);
-                        $gameResult = $gameMessage ? $redisManager->publish('activities:games', $gameMessage) : 0;
-                        $textResult = $textMessage ? $redisManager->publish('activities:texts:' . $activityData['game_id'], $textMessage) : 0;
+                        // Publish messages - Only user-centric tracking (ACTIVE)
+                        // $siteResult = $redisManager->publish('activities:site', $siteWideMessage);
+                        // $gameResult = $gameMessage ? $redisManager->publish('activities:games', $gameMessage) : 0;
+                        // $textResult = $textMessage ? $redisManager->publish('activities:texts:' . $activityData['game_id'], $textMessage) : 0;
                         $userResult = $redisManager->publish('users:activity', $userActivityMessage);
                         
                         // Log success (reduced logging - only log every 5th heartbeat)
@@ -339,10 +349,10 @@ class ControllerWriterActivity extends Controller {
                         
                         if ($logCount % 5 === 0) {
                             error_log("ActivityUpdate: Direct Redis publish successful for writer_id: " . $activityData['writer_id'] . 
-                                     " (site: $siteResult, game: $gameResult, text: $textResult, user: $userResult subscribers)");
+                                     " (user: $userResult subscribers) [Legacy events deprecated]");
                         }
                         
-                        return ($siteResult > 0 || $gameResult > 0 || $textResult > 0 || $userResult > 0);
+                        return ($userResult > 0);
                     } else {
                         error_log("ActivityUpdate: Redis not available for direct publishing");
                         return false;

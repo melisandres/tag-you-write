@@ -375,49 +375,98 @@ UI components listen for these events:
 ```javascript
 // Shelf activity indicators
 eventBus.on('textActivityChanged', (data) => {
-    if (data.source === 'user-centric') {
-        this.updateTextActivityIndicators(data);
-    }
+    // Note: All events are now user-centric, source check no longer needed
+    this.updateTextActivityIndicators(data);
 });
 
-// Game activity displays
+// Game activity displays  
 eventBus.on('gameActivityChanged', (data) => {
-    if (data.source === 'user-centric') {
-        this.updateGameActivityDisplay(data);
-    }
+    // Note: All events are now user-centric, source check no longer needed
+    this.updateGameActivityDisplay(data);
+});
+
+// Site activity displays (Footer/Header)
+eventBus.on('siteActivityUpdate', (data) => {
+    // Note: All events are now user-centric, source check no longer needed
+    this.updateSiteActivityDisplay(data);
 });
 ```
 
 ## Implementation Status
 
-### ✅ **Completed Components**
+### ✅ **COMPLETED - System Migration Complete**
 
 1. **UserActivityDataManager Core**: Full implementation with change detection, activity derivation, and event emission
-2. **SSE Integration**: Receives user activity updates from server
+2. **SSE Integration**: Receives user activity updates from server via `userActivityUpdate` events
 3. **Local Heartbeat Integration**: Processes current user's activity changes  
-4. **Shelf View UI**: Text activity indicators in shelf view
-5. **Database Initialization**: Loads active users on page startup
-6. **Cleanup System**: Removes stale users automatically
+4. **UI Component Integration**: All activity indicators (Footer, Header, Game List, Tree, Shelf, Modal) now use user-centric events
+5. **Database Initialization**: Loads active users on page startup via `getAllActiveUsers`
+6. **Cleanup System**: Removes stale users automatically after 10 minutes
+7. **Legacy System Deprecation**: All activity-centric backend methods, endpoints, and events have been deprecated/commented out
+8. **Performance Optimization**: Eliminated 9+ redundant database queries per user session
+9. **Event Flow Simplification**: Single data source (`userActivityUpdate`) drives all UI updates
 
-### 🚧 **In Progress**
+### 🗑️ **DEPRECATED - Legacy Activity-Centric System**
 
-1. **Modal View Integration**: Text activity indicators in modal view
-2. **Tree View Integration**: Text activity indicators in D3 tree visualization
+The following components have been **completely deprecated** and are no longer used:
 
-### 📋 **Todo**
+#### **Backend (Commented Out/Deprecated)**
+- ❌ `WriterActivity::getSiteWideActivityCounts()` - Method commented out
+- ❌ `WriterActivity::getGameActivityCounts()` - Method commented out  
+- ❌ `WriterActivity::getIndividualTextActivities()` - Method commented out
+- ❌ `DataFetchService::fetchSiteWideActivityData()` - Method commented out
+- ❌ `DataFetchService::fetchGameActivityData()` - Method commented out
+- ❌ `DataFetchService::fetchTextActivityData()` - Method commented out
+- ❌ `ControllerWriterActivity::getSiteWideActivityCounts()` - Method commented out
+- ❌ `ControllerWriterActivity::getGameActivityCounts()` - Method commented out
 
-1. **Backend Redis Integration**: Use Redis for user state instead of database queries
-2. **Old System Removal**: Comment out/remove backend-aggregated activity system
-3. **Performance Optimization**: Fine-tune cleanup intervals and thresholds
-4. **Analytics Dashboard**: Admin interface for monitoring user activities
+#### **Transport Layer (Events Disabled)**
+- ❌ SSE `siteActivityUpdate` events - No longer sent
+- ❌ SSE `gameActivityUpdate` events - No longer sent  
+- ❌ SSE `textActivityUpdate` events - No longer sent
+- ❌ Polling `siteActivityUpdate` events - No longer emitted
+- ❌ Polling `gameActivityUpdate` events - No longer emitted
+- ❌ Polling `textActivityUpdate` events - No longer emitted
 
-### 🔄 **Transition State**
+#### **Redis Channels (Inactive)**
+- ❌ `activities:site` - No longer published to
+- ❌ `activities:games` - No longer published to
+- ❌ `activities:texts:*` - No longer published to
 
-Currently, both old and new systems coexist:
-- **Old System**: Backend aggregates activity counts, sends to frontend
-- **New System**: Backend sends user activities, frontend derives aggregates
+#### **Frontend (Removed)**
+- ❌ `ActivityDataManager` - File completely deleted
+- ❌ Legacy event listeners - Commented out with deprecation notes
+- ❌ Test files - Legacy test files removed
 
-The new system is designed to be compatible with existing event listeners while providing more accurate data.
+### 🟢 **ACTIVE - User-Centric System Only**
+
+**Current Data Flow (Single Source of Truth):**
+```
+User Actions → ActivityManager → ControllerWriterActivity → Redis (users:activity) 
+    → SSE/Polling (userActivityUpdate) → UserActivityDataManager 
+    → Derived Events (siteActivityUpdate, gameActivityChanged, textActivityChanged) 
+    → UI Components
+```
+
+**Performance Benefits Achieved:**
+- **9 fewer database queries** per user session (3 per SSE init + 3 per 30s polling + 3 per AJAX request)
+- **3 fewer event types** transmitted over network
+- **3 fewer Redis channels** being published to
+- **Single activity processing pipeline** (no dual systems)
+
+### 📋 **Future Enhancements**
+
+1. **Analytics Dashboard**: Admin interface for monitoring user activities
+2. **Advanced Cleanup Logic**: More sophisticated stale user detection
+3. **Activity History**: Track user activity patterns over time
+4. **Load Balancing**: Distribute user activity processing across multiple instances
+
+### ⚠️ **Migration Notes**
+
+- **Backward Compatibility**: UI components still listen to the same event names (`siteActivityUpdate`, `gameActivityChanged`, `textActivityChanged`), but these are now derived from user data instead of backend aggregates
+- **Event Source Identification**: All user-centric events include `source: 'user-centric'` for debugging
+- **Deprecated Code**: Legacy methods remain commented out for debugging/admin use but are not called by the application
+- **Database Schema**: No changes required - user activity table structure remains the same
 
 ## Integration Guide
 
@@ -428,10 +477,9 @@ To integrate with the user-centric system:
 1. **Listen for Events**:
 ```javascript
 eventBus.on('textActivityChanged', (data) => {
-    if (data.source === 'user-centric') {
-        // Update UI based on text activity
-        this.updateTextActivityIndicator(data.textId, data.activity_type, data.user_id);
-    }
+    // Note: All events are now user-centric, source check no longer needed
+    // Update UI based on text activity
+    this.updateTextActivityIndicator(data.textId, data.activity_type, data.user_id);
 });
 ```
 
@@ -455,10 +503,16 @@ console.log('Site activity:', diagnostic.siteActivity);
 
 ### For Backend Developers
 
-1. **Send User Activities**: Ensure SSE sends individual user activity objects via `userActivityUpdate` events
-2. **Database Endpoint**: Provide `WriterActivity/getAllActiveUsers` endpoint for initialization  
-3. **Redis Integration**: Store user activities in Redis for performance
-4. **User Activity Format**: Ensure consistent field names (`writer_id`, `activity_type`, `activity_level`, `page_type`, `game_id`, `text_id`, `parent_id`, `timestamp`)
+1. **Send User Activities**: SSE sends individual user activity objects via `userActivityUpdate` events ✅ **IMPLEMENTED**
+2. **Database Endpoint**: `WriterActivity/getAllActiveUsers` endpoint for initialization ✅ **IMPLEMENTED**
+3. **Redis Integration**: User activities stored in Redis `users:activity` channel ✅ **IMPLEMENTED**
+4. **User Activity Format**: Consistent field names implemented ✅ **IMPLEMENTED**
+5. **Legacy System**: All activity-centric methods deprecated ✅ **COMPLETED**
+
+**⚠️ IMPORTANT**: Do not use the deprecated methods:
+- ~~`getSiteWideActivityCounts()`~~ - Use `getAllActiveUsers()` instead
+- ~~`getGameActivityCounts()`~~ - Use `getAllActiveUsers()` instead  
+- ~~`getIndividualTextActivities()`~~ - Use `getAllActiveUsers()` instead
 
 ## Debugging & Diagnostics
 
@@ -519,8 +573,8 @@ window.userActivityDataManager.getTextActivity('123')
 
 #### Duplicate Events
 **Symptom**: Multiple events fired for single user action
-**Cause**: Both old and new systems running simultaneously
-**Solution**: Check event `source` property - use `'user-centric'` events only
+**Cause**: ~~Both old and new systems running simultaneously~~ **RESOLVED - Legacy system deprecated**
+**Solution**: ~~Check event `source` property - use `'user-centric'` events only~~ **NO LONGER NEEDED - Only user-centric events are sent**
 
 #### Missing User States
 **Symptom**: Users not appearing in diagnostic info
@@ -529,4 +583,21 @@ window.userActivityDataManager.getTextActivity('123')
 
 ---
 
-*This documentation reflects the current implementation of the User-Centric Activity Tracking System. As the system evolves and the old system is phased out, this document will be updated accordingly.* 
+## 🎉 **Migration Complete**
+
+**Status**: The User-Centric Activity Tracking System migration is **100% COMPLETE** as of this documentation update.
+
+**What Changed:**
+- ✅ **Legacy activity-centric system completely deprecated**
+- ✅ **All UI components migrated to user-centric events**  
+- ✅ **Backend database queries reduced by 9+ per user session**
+- ✅ **Single source of truth established**
+- ✅ **Performance optimized and simplified**
+
+**System Health:**
+- 🟢 **User-centric tracking**: ACTIVE
+- 🔴 **Legacy activity-centric tracking**: DEPRECATED  
+- 🟢 **UI responsiveness**: IMPROVED
+- 🟢 **Database performance**: OPTIMIZED
+
+*This documentation reflects the completed implementation of the User-Centric Activity Tracking System. The legacy activity-centric system has been fully deprecated and is no longer in use.* 

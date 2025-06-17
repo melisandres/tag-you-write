@@ -626,46 +626,62 @@ class EventHandler {
             }
             
             // Send text activity updates if any
-            if (!empty($updates['textActivity'])) {
+/*             if (!empty($updates['textActivity'])) {
                 $this->sendEvent('textActivityUpdate', $updates['textActivity']);
+            }
+             */
+            // Send user activity updates if any (user-centric tracking)
+            if (!empty($updates['userActivity'])) {
+                $this->sendEvent('userActivityUpdate', $updates['userActivity']);
             }
             
             // Fetch and send current site-wide activity data for initialization
-            try {
-                $siteActivityData = $this->pollingService->fetchSiteWideActivityData();
-                if ($siteActivityData) {
-                    $this->sendEvent('siteActivityUpdate', $siteActivityData);
-                }
-                
-                // Also fetch and send game activity data for initialization
-                $gameActivityData = $this->pollingService->fetchGameActivityData();
-                if ($gameActivityData) {
-                    $this->sendEvent('gameActivityUpdate', $gameActivityData);
-                }
-                
-                // Fetch and send text activity data for initialization if viewing a story
-                if ($this->rootStoryId) {
-                    try {
-                        require_once('../../model/Game.php');
-                        $gameModel = new Game();
-                        $gameId = $gameModel->selectGameId($this->rootStoryId);
-                        
-                        if ($gameId) {
-                            $textActivityData = $this->pollingService->fetchTextActivityData($gameId);
-                            if ($textActivityData) {
-                                $this->sendEvent('textActivityUpdate', $textActivityData);
-                                error_log("SSE: Sent initial text activity data for game_id: $gameId (" . count($textActivityData) . " activities)");
-                            } else {
-                                error_log("SSE: No initial text activity data for game_id: $gameId");
-                            }
-                        }
-                    } catch (Exception $e) {
-                        error_log("SSE: Error fetching initial text activity data: " . $e->getMessage());
-                    }
-                }
-            } catch (Exception $e) {
-                error_log("SSE: Error fetching activity data: " . $e->getMessage());
-            }
+            // try {
+            //     $siteActivityData = $this->pollingService->fetchSiteWideActivityData();
+            //     if ($siteActivityData) {
+            //         $this->sendEvent('siteActivityUpdate', $siteActivityData);
+            //     }
+            // } catch (Exception $e) {
+            //     error_log("SSE: Error fetching site activity data: " . $e->getMessage());
+            // }
+
+            // Fetch and send game activity data for initialization  
+            // try {
+            //     $gameActivityData = $this->pollingService->fetchGameActivityData();
+            //     if ($gameActivityData) {
+            //         $this->sendEvent('gameActivityUpdate', $gameActivityData);
+            //     }
+            // } catch (Exception $e) {
+            //     error_log("SSE: Error fetching game activity data: " . $e->getMessage());
+            // }
+
+            // Also fetch and send initial text activity data if viewing a story
+            // if ($this->rootStoryId) {
+            //     try {
+            //         require_once('../../model/Game.php');
+            //         $gameModel = new Game();
+            //         $gameId = $gameModel->selectGameId($this->rootStoryId);
+                    
+            //         if ($gameId) {
+            //             $textActivityData = $this->pollingService->fetchTextActivityData($gameId);
+            //             if ($textActivityData) {
+            //                 $this->sendEvent('textActivityUpdate', $textActivityData);
+            //             }
+            //         }
+            //     } catch (Exception $e) {
+            //         error_log("SSE: Error fetching initial text activity data: " . $e->getMessage());
+            //     }
+            // }
+            
+            // Fetch and send initial user activity data for user-centric tracking
+            // try {
+            //     $userActivityData = $this->pollingService->fetchUserActivityData();
+            //     if ($userActivityData) {
+            //         $this->sendEvent('userActivityUpdate', $userActivityData);
+            //     }
+            // } catch (Exception $e) {
+            //     error_log("SSE: Error fetching initial user activity data: " . $e->getMessage());
+            // }
             
             // Update lastEventId
             if (isset($updates['lastEventId'])) {
@@ -742,42 +758,60 @@ class EventHandler {
                     $this->sendEvent('textActivityUpdate', $updates['textActivity']);
                 }
                 
-                // Periodically fetch and send site-wide activity data (every 30 seconds)
+                // Send user activity updates if any (user-centric tracking)
+                if (!empty($updates['userActivity'])) {
+                    $this->sendEvent('userActivityUpdate', $updates['userActivity']);
+                }
+                
+                // DEPRECATED: Legacy activity-centric data fetching - Frontend now uses user-centric tracking only
+                // The UserActivityDataManager derives all activity counts from userActivityUpdate events automatically
+                // Commenting out to reduce database queries and simplify data flow
+                
+                // Periodically fetch and send user activity data for user-centric tracking (every 30 seconds)
                 static $lastActivityCheck = 0;
                 if ((time() - $lastActivityCheck) >= 30) {
                     try {
-                        $siteActivityData = $this->pollingService->fetchSiteWideActivityData();
-                        if ($siteActivityData) {
-                            $this->sendEvent('siteActivityUpdate', $siteActivityData);
-                        }
+                        // DEPRECATED: Legacy activity-centric events
+                        // $siteActivityData = $this->pollingService->fetchSiteWideActivityData();
+                        // if ($siteActivityData) {
+                        //     $this->sendEvent('siteActivityUpdate', $siteActivityData);
+                        // }
                         
-                        // Also fetch and send game activity data
-                        $gameActivityData = $this->pollingService->fetchGameActivityData();
-                        if ($gameActivityData) {
-                            $this->sendEvent('gameActivityUpdate', $gameActivityData);
-                        }
+                        // $gameActivityData = $this->pollingService->fetchGameActivityData();
+                        // if ($gameActivityData) {
+                        //     $this->sendEvent('gameActivityUpdate', $gameActivityData);
+                        // }
                         
-                        // Also fetch and send text activity data if viewing a story
-                        if ($this->rootStoryId) {
-                            try {
-                                require_once('../../model/Game.php');
-                                $gameModel = new Game();
-                                $gameId = $gameModel->selectGameId($this->rootStoryId);
-                                
-                                if ($gameId) {
-                                    $textActivityData = $this->pollingService->fetchTextActivityData($gameId);
-                                    if ($textActivityData) {
-                                        $this->sendEvent('textActivityUpdate', $textActivityData);
-                                    }
-                                }
-                            } catch (Exception $e) {
-                                error_log("SSE: Error fetching text activity data during polling: " . $e->getMessage());
+                        // if ($this->rootStoryId) {
+                        //     try {
+                        //         require_once('../../model/Game.php');
+                        //         $gameModel = new Game();
+                        //         $gameId = $gameModel->selectGameId($this->rootStoryId);
+                        //         
+                        //         if ($gameId) {
+                        //             $textActivityData = $this->pollingService->fetchTextActivityData($gameId);
+                        //             if ($textActivityData) {
+                        //                 $this->sendEvent('textActivityUpdate', $textActivityData);
+                        //             }
+                        //         }
+                        //     } catch (Exception $e) {
+                        //         error_log("SSE: Error fetching text activity data during polling: " . $e->getMessage());
+                        //     }
+                        // }
+                        
+                        // User-centric tracking (ACTIVE) - This is the only activity data the frontend needs
+                        try {
+                            $userActivityData = $this->pollingService->fetchUserActivityData();
+                            if ($userActivityData) {
+                                $this->sendEvent('userActivityUpdate', $userActivityData);
                             }
+                        } catch (Exception $e) {
+                            error_log("SSE: Error fetching user activity data during polling: " . $e->getMessage());
                         }
                         
                         $lastActivityCheck = time();
                     } catch (Exception $e) {
-                        error_log("SSE: Error fetching activity data during polling: " . $e->getMessage());
+                        error_log("SSE: Error fetching user activity data during polling: " . $e->getMessage());
                     }
                 }
 
