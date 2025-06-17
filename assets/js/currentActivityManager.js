@@ -348,6 +348,18 @@ export class CurrentActivityManager {
             this.sendHeartbeatAndResetTimer();
         });
 
+        // Form updates (when form gets new ID after save)
+        eventBus.on('formUpdated', () => {
+            // Re-extract form context to pick up new text_id after save
+            if (this.currentActivity.page_type === 'text_form') {
+                this.extractFormPageContext();
+                this.setActivityLevel('active', false);
+                this.markUserActivity('formUpdated');
+                // Send single heartbeat after context update
+                this.sendHeartbeatAndResetTimer();
+            }
+        });
+
         // Page navigation inflection points
         window.addEventListener('beforeunload', () => {
             // DON'T immediately mark as idle - this causes flickering during same-site navigation

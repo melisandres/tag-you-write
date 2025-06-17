@@ -73,6 +73,14 @@
     --color-critical: rgba(150, 30, 30);
     --color-activity-adding-note: var(--color-success); 
 
+    /* Ghost heart colors */
+    --color-ghost-heart-lightest: rgba(255, 255, 255, 0.6);
+    --color-ghost-heart-lighter: rgba(200, 200, 255, 0.6);
+    --color-ghost-heart-light: rgba(100, 100, 200, 0.9);
+    --color-ghost-heart:  rgba(120, 120, 180, 0.8);
+    --color-ghost-heart-dark: rgba(100, 100, 200, 0.9);
+    --color-ghost-heart-darker: rgba(100, 100, 200, 0.9);
+
     --color-warning: var(--color-secondary); 
     --color-info: var(--color-primary);
 

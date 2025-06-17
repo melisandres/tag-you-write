@@ -1,206 +1,216 @@
 import { eventBus } from './eventBus.js';
 
+/**
+ * ACTIVITY INDICATORS - MODULAR DESIGN
+ * 
+ * 🔥 EASY HEADER REMOVAL GUIDE:
+ * To remove the header activity indicator (when done testing):
+ * 
+ * 1. DELETE the entire HeaderActivityIndicator class (lines ~70-130)
+ * 2. REMOVE this line in ActivityIndicator constructor:
+ *    this.headerIndicator = new HeaderActivityIndicator();
+ * 3. REMOVE header indicator from destroy method:
+ *    if (this.headerIndicator) { this.headerIndicator.destroy(); }
+ * 4. DELETE the header HTML from view/header.php (search for "header-activity-indicator")
+ * 5. DELETE activity-indicator.css from assets/css/elements/
+ * 
+ * That's it! Footer indicator will continue working independently.
+ */
+
+// === FOOTER ACTIVITY INDICATOR (PERMANENT) ===
+export class FooterActivityIndicator {
+    constructor() {
+        this.container = null;
+        this.activityData = { browsing: 0, writing: 0, total: 0 };
+        this.isSSEConnected = false;
+        
+        console.log('🔔 FooterActivityIndicator: Initializing');
+        this.init();
+    }
+
+    init() {
+        this.createIndicator();
+        this.setupEventListeners();
+        console.log('🔔 FooterActivityIndicator: Initialization complete');
+    }
+
+    createIndicator() {
+        this.container = document.getElementById('footer-activity-indicator');
+        if (!this.container) {
+            console.error('🔔 FooterActivityIndicator: Footer indicator not found in DOM');
+            return;
+        }
+        console.log('🔔 FooterActivityIndicator: Found footer indicator in DOM');
+    }
+
+    setupEventListeners() {
+        if (!this.container) return;
+        
+        // Listen for site-wide activity updates
+        eventBus.on('siteActivityUpdate', (data) => {
+            console.log('🔔 FooterActivityIndicator: Received activity update:', data);
+            this.updateDisplay(data);
+        });
+
+        // Listen for SSE connection status
+        eventBus.on('sseConnected', () => {
+            this.isSSEConnected = true;
+        });
+
+        eventBus.on('sseFailed', () => {
+            this.isSSEConnected = false;
+        });
+    }
+
+    updateDisplay(data) {
+        if (!this.container) return;
+        
+        const browsing = data.browsing || 0;
+        const writing = data.writing || 0;
+        const total = browsing + writing;
+        
+        // Store the data
+        this.activityData = { browsing, writing, total };
+
+        // Update footer display: "browsing:writing" format
+        const activityNumbers = this.container.querySelector('.activity-numbers');
+        if (activityNumbers) {
+            activityNumbers.textContent = `${browsing}:${writing}`;
+        }
+
+        // Update appearance based on activity
+        this.container.classList.toggle('has-activity', total > 0);
+        
+        console.log('🔔 FooterActivityIndicator: Updated - Browsing:', browsing, 'Writing:', writing);
+    }
+
+    destroy() {
+        if (this.container && this.container.parentNode) {
+            this.container.parentNode.removeChild(this.container);
+        }
+        console.log('🔔 FooterActivityIndicator: Destroyed');
+    }
+}
+
+// === HEADER ACTIVITY INDICATOR (TESTING ONLY - EASILY REMOVABLE) ===
+export class HeaderActivityIndicator {
+    constructor() {
+        this.container = null;
+        this.activityData = { browsing: 0, writing: 0, total: 0 };
+        this.isSSEConnected = false;
+        
+        console.log('🔔 HeaderActivityIndicator: Initializing (testing mode)');
+        this.init();
+    }
+
+    init() {
+        this.createIndicator();
+        this.setupEventListeners();
+        console.log('🔔 HeaderActivityIndicator: Initialization complete');
+    }
+
+    createIndicator() {
+        this.container = document.getElementById('header-activity-indicator');
+        if (!this.container) {
+            console.warn('🔔 HeaderActivityIndicator: Header indicator not found in DOM (this is optional)');
+            return;
+        }
+        console.log('🔔 HeaderActivityIndicator: Found header indicator in DOM');
+    }
+
+    setupEventListeners() {
+        if (!this.container) return;
+        
+        // Listen for site-wide activity updates
+        eventBus.on('siteActivityUpdate', (data) => {
+            console.log('🔔 HeaderActivityIndicator: Received activity update:', data);
+            this.updateDisplay(data);
+        });
+
+        // Listen for SSE connection status
+        eventBus.on('sseConnected', () => {
+            this.isSSEConnected = true;
+        });
+
+        eventBus.on('sseFailed', () => {
+            this.isSSEConnected = false;
+        });
+    }
+
+    updateDisplay(data) {
+        if (!this.container) return;
+        
+        const browsing = data.browsing || 0;
+        const writing = data.writing || 0;
+        const total = browsing + writing;
+        
+        // Store the data
+        this.activityData = { browsing, writing, total };
+
+        // Update header display: detailed format with labels
+        const totalCount = this.container.querySelector('.activity-count.total');
+        const editingCount = this.container.querySelector('.activity-count.editing');
+        
+        if (totalCount) {
+            totalCount.textContent = browsing;
+        }
+        
+        if (editingCount) {
+            editingCount.textContent = writing;
+        }
+
+        // Update appearance based on activity
+        this.container.classList.toggle('has-activity', total > 0);
+        
+        console.log('🔔 HeaderActivityIndicator: Updated - Browsing:', browsing, 'Writing:', writing);
+    }
+
+    destroy() {
+        if (this.container && this.container.parentNode) {
+            this.container.parentNode.removeChild(this.container);
+        }
+        console.log('🔔 HeaderActivityIndicator: Destroyed');
+    }
+}
+
+// === MAIN ACTIVITY INDICATOR MANAGER ===
 export class ActivityIndicator {
     constructor() {
         if (window.activityIndicatorInstance) {
             return window.activityIndicatorInstance;
         }
 
-        this.isOpen = false;
-        this.activityData = {
-            browsing: 0,
-            writing: 0,
-            total: 0
-        };
-        this.isSSEConnected = false; // Track SSE connection status
-
-        console.log('🔔 ActivityIndicator: Initializing simple version');
+        console.log('🔔 ActivityIndicator: Initializing manager with separate header/footer indicators');
+        
+        // Initialize footer indicator (permanent)
+        this.footerIndicator = new FooterActivityIndicator();
+        
+        // Initialize header indicator (testing only - easily removable)
+        this.headerIndicator = new HeaderActivityIndicator();
         
         window.activityIndicatorInstance = this;
-        this.init();
+        console.log('🔔 ActivityIndicator: Manager initialization complete');
     }
 
-    init() {
-        console.log('🔔 ActivityIndicator: Starting initialization');
-        
-        this.createIndicator();
-        this.setupEventListeners();
-        
-        console.log('🔔 ActivityIndicator: Initialization complete');
-    }
-
-    createIndicator() {
-        console.log('🔔 ActivityIndicator: Creating indicator DOM elements');
-        
-        // Create the main container
-        this.container = document.createElement('div');
-        this.container.className = 'activity-indicator';
-        this.container.innerHTML = `
-            <div class="activity-toggle" title="Site Activity">
-                <span class="activity-icon">👥</span>
-                <span class="activity-count">0</span>
-            </div>
-            <div class="activity-panel">
-                <div class="activity-header">
-                    <h4>Site Activity</h4>
-                    <button class="activity-close">×</button>
-                </div>
-                <div class="activity-content">
-                    <div class="activity-breakdown">
-                        <div class="activity-type">
-                            <span class="type-label">👀 Browsing:</span>
-                            <span class="type-count browsing-count">0</span>
-                        </div>
-                        <div class="activity-type">
-                            <span class="type-label">✍️ Writing:</span>
-                            <span class="type-count writing-count">0</span>
-                        </div>
-                    </div>
-                    <div class="activity-footer">
-                        <small>Real-time updates</small>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        // Add to page
-        document.body.appendChild(this.container);
-        
-        console.log('🔔 ActivityIndicator: DOM elements created and added to page');
-    }
-
-    setupEventListeners() {
-        console.log('🔔 ActivityIndicator: Setting up event listeners');
-        
-        // Test if we can receive ANY events
-        eventBus.on('test-event', (data) => {
-            console.log('🔔 ActivityIndicator: Received test event:', data);
-        });
-        
-        // Toggle panel
-        const toggle = this.container.querySelector('.activity-toggle');
-        toggle.addEventListener('click', () => {
-            console.log('🔔 ActivityIndicator: Toggle clicked, current state:', this.isOpen);
-            this.togglePanel();
-        });
-
-        // Close panel
-        const closeBtn = this.container.querySelector('.activity-close');
-        closeBtn.addEventListener('click', () => {
-            console.log('🔔 ActivityIndicator: Close button clicked');
-            this.closePanel();
-        });
-
-        // Close on outside click
-        document.addEventListener('click', (e) => {
-            if (this.isOpen && !this.container.contains(e.target)) {
-                console.log('🔔 ActivityIndicator: Outside click detected, closing panel');
-                this.closePanel();
-            }
-        });
-
-        // Listen for site-wide activity updates from SSE/polling
-        eventBus.on('siteActivityUpdate', (siteActivityData) => {
-            console.log('🔔 ActivityIndicator: ===== RECEIVED SITE ACTIVITY UPDATE =====');
-            console.log('🔔 ActivityIndicator: Timestamp:', new Date().toISOString());
-            console.log('🔔 ActivityIndicator: Data:', siteActivityData);
-            console.log('🔔 ActivityIndicator: Data source:', siteActivityData.source || 'unknown');
-            console.log('🔔 ActivityIndicator: Current activity data before update:', this.activityData);
-            this.updateDisplay(siteActivityData);
-            console.log('🔔 ActivityIndicator: Current activity data after update:', this.activityData);
-            console.log('🔔 ActivityIndicator: ===== END SITE ACTIVITY UPDATE =====');
-        });
-
-        // Listen for SSE connection status to properly track update source
-        eventBus.on('sseConnected', () => {
-            console.log('🔔 ActivityIndicator: SSE connected - future updates will be real-time');
-            this.isSSEConnected = true;
-        });
-
-        eventBus.on('sseFailed', () => {
-            console.log('🔔 ActivityIndicator: SSE failed - updates will be from polling fallback');
-            this.isSSEConnected = false;
-        });
-    }
-
-    togglePanel() {
-        console.log('🔔 ActivityIndicator: Toggling panel from', this.isOpen, 'to', !this.isOpen);
-        
-        if (this.isOpen) {
-            this.closePanel();
-        } else {
-            this.openPanel();
-        }
-    }
-
-    openPanel() {
-        console.log('🔔 ActivityIndicator: Opening panel');
-        
-        this.isOpen = true;
-        this.container.classList.add('open');
-    }
-
-    closePanel() {
-        console.log('🔔 ActivityIndicator: Closing panel');
-        
-        this.isOpen = false;
-        this.container.classList.remove('open');
-    }
-
+    // Legacy method for compatibility
     updateDisplay(data) {
-        console.log('🔔 ActivityIndicator: Updating display with data:', data);
-        console.log('🔔 ActivityIndicator: Update source:', this.isSSEConnected ? 'SSE (real-time)' : 'Polling (fallback)');
-        
-        // Handle simplified site-wide data format
-        const browsing = data.browsing || 0;
-        const writing = data.writing || 0;
-        const total = browsing + writing;
-        
-        console.log('🔔 ActivityIndicator: Parsed values - Browsing:', browsing, 'Writing:', writing, 'Total:', total);
-        
-        // Store the data
-        this.activityData = {
-            browsing: browsing,
-            writing: writing,
-            total: total
-        };
-
-        // Update toggle count (total active users)
-        const toggleCount = this.container.querySelector('.activity-count');
-        const oldToggleCount = toggleCount.textContent;
-        toggleCount.textContent = total;
-        console.log('🔔 ActivityIndicator: Updated toggle count from', oldToggleCount, 'to', total);
-        
-        // Update panel content
-        const browsingCountElement = this.container.querySelector('.browsing-count');
-        const writingCountElement = this.container.querySelector('.writing-count');
-        const oldBrowsingCount = browsingCountElement.textContent;
-        const oldWritingCount = writingCountElement.textContent;
-        
-        browsingCountElement.textContent = browsing;
-        writingCountElement.textContent = writing;
-        
-        console.log('🔔 ActivityIndicator: Updated panel - Browsing from', oldBrowsingCount, 'to', browsing, ', Writing from', oldWritingCount, 'to', writing);
-
-        // Update toggle appearance based on activity
-        const toggle = this.container.querySelector('.activity-toggle');
-        const hadActivity = toggle.classList.contains('has-activity');
-        toggle.classList.toggle('has-activity', total > 0);
-        
-        if (hadActivity !== (total > 0)) {
-            console.log('🔔 ActivityIndicator: Activity state changed from', hadActivity, 'to', total > 0);
-        }
-        
-        console.log('🔔 ActivityIndicator: Display updated - Browsing:', browsing, 'Writing:', writing, 'Total:', total);
+        // Both indicators handle their own updates via event listeners
+        // This method exists for backward compatibility but isn't needed
+        console.log('🔔 ActivityIndicator: Legacy updateDisplay called - indicators handle updates automatically');
     }
 
     destroy() {
-        console.log('🔔 ActivityIndicator: Destroying instance');
+        console.log('🔔 ActivityIndicator: Destroying all indicators');
         
-        if (this.container && this.container.parentNode) {
-            this.container.parentNode.removeChild(this.container);
+        if (this.footerIndicator) {
+            this.footerIndicator.destroy();
+        }
+        
+        if (this.headerIndicator) {
+            this.headerIndicator.destroy();
         }
         
         window.activityIndicatorInstance = null;
+        console.log('🔔 ActivityIndicator: All indicators destroyed');
     }
 } 

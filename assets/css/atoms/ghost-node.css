@@ -1,0 +1,45 @@
+/* Ghost Node Styles */
+.node--ghost {
+    animation: ghostPulse 2.5s ease-in-out infinite;
+    opacity: 0.9;
+    pointer-events: none;  /* Prevent interaction with ghost nodes */
+}
+
+.node--ghost .title-group text {
+    fill: var(--color-ghost-heart-dark);
+/*     fill: rgba(100, 100, 200, 0.9) !important; */
+    font-style: italic;
+}
+
+.node--ghost .text-by {
+    animation: none !important;
+    fill: var(--color-ghost-heart);
+/*     fill: rgba(120, 120, 180, 0.8) !important; */
+}
+
+.ghost-heart {
+    opacity: 0.8;
+    fill: var(--color-ghost-heart-lightest);
+    stroke: var(--color-ghost-heart-lighter) !important;
+/*     fill: rgba(200, 200, 255, 0.6) !important;
+    stroke: rgba(100, 100, 200, 0.9) !important; */
+    stroke-width: 2 !important;
+    filter: url(#ghostGlow) !important;
+}
+
+/* Fallback for browsers that don't support CSS animations */
+.ghost-heart:not(.animated) {
+    fill: var(--color-ghost-heart-lightest);
+    stroke: var(--color-white-lightest);
+/*     fill: rgba(255, 255, 255, 0.6) !important;
+    stroke: rgba(255, 255, 255, 0.9) !important; */
+}
+
+@keyframes ghostPulse {
+    0%, 100% {
+        opacity: 0.3;
+    }
+    50% {
+        opacity: 1.0;
+    }
+} 

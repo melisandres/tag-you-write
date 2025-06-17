@@ -79,8 +79,6 @@ export class TreeVisualizer {
 
         this.treeData = null;
 
-
-
         // Add event listener for title updates
         eventBus.on('updateTreeNodeTitle', this.handleTitleUpdate.bind(this));
 
@@ -93,9 +91,19 @@ export class TreeVisualizer {
         }
     }
     
+    // TODO: if this is where we draw the tree... I'm adding ghost nodes
     handleDrawTree({ container, data }) {
+        // Set container for later use
         this.container = container;
-        this.drawTree(data);
+
+        // Get the activity data
+        const activityData = window.userActivityDataManagerInstance.getDerivedTextActivities();
+
+        // Add ghost nodes to the main data
+        const enrichedTree = window.ghostTreeManager.enrichTreeWithGhosts(data, activityData);
+
+        // Draw the tree
+        this.drawTree(enrichedTree);
     }
 
     createColorScale(maxVotes) {
@@ -285,6 +293,80 @@ export class TreeVisualizer {
             .enter().append("feMergeNode")
             .attr("in", d => d);
 
+        // Add ghost glow filter - using the same robust pattern as unreadGlow
+        const ghostGlowFilter = defs.append("filter")
+            .attr("id", "ghostGlow")
+            .attr("x", "-300%")    // Same wide bounds as unreadGlow
+            .attr("y", "-300%")
+            .attr("width", "700%") // Same large size to prevent cutoff
+            .attr("height", "700%");
+
+        // Multiple blur layers for depth
+        ghostGlowFilter.append("feGaussianBlur")
+            .attr("in", "SourceGraphic")
+            .attr("stdDeviation", "3")
+            .attr("result", "blur1");
+
+        ghostGlowFilter.append("feGaussianBlur")
+            .attr("in", "SourceGraphic")
+            .attr("stdDeviation", "15")
+            .attr("result", "blur2");
+
+        ghostGlowFilter.append("feGaussianBlur")
+            .attr("in", "SourceGraphic")
+            .attr("stdDeviation", "25")
+            .attr("result", "blur3");
+
+        // Multiple color layers with blue/purple ghost colors
+        ghostGlowFilter.append("feFlood")
+            .attr("flood-color", "rgb(150, 150, 255)")  // Light blue
+            .attr("flood-opacity", "1")
+            .attr("result", "color1");
+
+        ghostGlowFilter.append("feFlood")
+            .attr("flood-color", "rgb(120, 120, 220)")  // Medium blue
+            .attr("flood-opacity", "0.9")
+            .attr("result", "color2");
+
+        ghostGlowFilter.append("feFlood")
+            .attr("flood-color", "rgb(100, 100, 200)")  // Darker blue
+            .attr("flood-opacity", "0.7")
+            .attr("result", "color3");
+
+        // Composite operations to combine colors with blurs
+        ghostGlowFilter.append("feComposite")
+            .attr("in", "color1")
+            .attr("in2", "blur1")
+            .attr("operator", "in")
+            .attr("result", "glow1");
+
+        ghostGlowFilter.append("feComposite")
+            .attr("in", "color2")
+            .attr("in2", "blur2")
+            .attr("operator", "in")
+            .attr("result", "glow2");
+
+        ghostGlowFilter.append("feComposite")
+            .attr("in", "color3")
+            .attr("in2", "blur3")
+            .attr("operator", "in")
+            .attr("result", "glow3");
+
+        // Merge all layers with intensity like unreadGlow
+        ghostGlowFilter.append("feMerge")
+            .selectAll("feMergeNode")
+            .data([
+                "glow3", // furthest outer glow
+                "glow3", // doubled for distance
+                "glow2", // middle glow
+                "glow2", // doubled for intensity
+                "glow1", // inner glow
+                "glow1", // doubled for intensity
+                "SourceGraphic"
+            ])
+            .enter().append("feMergeNode")
+            .attr("in", d => d);
+
         const g = this.svg.append("g")
   
         // To correct the stutter of the tree when it is zoomed out and dragged, append a "g" to the original "g".
@@ -341,13 +423,21 @@ export class TreeVisualizer {
         const node = child.selectAll(".node")
             .data(root.descendants())
             .enter().append("g")
-            .attr("class", d => `node${d.children ? " node--internal" : " node--leaf"}`)
+            .attr("class", d => {
+                let classes = `node${d.children ? " node--internal" : " node--leaf"}`;
+                if (d.data.isGhost) {
+                    classes += " node--ghost";
+                }
+                return classes;
+            })
             .attr("transform", d => `translate(${d.y},${d.x})`)
             .on("click", (event, d) => {
-                const customEvent = new CustomEvent('showStoryInModalRequest', {
-                    detail: { id: d.data.id }
-                });
-                document.dispatchEvent(customEvent);
+                if (!d.data.isGhost) {  // Only allow clicks on non-ghost nodes
+                    const customEvent = new CustomEvent('showStoryInModalRequest', {
+                        detail: { id: d.data.id }
+                    });
+                    document.dispatchEvent(customEvent);
+                }
             });
   
         const colorScale = this.colorScale;
@@ -360,7 +450,18 @@ export class TreeVisualizer {
         // Draw the heart/star for each node
         node.each(function(d) {
             const item = d3.select(this);
-            if (d.data.isWinner) {
+            if (d.data.isGhost) {
+                // Create ghost heart with pulsing animation
+                const ghostHeartPath = "m -10,-9 c -6.57,-7.05 -17.14,-7.05 -23.71,0 -6.56,7.05 -6.56,18.39 0,25.45 l 29.06,31.27 29.09,-31.23 c 6.57,-7.05 6.57,-18.4 0,-25.45 -6.57,-7.05 -17.14,-7.05 -23.71,0 l -5.35,5.75 -5.39,-5.78 z";
+                
+                const ghostHeart = item.append("path")
+                    .attr("d", ghostHeartPath)
+                    .attr("transform", "scale(0.4) translate(0, -15)")
+                    .attr("class", "ghost-heart");
+                
+                // Debug: Log that we created a ghost heart
+                console.log('👻 Created ghost heart for node:', d.data.id);
+            } else if (d.data.isWinner) {
                 item.append("path")
                     .attr("d", d3.symbol().type(d3.symbolStar).size(200))  // Use star for winner
                     .attr('class', d => d.data.text_seen == 1 ? 'star read' : 'star unread')  // Add class based on condition
@@ -539,11 +640,6 @@ export class TreeVisualizer {
         // After tree is completely drawn, apply search matches
         this.applySearchMatches();
         console.log('After calling applySearchMatches');
-        
-        // Apply current activity indicators after tree is drawn
-        if (window.treeUpdateManagerInstance) {
-            window.treeUpdateManagerInstance.applyCurrentActivityIndicators(this.container);
-        }
         
         // Explicitly translate all "Untitled" nodes immediately after drawing the tree
         // TODO: This ensures that the "Untitled" text is always translated on first draw... which is not working otherwise... it's annoying. 
@@ -990,6 +1086,12 @@ export class TreeVisualizer {
                 return window.i18n ? window.i18n.translate("general.by_you") : 'by you';
             }
         }
+
+        // Special handling for ghost nodes
+        if (data.isGhost) {
+            const ghostNameArea = window.i18n ? window.i18n.translate("tree.ghost_name_area") : 'someone types...';
+            return `${ghostNameArea}`;
+        }
     
         const names = `${data.firstName} ${data.lastName}`.split(' ');
         let formattedName = '';
@@ -1011,8 +1113,20 @@ export class TreeVisualizer {
     updateTitle(titleGroup, titleOrAccessor, fontSize) {
         titleGroup.selectAll("*").remove();  // Clear existing title
 
+        // Safely get the data from the titleGroup's parent node without calling datum()
+        let nodeData = null;
+        try {
+            const parentNode = titleGroup.node()?.parentNode;
+            if (parentNode && parentNode.__data__) {
+                nodeData = parentNode.__data__;
+            }
+        } catch (e) {
+            // If we can't access the data safely, nodeData remains null
+            console.warn('Could not access node data for title update:', e);
+        }
+        
         const title = typeof titleOrAccessor === 'function' 
-            ? titleOrAccessor(titleGroup.datum()) 
+            ? (nodeData ? titleOrAccessor(nodeData) : '?')
             : titleOrAccessor;
 
         const words = title.split(/\s+/);
@@ -1045,13 +1159,15 @@ export class TreeVisualizer {
         lines.forEach((line, i) => {
             const textEl = titleGroup.append("text")
                 .attr("dy", `${i * lineHeight}px`)
-                .attr("x", d => d.children ? -13 : 13)
-                .style("text-anchor", d => d.children ? "end" : "start")
+                .attr("x", nodeData && nodeData.children ? -13 : 13)
+                .style("text-anchor", nodeData && nodeData.children ? "end" : "start")
                 .style("font-size", `${fontSize}px`);
                 
-            // If this is the default "Untitled" translation, add a data-i18n attribute
+            // Add data-i18n attribute for translatable titles
             if (title === window.i18n?.translate("general.untitled") || title === "Untitled") {
                 textEl.attr("data-i18n", "general.untitled");
+            } else if (title === window.i18n?.translate("tree.ghost_title") || title === "click clack" || title === "tac tac") {
+                textEl.attr("data-i18n", "tree.ghost_title");
             }
             
             textEl.text(line);
@@ -1134,13 +1250,21 @@ export class TreeVisualizer {
 
         // Enter new nodes
         const nodeEnter = nodes.enter().append("g")
-            .attr("class", d => `node${d.children ? " node--internal" : " node--leaf"}`)
+            .attr("class", d => {
+                let classes = `node${d.children ? " node--internal" : " node--leaf"}`;
+                if (d.data.isGhost) {
+                    classes += " node--ghost";
+                }
+                return classes;
+            })
             .attr("transform", d => `translate(${d.y},${d.x})`)
             .on("click", (event, d) => {
-                const customEvent = new CustomEvent('showStoryInModalRequest', {
-                    detail: { id: d.data.id }
-                });
-                document.dispatchEvent(customEvent);
+                if (!d.data.isGhost) {  // Only allow clicks on non-ghost nodes
+                    const customEvent = new CustomEvent('showStoryInModalRequest', {
+                        detail: { id: d.data.id }
+                    });
+                    document.dispatchEvent(customEvent);
+                }
             });
 
         // Append elements to new nodes
@@ -1174,7 +1298,18 @@ export class TreeVisualizer {
             }
             
             // Remaining code with defensive checks...
-            if (d.data.isWinner) {
+            if (d.data.isGhost) {
+                // Create ghost heart with pulsing animation
+                const ghostHeartPath = "m -10,-9 c -6.57,-7.05 -17.14,-7.05 -23.71,0 -6.56,7.05 -6.56,18.39 0,25.45 l 29.06,31.27 29.09,-31.23 c 6.57,-7.05 6.57,-18.4 0,-25.45 -6.57,-7.05 -17.14,-7.05 -23.71,0 l -5.35,5.75 -5.39,-5.78 z";
+                
+                const ghostHeart = item.append("path")
+                    .attr("d", ghostHeartPath)
+                    .attr("transform", "scale(0.4) translate(0, -15)")
+                    .attr("class", "ghost-heart");
+                
+                // Debug: Log that we created a ghost heart
+                console.log('👻 Created ghost heart for node:', d.data.id);
+            } else if (d.data.isWinner) {
                 item.append("path")
                     .attr("d", d3.symbol().type(d3.symbolStar).size(200))
                     .attr('class', d => d.data && d.data.text_seen == 1 ? 'star read' : 'star unread')
@@ -1215,7 +1350,14 @@ export class TreeVisualizer {
             .attr("class", "title-group")
             .attr("transform", "translate(0, -10)");
 
-        const titleBottomPosition = this.updateTitle(titleGroup, d => d.data.title || (window.i18n ? window.i18n.translate("general.untitled") : "Untitled"), this.config.fontSize.title.max);
+        const titleBottomPosition = this.updateTitle(titleGroup, d => {
+            // Special handling for ghost nodes
+            if (d.data.isGhost) {
+                return window.i18n ? window.i18n.translate("tree.ghost_title") : "click clack";
+            }
+            // Regular nodes - use their title or fallback to untitled
+            return d.data.title || (window.i18n ? window.i18n.translate("general.untitled") : "Untitled");
+        }, this.config.fontSize.title.max);
 
         // Add the author name, positioned below the title
         nodeEnter.append("text")
@@ -1229,6 +1371,13 @@ export class TreeVisualizer {
                     return "text-by"; // Default class
                 }
                 return d.data.permissions.isMyText ? "text-by author" : "text-by";
+            })
+            .attr("data-i18n", d => {
+                // Add data-i18n attribute for ghost nodes to enable dynamic translation
+                if (d.data && d.data.isGhost) {
+                    return "tree.ghost_name_area";
+                }
+                return null;
             })
             .text(d => {
                 // Add defensive check before formatting author name
@@ -1565,45 +1714,21 @@ export class TreeVisualizer {
             this.svg.selectAll(".title-group text[data-i18n='general.untitled']")
                 .text(window.i18n ? window.i18n.translate("general.untitled") : "Untitled");
             
-            // Update translations for author nodes (existing code)
+            // Update translations for ghost node titles
+            this.svg.selectAll(".title-group text[data-i18n='tree.ghost_title']")
+                .text(window.i18n ? window.i18n.translate("tree.ghost_title") : "click clack");
+            
+            // Update translations for author nodes - use the formatAuthorName method for consistency
+            const self = this;
             this.svg.selectAll(".text-by")
-                .each(function() {
+                .each(function(data) {
                     const element = d3.select(this);
-                    const data = element.datum();
                     
                     // Only update if we have valid data
-                    if (data && data.data && data.data.permissions) {
-                        let authorText = '';
-                        
-                        if (data.data.permissions.isMyText) {
-                            if (data.data.text_status === 'draft' || data.data.text_status === 'incomplete_draft') {
-                                // For drafts: "your DRAFT" / "votre brouillon"
-                                const yourText = window.i18n ? window.i18n.translate("note-edit.your") + ' ' : 'your ';
-                                const draftText = window.i18n ? window.i18n.translate("general.draft") : 'DRAFT';
-                                authorText = `${yourText}${draftText}`;
-                            } else {
-                                // For completed texts: "by you"/ "votre texte"
-                                authorText = window.i18n ? window.i18n.translate("general.by_you") : 'by you';
-                            }
-                        } else {
-                            const names = `${data.data.firstName} ${data.data.lastName}`.split(' ');
-                            let formattedName = '';
-                            
-                            if (names.length > 1) {
-                                // Keep the last name, initialize others
-                                for (let i = 0; i < names.length - 1; i++) {
-                                    formattedName += names[i][0] + '. ';
-                                }
-                                formattedName += names[names.length - 1]; // Last name
-                            } else {
-                                formattedName = names[0];
-                            }
-                            
-                            const byText = window.i18n ? window.i18n.translate("general.by") : 'by';
-                            authorText = `${byText} ${formattedName}`;
-                        }
-                        
-                        // Update the text content
+                    if (data && data.data) {
+                        // Use the formatAuthorName method to get the properly translated text
+                        // This will handle ghost nodes, regular nodes, and "by you" texts correctly
+                        const authorText = self.formatAuthorName(data.data);
                         element.text(authorText);
                     }
                 });

@@ -8,6 +8,7 @@
 @import url(./atoms/language-switcher.css);
 @import url(./atoms/tooltip.css);
 @import url(./atoms/game-activity-indicator.css);
+@import url(./atoms/ghost-node.css);
 
 /* atoms/buttons */
 @import url(./atoms/buttons/btns.css);

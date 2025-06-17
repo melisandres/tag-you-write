@@ -604,6 +604,7 @@ export class UserActivityDataManager {
                 source: 'user-centric',
                 changes: textChangeList.map(c => ({ type: c.type, editingType: c.editingType }))
             };
+            console.log('👤 UserActivityDataManager: HERE Emitting textActivityChanged event:', eventData);
             
             eventBus.emit('textActivityChanged', eventData);
         });

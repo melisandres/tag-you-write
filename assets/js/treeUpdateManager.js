@@ -19,14 +19,16 @@ export class TreeUpdateManager {
     eventBus.on('searchApplied', this.handleSearchUpdate.bind(this));
     eventBus.on('updateNodeWinner', this.handleChooseWinnerFromPolling.bind(this));
     eventBus.on('textActivityChanged', this.handleTextActivityChanged.bind(this));
+    eventBus.on('treeRendered', this.applyCurrentActivityIndicators.bind(this));
   }
 
   handleTextActivityChanged(activityData) {
     const { textId, activity_type, parent_id, user_id } = activityData;
+    console.log('TreeUpdateManager: handleTextActivityChanged', { textId, activity_type, parent_id, user_id });
     
     if (activity_type === 'iterating') {
         // Show ghost node positioned under parent_id
-        this.showIteratingGhostNode(textId, parent_id, user_id);
+        this.updateGhostNode(textId, parent_id, user_id);
     } else if (activity_type === 'adding_note') {
         // Show "adding note" indicator on existing node
         this.showAddingNoteIndicator(textId, user_id);
@@ -224,12 +226,16 @@ export class TreeUpdateManager {
     const currentRootId = this.dataManager.getCurrentViewedRootStoryId();
     // Get the tree directly using getTree
     const updatedTreeData = this.dataManager.getTree(currentRootId);
+
+    // TODO: is this where I should be updating the tree with ghost nodes? 
+    // it is using the treeVisualizer treeData... not the dataManager treeData
+    this.updateTreeWithGhostNodes(updatedTreeData);
     
     // Update the visualizer's tree data
-    this.treeVisualizer.setTreeData(updatedTreeData);
+    //this.treeVisualizer.setTreeData(updatedTreeData);
     
     // Now update the visualization
-    this.treeVisualizer.updateTree();
+    //this.treeVisualizer.updateTree();
     
     // Check if search is active and explicitly apply search highlighting
     const searchTerm = this.dataManager.getSearch();
@@ -391,12 +397,76 @@ export class TreeUpdateManager {
   // Note: Tree view uses different visual approach than shelf view
 
   /**
-   * Show ghost node for iterating activity in tree view
-   * Creates a placeholder node in the tree structure
+   * Update ghost node for a specific text activity
    */
-  showIteratingGhostNode(textId, parentId, userId) {
-    console.log(`🌳 TreeUpdateManager: Would show iterating ghost for text ${textId} (not yet implemented for tree view)`);
-    // TODO: Implement tree-specific ghost node visualization
+  updateGhostNode(textId, parentId, userId) {
+    // Get the current tree data from the visualizer
+    const currentTree = this.treeVisualizer.treeData;
+    if (!currentTree) return;
+
+    // Create activity object in the expected format
+    const activity = {
+        text_id: textId,
+        activity_type: 'iterating',
+        parent_id: parentId,
+        user_id: userId
+    };
+
+    // Try to add the ghost node and get the modified tree
+    const modifiedTree = window.ghostTreeManager.addGhostNode(currentTree, activity);
+    
+    if (modifiedTree) {
+        // Update the tree visualization with the modified tree
+        this.treeVisualizer.setTreeData(modifiedTree);
+        this.treeVisualizer.updateTree();
+    }
+  }
+
+  /**
+   * Remove ghost node for a specific text
+   */
+  removeGhostNode(textId) {
+    // Get the current tree data from the visualizer
+    const currentTree = this.treeVisualizer.treeData;
+    if (!currentTree) return;
+
+    // Try to remove the ghost node
+    const modifiedTree = window.ghostTreeManager.removeGhostNode(currentTree, textId);
+    
+    if (modifiedTree) {
+        // Update the tree visualization
+        this.treeVisualizer.setTreeData(modifiedTree);
+        this.treeVisualizer.updateTree();
+    }
+  }
+
+  /**
+   * Update tree with all current ghost nodes
+   * Used for initialization or when we need to sync with all activities
+   */
+  updateTreeWithGhostNodes(updatedTreeData) {
+    // Get all current text activities
+    const textActivities = window.userActivityDataManager.getDerivedTextActivities();
+    
+    // Get enriched tree with all ghost nodes
+    const enrichedTree = window.ghostTreeManager.enrichTreeWithGhosts(updatedTreeData, textActivities);
+    
+    if (enrichedTree) {
+        // Update the tree visualization
+        this.treeVisualizer.setTreeData(enrichedTree);
+        this.treeVisualizer.updateTree();
+    }
+  }
+
+  /**
+   * Remove all text activity indicators for a given text
+   */
+  removeTextActivityIndicators(textId) {
+    // Remove adding note indicator
+    this.removeAddingNoteIndicator(textId);
+    
+    // Remove ghost node if it exists
+    this.removeGhostNode(textId);
   }
 
   /**
@@ -441,14 +511,6 @@ export class TreeUpdateManager {
   }
 
   /**
-   * Remove all text activity indicators for a given text in tree view
-   */
-  removeTextActivityIndicators(textId) {
-    console.log(`�� TreeUpdateManager: Removing activity indicators for text ${textId}`);
-    this.removeAddingNoteIndicator(textId);
-  }
-
-  /**
    * Apply current activity indicators to newly rendered tree
    * Similar to how search highlighting works in shelf
    */
@@ -459,6 +521,8 @@ export class TreeUpdateManager {
       console.log('❌ TreeUpdateManager: No userActivityDataManagerInstance found');
       return;
     }
+
+    //TODO: why are you getting all the activities? you have been sent the one that is updating... so why update them all? 
 
     // Get current text activities
     const textActivities = window.userActivityDataManagerInstance.getDerivedTextActivities();
@@ -471,9 +535,6 @@ export class TreeUpdateManager {
       if (activity_type === 'adding_note') {
         // Apply adding note indicator
         this.showAddingNoteIndicator(text_id, user_id);
-      } else if (activity_type === 'iterating') {
-        // Apply iterating placeholder (when implemented)
-        this.showIteratingGhostNode(text_id, parent_id, user_id);
       }
     });
     

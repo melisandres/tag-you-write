@@ -423,5 +423,9 @@
       "bookmark_tooltip": "bookmark",
       "tree_tooltip": "tree",
       "shelf_tooltip": "shelf"
+    },
+    "tree": {
+      "ghost_title": "click clack",
+      "ghost_name_area": ". . . someone types"
     }
   }

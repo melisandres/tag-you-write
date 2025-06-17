@@ -40,6 +40,7 @@ import { CurrentActivityManager } from './currentActivityManager.js';
 import { ActivityIndicator } from './activityIndicator.js';
 import { ActivityDataManager } from './activityDataManager.js';
 import { UserActivityDataManager } from './userActivityDataManager.js';
+import { GhostTreeManager } from './GhostTreeManager.js';
 
 // Make eventBus globally available immediately
 window.eventBus = eventBus;
@@ -161,8 +162,11 @@ document.addEventListener("DOMContentLoaded", async () => {
           // Initialize ActivityDataManager (must be before ActivityIndicator)
         //window.activityDataManager = new ActivityDataManager();
 
-        // Initialize UserActivityDataManager (Phase 1: Parallel system)
-        window.userActivityDataManager = new UserActivityDataManager();
+  // Initialize UserActivityDataManager (Phase 1: Parallel system)
+  window.userActivityDataManager = new UserActivityDataManager();
+
+  // Initialize GhostTreeManager
+  window.ghostTreeManager = new GhostTreeManager();
 
   // Initialize ActivityIndicator
   window.activityIndicator = new ActivityIndicator();

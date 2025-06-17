@@ -1,5 +1,7 @@
 # Tag You Write
 
+(This description is a work in progress... currently a rough AI generation. Will revisit soon... some of the information needs to be revised.)
+
 A collaborative writing platform that allows users to create, share, and interact with text-based content in a game-like environment.
 
 ## 🌟 Features

@@ -422,5 +422,9 @@
     "bookmark_tooltip": "suivre",
     "tree_tooltip": "arbre",
     "shelf_tooltip": "rayon"
-  }
+  },
+      "tree": {
+      "ghost_title": "tac tac",
+      "ghost_name_area": ". . . quelqu'un tape"
+    }
 }
