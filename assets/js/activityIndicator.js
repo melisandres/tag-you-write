@@ -22,7 +22,6 @@ export class FooterActivityIndicator {
     constructor() {
         this.container = null;
         this.activityData = { browsing: 0, writing: 0, total: 0 };
-        this.isSSEConnected = false;
         
         console.log('🔔 FooterActivityIndicator: Initializing');
         this.init();
@@ -50,15 +49,6 @@ export class FooterActivityIndicator {
         eventBus.on('siteActivityUpdate', (data) => {
             console.log('🔔 FooterActivityIndicator: Received activity update:', data);
             this.updateDisplay(data);
-        });
-
-        // Listen for SSE connection status
-        eventBus.on('sseConnected', () => {
-            this.isSSEConnected = true;
-        });
-
-        eventBus.on('sseFailed', () => {
-            this.isSSEConnected = false;
         });
     }
 
@@ -97,7 +87,6 @@ export class HeaderActivityIndicator {
     constructor() {
         this.container = null;
         this.activityData = { browsing: 0, writing: 0, total: 0 };
-        this.isSSEConnected = false;
         
         console.log('🔔 HeaderActivityIndicator: Initializing (testing mode)');
         this.init();
@@ -125,15 +114,6 @@ export class HeaderActivityIndicator {
         eventBus.on('siteActivityUpdate', (data) => {
             console.log('🔔 HeaderActivityIndicator: Received activity update:', data);
             this.updateDisplay(data);
-        });
-
-        // Listen for SSE connection status
-        eventBus.on('sseConnected', () => {
-            this.isSSEConnected = true;
-        });
-
-        eventBus.on('sseFailed', () => {
-            this.isSSEConnected = false;
         });
     }
 
