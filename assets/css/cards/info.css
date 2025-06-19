@@ -8,6 +8,17 @@ section.info{
     gap: 2em;
 }
 
+/* Apply same styling to div.info in form pages */
+.form-page div.info {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    padding: 10px;    
+    padding-top: var(--spacing-extra-extra-large);
+    gap: 2em;
+}
+
 .iterate.info {
     flex-direction: row-reverse;
     align-items: flex-end;

@@ -1,0 +1,177 @@
+/* Text Form Game Activity Indicator */
+/* Positioned to overlap the prompt area in the bottom right corner */
+
+/* Ensure parent containers can position the indicator */
+/* Target the prompt area for iteration forms, or any info-text-container for note forms */
+.info.iterate .info-container:nth-child(2) .info-text-container,
+.info-text-container {
+    position: relative;
+}
+
+:root {
+    /* Text form activity indicator specific variables */
+    --text-form-activity-size: 75px;
+    --text-form-activity-icon-size: 30px;
+    --text-form-activity-text-size: 12px;
+    --text-form-activity-bg: rgba(0, 0, 0, 0.8);
+    --text-form-activity-border: rgba(255, 255, 255, 0.2);
+    --text-form-activity-text-color: #ffffff;
+    --text-form-activity-text-color-active: #4CAF50;
+    --text-form-activity-icon-color: #ffffff;
+    --text-form-activity-icon-color-active: #4CAF50;
+}
+
+.text-form-game-activity-indicator {
+    /* Positioning - overlaps the prompt area in bottom right */
+    position: absolute;
+    bottom: -45px; /* Overlap by padding minus 5px as requested */
+    right: var(--spacing-small);
+    z-index: 100;
+    
+    /* Size and shape - circular */
+    width: var(--text-form-activity-size);
+    height: var(--text-form-activity-size);
+    border-radius: 50%;
+    
+    /* Visual - black circular background */
+    background-color: var(--text-form-activity-bg);
+    border: 1px solid var(--text-form-activity-border);
+    backdrop-filter: blur(4px);
+    
+    /* Layout - center content */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    
+    /* Visual feedback */
+    cursor: default;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Icon container */
+.text-form-game-activity-indicator .icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* SVG styling */
+.text-form-game-activity-indicator svg {
+    width: var(--text-form-activity-icon-size);
+    height: var(--text-form-activity-icon-size);
+    flex-shrink: 0;
+}
+
+.text-form-game-activity-indicator svg path {
+    fill: var(--text-form-activity-icon-color);
+    stroke: none;
+}
+
+.text-form-game-activity-indicator svg text {
+    display: none; /* Hide any text elements in the SVG */
+}
+
+/* Activity numbers display */
+.text-form-game-activity-indicator .activity-numbers {
+    font-size: var(--text-form-activity-text-size);
+    font-weight: 600;
+    color: var(--text-form-activity-text-color);
+    line-height: 1;
+    text-align: center;
+    font-family: var(--font-family-primary);
+    white-space: nowrap;
+    margin-top: -1px; /* Tight spacing with icon */
+}
+
+/* Active state - when there's activity */
+.text-form-game-activity-indicator.has-activity {
+    background-color: rgba(0, 0, 0, 0.9);
+    border-color: var(--text-form-activity-text-color-active);
+    box-shadow: 0 2px 12px rgba(76, 175, 80, 0.3);
+}
+
+.text-form-game-activity-indicator.has-activity svg path {
+    fill: var(--text-form-activity-icon-color-active);
+}
+
+.text-form-game-activity-indicator.has-activity .activity-numbers {
+    color: var(--text-form-activity-text-color-active);
+}
+
+/* No activity state - subtle appearance */
+.text-form-game-activity-indicator.no-activity {
+    opacity: 0.8;
+}
+
+.text-form-game-activity-indicator.no-activity .activity-numbers {
+    opacity: 0.7;
+}
+
+/* Hover effect for visual feedback */
+.text-form-game-activity-indicator:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.text-form-game-activity-indicator.has-activity:hover {
+    box-shadow: 0 4px 16px rgba(76, 175, 80, 0.4);
+}
+
+/* Pulse animation for active state */
+.text-form-game-activity-indicator.has-activity .icon svg {
+    animation: textFormPulse 2s infinite;
+}
+
+@keyframes textFormPulse {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 800px) {
+    .text-form-game-activity-indicator {
+        width: calc(var(--text-form-activity-size) - 10px);
+        height: calc(var(--text-form-activity-size) - 10px);
+        bottom: calc(var(--spacing-extra-small) - 40px);
+        right: calc(var(--spacing-extra-small) - 10px);
+    }
+    
+    .text-form-game-activity-indicator svg {
+        width: calc(var(--text-form-activity-icon-size) - 4px);
+        height: calc(var(--text-form-activity-icon-size) - 4px);
+    }
+    
+    .text-form-game-activity-indicator .activity-numbers {
+        font-size: calc(var(--text-form-activity-text-size) - 1px);
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .text-form-game-activity-indicator {
+        width: calc(var(--text-form-activity-size) - 30px);
+        height: calc(var(--text-form-activity-size) - 30px);
+    }
+    
+    .text-form-game-activity-indicator svg {
+        width: calc(var(--text-form-activity-icon-size) - 6px);
+        height: calc(var(--text-form-activity-icon-size) - 6px);
+    }
+    
+    .text-form-game-activity-indicator .activity-numbers {
+        font-size: calc(var(--text-form-activity-text-size) - 2px);
+    }
+} 

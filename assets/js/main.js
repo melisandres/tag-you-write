@@ -42,6 +42,7 @@ import { UserActivityDataManager } from './userActivityDataManager.js';
 import { GhostTreeManager } from './GhostTreeManager.js';
 import { GameListRenderer } from './gameListRenderer.js';
 import { GameSubscriptionManager } from './gameSubscriptionManager.js';
+import { TextFormGameActivityIndicator } from './textFormGameActivityIndicator.js';
 
 // Make eventBus globally available immediately
 window.eventBus = eventBus;
@@ -171,6 +172,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Initialize ActivityIndicator
   window.activityIndicator = new ActivityIndicator();
+  
+  // Initialize TextFormGameActivityIndicator (only on text form pages)
+  window.textFormGameActivityIndicator = new TextFormGameActivityIndicator();
 
   // No need for separate handleInitialState
 
