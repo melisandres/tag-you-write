@@ -683,6 +683,7 @@ export class TreeVisualizer {
             { label: "legend.winner", type: "star"},
             { label: "legend.unread", type: "unread-heart" },
             { label: "legend.search", type: "search-match"},
+            { label: "legend.text_in_progress", type: "ghost-heart" },
             { label: "legend.adding_note", type: "adding-note" },
             { label: "legend.votes", type: "vote-gradient", maxVotes: maxVotes } 
         ];
@@ -690,7 +691,7 @@ export class TreeVisualizer {
         const legend = self.svg.append("g")
             .attr("class", "legend")
             .classed("hidden", false)
-            .attr("transform", `translate(${self.containerWidth - 140}, ${self.containerHeight - 250})`)
+            .attr("transform", `translate(${self.containerWidth - 130}, ${self.containerHeight - 295})`)
             .style("cursor", "pointer")
             .on("click", () => {
                 self.toggleLegend();
@@ -703,7 +704,7 @@ export class TreeVisualizer {
             .attr("class", "legend-box")
             .attr("x", -legendBoxPadding)
             .attr("y", -legendBoxPadding)
-            .attr("width", 160)  // Increased width to accommodate longer text
+            .attr("width", 145)  // Narrowed width for better fit
             .attr("height", legendData.length * 45 + legendBoxPadding * 2)  // Height accounts for all items
             .attr("fill", "floralwhite")  // Set to non-transparent background
             .attr("stroke", "black")  // Optional border around the box
@@ -748,6 +749,21 @@ export class TreeVisualizer {
                     .attr("y", 5)
                     .attr("data-i18n", d.label)
                     .text(window.i18n ? window.i18n.translate(d.label) : d.label)
+                    .style("font-size", "15px");
+            } else if (d.type === "ghost-heart") {
+                // Add ghost heart path
+                const heartPath = "m -10,-9 c -6.57,-7.05 -17.14,-7.05 -23.71,0 -6.56,7.05 -6.56,18.39 0,25.45 l 29.06,31.27 29.09,-31.23 c 6.57,-7.05 6.57,-18.4 0,-25.45 -6.57,-7.05 -17.14,-7.05 -23.71,0 l -5.35,5.75 -5.39,-5.78 z";
+                
+                item.append("path")
+                    .attr("d", heartPath)
+                    .attr("transform", "scale(0.3) translate(10, -20)")  // Align with other hearts
+                    .attr("class", "ghost-heart");
+                    
+                item.append("text")
+                    .attr("x", 20)  // Aligned x position
+                    .attr("y", 5)
+                    .attr("data-i18n", d.label)
+                    .text(window.i18n ? window.i18n.translate(d.label) : "text in progress")
                     .style("font-size", "15px");
             }
             else if (d.type === "vote-gradient") {
@@ -853,7 +869,7 @@ export class TreeVisualizer {
         // Add toggle button under the legend
         const toggleButton = self.svg.append("g")
             .attr("class", "legend-toggle")
-            .attr("transform", `translate(${self.containerWidth  - 125}, ${self.containerHeight - 30})`)
+            .attr("transform", `translate(${self.containerWidth  - 135}, ${self.containerHeight - 30})`)
             .style("cursor", "pointer")
             .style("display", "none") 
             .on("click", () => this.toggleLegend());
@@ -896,12 +912,12 @@ export class TreeVisualizer {
 
     updateLegendPosition() {
         if (this.legend) {
-            const newX = this.container.clientWidth - 140;
-            const newY = this.container.clientHeight - 250;
+            const newX = this.container.clientWidth - 130;
+            const newY = this.container.clientHeight - 295;
             this.legend.attr("transform", `translate(${newX}, ${newY})`);
             
             // Update toggle button position
-            const toggleX = this.container.clientWidth - 125;
+            const toggleX = this.container.clientWidth - 135;
             this.legendToggle.attr("transform", `translate(${toggleX}, ${this.container.clientHeight - 30})`);
 
             // Update visibility based on screen size
