@@ -164,7 +164,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   window.currentActivityManager = new CurrentActivityManager();
 
               // Initialize UserActivityDataManager (User-centric activity tracking)
-    window.userActivityDataManager = new UserActivityDataManager();
+  window.userActivityDataManager = new UserActivityDataManager();
 
   // Initialize GhostTreeManager
   window.ghostTreeManager = new GhostTreeManager();

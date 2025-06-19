@@ -14,7 +14,6 @@ export class DataManager {
             return DataManager.instance;
         }
         
-        /* this.currentViewedRootStoryId = null; */
         const userIdMeta = document.querySelector('meta[name="user"]');
         this.currentUserId = userIdMeta.getAttribute('data-user-id') !== 'null' ? userIdMeta.getAttribute('data-user-id') : null;
         this.cache = this.loadCache() || {
@@ -22,7 +21,7 @@ export class DataManager {
             trees: new Map(),
             nodesMap: new Map(), // A flat structure to make updates easier
             lastGamesCheck: null,
-            currentViewedRootId: null,
+            currentViewedRootId: null, // Transient - established by URL params/page context
             pagination: {
                 currentPage: 1,
                 itemsPerPage: 10,
@@ -616,7 +615,7 @@ export class DataManager {
                     trees: new Map(parsed.trees || []),
                     nodesMap: new Map(parsed.nodesMap || []),
                     lastGamesCheck: parsed.lastGamesCheck || Date.now(),
-                    currentViewedRootId: parsed.currentViewedRootId,
+                    currentViewedRootId: null, // Always start fresh - transient state
                     pagination: parsed.pagination,
                     search: parsed.search || '',
                     searchResults: {
@@ -649,7 +648,7 @@ export class DataManager {
             trees: Array.from(cleanTrees.entries()),
             nodesMap: Array.from(this.cache.nodesMap.entries()),
             lastGamesCheck: this.cache.lastGamesCheck,
-            currentViewedRootId: this.cache.currentViewedRootId,
+            currentViewedRootId: null, // Transient - established by URL params/page context
             pagination: this.cache.pagination,
             search: this.cache.search,
             searchResults: {
