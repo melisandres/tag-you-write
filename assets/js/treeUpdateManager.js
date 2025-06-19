@@ -517,15 +517,15 @@ export class TreeUpdateManager {
   applyCurrentActivityIndicators(container) {
     console.log('🔍 TreeUpdateManager: applyCurrentActivityIndicators called with container:', container);
     
-    if (!window.userActivityDataManagerInstance) {
-      console.log('❌ TreeUpdateManager: No userActivityDataManagerInstance found');
+    if (!window.userActivityDataManager) {
+      console.log('❌ TreeUpdateManager: No userActivityDataManager found');
       return;
     }
 
     //TODO: why are you getting all the activities? you have been sent the one that is updating... so why update them all? 
 
     // Get current text activities
-    const textActivities = window.userActivityDataManagerInstance.getDerivedTextActivities();
+    const textActivities = window.userActivityDataManager.getDerivedTextActivities();
     console.log('🔍 TreeUpdateManager: Found text activities:', textActivities);
     
     textActivities.forEach(activity => {

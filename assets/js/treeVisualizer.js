@@ -97,7 +97,7 @@ export class TreeVisualizer {
         this.container = container;
 
         // Get the activity data
-        const activityData = window.userActivityDataManagerInstance.getDerivedTextActivities();
+        const activityData = window.userActivityDataManager.getDerivedTextActivities();
 
         // Add ghost nodes to the main data
         const enrichedTree = window.ghostTreeManager.enrichTreeWithGhosts(data, activityData);

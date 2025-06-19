@@ -16,9 +16,9 @@ export class UserActivityDataManager {
     constructor() {
         console.log('👤 UserActivityDataManager: Initializing');
         
-        // Singleton pattern
-        if (window.userActivityDataManagerInstance) {
-            return window.userActivityDataManagerInstance;
+        // Singleton pattern - return existing instance if it exists
+        if (window.userActivityDataManager) {
+            return window.userActivityDataManager;
         }
         
         // Configuration constants
@@ -58,8 +58,8 @@ export class UserActivityDataManager {
             lastUpdated: null
         };
         
-        // Store singleton instance
-        window.userActivityDataManagerInstance = this;
+        // Store singleton instance (cleaned up - using consistent naming)
+        window.userActivityDataManager = this;
         
         // Add global diagnostic function for debugging
         window.debugUserActivity = () => {
@@ -70,6 +70,31 @@ export class UserActivityDataManager {
         
         // Initialize
         this.init();
+    }
+    
+    /**
+     * Static method to get the singleton instance
+     * Provides cleaner access pattern for future use
+     */
+    static getInstance() {
+        if (!window.userActivityDataManager) {
+            window.userActivityDataManager = new UserActivityDataManager();
+        }
+        return window.userActivityDataManager;
+    }
+    
+    /**
+     * Static method to reset instance (useful for testing)
+     */
+    static resetInstance() {
+        if (window.userActivityDataManager) {
+            // Clean up timers and event listeners
+            if (window.userActivityDataManager.cleanupTimer) {
+                clearInterval(window.userActivityDataManager.cleanupTimer);
+            }
+            delete window.userActivityDataManager;
+            delete window.UserActivityDataManager;
+        }
     }
     
     init() {
@@ -636,7 +661,7 @@ export class UserActivityDataManager {
      */
     startCleanupTimer() {
         // Clean up every 2 minutes
-        setInterval(() => {
+        this.cleanupTimer = setInterval(() => {
             this.cleanupStaleUsers();
         }, this.CONFIG.CLEANUP_INTERVAL);
     }

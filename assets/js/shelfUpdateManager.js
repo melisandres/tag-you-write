@@ -873,17 +873,17 @@ export class ShelfUpdateManager {
   applyCurrentActivityIndicators(container) {
     console.log('🔍 ShelfUpdateManager: applyCurrentActivityIndicators called with container:', container);
     
-    if (!window.userActivityDataManagerInstance) {
-      console.log('❌ ShelfUpdateManager: No userActivityDataManagerInstance found');
+    if (!window.userActivityDataManager) {
+      console.log('❌ ShelfUpdateManager: No userActivityDataManager found');
       return;
     }
 
     // Get current text activities
-    const textActivities = window.userActivityDataManagerInstance.getDerivedTextActivities();
+    const textActivities = window.userActivityDataManager.getDerivedTextActivities();
     console.log('🔍 ShelfUpdateManager: Found text activities:', textActivities);
     
     // Also check diagnostic info
-    const diagnosticInfo = window.userActivityDataManagerInstance.getDiagnosticInfo();
+    const diagnosticInfo = window.userActivityDataManager.getDiagnosticInfo();
     console.log('🔍 ShelfUpdateManager: Diagnostic info:', diagnosticInfo);
     
     textActivities.forEach(activity => {
@@ -908,8 +908,8 @@ export class ShelfUpdateManager {
    */
   getUserName(userId) {
     // Try to get from user data manager or other sources
-    if (window.userActivityDataManagerInstance) {
-      const userActivities = window.userActivityDataManagerInstance.getUserActivities();
+    if (window.userActivityDataManager) {
+      const userActivities = window.userActivityDataManager.getUserActivities();
       const user = userActivities.find(u => u.writer_id === userId);
       if (user && user.name) {
         return user.name;

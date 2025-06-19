@@ -213,8 +213,8 @@ export class GameListRenderer {
 
     getGameActivityData(gameId) {
         // Try to get activity data from UserActivityDataManager (new system)
-        if (window.userActivityDataManagerInstance) {
-            const activity = window.userActivityDataManagerInstance.getGameActivity(gameId);
+        if (window.userActivityDataManager) {
+            const activity = window.userActivityDataManager.getGameActivity(gameId);
             if (activity) {
                 console.log(`🎮 GameListRenderer: Got activity for game ${gameId}:`, activity);
                 return activity;
