@@ -112,10 +112,6 @@ export class PollingManager {
             eventBus.emit('notificationsReceived', updates.notifications);
         }
         
-        // DEPRECATED: Legacy activity-centric events - UI now uses user-centric tracking via UserActivityDataManager
-        // The UserActivityDataManager listens to userActivityUpdate and derives site/game/text activities automatically
-        // This eliminates redundant processing and ensures consistent data flow
-        
         // Process user activity data (user-centric tracking)
         if (updates.userActivity) {
             console.log('Polling: Processing user activity:', updates.userActivity);

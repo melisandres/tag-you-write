@@ -324,9 +324,7 @@ class EventHandler {
     private function setupRedisSubscriptions() {
         // Define base channels that all clients get
         $channels = [
-            'activities:site',     // All clients get site-wide activity counts
-            'activities:games',    // All clients get game-specific activity counts
-            'users:activity',      // NEW: All clients get individual user activity updates
+            'users:activity',      // All clients get individual user activity updates
         ];
         
         // Add context-aware game subscription based on gameSubscriptionType
@@ -371,14 +369,6 @@ class EventHandler {
         // BUT only if gameSubscriptionType is not 'none' (simplified logic for forms)
         if ($this->rootStoryId && $this->gameSubscriptionType !== 'none') {
             $channels[] = 'texts:' . $this->rootStoryId;        // Text updates
-            
-            // Add text activity subscriptions    
-            if ($this->gameId) {
-                $channels[] = 'activities:texts:' . $this->gameId; // Text-level activities (use game_id for consistency)
-                error_log("SSE: Subscribed to text activities for game_id: $this->gameId (from rootStoryId: {$this->rootStoryId})");
-            } else {
-                error_log("SSE: Could not find game_id for rootStoryId: {$this->rootStoryId}");
-            }
         } else if ($this->rootStoryId && $this->gameSubscriptionType === 'none') {
             error_log("SSE: Skipping text subscriptions (gameSubscriptionType is 'none' - text form context)");
         }
@@ -415,16 +405,11 @@ class EventHandler {
                     
                     // Create appropriate deduplication key based on message type
                     $messageKey = '';
-                    if ($channel === 'activities:site' || $channel === 'activities:games') {
-                        // For activity messages, use source and timestamp for uniqueness
+                    if ($channel === 'users:activity') {
+                        // For user activity messages, use writer_id and timestamp for uniqueness
                         $timestamp = $data['timestamp'] ?? time();
-                        $source = $data['source'] ?? 'unknown';
-                        $messageKey = $channel . ':' . $source . ':' . $timestamp . ':' . $this->connectionId;
-                    } else if (strpos($channel, 'activities:texts:') === 0) {
-                        // For text activity messages, use writer_id and timestamp for uniqueness
-                        $timestamp = $data['timestamp'] ?? time();
-                        $writerId = $data['writer_id'] ?? 'unknown';
-                        $messageKey = $channel . ':activity:' . $writerId . ':' . $timestamp . ':' . $this->connectionId;
+                        $writerId = $data['data']['writer_id'] ?? 'unknown';
+                        $messageKey = $channel . ':' . $writerId . ':' . $timestamp . ':' . $this->connectionId;
                     } else {
                         // For other events (votes, texts, etc.), use the event ID
                         $eventId = $data['id'] ?? uniqid();
@@ -537,66 +522,8 @@ class EventHandler {
                             }
                             break;
                             
-                        case $channel === 'activities:site':
-                            // Site-wide activity counts - handle both old and new formats
-                            if (isset($data['data'])) {
-                                $activityData = $data['data'];
-                                $source = $data['source'] ?? 'unknown';
-                                
-                                try {
-                                    $this->sendEvent('siteActivityUpdate', $activityData);
-                                } catch (Exception $e) {
-                                    error_log("SSE Redis: ❌ Error sending site activity update to connection " . $this->connectionId . ": " . $e->getMessage());
-                                    return false; // Exit subscription on send error
-                                }
-                            } else {
-                                error_log("SSE Redis: Site activity message missing data. Full message: " . json_encode($data));
-                            }
-                            break;
-                            
-                        case $channel === 'activities:games':
-                            // Game-specific activity counts (global channel - all users)
-                            if (isset($data['data'])) {
-                                $gameActivityData = $data['data'];
-                                $source = $data['source'] ?? 'unknown';
-                                
-                                try {
-                                    $this->sendEvent('gameActivityUpdate', $gameActivityData);
-                                } catch (Exception $e) {
-                                    error_log("SSE Redis: ❌ Error sending game activity update to connection " . $this->connectionId . ": " . $e->getMessage());
-                                    return false; // Exit subscription on send error
-                                }
-                            } else {
-                                error_log("SSE Redis: Game activity message missing data. Full message: " . json_encode($data));
-                            }
-                            break;
-                            
-                        case strpos($channel, 'activities:texts:') === 0:
-                            // Text-level activity updates (individual user activities for current game viewers)
-                            if (isset($data['data'])) {
-                                $textActivityData = $data['data'];
-                                $source = $data['source'] ?? 'unknown';
-                                
-                                // Extract game_id from channel for logging
-                                $gameIdFromChannel = str_replace('activities:texts:', '', $channel);
-                                
-                                error_log("SSE Redis: Received text activity update on channel '$channel' for game_id: $gameIdFromChannel (connection: " . $this->connectionId . ")");
-                                error_log("SSE Redis: Text activity data: " . json_encode($textActivityData));
-                                
-                                try {
-                                    $this->sendEvent('textActivityUpdate', $textActivityData);
-                                    error_log("SSE Redis: ✅ Successfully sent textActivityUpdate event to client " . $this->connectionId . " (source: $source)");
-                                } catch (Exception $e) {
-                                    error_log("SSE Redis: ❌ Error sending text activity update to connection " . $this->connectionId . ": " . $e->getMessage());
-                                    return false; // Exit subscription on send error
-                                }
-                            } else {
-                                error_log("SSE Redis: Text activity message missing data. Full message: " . json_encode($data));
-                            }
-                            break;
-                            
                         case $channel === 'users:activity':
-                            // NEW: Individual user activity updates (user-centric tracking)
+                            // Individual user activity updates (user-centric tracking)
                             if (isset($data['data'])) {
                                 $userActivityData = $data['data'];
                                 $source = $data['source'] ?? 'unknown';
@@ -693,63 +620,30 @@ class EventHandler {
                 ]);
             }
             
-            // Send text activity updates if any
-/*             if (!empty($updates['textActivity'])) {
-                $this->sendEvent('textActivityUpdate', $updates['textActivity']);
-            }
-             */
             // Send user activity updates if any (user-centric tracking)
             if (!empty($updates['userActivity'])) {
                 $this->sendEvent('userActivityUpdate', $updates['userActivity']);
             }
             
-            // Fetch and send current site-wide activity data for initialization
-            // try {
-            //     $siteActivityData = $this->pollingService->fetchSiteWideActivityData();
-            //     if ($siteActivityData) {
-            //         $this->sendEvent('siteActivityUpdate', $siteActivityData);
-            //     }
-            // } catch (Exception $e) {
-            //     error_log("SSE: Error fetching site activity data: " . $e->getMessage());
-            // }
-
-            // Fetch and send game activity data for initialization  
-            // try {
-            //     $gameActivityData = $this->pollingService->fetchGameActivityData();
-            //     if ($gameActivityData) {
-            //         $this->sendEvent('gameActivityUpdate', $gameActivityData);
-            //     }
-            // } catch (Exception $e) {
-            //     error_log("SSE: Error fetching game activity data: " . $e->getMessage());
-            // }
-
-            // Also fetch and send initial text activity data if viewing a story
-            // if ($this->rootStoryId) {
-            //     try {
-            //         require_once('../../model/Game.php');
-            //         $gameModel = new Game();
-            //         $gameId = $gameModel->selectGameId($this->rootStoryId);
+            // Periodically fetch and send user activity data for user-centric tracking (every 30 seconds)
+            static $lastActivityCheck = 0;
+            if ((time() - $lastActivityCheck) >= 30) {
+                try {
+                    // User-centric tracking - This is the only activity data the frontend needs
+                    try {
+                        $userActivityData = $this->pollingService->fetchUserActivityData();
+                        if ($userActivityData) {
+                            $this->sendEvent('userActivityUpdate', $userActivityData);
+                        }
+                    } catch (Exception $e) {
+                        error_log("SSE: Error fetching user activity data during polling: " . $e->getMessage());
+                    }
                     
-            //         if ($gameId) {
-            //             $textActivityData = $this->pollingService->fetchTextActivityData($gameId);
-            //             if ($textActivityData) {
-            //                 $this->sendEvent('textActivityUpdate', $textActivityData);
-            //             }
-            //         }
-            //     } catch (Exception $e) {
-            //         error_log("SSE: Error fetching initial text activity data: " . $e->getMessage());
-            //     }
-            // }
-            
-            // Fetch and send initial user activity data for user-centric tracking
-            // try {
-            //     $userActivityData = $this->pollingService->fetchUserActivityData();
-            //     if ($userActivityData) {
-            //         $this->sendEvent('userActivityUpdate', $userActivityData);
-            //     }
-            // } catch (Exception $e) {
-            //     error_log("SSE: Error fetching initial user activity data: " . $e->getMessage());
-            // }
+                    $lastActivityCheck = time();
+                } catch (Exception $e) {
+                    error_log("SSE: Error fetching user activity data during polling: " . $e->getMessage());
+                }
+            }
             
             // Update lastEventId
             if (isset($updates['lastEventId'])) {
@@ -826,53 +720,16 @@ class EventHandler {
                     ]);
                 }
                 
-                // Send text activity updates if any
-                if (!empty($updates['textActivity'])) {
-                    $this->sendEvent('textActivityUpdate', $updates['textActivity']);
-                }
-                
                 // Send user activity updates if any (user-centric tracking)
                 if (!empty($updates['userActivity'])) {
                     $this->sendEvent('userActivityUpdate', $updates['userActivity']);
                 }
                 
-                // DEPRECATED: Legacy activity-centric data fetching - Frontend now uses user-centric tracking only
-                // The UserActivityDataManager derives all activity counts from userActivityUpdate events automatically
-                // Commenting out to reduce database queries and simplify data flow
-                
                 // Periodically fetch and send user activity data for user-centric tracking (every 30 seconds)
                 static $lastActivityCheck = 0;
                 if ((time() - $lastActivityCheck) >= 30) {
                     try {
-                        // DEPRECATED: Legacy activity-centric events
-                        // $siteActivityData = $this->pollingService->fetchSiteWideActivityData();
-                        // if ($siteActivityData) {
-                        //     $this->sendEvent('siteActivityUpdate', $siteActivityData);
-                        // }
-                        
-                        // $gameActivityData = $this->pollingService->fetchGameActivityData();
-                        // if ($gameActivityData) {
-                        //     $this->sendEvent('gameActivityUpdate', $gameActivityData);
-                        // }
-                        
-                        // if ($this->rootStoryId) {
-                        //     try {
-                        //         require_once('../../model/Game.php');
-                        //         $gameModel = new Game();
-                        //         $gameId = $gameModel->selectGameId($this->rootStoryId);
-                        //         
-                        //         if ($gameId) {
-                        //             $textActivityData = $this->pollingService->fetchTextActivityData($gameId);
-                        //             if ($textActivityData) {
-                        //                 $this->sendEvent('textActivityUpdate', $textActivityData);
-                        //             }
-                        //         }
-                        //     } catch (Exception $e) {
-                        //         error_log("SSE: Error fetching text activity data during polling: " . $e->getMessage());
-                        //     }
-                        // }
-                        
-                        // User-centric tracking (ACTIVE) - This is the only activity data the frontend needs
+                        // User-centric tracking - This is the only activity data the frontend needs
                         try {
                             $userActivityData = $this->pollingService->fetchUserActivityData();
                             if ($userActivityData) {

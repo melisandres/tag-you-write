@@ -58,10 +58,6 @@ class DataFetchService {
             'modifiedNodes' => [],
             'searchResults' => [],
             'notifications' => [],
-            // DEPRECATED: Legacy activity-centric data - UI now uses user-centric tracking
-            // 'siteWideActivity' => null,
-            // 'gameActivity' => null,
-            // 'textActivity' => null,
             'userActivity' => null, // User-centric activity data (primary source)
             'lastEventId' => $lastEventId,
             'debug' => [
@@ -76,30 +72,6 @@ class DataFetchService {
         ];
         
         try {
-            // DEPRECATED: Legacy activity-centric fetching - Frontend now uses user-centric tracking
-            // The UserActivityDataManager derives these counts from userActivity data automatically
-            // Commenting out to reduce database queries and improve performance
-            
-            // $siteWideActivity = $this->writerActivityModel->getSiteWideActivityCounts();
-            // if ($siteWideActivity) {
-            //     $updates['siteWideActivity'] = $siteWideActivity;
-            // }
-            
-            // $gameActivity = $this->fetchGameActivityData();
-            // if ($gameActivity) {
-            //     $updates['gameActivity'] = $gameActivity;
-            // }
-            
-            // if ($rootStoryId) {
-            //     $gameId = $this->gameModel->selectGameId($rootStoryId);
-            //     if ($gameId) {
-            //         $textActivity = $this->fetchTextActivityData($gameId);
-            //         if ($textActivity) {
-            //             $updates['textActivity'] = $textActivity;
-            //         }
-            //     }
-            // }
-            
             // Fetch user activity data for user-centric tracking (primary data source)
             $userActivity = $this->fetchUserActivityData();
             if ($userActivity) {
@@ -265,60 +237,7 @@ class DataFetchService {
         });
     }
 
-    /**
-     * DEPRECATED: Fetch site-wide activity counts
-     * 
-     * ⚠️ DEPRECATED: This method is no longer used by the frontend.
-     * The UI now uses user-centric tracking via UserActivityDataManager.
-     * 
-     * Kept for potential debugging/admin use only.
-     * 
-     * @return array|null Site-wide activity data or null on error
-     */
-/*     public function fetchSiteWideActivityData() {
-        return $this->executeWithRetry(function() {
-            return $this->writerActivityModel->getSiteWideActivityCounts();
-        });
-    } */
 
-    /**
-     * DEPRECATED: Fetch game-specific activity counts
-     * 
-     * ⚠️ DEPRECATED: This method is no longer used by the frontend.
-     * The UI now uses user-centric tracking via UserActivityDataManager.
-     * 
-     * Kept for potential debugging/admin use only.
-     * 
-     * @return array|null Game activity data or null on error
-     */
-/*     public function fetchGameActivityData() {
-        return $this->executeWithRetry(function() {
-            return $this->writerActivityModel->getGameActivityCounts();
-        });
-    } */
-
-    /**
-     * DEPRECATED: Fetch text-level activity data for a specific game
-     * 
-     * ⚠️ DEPRECATED: This method is no longer used by the frontend.
-     * The UI now uses user-centric tracking via UserActivityDataManager.
-     * 
-     * Kept for potential debugging/admin use only.
-     * 
-     * @param int|null $gameId Game ID to fetch text activities for
-     * @return array|null Text activity data or null on error
-     */
-/*     public function fetchTextActivityData($gameId = null) {
-        return $this->executeWithRetry(function() use ($gameId) {
-            if (!$gameId) {
-                return null;
-            }
-            
-            // Get individual user activities for the specified game
-            // This returns an array of individual activity records, not aggregated counts
-            return $this->writerActivityModel->getIndividualTextActivities($gameId);
-        });
-    } */
 
     /**
      * Fetch user activity data for user-centric tracking (consistent with SSE)

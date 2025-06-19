@@ -221,52 +221,7 @@ export class SSEManager {
             }
         });
 
-        // Site-wide activity update event
-        // NOTE: Site activity is now derived from individual user activities in UserActivityDataManager
-        // This direct handling is kept for backward compatibility but may be removed in the future
-        this.eventSource.addEventListener('siteActivityUpdate', (event) => {
-            try {
-                const siteActivityData = JSON.parse(event.data);
-                console.log('SSE: Parsed site activity data (legacy):', siteActivityData);
-                
-                // DEPRECATED: Legacy event - UI now uses user-centric tracking via UserActivityDataManager
-                // The UserActivityDataManager listens to userActivityUpdate and derives site activities automatically
-                console.log('SSE: Skipping legacy site activity - handled by UserActivityDataManager');
-
-            } catch (error) {
-                console.error('SSE: Error processing site activity update:', error);
-            }
-        });
-
-        // Game activity update event
-        this.eventSource.addEventListener('gameActivityUpdate', (event) => {
-            try {
-                const gameActivityData = JSON.parse(event.data);
-                console.log('SSE: Parsed game activity data (legacy):', gameActivityData);
-                
-                // DEPRECATED: Legacy event - UI now uses user-centric tracking via UserActivityDataManager
-                console.log('SSE: Skipping legacy game activity - handled by UserActivityDataManager');
-
-            } catch (error) {
-                console.error('SSE: Error processing game activity update:', error);
-            }
-        });
-
-        // Text activity update event
-        this.eventSource.addEventListener('textActivityUpdate', (event) => {
-            try {
-                const textActivityData = JSON.parse(event.data);
-                console.log('SSE: Parsed text activity data (legacy):', textActivityData);
-                
-                // DEPRECATED: Legacy event - UI now uses user-centric tracking via UserActivityDataManager
-                console.log('SSE: Skipping legacy text activity - handled by UserActivityDataManager');
-                
-            } catch (error) {
-                console.error('SSE: Error processing text activity update:', error);
-            }
-        });
-
-        // NEW: Individual user activity update event
+        // Individual user activity update event
         this.eventSource.addEventListener('userActivityUpdate', (event) => {
             try {
                 const userActivityData = JSON.parse(event.data);
