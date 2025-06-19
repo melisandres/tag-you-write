@@ -36,17 +36,3 @@
     width: 47px;
     height: 42px;
 }
-
-.modal-btns .close-modal{
-    font-family: math;
-    border: none;
-    width: 47px;
-    height: 42px;
-    background: #f2f47be6;
-    color: black;
-    font-size: 44px;
-    font-weight: 100;
-    line-height: 0;
-    margin-top: 7px;
-    cursor: pointer;
-}

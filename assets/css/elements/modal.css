@@ -33,6 +33,38 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    position: relative;
+}
+
+.modal .top-info .top-info-left {
+    display: flex;
+    align-items: center;
+}
+
+.modal .top-info .top-info-middle {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    pointer-events: none; /* Allow clicks to pass through to underlying elements */
+}
+
+.modal .top-info .top-info-middle span {
+    pointer-events: auto; /* Re-enable clicks on the actual status spans */
+    display: inline-block;
+}
+
+.modal .top-info .top-info-close {
+    font-family: math;
+    border: none;
+    width: 47px;
+    height: 42px;
+    font-size: 44px;
+    font-weight: 100;
+    line-height: 0;
+    cursor: pointer;
+    opacity: var(--modal-button-opacity, 1);
+    flex-shrink: 0;
 }
 
 /* this is the buttons area -- the close button is always there */

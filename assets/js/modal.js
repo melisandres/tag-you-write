@@ -7,8 +7,7 @@ export class Modal {
       this.modalElement = modalElement;
       this.modalContent = modalElement.querySelector('.modal-dynamic-content');
       this.modalBtns = modalElement.querySelector('.modal-dynamic-btns');
-      this.closeButton = modalElement.querySelector('.close-modal');
-      this.closeButton.addEventListener('click', this.hideModal.bind(this));
+      // Note: closeButton will be found after content is populated since it's now dynamic
     }
   
     showModal(data) {
@@ -37,9 +36,14 @@ export class Modal {
       // build the modal content
       this.modalContent.innerHTML = `
             <div class="top-info ${data.text_status}">
-              ${this.getNumberOfVotes(data)}
-              ${data.text_status=='draft' || data.text_status=='incomplete_draft' ? `<span class="status draft" data-i18n="modal.draft">${draft}</span>` : ''}
-              ${data.isWinner ? `<span class="status winner" data-i18n="modal.winner">${winner}</span>` : ''}
+              <div class="top-info-left">
+                ${this.getNumberOfVotes(data)}
+              </div>
+              <div class="top-info-middle">
+               ${data.text_status=='draft' || data.text_status=='incomplete_draft' ? `<span class="status draft" data-i18n="modal.draft">${draft}</span>` : ''}
+                ${data.isWinner ? `<span class="status winner" data-i18n="modal.winner">${winner}</span>` : ''}
+              </div>
+              <button class="close-modal top-info-close">×</button>
             </div>
             <h2 class="headline" ${untitledDataI18n}>${data.title || untitledText}</h2>
             <h3 class="author"> -&nbsp${data.firstName} ${data.lastName}&nbsp- </h3>
@@ -109,6 +113,12 @@ export class Modal {
       ` : ''}
     `;
     this.applySVGColors();
+    
+    // Add event listener to the dynamically created close button
+    const closeButton = this.modalElement.querySelector('.close-modal');
+    if (closeButton) {
+      closeButton.addEventListener('click', this.hideModal.bind(this));
+    }
     
     // Emit event after modal is fully drawn
     eventBus.emit('modalDrawComplete', {
