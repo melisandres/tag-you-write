@@ -14,8 +14,8 @@ section.info{
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: space-evenly;
-    padding: 10px;    
-    padding-top: var(--spacing-extra-extra-large);
+    /* padding: 10px;   */  
+    padding-bottom: var(--spacing-extra-extra-large);
     gap: 2em;
 }
 
