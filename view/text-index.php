@@ -20,7 +20,7 @@
         </div>
         <div class="story-btns">
             {% if session.writer_id %}
-                <button data-bookmark-story data-text-id="{{ text.id }}" class="story-btn bookmark-btn" data-svg="bookmark" data-i18n-title="{{ 'general.bookmark_tooltip' }}" title="{{ translate('general.bookmark_tooltip') }}">
+                <button data-bookmark-story data-text-id="{{ text.id }}" class="story-btn bookmark-btn {{ text.isBookmarked ? 'bookmarked' : '' }}" data-svg="bookmark" data-i18n-title="{{ 'general.bookmark_tooltip' }}" title="{{ translate('general.bookmark_tooltip') }}">
                 </button>
             {% endif %}
             <div class="game-activity-indicator no-activity" data-i18n-title="activity.editingVsBrowsing" title="{{ translate('activity.editingVsBrowsing') }}" data-game-id="{{ text.game_id }}">

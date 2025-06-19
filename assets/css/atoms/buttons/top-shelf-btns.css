@@ -12,8 +12,26 @@
     border: none;
 }
 
-.bookmark-btn svg path {
+/* Unbookmarked state - outline only */
+.bookmark-btn svg .bookmark-main {
+    fill: none;
+    stroke: var(--color-primary);
+    stroke-width: 1.5;
+}
+
+.bookmark-btn svg .bookmark-inner {
+    display: none;
+}
+
+/* Bookmarked state - simple filled bookmark */
+.bookmark-btn.bookmarked svg .bookmark-main {
     fill: var(--color-primary);
+    stroke: var(--color-primary);
+    stroke-width: 1.5;
+}
+
+.bookmark-btn.bookmarked svg .bookmark-inner {
+    display: none;
 }
 
 .bookmark-btn {

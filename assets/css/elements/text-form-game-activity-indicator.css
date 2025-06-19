@@ -26,7 +26,7 @@
     position: absolute;
     bottom: -45px; /* Overlap by padding minus 5px as requested */
     right: var(--spacing-small);
-    z-index: 100;
+    z-index: 2;
     
     /* Size and shape - circular */
     width: var(--text-form-activity-size);

@@ -143,7 +143,7 @@ export class GameListRenderer {
 
         return `
             ${this.userLoggedIn ? `
-                <button data-bookmark-story data-text-id="${game.id}" class="story-btn bookmark-btn" data-svg="bookmark" data-i18n-title="general.bookmark_tooltip" title="${bookmarkTooltip}">
+                <button data-bookmark-story data-text-id="${game.id || game.text_id}" class="story-btn bookmark-btn ${game.isBookmarked ? 'bookmarked' : ''}" data-svg="bookmark" data-i18n-title="general.bookmark_tooltip" title="${bookmarkTooltip}">
                     <span class="icon" data-svg="bookmark">${SVGManager.bookmarkSVG}</span>
                 </button>
             ` : ''}

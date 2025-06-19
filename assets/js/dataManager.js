@@ -996,6 +996,9 @@ export class DataManager {
             hasJoined: game.hasJoined === '1' || 
                       game.hasJoined === true || 
                       game.hasJoined === 1,
+            isBookmarked: game.isBookmarked === '1' || 
+                         game.isBookmarked === true || 
+                         game.isBookmarked === 1,
             text_count: parseInt(game.text_count) || 0,
             seen_count: parseInt(game.seen_count) || 0,
             unseen_count: parseInt(game.unseen_count) || 0,

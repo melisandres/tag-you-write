@@ -2,6 +2,7 @@ import { Modal } from './modal.js';
 import { StoryManager } from './storyManager.js';
 import { UIManager } from './uiManager.js';
 import { VoteManager } from './voteManager.js'; 
+import { BookmarkManager } from './bookmarkManager.js';
 import { RefreshManager } from './refreshManager.js';
 import { SeenManager } from './seenManager.js';
 import { WarningManager } from './warningManager.js';
@@ -106,6 +107,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Initialize VoteManager
   new VoteManager(warningManager);
+
+  // Initialize BookmarkManager
+  new BookmarkManager();
 
 
 

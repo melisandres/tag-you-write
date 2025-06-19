@@ -29,7 +29,7 @@
 
         <div class="story-btns">
             {% if session.writer_id %}
-                <button data-bookmark-story data-text-id="{{ game.id }}" class="story-btn bookmark-btn" data-svg="bookmark"  data-i18n-title="general.bookmark_tooltip" title="{{ translate('general.bookmark_tooltip') }}">
+                <button data-bookmark-story data-text-id="{{ game.id }}" class="story-btn bookmark-btn {{ game.isBookmarked ? 'bookmarked' : '' }}" data-svg="bookmark"  data-i18n-title="general.bookmark_tooltip" title="{{ translate('general.bookmark_tooltip') }}">
                 </button>
             {% endif %}
             <div class="game-activity-indicator no-activity" data-i18n-title="activity.editingVsBrowsing" title="{{ translate('activity.editingVsBrowsing') }}" data-game-id="{{ game.game_id }}">

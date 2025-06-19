@@ -116,7 +116,8 @@
                            SELECT 1
                            FROM game_has_player ghp
                            WHERE ghp.game_id = g.id AND ghp.player_id = :loggedInWriterId
-                        ) THEN 1 ELSE 0 END) AS hasJoined
+                        ) THEN 1 ELSE 0 END) AS hasJoined,
+                        (CASE WHEN b.text_id IS NOT NULL THEN 1 ELSE 0 END) AS isBookmarked
                   FROM (SELECT @row_num := 0) r,
                         game g
                   INNER JOIN text rt ON g.id = rt.game_id AND rt.parent_id IS NULL
@@ -124,6 +125,7 @@
                         (ts.status = 'published' OR (ts.status = 'draft' AND rt.writer_id = :loggedInWriterId) OR (ts.status = 'incomplete_draft' AND rt.writer_id = :loggedInWriterId)) 
                   INNER JOIN text t ON g.id = t.game_id
                   LEFT JOIN seen s ON t.id = s.text_id AND s.writer_id = :loggedInWriterId
+                  LEFT JOIN bookmark b ON rt.id = b.text_id AND b.writer_id = :loggedInWriterId
                   WHERE 1=1 
                   $filterString
                   GROUP BY g.id, g.prompt, rt.id, rt.title";
@@ -260,7 +262,8 @@
                         SELECT 1
                         FROM game_has_player ghp
                         WHERE ghp.game_id = g.id AND ghp.player_id = :loggedInWriterId
-                     ) THEN 1 ELSE 0 END) AS hasJoined
+                     ) THEN 1 ELSE 0 END) AS hasJoined,
+                     (CASE WHEN b.text_id IS NOT NULL THEN 1 ELSE 0 END) AS isBookmarked
             FROM (SELECT @row_num := 0) r,
             game g
             INNER JOIN text rt ON g.id = rt.game_id AND rt.parent_id IS NULL
@@ -268,6 +271,7 @@
                   (ts.status = 'published' OR (ts.status = 'draft' AND rt.writer_id = :loggedInWriterId) OR (ts.status = 'incomplete_draft' AND rt.writer_id = :loggedInWriterId)) 
             INNER JOIN text t ON g.id = t.game_id
             LEFT JOIN seen s ON t.id = s.text_id AND s.writer_id = :loggedInWriterId
+            LEFT JOIN bookmark b ON rt.id = b.text_id AND b.writer_id = :loggedInWriterId
             WHERE CAST(g.modified_at AS DATETIME) > CAST(:lastCheck AS DATETIME)
             $filterString
             GROUP BY g.id, g.prompt, rt.id, rt.title";

@@ -70,8 +70,8 @@ export class GameSearchFilterManager {
             if (!response.ok) throw new Error('Failed to fetch games');
             
             const games = await response.json();
-            this.dataManager.updateGamesData(games, true);
-            this.renderer.renderGamesList(games);
+            const normalizedGames = this.dataManager.updateGamesData(games, true);
+            this.renderer.renderGamesList(normalizedGames);
             
         } catch (error) {
             console.error('Error refreshing games list:', error);
