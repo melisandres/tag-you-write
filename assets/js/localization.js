@@ -417,6 +417,7 @@ export class Localization {
    * Update all tooltips on the page
    */
   updateTooltips() {
+    console.log('LOCALIZATION: Updating tooltips');
     const tooltipElements = document.querySelectorAll('[data-i18n-tooltip]');
     tooltipElements.forEach(element => {
       const key = element.getAttribute('data-i18n-tooltip');

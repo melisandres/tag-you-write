@@ -106,7 +106,8 @@ export class GameListRenderer {
         // translate the strings
         const untitledText = window.i18n ? window.i18n.translate("general.untitled") : "Untitled";
         const untitledDataI18n = game.title ? '' : 'data-i18n="general.untitled"';
-        const tooltipContributor = hasContributed ? 'data-i18n-tooltip="tooltips.contributor"' : '';
+        const translatedTooltip = window.i18n ? window.i18n.translate('tooltips.contributor') : '☆ contributor';
+        const tooltipContributor = hasContributed ? `data-i18n-tooltip="tooltips.contributor" data-tooltip-text="${translatedTooltip}"` : '';
 
         // build the game card
         return `
@@ -291,7 +292,14 @@ export class GameListRenderer {
         const contributedElement = gameElement.querySelector('.contributed');
         if (contributedElement) {
             contributedElement.classList.toggle('contributed', hasContributed);
-            contributedElement.setAttribute('data-i18n-tooltip', hasContributed ? 'tooltips.contributor' : '');
+            if (hasContributed) {
+                const translatedTooltip = window.i18n ? window.i18n.translate('tooltips.contributor') : '☆ contributor';
+                contributedElement.setAttribute('data-i18n-tooltip', 'tooltips.contributor');
+                contributedElement.setAttribute('data-tooltip-text', translatedTooltip);
+            } else {
+                contributedElement.removeAttribute('data-i18n-tooltip');
+                contributedElement.removeAttribute('data-tooltip-text');
+            }
         }
 
         // Update counts

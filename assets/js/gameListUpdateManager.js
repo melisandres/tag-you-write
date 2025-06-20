@@ -127,7 +127,14 @@ export class GameListUpdateManager {
     if (h2Element) {
       const hasContributed = newGame.hasContributed === '1' || newGame.hasContributed === true || newGame.hasContributed === 1;
       h2Element.classList.toggle('contributed', hasContributed);
-      h2Element.setAttribute('data-i18n-tooltip', hasContributed ? 'tooltips.contributor' : '');
+      if (hasContributed) {
+        const translatedTooltip = window.i18n ? window.i18n.translate('tooltips.contributor') : '☆ contributor';
+        h2Element.setAttribute('data-i18n-tooltip', 'tooltips.contributor');
+        h2Element.setAttribute('data-tooltip-text', translatedTooltip);
+      } else {
+        h2Element.removeAttribute('data-i18n-tooltip');
+        h2Element.removeAttribute('data-tooltip-text');
+      }
     }
   }
 
