@@ -1545,9 +1545,14 @@ export class TreeVisualizer {
             }
         });
 
-        // After applying search-match class, apply title highlights
+        // Apply title highlights only to nodes that have title/writer matches
         this.svg.selectAll('.node').each((d) => {
-            this.handleTitleHighlight(d.data.id, searchTerm, true);
+            const nodeId = String(d.data.id);
+            const nodeData = searchResults.nodes[nodeId];
+            
+            if (nodeData && (nodeData.titleMatches || nodeData.writerMatches)) {
+                this.handleTitleHighlight(d.data.id, searchTerm, true);
+            }
         });
     }
 
@@ -1588,38 +1593,36 @@ export class TreeVisualizer {
             const titleTexts = titleGroup.selectAll("text");
             if (!titleTexts.empty()) {
                 if (shouldHighlight) {
+                    // Get original title from node data (source of truth)
+                    const nodeData = nodeGroup.datum();
+                    const originalTitle = nodeData.data.title || (window.i18n ? window.i18n.translate("general.untitled") : "Untitled");
+                    
+                    // Collect text elements for highlighting distribution
+                    const textNodes = [];
                     titleTexts.each(function() {
                         const text = d3.select(this);
                         if (!text.node()) return;
-                        const originalText = text.text();
-                        const regex = new RegExp(`(${searchTerm})`, 'gi');
-                        if (regex.test(originalText)) {
-                            text.text(''); // Clear existing text
-                            const parts = originalText.split(regex);
-                            parts.forEach(part => {
-                                if (regex.test(part)) {
-                                    text.append('tspan')
-                                        .attr('class', 'search-highlight')
-                                        .text(part);
-                                } else {
-                                    text.append('tspan')
-                                    .text(part);
-                                }
-                            });
-                        }
+                        textNodes.push({ element: text, text: text.text() });
                     });
+                    
+                    // Apply highlighting (we already know matches exist from caller)
+                    this.highlightAcrossMultipleLines(textNodes, searchTerm, originalTitle);
                 } else {
+                    // Reset to original text without highlighting
                     titleTexts.each(function() {
                         const text = d3.select(this);
                         if (!text.node()) return;
+                        
+                        // Remove all tspans and get back to clean text
                         const originalText = text.text();
-                        text.text(originalText); // Reset to original text
+                        text.selectAll('tspan').remove();
+                        text.text(originalText);
                     });
                 }
             }
         }
 
-        // Handle author text
+        // Handle author text (existing logic unchanged)
         const authorText = nodeGroup.select("text.text-by");
 
         if (!authorText.empty() && authorText.node()) {
@@ -1714,6 +1717,80 @@ export class TreeVisualizer {
                 authorText.text(authorName);
             }
         }
+    }
+
+    /**
+     * Highlight search terms across multiple text lines
+     * This handles the complex case where search terms span line breaks
+     */
+    highlightAcrossMultipleLines(textNodes, searchTerm, originalTitle) {
+        const escapedSearchTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`(${escapedSearchTerm})`, 'gi');
+        
+        // Step 1: Find all matches in the original title
+        const matches = [];
+        let match;
+        while ((match = regex.exec(originalTitle)) !== null) {
+            matches.push({
+                start: match.index,
+                end: match.index + match[0].length
+            });
+            // Prevent infinite loop on zero-length matches
+            if (match.index === regex.lastIndex) {
+                regex.lastIndex++;
+            }
+        }
+        
+        if (matches.length === 0) return;
+        
+        // Step 2: Map each line's position in the reconstructed title
+        let position = 0;
+        const lineInfo = textNodes.map(({ element, text }) => {
+            const lineStart = position;
+            const lineEnd = position + text.length;
+            position += text.length + 1; // +1 for space between lines
+            return { element, text, start: lineStart, end: lineEnd };
+        });
+        
+        // Step 3: For each line, find which matches overlap with it
+        lineInfo.forEach(line => {
+            const overlappingMatches = matches.filter(match => 
+                match.start < line.end && match.end > line.start
+            );
+            
+            if (overlappingMatches.length > 0) {
+                // This line has matches, rebuild it with highlighting
+                line.element.text('');
+                
+                let currentPos = 0;
+                overlappingMatches.forEach(match => {
+                    // Calculate positions within this line
+                    const matchStart = Math.max(0, match.start - line.start);
+                    const matchEnd = Math.min(line.text.length, match.end - line.start);
+                    
+                    // Add text before match
+                    if (matchStart > currentPos) {
+                        line.element.append('tspan')
+                            .text(line.text.substring(currentPos, matchStart));
+                    }
+                    
+                    // Add highlighted match
+                    if (matchEnd > matchStart) {
+                        line.element.append('tspan')
+                            .attr('class', 'search-highlight')
+                            .text(line.text.substring(matchStart, matchEnd));
+                    }
+                    
+                    currentPos = matchEnd;
+                });
+                
+                // Add remaining text after last match
+                if (currentPos < line.text.length) {
+                    line.element.append('tspan')
+                        .text(line.text.substring(currentPos));
+                }
+            }
+        });
     }
 
     // New method to handle language changes
