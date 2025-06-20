@@ -97,6 +97,20 @@
             <input type="text" name="keywords" data-i18n-placeholder="cr_it_ed.keywords_placeholder" placeholder="{{ translate('cr_it_ed.keywords_placeholder') }}" value="{{ data.keywords|default('') }}">
         </label>
 
+        <label>
+            <span data-i18n="cr_it_ed.invite_collaborators" class="headline">
+                {{ translate('cr_it_ed.invite_collaborators') }}
+            </span>
+            <input type="text" 
+                   id="invitee-input" 
+                   data-i18n-placeholder="cr_it_ed.invite_placeholder" 
+                   placeholder="{{ translate('cr_it_ed.invite_placeholder') }}" 
+                   autocomplete="off">
+            <div class="invitees-display" id="invitees-display"></div>
+        </label>
+
+        <input type="hidden" name="invitees" id="invitees-data" value="">
+
         <input type="hidden" name="writer_id" value="{{ session.writer_id }}"> 
         <input type="hidden" name="currentPage" value="{{ data.id ? 'text-draft-edit.php' : 'text-create.php' }}">
         <input type="hidden" name="text_status" data-text-status value="{{ data.id ? 'draft' : 'draft' }}">

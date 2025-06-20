@@ -190,6 +190,11 @@ export class ValidationManager {
                     this.validateMaxKeywords(5, 'front_val.root.keywords.max_keywords'),
                     this.validateMaxCharacterCount(255, 'front_val.root.keywords.max_character_count'),
                     this.validateKeywordWordCount(2, 'front_val.root.keywords.keyword_word_count'),
+                ],
+                invitees: [
+                    this.validateInvitees('front_val.root.invitees.invalid_format'),
+                    this.validateMaxInvitees(10, 'front_val.root.invitees.max_invitees'),
+                    this.validateMaxCharacterCount(0, 'front_val.root.invitees.typed', 'info')
                 ]
             },
             iteration: {
@@ -436,6 +441,69 @@ export class ValidationManager {
                 message: isValid ? '' : errorMessage,
                 severity: severity
             };
+        };
+    }
+
+    validateInvitees(errorMessage, severity = 'error') {
+        return function (value) {
+            // If empty, that's valid (not required)
+            if (!value || value.trim() === '') {
+                return { isValid: true, message: '', severity: 'success' };
+            }
+
+            try {
+                const invitees = JSON.parse(value);
+                
+                // Must be an array
+                if (!Array.isArray(invitees)) {
+                    return { isValid: false, message: errorMessage, severity: severity };
+                }
+
+                // Validate each invitee
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                const usernameRegex = /^[a-zA-Z0-9_-]{3,20}$/;
+                
+                for (const invitee of invitees) {
+                    if (!invitee.input || !invitee.type || !invitee.id) {
+                        return { isValid: false, message: errorMessage, severity: severity };
+                    }
+                    
+                    if (invitee.type === 'email' && !emailRegex.test(invitee.input)) {
+                        return { isValid: false, message: errorMessage, severity: severity };
+                    }
+                    
+                    if (invitee.type === 'username' && !usernameRegex.test(invitee.input)) {
+                        return { isValid: false, message: errorMessage, severity: severity };
+                    }
+                }
+                
+                return { isValid: true, message: '', severity: 'success' };
+                
+            } catch (e) {
+                return { isValid: false, message: errorMessage, severity: severity };
+            }
+        };
+    }
+
+    validateMaxInvitees(maxCount, errorMessage, severity = 'error') {
+        return function (value) {
+            // If empty, that's valid
+            if (!value || value.trim() === '') {
+                return { isValid: true, message: '', severity: 'success' };
+            }
+
+            try {
+                const invitees = JSON.parse(value);
+                const isValid = Array.isArray(invitees) && invitees.length <= maxCount;
+                
+                return {
+                    isValid: isValid,
+                    message: isValid ? '' : errorMessage,
+                    severity: severity
+                };
+            } catch (e) {
+                return { isValid: true, message: '', severity: 'success' }; // Let validateInvitees handle JSON errors
+            }
         };
     }
 

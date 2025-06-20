@@ -99,7 +99,10 @@
       "kickoff_text": "kickoff the text",
       "writing_placeholder": "When you climb out the window, don't forget your rainboots.",
       "keywords": "keywords",
-      "keywords_placeholder": "adventure, rainboots"
+      "keywords_placeholder": "adventure, rainboots",
+      "invite_collaborators": "invite collaborators",
+      "invite_placeholder": "Enter username or email address",
+      "remove_invitee": "Remove invitee"
     },
     "note-edit": {
       "here_is_what_you_wrote": "Here's your text: ",
@@ -289,6 +292,11 @@
           "max_keywords": "*5 keywords max--comma separated",
           "max_character_count": "*255 characters max",
           "keyword_word_count": "*a keyword can be 2 words, but no more. Invalid keywords: {invalidKeywords}"
+        },
+        "invitees": {
+          "invalid_format": "*invalid invitation format",
+          "max_invitees": "*maximum 10 invitees allowed",
+          "typed": "*invitation list"
         }
       },
       "iteration": {

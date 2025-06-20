@@ -44,6 +44,7 @@ import { GhostTreeManager } from './GhostTreeManager.js';
 import { GameListRenderer } from './gameListRenderer.js';
 import { GameSubscriptionManager } from './gameSubscriptionManager.js';
 import { TextFormGameActivityIndicator } from './textFormGameActivityIndicator.js';
+import { InviteInputManager } from './inviteInputManager.js';
 
 // Make eventBus globally available immediately
 window.eventBus = eventBus;
@@ -124,6 +125,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   new ButtonUpdateManager(autoSaveManager);
   new FormManager(autoSaveManager);
   new ValidationManager();
+  
+  // Initialize InviteInputManager for text creation forms
+  new InviteInputManager();
 
   // Initialize InstaPublishManager and InstaDeleteManager
   new InstaPublishManager(warningManager);

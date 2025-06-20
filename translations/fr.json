@@ -98,7 +98,10 @@
     "kickoff_text": "commencer le texte",
     "writing_placeholder": "Quand vous sortez par la fenêtre, n'oubliez pas vos bottes de pluie.",
     "keywords": "mots-clés",
-    "keywords_placeholder": "pluie, fenêtre, panda"
+    "keywords_placeholder": "pluie, fenêtre, panda",
+    "invite_collaborators": "inviter des collaborateurs",
+    "invite_placeholder": "Entrez nom d'utilisateur ou adresse email",
+    "remove_invitee": "Retirer invité"
   },
   "note-edit": {
     "here_is_what_you_wrote": "Voici votre texte: ",
@@ -288,6 +291,11 @@
         "max_keywords": "*5 mots-clés max--séparés par des virgules",
         "max_character_count": "*255 caractères max",
         "keyword_word_count": "*un mot-clé peut être de 2 mots, mais pas plus. Mots-clés invalides: {invalidKeywords}"
+      },
+      "invitees": {
+        "invalid_format": "*format d'invitation invalide",
+        "max_invitees": "*maximum 10 invités autorisés",
+        "typed": "*liste d'invitations"
       }
     },
     "iteration": {
