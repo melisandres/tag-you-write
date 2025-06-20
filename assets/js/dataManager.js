@@ -34,7 +34,8 @@ export class DataManager {
             },
             filters: {
                 hasContributed: null,
-                gameState: 'all'
+                gameState: 'all',
+                bookmarked: null
             }
         };
 
@@ -153,7 +154,8 @@ export class DataManager {
             searchResults: new Map(),
             filters: {
                 hasContributed: null,
-                gameState: 'all'
+                gameState: 'all',
+                bookmarked: null
             },
         };
     }
@@ -742,7 +744,8 @@ export class DataManager {
             searchResults: new Map(),
             filters: {
                 hasContributed: null,
-                gameState: 'all'
+                gameState: 'all',
+                bookmarked: null
             }
         };
         localStorage.removeItem('storyCache');  // Completely remove from localStorage
@@ -786,7 +789,8 @@ export class DataManager {
 
         this.cache.filters = {
             hasContributed: filters.hasContributed ?? null,
-            gameState: filters.gameState ?? 'all'
+            gameState: filters.gameState ?? 'all',
+            bookmarked: filters.bookmarked ?? null
         };
         this.saveCache();
 

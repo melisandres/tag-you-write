@@ -743,10 +743,6 @@ export class SVGManager{
             <path
                d="M 2 2 L 23 2 C 23.5 2 24 2.5 24 3 L 24 75 C 24 75.5 23.7 76 23.3 76.2 C 22.9 76.4 22.4 76.3 22.1 76 L 12.5 67 L 2.9 76 C 2.6 76.3 2.1 76.4 1.7 76.2 C 1.3 76 1 75.5 1 75 L 1 3 C 1 2.5 1.5 2 2 2 Z"
                class="bookmark-main"/>
-            <!-- Inner notch at bottom -->
-            <path
-               d="M 12.5 67 L 7 72 L 7 8 L 18 8 L 18 72 L 12.5 67 Z"
-               class="bookmark-inner"/>
          </svg>
       `;
    }

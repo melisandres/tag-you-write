@@ -205,6 +205,11 @@
         "open": "open",
         "closed": "closed",
         "pending": "pending"
+      },
+      "bookmark": {
+        "all": "all",
+        "bookmarked": "bookmarked",
+        "not_bookmarked": "not bookmarked"
       }
     },
     "search": {

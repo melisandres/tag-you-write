@@ -2,9 +2,10 @@ import { SVGManager } from './svgManager.js';
 
 /**
  * FilterManager handles the UI and logic for filtering stories/games in the application.
- * It manages two types of filters:
+ * It manages three types of filters:
  * 1. Contribution filters (everyone's, contributed, started)
  * 2. Game state filters (all, open, closed, pending)
+ * 3. Bookmark filters (all, bookmarked, not bookmarked)
  */
 export class FilterManager {
     /**
@@ -41,7 +42,8 @@ export class FilterManager {
         if (!this.dataManager.cache.filters) {
             this.dataManager.cache.filters = {
                 hasContributed: null,  // default state (null = show all)
-                gameState: 'all'       // default to showing all states
+                gameState: 'all',      // default to showing all states
+                bookmarked: null       // default state (null = show all)
             };
         }
 
@@ -70,6 +72,16 @@ export class FilterManager {
                 'closed': { text: 'closed', key: 'closed' }
               };
 
+        // Define bookmark states with display text and i18n keys
+        // - null: Show all stories (bookmarked and not bookmarked)
+        // - true: Show only bookmarked stories
+        // - false: Show only non-bookmarked stories
+        this.bookmarkStates = {
+            'null': { text: 'all', key: 'all' },
+            'true': { text: 'bookmarked', key: 'bookmarked' },
+            'false': { text: 'not bookmarked', key: 'not_bookmarked' }
+        };
+
         // Initialize UI and bind events
         this.initializeUI();
         this.bindEvents();
@@ -96,6 +108,10 @@ export class FilterManager {
             const hasContributed = this.dataManager.cache.filters.hasContributed;
             const hasContributedClass = hasContributed === null ? 'all' : hasContributed === true ? 'contributor' : 'mine';
             
+            // Set the class name for bookmarked
+            const bookmarked = this.dataManager.cache.filters.bookmarked;
+            const bookmarkedClass = bookmarked === null ? 'all' : bookmarked === true ? 'bookmarked' : 'not-bookmarked';
+            
             // Create the filter menu content
             this.filterMenu.innerHTML = `
                 <div class="filter-options">
@@ -119,6 +135,17 @@ export class FilterManager {
                             ${this.getGameStateText(this.dataManager.cache.filters.gameState)}
                         </span>
                     </button>
+                    ${ this.currentWriterId !== 'null' ? `
+                    <button class="filter-button bookmark-filter" aria-label="Filter Bookmarks">
+                        <span class="filter-icon ${bookmarkedClass}">
+                            ${SVGManager.bookmarkSVG}
+                        </span>
+                        <span class="filter-text" data-i18n="filters.bookmark.${this.getBookmarkStateKey(bookmarked)}">
+                            ${this.getBookmarkStateText(String(bookmarked))}
+                        </span>
+                    </button>
+                    ` : ''
+                    }
                 </div>
             `;
         }
@@ -179,6 +206,23 @@ export class FilterManager {
             eventBus.emit('refreshGames');
         });
 
+        // Bookmark filter button event
+        const bookmarkButton = this.filterMenu.querySelector('.bookmark-filter');
+        if (bookmarkButton) {
+            bookmarkButton.addEventListener('click', () => {
+                // Cycle to the next bookmark state
+                const currentState = this.dataManager.cache.filters.bookmarked;
+                const newState = this.getNextBookmarkState(currentState);
+                this.dataManager.setFilters({
+                    ...this.dataManager.getFilters(),
+                    bookmarked: newState
+                });
+                this.updateBookmarkButton(newState);
+                eventBus.emit('filterApplied');
+                eventBus.emit('refreshGames');
+            });
+        }
+
         // Update URL when filters change
         const updateUrlWithFilters = (filters) => {
             const params = new URLSearchParams(window.location.search);
@@ -187,6 +231,10 @@ export class FilterManager {
             const urlHasContributed = filters.hasContributed === null ? 'all' :
                                      filters.hasContributed === true ? 'contributor' :
                                      'mine';
+            
+            const urlBookmarked = filters.bookmarked === null ? 'all' :
+                                 filters.bookmarked === true ? 'bookmarked' :
+                                 'not_bookmarked';
             
             // Set or remove URL parameters based on filter values
             if (filters.hasContributed !== null) {
@@ -199,6 +247,12 @@ export class FilterManager {
                 params.set('gameState', filters.gameState);
             } else {
                 params.delete('gameState');
+            }
+
+            if (filters.bookmarked !== null) {
+                params.set('bookmarked', urlBookmarked);
+            } else {
+                params.delete('bookmarked');
             }
             
             // Update URL without reloading the page
@@ -221,6 +275,7 @@ export class FilterManager {
         // Update UI to reflect new filter values
         this.updateFilterButton(filters.hasContributed);
         this.updateGameStateButton(filters.gameState);
+        this.updateBookmarkButton(filters.bookmarked);
         this.updateNavLink();
         eventBus.emit('filtersChanged', filters);
         
@@ -236,7 +291,8 @@ export class FilterManager {
     updateNavLink() {
         // Check if there are active filters
         const hasActiveFilters = this.dataManager.cache.filters.hasContributed !== null || 
-                                this.dataManager.cache.filters.gameState !== 'all';
+                                this.dataManager.cache.filters.gameState !== 'all' ||
+                                this.dataManager.cache.filters.bookmarked !== null;
         // Use 'active' class for filter state
         this.filterNavLink.classList.toggle('active', hasActiveFilters);
     }
@@ -283,6 +339,36 @@ export class FilterManager {
     }
 
     /**
+     * Update the bookmark filter button UI
+     * @param {null|boolean} bookmarked - The bookmark filter state
+     */
+    updateBookmarkButton(bookmarked) {
+        const button = this.filterMenu.querySelector('.bookmark-filter');
+        const icon = button?.querySelector('.filter-icon');
+        const text = button?.querySelector('.filter-text');
+        
+        // Update classes based on state
+        if (icon) {
+            // Remove all possible state classes
+            icon.classList.remove('all', 'bookmarked', 'not-bookmarked');
+            // Add the appropriate class
+            icon.classList.add(bookmarked === null ? 'all' : 
+                              bookmarked === true ? 'bookmarked' : 'not-bookmarked');
+        }
+        if (text) {
+            // Update the data-i18n attribute for localization
+            const i18nKey = `filters.bookmark.${this.getBookmarkStateKey(bookmarked)}`;
+            text.setAttribute('data-i18n', i18nKey);
+            text.textContent = this.getBookmarkStateText(String(bookmarked));
+            
+            // Apply translation
+            if (window.i18n) {
+                window.i18n.updatePageTranslations(text.parentElement);
+            }
+        }
+    }
+
+    /**
      * Get the display text for a game state
      * @param {string} state - The game state ('all', 'open', 'closed', 'pending')
      * @returns {string} The display text
@@ -298,6 +384,24 @@ export class FilterManager {
      */
     getGameStateKey(state) {
         return this.gameStates[state]?.key || this.gameStates['all'].key;
+    }
+
+    /**
+     * Get the display text for a bookmark state
+     * @param {string} state - String representation of the bookmark state ('null', 'true', 'false')
+     * @returns {string} The display text
+     */
+    getBookmarkStateText(state) {
+        return this.bookmarkStates[state]?.text || this.bookmarkStates['null'].text;
+    }
+
+    /**
+     * Get the i18n key for a bookmark state
+     * @param {null|boolean} state - The bookmark state
+     * @returns {string} The i18n key
+     */
+    getBookmarkStateKey(state) {
+        return this.bookmarkStates[String(state)]?.key || this.bookmarkStates['null'].key;
     }
 
     /**
@@ -328,6 +432,18 @@ export class FilterManager {
     }
 
     /**
+     * Get the next bookmark state in the cycle
+     * @param {null|boolean} currentState - The current bookmark state
+     * @returns {null|boolean} The next bookmark state
+     */
+    getNextBookmarkState(currentState) {
+        const stateOrder = [null, true, false];  // null = all, true = bookmarked, false = not bookmarked
+        const currentIndex = stateOrder.indexOf(currentState);
+        const nextIndex = (currentIndex + 1) % stateOrder.length;
+        return stateOrder[nextIndex];
+    }
+
+    /**
      * Get the display text for a contribution state
      * @param {string} state - String representation of the contribution state ('null', 'true', 'mine')
      * @returns {string} The display text
@@ -342,7 +458,7 @@ export class FilterManager {
      * @returns {string} The i18n key
      */
     getContributionStateKey(state) {
-        return this.contributionStates[state]?.key || this.contributionStates['null'].key;
+        return this.contributionStates[String(state)]?.key || this.contributionStates['null'].key;
     }
 
     /**
@@ -391,6 +507,7 @@ export class FilterManager {
         const urlParams = new URLSearchParams(window.location.search);
         const hasContributed = urlParams.get('hasContributed');
         const gameState = urlParams.get('gameState');
+        const bookmarked = urlParams.get('bookmarked');
 
         // Create filters object from URL parameters
         const filters = {
@@ -398,13 +515,17 @@ export class FilterManager {
             hasContributed: hasContributed === null || hasContributed === 'all' ? null :
                             hasContributed === 'contributor' ? true :
                             'mine',
-            gameState: gameState || 'all'
+            gameState: gameState || 'all',
+            bookmarked: bookmarked === null || bookmarked === 'all' ? null :
+                       bookmarked === 'bookmarked' ? true :
+                       false
         };
 
         // Apply the filters
         this.dataManager.setFilters(filters);
         this.updateFilterButton(filters.hasContributed);
         this.updateGameStateButton(filters.gameState);
+        this.updateBookmarkButton(filters.bookmarked);
         this.updateNavLink();
         
         // Only emit filtersChanged - it already triggers a refresh

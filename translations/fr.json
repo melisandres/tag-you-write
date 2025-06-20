@@ -204,6 +204,11 @@
       "open": "ouvertes",
       "closed": "fermées",
       "pending": "à venir"
+    },
+    "bookmark": {
+      "all": "tous",
+      "bookmarked": "favoris",
+      "not_bookmarked": "non favoris"
     }
   },
   "search": {

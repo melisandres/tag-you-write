@@ -50,6 +50,15 @@
          }
       }
       
+      // Handle bookmarked filter
+      if (isset($filters['bookmarked']) && $filters['bookmarked'] !== null) {
+         if ($filters['bookmarked'] === true) {
+            $filterString .= " AND b.text_id IS NOT NULL";
+         } elseif ($filters['bookmarked'] === false) {
+            $filterString .= " AND b.text_id IS NULL";
+         }
+      }
+      
       // Handle gameId filter
       if ($id) {
          $filterString .= " AND g.id = :id";
@@ -199,6 +208,15 @@
             case 'pending':
                $filterString .= " AND ts.status IN ('draft', 'incomplete_draft')";
                break;
+         }
+      }
+
+      // Handle bookmarked filter
+      if (isset($filters['bookmarked']) && $filters['bookmarked'] !== null) {
+         if ($filters['bookmarked'] === true) {
+            $filterString .= " AND b.text_id IS NOT NULL";
+         } elseif ($filters['bookmarked'] === false) {
+            $filterString .= " AND b.text_id IS NULL";
          }
       }
 
