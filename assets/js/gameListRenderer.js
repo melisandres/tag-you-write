@@ -107,7 +107,6 @@ export class GameListRenderer {
         const untitledText = window.i18n ? window.i18n.translate("general.untitled") : "Untitled";
         const untitledDataI18n = game.title ? '' : 'data-i18n="general.untitled"';
         const translatedTooltip = window.i18n ? window.i18n.translate('tooltips.contributor') : '☆ contributor';
-        const tooltipContributor = hasContributed ? `data-i18n-tooltip="tooltips.contributor" data-tooltip-text="${translatedTooltip}"` : '';
 
         // build the game card
         return `
@@ -117,9 +116,10 @@ export class GameListRenderer {
                  data-seen-count="${game.seen_count}" 
                  data-text-count="${game.text_count}" 
                  data-text-id="${game.id || game.text_id}">
-                <div class="story-title ${game.unseen_count > 0 && this.userLoggedIn ? 'unreads' : ''}">
-                    <h2 class="${hasContributed ? 'contributed' : ''}" ${tooltipContributor}>
-                        <a data-refresh-default ${untitledDataI18n} data-text-id="${game.id || game.text_id}">
+                <div class="story-title ${game.unseen_count > 0 && this.userLoggedIn ? 'unreads' : ''}" data-refresh-default data-text-id="${game.id || game.text_id}">
+                    <h2>
+                        ${hasContributed ? `<span class="contributor-star" data-svg="star" data-i18n-tooltip="tooltips.contributor" data-tooltip-text="${translatedTooltip}"></span>` : ''}
+                        <a data-text-id="${game.id || game.text_id}" ${untitledDataI18n}>
                             ${game.title || untitledText}
                         </a>
                     </h2>
@@ -250,6 +250,11 @@ export class GameListRenderer {
             existingGames[insertIndex].insertAdjacentHTML('beforebegin', newGameElement);
         }
 
+        // Populate SVGs for the newly inserted element
+        if (this.uiManager && this.uiManager.populateSvgsInContainer) {
+            this.uiManager.populateSvgsInContainer(this.container);
+        }
+
         // Reapply search highlighting if there's an active search
         const activeSearch = this.dataManager.getSearch();
         if (activeSearch) {
@@ -289,16 +294,31 @@ export class GameListRenderer {
         }
 
         // Update hasContributed status
-        const contributedElement = gameElement.querySelector('.contributed');
-        if (contributedElement) {
-            contributedElement.classList.toggle('contributed', hasContributed);
-            if (hasContributed) {
+        const h2Element = gameElement.querySelector('.story-title h2');
+        if (h2Element) {
+            const existingContributorStar = h2Element.querySelector('.contributor-star');
+            
+            if (hasContributed && !existingContributorStar) {
+                // Add contributor star if user now has contributed
                 const translatedTooltip = window.i18n ? window.i18n.translate('tooltips.contributor') : '☆ contributor';
-                contributedElement.setAttribute('data-i18n-tooltip', 'tooltips.contributor');
-                contributedElement.setAttribute('data-tooltip-text', translatedTooltip);
-            } else {
-                contributedElement.removeAttribute('data-i18n-tooltip');
-                contributedElement.removeAttribute('data-tooltip-text');
+                const starElement = document.createElement('span');
+                starElement.className = 'contributor-star';
+                starElement.setAttribute('data-svg', 'star');
+                starElement.setAttribute('data-i18n-tooltip', 'tooltips.contributor');
+                starElement.setAttribute('data-tooltip-text', translatedTooltip);
+                h2Element.insertBefore(starElement, h2Element.firstChild);
+                
+                // Populate the SVG content using the consistent approach
+                if (this.uiManager && this.uiManager.populateSvgs) {
+                    this.uiManager.populateSvgs([starElement]);
+                }
+            } else if (!hasContributed && existingContributorStar) {
+                // Remove contributor star if user no longer has contributed
+                existingContributorStar.remove();
+            } else if (hasContributed && existingContributorStar) {
+                // Update existing star's tooltip
+                const translatedTooltip = window.i18n ? window.i18n.translate('tooltips.contributor') : '☆ contributor';
+                existingContributorStar.setAttribute('data-tooltip-text', translatedTooltip);
             }
         }
 
@@ -341,6 +361,11 @@ export class GameListRenderer {
             const gameCard = this.renderGameCard(game);
             this.container.insertAdjacentHTML('beforeend', gameCard);
         });
+
+        // Populate SVGs for all newly rendered elements
+        if (this.uiManager && this.uiManager.populateSvgsInContainer) {
+            this.uiManager.populateSvgsInContainer(this.container);
+        }
 
         // Emit event after rendering is complete
         eventBus.emit('gamesListUpdated');

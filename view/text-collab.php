@@ -21,8 +21,9 @@
         data-text-count="{{ game.text_count }}" 
         data-text-id="{{ game.id }}">
         
-        <div class="story-title {% if session.writer_id and game.unseen_count %}unreads{% endif %}">
-            <h2 class="{{ game.hasContributed ? 'contributed' : '' }}" data-i18n-tooltip="{{ game.hasContributed ? 'tooltips.contributor' : '' }}" data-refresh-default data-text-id="{{ game.id }}">
+        <div class="story-title {% if session.writer_id and game.unseen_count %}unreads{% endif %}" data-refresh-default data-text-id="{{ game.id }}">
+            <h2>
+                {% if game.hasContributed %}<span class="contributor-star" data-svg="star" data-i18n-tooltip="tooltips.contributor" data-tooltip-text="{{ translate('tooltips.contributor') }}"></span>{% endif %}
                 {{ game.title ? game.title : translate('general.untitled') }}
             </h2>
         </div>

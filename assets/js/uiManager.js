@@ -33,7 +33,12 @@ export class UIManager {
 
   initSvgs(){
     const svgContainers = document.querySelectorAll('[data-svg]');
-    svgContainers.forEach(element => {
+    this.populateSvgs(svgContainers);
+  }
+
+  // Helper method to populate SVGs for a collection of elements
+  populateSvgs(elements) {
+    elements.forEach(element => {
         const svgType = element.getAttribute('data-svg');
         if(SVGManager[svgType + 'SVG']) {
           element.innerHTML = SVGManager[svgType + 'SVG'];
@@ -43,27 +48,33 @@ export class UIManager {
       });
   }
 
+  // Helper method to populate SVGs for a specific container (useful after dynamic rendering)
+  populateSvgsInContainer(container) {
+    const svgContainers = container.querySelectorAll('[data-svg]');
+    this.populateSvgs(svgContainers);
+  }
+
   initEventListeners() {
     // Checking for any UI changes comming from the ".stories" div 
     const storiesContainer = document.querySelector('[data-stories]');
     const oneStoryContainer = document.querySelector('[data-one-story]');
 
     storiesContainer ? storiesContainer.addEventListener('click', (event) => this.handleStoriesRefresh(event)) : "";
-
     oneStoryContainer ? oneStoryContainer.addEventListener('click', (event) => this.handleStoriesRefresh(event)) : "";
   }
 
   handleStoriesRefresh(event) {
     const treeTarget = event.target.closest("[data-refresh-tree]");
     const shelfTarget = event.target.closest("[data-refresh-shelf]");
-    const defaultTarget = event.target.closest("[data-refresh-default]");
+    const storyTitleTarget = event.target.closest(".story-title");
+    const promptTitleTarget = event.target.closest(".story-writing");
 
     // A variable to hold keyword shelf if shelfTarget, modal if modalTarget, and tree if treeTarget
     let targetType;
 
     if (shelfTarget) {
         targetType = 'shelf';
-    } else if (defaultTarget) {
+    } else if (storyTitleTarget || promptTitleTarget) {
         targetType = 'default';
     } else if (treeTarget) {
         targetType = 'tree';
@@ -79,9 +90,18 @@ export class UIManager {
     let container = document.querySelector('#showcase');
     const story = event.target.closest(".story");
 
-    // Grab the textId from the button clicked
-    const targetElement = { tree: treeTarget, shelf: shelfTarget, default: defaultTarget }[targetType];
-    const textId = targetElement ? targetElement.dataset.textId : null;
+    // Grab the textId from the button clicked, story title, or prompt title
+    let textId;
+    if (targetType === 'default') {
+      if (storyTitleTarget) {
+        textId = storyTitleTarget.dataset.textId || story.dataset.textId;
+      } else if (promptTitleTarget) {
+        textId = story.dataset.textId;
+      }
+    } else {
+      const targetElement = { tree: treeTarget, shelf: shelfTarget }[targetType];
+      textId = targetElement ? targetElement.dataset.textId : null;
+    }
 
     // Grab the textId from the showcase on screen, if there is one
     let previousTextId = null;
@@ -139,7 +159,7 @@ export class UIManager {
       //const textId = shelfTarget.dataset.textId;
       this.drawShelf(textId, container);
     } 
-    if (defaultTarget) {
+    if (storyTitleTarget || promptTitleTarget) {
       // for now, just draw the tree
       this.handleDefaultRefresh(textId, container);
     }

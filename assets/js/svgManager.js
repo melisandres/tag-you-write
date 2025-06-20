@@ -1250,7 +1250,7 @@ export class SVGManager{
    static get starSVG() {
       return `
          <svg viewBox="-10 -10 20 20" width="20" height="20">
-         <path d="M0,-10L2.35,-3.27L9.51,-3.27L3.58,1.25L5.93,7.98L0,3.46L-5.93,7.98L-3.58,1.25L-9.51,-3.27L-2.35,-3.27Z" fill="currentColor" stroke="black" stroke-width="0.8"/>
+         <path d="M0,-10L2.35,-3.27L9.51,-3.27L3.58,1.25L5.93,7.98L0,3.46L-5.93,7.98L-3.58,1.25L-9.51,-3.27L-2.35,-3.27Z" fill="currentColor" stroke="currentColor" stroke-width="0.8"/>
          </svg>
       `;
    }

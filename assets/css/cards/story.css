@@ -8,6 +8,10 @@
     margin: 0 0 var(--story-margin-bottom) 0;
 }
 
+.story-writing {
+    cursor:pointer;
+}
+
 .story.story-has-showcase {
     display: grid;
     grid-template-columns: 1fr 1fr 45%;
