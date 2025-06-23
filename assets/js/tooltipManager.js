@@ -22,9 +22,10 @@ export class TooltipManager {
      * @param {HTMLElement} container - The container to update tooltips in
      */
     updateTooltips() {
+        // TODO: this seems to work better without this... look into it? so maybe the whole class can be removed?
         // Delegate to the localization system's method
-        if (this.localization && this.localization.updateTooltips) {
+/*         if (this.localization && this.localization.updateTooltips) {
             this.localization.updateTooltips();
-        }
+        } */
     }
 }

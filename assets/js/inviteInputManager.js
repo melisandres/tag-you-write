@@ -53,7 +53,7 @@ export class InviteInputManager {
         const invitee = {
             input: input,
             type: type,
-            id: this.generateInviteeId()
+/*             id: this.generateInviteeId() */
         };
 
         // Add to array
@@ -93,9 +93,9 @@ export class InviteInputManager {
         return this.invitees.some(invitee => invitee.input.toLowerCase() === input.toLowerCase());
     }
 
-    generateInviteeId() {
+/*     generateInviteeId() {
         return 'invitee_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-    }
+    } */
 
     renderInvitees() {
         this.inviteesDisplay.innerHTML = '';

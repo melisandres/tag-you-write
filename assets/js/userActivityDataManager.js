@@ -261,13 +261,24 @@ export class UserActivityDataManager {
         
         // If no previous activity, this is a new user (initialization)
         if (!previousActivity) {
-            if (currentActivity.activity_level === 'active' && currentActivity.game_id) {
-                changes.push({
-                    type: 'game_joined',
-                    gameId: currentActivity.game_id,
-                    userId: currentActivity.writer_id,
-                    activityType: this.getActivityCategory(currentActivity.activity_type)
-                });
+            if (currentActivity.activity_level === 'active') {
+                if (currentActivity.game_id) {
+                    // User is in a specific game
+                    changes.push({
+                        type: 'game_joined',
+                        gameId: currentActivity.game_id,
+                        userId: currentActivity.writer_id,
+                        activityType: this.getActivityCategory(currentActivity.activity_type)
+                    });
+                } else {
+                    // User is browsing (game_id is null) - still counts for site activity
+                    changes.push({
+                        type: 'user_started_browsing',
+                        gameId: null,
+                        userId: currentActivity.writer_id,
+                        activityType: this.getActivityCategory(currentActivity.activity_type)
+                    });
+                }
             }
             
             // Also check if the new user is currently editing text (for initialization)
@@ -312,22 +323,20 @@ export class UserActivityDataManager {
         
         // Check for activity level changes (active <-> idle)
         if (previousActivity.activity_level !== currentActivity.activity_level) {
-            if (currentActivity.game_id) {
-                if (currentActivity.activity_level === 'idle' && previousActivity.activity_level === 'active') {
-                    changes.push({
-                        type: 'user_went_idle',
-                        gameId: currentActivity.game_id,
-                        userId: currentActivity.writer_id,
-                        activityType: this.getActivityCategory(previousActivity.activity_type)
-                    });
-                } else if (currentActivity.activity_level === 'active' && previousActivity.activity_level === 'idle') {
-                    changes.push({
-                        type: 'user_became_active',
-                        gameId: currentActivity.game_id,
-                        userId: currentActivity.writer_id,
-                        activityType: this.getActivityCategory(currentActivity.activity_type)
-                    });
-                }
+            if (currentActivity.activity_level === 'idle' && previousActivity.activity_level === 'active') {
+                changes.push({
+                    type: 'user_went_idle',
+                    gameId: currentActivity.game_id, // Can be null for browsing users
+                    userId: currentActivity.writer_id,
+                    activityType: this.getActivityCategory(previousActivity.activity_type)
+                });
+            } else if (currentActivity.activity_level === 'active' && previousActivity.activity_level === 'idle') {
+                changes.push({
+                    type: 'user_became_active',
+                    gameId: currentActivity.game_id, // Can be null for browsing users
+                    userId: currentActivity.writer_id,
+                    activityType: this.getActivityCategory(currentActivity.activity_type)
+                });
             }
         }
         
