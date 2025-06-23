@@ -626,7 +626,8 @@ export class DataManager {
                     },
                     filters: parsed.filters || {
                         hasContributed: null,
-                        gameState: 'all'
+                        gameState: 'all',
+                        bookmarked: null
                     },
                 };
                 return cache;
@@ -994,6 +995,9 @@ export class DataManager {
             open_for_changes: game.openForChanges === '1' || 
                              game.openForChanges === true || 
                              game.openForChanges === 1,
+            pending: game.pending === '1' || 
+                    game.pending === true || 
+                    game.pending === 1,
             hasContributed: game.hasContributed === '1' || 
                            game.hasContributed === true || 
                            game.hasContributed === 1,

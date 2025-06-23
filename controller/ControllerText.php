@@ -22,7 +22,10 @@ class ControllerText extends Controller{
             'hasContributed' => isset($_GET['hasContributed']) ? 
                 ($_GET['hasContributed'] === 'true' || $_GET['hasContributed'] === 'contributor' ? true : 
                 ($_GET['hasContributed'] === 'mine' ? 'mine' : null)) : null,
-            'gameState' => isset($_GET['gameState']) ? $_GET['gameState'] : 'all'
+            'gameState' => isset($_GET['gameState']) ? $_GET['gameState'] : 'all',
+            'bookmarked' => isset($_GET['bookmarked']) ? 
+                ($_GET['bookmarked'] === 'bookmarked' ? true : 
+                ($_GET['bookmarked'] === 'not_bookmarked' ? false : null)) : null
         ];
 
         // TODO: Get the sort parameter from URL

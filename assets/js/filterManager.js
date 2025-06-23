@@ -90,12 +90,6 @@ export class FilterManager {
         eventBus.on('filterApplied', () => this.updateNavLink());
         eventBus.on('filtersUpdated', (filters) => this.handlefiltersUpdated(filters));
         this.menuManager = window.menuManager;
-
-        // Listen for browser navigation events
-        window.addEventListener('popstate', () => this.applyFiltersFromUrl());
-
-        // Apply filters from URL on initial load
-        this.applyFiltersFromUrl(true);
     }
 
     /**
@@ -498,39 +492,5 @@ export class FilterManager {
         }
     }
 
-    /**
-     * Apply filters from URL parameters
-     * @param {boolean} thisIsInitialLoad - Whether this is the initial page load
-     */
-    applyFiltersFromUrl(thisIsInitialLoad = false) {
-        // Get URL parameters
-        const urlParams = new URLSearchParams(window.location.search);
-        const hasContributed = urlParams.get('hasContributed');
-        const gameState = urlParams.get('gameState');
-        const bookmarked = urlParams.get('bookmarked');
 
-        // Create filters object from URL parameters
-        const filters = {
-            // Convert URL strings to internal values
-            hasContributed: hasContributed === null || hasContributed === 'all' ? null :
-                            hasContributed === 'contributor' ? true :
-                            'mine',
-            gameState: gameState || 'all',
-            bookmarked: bookmarked === null || bookmarked === 'all' ? null :
-                       bookmarked === 'bookmarked' ? true :
-                       false
-        };
-
-        // Apply the filters
-        this.dataManager.setFilters(filters);
-        this.updateFilterButton(filters.hasContributed);
-        this.updateGameStateButton(filters.gameState);
-        this.updateBookmarkButton(filters.bookmarked);
-        this.updateNavLink();
-        
-        // Only emit filtersChanged - it already triggers a refresh
-        if (!thisIsInitialLoad) {
-            eventBus.emit('filtersChanged', filters);
-        }
-    }
 }

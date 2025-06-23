@@ -552,6 +552,9 @@ export class FormManager {
         if (filters.gameState !== 'all') {
             queryParams.gameState = filters.gameState;
         }
+        if (filters.bookmarked !== null) {
+            queryParams.bookmarked = filters.bookmarked === true ? 'bookmarked' : 'not_bookmarked';
+        }
         
         // Use the localization utility
         const finalUrl = window.i18n.createUrl(redirectUrl, queryParams);

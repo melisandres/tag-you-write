@@ -23,6 +23,7 @@ export class GameSearchFilterManager {
         // Get initial filters from URL parameters
         const urlParams = new URLSearchParams(window.location.search);
         const hasContributed = urlParams.get('hasContributed');
+        const bookmarked = urlParams.get('bookmarked');
 
         // Convert URL string values to backend values
         const convertedHasContributed = hasContributed === 'all' ? null :
@@ -30,9 +31,14 @@ export class GameSearchFilterManager {
                                        hasContributed === 'mine' ? 'mine' :
                                        null;
 
+        const convertedBookmarked = bookmarked === null || bookmarked === 'all' ? null :
+                                   bookmarked === 'bookmarked' ? true :
+                                   false;
+
         const initialFilters = {
             hasContributed: convertedHasContributed,
-            gameState: urlParams.get('gameState') || 'all'
+            gameState: urlParams.get('gameState') || 'all',
+            bookmarked: convertedBookmarked
         };
 
         // Set initial filters
