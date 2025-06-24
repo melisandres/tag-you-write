@@ -31,7 +31,7 @@ export class ValidationManager {
         // if you are initializing in editing mode, validate all the fields
         if (activity === 'editing') {
             this.formValidity = {};
-            const visibleFields = this.form.querySelectorAll('input:not([type="hidden"]), textarea:not([type="hidden"])');
+            const visibleFields = this.form.querySelectorAll('input:not([type="hidden"]):not([data-ui-helper]), textarea:not([type="hidden"])');
             visibleFields.forEach(field => {
                 this.formValidity[field.name] = false;
                 this.validateField({
@@ -44,7 +44,7 @@ export class ValidationManager {
             this.checkOverallValidity();
         } else if (activity === 'creating') {
             // if you are initializing in creating mode (a new form), autosave is allowed, publish is not-- but don't validate the fields, because they are still being filled out
-            const visibleFields = form.querySelectorAll('input:not([type="hidden"]), textarea:not([type="hidden"])');
+            const visibleFields = form.querySelectorAll('input:not([type="hidden"]):not([data-ui-helper]), textarea:not([type="hidden"])');
             visibleFields.forEach(field => {
                 // keywords is a special case, because you should be able to publish without adding anything there. 
                 if(field.name === 'keywords') {
@@ -57,7 +57,7 @@ export class ValidationManager {
         } else {
             console.log('doing this thing')
             // there are other forms... like the signup form... 
-            const visibleFields = form.querySelectorAll('input:not([type="hidden"]), textarea:not([type="hidden"])');
+            const visibleFields = form.querySelectorAll('input:not([type="hidden"]):not([data-ui-helper]), textarea:not([type="hidden"])');
             visibleFields.forEach(field => {
                 this.formValidity[field.name] = { canAutosave: false, canPublish: false };
             });
@@ -70,7 +70,7 @@ export class ValidationManager {
         if (!this.form) return;
         
         // Get all visible fields in the form
-        const visibleFields = this.form.querySelectorAll('input:not([type="hidden"]), textarea:not([type="hidden"])');
+        const visibleFields = this.form.querySelectorAll('input:not([type="hidden"]):not([data-ui-helper]), textarea:not([type="hidden"])');
         
         visibleFields.forEach(field => {
             this.validateField({
@@ -464,7 +464,7 @@ export class ValidationManager {
                 const usernameRegex = /^[a-zA-Z0-9_-]{3,20}$/;
                 
                 for (const invitee of invitees) {
-                    if (!invitee.input || !invitee.type || !invitee.id) {
+                    if (!invitee.input || !invitee.type /* || !invitee.id */) {
                         return { isValid: false, message: errorMessage, severity: severity };
                     }
                     
@@ -553,14 +553,45 @@ export class ValidationManager {
         feedback.classList.add(messageObj.severity);
     }
 
+
+
+    // Extract display target logic into separate method
+    getDisplayTarget(fieldName, field) {
+        // First check if there's a UI helper (custom form component)
+        const uiHelper = field.closest('label')?.querySelector('[data-ui-helper="true"]');
+        if (uiHelper) {
+            const labelElement = uiHelper.closest('label');
+            // Look for a custom display container or fall back to the UI helper itself
+            const displayContainer = labelElement?.querySelector(`#${fieldName}-display`) || 
+                                   labelElement?.querySelector('.invitees-display') || // backwards compatibility
+                                   uiHelper;
+            return { labelElement, targetElement: displayContainer };
+        }
+
+        // Second, check if this is a CKEditor field (hidden textarea with .ck-editor)
+        if (field.tagName === 'TEXTAREA' && field.style.display === 'none') {
+            const labelElement = field.closest('label');
+            const editorElement = labelElement?.querySelector('.ck-editor__editable');
+            if (editorElement) {
+                return { labelElement, targetElement: editorElement };
+            }
+        }
+
+        // Default logic for standard fields (input, select, etc.)
+        const labelElement = field.closest('label');
+        const targetElement = field;
+
+        return { labelElement, targetElement };
+    }
+
     // Handle displaying the validation results
     showValidationResult(fieldName, criticalErrors, errors, warnings, infos, successes) {
         const field = document.querySelector(`[name="${fieldName}"]`);
         if (!field) return;
 
-        // Get the parent label
-        const labelElement = field.closest('label');
-        
+        const { labelElement, targetElement } = this.getDisplayTarget(fieldName, field);
+        if (!labelElement || !targetElement) return;
+
         // Remove any existing feedback elements
         const existingFeedbacks = labelElement.querySelectorAll('.feedback');
         existingFeedbacks.forEach(feedback => feedback.remove());
@@ -589,15 +620,6 @@ export class ValidationManager {
                 this.setFeedbackMessage(feedback, infos[0]);
             } else if (successes.length > 0) {
                 this.setFeedbackMessage(feedback, successes[0]);
-            }
-        }
-
-        // Find the target element for feedback insertion
-        let targetElement = field;
-        if (field.tagName === 'TEXTAREA' && field.style.display === 'none') {
-            const editorElement = labelElement.querySelector('.ck-editor__editable');
-            if (editorElement) {
-                targetElement = editorElement;
             }
         }
 

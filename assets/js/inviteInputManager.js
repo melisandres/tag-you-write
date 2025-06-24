@@ -16,6 +16,7 @@ export class InviteInputManager {
 
     init() {
         this.setupEventListeners();
+        this.setupFormRestorationListeners();
     }
 
     setupEventListeners() {
@@ -35,6 +36,71 @@ export class InviteInputManager {
         });
 
         // No need for real-time validation - ValidationManager handles this
+    }
+
+    setupFormRestorationListeners() {
+        // Listen for form restoration events
+        eventBus.on('formRestored', (formData) => {
+            if (formData.invitees) {
+                this.restoreInviteesFromData(formData.invitees);
+            }
+        });
+
+        // Also listen for direct changes to the hidden field (belt and suspenders)
+        if (this.inviteesDataInput) {
+            // Create a MutationObserver to watch for value changes
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
+                        this.syncFromHiddenField();
+                    }
+                });
+            });
+
+            observer.observe(this.inviteesDataInput, { 
+                attributes: true, 
+                attributeFilter: ['value'] 
+            });
+
+            // Also listen for input events (for programmatic value changes)
+            this.inviteesDataInput.addEventListener('input', () => {
+                this.syncFromHiddenField();
+            });
+        }
+    }
+
+    restoreInviteesFromData(inviteesJson) {
+        try {
+            const restoredInvitees = JSON.parse(inviteesJson);
+            if (Array.isArray(restoredInvitees)) {
+                console.log('Restoring invitees from form data:', restoredInvitees);
+                this.invitees = restoredInvitees;
+                this.renderInvitees();
+                // Don't call updateHiddenField() here - the hidden field already has the correct value
+            }
+        } catch (e) {
+            console.warn('Failed to restore invitees from form data:', e);
+        }
+    }
+
+    syncFromHiddenField() {
+        if (!this.inviteesDataInput.value) {
+            this.invitees = [];
+            this.renderInvitees();
+            return;
+        }
+
+        try {
+            const hiddenFieldInvitees = JSON.parse(this.inviteesDataInput.value);
+            if (Array.isArray(hiddenFieldInvitees) && 
+                JSON.stringify(hiddenFieldInvitees) !== JSON.stringify(this.invitees)) {
+                console.log('Syncing invitees from hidden field:', hiddenFieldInvitees);
+                this.invitees = hiddenFieldInvitees;
+                this.renderInvitees();
+            }
+        } catch (e) {
+            console.warn('Failed to sync invitees from hidden field:', e);
+        }
     }
 
     addInvitee() {
@@ -61,30 +127,20 @@ export class InviteInputManager {
 
         // Update UI
         this.renderInvitees();
-        this.updateHiddenField();
+        this.updateHiddenField(); // This now triggers autosave automatically
 
         // Clear input
         this.inviteeInput.value = '';
 
-        // Emit event for form validation (ValidationManager will handle validation)
-        eventBus.emit('inputChanged', {
-            formType: 'root',
-            fieldName: 'invitees',
-            fieldValue: JSON.stringify(this.invitees)
-        });
+        // No need to manually emit - updateHiddenField() now dispatches input event
     }
 
     removeInvitee(inviteeId) {
         this.invitees = this.invitees.filter(invitee => invitee.id !== inviteeId);
         this.renderInvitees();
-        this.updateHiddenField();
+        this.updateHiddenField(); // This now triggers autosave automatically
 
-        // Emit event for form validation
-        eventBus.emit('inputChanged', {
-            formType: 'root',
-            fieldName: 'invitees',
-            fieldValue: JSON.stringify(this.invitees)
-        });
+        // No need to manually emit - updateHiddenField() now dispatches input event
     }
 
     // Validation is now handled by ValidationManager
@@ -109,7 +165,10 @@ export class InviteInputManager {
     createInviteeElement(invitee) {
         const wrapper = document.createElement('div');
         wrapper.className = 'invitee-item';
-        wrapper.dataset.inviteeId = invitee.id;
+        
+        // Use id if available, otherwise use input as identifier
+        const identifier = invitee.id || invitee.input;
+        wrapper.dataset.inviteeId = identifier;
 
         const typeIcon = invitee.type === 'email' ? '📧' : '👤';
         
@@ -123,13 +182,26 @@ export class InviteInputManager {
 
         // Add remove button event listener
         const removeBtn = wrapper.querySelector('.remove-invitee-btn');
-        removeBtn.addEventListener('click', () => this.removeInvitee(invitee.id));
+        removeBtn.addEventListener('click', () => this.removeInviteeByIdentifier(identifier));
 
         return wrapper;
     }
 
+    removeInviteeByIdentifier(identifier) {
+        // Try to remove by id first, then by input
+        this.invitees = this.invitees.filter(invitee => 
+            invitee.id !== identifier && invitee.input !== identifier
+        );
+        this.renderInvitees();
+        this.updateHiddenField(); // This now triggers autosave automatically
+    }
+
     updateHiddenField() {
         this.inviteesDataInput.value = JSON.stringify(this.invitees);
+        
+        // Dispatch input event to trigger autosave
+        const event = new Event('input', { bubbles: true });
+        this.inviteesDataInput.dispatchEvent(event);
     }
 
     // Error handling is now managed by ValidationManager

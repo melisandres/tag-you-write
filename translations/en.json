@@ -235,7 +235,8 @@
     "form_field": {
       "title": "title",
       "prompt": "prompt",
-      "text": "text"
+      "text": "text",
+      "invitees": "invitees"
     },
     "toast": {
       "text": {

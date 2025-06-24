@@ -351,7 +351,7 @@ export class FormManager {
     setupCheckForInput() {
         this.form.addEventListener('input', (event) => {
             const target = event.target;
-            if (target.matches('textarea, input:not([type="hidden"]), input[type="hidden"][name="id"]')) {
+            if (target.matches('textarea, input:not([type="hidden"]):not([data-ui-helper]), input[type="hidden"][name="id"], input[name="invitees"]')) {
                 console.log('input changed', target.name, target.value);
                 eventBus.emit('inputChanged', {
                     formType: this.formType,

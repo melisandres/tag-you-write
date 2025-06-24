@@ -103,6 +103,7 @@
             </span>
             <input type="text" 
                    id="invitee-input" 
+                   data-ui-helper="true"
                    data-i18n-placeholder="cr_it_ed.invite_placeholder" 
                    placeholder="{{ translate('cr_it_ed.invite_placeholder') }}" 
                    autocomplete="off">

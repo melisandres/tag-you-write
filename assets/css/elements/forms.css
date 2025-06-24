@@ -176,9 +176,9 @@ label .ck.ck-content.ck-editor__editable {
     position: absolute;
 }
 
-input[name="keywords"] ~ .feedback{
+/* input[name="keywords"] ~ .feedback{
     position: relative;
-}
+} */
 
 /* Invitees Input Styling */
 .invitees-display {

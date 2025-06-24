@@ -234,7 +234,8 @@
   "form_field": {
     "title": "titre",
     "prompt": "texte incitatif",
-    "text": "texte"
+    "text": "texte",
+    "invitees": "invités"
   },
   "toast": {
     "text": {
