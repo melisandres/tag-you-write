@@ -561,10 +561,8 @@ export class ValidationManager {
         const uiHelper = field.closest('label')?.querySelector('[data-ui-helper="true"]');
         if (uiHelper) {
             const labelElement = uiHelper.closest('label');
-            // Look for a custom display container or fall back to the UI helper itself
-            const displayContainer = labelElement?.querySelector(`#${fieldName}-display`) || 
-                                   labelElement?.querySelector('.invitees-display') || // backwards compatibility
-                                   uiHelper;
+                        // Look for a custom display container or fall back to the UI helper itself
+            const displayContainer = labelElement?.querySelector(`#${fieldName}-display`) || uiHelper;
             return { labelElement, targetElement: displayContainer };
         }
 
