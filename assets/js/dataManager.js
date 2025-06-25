@@ -81,6 +81,7 @@ export class DataManager {
         //this.clearCache();
 
         this.initializeCurrentViewedRootIdFromUrl();
+        this.initializeCurrentViewedRootIdFromForm();
     }
 
     initializeCurrentViewedRootIdFromUrl() {
@@ -90,6 +91,22 @@ export class DataManager {
         if (urlRootStoryId) {
             console.log('DataManager: Setting currentViewedRootId from URL:', urlRootStoryId);
             this.setCurrentViewedRootStoryId(urlRootStoryId);
+        }
+    }
+
+    initializeCurrentViewedRootIdFromForm() {
+        const formType = document.querySelector('[data-form-type]')?.dataset.formType;
+        if (formType && formType !== 'root') {
+            const gameId = document.querySelector('input[name="game_id"]').value;
+            if (gameId) {
+                // Convert game ID to root ID (text_id) using existing method
+                const rootId = this.getGameRootId(gameId);
+                if (rootId) {
+                    this.setCurrentViewedRootStoryId(rootId);
+                } else {
+                    console.warn('Could not find root ID for game ID:', gameId);
+                }
+            }
         }
     }
 
