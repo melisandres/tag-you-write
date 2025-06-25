@@ -459,25 +459,69 @@ export class ValidationManager {
                     return { isValid: false, message: errorMessage, severity: severity };
                 }
 
-                // Validate each invitee
+                // Validate each invitee and add validation status
+                // Use the same email regex as validateEmail method
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 const usernameRegex = /^[a-zA-Z0-9_-]{3,20}$/;
                 
+                let hasErrors = false;
+                const validatedInvitees = [];
+                
                 for (const invitee of invitees) {
-                    if (!invitee.input || !invitee.type /* || !invitee.id */) {
-                        return { isValid: false, message: errorMessage, severity: severity };
+                    // Create a copy with validation status
+                    const validatedInvitee = { ...invitee };
+                    
+                    // Validate structure
+                    if (!invitee.input || !invitee.type) {
+                        validatedInvitee.validationStatus = {
+                            isValid: false,
+                            errorType: 'structure',
+                            message: 'Invalid invitee format'
+                        };
+                        hasErrors = true;
+                    }
+                    // Validate email format
+                    else if (invitee.type === 'email' && !emailRegex.test(invitee.input)) {
+                        validatedInvitee.validationStatus = {
+                            isValid: false,
+                            errorType: 'email_format',
+                            message: 'Invalid email format'
+                        };
+                        hasErrors = true;
+                    }
+                    // Validate username format (for now - we'll enhance this later)
+                    else if (invitee.type === 'username' && !usernameRegex.test(invitee.input)) {
+                        validatedInvitee.validationStatus = {
+                            isValid: false,
+                            errorType: 'username_format',
+                            message: 'Invalid username format'
+                        };
+                        hasErrors = true;
+                    }
+                    // Valid invitee
+                    else {
+                        validatedInvitee.validationStatus = {
+                            isValid: true,
+                            message: 'Valid'
+                        };
                     }
                     
-                    if (invitee.type === 'email' && !emailRegex.test(invitee.input)) {
-                        return { isValid: false, message: errorMessage, severity: severity };
-                    }
-                    
-                    if (invitee.type === 'username' && !usernameRegex.test(invitee.input)) {
-                        return { isValid: false, message: errorMessage, severity: severity };
-                    }
+                    validatedInvitees.push(validatedInvitee);
                 }
                 
-                return { isValid: true, message: '', severity: 'success' };
+                // Emit event to trigger a complete re-render with validation status
+                // This becomes the single source of truth for invitee rendering
+                eventBus.emit('renderInviteesWithValidation', {
+                    invitees: validatedInvitees,
+                    hasErrors: hasErrors
+                });
+                
+                // Return aggregate result (existing behavior preserved)
+                return {
+                    isValid: !hasErrors,
+                    message: hasErrors ? errorMessage : '',
+                    severity: hasErrors ? severity : 'success'
+                };
                 
             } catch (e) {
                 return { isValid: false, message: errorMessage, severity: severity };
@@ -553,7 +597,35 @@ export class ValidationManager {
         feedback.classList.add(messageObj.severity);
     }
 
-
+    /**
+     * Validate a single username - can be enhanced for API validation
+     * @param {string} username - The username to validate
+     * @returns {Promise<Object>} - Validation result with async support
+     */
+    async validateUsername(username) {
+        // Phase 1: Basic format validation (current implementation)
+        const usernameRegex = /^[a-zA-Z0-9_-]{3,20}$/;
+        
+        if (!usernameRegex.test(username)) {
+            return {
+                isValid: false,
+                errorType: 'username_format',
+                message: 'Username must be 3-20 characters, letters/numbers/underscore/dash only'
+            };
+        }
+        
+        // Phase 2: API validation (future enhancement)
+        // TODO: Add API call here to check:
+        // - Does user exist?
+        // - Is user in same age/school group?
+        // - Has user opted into collaboration?
+        
+        // For now, assume valid if format is correct
+        return {
+            isValid: true,
+            message: 'Valid username format'
+        };
+    }
 
     // Extract display target logic into separate method
     getDisplayTarget(fieldName, field) {

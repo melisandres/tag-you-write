@@ -102,15 +102,16 @@
                 {{ translate('cr_it_ed.invite_collaborators') }}
             </span>
             <input type="text" 
-                   id="invitee-input" 
+                   id="invitees-input" 
                    data-ui-helper="true"
                    data-i18n-placeholder="cr_it_ed.invite_placeholder" 
                    placeholder="{{ translate('cr_it_ed.invite_placeholder') }}" 
                    autocomplete="off">
             <div class="invitees-display" id="invitees-display"></div>
+            <input type="hidden" name="invitees" id="invitees-data" value="">
         </label>
 
-        <input type="hidden" name="invitees" id="invitees-data" value="">
+
 
         <input type="hidden" name="writer_id" value="{{ session.writer_id }}"> 
         <input type="hidden" name="currentPage" value="{{ data.id ? 'text-draft-edit.php' : 'text-create.php' }}">

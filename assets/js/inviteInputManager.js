@@ -1,13 +1,30 @@
 import { eventBus } from './eventBus.js';
 import { SVGManager } from './svgManager.js';
 
+/**
+ * Manages the invitee input system for collaborative text creation.
+ * 
+ * Responsibilities:
+ * - Handle user input for adding invitees (email/username)
+ * - Maintain sync between visual display and hidden form field
+ * - Coordinate with ValidationManager for real-time validation
+ * - Support form restoration and edit mode
+ * 
+ * Data Flow:
+ * 1. User adds invitee → updates internal array → updates hidden field → triggers validation
+ * 2. ValidationManager validates → triggers render with validation status
+ * 3. Form restoration → updates internal array → triggers validation → renders
+ */
 export class InviteInputManager {
     constructor() {
-        this.inviteeInput = document.getElementById('invitee-input');
+        // DOM elements
+        this.inviteeInput = document.getElementById('invitees-input');
         this.inviteesDisplay = document.getElementById('invitees-display');
         this.inviteesDataInput = document.getElementById('invitees-data');
         
-        this.invitees = []; // Array to store invitee objects
+        // State management
+        this.invitees = []; // Array of invitee objects: {input, type, validationStatus?}
+        this.isUpdatingHiddenField = false; // Prevents infinite sync loops
         
         if (this.inviteeInput && this.inviteesDisplay) {
             this.init();
@@ -15,12 +32,16 @@ export class InviteInputManager {
     }
 
     init() {
-        this.setupEventListeners();
+        this.setupInputListeners();
         this.setupFormRestorationListeners();
+        this.setupValidationListeners();
     }
 
-    setupEventListeners() {
-        // Handle Enter key and blur events
+    /**
+     * Set up listeners for user input events (Enter key, blur)
+     */
+    setupInputListeners() {
+        // Add invitee on Enter key
         this.inviteeInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
@@ -28,27 +49,28 @@ export class InviteInputManager {
             }
         });
 
+        // Add invitee on blur if there's content (UX: saves partial input)
         this.inviteeInput.addEventListener('blur', () => {
-            // Add invitee on blur if there's content
             if (this.inviteeInput.value.trim()) {
                 this.addInvitee();
             }
         });
-
-        // No need for real-time validation - ValidationManager handles this
     }
 
+    /**
+     * Set up listeners for form restoration (autosave, page reload recovery)
+     */
     setupFormRestorationListeners() {
-        // Listen for form restoration events
+        // Listen for form restoration events from autosave system
         eventBus.on('formRestored', (formData) => {
             if (formData.invitees) {
                 this.restoreInviteesFromData(formData.invitees);
             }
         });
 
-        // Also listen for direct changes to the hidden field (belt and suspenders)
+        // Monitor hidden field changes (belt and suspenders approach)
         if (this.inviteesDataInput) {
-            // Create a MutationObserver to watch for value changes
+            // Watch for attribute changes (programmatic updates)
             const observer = new MutationObserver((mutations) => {
                 mutations.forEach((mutation) => {
                     if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
@@ -62,97 +84,124 @@ export class InviteInputManager {
                 attributeFilter: ['value'] 
             });
 
-            // Also listen for input events (for programmatic value changes)
+            // Watch for input events (user/programmatic changes)
             this.inviteesDataInput.addEventListener('input', () => {
                 this.syncFromHiddenField();
             });
         }
     }
 
+    /**
+     * Set up listeners for validation system coordination
+     */
+    setupValidationListeners() {
+        // ValidationManager tells us when and how to render (single source of truth)
+        eventBus.on('renderInviteesWithValidation', (data) => {
+            this.handleRenderWithValidation(data.invitees, data.hasErrors);
+        });
+    }
+
+    /**
+     * Restore invitees from JSON data (used by form restoration)
+     */
     restoreInviteesFromData(inviteesJson) {
         try {
             const restoredInvitees = JSON.parse(inviteesJson);
             if (Array.isArray(restoredInvitees)) {
-                console.log('Restoring invitees from form data:', restoredInvitees);
                 this.invitees = restoredInvitees;
-                this.renderInvitees();
-                // Don't call updateHiddenField() here - the hidden field already has the correct value
+                this.triggerValidation(); // Let validation system handle rendering
             }
         } catch (e) {
             console.warn('Failed to restore invitees from form data:', e);
         }
     }
 
+    /**
+     * Sync internal state from hidden field value
+     * Prevents sync loops using isUpdatingHiddenField flag
+     */
     syncFromHiddenField() {
+        if (this.isUpdatingHiddenField) {
+            return; // Prevent infinite loops
+        }
+        
+        // Handle empty field
         if (!this.inviteesDataInput.value) {
             this.invitees = [];
-            this.renderInvitees();
+            this.triggerValidation();
             return;
         }
 
         try {
             const hiddenFieldInvitees = JSON.parse(this.inviteesDataInput.value);
-            if (Array.isArray(hiddenFieldInvitees) && 
-                JSON.stringify(hiddenFieldInvitees) !== JSON.stringify(this.invitees)) {
-                console.log('Syncing invitees from hidden field:', hiddenFieldInvitees);
-                this.invitees = hiddenFieldInvitees;
-                this.renderInvitees();
+            if (Array.isArray(hiddenFieldInvitees)) {
+                // Only update if there's a structural change (optimize performance)
+                if (this.hasStructuralChange(hiddenFieldInvitees)) {
+                    this.invitees = hiddenFieldInvitees;
+                    this.triggerValidation();
+                }
             }
         } catch (e) {
             console.warn('Failed to sync invitees from hidden field:', e);
         }
     }
 
+    /**
+     * Check if the hidden field data represents a structural change
+     * (ignores validation status changes to prevent unnecessary updates)
+     */
+    hasStructuralChange(newInvitees) {
+        const newStructure = JSON.stringify(newInvitees.map(inv => ({input: inv.input, type: inv.type})));
+        const currentStructure = JSON.stringify(this.invitees.map(inv => ({input: inv.input, type: inv.type})));
+        return newStructure !== currentStructure;
+    }
+
+    /**
+     * Add a new invitee from user input
+     */
     addInvitee() {
         const input = this.inviteeInput.value.trim();
         if (!input) return;
 
-        // Check if already exists
+        // Prevent duplicates (case-insensitive)
         if (this.inviteeExists(input)) {
-            return; // Silently ignore duplicates
+            this.inviteeInput.value = ''; // Clear input even for duplicates
+            return;
         }
 
-        // Determine type (simple heuristic)
-        const type = input.includes('@') ? 'email' : 'username';
-
-        // Create invitee object
+        // Create invitee object (input serves as unique identifier)
         const invitee = {
             input: input,
-            type: type,
-/*             id: this.generateInviteeId() */
+            type: input.includes('@') ? 'email' : 'username'
         };
 
-        // Add to array
         this.invitees.push(invitee);
-
-        // Update UI
-        this.renderInvitees();
-        this.updateHiddenField(); // This now triggers autosave automatically
-
-        // Clear input
-        this.inviteeInput.value = '';
-
-        // No need to manually emit - updateHiddenField() now dispatches input event
+        this.updateHiddenField(); // Triggers validation and re-render
+        this.inviteeInput.value = ''; // Clear input for next entry
     }
 
-    removeInvitee(inviteeId) {
-        this.invitees = this.invitees.filter(invitee => invitee.id !== inviteeId);
-        this.renderInvitees();
-        this.updateHiddenField(); // This now triggers autosave automatically
-
-        // No need to manually emit - updateHiddenField() now dispatches input event
+    /**
+     * Remove invitee by input value (used as unique identifier)
+     */
+    removeInvitee(input) {
+        this.invitees = this.invitees.filter(invitee => 
+            invitee.input.toLowerCase() !== input.toLowerCase()
+        );
+        this.updateHiddenField(); // Triggers validation and re-render
     }
 
-    // Validation is now handled by ValidationManager
-
+    /**
+     * Check if invitee already exists (case-insensitive)
+     */
     inviteeExists(input) {
-        return this.invitees.some(invitee => invitee.input.toLowerCase() === input.toLowerCase());
+        return this.invitees.some(invitee => 
+            invitee.input.toLowerCase() === input.toLowerCase()
+        );
     }
 
-/*     generateInviteeId() {
-        return 'invitee_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-    } */
-
+    /**
+     * Render the invitees display (called by validation system)
+     */
     renderInvitees() {
         this.inviteesDisplay.innerHTML = '';
 
@@ -162,61 +211,119 @@ export class InviteInputManager {
         });
     }
 
+    /**
+     * Create DOM element for a single invitee
+     */
     createInviteeElement(invitee) {
         const wrapper = document.createElement('div');
         wrapper.className = 'invitee-item';
+        wrapper.dataset.inviteeInput = invitee.input; // Use input as identifier
         
-        // Use id if available, otherwise use input as identifier
-        const identifier = invitee.id || invitee.input;
-        wrapper.dataset.inviteeId = identifier;
-
+        // Apply validation status classes
+        this.applyValidationClasses(wrapper, invitee);
+        
+        // Create content
         const typeIcon = invitee.type === 'email' ? '📧' : '👤';
+        const validationIndicator = this.createValidationIndicator(invitee);
         
         wrapper.innerHTML = `
             <span class="invitee-type-icon">${typeIcon}</span>
-            <span class="invitee-input">${invitee.input}</span>
-            <button type="button" class="remove-invitee-btn" data-i18n-title="cr_it_ed.remove_invitee" title="${window.i18n ? window.i18n.translate('cr_it_ed.remove_invitee') : 'Remove invitee'}">
+            <span class="invitees-input">${invitee.input}</span>
+            ${validationIndicator}
+            <button type="button" class="remove-invitee-btn" 
+                    data-i18n-title="cr_it_ed.remove_invitee" 
+                    title="${window.i18n ? window.i18n.translate('cr_it_ed.remove_invitee') : 'Remove invitee'}">
                 ${SVGManager.xSVG}
             </button>
         `;
 
-        // Add remove button event listener
+        // Add remove functionality
         const removeBtn = wrapper.querySelector('.remove-invitee-btn');
-        removeBtn.addEventListener('click', () => this.removeInviteeByIdentifier(identifier));
+        removeBtn.addEventListener('click', () => this.removeInvitee(invitee.input));
 
         return wrapper;
     }
 
-    removeInviteeByIdentifier(identifier) {
-        // Try to remove by id first, then by input
-        this.invitees = this.invitees.filter(invitee => 
-            invitee.id !== identifier && invitee.input !== identifier
-        );
-        this.renderInvitees();
-        this.updateHiddenField(); // This now triggers autosave automatically
+    /**
+     * Apply validation status classes to invitee element
+     */
+    applyValidationClasses(element, invitee) {
+        if (invitee.validationStatus) {
+            if (invitee.validationStatus.isValid) {
+                element.classList.add('invitee-valid');
+            } else {
+                element.classList.add('invitee-invalid');
+                element.classList.add(`invitee-error-${invitee.validationStatus.errorType}`);
+            }
+        }
     }
 
+    /**
+     * Create validation indicator HTML
+     */
+    createValidationIndicator(invitee) {
+        if (!invitee.validationStatus) {
+            return '';
+        }
+        
+        if (invitee.validationStatus.isValid) {
+            return '<span class="invitee-validation-indicator valid" title="Valid">✓</span>';
+        } else {
+            return `<span class="invitee-validation-indicator invalid" title="${invitee.validationStatus.message}">⚠</span>`;
+        }
+    }
+
+    /**
+     * Update hidden form field and trigger validation
+     * Uses flag to prevent sync loops
+     */
     updateHiddenField() {
+        this.isUpdatingHiddenField = true;
+        
         this.inviteesDataInput.value = JSON.stringify(this.invitees);
         
-        // Dispatch input event to trigger autosave
+        // Trigger autosave and validation systems
+        const event = new Event('input', { bubbles: true });
+        this.inviteesDataInput.dispatchEvent(event);
+        
+        // Reset flag after brief delay to allow event propagation
+        setTimeout(() => {
+            this.isUpdatingHiddenField = false;
+        }, 100);
+    }
+
+    /**
+     * Trigger validation without updating hidden field (for sync scenarios)
+     */
+    triggerValidation() {
         const event = new Event('input', { bubbles: true });
         this.inviteesDataInput.dispatchEvent(event);
     }
 
-    // Error handling is now managed by ValidationManager
+    // === Public API Methods ===
 
-    // Method to populate invitees from server data (for edit mode)
+    /**
+     * Populate invitees from server data (used in edit mode)
+     */
     populateInvitees(inviteesData) {
         if (Array.isArray(inviteesData)) {
             this.invitees = inviteesData;
-            this.renderInvitees();
-            this.updateHiddenField();
+            this.updateHiddenField(); // Triggers validation and rendering
         }
     }
 
-    // Method to get current invitees
+    /**
+     * Get current invitees array
+     */
     getInvitees() {
         return this.invitees;
+    }
+
+    /**
+     * Handle render command from ValidationManager (single source of truth)
+     */
+    handleRenderWithValidation(validatedInvitees, hasErrors) {
+        this.invitees = validatedInvitees;
+        this.renderInvitees();
     }
 } 
