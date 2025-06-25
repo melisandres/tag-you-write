@@ -35,7 +35,11 @@ export class TextFormGameActivityIndicator {
     }
 
     isTextFormPage() {
-        return !!document.querySelector('[data-form-type]');
+        const formType = document.querySelector('[data-form-type]')?.dataset.formType;
+        if (!formType || formType === 'root') {
+            return false
+        }
+        return true;
     }
 
     extractGameId() {
