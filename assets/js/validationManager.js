@@ -192,8 +192,8 @@ export class ValidationManager {
                     this.validateKeywordWordCount(2, 'front_val.root.keywords.keyword_word_count'),
                 ],
                 invitees: [
-                    this.validateInvitees('front_val.root.invitees.invalid_format'),
                     this.validateMaxInvitees(10, 'front_val.root.invitees.max_invitees'),
+                    this.validateInvitees('front_val.root.invitees.invalid_format'),
                     this.validateMaxCharacterCount(0, 'front_val.root.invitees.typed', 'info')
                 ]
             },

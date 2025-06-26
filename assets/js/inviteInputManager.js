@@ -218,16 +218,17 @@ export class InviteInputManager {
         const wrapper = document.createElement('div');
         wrapper.className = 'invitee-item';
         wrapper.dataset.inviteeInput = invitee.input; // Use input as identifier
+        wrapper.classList.add(`invitee-${invitee.type}`);
         
         // Apply validation status classes
         this.applyValidationClasses(wrapper, invitee);
         
         // Create content
-        const typeIcon = invitee.type === 'email' ? '📧' : '👤';
+        const typeIcon = invitee.type === 'email' ? SVGManager.emailSVG : SVGManager.userSVG;
         const validationIndicator = this.createValidationIndicator(invitee);
         
         wrapper.innerHTML = `
-            <span class="invitee-type-icon">${typeIcon}</span>
+            <div class="invitee-type-icon">${typeIcon}</div>
             <span class="invitees-input">${invitee.input}</span>
             ${validationIndicator}
             <button type="button" class="remove-invitee-btn" 
@@ -262,15 +263,8 @@ export class InviteInputManager {
      * Create validation indicator HTML
      */
     createValidationIndicator(invitee) {
-        if (!invitee.validationStatus) {
-            return '';
-        }
-        
-        if (invitee.validationStatus.isValid) {
-            return '<span class="invitee-validation-indicator valid" title="Valid">✓</span>';
-        } else {
-            return `<span class="invitee-validation-indicator invalid" title="${invitee.validationStatus.message}">⚠</span>`;
-        }
+        // No validation indicators - keep styling clean
+        return '';
     }
 
     /**

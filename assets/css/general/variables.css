@@ -59,6 +59,7 @@
 
     /* Secondary color -- text and background*/
     --color-secondary-lightest: rgb(255, 241, 246); 
+    --color-secondary-lighter: rgb(239, 221, 239); 
     --color-secondary-light:rgb(215, 175, 215); 
     --color-secondary-medium: rgb(180, 100, 180);
     --color-secondary: rgb(139, 7, 47); 
