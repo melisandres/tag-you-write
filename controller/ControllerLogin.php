@@ -304,7 +304,7 @@ class ControllerLogin extends Controller {
         }
     }
 
-    // Add the sendJsonResponse method from ControllerText
+/*     // Add the sendJsonResponse method from ControllerText
     private function sendJsonResponse($success, $message, $additionalData = null) {
         // Clear any output that might have been sent before
         if (ob_get_length()) ob_clean();
@@ -328,7 +328,7 @@ class ControllerLogin extends Controller {
         header('Content-Type: application/json');
         echo json_encode($response);
         exit;
-    }
+    } */
 }
 
 ?>

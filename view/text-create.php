@@ -109,7 +109,7 @@
                    placeholder="{{ translate('cr_it_ed.invite_placeholder') }}" 
                    autocomplete="off">
             <div class="invitees-display" id="invitees-display"></div>
-            <input type="hidden" name="invitees" id="invitees-data" value="">
+            <input type="hidden" name="invitees" id="invitees-data" value="{{ data.invitees|default('') }}">
         </label>
         {% endif %}
 

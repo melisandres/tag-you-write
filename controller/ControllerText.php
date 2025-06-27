@@ -10,6 +10,7 @@ RequirePage::model('GameHasPlayer');
 RequirePage::model('TextStatus');
 RequirePage::model('Seen');
 RequirePage::controller('ControllerGame');
+RequirePage::controller('ControllerGameInvitation');
 RequirePage::model('Notification');
 RequirePage::model('Event');
 
@@ -456,6 +457,20 @@ class ControllerText extends Controller{
             }
         }
 
+        // Handle invitees (only for root texts)
+        if ($isRootText && isset($input['invitees'])) {
+            $inviteesData = json_decode($input['invitees'], true);
+            if (json_last_error() === JSON_ERROR_NONE && !empty($inviteesData)) {
+                $inviteeController = new ControllerGameInvitation();
+                $invitationResult = $inviteeController->storeInvitations($input['game_id'], $currentWriterId, $inviteesData);
+                
+                // Log invitation results (could also send to frontend later)
+                if (!$invitationResult['success']) {
+                    error_log('Invitation storage errors: ' . json_encode($invitationResult['errors']));
+                }
+            }
+        }
+
         // EVENTS! But only when a text is published. And if the text is a root, Two events: game and text--because this is "Store" not "update".
 
         // NOTE: This is assuming that the writer does not need to see their draft on a representation of the game while editing, and that leaving the form page to return to the game page will go through the modifiedSince endpoint, and bypass the events system, which will not carry any events for drafts but only for publishing. 
@@ -621,8 +636,8 @@ class ControllerText extends Controller{
                 $textData['game_title'] = $parentData['game_title'];
             } else {
                 // For root texts, load existing invitees data
-                // TODO: Load actual invitees from gameInvitation table when storage is implemented
-                $textData['invitees'] = '[]'; // Default to empty for now
+                $inviteeController = new ControllerGameInvitation();
+                $textData['invitees'] = $inviteeController->getInvitationsForEditing($textData['game_id'], $currentWriterId);
             }
 
             // Send it all to the form
@@ -664,9 +679,10 @@ class ControllerText extends Controller{
         // For insta-publish, ensure invitees pass strict validation (root texts only)
         $isRoot = $textData['parent_id'] == '' ? true : false;
         if ($isRoot) {
-            // We need to get the current invitees data for this text/game
-            // For now, we'll create a mock input array to validate existing invitees
-            $mockInput = ['invitees' => '[]']; // Default to empty - TODO: Load actual invitees from database
+            // Get the current invitees data for this text/game
+            $inviteeController = new ControllerGameInvitation();
+            $existingInvitees = $inviteeController->getInvitationsForEditing($textData['game_id'], $currentWriterId);
+            $mockInput = ['invitees' => $existingInvitees];
             $inviteeValidation = $this->validateInvitees($mockInput, $isRoot, 'published');
             
             if (is_array($inviteeValidation) && isset($inviteeValidation['status']) && $inviteeValidation['status'] === 'error') {
@@ -950,6 +966,20 @@ class ControllerText extends Controller{
             }   
         }
 
+        // Handle invitees (only for root texts)
+        if ($isRoot && isset($input['invitees'])) {
+            $inviteesData = json_decode($input['invitees'], true);
+            if (json_last_error() === JSON_ERROR_NONE && !empty($inviteesData)) {
+                $inviteeController = new ControllerGameInvitation();
+                $invitationResult = $inviteeController->storeInvitations($gameId, $currentWriterId, $inviteesData);
+                
+                // Log invitation results (could also send to frontend later)
+                if (!$invitationResult['success']) {
+                    error_log('Invitation storage errors: ' . json_encode($invitationResult['errors']));
+                }
+            }
+        }
+
         // Final events and messages
         if ($status == "published"){
             // Create events for the published text
@@ -1224,28 +1254,23 @@ class ControllerText extends Controller{
             ];
         }
         
-        // Strict validation for publication or when intended status is 'published'
-        if ($intended_status === 'published') {
-            $strictValidation = $inviteeController->validateInvitees($inviteesData, 'strict');
-            
-            if ($strictValidation['status'] === 'success') {
-                return $intended_status; // Keep the intended status
+        // Strict validation (always runs - determines if draft should be incomplete_draft)
+        $strictValidation = $inviteeController->validateInvitees($inviteesData, 'strict');
+        
+        if ($strictValidation['status'] === 'success') {
+            return $intended_status; // Keep the intended status
+        } else {
+            // Strict validation failed
+            if ($intended_status == 'draft') {
+                return 'incomplete_draft'; // Downgrade draft to incomplete_draft
             } else {
-                // Strict validation failed
-                if ($intended_status == 'draft') {
-                    return 'incomplete_draft'; // Downgrade draft to incomplete_draft
-                } else {
-                    // For 'published' status, return validation errors
-                    return [
-                        'status' => 'error',
-                        'errors' => $strictValidation['errors']
-                    ];
-                }
+                // For 'published' status, return validation errors
+                return [
+                    'status' => 'error',
+                    'errors' => $strictValidation['errors']
+                ];
             }
         }
-        
-        // For draft status with basic validation passing, return as-is
-        return $intended_status;
     }
 
     public function validateNote($data){

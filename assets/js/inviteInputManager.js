@@ -37,6 +37,28 @@ export class InviteInputManager {
         this.setupInputListeners();
         this.setupFormRestorationListeners();
         this.setupValidationListeners();
+        
+        // Initialize from existing data on page load
+        this.initializeFromHiddenField();
+    }
+
+    /**
+     * Initialize invitees from hidden field data on page load
+     */
+    initializeFromHiddenField() {
+        if (this.inviteesDataInput && this.inviteesDataInput.value) {
+            try {
+                const existingData = JSON.parse(this.inviteesDataInput.value);
+                if (Array.isArray(existingData) && existingData.length > 0) {
+                    this.invitees = existingData;
+                    // Trigger validation instead of direct rendering
+                    // This ensures pills get their validation status on page load
+                    this.triggerValidation();
+                }
+            } catch (e) {
+                console.warn('Failed to initialize invitees from hidden field:', e);
+            }
+        }
     }
 
     /**
@@ -208,9 +230,12 @@ export class InviteInputManager {
      * Remove invitee by input value (used as unique identifier)
      */
     removeInvitee(input) {
-        this.invitees = this.invitees.filter(invitee => 
-            invitee.input.toLowerCase() !== input.toLowerCase()
-        );
+        this.invitees = this.invitees.filter(invitee => {
+            // Handle cases where invitee.input might be null/undefined
+            const inviteeInput = invitee.input || '';
+            const targetInput = input || '';
+            return inviteeInput.toLowerCase() !== targetInput.toLowerCase();
+        });
         this.updateHiddenField(); // Triggers validation and re-render
     }
 
@@ -218,9 +243,11 @@ export class InviteInputManager {
      * Check if invitee already exists (case-insensitive)
      */
     inviteeExists(input) {
-        return this.invitees.some(invitee => 
-            invitee.input.toLowerCase() === input.toLowerCase()
-        );
+        if (!input) return false;
+        return this.invitees.some(invitee => {
+            const inviteeInput = invitee.input || '';
+            return inviteeInput.toLowerCase() === input.toLowerCase();
+        });
     }
 
     /**
@@ -241,8 +268,11 @@ export class InviteInputManager {
     createInviteeElement(invitee) {
         const wrapper = document.createElement('div');
         wrapper.className = 'invitee-item';
-        wrapper.dataset.inviteeInput = invitee.input; // Use input as identifier
-        wrapper.classList.add(`invitee-${invitee.type}`);
+        
+        // Use input as identifier, but handle null/undefined cases
+        const inputIdentifier = invitee.input || 'unknown-' + Date.now();
+        wrapper.dataset.inviteeInput = inputIdentifier;
+        wrapper.classList.add(`invitee-${invitee.type || 'unknown'}`);
         
         // Apply validation status classes
         this.applyValidationClasses(wrapper, invitee);
@@ -251,9 +281,15 @@ export class InviteInputManager {
         const typeIcon = invitee.type === 'email' ? SVGManager.emailSVG : SVGManager.userSVG;
         const validationIndicator = this.createValidationIndicator(invitee);
         
+        // Use userData.fullName if available, otherwise fallback to input, or show placeholder
+        let displayName = invitee.input || 'Unknown invitee';
+        if (invitee.userData && invitee.userData.fullName) {
+            displayName = invitee.userData.fullName;
+        }
+        
         wrapper.innerHTML = `
             <div class="invitee-type-icon">${typeIcon}</div>
-            <span class="invitees-input">${invitee.input}</span>
+            <span class="invitees-input">${displayName}</span>
             ${validationIndicator}
             <button type="button" class="remove-invitee-btn" 
                     data-i18n-title="cr_it_ed.remove_invitee" 
