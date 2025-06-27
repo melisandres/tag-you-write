@@ -97,6 +97,7 @@
             <input type="text" name="keywords" data-i18n-placeholder="cr_it_ed.keywords_placeholder" placeholder="{{ translate('cr_it_ed.keywords_placeholder') }}" value="{{ data.keywords|default('') }}">
         </label>
 
+        {% if not data.parent_id %}
         <label>
             <span data-i18n="cr_it_ed.invite_collaborators" class="headline">
                 {{ translate('cr_it_ed.invite_collaborators') }}
@@ -110,7 +111,7 @@
             <div class="invitees-display" id="invitees-display"></div>
             <input type="hidden" name="invitees" id="invitees-data" value="">
         </label>
-
+        {% endif %}
 
 
         <input type="hidden" name="writer_id" value="{{ session.writer_id }}"> 

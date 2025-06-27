@@ -96,7 +96,7 @@ export class DataManager {
 
     initializeCurrentViewedRootIdFromForm() {
         const formType = document.querySelector('[data-form-type]')?.dataset.formType;
-        if (formType && formType !== 'root') {
+        if (formType && (formType === 'iterating' || formType === 'adding_note')) {
             const gameId = document.querySelector('input[name="game_id"]').value;
             if (gameId) {
                 // Convert game ID to root ID (text_id) using existing method
