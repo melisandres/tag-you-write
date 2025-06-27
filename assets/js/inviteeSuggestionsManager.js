@@ -192,7 +192,7 @@ export class InviteeSuggestionsManager {
     showCollaboratorsLoadingState() {
         this.suggestionsContainer.innerHTML = `
             <div class="suggestions-loading">
-                <span>${window.i18n ? window.i18n.translate('cr_it_ed.loading') : 'Loading...'}</span>
+                <span data-i18n="cr_it_ed.loading">${window.i18n ? window.i18n.translate('cr_it_ed.loading') : 'Loading...'}</span>
             </div>
         `;
         this.suggestionsContainer.style.display = 'block';
@@ -204,7 +204,7 @@ export class InviteeSuggestionsManager {
     showErrorState(message) {
         this.suggestionsContainer.innerHTML = `
             <div class="suggestions-error">
-                <span>${message || (window.i18n ? window.i18n.translate('cr_it_ed.error_loading_collaborators') : 'Error loading collaborators')}</span>
+                <span data-i18n="cr_it_ed.error_loading_collaborators">${message || (window.i18n ? window.i18n.translate('cr_it_ed.error_loading_collaborators') : 'Error loading collaborators')}</span>
             </div>
         `;
         this.suggestionsContainer.style.display = 'block';
@@ -293,7 +293,7 @@ export class InviteeSuggestionsManager {
         if (collaborators.length > 0) {
             suggestionsHTML += `
                 <div class="suggestions-header recent-collaborators-header">
-                    <span>${window.i18n ? window.i18n.translate('cr_it_ed.recent_collaborators') : 'Recent Collaborators'}</span>
+                    <span data-i18n="cr_it_ed.recent_collaborators">${window.i18n ? window.i18n.translate('cr_it_ed.recent_collaborators') : 'Recent Collaborators'}</span>
                 </div>
                 <div class="suggestions-list recent-collaborators-list">
                     ${collaborators.map(collaborator => this.createUserSuggestion(collaborator)).join('')}
@@ -304,7 +304,7 @@ export class InviteeSuggestionsManager {
         // Always show Other Users section
         suggestionsHTML += `
             <div class="suggestions-header search-users-header">
-                <span>${window.i18n ? window.i18n.translate('cr_it_ed.other_users') : 'Other Users'}</span>
+                <span data-i18n="cr_it_ed.other_users">${window.i18n ? window.i18n.translate('cr_it_ed.other_users') : 'Other Users'}</span>
             </div>
         `;
 
@@ -312,7 +312,7 @@ export class InviteeSuggestionsManager {
         if (isLoadingSearch) {
             suggestionsHTML += `
                 <div class="suggestions-loading">
-                    <span>${window.i18n ? window.i18n.translate('cr_it_ed.loading') : 'Loading...'}</span>
+                    <span data-i18n="cr_it_ed.loading">${window.i18n ? window.i18n.translate('cr_it_ed.loading') : 'Loading...'}</span>
                 </div>
             `;
         } else if (searchUsers.length > 0) {
@@ -324,13 +324,13 @@ export class InviteeSuggestionsManager {
         } else if (currentSearchTerm.length >= 2) {
             suggestionsHTML += `
                 <div class="suggestions-empty">
-                    <span>${window.i18n ? window.i18n.translate('cr_it_ed.no_users_found') : 'No users found'}</span>
+                    <span data-i18n="cr_it_ed.no_users_found">${window.i18n ? window.i18n.translate('cr_it_ed.no_users_found') : 'No users found'}</span>
                 </div>
             `;
         } else {
             suggestionsHTML += `
                 <div class="suggestions-empty">
-                    <span>${window.i18n ? window.i18n.translate('cr_it_ed.type_to_search') : 'Type to search for users...'}</span>
+                    <span data-i18n="cr_it_ed.type_to_search">${window.i18n ? window.i18n.translate('cr_it_ed.type_to_search') : 'Type to search for users...'}</span>
                 </div>
             `;
         }
@@ -339,7 +339,7 @@ export class InviteeSuggestionsManager {
         if (!suggestionsHTML) {
             suggestionsHTML = `
                 <div class="suggestions-empty">
-                    <span>${window.i18n ? window.i18n.translate('cr_it_ed.no_collaborators_found') : 'No collaborators found'}</span>
+                    <span data-i18n="cr_it_ed.no_collaborators_found">${window.i18n ? window.i18n.translate('cr_it_ed.no_collaborators_found') : 'No collaborators found'}</span>
                 </div>
             `;
         }
@@ -373,6 +373,7 @@ export class InviteeSuggestionsManager {
                 <button type="button" class="add-collaborator-btn ${buttonClass}" 
                         data-user-id="${user.id}"
                         data-user-name="${user.fullName}"
+                        data-i18n-title="${isSelected ? 'cr_it_ed.collaborator_selected' : 'cr_it_ed.add_collaborator'}"
                         title="${buttonTitle}">
                     ${buttonIcon}
                 </button>
