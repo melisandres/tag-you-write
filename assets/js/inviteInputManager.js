@@ -23,11 +23,13 @@ export class InviteInputManager {
         this.inviteesDataInput = document.getElementById('invitees-data');
         
         // State management
-        this.invitees = []; // Array of invitee objects: {input, type, validationStatus?}
+        this.invitees = []; // Array of invitee objects: {input, type, userId?, validationStatus?}
         this.isUpdatingHiddenField = false; // Prevents infinite sync loops
         
         if (this.inviteeInput && this.inviteesDisplay) {
             this.init();
+            // Make this instance available globally
+            window.inviteInputManagerInstance = this;
         }
     }
 
@@ -172,12 +174,34 @@ export class InviteInputManager {
         // Create invitee object (input serves as unique identifier)
         const invitee = {
             input: input,
-            type: input.includes('@') ? 'email' : 'username'
+            type: input.includes('@') ? 'email' : 'username',
+            userId: null // Will be populated by validation or selection
         };
 
         this.invitees.push(invitee);
         this.updateHiddenField(); // Triggers validation and re-render
         this.inviteeInput.value = ''; // Clear input for next entry
+    }
+
+    /**
+     * Add a new invitee with known user data (from recent collaborators)
+     */
+    addInviteeWithData(input, userId = null, type = null) {
+        // Prevent duplicates (case-insensitive)
+        if (this.inviteeExists(input)) {
+            return false;
+        }
+
+        // Create invitee object with known data
+        const invitee = {
+            input: input,
+            type: type || (input.includes('@') ? 'email' : 'username'),
+            userId: userId
+        };
+
+        this.invitees.push(invitee);
+        this.updateHiddenField(); // Triggers validation and re-render
+        return true;
     }
 
     /**
@@ -279,6 +303,12 @@ export class InviteInputManager {
         // Trigger autosave and validation systems
         const event = new Event('input', { bubbles: true });
         this.inviteesDataInput.dispatchEvent(event);
+        
+        // Emit event for other components (like RecentCollaboratorsManager)
+        eventBus.emit('inviteesChanged', {
+            invitees: this.invitees,
+            userIds: this.invitees.filter(inv => inv.userId).map(inv => inv.userId)
+        });
         
         // Reset flag after brief delay to allow event propagation
         setTimeout(() => {

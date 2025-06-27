@@ -8,439 +8,449 @@
     "browsing": "Browsing",
     "editingVsBrowsing": "users editing : users browsing"
   },
-    "nav": {
-        "home": "Home",
-        "home_tooltip": "home",
-        "filter": "Filter",
-        "filter_tooltip": "filter texts",
-        "browse": "Browse",
-        "browse_tooltip": "browse texts",
-        "language": "Language",
-        "language_tooltip": "change language",
-        "search": "Search",
-        "search_tooltip": "keyword search",
-        "newGame": "New Collaboration",
-        "newGame_tooltip": "create a new collaboration",
-        "notifications": "Notifications",
-        "notifications_tooltip": "notifications",
-        "login": "Log in",
-        "login_tooltip": "log in",
-        "logout": "Logout",
-        "logout_tooltip": "logout"
-    },
-    "notifications": {
-      "notification_game_won": "Game Won!",
-      "notification_game_closed": "Game Closed",
-      "notification_game_won_text": "The {game_title_link} collaboration is closed. Your iteration: \"{winning_title}\" has been unanimously chosen as the winner!",
-      "notification_game_closed_text": "The {game_title_link} collaboration is closed. The winning text is \"{winning_title}\"",
-      "warning_game_won_title": "Game Closed",
-      "warning_game_closed_title": "Game Closed",
-      "warning_game_won_text": "The winning vote was just cast! The {game_title} collaboration is closed. Your iteration: \"{winning_title}\" has been unanimously chosen as the winner! Sadly, the text you are working on is no longer in the running.",
-      "warning_game_closed_text": "The winning vote was just cast! The \"{game_title}\" collaboration is closed. The winning text is \"{winning_title}\". Sadly, the text you are working on is no longer in the running.",
-      "no_notifications": "No notifications"
-    },
-    "footer": {
-      "made_with_love": "Made with love by Melisandre"
-    },
-    "page_title" : {
-      "home": "Scratch that!",
-      "texts": "All Texts!",
-      "story_collab": "Story Collaboration",
+  "nav": {
+      "home": "Home",
+      "home_tooltip": "home",
+      "filter": "Filter",
+      "filter_tooltip": "filter texts",
+      "browse": "Browse",
+      "browse_tooltip": "browse texts",
+      "language": "Language",
+      "language_tooltip": "change language",
+      "search": "Search",
+      "search_tooltip": "keyword search",
+      "newGame": "New Collaboration",
+      "newGame_tooltip": "create a new collaboration",
+      "notifications": "Notifications",
+      "notifications_tooltip": "notifications",
       "login": "Log in",
-      "logout": "Log out",
-      "forgot_password": "Forgot Password",
-      "home_error": "Error Page",
-      "reset_password": "Reset Password",
-      "text_create": "Create Text",
-      "text_edit": "Edit Text",
-      "text_iterate": "Iterate on Text",
-      "note_edit": "Leave a Note",
-      "writer_create": "Join our community",
-      "writer_edit": "Edit your info"
+      "login_tooltip": "log in",
+      "logout": "Logout",
+      "logout_tooltip": "logout"
+  },
+  "notifications": {
+    "notification_game_won": "Game Won!",
+    "notification_game_closed": "Game Closed",
+    "notification_game_won_text": "The {game_title_link} collaboration is closed. Your iteration: \"{winning_title}\" has been unanimously chosen as the winner!",
+    "notification_game_closed_text": "The {game_title_link} collaboration is closed. The winning text is \"{winning_title}\"",
+    "warning_game_won_title": "Game Closed",
+    "warning_game_closed_title": "Game Closed",
+    "warning_game_won_text": "The winning vote was just cast! The {game_title} collaboration is closed. Your iteration: \"{winning_title}\" has been unanimously chosen as the winner! Sadly, the text you are working on is no longer in the running.",
+    "warning_game_closed_text": "The winning vote was just cast! The \"{game_title}\" collaboration is closed. The winning text is \"{winning_title}\". Sadly, the text you are working on is no longer in the running.",
+    "no_notifications": "No notifications"
+  },
+  "footer": {
+    "made_with_love": "Made with love by Melisandre"
+  },
+  "page_title" : {
+    "home": "Scratch that!",
+    "texts": "All Texts!",
+    "story_collab": "Story Collaboration",
+    "login": "Log in",
+    "logout": "Log out",
+    "forgot_password": "Forgot Password",
+    "home_error": "Error Page",
+    "reset_password": "Reset Password",
+    "text_create": "Create Text",
+    "text_edit": "Edit Text",
+    "text_iterate": "Iterate on Text",
+    "note_edit": "Leave a Note",
+    "writer_create": "Join our community",
+    "writer_edit": "Edit your info"
+  },
+  "forgot_password": {
+    "reset_password": "Reset Password",
+    "request_reset_link": "reset", 
+    "email": "email",
+    "request_reset_link_tooltip": "reset password"
+  },
+  "home_error": {
+    "page_title": "Error Page",
+    "error_message": "We can not do that.",
+    "default_error_message": "Congratulations! Getting lost is the first step in getting anywhere worthwhile."
+  },
+  "login": {
+    "page_title": "Log in",
+    "login": "Log in",
+    "login_tooltip": "log in",
+    "forgot_password": "Forgot Password",
+    "forgot_password_tooltip": "forgot password",
+    "create_account": "Create Account",
+    "create_account_tooltip": "create account"
+  },
+  "reset_password": {
+    "page_title": "Set new password",
+    "new_password": "new password",
+    "update_password": "update password",
+    "update_password_tooltip": "update password"
+  },
+  "cr_it_ed": {
+    "iterating_on": "iterating on:",
+    "prompt": "prompt:",
+    "good_to_know": "good to know:",
+    "good_to_know_text": "<p>While your title and prompt will be carved in STONE, your text will be rehashed by all who join the game.</p> <p>May the best iteration win!</p>",
+    "choose_a_title": "choose a title",
+    "describe_your_changes": "describe your changes",
+    "title_placeholder": "Elsewhere",
+    "changes_placeholder": "Added a panda",
+    "create_prompt": "create a prompt",
+    "prompt_placeholder": "Instructions: how to run away from yourself, when you are also chasing yourself...",
+    "your_version": "your version of \"{game_title}\"",
+    "kickoff_text": "kickoff the text",
+    "writing_placeholder": "When you climb out the window, don't forget your rainboots.",
+    "keywords": "keywords",
+    "keywords_placeholder": "adventure, rainboots",
+    "invite_collaborators": "invite collaborators",
+    "invite_placeholder": "search users / enter email address",
+    "remove_invitee": "Remove invitee", 
+    "recent_collaborators": "Recent Collaborators",
+    "other_users": "Other Users",
+    "no_users_found": "No users found",
+    "type_to_search": "Type to search for users...",
+    "no_collaborators_found": "No collaborators found",
+    "error_loading_collaborators": "Error loading collaborators",
+    "user_not_authenticated": "User not authenticated",
+    "add_collaborator": "Add collaborator",
+    "collaborator_selected": "Already selected",
+    "loading": "Loading..."
+  },
+  "note-edit": {
+    "here_is_what_you_wrote": "Here's your text: ",
+    "change_note_message": "Oops! You can change your note:",
+    "leave_note_message": "Oops! You can leave a note for other writers:",
+    "add_note": "Add Note",
+    "add_note_tooltip": "add a note",
+    "change_note": "Change Note",
+    "change_note_tooltip": "change a note",
+    "your": "your",
+    "note_placeholder": "Write your note here...",
+    "by_you": "by you"
+  },
+  "general": {
+    "greeting": "Hello, {name}!",
+    "email": "email",
+    "password": "password",
+    "username": "username",
+    "untitled": "untitled",
+    "publish": "publish",
+    "publish_tooltip": "publish your text",
+    "save": "save",
+    "save_tooltip": "save as draft",
+    "delete": "delete",
+    "delete_tooltip": "delete this text",
+    "cancel": "cancel",
+    "cancel_tooltip": "exit without saving",
+    "draft": "draft",
+    "exit": "exit",
+    "game": "COLLAB",
+    "pending": "PENDING",
+    "open": "OPEN",
+    "closed": "CLOSED",
+    "view_tree_tooltip": "view tree",
+    "view_shelf_tooltip": "view shelf",
+    "tree_tooltip": "tree",
+    "shelf_tooltip": "shelf",
+    "vote_tooltip": "vote!",
+    "login_tooltip": "log in",
+    "bookmark_tooltip": "bookmark",
+    "iterate_tooltip": "iterate",
+    "new_game_tooltip": "new game",
+    "by": "by",
+    "by_you": "by you",
+    "by_other": "by {firstName} {lastName}",
+    "winner": "WINNER",
+    "iterate": "iterate",
+    "edit": "edit",
+    "add_note": "add note",
+    "vote": "vote"
+  },
+  "writer-create": {
+    "first_name": "First Name",
+    "last_name": "Last Name",
+    "email": "Email",
+    "birthday": "Birthday",
+    "password": "Password",
+    "save": "Save",
+    "save_tooltip": "save your information",
+    "cancel": "Cancel",
+    "untitled": "Untitled"
+  },
+  "auto_save": {
+    "fix_fields_intro": "Please fix ",
+    "field_singular": "the {field} field",
+    "field_dual": "the {field1} and {field2} fields",
+    "field_plural": "the {fields}, and {lastField} fields",
+    "fix_fields_outro": " to enable autosaving."
+  },
+  "home_index": {
+    "title": "collaborative writing",
+    "add_a_few_words": "Add a few words to someone else's.",
+    "write_a_sentence": "Write a sentence, and see it grow legs.",
+    "write_a_phrase": "Write a phrase, and watch its head roll away.",
+    "login": "log in",
+    "browse": "browse collaborations",
+    "how": "how it works",
+    "how_to_collaborate": "how to collaborate",
+    "collaborate_step_one_title": "1. Log in",
+    "collaborate_step_one_text": "Create an account and/or log in.",
+    "collaborate_step_two_title": "2. Explore",
+    "collaborate_step_two_text": "Click on the <span class='info-icon' data-svg='browse'></span> (top menu) to enter our library, where you can expand and explore collaborations.",
+    "collaborate_step_three_title": "3. Write",
+    "collaborate_step_three_text": "Choose a story node that inspires you, change the text (\"iterate\"), and publish <span class='info-icon' data-svg='publish'></span> your version when you're ready to share.",
+    "collaborate_step_four_title": "4. Vote",
+    "collaborate_step_four_text": "Vote on a winning text. The first text to get upvotes from all collaborating writers wins!",
+    "how_to_start_new_collaboration": "how to start a new collaboration",
+    "create_collaboration_step_one_title": "1. Log in",
+    "create_collaboration_step_one_text": "Create an account and/or log in.",
+    "create_collaboration_step_two_title": "2. Create",
+    "create_collaboration_step_two_text": "Click on the <span class='info-icon' data-svg='newGame'></span> (top menu) to start a new collaboration. You will be asked to create a title, a prompt, and a starting text. All future collaborators will consult yout title and prompt while they write. When you're ready to share, just publish <span class='info-icon' data-svg='publish'></span>.",
+    "create_collaboration_step_three_title": "3. Share",
+    "create_collaboration_step_three_text": "Let your friends know! Or wait for someone from our community to contribute."
+  },
+  "filters": {
+    "contribution": {
+      "all": "everyone's",
+      "contributed": "contributed",
+      "mine": "started"
     },
-    "forgot_password": {
-      "reset_password": "Reset Password",
-      "request_reset_link": "reset", 
-      "email": "email",
-      "request_reset_link_tooltip": "reset password"
+    "gameState": {
+      "all": "open/closed/pending",
+      "open": "open",
+      "closed": "closed",
+      "pending": "pending"
     },
-    "home_error": {
-      "page_title": "Error Page",
-      "error_message": "We can not do that.",
-      "default_error_message": "Congratulations! Getting lost is the first step in getting anywhere worthwhile."
+    "bookmark": {
+      "all": "all",
+      "bookmarked": "bookmarked",
+      "not_bookmarked": "not bookmarked"
+    }
+  },
+  "search": {
+    "placeholder": "search games..."
+  },
+  "games": {
+    "noGamesMessage": "No games found matching your current filters"
+  },
+  "warning": {
+    "add_note": "Your note will be public, but you can edit it any time.",
+    "publish": "You are about to publish this text. This action is irreversible.",
+    "new_game": "Ready to start a new game? This action cannot be undone.",
+    "delete": "Are you sure you want to delete this text? This action cannot be undone.",
+    "last_vote": "This vote confirms the grand winner and ends the game. Are you sure?",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "confirm_game_done": "Understood!",
+    "cancel_game_done": "Ignore..."
+  },
+  "form_field": {
+    "title": "title",
+    "prompt": "prompt",
+    "text": "text",
+    "invitees": "invitees"
+  },
+  "toast": {
+    "text": {
+      "invalid_json": "Invalid data received",
+      "no_input": "No data received",
+      "auto_success": "Auto-save!",
+      "success": "Saved!",
+      "permission_denied_iterate": "Permission to iterate denied",
+      "failed_create_game": "Failed to create a new game",
+      "permission_denied_publish": "Permission to publish denied",
+      "publish_success": "Published!",
+      "publish_failed": "Failed to publish",
+      "permission_denied_edit": "Permission to edit denied",
+      "note_success": "Note updated",
+      "note_failed": "Failed to update note",
+      "permission_denied_delete": "Permission to delete denied",
+      "delete_failed": "Failed to delete",
+      "delete_success": "Deleted!"
+    },
+    "form_manager": {
+      "up_to_date": "Already up to date!",
+      "please_fill_required_fields_correctly": "Please fill required fields correctly",
+      "validation_failed": "Validation failed",
+      "error_occurred": "An error occurred",
+      "account_created_successfully": "Account created successfully! Welcome!",
+      "error_deleting": "An error occurred while deleting."
+    }
+  },
+  "front_val": {
+    "word_count": {
+      "remaining": "you can add {remainingWords} word{pluralization}",
+      "over": "you are {remainingWords} word{pluralization} over the limit"
+    },
+    "root": {
+      "title": {
+        "required": "*a name for the text to grow into",
+        "max_char": "*100 characters max",
+        "typed": "*the title you choose will be carved in stone"
+      },
+      "writing": {
+        "required": "*don't be too precious...",
+        "typed": "*whatever you write will be subject to iteration",
+        "max_word_count": "*add 50 words max",
+        "max_word_count_warning_threshold": "*nearing 50 words..."
+      },
+      "prompt": {
+        "typed": "*your prompt will be the yardstick for all iterations",
+        "required": "*a prompt to steer all iterations",
+        "max_word_count": "*100 words max.",
+        "max_character_count_critical": "*500 characters max."
+      },
+      "keywords": {
+        "typed": "*max 3 keywords, separated by commas please",
+        "max_keywords": "*5 keywords max--comma separated",
+        "max_character_count": "*255 characters max",
+        "keyword_word_count": "*a keyword can be 2 words, but no more. Invalid keywords: {invalidKeywords}"
+      },
+      "invitees": {
+        "invalid_format": "*invalid invitation format",
+        "max_invitees": "*maximum 10 invitees allowed",
+        "typed": "*invitation list"
+      }
+    },
+    "iteration": {
+      "title": {
+        "required": "*required",
+        "typed": "*3 words or less",
+        "max_character_count_critical": "*100 characters max"
+      },
+      "writing": {
+        "required": "*required",
+        "max_word_count": "*add 50 words max",
+        "max_word_count_warning_threshold": "*nearing 50 words...",
+        "writing_changes": "*required"
+      },
+      "keywords": {
+        "typed": "*max 3 keywords, separated by commas please",
+        "max_keywords": "*5 keywords max--comma separated",
+        "max_character_count": "*255 characters max",
+        "keyword_word_count": "*a keyword can be 2 words, but no more. Invalid keywords: {invalidKeywords}"
+      }
+    },
+    "addingNote": {
+      "note": {
+        "required": "*required",
+        "max_word_count": "*50 words max",
+        "max_word_count_warning_threshold": "*nearing 50 words..."
+      }
     },
     "login": {
-      "page_title": "Log in",
-      "login": "Log in",
-      "login_tooltip": "log in",
-      "forgot_password": "Forgot Password",
-      "forgot_password_tooltip": "forgot password",
-      "create_account": "Create Account",
-      "create_account_tooltip": "create account"
-    },
-    "reset_password": {
-      "page_title": "Set new password",
-      "new_password": "new password",
-      "update_password": "update password",
-      "update_password_tooltip": "update password"
-    },
-    "cr_it_ed": {
-      "iterating_on": "iterating on:",
-      "prompt": "prompt:",
-      "good_to_know": "good to know:",
-      "good_to_know_text": "<p>While your title and prompt will be carved in STONE, your text will be rehashed by all who join the game.</p> <p>May the best iteration win!</p>",
-      "choose_a_title": "choose a title",
-      "describe_your_changes": "describe your changes",
-      "title_placeholder": "Elsewhere",
-      "changes_placeholder": "Added a panda",
-      "create_prompt": "create a prompt",
-      "prompt_placeholder": "Instructions: how to run away from yourself, when you are also chasing yourself...",
-      "your_version": "your version of \"{game_title}\"",
-      "kickoff_text": "kickoff the text",
-      "writing_placeholder": "When you climb out the window, don't forget your rainboots.",
-      "keywords": "keywords",
-      "keywords_placeholder": "adventure, rainboots",
-      "invite_collaborators": "invite collaborators",
-      "invite_placeholder": "Enter username or email address",
-      "remove_invitee": "Remove invitee"
-    },
-    "note-edit": {
-      "here_is_what_you_wrote": "Here's your text: ",
-      "change_note_message": "Oops! You can change your note:",
-      "leave_note_message": "Oops! You can leave a note for other writers:",
-      "add_note": "Add Note",
-      "add_note_tooltip": "add a note",
-      "change_note": "Change Note",
-      "change_note_tooltip": "change a note",
-      "your": "your",
-      "note_placeholder": "Write your note here...",
-      "by_you": "by you"
-    },
-    "general": {
-      "greeting": "Hello, {name}!",
-      "email": "email",
-      "password": "password",
-      "username": "username",
-      "untitled": "untitled",
-      "publish": "publish",
-      "publish_tooltip": "publish your text",
-      "save": "save",
-      "save_tooltip": "save as draft",
-      "delete": "delete",
-      "delete_tooltip": "delete this text",
-      "cancel": "cancel",
-      "cancel_tooltip": "exit without saving",
-      "draft": "draft",
-      "exit": "exit",
-      "game": "COLLAB",
-      "pending": "PENDING",
-      "open": "OPEN",
-      "closed": "CLOSED",
-      "view_tree_tooltip": "view tree",
-      "view_shelf_tooltip": "view shelf",
-      "tree_tooltip": "tree",
-      "shelf_tooltip": "shelf",
-      "vote_tooltip": "vote!",
-      "login_tooltip": "log in",
-      "bookmark_tooltip": "bookmark",
-      "iterate_tooltip": "iterate",
-      "new_game_tooltip": "new game",
-      "by": "by",
-      "by_you": "by you",
-      "by_other": "by {firstName} {lastName}",
-      "winner": "WINNER",
-      "iterate": "iterate",
-      "edit": "edit",
-      "add_note": "add note",
-      "vote": "vote"
-    },
-    "writer-create": {
-      "first_name": "First Name",
-      "last_name": "Last Name",
-      "email": "Email",
-      "birthday": "Birthday",
-      "password": "Password",
-      "save": "Save",
-      "save_tooltip": "save your information",
-      "cancel": "Cancel",
-      "untitled": "Untitled"
-    },
-    "auto_save": {
-      "fix_fields_intro": "Please fix ",
-      "field_singular": "the {field} field",
-      "field_dual": "the {field1} and {field2} fields",
-      "field_plural": "the {fields}, and {lastField} fields",
-      "fix_fields_outro": " to enable autosaving."
-    },
-    "home_index": {
-      "title": "collaborative writing",
-      "add_a_few_words": "Add a few words to someone else's.",
-      "write_a_sentence": "Write a sentence, and see it grow legs.",
-      "write_a_phrase": "Write a phrase, and watch its head roll away.",
-      "login": "log in",
-      "browse": "browse collaborations",
-      "how": "how it works",
-      "how_to_collaborate": "how to collaborate",
-      "collaborate_step_one_title": "1. Log in",
-      "collaborate_step_one_text": "Create an account and/or log in.",
-      "collaborate_step_two_title": "2. Explore",
-      "collaborate_step_two_text": "Click on the <span class='info-icon' data-svg='browse'></span> (top menu) to enter our library, where you can expand and explore collaborations.",
-      "collaborate_step_three_title": "3. Write",
-      "collaborate_step_three_text": "Choose a story node that inspires you, change the text (\"iterate\"), and publish <span class='info-icon' data-svg='publish'></span> your version when you're ready to share.",
-      "collaborate_step_four_title": "4. Vote",
-      "collaborate_step_four_text": "Vote on a winning text. The first text to get upvotes from all collaborating writers wins!",
-      "how_to_start_new_collaboration": "how to start a new collaboration",
-      "create_collaboration_step_one_title": "1. Log in",
-      "create_collaboration_step_one_text": "Create an account and/or log in.",
-      "create_collaboration_step_two_title": "2. Create",
-      "create_collaboration_step_two_text": "Click on the <span class='info-icon' data-svg='newGame'></span> (top menu) to start a new collaboration. You will be asked to create a title, a prompt, and a starting text. All future collaborators will consult yout title and prompt while they write. When you're ready to share, just publish <span class='info-icon' data-svg='publish'></span>.",
-      "create_collaboration_step_three_title": "3. Share",
-      "create_collaboration_step_three_text": "Let your friends know! Or wait for someone from our community to contribute."
-    },
-    "filters": {
-      "contribution": {
-        "all": "everyone's",
-        "contributed": "contributed",
-        "mine": "started"
+      "email": {
+        "required": "*required",
+        "email": "*must be a valid email address"
       },
-      "gameState": {
-        "all": "open/closed/pending",
-        "open": "open",
-        "closed": "closed",
-        "pending": "pending"
-      },
-      "bookmark": {
-        "all": "all",
-        "bookmarked": "bookmarked",
-        "not_bookmarked": "not bookmarked"
+      "password": {
+        "required": "*required",
+        "max_character_count": "*20 characters max",
+        "min_character_count": "*6 characters min",
+        "pattern": "*only letters and numbers allowed"
       }
     },
-    "search": {
-      "placeholder": "search games..."
-    },
-    "games": {
-      "noGamesMessage": "No games found matching your current filters"
-    },
-    "warning": {
-      "add_note": "Your note will be public, but you can edit it any time.",
-      "publish": "You are about to publish this text. This action is irreversible.",
-      "new_game": "Ready to start a new game? This action cannot be undone.",
-      "delete": "Are you sure you want to delete this text? This action cannot be undone.",
-      "last_vote": "This vote confirms the grand winner and ends the game. Are you sure?",
-      "confirm": "Confirm",
-      "cancel": "Cancel",
-      "confirm_game_done": "Understood!",
-      "cancel_game_done": "Ignore..."
-    },
-    "form_field": {
-      "title": "title",
-      "prompt": "prompt",
-      "text": "text",
-      "invitees": "invitees"
-    },
-    "toast": {
-      "text": {
-        "invalid_json": "Invalid data received",
-        "no_input": "No data received",
-        "auto_success": "Auto-save!",
-        "success": "Saved!",
-        "permission_denied_iterate": "Permission to iterate denied",
-        "failed_create_game": "Failed to create a new game",
-        "permission_denied_publish": "Permission to publish denied",
-        "publish_success": "Published!",
-        "publish_failed": "Failed to publish",
-        "permission_denied_edit": "Permission to edit denied",
-        "note_success": "Note updated",
-        "note_failed": "Failed to update note",
-        "permission_denied_delete": "Permission to delete denied",
-        "delete_failed": "Failed to delete",
-        "delete_success": "Deleted!"
-      },
-      "form_manager": {
-        "up_to_date": "Already up to date!",
-        "please_fill_required_fields_correctly": "Please fill required fields correctly",
-        "validation_failed": "Validation failed",
-        "error_occurred": "An error occurred",
-        "account_created_successfully": "Account created successfully! Welcome!",
-        "error_deleting": "An error occurred while deleting."
+    "resetPassword": {
+      "password": {
+        "required": "*required",
+        "max_character_count": "*20 characters max",
+        "min_character_count": "*6 characters min",
+        "pattern": "*only letters and numbers allowed"
       }
     },
-    "front_val": {
-      "word_count": {
-        "remaining": "you can add {remainingWords} word{pluralization}",
-        "over": "you are {remainingWords} word{pluralization} over the limit"
-      },
-      "root": {
-        "title": {
-          "required": "*a name for the text to grow into",
-          "max_char": "*100 characters max",
-          "typed": "*the title you choose will be carved in stone"
-        },
-        "writing": {
-          "required": "*don't be too precious...",
-          "typed": "*whatever you write will be subject to iteration",
-          "max_word_count": "*add 50 words max",
-          "max_word_count_warning_threshold": "*nearing 50 words..."
-        },
-        "prompt": {
-          "typed": "*your prompt will be the yardstick for all iterations",
-          "required": "*a prompt to steer all iterations",
-          "max_word_count": "*100 words max.",
-          "max_character_count_critical": "*500 characters max."
-        },
-        "keywords": {
-          "typed": "*max 3 keywords, separated by commas please",
-          "max_keywords": "*5 keywords max--comma separated",
-          "max_character_count": "*255 characters max",
-          "keyword_word_count": "*a keyword can be 2 words, but no more. Invalid keywords: {invalidKeywords}"
-        },
-        "invitees": {
-          "invalid_format": "*invalid invitation format",
-          "max_invitees": "*maximum 10 invitees allowed",
-          "typed": "*invitation list"
-        }
-      },
-      "iteration": {
-        "title": {
-          "required": "*required",
-          "typed": "*3 words or less",
-          "max_character_count_critical": "*100 characters max"
-        },
-        "writing": {
-          "required": "*required",
-          "max_word_count": "*add 50 words max",
-          "max_word_count_warning_threshold": "*nearing 50 words...",
-          "writing_changes": "*required"
-        },
-        "keywords": {
-          "typed": "*max 3 keywords, separated by commas please",
-          "max_keywords": "*5 keywords max--comma separated",
-          "max_character_count": "*255 characters max",
-          "keyword_word_count": "*a keyword can be 2 words, but no more. Invalid keywords: {invalidKeywords}"
-        }
-      },
-      "addingNote": {
-        "note": {
-          "required": "*required",
-          "max_word_count": "*50 words max",
-          "max_word_count_warning_threshold": "*nearing 50 words..."
-        }
-      },
-      "login": {
-        "email": {
-          "required": "*required",
-          "email": "*must be a valid email address"
-        },
-        "password": {
-          "required": "*required",
-          "max_character_count": "*20 characters max",
-          "min_character_count": "*6 characters min",
-          "pattern": "*only letters and numbers allowed"
-        }
-      },
-      "resetPassword": {
-        "password": {
-          "required": "*required",
-          "max_character_count": "*20 characters max",
-          "min_character_count": "*6 characters min",
-          "pattern": "*only letters and numbers allowed"
-        }
-      },
-      "forgotPassword": {
-        "email": {
-          "required": "*required",
-          "email": "*must be a valid email address"
-        }
-      },
-      "writerCreate": {
-        "firstName": {
-          "required": "*required",
-          "max_character_count": "*45 characters max",
-          "pattern": "*only letters allowed"
-        },
-        "lastName": {
-          "required": "*required",
-          "max_character_count": "*45 characters max",
-          "pattern": "*only letters allowed"
-        },
-        "email": {
-          "required": "*required",
-          "max_character_count": "*50 characters max",
-          "email": "*must be a valid email address" 
-        },
-        "birthday": {
-          "required": "*required",
-          "date": "*must be a valid date"
-        },
-        "password": { 
-          "required": "*required",
-          "max_character_count": "*20 characters max",
-          "min_character_count": "*6 characters min",
-          "pattern": "*only letters and numbers allowed"
-        }
+    "forgotPassword": {
+      "email": {
+        "required": "*required",
+        "email": "*must be a valid email address"
       }
     },
-    "error": {
-      "text_not_found": "Text not found",
-      "no_game_specified": "No game specified",
-      "game_not_found": "Game not found",
-      "game_does_not_exist": "Something went wrong. Sorry. The requested text does not exist.", 
-      "no_text_id_provided": "No text ID provided",
-      "permission_denied_edit": "Sorry! You don't have permission to edit this text.",
-      "permission_denied_iterate": "Sorry! This action is not permitted, for one of many reasons..",
-      "already_logged_in": "You are already logged into an account",
-      "invalid_request_method": "Invalid request method",
-      "already_registered": "We already have a user registered with that email address.",
-      "something_went_wrong": "Something went wrong. Sorry."
-    },
-    "auth": {
-      "no_match": "Username and/or password don't match",
-      "account_created": "Account created successfully! Welcome!",
-      "login_success": "Login successful",
-      "validation_failed": "Validation failed",
-      "invalid_json": "Invalid data received",
-      "account_created_email": {
-        "email_title": "Welcome to the Tag You Write family",
-        "email_message": "Welcome {name}! Tag you write is an experiment. I'm hoping it will be a fun way to write small pieces collaboratively. If you have any issues with your account, or any feedback, just hit \"reply\". Thanks for participating!"
+    "writerCreate": {
+      "firstName": {
+        "required": "*required",
+        "max_character_count": "*45 characters max",
+        "pattern": "*only letters allowed"
       },
-      "password_reset": {
-        "email_title": "Password Reset Request",
-        "email_message": "Click the following link to reset your password: \n\n",
-        "email_link": "Reset Password",
-        "email_sent": "Password reset link has been sent to your email", 
-        "email_not_found": "Email not found", 
-        "invalid_or_expired_reset_link": "Invalid or expired reset link",
-        "password_updated": "Password updated successfully"
+      "lastName": {
+        "required": "*required",
+        "max_character_count": "*45 characters max",
+        "pattern": "*only letters allowed"
+      },
+      "email": {
+        "required": "*required",
+        "max_character_count": "*50 characters max",
+        "email": "*must be a valid email address" 
+      },
+      "birthday": {
+        "required": "*required",
+        "date": "*must be a valid date"
+      },
+      "password": { 
+        "required": "*required",
+        "max_character_count": "*20 characters max",
+        "min_character_count": "*6 characters min",
+        "pattern": "*only letters and numbers allowed"
       }
-    },
-    "legend": {
-      "winner": "winner",
-      "unread": "unread",
-      "search": "search",
-      "votes": "# of votes",
-      "not_enough_players_line1": "*Not enough",
-      "not_enough_players_line2": "players for votes",
-      "show_legend": "Show Legend",
-      "adding_note": "note in progress",
-      "text_in_progress": "text in progress"
-    },
-    "d3_visualization": {
-      "unavailable_title": "D3 Visualization Unavailable",
-      "unavailable_message": "The D3 library could not be loaded. Please check your internet connection or contact the administrator."
-    },
-    "modal": {
-      "draft": "DRAFT",
-      "winner": "WINNER",
-      "ps": "P.S..."
-    },
-    "tooltips": {
-      "contributor": "☆ contributor",
-      "bookmark_tooltip": "bookmark",
-      "tree_tooltip": "tree",
-      "shelf_tooltip": "shelf"
-    },
-    "tree": {
-      "ghost_title": "click clack",
-      "ghost_name_area": ". . . someone types"
     }
+  },
+  "error": {
+    "text_not_found": "Text not found",
+    "no_game_specified": "No game specified",
+    "game_not_found": "Game not found",
+    "game_does_not_exist": "Something went wrong. Sorry. The requested text does not exist.", 
+    "no_text_id_provided": "No text ID provided",
+    "permission_denied_edit": "Sorry! You don't have permission to edit this text.",
+    "permission_denied_iterate": "Sorry! This action is not permitted, for one of many reasons..",
+    "already_logged_in": "You are already logged into an account",
+    "invalid_request_method": "Invalid request method",
+    "already_registered": "We already have a user registered with that email address.",
+    "something_went_wrong": "Something went wrong. Sorry."
+  },
+  "auth": {
+    "no_match": "Username and/or password don't match",
+    "account_created": "Account created successfully! Welcome!",
+    "login_success": "Login successful",
+    "validation_failed": "Validation failed",
+    "invalid_json": "Invalid data received",
+    "account_created_email": {
+      "email_title": "Welcome to the Tag You Write family",
+      "email_message": "Welcome {name}! Tag you write is an experiment. I'm hoping it will be a fun way to write small pieces collaboratively. If you have any issues with your account, or any feedback, just hit \"reply\". Thanks for participating!"
+    },
+    "password_reset": {
+      "email_title": "Password Reset Request",
+      "email_message": "Click the following link to reset your password: \n\n",
+      "email_link": "Reset Password",
+      "email_sent": "Password reset link has been sent to your email", 
+      "email_not_found": "Email not found", 
+      "invalid_or_expired_reset_link": "Invalid or expired reset link",
+      "password_updated": "Password updated successfully"
+    }
+  },
+  "legend": {
+    "winner": "winner",
+    "unread": "unread",
+    "search": "search",
+    "votes": "# of votes",
+    "not_enough_players_line1": "*Not enough",
+    "not_enough_players_line2": "players for votes",
+    "show_legend": "Show Legend",
+    "adding_note": "note in progress",
+    "text_in_progress": "text in progress"
+  },
+  "d3_visualization": {
+    "unavailable_title": "D3 Visualization Unavailable",
+    "unavailable_message": "The D3 library could not be loaded. Please check your internet connection or contact the administrator."
+  },
+  "modal": {
+    "draft": "DRAFT",
+    "winner": "WINNER",
+    "ps": "P.S..."
+  },
+  "tooltips": {
+    "contributor": "☆ contributor",
+    "bookmark_tooltip": "bookmark",
+    "tree_tooltip": "tree",
+    "shelf_tooltip": "shelf"
+  },
+  "tree": {
+    "ghost_title": "click clack",
+    "ghost_name_area": ". . . someone types"
   }
+}

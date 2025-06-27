@@ -271,3 +271,178 @@ label .ck.ck-content.ck-editor__editable {
 }
 
 /* Error styling is handled by ValidationManager feedback system */
+
+/* Collaborators Suggestions Styling */
+.collaborators-suggestions {
+    position: relative;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: var(--color-white);
+    border: 1px solid var(--color-grey-light);
+    border-radius: 0 0 0.5rem 0.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 2;
+    /* max-height: 280px; */
+    overflow-y: auto;
+    display: none;
+}
+
+.suggestions-header {
+    padding: 0.75rem 1rem;
+    background: var(--color-grey-lightest);
+    border-bottom: 1px solid var(--color-grey-light);
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--text-color-secondary);
+    position: sticky;
+    top: 0;
+    z-index: 3;
+}
+
+/* Different styling for the two header types */
+.suggestions-header.recent-collaborators-header {
+    background: var(--color-secondary-lightest);
+    color: var(--color-secondary-dark);
+}
+
+.suggestions-header.search-users-header {
+    background: var(--color-accent-lightest, #e8f4fd);
+    color: var(--color-accent-dark, #1e5fa8);
+}
+
+.suggestions-list {
+    max-height: 160px;
+    overflow-y: visible;
+    position: relative;
+}
+
+.search-users-list {
+    /* No additional border needed */
+}
+
+.collaborator-suggestion {
+    font-family: var(--font-family-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid var(--color-grey-lightest);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.collaborator-suggestion:hover {
+    background-color: var(--color-secondary-lightest);
+}
+
+.collaborator-suggestion.selected {
+    background-color: var(--color-success-lightest, #d4edda);
+    border-color: var(--color-success-light, #c3e6cb);
+}
+
+.collaborator-suggestion:last-child {
+    border-bottom: none;
+}
+
+.collaborator-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1;
+}
+
+.collaborator-name {
+    font-weight: 500;
+    color: var(--text-color-primary);
+    font-size: 0.875rem;
+}
+
+.collaborator-email {
+    font-size: 0.75rem;
+    color: var(--text-color-secondary);
+}
+
+.add-collaborator-btn {
+    background: var(--color-accent);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 1.5rem;
+    height: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+    flex-shrink: 0;
+}
+
+.add-collaborator-btn:hover {
+    background: var(--color-accent-dark);
+}
+
+.add-collaborator-btn.selected {
+    background: var(--color-success, #28a745);
+    cursor: default;
+}
+
+.add-collaborator-btn.selected:hover {
+    background: var(--color-success, #28a745);
+}
+
+.suggestions-loading,
+.suggestions-error,
+.suggestions-empty {
+    padding: 1rem;
+    text-align: center;
+    color: var(--text-color-secondary);
+    font-size: 0.875rem;
+}
+
+.suggestions-error {
+    color: var(--color-error);
+}
+
+/* Ensure the invitee input container has relative positioning for dropdown */
+#invitees-input {
+    position: relative;
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+    .collaborators-suggestions {
+        background: var(--color-dark);
+        border-color: var(--color-grey-dark);
+    }
+    
+    .suggestions-header {
+        background: var(--color-grey-dark);
+        border-color: var(--color-grey);
+        color: var(--text-color-secondary);
+    }
+    
+    .suggestions-header.recent-collaborators-header {
+        background: var(--color-secondary-dark);
+        color: var(--color-secondary-lightest);
+    }
+    
+    .suggestions-header.search-users-header {
+        background: var(--color-accent-dark, #1e5fa8);
+        color: var(--color-accent-lightest, #e8f4fd);
+    }
+    
+    .recent-collaborators-list {
+        border-bottom-color: var(--color-grey-dark);
+    }
+    
+    .collaborator-suggestion {
+        border-color: var(--color-grey-dark);
+    }
+    
+    .collaborator-suggestion:hover {
+        background-color: var(--color-grey-dark);
+    }
+}

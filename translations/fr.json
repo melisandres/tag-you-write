@@ -100,8 +100,18 @@
     "keywords": "mots-clés",
     "keywords_placeholder": "pluie, fenêtre, panda",
     "invite_collaborators": "inviter des collaborateurs",
-    "invite_placeholder": "Entrez nom d'utilisateur ou adresse email",
-    "remove_invitee": "Retirer invité"
+    "invite_placeholder": "cherchez un utilisateur / tapez une adresse email",
+    "remove_invitee": "Retirer invité",
+    "recent_collaborators": "Collaborateurs récents",
+    "other_users": "Autres utilisateurs",
+    "no_users_found": "Aucun utilisateur trouvé",
+    "type_to_search": "Tapez pour rechercher des utilisateurs...",
+    "no_collaborators_found": "Aucun collaborateur trouvé",
+    "error_loading_collaborators": "Erreur lors du chargement des collaborateurs",
+    "user_not_authenticated": "Utilisateur non authentifié",
+    "add_collaborator": "Ajouter collaborateur",
+    "collaborator_selected": "Déjà sélectionné",
+    "loading": "Chargement..."
   },
   "note-edit": {
     "here_is_what_you_wrote": "Voici votre texte: ",

@@ -462,7 +462,8 @@ export class ValidationManager {
                 // Validate each invitee and add validation status
                 // Use the same email regex as validateEmail method
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                const usernameRegex = /^[a-zA-Z0-9_-]{3,20}$/;
+                // Updated regex to accept "firstName lastName" format with Unicode letters (including accents)
+                const usernameRegex = /^[\p{L}]+\s[\p{L}]+$/u;
                 
                 let hasErrors = false;
                 const validatedInvitees = [];
@@ -489,16 +490,75 @@ export class ValidationManager {
                         };
                         hasErrors = true;
                     }
-                    // Validate username format (for now - we'll enhance this later)
-                    else if (invitee.type === 'username' && !usernameRegex.test(invitee.input)) {
+                    // For usernames with ID (selected from list), they're automatically valid
+                    else if (invitee.type === 'username' && invitee.userId) {
                         validatedInvitee.validationStatus = {
-                            isValid: false,
-                            errorType: 'username_format',
-                            message: 'Invalid username format'
+                            isValid: true,
+                            message: 'Valid user selected'
                         };
-                        hasErrors = true;
                     }
-                    // Valid invitee
+                    // For usernames without ID, check if they match someone in available users (recent collaborators + search results)
+                    else if (invitee.type === 'username' && !invitee.userId) {
+                        // Try to auto-select from all available users (recent collaborators + search results)
+                        const recentCollaboratorsManager = window.recentCollaboratorsManagerInstance;
+                        if (recentCollaboratorsManager && typeof recentCollaboratorsManager.getAllUsers === 'function') {
+                            const allAvailableUsers = recentCollaboratorsManager.getAllUsers();
+                            const matchingUser = allAvailableUsers.find(
+                                user => user.fullName.toLowerCase() === invitee.input.toLowerCase()
+                            );
+                            
+                            if (matchingUser) {
+                                // Auto-populate the userId
+                                validatedInvitee.userId = matchingUser.id;
+                                
+                                // Determine source for better messaging
+                                const isFromRecentCollaborators = recentCollaboratorsManager.collaborators.some(
+                                    collab => collab.id === matchingUser.id
+                                );
+                                const sourceMessage = isFromRecentCollaborators ? 
+                                    'Auto-selected from recent collaborators' : 
+                                    'Auto-selected from search results';
+                                
+                                validatedInvitee.validationStatus = {
+                                    isValid: true,
+                                    message: sourceMessage
+                                };
+                            } else {
+                                // Check format first, then show user not found
+                                if (!usernameRegex.test(invitee.input)) {
+                                    validatedInvitee.validationStatus = {
+                                        isValid: false,
+                                        errorType: 'username_format',
+                                        message: 'Username must be in "firstName lastName" format'
+                                    };
+                                } else {
+                                    validatedInvitee.validationStatus = {
+                                        isValid: false,
+                                        errorType: 'user_not_found',
+                                        message: 'User not found. Please search and select from suggestions.'
+                                    };
+                                }
+                                hasErrors = true;
+                            }
+                        } else {
+                            // Fallback to legacy validation if enhanced search not available
+                            if (!usernameRegex.test(invitee.input)) {
+                                validatedInvitee.validationStatus = {
+                                    isValid: false,
+                                    errorType: 'username_format',
+                                    message: 'Username must be in "firstName lastName" format'
+                                };
+                            } else {
+                                validatedInvitee.validationStatus = {
+                                    isValid: false,
+                                    errorType: 'user_not_found',
+                                    message: 'User not found. Please search and select from suggestions.'
+                                };
+                            }
+                            hasErrors = true;
+                        }
+                    }
+                    // Valid invitee (email with valid format)
                     else {
                         validatedInvitee.validationStatus = {
                             isValid: true,
@@ -603,14 +663,14 @@ export class ValidationManager {
      * @returns {Promise<Object>} - Validation result with async support
      */
     async validateUsername(username) {
-        // Phase 1: Basic format validation (current implementation)
-        const usernameRegex = /^[a-zA-Z0-9_-]{3,20}$/;
+        // Phase 1: Basic format validation (firstName lastName format)
+        const usernameRegex = /^[a-zA-Z]+\s[a-zA-Z]+$/;
         
         if (!usernameRegex.test(username)) {
             return {
                 isValid: false,
                 errorType: 'username_format',
-                message: 'Username must be 3-20 characters, letters/numbers/underscore/dash only'
+                message: 'Username must be in "firstName lastName" format'
             };
         }
         

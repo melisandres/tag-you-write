@@ -206,6 +206,5 @@ class ControllerGame extends Controller {
     public function validateNewGame(){
 
     }
-    
 }
 ?>
