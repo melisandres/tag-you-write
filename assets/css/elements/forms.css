@@ -283,7 +283,7 @@ label .ck.ck-content.ck-editor__editable {
     border-radius: 0 0 0.5rem 0.5rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     z-index: 2;
-    /* max-height: 280px; */
+    max-height: 200px;
     overflow-y: auto;
     display: none;
 }
@@ -312,7 +312,7 @@ label .ck.ck-content.ck-editor__editable {
 }
 
 .suggestions-list {
-    max-height: 160px;
+    /* max-height: 160px; */
     overflow-y: visible;
     position: relative;
 }

@@ -1,43 +1,65 @@
 import { eventBus } from './eventBus.js';
+import { InviteeServices } from './inviteeServices.js';
 
 /**
- * Manages recent collaborators and user search functionality for invitee input system.
+ * Manages the UI for invitee suggestions and user search functionality.
  * 
  * Responsibilities:
- * - Fetch recent collaborators from backend
- * - Search users as user types (debounced)
- * - Display both lists in suggestion dropdown with sticky headers
+ * - Handle UI interactions and DOM manipulation
+ * - Display suggestions in dropdown with sticky headers
  * - Handle collaborator/user selection for invitee input
+ * - Manage visual feedback for selected users
  * - Coordinate with InviteInputManager and ValidationManager
+ * 
+ * Uses InviteeServices for all data operations.
  */
-export class RecentCollaboratorsManager {
+export class InviteeSuggestionsManager {
     constructor() {
-        this.collaborators = [];
-        this.searchUsers = [];
-        this.isLoadingCollaborators = false;
-        this.isLoadingSearch = false;
-        this.hasLoadedCollaborators = false;
         this.selectedCollaboratorIds = new Set(); // Track selected collaborators
         this.lastScrollPosition = 0; // Track scroll position
-        this.searchDebounceTimer = null;
-        this.currentSearchTerm = '';
         
         // DOM elements
         this.suggestionsContainer = null;
         this.inviteeInput = document.getElementById('invitees-input');
         this.inviteInputManager = null; // Will be set when available
         
+        // Initialize service
+        this.inviteeServices = new InviteeServices();
+        
         if (this.inviteeInput) {
             this.init();
             // Make this instance available globally
+            window.inviteeSuggestionsManagerInstance = this;
+            // Legacy support
             window.recentCollaboratorsManagerInstance = this;
         }
     }
 
     init() {
+        this.setupServiceCallbacks();
         this.createSuggestionsContainer();
         this.setupEventListeners();
         this.setupInviteInputIntegration();
+    }
+
+    /**
+     * Set up callbacks for service events
+     */
+    setupServiceCallbacks() {
+        this.inviteeServices.setEventCallbacks({
+            onCollaboratorsLoaded: (collaborators) => {
+                this.renderCurrentState();
+            },
+            onSearchResultsUpdated: (searchUsers) => {
+                this.renderCurrentState();
+            },
+            onLoadingStateChanged: (loadingState) => {
+                this.renderCurrentState();
+            },
+            onError: (error) => {
+                this.showErrorState(error);
+            }
+        });
     }
 
     /**
@@ -69,11 +91,11 @@ export class RecentCollaboratorsManager {
     setupEventListeners() {
         // Show suggestions when input is focused
         this.inviteeInput.addEventListener('focus', () => {
-            if (this.hasLoadedCollaborators) {
+            if (this.inviteeServices.isCollaboratorsLoaded()) {
                 this.showSuggestions();
             } else {
                 // If not loaded yet, trigger load and then show
-                this.loadCollaborators().then(() => {
+                this.inviteeServices.loadCollaborators().then(() => {
                     this.showSuggestions();
                 });
             }
@@ -91,92 +113,13 @@ export class RecentCollaboratorsManager {
         this.inviteeInput.addEventListener('input', () => {
             const inputValue = this.inviteeInput.value.trim();
             
-            // Update current search term immediately for consistent filtering
-            this.currentSearchTerm = inputValue;
+            console.log(this.inviteeServices);
+            // Update search term in service and trigger search
+            this.inviteeServices.searchUsers(inputValue);
             
-            // Trigger debounced search for users
-            this.debouncedUserSearch(inputValue);
-            
-            // Re-render with current filtered data (both recent collaborators and search results)
+            // Re-render with current filtered data
             this.renderCurrentState();
         });
-    }
-
-    /**
-     * Debounced search for users
-     */
-    debouncedUserSearch(searchTerm) {
-        // Clear existing timer
-        if (this.searchDebounceTimer) {
-            clearTimeout(this.searchDebounceTimer);
-        }
-
-        // Set new timer
-        this.searchDebounceTimer = setTimeout(() => {
-            this.searchUsersApi(searchTerm);
-        }, 200); // 200ms debounce - faster response
-    }
-
-    /**
-     * Search users via API
-     */
-    async searchUsersApi(searchTerm) {
-        // Store the search term we're about to search for
-        const currentSearchAttempt = searchTerm;
-        this.currentSearchTerm = searchTerm;
-
-        // Clear search results if term is too short
-        if (!searchTerm || searchTerm.length < 2) {
-            this.searchUsers = [];
-            this.isLoadingSearch = false;
-            this.renderCurrentState();
-            return;
-        }
-
-        this.isLoadingSearch = true;
-        this.renderCurrentState(); // Use renderCurrentState instead of showSearchLoadingState
-
-        try {
-            const endpoint = 'gameInvitation/searchUsers';
-            const url = window.i18n.createUrl(endpoint) + '?q=' + encodeURIComponent(searchTerm);
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'same-origin'
-            });
-
-            if (!response.ok) {
-                if (response.status === 401) {
-                    console.warn('User not authenticated for user search');
-                    this.searchUsers = [];
-                } else {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return;
-            }
-
-            const data = await response.json();
-            
-            // Only update if this is still the current search term
-            if (data.success && data.users && currentSearchAttempt === this.currentSearchTerm) {
-                this.searchUsers = data.users;
-            } else {
-                console.warn('Failed to search users:', data.error);
-                this.searchUsers = [];
-            }
-
-        } catch (error) {
-            console.error('Error searching users:', error);
-            this.searchUsers = [];
-        } finally {
-            // Only clear loading state if this is still the current search attempt
-            if (currentSearchAttempt === this.currentSearchTerm) {
-                this.isLoadingSearch = false;
-                this.renderCurrentState();
-            }
-        }
     }
 
     /**
@@ -244,56 +187,6 @@ export class RecentCollaboratorsManager {
     }
 
     /**
-     * Fetch recent collaborators from the backend
-     */
-    async loadCollaborators() {
-        if (this.isLoadingCollaborators || this.hasLoadedCollaborators) return;
-
-        this.isLoadingCollaborators = true;
-        this.showCollaboratorsLoadingState();
-
-        try {
-            const endpoint = 'gameInvitation/getRecentCollaborators';
-            const url = window.i18n.createUrl(endpoint);
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'same-origin'
-            });
-
-            if (!response.ok) {
-                if (response.status === 401) {
-                    console.warn('User not authenticated for recent collaborators');
-                    this.showErrorState('User not authenticated');
-                    return;
-                }
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            
-            if (data.success && data.collaborators) {
-                this.collaborators = data.collaborators;
-                this.hasLoadedCollaborators = true;
-                
-                // Render but keep hidden unless input is focused
-                this.renderCurrentState();
-                this.hideSuggestions();
-            } else {
-                console.warn('Failed to load collaborators:', data.error);
-            }
-
-        } catch (error) {
-            console.error('Error loading recent collaborators:', error);
-            this.showErrorState();
-        } finally {
-            this.isLoadingCollaborators = false;
-        }
-    }
-
-    /**
      * Show loading state for collaborators
      */
     showCollaboratorsLoadingState() {
@@ -303,16 +196,6 @@ export class RecentCollaboratorsManager {
             </div>
         `;
         this.suggestionsContainer.style.display = 'block';
-    }
-
-    /**
-     * Show loading state for search
-     */
-    showSearchLoadingState() {
-        // Only show if we're currently displaying suggestions
-        if (this.suggestionsContainer.style.display === 'block') {
-            this.renderCurrentState();
-        }
     }
 
     /**
@@ -331,7 +214,11 @@ export class RecentCollaboratorsManager {
      * Show the suggestions container
      */
     showSuggestions() {
-        if (this.collaborators.length > 0 || this.searchUsers.length > 0 || this.currentSearchTerm.length >= 2) {
+        const filteredCollaborators = this.inviteeServices.getFilteredCollaborators();
+        const filteredSearchUsers = this.inviteeServices.getFilteredSearchUsers();
+        const currentSearchTerm = this.inviteeServices.getCurrentSearchTerm();
+        
+        if (filteredCollaborators.length > 0 || filteredSearchUsers.length > 0 || currentSearchTerm.length >= 2) {
             this.suggestionsContainer.style.display = 'block';
             this.renderCurrentState();
             
@@ -358,7 +245,11 @@ export class RecentCollaboratorsManager {
         this.selectedCollaboratorIds = currentSelectedIds;
 
         // Apply visual state to all users (collaborators and search results)
-        [...this.collaborators, ...this.searchUsers].forEach(user => {
+        const allUsers = [
+            ...this.inviteeServices.getCollaborators(), 
+            ...this.inviteeServices.getSearchUsers()
+        ];
+        allUsers.forEach(user => {
             const isSelected = currentSelectedIds.has(user.id);
             this.updateUserVisualState(user.id, isSelected);
         });
@@ -372,61 +263,11 @@ export class RecentCollaboratorsManager {
     }
 
     /**
-     * Get filtered recent collaborators based on current input
-     */
-    getFilteredCollaborators() {
-        const inputValue = this.currentSearchTerm.toLowerCase();
-        
-        if (!inputValue) {
-            return this.collaborators;
-        }
-        
-        return this.collaborators.filter(collaborator => {
-            const fullName = collaborator.fullName.toLowerCase();
-            const firstName = collaborator.firstName.toLowerCase();
-            const lastName = collaborator.lastName.toLowerCase();
-            
-            return fullName.includes(inputValue) || 
-                   firstName.includes(inputValue) || 
-                   lastName.includes(inputValue);
-        });
-    }
-
-    /**
-     * Get filtered search users based on current input
-     * Excludes users that are already in recent collaborators
-     */
-    getFilteredSearchUsers() {
-        const inputValue = this.currentSearchTerm.toLowerCase();
-        
-        // Get IDs of recent collaborators to exclude duplicates
-        const recentCollaboratorIds = new Set(this.collaborators.map(collab => collab.id));
-        
-        // Filter search users to exclude recent collaborators
-        let filteredUsers = this.searchUsers.filter(user => !recentCollaboratorIds.has(user.id));
-        
-        // Further filter based on input text if provided
-        if (inputValue) {
-            filteredUsers = filteredUsers.filter(user => {
-                const fullName = user.fullName.toLowerCase();
-                const firstName = user.firstName.toLowerCase();
-                const lastName = user.lastName.toLowerCase();
-                
-                return fullName.includes(inputValue) || 
-                       firstName.includes(inputValue) || 
-                       lastName.includes(inputValue);
-            });
-        }
-        
-        return filteredUsers;
-    }
-
-    /**
      * Render the current state with filtered data
      */
     renderCurrentState() {
-        const filteredCollaborators = this.getFilteredCollaborators();
-        const filteredSearchUsers = this.getFilteredSearchUsers();
+        const filteredCollaborators = this.inviteeServices.getFilteredCollaborators();
+        const filteredSearchUsers = this.inviteeServices.getFilteredSearchUsers();
         this.renderSuggestions(filteredCollaborators, filteredSearchUsers);
     }
 
@@ -441,8 +282,11 @@ export class RecentCollaboratorsManager {
      * Render the suggestions list with both collaborators and search results
      */
     renderSuggestions(collaboratorsToShow = null, searchUsersToShow = null) {
-        const collaborators = collaboratorsToShow !== null ? collaboratorsToShow : this.getFilteredCollaborators();
-        const searchUsers = searchUsersToShow !== null ? searchUsersToShow : this.getFilteredSearchUsers();
+        const collaborators = collaboratorsToShow !== null ? collaboratorsToShow : this.inviteeServices.getFilteredCollaborators();
+        const searchUsers = searchUsersToShow !== null ? searchUsersToShow : this.inviteeServices.getFilteredSearchUsers();
+        const currentSearchTerm = this.inviteeServices.getCurrentSearchTerm();
+        const isLoadingSearch = this.inviteeServices.isLoadingSearchData();
+        
         let suggestionsHTML = '';
 
         // Recent Collaborators Section
@@ -457,38 +301,34 @@ export class RecentCollaboratorsManager {
             `;
         }
 
-        // Search Results Section
-        if (this.currentSearchTerm.length >= 2) {
+        // Always show Other Users section
+        suggestionsHTML += `
+            <div class="suggestions-header search-users-header">
+                <span>${window.i18n ? window.i18n.translate('cr_it_ed.other_users') : 'Other Users'}</span>
+            </div>
+        `;
+
+        // Search Results or Messages Section
+        if (isLoadingSearch) {
             suggestionsHTML += `
-                <div class="suggestions-header search-users-header">
-                    <span>${window.i18n ? window.i18n.translate('cr_it_ed.other_users') : 'Other Users'}</span>
+                <div class="suggestions-loading">
+                    <span>${window.i18n ? window.i18n.translate('cr_it_ed.loading') : 'Loading...'}</span>
                 </div>
             `;
-
-            if (this.isLoadingSearch) {
-                suggestionsHTML += `
-                    <div class="suggestions-loading">
-                        <span>${window.i18n ? window.i18n.translate('cr_it_ed.loading') : 'Loading...'}</span>
-                    </div>
-                `;
-            } else if (searchUsers.length > 0) {
-                suggestionsHTML += `
-                    <div class="suggestions-list search-users-list">
-                        ${searchUsers.map(user => this.createUserSuggestion(user)).join('')}
-                    </div>
-                `;
-            } else {
-                suggestionsHTML += `
-                    <div class="suggestions-empty">
-                        <span>${window.i18n ? window.i18n.translate('cr_it_ed.no_users_found') : 'No users found'}</span>
-                    </div>
-                `;
-            }
-        } else if (this.currentSearchTerm.length > 0) {
+        } else if (searchUsers.length > 0) {
             suggestionsHTML += `
-                <div class="suggestions-header search-users-header">
-                    <span>${window.i18n ? window.i18n.translate('cr_it_ed.other_users') : 'Other Users'}</span>
+                <div class="suggestions-list search-users-list">
+                    ${searchUsers.map(user => this.createUserSuggestion(user)).join('')}
                 </div>
+            `;
+        } else if (currentSearchTerm.length >= 2) {
+            suggestionsHTML += `
+                <div class="suggestions-empty">
+                    <span>${window.i18n ? window.i18n.translate('cr_it_ed.no_users_found') : 'No users found'}</span>
+                </div>
+            `;
+        } else {
+            suggestionsHTML += `
                 <div class="suggestions-empty">
                     <span>${window.i18n ? window.i18n.translate('cr_it_ed.type_to_search') : 'Type to search for users...'}</span>
                 </div>
@@ -593,8 +433,7 @@ export class RecentCollaboratorsManager {
             
             // Clear the input and search results
             this.inviteeInput.value = '';
-            this.currentSearchTerm = '';
-            this.searchUsers = [];
+            this.inviteeServices.clearSearch();
             this.renderCurrentState();
             
             // Emit event for other components
@@ -686,23 +525,44 @@ export class RecentCollaboratorsManager {
      * Returns both filtered collaborators and search results
      */
     getAllUsers() {
-        const filteredCollaborators = this.getFilteredCollaborators();
-        const filteredSearchUsers = this.getFilteredSearchUsers();
-        const allUsers = [...filteredCollaborators, ...filteredSearchUsers];
-        
-        // Remove duplicates by ID
-        const uniqueUsers = allUsers.filter((user, index, arr) => 
-            arr.findIndex(u => u.id === user.id) === index
-        );
-        return uniqueUsers;
+        return this.inviteeServices.getAllFilteredUsers();
     }
 
     /**
      * Refresh collaborators data
      */
     refreshCollaborators() {
-        this.hasLoadedCollaborators = false;
-        this.loadCollaborators();
+        return this.inviteeServices.refreshCollaborators();
+    }
+
+    /**
+     * Load collaborators if not already loaded
+     */
+    loadCollaborators() {
+        return this.inviteeServices.loadCollaborators();
+    }
+
+    // === Service delegation methods ===
+    
+    /**
+     * Get current collaborators from service
+     */
+    getCollaborators() {
+        return this.inviteeServices.getCollaborators();
+    }
+
+    /**
+     * Get current search users from service
+     */
+    getSearchUsers() {
+        return this.inviteeServices.getSearchUsers();
+    }
+
+    /**
+     * Get current search term from service
+     */
+    getCurrentSearchTerm() {
+        return this.inviteeServices.getCurrentSearchTerm();
     }
 
     // === Legacy methods for backward compatibility ===
@@ -719,5 +579,47 @@ export class RecentCollaboratorsManager {
      */
     deselectCollaborator(collaboratorId, collaboratorName) {
         this.deselectUser(collaboratorId, collaboratorName);
+    }
+
+    /**
+     * Legacy getter for collaborators (for backward compatibility)
+     */
+    get collaborators() {
+        return this.inviteeServices.getCollaborators();
+    }
+
+    /**
+     * Legacy getter for search users (for backward compatibility)
+     */
+    get searchUsers() {
+        return this.inviteeServices.getSearchUsers();
+    }
+
+    /**
+     * Legacy getter for current search term (for backward compatibility)
+     */
+    get currentSearchTerm() {
+        return this.inviteeServices.getCurrentSearchTerm();
+    }
+
+    /**
+     * Legacy getter for loading state (for backward compatibility)
+     */
+    get isLoadingCollaborators() {
+        return this.inviteeServices.isLoadingCollaboratorsData();
+    }
+
+    /**
+     * Legacy getter for loading state (for backward compatibility)
+     */
+    get isLoadingSearch() {
+        return this.inviteeServices.isLoadingSearchData();
+    }
+
+    /**
+     * Legacy getter for loaded state (for backward compatibility)
+     */
+    get hasLoadedCollaborators() {
+        return this.inviteeServices.isCollaboratorsLoaded();
     }
 } 

@@ -304,7 +304,7 @@ export class InviteInputManager {
         const event = new Event('input', { bubbles: true });
         this.inviteesDataInput.dispatchEvent(event);
         
-        // Emit event for other components (like RecentCollaboratorsManager)
+        // Emit event for other components (like InviteeSuggestionsManager)
         eventBus.emit('inviteesChanged', {
             invitees: this.invitees,
             userIds: this.invitees.filter(inv => inv.userId).map(inv => inv.userId)

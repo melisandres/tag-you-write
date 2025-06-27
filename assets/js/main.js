@@ -45,7 +45,7 @@ import { GameListRenderer } from './gameListRenderer.js';
 import { GameSubscriptionManager } from './gameSubscriptionManager.js';
 import { TextFormGameActivityIndicator } from './textFormGameActivityIndicator.js';
 import { InviteInputManager } from './inviteInputManager.js';
-import { RecentCollaboratorsManager } from './recentCollaboratorsManager.js';
+import { InviteeSuggestionsManager } from './inviteeSuggestionsManager.js';
 
 // Make eventBus globally available immediately
 window.eventBus = eventBus;
@@ -130,8 +130,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Initialize InviteInputManager for text creation forms
   new InviteInputManager();
   
-  // Initialize RecentCollaboratorsManager for invitee suggestions
-  new RecentCollaboratorsManager();
+  // Initialize InviteeSuggestionsManager for invitee suggestions
+  new InviteeSuggestionsManager();
 
   // Initialize InstaPublishManager and InstaDeleteManager
   new InstaPublishManager(warningManager);
