@@ -279,7 +279,7 @@ label .ck.ck-content.ck-editor__editable {
     left: 0;
     right: 0;
     background: var(--color-white);
-    border: 1px solid var(--color-grey-light);
+    border: 1px solid var(--color-primary-light);
     border-radius: 0 0 0.5rem 0.5rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     z-index: 2;
@@ -291,7 +291,7 @@ label .ck.ck-content.ck-editor__editable {
 .suggestions-header {
     padding: 0.75rem 1rem;
     background: var(--color-grey-lightest);
-    border-bottom: 1px solid var(--color-grey-light);
+    border-bottom: 1px solid var(--color-primary-light);
     font-weight: 600;
     font-size: 0.875rem;
     color: var(--text-color-secondary);
@@ -301,14 +301,18 @@ label .ck.ck-content.ck-editor__editable {
 }
 
 /* Different styling for the two header types */
-.suggestions-header.recent-collaborators-header {
-    background: var(--color-secondary-lightest);
-    color: var(--color-secondary-dark);
+.suggestions-header.recent-collaborators-header,
+.suggestions-header.search-users-header {
+    color: var(--color-grey-medium);
+    background: var(--color-primary-lightest);
+    border-top: 1px solid var(--color-primary-light);
 }
 
-.suggestions-header.search-users-header {
-    background: var(--color-accent-lightest, #e8f4fd);
-    color: var(--color-accent-dark, #1e5fa8);
+.suggestions-header.recent-collaborators-header span,
+.suggestions-header.search-users-header span {
+    font-family: var(--font-family-secondary);
+    font-weight: 600;
+    font-size: var(--font-size-small);
 }
 
 .suggestions-list {
