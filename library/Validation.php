@@ -36,6 +36,7 @@
             'date_dmy'      => '[0-9]{1,2}\-[0-9]{1,2}\-[0-9]{4}',
             'date_ymd'      => '[0-9]{4}\-[0-9]{1,2}\-[0-9]{1,2}',
             'email'         => '[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})',
+            'username'      => '[a-zA-Z0-9._-]+',
             'keywords'      => '^([\w\s]+)(, [\w\s]+)*$'
         );
 
@@ -465,6 +466,57 @@
         public function differentFrom($parentText) {
             if ($parentText && $this->value === $parentText) {
                 $this->errors[] = 'The '.$this->name.' field must be different from the parent text.';
+            }
+            return $this;
+        }
+
+        /**
+         * Validate username length
+         *
+         * @param int $minLength Minimum length (default 2)
+         * @param int $maxLength Maximum length (default 50)
+         * @return $this
+         */
+        public function usernameLength($minLength = 2, $maxLength = 50) {
+            $length = strlen($this->value);
+            if ($length < $minLength || $length > $maxLength) {
+                $this->errors[] = 'The '.$this->name.' must be between '.$minLength.' and '.$maxLength.' characters.';
+            }
+            return $this;
+        }
+
+        /**
+         * Check if value is unique in an array (case-insensitive)
+         *
+         * @param array $existingValues Array of existing values to check against
+         * @param string $errorMessage Custom error message (optional)
+         * @return $this
+         */
+        public function uniqueInArray($existingValues, $errorMessage = null) {
+            if (!is_array($existingValues)) {
+                $existingValues = [];
+            }
+            
+            $currentValueLower = strtolower($this->value);
+            $existingValuesLower = array_map('strtolower', $existingValues);
+            
+            if (in_array($currentValueLower, $existingValuesLower)) {
+                $message = $errorMessage ?: 'The '.$this->name.' "' . $this->value . '" already exists.';
+                $this->errors[] = $message;
+            }
+            return $this;
+        }
+
+        /**
+         * Validate maximum number of items in array
+         *
+         * @param int $maxCount Maximum number of items allowed
+         * @param string $itemType Type of items for error message (e.g., 'invitees', 'keywords')
+         * @return $this
+         */
+        public function maxArrayCount($maxCount, $itemType = 'items') {
+            if (is_array($this->value) && count($this->value) > $maxCount) {
+                $this->errors[] = 'Too many '.$itemType.'. Maximum '.$maxCount.' allowed.';
             }
             return $this;
         }

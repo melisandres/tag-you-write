@@ -44,6 +44,33 @@ abstract class Controller{
             'user_id' => $_SESSION['writer_id'] ?? null
         ]);
     }
+
+    /**
+     * Send a standardized JSON response
+     * 
+     * @param bool $success Whether the operation was successful
+     * @param string $message Toast message key for translation
+     * @param mixed $additionalData Additional data to include in response (array) or redirect URL (string)
+     */
+    protected function sendJsonResponse($success, $message, $additionalData = null) {
+        // Clear any output that might have been sent before
+        if (ob_get_length()) ob_clean();
+        $response = [
+            'success' => $success,
+            'toastMessage' => $message,
+            'toastType' => $success ? 'success' : 'error',
+        ];
+
+        if (is_array($additionalData)) {
+            $response = array_merge($response, $additionalData);
+        } elseif ($additionalData !== null) {
+            $response['redirectUrl'] = $additionalData;
+        }
+
+        header('Content-Type: application/json');
+        echo json_encode($response);
+        exit;
+    }
 }
 
 ?>
