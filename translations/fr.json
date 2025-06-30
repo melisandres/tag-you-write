@@ -30,8 +30,10 @@
   "notifications": {
     "notification_game_won": "Partie Gagnée!",
     "notification_game_closed": "Partie Terminée",
+    "notification_game_invitation": "Nouvelle invitation de collaboration",
     "notification_game_won_text": "La collaboration {game_title_link} est terminée. Votre itération : \"{winning_title}\" a été choisie à l'unanimité comme gagnante !",
     "notification_game_closed_text": "La collaboration {game_title_link} est terminée. Le texte gagnant est \"{winning_title}\"",
+    "notification_game_invitation_text": "Vous avez été invité(e) à collaborer sur {game_title_link}",
     "warning_game_won_title": "Partie Gagnée!",
     "warning_game_closed_title": "Partie Terminée",
     "warning_game_won_text": "Le vote gagnant vient de voter! La collaboration {game_title} est terminée. Votre itération : \"{winning_title}\" a été choisie à l'unanimité comme gagnante ! Malheureusement, le texte que vous écrivez ne pourra pas être considéré.",
@@ -263,7 +265,9 @@
       "note_failed": "Échec de la mise à jour de la note",
       "permission_denied_delete": "Permission refusée pour supprimer",
       "delete_failed": "Échec de la suppression",
-      "delete_success": "Supprimé!"
+      "delete_success": "Supprimé!",
+      "invitees_validation_failed": "Vos invités ne sont pas valides",
+      "validation_failed": "Votre formulaire n'est pas valide"
     },
     "form_manager": {
       "up_to_date": "Déjà à jour!",
@@ -400,7 +404,12 @@
     "already_logged_in": "Vous êtes déjà connecté à un compte",
     "invalid_request_method": "Méthode de requête invalide",
     "already_registered": "Nous avons déjà un utilisateur enregistré avec cette adresse email.",
-    "something_went_wrong": "Quelque chose s'est mal passé. Désolé."
+    "something_went_wrong": "Quelque chose s'est mal passé. Désolé.",
+    "invalid_invitation_link": "Lien d'invitation invalide",
+    "invitation_not_found": "Invitation non trouvée ou expirée",
+    "invitation_already_processed": "Cette invitation a déjà été traitée",
+    "invitation_not_for_this_user": "Cette invitation n'est pas pour votre compte",
+    "invitation_processing_failed": "Échec du traitement de l'invitation"
   },
   "auth": {
     "no_match": "Nom d'utilisateur et/ou mot de passe ne correspondent pas",
@@ -422,6 +431,13 @@
       "password_updated": "Mot de passe mis à jour avec succès"
     }
   },
+  "email": {
+    "game_invitation": {
+      "subject": "{inviterName} vous invite à collaborer sur \"{gameTitle}\"",
+      "message": "Bonjour {recipientName},\n\n{inviterName} vous a invité(e) à collaborer sur un projet d'écriture appelé \"{gameTitle}\".\n\nInvite: {gamePrompt}\n\nCliquez sur le lien ci-dessous pour rejoindre la collaboration:\n{invitationUrl}\n\nBonne écriture!\n\nL'équipe Tag You Write"
+    }
+  },
+
   "legend": {
     "winner": "gagnant",
     "unread": "non lu",

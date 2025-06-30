@@ -317,7 +317,7 @@ class ControllerGameInvitation extends Controller {
                         'invitee_id' => $inviteeId,
                         'email' => $email,
                         'token' => $token,
-                        'invited_at' => date('Y-m-d H:i:s'),
+                        'invited_at' => null, // Will be set when invitations are actually sent
                         'status' => 'pending',
                         'can_invite_others' => 0 // Changed from false to 0
                     ];
@@ -441,6 +441,403 @@ class ControllerGameInvitation extends Controller {
         } catch (Exception $e) {
             error_log('Error in getInvitationsForEditing: ' . $e->getMessage());
             return '[]'; // Return empty array on error
+        }
+    }
+
+    /**
+     * Send email invitations for a game (when game is started--specifically when the root node ispublished)
+     * Updates invited_at timestamp and sends emails to all pending invitees
+     * Also creates notifications for registered users
+     * 
+     * @param int $gameId The game ID
+     * @param array $gameData Game information for email content
+     * @return array Success status and results
+     */
+    public function sendInvitations($gameId, $gameData) {
+        try {
+            RequirePage::model('GameInvitation');
+            RequirePage::model('Writer');
+            RequirePage::library('Email');
+            
+            $gameInvitation = new GameInvitation();
+            $writer = new Writer();
+            $emailer = new Email();
+            
+            // Get all pending invitations for this game that haven't been sent yet
+            $invitations = $gameInvitation->getInvitationsByGame($gameId);
+            $pendingInvitations = array_filter($invitations, function($inv) {
+                return $inv['status'] === 'pending' && is_null($inv['invited_at']);
+            });
+            
+            if (empty($pendingInvitations)) {
+                return [
+                    'success' => true,
+                    'message' => 'No pending invitations to send',
+                    'sent_count' => 0,
+                    'notification_count' => 0
+                ];
+            }
+            
+            $emailsSent = 0;
+            $notificationsCreated = 0;
+            $errors = [];
+            $currentTimestamp = date('Y-m-d H:i:s');
+            
+            foreach ($pendingInvitations as $invitation) {
+                // Determine recipient email and name
+                $recipientEmail = null;
+                $recipientName = null;
+                $isRegisteredUser = false;
+                
+                if ($invitation['invitee_id']) {
+                    // Registered user - get their email from the database
+                    $userData = $writer->selectId($invitation['invitee_id']);
+                    if ($userData) {
+                        $recipientEmail = $userData['email'];
+                        $recipientName = trim($userData['firstName'] . ' ' . $userData['lastName']);
+                        $isRegisteredUser = true;
+                    }
+                } else if ($invitation['email']) {
+                    // Email invitation or invalid username stored in email column
+                    $recipientEmail = $invitation['email'];
+                    $recipientName = $recipientEmail; // Use email as name for unregistered users
+                    $isRegisteredUser = false;
+                }
+                
+                // Skip if no valid email found
+                if (!$recipientEmail) {
+                    $errors[] = "No valid email found for invitation ID: " . $invitation['id'];
+                    continue;
+                }
+                
+                // Get inviter information
+                $inviterData = $writer->selectId($invitation['inviter_id']);
+                $inviterName = $inviterData ? trim($inviterData['firstName'] . ' ' . $inviterData['lastName']) : 'Someone';
+                
+                // Prepare email content
+                try {
+                    $subject = translate('email.game_invitation.subject', [
+                        'inviterName' => $inviterName,
+                        'gameTitle' => $gameData['title'] ?? 'Untitled Game'
+                    ]);
+                    
+                    // Generate invitation URL
+                    $invitationUrl = RequirePage::getBaseUrl() . langUrl('GameInvitation/visit/' . $invitation['token']);
+                    
+                    $message = translate('email.game_invitation.message', [
+                        'recipientName' => $recipientName,
+                        'inviterName' => $inviterName,
+                        'gameTitle' => $gameData['title'] ?? 'Untitled Game',
+                        'gamePrompt' => $gameData['prompt'] ?? '',
+                        'invitationUrl' => $invitationUrl
+                    ]);
+                    
+                    // Send email
+                    if ($emailer->welcome($recipientEmail, $recipientName, $subject, $message)) {
+                        $emailsSent++;
+                        
+                        // Update invitation with sent timestamp
+                        $gameInvitation->update([
+                            'id' => $invitation['id'],
+                            'invited_at' => $currentTimestamp
+                        ]);
+                        
+                        // Create notification for registered users
+                        if ($isRegisteredUser) {
+                            $this->createInvitationNotification(
+                                $invitation['invitee_id'], 
+                                $invitation['inviter_id'], 
+                                $gameId, 
+                                $gameData
+                            );
+                            $notificationsCreated++;
+                        }
+                    } else {
+                        $errors[] = "Failed to send email to: " . $recipientEmail;
+                    }
+                } catch (Exception $e) {
+                    $errors[] = "Exception when processing invitation: " . $e->getMessage();
+                }
+            }
+            
+            $result = [
+                'success' => empty($errors) || $emailsSent > 0, // Success if at least one email sent
+                'message' => $emailsSent > 0 ? 'Invitations sent successfully' : 'Failed to send invitations',
+                'sent_count' => $emailsSent,
+                'notification_count' => $notificationsCreated,
+                'errors' => $errors
+            ];
+            
+            return $result;
+            
+        } catch (Exception $e) {
+            error_log('Error in sendInvitations: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'Failed to send invitations: ' . $e->getMessage(),
+                'sent_count' => 0,
+                'notification_count' => 0,
+                'errors' => [$e->getMessage()]
+            ];
+        }
+    }
+
+    /**
+     * Create notification for game invitation (registered users only)
+     * 
+     * @param int $inviteeId The user being invited
+     * @param int $inviterId The user doing the inviting
+     * @param int $gameId The game ID
+     * @param array $gameData Game information
+     */
+    private function createInvitationNotification($inviteeId, $inviterId, $gameId, $gameData) {
+        try {
+            error_log("Creating notification for user $inviteeId from inviter $inviterId for game $gameId");
+            RequirePage::controller('ControllerNotification');
+            
+            // Create structured message for notification
+            $message = json_encode([
+                'title' => 'notification.game_invitation.title',
+                'message' => 'notification.game_invitation.message',
+                'gameId' => $gameId,
+                'gameTitle' => $gameData['title'] ?? 'Untitled Game',
+                'inviterId' => $inviterId,
+                'inviterName' => $gameData['inviterName'] ?? 'Someone'
+            ]);
+            
+            // Use ControllerNotification to create the notification
+            $notification = new ControllerNotification();
+            $notificationId = $notification->create(
+                $inviteeId,  // The user receiving the notification
+                $gameId,     // The game ID
+                'game_invitation', // Notification type
+                $message     // Message data
+            );
+            
+            error_log("Notification created with ID: " . ($notificationId ? $notificationId : 'FAILED'));
+            
+            if ($notificationId) {
+                // Get root_text_id from the game model
+                RequirePage::model('Game');
+                $game = new Game();
+                $rootTextId = $game->getRootText($gameId);
+                
+                // Create event for the notification using the standard createEvents method
+                // Use NOTIFICATION_CREATED to ensure proper Redis handling
+                $this->createEvents('NOTIFICATION_CREATED', [
+                    'notificationId' => $notificationId,
+                    'writerId' => $inviteeId, // This should be the recipient ID for Redis channel
+                    'notificationType' => 'game_invitation',
+                    'relatedType' => 'game',
+                    'relatedId' => $gameId,
+                    'gameId' => $gameId, // Add gameId to ensure getRootTextId can find it
+                    'textId' => $rootTextId // Add textId as a fallback
+                ], 'game_invitation');
+                
+                error_log("Event created for notification ID: $notificationId");
+            }
+            
+        } catch (Exception $e) {
+            error_log('Error creating invitation notification: ' . $e->getMessage());
+            error_log('Stack trace: ' . $e->getTraceAsString());
+        }
+    }
+
+    /**
+     * Handle invitation access via token
+     * Route: GameInvitation/visit/[token]
+     * 
+     * This function acts as an access gateway for invited users.
+     * It marks the invitation as 'viewed' when first visited.
+     * True acceptance happens when the user contributes (publishes) to the game.
+     * The token remains valid for future access to private games.
+     * 
+     * @param string $token The invitation token
+     */
+    public function visit($token = null) {
+        if (!$token) {
+            $notifications = $this->getNotifications();
+            Twig::render('home-error.php', [
+                'message' => "error.invalid_invitation_link",
+                'notifications' => $notifications,
+                'notificationsData' => json_encode($notifications)
+            ]);
+            return;
+        }
+        
+        try {
+            RequirePage::model('GameInvitation');
+            RequirePage::model('Game');
+            RequirePage::model('Writer');
+            RequirePage::model('GameHasPlayer');
+            
+            $gameInvitation = new GameInvitation();
+            $game = new Game();
+            $writer = new Writer();
+            $gameHasPlayer = new GameHasPlayer();
+            
+            // Find invitation by token
+            $invitation = $gameInvitation->selectId($token, 'token');
+            
+            if (!$invitation) {
+                $notifications = $this->getNotifications();
+                Twig::render('home-error.php', [
+                    'message' => "error.invitation_not_found",
+                    'notifications' => $notifications,
+                    'notificationsData' => json_encode($notifications)
+                ]);
+                return;
+            }
+            
+            // Check if invitation is still valid (allow both pending and viewed status)
+            if (!in_array($invitation['status'], ['pending', 'viewed'])) {
+                $notifications = $this->getNotifications();
+                Twig::render('home-error.php', [
+                    'message' => "error.invitation_already_processed",
+                    'notifications' => $notifications,
+                    'notificationsData' => json_encode($notifications)
+                ]);
+                return;
+            }
+            
+            // Get game information
+            $gameData = $game->selectId($invitation['game_id']);
+            if (!$gameData) {
+                $notifications = $this->getNotifications();
+                Twig::render('home-error.php', [
+                    'message' => "error.game_not_found",
+                    'notifications' => $notifications,
+                    'notificationsData' => json_encode($notifications)
+                ]);
+                return;
+            }
+            
+            // Check if user is logged in
+            if (!isset($_SESSION['writer_id'])) {
+                // Store token in session for after login/registration
+                $_SESSION['pending_invitation_token'] = $token;
+                RequirePage::redirect('login');
+                return;
+            }
+            
+            $currentUserId = $_SESSION['writer_id'];
+            
+            // If invitation was for a registered user, verify it's the right user
+            if ($invitation['invitee_id'] && $invitation['invitee_id'] != $currentUserId) {
+                $notifications = $this->getNotifications();
+                Twig::render('home-error.php', [
+                    'message' => "error.invitation_not_for_this_user",
+                    'notifications' => $notifications,
+                    'notificationsData' => json_encode($notifications)
+                ]);
+                return;
+            }
+            
+            // Add user to game
+            $gameHasPlayerData = [
+                'player_id' => $currentUserId,
+                'game_id' => $invitation['game_id'],
+                'active' => 1
+            ];
+            
+            // Check if already a player
+            $existingPlayer = $gameHasPlayer->selectCompositeId([
+                'game_id' => $invitation['game_id'], 
+                'player_id' => $currentUserId
+            ]);
+            
+            if (!$existingPlayer) {
+                $gameHasPlayer->insert($gameHasPlayerData);
+            }
+            
+            // Update invitation status to 'viewed' (true acceptance happens when user contributes)
+            // Only update if status is still 'pending' to avoid overwriting on repeat visits
+            if ($invitation['status'] === 'pending') {
+                $gameInvitation->update([
+                    'id' => $invitation['id'],
+                    'status' => 'viewed',
+                    'visited_at' => date('Y-m-d H:i:s'),
+                    'invitee_id' => $currentUserId // Update invitee_id for email invitations
+                ]);
+            }
+            
+            // Store invitation info in session for permission checks in other controllers
+            $_SESSION['game_invitation_access'][$invitation['game_id']] = [
+                'token' => $token,
+                'invitation_id' => $invitation['id'],
+                'can_invite_others' => $invitation['can_invite_others']
+            ];
+            
+            // Clear pending invitation from session
+            unset($_SESSION['pending_invitation_token']);
+            
+            // Redirect to the game collaboration page
+            if ($gameData['root_text_id']) {
+                RequirePage::redirect('text/collab/' . $gameData['root_text_id']);
+            } else {
+                RequirePage::redirect('text');
+            }
+            
+        } catch (Exception $e) {
+            error_log('Error in visit invitation: ' . $e->getMessage());
+            $notifications = $this->getNotifications();
+            Twig::render('home-error.php', [
+                'message' => "error.invitation_processing_failed",
+                'notifications' => $notifications,
+                'notificationsData' => json_encode($notifications)
+            ]);
+        }
+    }
+
+    /**
+     * Check if current user has invitation access to a game
+     * This can be used by other controllers to verify game access permissions
+     * 
+     * @param int $gameId The game ID to check access for
+     * @return bool|array Returns false if no access, or invitation info array if access granted
+     */
+    public function checkInvitationAccess($gameId) {
+        // Check if user is logged in
+        if (!isset($_SESSION['writer_id'])) {
+            return false;
+        }
+        
+        $currentUserId = $_SESSION['writer_id'];
+        
+        // Check session for cached invitation access
+        if (isset($_SESSION['game_invitation_access'][$gameId])) {
+            return $_SESSION['game_invitation_access'][$gameId];
+        }
+        
+        // Check database for any valid invitations for this user/game
+        try {
+            RequirePage::model('GameInvitation');
+            $gameInvitation = new GameInvitation();
+            
+            $invitations = $gameInvitation->getInvitationsByGame($gameId);
+            
+            // Look for any invitation for current user that's been viewed or is pending
+            foreach ($invitations as $invitation) {
+                if ($invitation['invitee_id'] == $currentUserId && 
+                    in_array($invitation['status'], ['pending', 'viewed'])) {
+                    
+                    // Cache in session
+                    $accessInfo = [
+                        'token' => $invitation['token'],
+                        'invitation_id' => $invitation['id'],
+                        'can_invite_others' => $invitation['can_invite_others']
+                    ];
+                    $_SESSION['game_invitation_access'][$gameId] = $accessInfo;
+                    
+                    return $accessInfo;
+                }
+            }
+            
+            return false;
+            
+        } catch (Exception $e) {
+            error_log('Error checking invitation access: ' . $e->getMessage());
+            return false;
         }
     }
 }

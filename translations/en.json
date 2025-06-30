@@ -31,8 +31,10 @@
   "notifications": {
     "notification_game_won": "Game Won!",
     "notification_game_closed": "Game Closed",
+    "notification_game_invitation": "New Collaboration Invitation",
     "notification_game_won_text": "The {game_title_link} collaboration is closed. Your iteration: \"{winning_title}\" has been unanimously chosen as the winner!",
     "notification_game_closed_text": "The {game_title_link} collaboration is closed. The winning text is \"{winning_title}\"",
+    "notification_game_invitation_text": "You've been invited to collaborate on {game_title_link}",
     "warning_game_won_title": "Game Closed",
     "warning_game_closed_title": "Game Closed",
     "warning_game_won_text": "The winning vote was just cast! The {game_title} collaboration is closed. Your iteration: \"{winning_title}\" has been unanimously chosen as the winner! Sadly, the text you are working on is no longer in the running.",
@@ -264,7 +266,9 @@
       "note_failed": "Failed to update note",
       "permission_denied_delete": "Permission to delete denied",
       "delete_failed": "Failed to delete",
-      "delete_success": "Deleted!"
+      "delete_success": "Deleted!",
+      "invitees_validation_failed": "Your invitees are not valid",
+      "validation_failed": "Your form is not valid"
     },
     "form_manager": {
       "up_to_date": "Already up to date!",
@@ -401,7 +405,12 @@
     "already_logged_in": "You are already logged into an account",
     "invalid_request_method": "Invalid request method",
     "already_registered": "We already have a user registered with that email address.",
-    "something_went_wrong": "Something went wrong. Sorry."
+    "something_went_wrong": "Something went wrong. Sorry.",
+    "invalid_invitation_link": "Invalid invitation link",
+    "invitation_not_found": "Invitation not found or expired",
+    "invitation_already_processed": "This invitation has already been processed",
+    "invitation_not_for_this_user": "This invitation is not for your account",
+    "invitation_processing_failed": "Failed to process invitation"
   },
   "auth": {
     "no_match": "Username and/or password don't match",
@@ -423,6 +432,13 @@
       "password_updated": "Password updated successfully"
     }
   },
+  "email": {
+    "game_invitation": {
+      "subject": "{inviterName} invites you to collaborate on \"{gameTitle}\"",
+      "message": "Hello {recipientName},\n\n{inviterName} has invited you to collaborate on a writing project called \"{gameTitle}\".\n\nPrompt: {gamePrompt}\n\nClick the link below to join the collaboration:\n{invitationUrl}\n\nHappy writing!\n\nThe Tag You Write Team"
+    }
+  },
+
   "legend": {
     "winner": "winner",
     "unread": "unread",

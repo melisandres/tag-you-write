@@ -363,7 +363,7 @@ class ControllerText extends Controller{
 
         // Check if invitee validation returned an error structure
         if (is_array($status) && isset($status['status']) && $status['status'] === 'error') {
-            $this->sendJsonResponse(false, 'toast.text.validation_failed', ['errors' => $status['errors']]);
+            $this->sendJsonResponse(false, 'toast.text.invitees_validation_failed', ['errors' => $status['errors']]);
             exit;
         }
 
@@ -483,6 +483,11 @@ class ControllerText extends Controller{
                 'title' => $input['title'],
                 'isRoot' => $isRootText
             ], 'form_submit');
+
+            // Send email invitations for root texts when published (game is "started")
+            if ($isRootText) {
+                $this->sendGameInvitations($input['game_id'], $input['title'], $input['prompt']);
+            }
         }
 
         // Same action in both cases. Not an autosave, doing it here, Yes an autosave, doing it in the autosave method.
@@ -746,6 +751,12 @@ class ControllerText extends Controller{
                 'isRoot' => $isRoot
             ], 'insta_publish');
 
+            // Send email invitations for root texts when published (game is "started")
+            if ($isRoot) {
+                $this->sendGameInvitations($gameId, $textData['title'], $textData['prompt'] ?? '');
+            }
+
+            // Fetch game data for response
             $gameData = $game->getGames(null, [], $gameId);
             $gameData[0]['isNewPlayer'] = !$existingPlayer; 
         }
@@ -991,6 +1002,11 @@ class ControllerText extends Controller{
                 'isRoot' => $isRoot
             ], 'update');
 
+            // Send email invitations for root texts when published (game is "started")
+            if ($isRoot) {
+                $this->sendGameInvitations($gameId, $input['title'], $input['prompt'] ?? '');
+            }
+
             // Send a success message
             $this->sendJsonResponse(true, 'toast.text.publish_success', 'text');
         }else{
@@ -1230,15 +1246,18 @@ class ControllerText extends Controller{
             return $intended_status; // No invitee validation needed for iterations
         }
         
-        // Get invitees from data, default to empty array if not present
-        $inviteesData = isset($data['invitees']) ? json_decode($data['invitees'], true) : [];
-        
-        // Handle JSON decode errors
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            return [
-                'status' => 'error',
-                'errors' => ['invitees' => ['Invalid invitee data format']]
-            ];
+        // If invitees is not set or is empty string, treat as empty array
+        if (!isset($data['invitees']) || trim($data['invitees']) === '') {
+            $inviteesData = [];
+        } else {
+            $inviteesData = json_decode($data['invitees'], true);           
+            // Handle JSON decode errors
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return [
+                    'status' => 'error',
+                    'errors' => ['invitees' => ['Invalid invitee data format']]
+                ];
+            }
         }
         
         $inviteeController = new ControllerGameInvitation();
@@ -1314,6 +1333,32 @@ class ControllerText extends Controller{
             echo json_encode(['error' => $e->getMessage()]);
         }
         exit;
+    }
+
+    // Helper method to send invitations for a game
+    private function sendGameInvitations($gameId, $title, $prompt = '') {
+        // Skip if not a root text or missing required data
+        if (!$gameId || !$title) {
+            return false;
+        }
+
+        $inviteeController = new ControllerGameInvitation();
+        $gameData = [
+            'title' => $title,
+            'prompt' => $prompt ?? '',
+            'inviterName' => $_SESSION['writer_firstName'] . ' ' . $_SESSION['writer_lastName']
+        ];
+
+        $invitationEmailResult = $inviteeController->sendInvitations($gameId, $gameData);
+        
+        // Log invitation email results
+        if ($invitationEmailResult['success']) {
+            error_log("Invitations sent successfully: {$invitationEmailResult['sent_count']} emails, {$invitationEmailResult['notification_count']} notifications");
+        } else {
+            error_log('Invitation email errors: ' . json_encode($invitationEmailResult['errors']));
+        }
+
+        return $invitationEmailResult;
     }
 }
 

@@ -4,7 +4,7 @@ require_once('Crud.php');
 class GameInvitation extends Crud{
 
     public $table = 'game_invitation';
-    public $primaryKey = ['id'];
+    public $primaryKey = 'id';
     public $fillable = ['id', 
                         'game_id', 
                         'inviter_id', 
@@ -12,6 +12,7 @@ class GameInvitation extends Crud{
                         'email', 
                         'token', 
                         'invited_at', 
+                        'visited_at',
                         'accepted_at', 
                         'declined_at', 
                         'message', 
