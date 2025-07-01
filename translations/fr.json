@@ -115,6 +115,20 @@
     "collaborator_selected": "Déjà sélectionné",
     "loading": "Chargement..."
   },
+  "game_settings": {
+    "visibility_settings": "visibilité du jeu",
+    "join_settings": "participation au jeu",
+    "visible_to_all": "Tous",
+    "visible_to_all_description": "Tout le monde peut voir cette collaboration dans les listes et recherches",
+    "visible_to_invited": "invités seulement",
+    "visible_to_invited_description": "Seuls les collaborateurs invités peuvent voir cette collaboration",
+    "joinable_by_all": "Tous",
+    "joinable_by_all_description": "Tout le monde peut contribuer à cette collaboration",
+    "joinable_by_invited": "invités seulement",
+    "joinable_by_invited_description": "Seules les personnes invitées peuvent contribuer à cette collaboration",
+    "access_control": "Contrôle d'accès",
+    "collaboration_settings": "Paramètres de collaboration"
+  },
   "note-edit": {
     "here_is_what_you_wrote": "Voici votre texte: ",
     "your": "votre",

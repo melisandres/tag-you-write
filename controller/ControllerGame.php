@@ -12,7 +12,16 @@ class ControllerGame extends Controller {
 
     public function createGame($data) {
         $game = new Game;
-        $gameData = ['prompt' => $data['prompt']];
+        
+        // Set default values for access control if not provided
+        $visibleToAll = isset($data['visible_to_all']) ? (int)$data['visible_to_all'] : 1; // Default: visible to all
+        $joinableByAll = isset($data['joinable_by_all']) ? (int)$data['joinable_by_all'] : 1; // Default: joinable by all
+        
+        $gameData = [
+            'prompt' => $data['prompt'],
+            'visible_to_all' => $visibleToAll,
+            'joinable_by_all' => $joinableByAll
+        ];
 
         $gameId = $game->insert($gameData);
         if (!$gameId || is_array($gameId)) {

@@ -1,0 +1,142 @@
+/* Access Control Settings Styles */
+.access-control-section {
+    margin-top: 1.5rem;
+    align-self: flex-start;
+    overflow-x: clip;
+}
+
+/* Row layout for side-by-side toggles */
+.toggle-controls-row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+/* Toggle Switch Styles */
+.toggle-setting {
+    flex: 1;
+    display: grid;
+    width: calc(50% - 20px); /* 50% of parent width minus total border width */
+    /* width: 320px; */
+    gap: 20px;
+    background-color: var(--color-white);
+    border: 1px solid var(--color-primary-lightest);
+    border-radius: 8px;
+}
+
+
+.setting-label {
+    font-weight: 500;
+    color: #333;
+    font-size: 0.9rem;
+    z-index: 2;
+}
+
+.toggle-control {
+    grid-column: 1/-1;
+    display: grid;
+    grid-template-columns: min-content 44px auto;
+    gap: 10px;
+}
+
+.toggle-label-left {
+    grid-column: 1;
+    font-size: 0.85rem;
+    color: #666;
+    font-weight: 400;
+    transition: all 0.2s ease;
+}
+
+.toggle-label-right {
+    grid-column: 3;
+    font-size: 0.85rem;
+    color: #666;
+    font-weight: 400;
+    transition: all 0.2s ease;
+}
+
+/* Active state - simple and clear */
+.toggle-label-left.active,
+.toggle-label-right.active {
+    color: #333;
+    font-weight: 600;
+    position: relative;
+    z-index: 1; /* Ensure text appears above background circle */
+}
+
+/* Background circle for active labels */
+.toggle-background-circle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+    background-color: var(--color-primary-lightest, rgba(0, 123, 255, 0.15));
+    border-radius: 50%;
+    z-index: -2;
+    opacity: 0.8;
+    filter: blur(4px);
+    transition: all 0.3s ease;
+}
+
+/* Toggle Switch - simplified and functional */
+.toggle-switch {
+    grid-column: 2;
+    position: relative;
+    /* display: inline-block; */
+    width: 25px;
+    height: 26px;
+    justify-self: center;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    z-index: 2;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--color-primary-light);
+    transition: 0.3s;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 2px;
+    top: 2px;
+    background-color: var(--color-white-light);
+    transition: 0.3s;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.toggle-switch input:checked + .toggle-slider {
+    background-color: var(--color-primary);
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+    /*250px is the width of the toggle-setting div
+    10px is the width of the gaps between the labels and the toggle (THERE ARE 2)
+    50px is the width of the toggle-label-left
+    30px is the width of the toggle-label-right
+    44px is the width of the toggle-slider *2 (because it's a circle)
+    4px is the width of the toggle-slider left (and right) (I think)
+    */
+    /* transform: translateX(calc(320px - ((10px * 2) + 50px + 30px + 44px + 4px))); */
+    transform: translateX(18px);   
+}
+
+.toggle-switch:hover .toggle-slider {
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}

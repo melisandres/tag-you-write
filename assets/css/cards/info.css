@@ -15,7 +15,7 @@ section.info{
     flex-wrap: wrap;
     justify-content: space-evenly;
     /* padding: 10px;   */  
-    padding-bottom: var(--spacing-extra-extra-large);
+    /* padding-bottom: var(--spacing-extra-extra-large); */
     gap: 2em;
 }
 

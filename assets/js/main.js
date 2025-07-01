@@ -46,6 +46,7 @@ import { GameSubscriptionManager } from './gameSubscriptionManager.js';
 import { TextFormGameActivityIndicator } from './textFormGameActivityIndicator.js';
 import { InviteInputManager } from './inviteInputManager.js';
 import { InviteeSuggestionsManager } from './inviteeSuggestionsManager.js';
+import { FormTogglesManager } from './formTogglesManager.js';
 
 // Make eventBus globally available immediately
 window.eventBus = eventBus;
@@ -126,6 +127,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   new ButtonUpdateManager(autoSaveManager);
   new FormManager(autoSaveManager);
   new ValidationManager();
+  new FormTogglesManager();
   
   // Initialize InviteInputManager for text creation forms
   new InviteInputManager();
@@ -211,5 +213,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Initialize update handling
   new NodesModifiedHandler();
   const gamesModifiedHandler = new GamesModifiedHandler();
+
+
 
 });

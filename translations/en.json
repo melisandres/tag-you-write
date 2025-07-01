@@ -116,6 +116,20 @@
     "collaborator_selected": "Already selected",
     "loading": "Loading..."
   },
+  "game_settings": {
+    "visibility_settings": "game visibility",
+    "join_settings": "game joinability",
+    "visible_to_all": "All",
+    "visible_to_all_description": "Anyone can see this collaboration in lists and searches",
+    "visible_to_invited": "invitees only",
+    "visible_to_invited_description": "Only invited collaborators can see this collaboration",
+    "joinable_by_all": "All",
+    "joinable_by_all_description": "Anyone can contribute to this collaboration",
+    "joinable_by_invited": "invitees only",
+    "joinable_by_invited_description": "Only invited people can contribute to this collaboration",
+    "access_control": "Access Control",
+    "collaboration_settings": "Collaboration Settings"
+  },
   "note-edit": {
     "here_is_what_you_wrote": "Here's your text: ",
     "change_note_message": "Oops! You can change your note:",

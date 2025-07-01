@@ -38,6 +38,7 @@
 @import url(./elements/notifications-menu.css);
 @import url(./elements/activity-indicator.css);
 @import url(./elements/text-form-game-activity-indicator.css);
+@import url(./elements/access-control.css);
 
 /* general: a catch-all  */
 @import url(./general/general.css);

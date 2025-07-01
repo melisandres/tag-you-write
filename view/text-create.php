@@ -98,6 +98,42 @@
         </label>
 
         {% if not data.parent_id %}
+                <!-- Access Control Settings -->
+                <div class="access-control-section">
+            <div class="toggle-controls-row">
+                <!-- Visibility Settings -->
+                <div class="toggle-setting">
+                    <span class="setting-label" data-i18n="game_settings.visibility_settings">
+                        {{ translate('game_settings.visibility_settings') }}
+                    </span>
+                    <div class="toggle-control">
+                        <span class="toggle-label-left" data-i18n="game_settings.visible_to_all">{{ translate('game_settings.visible_to_all') }}</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="visible_to_all_toggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span class="toggle-label-right" data-i18n="game_settings.visible_to_invited">{{ translate('game_settings.visible_to_invited') }}</span>
+                        <input type="hidden" name="visible_to_all" value="1">
+                    </div>
+                </div>
+                
+                <!-- Join Settings -->
+                <div class="toggle-setting">
+                    <span class="setting-label" data-i18n="game_settings.join_settings">
+                        {{ translate('game_settings.join_settings') }}
+                    </span>
+                    <div class="toggle-control">
+                        <span class="toggle-label-left" data-i18n="game_settings.joinable_by_all">{{ translate('game_settings.joinable_by_all') }}</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="joinable_by_all_toggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span class="toggle-label-right" data-i18n="game_settings.joinable_by_invited">{{ translate('game_settings.joinable_by_invited') }}</span>
+                        <input type="hidden" name="joinable_by_all" value="1">
+                    </div>
+                </div>
+            </div>
+        </div>
         <label>
             <span data-i18n="cr_it_ed.invite_collaborators" class="headline">
                 {{ translate('cr_it_ed.invite_collaborators') }}
@@ -111,8 +147,8 @@
             <div class="invitees-display" id="invitees-display"></div>
             <input type="hidden" name="invitees" id="invitees-data" value="{{ data.invitees|default('') }}">
         </label>
-        {% endif %}
 
+        {% endif %}
 
         <input type="hidden" name="writer_id" value="{{ session.writer_id }}"> 
         <input type="hidden" name="currentPage" value="{{ data.id ? 'text-draft-edit.php' : 'text-create.php' }}">
