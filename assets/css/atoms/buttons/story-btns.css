@@ -1,4 +1,9 @@
-/* top shelf button/icons */
+/* story button/icons */
+.story-btns {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;   
+}
+
 .story-btn:hover {
     background-image: var(--button-hover-gradient);
 }
