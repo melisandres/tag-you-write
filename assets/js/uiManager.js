@@ -87,6 +87,7 @@ export class UIManager {
       return;
     }
 
+    let wrapper = document.querySelector('#showcase-wrapper');
     let container = document.querySelector('#showcase');
     const story = event.target.closest(".story");
 
@@ -105,14 +106,14 @@ export class UIManager {
 
     // Grab the textId from the showcase on screen, if there is one
     let previousTextId = null;
-    container ? previousTextId = container.closest(".story").dataset.textId : "";
+    wrapper ? previousTextId = wrapper.closest(".story").dataset.textId : "";
 
     // Grab the type of view now onscreen
     let previousViewType = "none";
-    container ? previousViewType = container.dataset.showcase : "";   
+    wrapper ? previousViewType = wrapper.dataset.showcase : "";   
 
     // If you've opened the showcase area elsewhere, close it
-    container ? container.remove() : "";
+    wrapper ? wrapper.remove() : "";
 
     // check if the action to toggle off the view, or to get a new view
     if (
@@ -145,8 +146,9 @@ export class UIManager {
         });
     }
 
-    // now create showcase container and append to the current story
-    story.innerHTML += '<div id="showcase"></div>';
+    // now create showcase wrapper and container, append to the current story
+    story.innerHTML += '<div id="showcase-wrapper"><div id="showcase"></div></div>';
+    wrapper = document.querySelector('#showcase-wrapper');
     container = document.querySelector('#showcase');
 
     // now fill it depending on the button (tree or shelf)
@@ -168,11 +170,15 @@ export class UIManager {
 
   // Call drawTree from the storyManager
   async drawTree(textId, container) {
+    // Create tabs before drawing content
+    this.createShowcaseTabs(textId, container, 'tree');
     await this.storyManager.drawTree(textId, container);
   }
 
   // Call drawShelf from the storyManager
   async drawShelf(textId, container) {
+    // Create tabs before drawing content
+    this.createShowcaseTabs(textId, container, 'shelf');
     await this.storyManager.drawShelf(textId, container);
     
     // TODO: make sure this is good Restore drawers if available in state
@@ -187,37 +193,151 @@ export class UIManager {
     this.drawTree(textId, container);
   }
 
+  // New method to create showcase tabs
+  createShowcaseTabs(textId, container, activeType) {
+    const wrapper = this.getShowcaseWrapper(container);
+    if (!wrapper) return;
+    
+    const tabsContainer = this.ensureTabsContainer(wrapper, textId, container);
+    this.updateActiveTab(tabsContainer, activeType);
+    wrapper.dataset.showcase = activeType;
+  }
+
+  // Helper: Get and validate wrapper
+  getShowcaseWrapper(container) {
+    const wrapper = container.parentElement;
+    if (!wrapper || wrapper.id !== 'showcase-wrapper') {
+      console.error('Showcase wrapper not found');
+      return null;
+    }
+    return wrapper;
+  }
+
+  // Helper: Ensure tabs container exists
+  ensureTabsContainer(wrapper, textId, showcaseContainer) {
+    let tabsContainer = wrapper.querySelector('.showcase-tabs');
+    
+    if (!tabsContainer) {
+      tabsContainer = this.createTabsContainer(textId);
+      wrapper.insertBefore(tabsContainer, showcaseContainer);
+    }
+    
+    return tabsContainer;
+  }
+
+  // Helper: Create the actual tabs container with tabs
+  createTabsContainer(textId) {
+    const tabsContainer = document.createElement('div');
+    tabsContainer.className = 'showcase-tabs';
+    
+    const showcaseTypes = [
+      { type: 'tree', svg: this.SVGManager.treeSVG, labelKey: 'general.showcase_tree_tab' },
+      { type: 'shelf', svg: this.SVGManager.shelfSVG, labelKey: 'general.showcase_shelf_tab' }
+    ];
+    
+    showcaseTypes.forEach(({ type, svg, labelKey }) => {
+      const tab = this.createTab(type, textId, svg, labelKey);
+      tabsContainer.appendChild(tab);
+    });
+    
+    return tabsContainer;
+  }
+
+  // Helper: Create individual tab
+  createTab(type, textId, svg, labelKey) {
+    const tab = document.createElement('button');
+    tab.className = 'showcase-tab';
+    tab.dataset.showcaseType = type;
+    tab.dataset.textId = textId;
+    
+    // Better internationalization - let the i18n system handle updates
+    const fallbackLabel = type.charAt(0).toUpperCase() + type.slice(1);
+    tab.innerHTML = `${svg} <span data-i18n="${labelKey}">${window.i18n?.translate(labelKey) || fallbackLabel}</span>`;
+    
+    // Use event delegation instead of direct listeners
+    tab.addEventListener('click', (e) => this.handleTabClick(e));
+    
+    return tab;
+  }
+
+  // Helper: Update active tab state
+  updateActiveTab(tabsContainer, activeType) {
+    const tabs = tabsContainer.querySelectorAll('.showcase-tab');
+    tabs.forEach(tab => {
+      tab.classList.toggle('active', tab.dataset.showcaseType === activeType);
+    });
+  }
+
+  // Handle tab clicks
+  handleTabClick(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    const tab = event.currentTarget;
+    const showcaseType = tab.dataset.showcaseType;
+    const textId = tab.dataset.textId;
+    const container = document.querySelector('#showcase');
+    
+    // Don't do anything if clicking the already active tab
+    if (tab.classList.contains('active')) {
+      return;
+    }
+    
+    // Clear only the showcase content (tabs are in wrapper, so they'll remain)
+    container.innerHTML = '';
+    
+    // Draw the new content type
+    if (showcaseType === 'tree') {
+      this.drawTree(textId, container);
+    } else if (showcaseType === 'shelf') {
+      this.drawShelf(textId, container);
+    }
+    
+    // Emit showcase type changed event
+    eventBus.emit('showcaseTypeChanged', {
+      type: showcaseType,
+      rootStoryId: textId
+    });
+  }
+
   // To be accessed while doing automatic refreshes
   createShowcaseContainer(rootStoryId, clearExisting = true) {
+    let wrapper = document.querySelector('#showcase-wrapper');
     let container = document.querySelector('#showcase');
     const story = document.querySelector(`.story[data-text-id="${rootStoryId}"]`);
 
-    if (container && clearExisting) {
-      container.remove();
+    if (wrapper && clearExisting) {
+      wrapper.remove();
       this.dataManager.setCurrentViewedRootStoryId(null);
       eventBus.emit('showcaseChanged', null);
     }
 
-    if (story && !container) {
-      story.innerHTML += '<div id="showcase"></div>';
+    if (story && !wrapper) {
+      story.innerHTML += '<div id="showcase-wrapper"><div id="showcase"></div></div>';
+      wrapper = document.querySelector('#showcase-wrapper');
       container = document.querySelector('#showcase');
       
       // Set current root story ID when creating new showcase
       this.dataManager.setCurrentViewedRootStoryId(rootStoryId);
       
       const { type } = this.showcaseManager.getShowcaseParams();
-      if (type) {
-          container.dataset.showcase = type;
-      }
+      const showcaseType = type || 'tree'; // Default to tree if no type specified
+      
+      // Create tabs for the showcase
+      this.createShowcaseTabs(rootStoryId, container, showcaseType);
       
       eventBus.emit('showcaseChanged', rootStoryId);
-    } else if (container && !clearExisting) {
-      // Container exists and we're not clearing - just ensure the rootStoryId is set
+    } else if (wrapper && !clearExisting) {
+      // Wrapper exists and we're not clearing - just ensure the rootStoryId is set
       this.dataManager.setCurrentViewedRootStoryId(rootStoryId);
       
       const { type } = this.showcaseManager.getShowcaseParams();
       if (type) {
-          container.dataset.showcase = type;
+          // Update existing tabs if they exist
+          const existingTabs = wrapper.querySelector('.showcase-tabs');
+          if (existingTabs) {
+            this.createShowcaseTabs(rootStoryId, container, type);
+          }
       }
     }
 

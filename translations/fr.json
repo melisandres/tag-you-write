@@ -165,6 +165,8 @@
     "view_shelf_tooltip": "voir en rayon",
     "tree_tooltip": "arbre",
     "shelf_tooltip": "rayon",
+    "showcase_tree_tab": "Arbre",
+    "showcase_shelf_tab": "Rayon",
     "vote_tooltip": "votez!",
     "login_tooltip": "connexion",
     "bookmark_tooltip": "suivre",

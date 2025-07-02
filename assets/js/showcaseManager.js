@@ -56,11 +56,11 @@ export class ShowcaseManager {
                 
                 // Then try URL, then DOM, then default to shelf
                 const existingType = urlParams.get('showcase');
-                const showcaseEl = document.querySelector('#showcase');
-                const currentType = type || savedType || existingType || showcaseEl?.dataset.showcase || 'shelf';
+                const showcaseWrapper = document.querySelector('#showcase-wrapper');
+                const currentType = type || savedType || existingType || showcaseWrapper?.dataset.showcase || 'shelf';
                 
                 console.log('Setting showcase type:', currentType, 
-                    'from:', { type, savedType, existingType, domType: showcaseEl?.dataset.showcase });
+                    'from:', { type, savedType, existingType, domType: showcaseWrapper?.dataset.showcase });
                 
                 urlParams.set('showcase', currentType);
             }

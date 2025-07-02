@@ -15,8 +15,8 @@
 /* Unbookmarked state - outline only */
 .bookmark-btn svg .bookmark-main {
     fill: none;
-    stroke: var(--color-primary);
-    stroke-width: 1.5;
+    stroke: var(--color-primary-dark);
+    stroke-width: 3px;
 }
 
 .bookmark-btn svg .bookmark-inner {

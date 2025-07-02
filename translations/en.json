@@ -166,6 +166,8 @@
     "view_shelf_tooltip": "view shelf",
     "tree_tooltip": "tree",
     "shelf_tooltip": "shelf",
+    "showcase_tree_tab": "Tree",
+    "showcase_shelf_tab": "Shelf",
     "vote_tooltip": "vote!",
     "login_tooltip": "log in",
     "bookmark_tooltip": "bookmark",

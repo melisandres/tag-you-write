@@ -24,7 +24,7 @@ export class ShelfUpdateManager {
     //TODO: can the following two be cleaned up? so that they point to methods? 
     eventBus.on('searchChanged', ({ searchTerm }) => {
         // Only handle if we're in shelf view
-        const container = document.querySelector('#showcase[data-showcase="shelf"]');
+        const container = document.querySelector('#showcase-wrapper[data-showcase="shelf"] #showcase');
         if (!container) return;
         
         if (!searchTerm) {
@@ -157,7 +157,7 @@ export class ShelfUpdateManager {
   }
 
   handleInstaPublish({ textId, newStatus }) {
-    const container = document.querySelector('#showcase[data-showcase="shelf"]');
+    const container = document.querySelector('#showcase-wrapper[data-showcase="shelf"] #showcase');
     if (container) {
       const drawer = container.querySelector(`li[data-story-id="${textId}"]`);
       if (drawer) {
@@ -221,7 +221,7 @@ export class ShelfUpdateManager {
   }
 
   handleInstaDelete({ textId }) {
-    const container = document.querySelector('#showcase[data-showcase="shelf"]');
+    const container = document.querySelector('#showcase-wrapper[data-showcase="shelf"] #showcase');
     if (container) {
       const drawer = container.querySelector(`li[data-story-id="${textId}"]`);
       if (drawer) {
@@ -236,7 +236,7 @@ export class ShelfUpdateManager {
   }
 
   handleChooseWinner({ textId }) {
-    const container = document.querySelector('#showcase[data-showcase="shelf"]');
+    const container = document.querySelector('#showcase-wrapper[data-showcase="shelf"] #showcase');
     if (container) {
       const drawers = container.querySelectorAll('li.node');
       if (drawers) {
@@ -320,7 +320,7 @@ export class ShelfUpdateManager {
   }
 
   handleGamePlayerCountUpdate({ newPlayerCount, gameId }) {
-    const container = document.querySelector('#showcase[data-showcase="shelf"]');
+    const container = document.querySelector('#showcase-wrapper[data-showcase="shelf"] #showcase');
     if (!container) return;
 
     const showCaseGameId = container.closest('[data-game-id]').dataset.gameId;
@@ -511,7 +511,7 @@ export class ShelfUpdateManager {
   }
 
   handleSearchUpdate(searchData) {
-    const container = document.querySelector('#showcase[data-showcase="shelf"]');
+    const container = document.querySelector('#showcase-wrapper[data-showcase="shelf"] #showcase');
     if (!container) return;
 
     const searchTerm = searchData.searchTerm || this.dataManager.getSearch();
@@ -578,7 +578,7 @@ export class ShelfUpdateManager {
   }
 
   handleShelfGameUpdate(gameData) {
-    const container = document.querySelector('#showcase[data-showcase="shelf"]');
+    const container = document.querySelector('#showcase-wrapper[data-showcase="shelf"] #showcase');
     if (!container) return;
 
     // Check if this is the game being displayed in the shelf
@@ -733,7 +733,7 @@ export class ShelfUpdateManager {
    * Creates a visual indicator that someone is working on iterating a text
    */
   showIteratingPlaceholder(textId, parentId, userId) {
-    const container = document.querySelector('#showcase[data-showcase="shelf"]');
+    const container = document.querySelector('#showcase-wrapper[data-showcase="shelf"] #showcase');
     if (!container) return;
 
     // Remove any existing placeholder for this text
@@ -781,7 +781,7 @@ export class ShelfUpdateManager {
    * Shows the always-present dot and adds the activity text
    */
   showAddingNoteIndicator(textId, userId) {
-    const container = document.querySelector('#showcase[data-showcase="shelf"]');
+    const container = document.querySelector('#showcase-wrapper[data-showcase="shelf"] #showcase');
     if (!container) return;
 
     const nodeElement = container.querySelector(`li[data-story-id="${textId}"]`);
@@ -822,7 +822,7 @@ export class ShelfUpdateManager {
    * Cleans up when user stops editing
    */
   removeTextActivityIndicators(textId) {
-    const container = document.querySelector('#showcase[data-showcase="shelf"]');
+    const container = document.querySelector('#showcase-wrapper[data-showcase="shelf"] #showcase');
     if (!container) return;
 
     // Remove iterating placeholder
@@ -856,7 +856,7 @@ export class ShelfUpdateManager {
    * Remove iterating placeholder for a specific text
    */
   removeIteratingPlaceholder(textId) {
-    const container = document.querySelector('#showcase[data-showcase="shelf"]');
+    const container = document.querySelector('#showcase-wrapper[data-showcase="shelf"] #showcase');
     if (!container) return;
 
     const placeholder = container.querySelector(`li.iterating-placeholder[data-story-id="${textId}"]`);

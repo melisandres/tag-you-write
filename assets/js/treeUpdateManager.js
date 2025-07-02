@@ -84,7 +84,7 @@ export class TreeUpdateManager {
   }
 
   handleInstaDelete({ textId }) {
-    const container = document.querySelector('#showcase[data-showcase="tree"]');
+    const container = document.querySelector('#showcase-wrapper[data-showcase="tree"] #showcase');
     if (container) {
       // Update s heart
       const heart = document.querySelector(`path[data-id="${textId}"]:not(.link)`);
@@ -108,7 +108,7 @@ export class TreeUpdateManager {
   }
 
   handleChooseWinner({ textId }) {
-    const container = document.querySelector('#showcase[data-showcase="tree"]');
+    const container = document.querySelector('#showcase-wrapper[data-showcase="tree"] #showcase');
     if (container) {
       // Update selector to find path instead of circle
       const heart = container.querySelector(`path[data-id="${textId}"]`);
@@ -137,7 +137,7 @@ export class TreeUpdateManager {
   }
 
   handleVoteToggle({ data }) {
-    const container = document.querySelector('#showcase[data-showcase="tree"]')
+    const container = document.querySelector('#showcase-wrapper[data-showcase="tree"] #showcase')
     const playerCountMinusOne = data.playerCountMinusOne || data.playerCount - 1;
 
     // If the showcase is not a tree, do nothing
@@ -158,7 +158,7 @@ export class TreeUpdateManager {
   }
 
   handleGamePlayerCountUpdate({ newPlayerCount, gameId }) {
-    const container = document.querySelector('#showcase[data-showcase="tree"]');
+    const container = document.querySelector('#showcase-wrapper[data-showcase="tree"] #showcase');
     if (!container) return;
 
     const showCaseGameId = container.closest('[data-game-id]').dataset.gameId;
@@ -253,7 +253,7 @@ export class TreeUpdateManager {
 
   handleNodeTextContentUpdate(nodeData) {
     console.log("1. handleNodeTextContentUpdate START:", nodeData);
-    const container = document.querySelector('#showcase[data-showcase="tree"]');
+    const container = document.querySelector('#showcase-wrapper[data-showcase="tree"] #showcase');
     if (!container) return;
 
     // Emit event for TreeVisualizer to handle title update
@@ -353,14 +353,14 @@ export class TreeUpdateManager {
   }
 
   updateSingleNodeSearchHighlight(nodeId) {
-    const container = document.querySelector('#showcase[data-showcase="tree"]');
+    const container = document.querySelector('#showcase-wrapper[data-showcase="tree"] #showcase');
     if (!container) return;
     this.handleNodeHighlighting(nodeId, container);
   }
 
   handleSearchUpdate(searchTerm) {
     console.log('1. handleSearchUpdate called with term:', searchTerm);
-    const container = document.querySelector('#showcase[data-showcase="tree"]');
+    const container = document.querySelector('#showcase-wrapper[data-showcase="tree"] #showcase');
     console.log('2. Container found:', !!container);
     if (!container) return;
 
@@ -473,7 +473,7 @@ export class TreeUpdateManager {
    * Show visual indicator that someone is adding a note in tree view
    */
   showAddingNoteIndicator(textId, userId) {
-    const container = document.querySelector('#showcase[data-showcase="tree"]');
+    const container = document.querySelector('#showcase-wrapper[data-showcase="tree"] #showcase');
     if (!container) return;
 
     // Find the node group by data-id
@@ -504,7 +504,7 @@ export class TreeUpdateManager {
   }
 
   removeAddingNoteIndicator(textId) {
-    const container = document.querySelector('#showcase[data-showcase="tree"]');
+    const container = document.querySelector('#showcase-wrapper[data-showcase="tree"] #showcase');
     if (!container) return;
     const dot = container.querySelector(`circle.activity-dot.adding-note[data-adding-note-indicator="${textId}"]`);
     if (dot) dot.remove();

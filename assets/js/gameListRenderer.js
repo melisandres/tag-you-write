@@ -379,9 +379,9 @@ export class GameListRenderer {
 
     saveCurrentViewState() {
         console.log("Starting saveCurrentViewState");
-        const showcaseEl = document.querySelector("#showcase");
-        if (!showcaseEl) {
-            console.log("No showcase element found");
+        const showcaseWrapper = document.querySelector("#showcase-wrapper");
+        if (!showcaseWrapper) {
+            console.log("No showcase wrapper found");
             return;
         }
 
@@ -391,24 +391,24 @@ export class GameListRenderer {
 
         // Update only the showcase portion of the state
         refreshManager.setShowcaseState({
-            type: showcaseEl.dataset.showcase,
-            rootStoryId: showcaseEl.closest('[data-text-id]')?.dataset.textId,
+            type: showcaseWrapper.dataset.showcase,
+            rootStoryId: showcaseWrapper.closest('[data-text-id]')?.dataset.textId,
         });
 
          // Capture transform separately if it's a tree view
-        if (showcaseEl.dataset.showcase === 'tree') {
+        if (showcaseWrapper.dataset.showcase === 'tree') {
             refreshManager.captureD3Transform();
         }
 
         // TODO: Make sure this is good. Capture open drawers if it's a shelf view
-        if (showcaseEl.dataset.showcase === 'shelf') {
+        if (showcaseWrapper.dataset.showcase === 'shelf') {
             const openDrawers = Array.from(document.querySelectorAll('.writing:not(.hidden)'))
                 .map(drawer => drawer.closest('[data-story-id]')?.dataset.storyId)
                 .filter(Boolean);
                 
             refreshManager.setShowcaseState({
-                type: showcaseEl.dataset.showcase,
-                rootStoryId: showcaseEl.closest('[data-text-id]')?.dataset.textId,
+                type: showcaseWrapper.dataset.showcase,
+                rootStoryId: showcaseWrapper.closest('[data-text-id]')?.dataset.textId,
                 drawers: openDrawers
             });
         }

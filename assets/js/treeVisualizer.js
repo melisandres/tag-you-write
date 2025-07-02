@@ -147,8 +147,10 @@ export class TreeVisualizer {
 
         // Clear any existing content
         this.container.innerHTML = ''; 
+        
+        // Clear both showcase classes and add the appropriate one
+        this.container.classList.remove("with-tree", "with-shelf");
         this.container.classList.add("with-tree");
-        this.container.dataset.showcase = 'tree';
 
         // Remove the class .story-has-showcase
         const previousStory = document.querySelector('.story-has-showcase')
