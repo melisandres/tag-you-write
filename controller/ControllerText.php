@@ -640,9 +640,17 @@ class ControllerText extends Controller{
                 $textData['parentWriting'] = $parentData['writing'];
                 $textData['game_title'] = $parentData['game_title'];
             } else {
-                // For root texts, load existing invitees data
+                // For root texts, load existing invitees data and game access settings
                 $inviteeController = new ControllerGameInvitation();
                 $textData['invitees'] = $inviteeController->getInvitationsForEditing($textData['game_id'], $currentWriterId);
+                
+                // Load game access control settings
+                $game = new Game();
+                $gameData = $game->selectId($textData['game_id']);
+                if ($gameData) {
+                    $textData['visible_to_all'] = $gameData['visible_to_all'];
+                    $textData['joinable_by_all'] = $gameData['joinable_by_all'];
+                }
             }
 
             // Send it all to the form
@@ -881,12 +889,22 @@ class ControllerText extends Controller{
             exit;
         }
 
-        // Root texts need to update the game prompt
+        // Root texts need to update the game prompt and access control settings
         if ($isRoot) {
-            $game->update([
+            $gameUpdateData = [
                 'id' => $gameId, 
                 'prompt' => $input['prompt']
-            ]);
+            ];
+            
+            // Add access control settings if they're provided
+            if (isset($input['visible_to_all'])) {
+                $gameUpdateData['visible_to_all'] = (int)$input['visible_to_all'];
+            }
+            if (isset($input['joinable_by_all'])) {
+                $gameUpdateData['joinable_by_all'] = (int)$input['joinable_by_all'];
+            }
+            
+            $game->update($gameUpdateData);
         }
 
         // you'll need the text-status-id in order to save the text

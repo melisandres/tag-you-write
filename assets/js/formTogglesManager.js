@@ -71,8 +71,23 @@ export class FormTogglesManager {
 
     setInitialStates() {
         console.log('Setting initial states...');
-        console.log('Visibility toggle checked:', this.visibilityToggle.checked);
-        console.log('Joinability toggle checked:', this.joinabilityToggle.checked);
+        
+        // Set toggles based on hidden field values (saved data)
+        const visibilityValue = this.visibilityHidden.value;
+        const joinabilityValue = this.joinabilityHidden.value;
+        
+        console.log('Hidden field values - Visibility:', visibilityValue, 'Joinability:', joinabilityValue);
+        
+        // Set checkbox states based on hidden field values
+        // Value "1" = all users = checkbox unchecked (left position)
+        // Value "0" = invitees only = checkbox checked (right position)
+        this.visibilityToggle.checked = visibilityValue === '0';
+        this.joinabilityToggle.checked = joinabilityValue === '0';
+        
+        console.log('Visibility toggle set to:', this.visibilityToggle.checked);
+        console.log('Joinability toggle set to:', this.joinabilityToggle.checked);
+        
+        // Update visual states based on checkbox states
         this.updateToggleState('visibility');
         this.updateToggleState('joinability');
     }
@@ -99,24 +114,23 @@ export class FormTogglesManager {
             return;
         }
 
-        // Clear all active classes first
+        // Clear all active classes from this toggle's labels
         labels.forEach(label => {
             label.classList.remove('active');
-            this.removeBackgroundCircle(label);
         });
         
         if (toggle.checked) {
-            // Checked = circle on right = "all users" = value 1
-            hiddenInput.value = '1';
-            labels[1].classList.add('active'); // RIGHT label (all users)
-            this.addBackgroundCircle(labels[1]);
-            console.log(`${settingName}: Set to "all users" (value: 1)`);
-        } else {
-            // Unchecked = circle on left = "invitees only" = value 0
+            // Checked = circle on right = "invitees only" = value 0
             hiddenInput.value = '0';
-            labels[0].classList.add('active'); // LEFT label (invitees only)
-            this.addBackgroundCircle(labels[0]);
+            labels[1].classList.add('active'); // RIGHT label (invitees only)
+            this.addBackgroundCircle(labels[1]);
             console.log(`${settingName}: Set to "invitees only" (value: 0)`);
+        } else {
+            // Unchecked = circle on left = "all users" = value 1
+            hiddenInput.value = '1';
+            labels[0].classList.add('active'); // LEFT label (all users)
+            this.addBackgroundCircle(labels[0]);
+            console.log(`${settingName}: Set to "all users" (value: 1)`);
         }
     }
 
@@ -125,15 +139,27 @@ export class FormTogglesManager {
      * @param {HTMLElement} label - The label element to add background to
      */
     addBackgroundCircle(label) {
-        // Remove any existing background circle first
-        this.removeBackgroundCircle(label);
+        // Get the parent toggle-control container
+        const toggleControl = label.closest('.toggle-control');
+        if (!toggleControl) return;
+        
+        // Remove any existing background circle from THIS toggle only
+        const existingCircles = toggleControl.querySelectorAll('.toggle-background-circle');
+        existingCircles.forEach(circle => circle.remove());
         
         // Create the background circle
         const circle = document.createElement('div');
         circle.className = 'toggle-background-circle';
         
-        // Insert it as the first child so it appears behind the text
-        label.insertBefore(circle, label.firstChild);
+        // Determine if this is left or right label and add appropriate class
+        if (label.classList.contains('toggle-label-left')) {
+            circle.classList.add('left');
+        } else if (label.classList.contains('toggle-label-right')) {
+            circle.classList.add('right');
+        }
+        
+        // Add as sibling within toggle-control
+        toggleControl.appendChild(circle);
     }
 
     /**
@@ -141,9 +167,26 @@ export class FormTogglesManager {
      * @param {HTMLElement} label - The label element to remove background from
      */
     removeBackgroundCircle(label) {
-        const existingCircle = label.querySelector('.toggle-background-circle');
-        if (existingCircle) {
-            existingCircle.remove();
+        // This method is now just for backward compatibility
+        this.removeAllBackgroundCircles();
+    }
+
+    /**
+     * Remove all background circles from the toggle controls
+     */
+    removeAllBackgroundCircles() {
+        // Remove from visibility control
+        if (this.visibilityToggle) {
+            const visibilityControl = this.visibilityToggle.closest('.toggle-control');
+            const existingCircles = visibilityControl?.querySelectorAll('.toggle-background-circle');
+            existingCircles?.forEach(circle => circle.remove());
+        }
+        
+        // Remove from joinability control
+        if (this.joinabilityToggle) {
+            const joinabilityControl = this.joinabilityToggle.closest('.toggle-control');
+            const existingCircles = joinabilityControl?.querySelectorAll('.toggle-background-circle');
+            existingCircles?.forEach(circle => circle.remove());
         }
     }
 

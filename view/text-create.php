@@ -109,11 +109,11 @@
                     <div class="toggle-control">
                         <span class="toggle-label-left" data-i18n="game_settings.visible_to_all">{{ translate('game_settings.visible_to_all') }}</span>
                         <label class="toggle-switch">
-                            <input type="checkbox" name="visible_to_all_toggle" checked>
+                            <input type="checkbox" name="visible_to_all_toggle" data-ui-helper="true">
                             <span class="toggle-slider"></span>
                         </label>
                         <span class="toggle-label-right" data-i18n="game_settings.visible_to_invited">{{ translate('game_settings.visible_to_invited') }}</span>
-                        <input type="hidden" name="visible_to_all" value="1">
+                        <input type="hidden" name="visible_to_all" value="{{ data.visible_to_all|default('1') }}">
                     </div>
                 </div>
                 
@@ -125,11 +125,11 @@
                     <div class="toggle-control">
                         <span class="toggle-label-left" data-i18n="game_settings.joinable_by_all">{{ translate('game_settings.joinable_by_all') }}</span>
                         <label class="toggle-switch">
-                            <input type="checkbox" name="joinable_by_all_toggle" checked>
+                            <input type="checkbox" name="joinable_by_all_toggle" data-ui-helper="true">
                             <span class="toggle-slider"></span>
                         </label>
                         <span class="toggle-label-right" data-i18n="game_settings.joinable_by_invited">{{ translate('game_settings.joinable_by_invited') }}</span>
-                        <input type="hidden" name="joinable_by_all" value="1">
+                        <input type="hidden" name="joinable_by_all" value="{{ data.joinable_by_all|default('1') }}">
                     </div>
                 </div>
             </div>

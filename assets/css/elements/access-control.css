@@ -2,7 +2,6 @@
 .access-control-section {
     margin-top: 1.5rem;
     align-self: flex-start;
-    overflow-x: clip;
 }
 
 /* Row layout for side-by-side toggles */
@@ -19,9 +18,8 @@
     width: calc(50% - 20px); /* 50% of parent width minus total border width */
     /* width: 320px; */
     gap: 20px;
-    background-color: var(--color-white);
-    border: 1px solid var(--color-primary-lightest);
-    border-radius: 8px;
+    /* background-color: var(--color-white); */
+    /* border: 1px solid var(--color-primary-lightest); */
 }
 
 
@@ -37,13 +35,14 @@
     display: grid;
     grid-template-columns: min-content 44px auto;
     gap: 10px;
+    position: relative; /* For absolute positioning of background circles */
 }
 
 .toggle-label-left {
     grid-column: 1;
     font-size: 0.85rem;
     color: #666;
-    font-weight: 400;
+    font-weight: 600;
     transition: all 0.2s ease;
 }
 
@@ -51,8 +50,9 @@
     grid-column: 3;
     font-size: 0.85rem;
     color: #666;
-    font-weight: 400;
+    font-weight: 600;
     transition: all 0.2s ease;
+    z-index: 2;
 }
 
 /* Active state - simple and clear */
@@ -61,23 +61,34 @@
     color: #333;
     font-weight: 600;
     position: relative;
-    z-index: 1; /* Ensure text appears above background circle */
+    z-index: 2; /* Ensure text appears above background circle */
 }
 
-/* Background circle for active labels */
+/* Background circle for active labels - now positioned relative to toggle-control parent */
 .toggle-background-circle {
     position: absolute;
     top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     width: 100px;
     height: 100px;
     background-color: var(--color-primary-lightest, rgba(0, 123, 255, 0.15));
     border-radius: 50%;
-    z-index: -2;
+    z-index: -1; /* Behind everything but independent */
     opacity: 0.8;
     filter: blur(4px);
     transition: all 0.3s ease;
+    pointer-events: none; /* Prevent interference with other elements */
+}
+
+/* Position for left label background */
+.toggle-background-circle.left {
+    left: -40px; /* Adjust to center on left label */
+    transform: translateY(-50%);
+}
+
+/* Position for right label background */
+.toggle-background-circle.right {
+    right: -10px; /* Adjust to center on right label */
+    transform: translateY(-50%);
 }
 
 /* Toggle Switch - simplified and functional */
@@ -104,7 +115,8 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: var(--color-primary-light);
+    outline: 1px solid var(--color-grey-light);
+    background-color: var(--color-love-light);
     transition: 0.3s;
 }
 
@@ -122,7 +134,7 @@
 }
 
 .toggle-switch input:checked + .toggle-slider {
-    background-color: var(--color-primary);
+    background-color: var(--color-love);
 }
 
 .toggle-switch input:checked + .toggle-slider:before {
@@ -138,5 +150,11 @@
 }
 
 .toggle-switch:hover .toggle-slider {
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+}
+
+@media (max-width: 365px) {
+    .access-control-section {
+        overflow-x: clip;
+    }
 }

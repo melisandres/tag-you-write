@@ -326,6 +326,12 @@
         "invalid_format": "*invalid invitation format",
         "max_invitees": "*maximum 10 invitees allowed",
         "typed": "*invitation list"
+      },
+      "visible_to_all": {
+        "invalid_value": "*invalid visibility setting"
+      },
+      "joinable_by_all": {
+        "invalid_value": "*invalid joinability setting"
       }
     },
     "iteration": {

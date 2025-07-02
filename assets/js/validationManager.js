@@ -195,6 +195,12 @@ export class ValidationManager {
                     this.validateMaxInvitees(10, 'front_val.root.invitees.max_invitees'),
                     this.validateInvitees('front_val.root.invitees.invalid_format'),
                     this.validateMaxCharacterCount(0, 'front_val.root.invitees.typed', 'info')
+                ],
+                visible_to_all: [
+                    this.validateBooleanValue('front_val.root.visible_to_all.invalid_value')
+                ],
+                joinable_by_all: [
+                    this.validateBooleanValue('front_val.root.joinable_by_all.invalid_value')
                 ]
             },
             iteration: {
@@ -440,6 +446,19 @@ export class ValidationManager {
                 isValid: isValid,
                 message: isValid ? '' : errorMessage,
                 severity: severity
+            };
+        };
+    }
+
+    validateBooleanValue(errorMessage, severity = 'error') {
+        return function (value) {
+            // Accept "0", "1", 0, 1, true, false, or empty string (default to valid)
+            const stringValue = String(value).trim();
+            const isValid = stringValue === '' || stringValue === '0' || stringValue === '1';
+            return { 
+                isValid: isValid, 
+                message: isValid ? '' : errorMessage, 
+                severity: severity 
             };
         };
     }
