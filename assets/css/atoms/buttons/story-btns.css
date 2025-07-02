@@ -1,7 +1,6 @@
 /* top shelf button/icons */
 .story-btn:hover {
     background-image: var(--button-hover-gradient);
-    cursor: pointer;
 }
 
 .story-btn{
@@ -44,3 +43,21 @@
     height: 35px;
 }
 
+  
+/* Privacy Indicator Styling */
+.privacy-indicator {
+display: flex;
+align-items: center;
+justify-content: center;
+cursor: default; 
+}
+
+.privacy-indicator svg {
+fill: var(--color-primary-dark);
+stroke: var(--color-primary-dark);
+}
+
+.privacy-indicator svg path ~ text{
+display: none;
+}
+  

@@ -64,22 +64,18 @@ export class UIManager {
   }
 
   handleStoriesRefresh(event) {
-    const treeTarget = event.target.closest("[data-refresh-tree]");
-    const shelfTarget = event.target.closest("[data-refresh-shelf]");
+    // Note: Tree/shelf buttons have been replaced with privacy indicators
+    // Users now open showcases via title clicks and switch views via tabs
     const storyTitleTarget = event.target.closest(".story-title");
     const promptTitleTarget = event.target.closest(".story-writing");
 
-    // A variable to hold keyword shelf if shelfTarget, modal if modalTarget, and tree if treeTarget
+    // Determine target type - now only title clicks open the showcase
     let targetType;
 
-    if (shelfTarget) {
-        targetType = 'shelf';
-    } else if (storyTitleTarget || promptTitleTarget) {
+    if (storyTitleTarget || promptTitleTarget) {
         targetType = 'default';
-    } else if (treeTarget) {
-        targetType = 'tree';
     } else {
-        targetType = 'none';  // Or any other default value
+        targetType = 'none';
     }
 
     // Don't continue if you clicked neither button
@@ -91,7 +87,7 @@ export class UIManager {
     let container = document.querySelector('#showcase');
     const story = event.target.closest(".story");
 
-    // Grab the textId from the button clicked, story title, or prompt title
+    // Grab the textId from the story title or prompt title
     let textId;
     if (targetType === 'default') {
       if (storyTitleTarget) {
@@ -99,9 +95,6 @@ export class UIManager {
       } else if (promptTitleTarget) {
         textId = story.dataset.textId;
       }
-    } else {
-      const targetElement = { tree: treeTarget, shelf: shelfTarget }[targetType];
-      textId = targetElement ? targetElement.dataset.textId : null;
     }
 
     // Grab the textId from the showcase on screen, if there is one
@@ -117,8 +110,6 @@ export class UIManager {
 
     // check if the action to toggle off the view, or to get a new view
     if (
-      // Close if clicking the same view type on the same story
-      (previousViewType === targetType && textId === previousTextId) ||
       // Close if clicking default when any showcase is already open for this story
       (targetType === 'default' && previousTextId === textId && previousViewType !== 'none')
     ) {
@@ -151,18 +142,9 @@ export class UIManager {
     wrapper = document.querySelector('#showcase-wrapper');
     container = document.querySelector('#showcase');
 
-    // now fill it depending on the button (tree or shelf)
-    if (targetType == 'tree') {
-      //const textId = treeTarget.dataset.textId;
-      this.drawTree(textId, container);
-    }
-
-    if (targetType == 'shelf') {
-      //const textId = shelfTarget.dataset.textId;
-      this.drawShelf(textId, container);
-    } 
-    if (storyTitleTarget || promptTitleTarget) {
-      // for now, just draw the tree
+    // Fill with default view (tree) when clicking titles
+    if (targetType === 'default') {
+      // Default to tree view when opening via title clicks
       this.handleDefaultRefresh(textId, container);
     }
 

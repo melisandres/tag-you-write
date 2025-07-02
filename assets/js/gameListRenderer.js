@@ -138,9 +138,8 @@ export class GameListRenderer {
     renderStoryButtons(game) {
         //translate the tooltips
         const bookmarkTooltip = window.i18n.translate('general.bookmark_tooltip');
-        const treeTooltip = window.i18n.translate('general.view_tree_tooltip');
-        const shelfTooltip = window.i18n.translate('general.view_shelf_tooltip');
         const activityTooltip = window.i18n.translate('activity.editingVsBrowsing');
+        const privacyInfo = this.getPrivacyInfo(game);
 
         return `
             ${this.userLoggedIn ? `
@@ -148,17 +147,46 @@ export class GameListRenderer {
                     <span class="icon" data-svg="bookmark">${SVGManager.bookmarkSVG}</span>
                 </button>
             ` : ''}
-            <div class="game-activity-indicator ${this.getActivityState(game)}" data-i18n-title="activity.editingVsBrowsing" title="${activityTooltip}" data-game-id="${game.game_id}">
+            <div class="story-btn game-activity-indicator ${this.getActivityState(game)}" data-i18n-title="activity.editingVsBrowsing" title="${activityTooltip}" data-game-id="${game.game_id}">
                 <span class="icon" data-svg="user">${SVGManager.userSVG}</span>
                 <div class="activity-numbers">${this.getActivityNumbers(game)}</div>
             </div>
-            <button data-refresh-tree data-text-id="${game.id || game.text_id}" class="story-btn" data-svg="tree" data-i18n-title="general.view_tree_tooltip" title="${treeTooltip}">
-                <span class="icon" data-svg="tree">${SVGManager.treeSVG}</span>
-            </button>
-            <button data-refresh-shelf data-text-id="${game.id || game.text_id}" class="story-btn" data-svg="shelf" data-i18n-title="general.view_shelf_tooltip" title="${shelfTooltip}">
-                <span class="icon" data-svg="shelf">${SVGManager.shelfSVG}</span>
-            </button>
+            <div class="story-btn privacy-indicator" data-i18n-title="${privacyInfo.tooltipKey}" title="${privacyInfo.tooltip}">
+                <span class="icon" data-svg="${privacyInfo.svg}">${privacyInfo.svgContent}</span>
+            </div>
         `;
+    }
+
+    // Helper method to determine privacy level and return appropriate info
+    getPrivacyInfo(game) {
+        const visibleToAll = game.visible_to_all === '1' || game.visible_to_all === 1 || game.visible_to_all === true;
+        const joinableByAll = game.joinable_by_all === '1' || game.joinable_by_all === 1 || game.joinable_by_all === true;
+
+        if (visibleToAll && joinableByAll) {
+            // Public - anyone can view and join
+            return {
+                svg: 'public',
+                svgContent: SVGManager.publicSVG,
+                tooltipKey: 'general.privacy_public_tooltip',
+                tooltip: window.i18n.translate('general.privacy_public_tooltip')
+            };
+        } else if (visibleToAll && !joinableByAll) {
+            // Public, invite-only - anyone can view, only invited can join
+            return {
+                svg: 'visible',
+                svgContent: SVGManager.visibleSVG,
+                tooltipKey: 'general.privacy_visible_tooltip',
+                tooltip: window.i18n.translate('general.privacy_visible_tooltip')
+            };
+        } else {
+            // Private - only invited can view and join
+            return {
+                svg: 'locked',
+                svgContent: SVGManager.lockedSVG,
+                tooltipKey: 'general.privacy_private_tooltip',
+                tooltip: window.i18n.translate('general.privacy_private_tooltip')
+            };
+        }
     }
 
     renderGameStatus(game) {

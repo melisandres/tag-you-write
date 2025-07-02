@@ -41,6 +41,24 @@
         /* background-color: var(--color-primary-lightest); */
     }
 }
+  
+  /* Privacy Indicator Styling */
+  .privacy-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default; 
+  }
+  
+  .privacy-indicator svg {
+    fill: var(--color-primary-dark);
+    stroke: var(--color-primary-dark);
+  }
+
+  .privacy-indicator svg path ~ text{
+    display: none;
+  }
+  
 
 #show-case{
     grid-area: showcase;

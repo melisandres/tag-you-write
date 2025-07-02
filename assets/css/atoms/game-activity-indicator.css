@@ -106,8 +106,3 @@
         font-size: calc(var(--activity-text-size) - 1px);
     }
 }
-
-/* Optional: Subtle hover effect for visual feedback (even though not interactive) */
-.story:hover .game-activity-indicator {
-    /* Could add a subtle glow or scale if desired */
-} 
