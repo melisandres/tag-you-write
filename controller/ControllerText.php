@@ -1215,7 +1215,7 @@ class ControllerText extends Controller{
             $val->name('title')->value($data["title"])->required()->max(100);
             $val->name('writing')->value($cleanWriting)->required()->wordCount(50, "");
             $val->name('prompt')->value($cleanPrompt)->required()->max(500);
-            $val->name('invitees')->value($inviteesData)->maxArrayCount(10, 'invitees')->inviteesFormat();
+            $val->name('invitees')->value($inviteesData)->maxArrayCount(10, 'invitees')->inviteesFormat()->requiredWhenNotPublic($data['joinable_by_all'], $data['visible_to_all']);
         }
         
         if ($val->isSuccess()) {

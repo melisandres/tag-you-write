@@ -94,18 +94,15 @@ export class InviteeSuggestionsManager {
         this.inviteeInput.addEventListener('focus', () => {
             // Skip if we just hid suggestions via click handler
             if (this.suppressNextFocus) {
-                console.log('HERE: suppressing focus event');
                 this.suppressNextFocus = false;
                 return;
             }
             
             if (this.inviteeServices.isCollaboratorsLoaded()) {
-                console.log('HERE: showSuggestions');
                 this.showSuggestions();
             } else {
                 // If not loaded yet, trigger load and then show
                 this.inviteeServices.loadCollaborators().then(() => {
-                    console.log('HERE: showSuggestions after load');
                     this.showSuggestions();
                 });
             }

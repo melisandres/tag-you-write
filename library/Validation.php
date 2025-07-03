@@ -645,4 +645,27 @@
             return $this;
         }
 
+        /**
+         * Validate invitees are required when game is not public
+         * If joinable==0 OR visible==0, then invitee count must be > 0
+         *
+         * @param mixed $joinableValue The joinable_by_all value (0 or 1)
+         * @param mixed $visibleValue The visible_to_all value (0 or 1)
+         * @return $this
+         */
+        public function requiredWhenNotPublic($joinableValue, $visibleValue) {
+            // Convert to integers for comparison
+            $joinable = intval($joinableValue);
+            $visible = intval($visibleValue);
+            
+            // If game is not public (joinable==0 OR visible==0), invitees are required
+            if ($joinable === 0 || $visible === 0) {
+                if (!is_array($this->value) || count($this->value) === 0) {
+                    $this->errors[] = 'When the game is not fully public, you must invite at least one person.';
+                }
+            }
+            
+            return $this;
+        }
+
     }
