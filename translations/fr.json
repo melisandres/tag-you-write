@@ -113,7 +113,9 @@
     "user_not_authenticated": "Utilisateur non authentifié",
     "add_collaborator": "Ajouter collaborateur",
     "collaborator_selected": "Déjà sélectionné",
-    "loading": "Chargement..."
+    "loading": "Chargement...",
+    "joinability_disabled_message": "Le jeu ne peut pas être accessible à tous si il n'est pas visible par tous.",
+    "access_control": "qui peut intéragir avec votre jeu"
   },
   "game_settings": {
     "visibility_settings": "visibilité du jeu",
@@ -339,6 +341,9 @@
       },
       "joinable_by_all": {
         "invalid_value": "*paramètre d'accessibilité invalide"
+      },
+      "access_control": {
+        "no_invitees_for_limited_access": "*Impossible de publier: L'accès est limité aux invités mais aucun invité n'a été ajouté."
       }
     },
     "iteration": {

@@ -7,10 +7,6 @@ export class FormTogglesManager {
         this.joinabilityHidden = null;
         this.joinabilityLabels = null;
         
-        // Store previous joinability value for restoration
-        this.previousJoinabilityValue = '1'; // Default to "all users"
-        this.joinabilityMessageElement = null;
-        
         this.init();
     }
 
@@ -26,7 +22,6 @@ export class FormTogglesManager {
     setupToggles() {
         this.findElements();
         if (this.elementsExist()) {
-            this.createMessageElement();
             this.addEventListeners();
             this.setInitialStates();
             console.log('FormTogglesManager: Toggles initialized successfully');
@@ -57,30 +52,6 @@ export class FormTogglesManager {
         }
     }
 
-    /**
-     * Create a message element to show when joinability is disabled
-     */
-    createMessageElement() {
-        if (!this.joinabilityToggle) return;
-        
-        const joinabilitySetting = this.joinabilityToggle.closest('.toggle-setting');
-        if (!joinabilitySetting) return;
-        
-        // Check if message element already exists
-        this.joinabilityMessageElement = joinabilitySetting.querySelector('.joinability-disabled-message');
-        
-        if (!this.joinabilityMessageElement) {
-            const translateMessage = window.i18n.translate('cr_it_ed.joinability_disabled_message');
-            this.joinabilityMessageElement = document.createElement('div');
-            this.joinabilityMessageElement.className = 'joinability-disabled-message';
-            this.joinabilityMessageElement.dataset.i18n = 'cr_it_ed.joinability_disabled_message';
-            this.joinabilityMessageElement.textContent = translateMessage;
-            
-            // Insert as child of the toggle-setting container for proper overlay positioning
-            joinabilitySetting.appendChild(this.joinabilityMessageElement);
-        }
-    }
-
     elementsExist() {
         const hasVisibility = this.visibilityToggle && this.visibilityHidden && this.visibilityLabels && this.visibilityLabels.length >= 2;
         const hasJoinability = this.joinabilityToggle && this.joinabilityHidden && this.joinabilityLabels && this.joinabilityLabels.length >= 2;
@@ -91,12 +62,10 @@ export class FormTogglesManager {
         this.visibilityToggle.addEventListener('change', () => {
             console.log('Visibility toggle changed:', this.visibilityToggle.checked);
             this.updateToggleState('visibility');
-            this.handleVisibilityDependency();
         });
         this.joinabilityToggle.addEventListener('change', () => {
             console.log('Joinability toggle changed:', this.joinabilityToggle.checked);
             this.updateToggleState('joinability');
-            this.storeJoinabilityValue();
         });
     }
 
@@ -108,9 +77,6 @@ export class FormTogglesManager {
         const joinabilityValue = this.joinabilityHidden.value;
         
         console.log('Hidden field values - Visibility:', visibilityValue, 'Joinability:', joinabilityValue);
-        
-        // Store the initial joinability value as the "previous" value
-        this.previousJoinabilityValue = joinabilityValue;
         
         // Set checkbox states based on hidden field values
         // Value "1" = all users = checkbox unchecked (left position)
@@ -124,97 +90,6 @@ export class FormTogglesManager {
         // Update visual states based on checkbox states
         this.updateToggleState('visibility');
         this.updateToggleState('joinability');
-        
-        // Handle initial dependency state
-        this.handleVisibilityDependency();
-    }
-
-    /**
-     * Handle the dependency between visibility and joinability
-     */
-    handleVisibilityDependency() {
-        const visibilityValue = this.visibilityHidden.value;
-        
-        if (visibilityValue === '0') {
-            // Visibility is "invitees only" - disable joinability
-            this.disableJoinabilityToggle();
-        } else {
-            // Visibility is "all users" - enable joinability
-            this.enableJoinabilityToggle();
-        }
-    }
-
-    /**
-     * Disable the joinability toggle when visibility is set to invitees only
-     */
-    disableJoinabilityToggle() {
-        // Store current joinability value before disabling
-        this.storeJoinabilityValue();
-        
-        // Set joinability to "invitees only" (0)
-        this.joinabilityToggle.checked = true; // Checked = invitees only
-        this.updateToggleState('joinability');
-        
-        // Disable the toggle
-        this.joinabilityToggle.disabled = true;
-        
-        // Add disabled class to the toggle setting container
-        const joinabilitySetting = this.joinabilityToggle.closest('.toggle-setting');
-        if (joinabilitySetting) {
-            joinabilitySetting.classList.add('disabled');
-        }
-        
-        // Show the message
-        if (this.joinabilityMessageElement) {
-            this.joinabilityMessageElement.classList.add('show');
-        }
-        
-        console.log('Joinability toggle disabled - visibility is set to invitees only');
-    }
-
-    /**
-     * Enable the joinability toggle when visibility is set to all users
-     */
-    enableJoinabilityToggle() {
-        // Enable the toggle
-        this.joinabilityToggle.disabled = false;
-        
-        // Remove disabled class from the toggle setting container
-        const joinabilitySetting = this.joinabilityToggle.closest('.toggle-setting');
-        if (joinabilitySetting) {
-            joinabilitySetting.classList.remove('disabled');
-        }
-        
-        // Hide the message
-        if (this.joinabilityMessageElement) {
-            this.joinabilityMessageElement.classList.remove('show');
-        }
-        
-        // Restore previous joinability value
-        this.restoreJoinabilityValue();
-        
-        console.log('Joinability toggle enabled - visibility is set to all users');
-    }
-
-    /**
-     * Store the current joinability value for later restoration
-     */
-    storeJoinabilityValue() {
-        // Only store if the toggle is not disabled
-        if (!this.joinabilityToggle.disabled) {
-            this.previousJoinabilityValue = this.joinabilityHidden.value;
-            console.log('Stored joinability value:', this.previousJoinabilityValue);
-        }
-    }
-
-    /**
-     * Restore the previously stored joinability value
-     */
-    restoreJoinabilityValue() {
-        // Set the toggle based on the stored value
-        this.joinabilityToggle.checked = this.previousJoinabilityValue === '0';
-        this.updateToggleState('joinability');
-        console.log('Restored joinability value:', this.previousJoinabilityValue);
     }
 
     /**

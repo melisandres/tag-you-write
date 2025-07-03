@@ -99,7 +99,10 @@
 
         {% if not data.parent_id %}
                 <!-- Access Control Settings -->
-                <div class="access-control-section">
+        <div class="access-control-section">
+            <span data-i18n="cr_it_ed.access_control" class="headline">
+                {{ translate('cr_it_ed.access_control') }}
+            </span>
             <div class="toggle-controls-row">
                 <!-- Visibility Settings -->
                 <div class="toggle-setting">

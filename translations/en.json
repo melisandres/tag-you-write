@@ -114,7 +114,9 @@
     "user_not_authenticated": "User not authenticated",
     "add_collaborator": "Add collaborator",
     "collaborator_selected": "Already selected",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "joinability_disabled_message": "The game cannot be joinable by all if it is not visible to all users.",
+    "access_control": "who can interact with your game"
   },
   "game_settings": {
     "visibility_settings": "game visibility",
@@ -339,7 +341,10 @@
         "invalid_value": "*invalid visibility setting"
       },
       "joinable_by_all": {
-        "invalid_value": "*invalid joinability setting"
+        "invalid_value": "Joinability setting must be either '0' or '1'"
+      },
+      "access_control": {
+        "no_invitees_for_limited_access": "*Cannot publish: Access is limited to invitees but no invitees have been added."
       }
     },
     "iteration": {

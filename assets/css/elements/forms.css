@@ -19,7 +19,9 @@ input, textarea{
     gap: 1em;
 }
 
-#main-form label, #main-form .form-btns {
+#main-form label, 
+#main-form .form-btns, 
+#main-form .access-control-section {
     width: 100%;
     max-width: 75ch;
 }
@@ -33,7 +35,8 @@ textarea, input{
     min-width: 100%;
 }
 
-label span.headline{
+label span.headline, 
+.access-control-section span.headline{
     display: block;
     font-family: var(--font-family-secondary);
     margin-top: var(--spacing-extra-extra-large);
@@ -83,7 +86,8 @@ input[type="submit"]{
     margin: 0;
 }
 
-#main-form input, #main-form textarea{
+#main-form input, 
+#main-form textarea{
     background-color: var(--color-white-lightest);
 }
 
@@ -416,7 +420,7 @@ label .ck.ck-content.ck-editor__editable {
 }
 
 /* Dark mode adjustments */
-@media (prefers-color-scheme: dark) {
+/* @media (prefers-color-scheme: dark) {
     .collaborators-suggestions {
         background: var(--color-dark);
         border-color: var(--color-grey-dark);
@@ -449,4 +453,4 @@ label .ck.ck-content.ck-editor__editable {
     .collaborator-suggestion:hover {
         background-color: var(--color-grey-dark);
     }
-}
+} */

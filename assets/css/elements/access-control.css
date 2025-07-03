@@ -1,7 +1,8 @@
 /* Access Control Settings Styles */
 .access-control-section {
     margin-top: 1.5rem;
-    align-self: flex-start;
+    /* align-self: flex-start; */
+
 }
 
 /* Row layout for side-by-side toggles */
@@ -9,6 +10,7 @@
     display: flex;
     gap: 20px;
     flex-wrap: wrap;
+    margin-top: 1.75rem;
 }
 
 /* Toggle Switch Styles */
@@ -16,17 +18,16 @@
     flex: 1;
     display: grid;
     width: calc(50% - 20px); /* 50% of parent width minus total border width */
-    /* width: 320px; */
     gap: 20px;
-    /* background-color: var(--color-white); */
-    /* border: 1px solid var(--color-primary-lightest); */
+    position: relative; /* For positioning the disabled message overlay */
 }
 
 
 .setting-label {
+    font-family: var(--font-family-secondary);
     font-weight: 500;
     color: #333;
-    font-size: 0.9rem;
+    font-size: 0.90rem;
     z-index: 2;
 }
 
@@ -36,6 +37,7 @@
     grid-template-columns: min-content 44px auto;
     gap: 10px;
     position: relative; /* For absolute positioning of background circles */
+    max-width: min-content;
 }
 
 .toggle-label-left {
@@ -53,6 +55,7 @@
     font-weight: 600;
     transition: all 0.2s ease;
     z-index: 2;
+    max-width: min-content;
 }
 
 /* Active state - simple and clear */
@@ -62,6 +65,7 @@
     font-weight: 600;
     position: relative;
     z-index: 2; /* Ensure text appears above background circle */
+    max-width: min-content;
 }
 
 /* Background circle for active labels - now positioned relative to toggle-control parent */
@@ -153,8 +157,69 @@
     box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
 }
 
-@media (max-width: 365px) {
+/* Disabled Toggle State */
+.toggle-setting.disabled {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.toggle-setting.disabled .toggle-label-left,
+.toggle-setting.disabled .toggle-label-right {
+    opacity: 0.5;
+    color: #999;
+}
+
+.toggle-setting.disabled .toggle-slider {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.toggle-setting.disabled .toggle-background-circle {
+    opacity: 0.3;
+}
+
+/* Joinability Disabled Message */
+.joinability-disabled-message {
+    position: absolute;
+    top: 150%;
+    left: 30%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.95);
+    color: #666;
+    font-size: 0.8rem;
+    font-style: italic;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    display: none;
+    width: 250px;
+    text-align: center;
+    line-height: 1.3;
+    backdrop-filter: blur(2px);
+}
+
+.joinability-disabled-message.show {
+    display: block;
+}
+
+
+@media (max-width: 355px) {
+    /* make sure the selection hightlight circle doesn't overflow  */
     .access-control-section {
         overflow-x: clip;
+    }
+}
+@media (max-width: 390px) {
+    .joinability-disabled-message {
+        font-size: 0.75rem;
+        padding: 6px 10px;
+        max-width: 180px;
+    }
+
+    .toggle-label-left,
+    .toggle-label-right{
+        font-size: 0.68rem;
     }
 }
