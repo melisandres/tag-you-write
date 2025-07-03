@@ -335,13 +335,15 @@
       "invitees": {
         "invalid_format": "*invalid invitation format",
         "max_invitees": "*maximum 10 invitees allowed",
-        "typed": "*invitation list"
+        "typed": "*invitation list",
+        "required_when_access_limited": "*Invitees required when access is limited to invitees only"
       },
       "visible_to_all": {
         "invalid_value": "*invalid visibility setting"
       },
       "joinable_by_all": {
-        "invalid_value": "Joinability setting must be either '0' or '1'"
+        "invalid_value": "Joinability setting must be either '0' or '1'",
+        "must_follow_visibility": "*Joinability must be limited when visibility is limited to invitees"
       },
       "access_control": {
         "no_invitees_for_limited_access": "*Cannot publish: Access is limited to invitees but no invitees have been added."

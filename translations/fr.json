@@ -334,13 +334,15 @@
       "invitees": {
         "invalid_format": "*format d'invitation invalide",
         "max_invitees": "*maximum 10 invités autorisés",
-        "typed": "*liste d'invitations"
+        "typed": "*liste d'invitations",
+        "required_when_access_limited": "*Invités requis lorsque l'accès est limité aux invités seulement"
       },
       "visible_to_all": {
         "invalid_value": "*paramètre de visibilité invalide"
       },
       "joinable_by_all": {
-        "invalid_value": "*paramètre d'accessibilité invalide"
+        "invalid_value": "*paramètre d'accessibilité invalide",
+        "must_follow_visibility": "*L'accessibilité doit être limitée lorsque la visibilité est limitée aux invités"
       },
       "access_control": {
         "no_invitees_for_limited_access": "*Impossible de publier: L'accès est limité aux invités mais aucun invité n'a été ajouté."

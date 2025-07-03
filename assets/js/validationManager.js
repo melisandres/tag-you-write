@@ -87,17 +87,31 @@ export class ValidationManager {
 
     // inputChange is being fired by the formManager
     handleInputChanged(data) {
-        //console.log('handleInputChanged', data);
         this.validateField(data);
         if (data.fieldName === 'writing' || data.fieldName === 'note') {
             this.updateWordCount(data.fieldValue);
         }
     }
 
-    validateField({ fieldName, fieldValue, formType, init = false }) {
+    /**
+     * Get dependent fields that should be re-validated when this field changes
+     */
+    getDependentFields(fieldName, formType) {
+        const fieldDependencies = {
+            root: {
+                'visible_to_all': ['invitees', 'joinable_by_all'],
+                'joinable_by_all': ['invitees']
+            }
+        };
+
+        return fieldDependencies[formType]?.[fieldName] || [];
+    }
+
+    validateField({ fieldName, fieldValue, formType, init = false}) {
         console.log('Validating field:', fieldName, 'with value:', fieldValue, 'for form type:', formType);
         const validators = this.getValidatorsForForm(formType);
         
+        // Validate the main field
         if (validators[fieldName]) {
             console.log('Found validators for field:', fieldName);
             const validationResults = validators[fieldName].map((validator) => validator(fieldValue));
@@ -118,50 +132,38 @@ export class ValidationManager {
             console.log(`${fieldName} final validity:`, { canAutosave, canPublish });
 
             this.formValidity[fieldName] = { canAutosave, canPublish };
-
-            // Always call checkOverallValidity, even during initialization
-            if (!init) this.checkOverallValidity();
-            
-            return { canAutosave, canPublish }; 
         }
+
+        // Validate dependent fields automatically (only for non-init calls to prevent recursion)
+        if (!init) {
+            const dependentFields = this.getDependentFields(fieldName, formType);
+            dependentFields.forEach(dependentField => {
+                console.log(`Auto-validating dependent field: ${dependentField}`);
+                const dependentFieldElement = document.querySelector(`[name="${dependentField}"]`);
+                
+                if (dependentFieldElement) {
+                    // Trigger validation through the event system to get proper field value
+/*                     eventBus.emit('inputChanged', {
+                        fieldName: dependentField,
+                        fieldValue: dependentFieldElement.value,
+                        formType: formType,
+                        init: true // Prevent infinite dependency loops
+                    }); */
+
+                    this.validateField({
+                        fieldName: dependentField,
+                        fieldValue: dependentFieldElement.value,
+                        formType: formType,
+                        init: true
+                    });
+                }
+            });
+        }
+
+        // Always call checkOverallValidity, even during initialization
+        if (!init) this.checkOverallValidity();
         
-        if (fieldName === 'writing' || fieldName === 'note') {
-            const parentText = this.parentTextElement ? this.parentTextElement.value : '';
-            const parentWordCount = this.countWords(parentText);
-            const userWordCount = this.countWords(fieldValue);
-            const remainingWords = this.maxWords - (userWordCount - parentWordCount);
-
-            let result;
-            if (remainingWords < 0) {
-                result = { 
-                    isValid: false, 
-                    message: `Word count exceeds the limit by ${-remainingWords} word${remainingWords !== -1 ? 's' : ''}`, 
-                    severity: 'error' 
-                };
-            } else if (remainingWords <= 5) {
-                result = {
-                    isValid: true,
-                    message: `You have ${remainingWords} word${remainingWords !== 1 ? 's' : ''} left`,
-                    severity: 'warning'
-                };
-            } else {
-                result = { isValid: true, message: '', severity: 'success' };
-            }
-            
-            // TODO: this is not right: I need to further study this... but a result is not necessarily an "error"... this is sending every result as an error... I think. 
-            this.showValidationResult(fieldName, [], [result], [], [], []);
-            
-            const canAutosave = result.severity !== 'critical';
-            const canPublish = result.severity !== 'critical' && result.severity !== 'error';
-            
-            this.formValidity[fieldName] = { canAutosave, canPublish };
-            
-            // Always call checkOverallValidity, even during initialization
-            if (!init) this.checkOverallValidity();
-            
-            return { canAutosave, canPublish };
-        }
-
+        return this.formValidity[fieldName] || { canAutosave: true, canPublish: true }; 
     }
 
     getValidatorsForForm(formType) {
@@ -194,13 +196,15 @@ export class ValidationManager {
                 invitees: [
                     this.validateMaxInvitees(10, 'front_val.root.invitees.max_invitees'),
                     this.validateInvitees('front_val.root.invitees.invalid_format'),
-                    this.validateMaxCharacterCount(0, 'front_val.root.invitees.typed', 'info')
+                    this.validateMaxCharacterCount(0, 'front_val.root.invitees.typed', 'info'),
+                    this.validateInviteesRequired('front_val.root.invitees.required_when_access_limited')
                 ],
                 visible_to_all: [
                     this.validateBooleanValue('front_val.root.visible_to_all.invalid_value')
                 ],
                 joinable_by_all: [
-                    this.validateBooleanValue('front_val.root.joinable_by_all.invalid_value')
+                    this.validateBooleanValue('front_val.root.joinable_by_all.invalid_value'),
+                    this.validateJoinabilityDependsOnVisibility('front_val.root.joinable_by_all.must_follow_visibility')
                 ]
             },
             iteration: {
@@ -283,7 +287,7 @@ export class ValidationManager {
             }
         };
 
-        console.log('Validators for form type', formType, ':', validators[formType] || 'No validators found');
+        //console.log('Validators for form type', formType, ':', validators[formType] || 'No validators found');
         return validators[formType] || {};
     }
 
@@ -622,11 +626,95 @@ export class ValidationManager {
                 return {
                     isValid: isValid,
                     message: isValid ? '' : errorMessage,
-                    severity: severity
+                    severity: isValid ? 'success' : severity
                 };
             } catch (e) {
                 return { isValid: true, message: '', severity: 'success' }; // Let validateInvitees handle JSON errors
             }
+        };
+    }
+
+    /**
+     * Validate that invitees are provided when access is limited to invitees only
+     * This prevents publishing when visibility or joinability is limited but no invitees exist
+     */
+    validateInviteesRequired(errorMessage, severity = 'error') {
+        const form = this.form; // Capture form reference in closure
+        
+        return function (value) {
+            if (!form) return { isValid: true, message: '', severity: 'success' };
+
+            const visibilityInput = form.querySelector('input[name="visible_to_all"]');
+            const joinabilityInput = form.querySelector('input[name="joinable_by_all"]');
+
+            if (!visibilityInput || !joinabilityInput) {
+                return { isValid: true, message: '', severity: 'success' };
+            }
+
+            const visibilityValue = visibilityInput.value; // "0" = invitees only, "1" = all users
+            const joinabilityValue = joinabilityInput.value; // "0" = invitees only, "1" = all users
+
+            // Check if either visibility or joinability is limited to invitees
+            const isVisibilityLimited = visibilityValue === '0';
+            const isJoinabilityLimited = joinabilityValue === '0';
+            const accessIsLimited = isVisibilityLimited || isJoinabilityLimited;
+
+            if (!accessIsLimited) {
+                return { isValid: true, message: '', severity: 'success' };
+            }
+
+            // Check if there are any invitees
+            let hasInvitees = false;
+            if (value && value.trim() !== '') {
+                try {
+                    const invitees = JSON.parse(value);
+                    hasInvitees = Array.isArray(invitees) && invitees.length > 0;
+                } catch (e) {
+                    hasInvitees = false;
+                }
+            }
+
+            if (accessIsLimited && !hasInvitees) {
+                return {
+                    isValid: false,
+                    message: errorMessage,
+                    severity: severity
+                };
+            }
+
+            return { isValid: true, message: '', severity: 'success' };
+        };
+    }
+
+    /**
+     * Validate that joinability follows visibility constraints
+     * If visibility is limited to invitees (0), then joinability must also be limited to invitees (0)
+     */
+    validateJoinabilityDependsOnVisibility(errorMessage, severity = 'error') {
+        const form = this.form; // Capture form reference in closure
+        
+        return function (value) {
+            if (!form) return { isValid: true, message: '', severity: 'success' };
+
+            const visibilityInput = form.querySelector('input[name="visible_to_all"]');
+            
+            if (!visibilityInput) {
+                return { isValid: true, message: '', severity: 'success' };
+            }
+
+            const visibilityValue = visibilityInput.value; // "0" = invitees only, "1" = all users
+            const joinabilityValue = value; // Current field value being validated
+
+            // If visibility is limited to invitees (0), joinability must also be limited to invitees (0)
+            if (visibilityValue === '0' && joinabilityValue !== '0') {
+                return {
+                    isValid: false,
+                    message: errorMessage,
+                    severity: severity
+                };
+            }
+
+            return { isValid: true, message: '', severity: 'success' };
         };
     }
 

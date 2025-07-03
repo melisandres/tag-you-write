@@ -1,3 +1,5 @@
+import { eventBus } from './eventBus.js';
+
 export class FormTogglesManager {
     constructor() {
         this.visibilityToggle = null;
@@ -92,11 +94,13 @@ export class FormTogglesManager {
             console.log('Visibility toggle changed:', this.visibilityToggle.checked);
             this.updateToggleState('visibility');
             this.handleVisibilityDependency();
+            this.triggerFormEvents('visible_to_all');
         });
         this.joinabilityToggle.addEventListener('change', () => {
             console.log('Joinability toggle changed:', this.joinabilityToggle.checked);
             this.updateToggleState('joinability');
             this.storeJoinabilityValue();
+            this.triggerFormEvents('joinable_by_all');
         });
     }
 
@@ -169,6 +173,9 @@ export class FormTogglesManager {
             this.joinabilityMessageElement.classList.add('show');
         }
         
+        // Trigger form events for the forced change
+        this.triggerFormEvents('joinable_by_all');
+        
         console.log('Joinability toggle disabled - visibility is set to invitees only');
     }
 
@@ -214,6 +221,10 @@ export class FormTogglesManager {
         // Set the toggle based on the stored value
         this.joinabilityToggle.checked = this.previousJoinabilityValue === '0';
         this.updateToggleState('joinability');
+        
+        // Trigger form events for the restored value
+        this.triggerFormEvents('joinable_by_all');
+        
         console.log('Restored joinability value:', this.previousJoinabilityValue);
     }
 
@@ -337,5 +348,24 @@ export class FormTogglesManager {
             visibleToAll: this.visibilityHidden?.value || '1',
             joinableByAll: this.joinabilityHidden?.value || '1'
         };
+    }
+
+    /**
+     * Trigger form events for validation and change detection
+     */
+    triggerFormEvents(fieldName) {
+        const hiddenInput = document.querySelector(`input[name="${fieldName}"]`);
+        if (hiddenInput) {
+            // Trigger native input event on the hidden field for form change detection
+            const inputEvent = new Event('input', { bubbles: true, cancelable: true });
+            hiddenInput.dispatchEvent(inputEvent);
+            
+            // Trigger the custom event bus for validation
+            eventBus.emit('inputChanged', {
+                formType: document.querySelector('#main-form')?.dataset.formType,
+                fieldName: fieldName,
+                fieldValue: hiddenInput.value
+            });
+        }
     }
 }   

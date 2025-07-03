@@ -30,6 +30,10 @@ label input{
     padding: var(--spacing-medium);
 }
 
+#main-form .form-btns{
+    margin-top: var(--spacing-extra-large);
+}
+
 textarea, input{
     max-width: 100%;
     min-width: 100%;
@@ -125,6 +129,10 @@ label .ck.ck-content.ck-editor__editable {
 
 .form-page .feedback.info, .form-page .feedback.info{
     color: var(--color-info);
+}
+
+.form-page .feedback.warning, .form-page .feedback.warning{
+    color: var(--color-warning);
 }
 
 .form-page span.additional-info{
