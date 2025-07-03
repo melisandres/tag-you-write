@@ -115,7 +115,7 @@
     "add_collaborator": "Add collaborator",
     "collaborator_selected": "Already selected",
     "loading": "Loading...",
-    "joinability_disabled_message": "The game cannot be joinable by all if it is not visible to all users.",
+    "joinability_disabled_message": "The game cannot be joinable by all if it is not visible to all.",
     "access_control": "who can interact with your game"
   },
   "game_settings": {

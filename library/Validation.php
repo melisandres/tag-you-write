@@ -521,4 +521,128 @@
             return $this;
         }
 
+        /**
+         * Validate invitee input format based on type
+         *
+         * @param string $type The type of input ('email' or 'username')
+         * @return $this
+         */
+        public function inviteeInput($type) {
+            if ($type === 'email') {
+                return $this->pattern('email');
+            } elseif ($type === 'username') {
+                return $this->pattern('username')->usernameLength(2, 50);
+            } else {
+                $this->errors[] = 'Invalid invitee type. Must be email or username.';
+            }
+            return $this;
+        }
+
+        /**
+         * Validate that invitee has required userId for strict validation
+         *
+         * @param mixed $userId The user ID to validate
+         * @param bool $strict Whether strict validation is required
+         * @return $this
+         */
+        public function inviteeUserId($userId, $strict = false) {
+            if ($strict && ($userId === null || $userId === '')) {
+                $this->errors[] = 'Username must be selected from suggestions.';
+            } elseif ($userId !== null && (!is_numeric($userId) || intval($userId) <= 0)) {
+                $this->errors[] = 'User ID must be a positive number.';
+            }
+            return $this;
+        }
+
+        /**
+         * Validate invitee structure is valid array
+         *
+         * @return $this
+         */
+        public function inviteeStructure() {
+            if (!is_array($this->value)) {
+                $this->errors[] = 'Invitee data must be an object.';
+                return $this;
+            }
+            
+            // Check required fields exist
+            if (!isset($this->value['input']) || empty(trim($this->value['input']))) {
+                $this->errors[] = 'Invitee input is required.';
+            }
+            
+            if (!isset($this->value['type']) || !in_array($this->value['type'], ['email', 'username'])) {
+                $this->errors[] = 'Invitee type must be email or username.';
+            }
+            
+            return $this;
+        }
+
+        /**
+         * Validate binary value (0 or 1)
+         *
+         * @return $this
+         */
+        public function binaryValue() {
+            if ($this->value !== '0' && $this->value !== '1' && $this->value !== 0 && $this->value !== 1) {
+                $this->errors[] = 'The '.$this->name.' field must be 0 or 1.';
+            }
+            return $this;
+        }
+
+        /**
+         * Validate conditional dependency (if field A = value X, then field B must = value Y)
+         *
+         * @param mixed $dependentFieldValue The value of the dependent field to check
+         * @param mixed $triggerValue If this field equals this value...
+         * @param mixed $requiredValue Then dependent field must equal this value
+         * @return $this
+         */
+        public function conditionalDependency($dependentFieldValue, $triggerValue, $requiredValue) {
+            if ($this->value == $triggerValue && $dependentFieldValue != $requiredValue) {
+                $this->errors[] = 'When '.$this->name.' is '.$triggerValue.', the dependent field must be '.$requiredValue.'.';
+            }
+            return $this;
+        }
+
+        /**
+         * Validate invitees array format (each item must be email or username+userId)
+         *
+         * @return $this
+         */
+        public function inviteesFormat() {
+            if (!is_array($this->value)) {
+                return $this; // Let other validations handle non-array case
+            }
+            
+            foreach ($this->value as $index => $invitee) {
+                if (!is_array($invitee)) {
+                    $this->errors[] = 'Invitee '.($index + 1).' must be an object.';
+                    continue;
+                }
+                
+                $input = isset($invitee['input']) ? trim($invitee['input']) : '';
+                $type = isset($invitee['type']) ? $invitee['type'] : '';
+                $userId = isset($invitee['userId']) ? $invitee['userId'] : null;
+                
+                // Basic structure check
+                if (empty($input) || !in_array($type, ['email', 'username'])) {
+                    $this->errors[] = 'Invitee '.($index + 1).' has invalid format.';
+                    continue;
+                }
+                
+                // Type-specific validation
+                if ($type === 'email') {
+                    if (!filter_var($input, FILTER_VALIDATE_EMAIL)) {
+                        $this->errors[] = 'Invitee '.($index + 1).' must be a valid email.';
+                    }
+                } elseif ($type === 'username') {
+                    if (empty($userId) || !is_numeric($userId) || intval($userId) <= 0) {
+                        $this->errors[] = 'Invitee '.($index + 1).' username must have valid user ID.';
+                    }
+                }
+            }
+            
+            return $this;
+        }
+
     }

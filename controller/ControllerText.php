@@ -358,14 +358,7 @@ class ControllerText extends Controller{
             exit;
         }
 
-        // Validate invitees (only for root texts)
-        $status = $this->validateInvitees($input, $isRootText, $status);
 
-        // Check if invitee validation returned an error structure
-        if (is_array($status) && isset($status['status']) && $status['status'] === 'error') {
-            $this->sendJsonResponse(false, 'toast.text.invitees_validation_failed', ['errors' => $status['errors']]);
-            exit;
-        }
 
         // Create a new game if this is a root text (no game_id && no parent_id
         if ($isRootText) {
@@ -689,19 +682,7 @@ class ControllerText extends Controller{
             $this->sendJsonResponse(false, 'toast.text.permission_denied_publish');
         }
 
-        // For insta-publish, ensure invitees pass strict validation (root texts only)
-        $isRoot = $textData['parent_id'] == '' ? true : false;
-        if ($isRoot) {
-            // Get the current invitees data for this text/game
-            $inviteeController = new ControllerGameInvitation();
-            $existingInvitees = $inviteeController->getInvitationsForEditing($textData['game_id'], $currentWriterId);
-            $mockInput = ['invitees' => $existingInvitees];
-            $inviteeValidation = $this->validateInvitees($mockInput, $isRoot, 'published');
-            
-            if (is_array($inviteeValidation) && isset($inviteeValidation['status']) && $inviteeValidation['status'] === 'error') {
-                $this->sendJsonResponse(false, 'toast.text.validation_failed', ['errors' => $inviteeValidation['errors']]);
-            }
-        }
+
 
         // Get the 'published' status_id dynamically
         $textStatus = new TextStatus;
@@ -880,14 +861,7 @@ class ControllerText extends Controller{
             exit;
         }
 
-        // Validate invitees (only for root texts)
-        $status = $this->validateInvitees($input, $isRoot, $status);
 
-        // Check if invitee validation returned an error structure
-        if (is_array($status) && isset($status['status']) && $status['status'] === 'error') {
-            $this->sendJsonResponse(false, 'toast.text.validation_failed', ['errors' => $status['errors']]);
-            exit;
-        }
 
         // Root texts need to update the game prompt and access control settings
         if ($isRoot) {
@@ -1201,6 +1175,12 @@ class ControllerText extends Controller{
         $cleanParentWriting = isset($data['parentWriting']) ? strip_tags($data['parentWriting']) : '';
         if ($isRoot) {
             $cleanPrompt = strip_tags($data["prompt"]);
+            // Parse invitees (could be JSON string or array)
+            $inviteesData = $data['invitees'];
+            if (is_string($inviteesData)) {
+                $inviteesData = json_decode($inviteesData, true) ?: [];
+            }
+
         }
 
         // Basic validation for all texts (including incomplete drafts)
@@ -1210,6 +1190,9 @@ class ControllerText extends Controller{
 
         if ($isRoot) {
             $val->name('prompt')->value($cleanPrompt)->max(500);
+            $val->name('visible_to_all')->value($data['visible_to_all'])->binaryValue()->conditionalDependency($data['joinable_by_all'], '0', '0');
+            $val->name('joinable_by_all')->value($data['joinable_by_all'])->binaryValue();
+            $val->name('invitees')->value($inviteesData)->maxArrayCount(50, 'invitees');
         }
 
         // Check if basic validation passes
@@ -1232,6 +1215,7 @@ class ControllerText extends Controller{
             $val->name('title')->value($data["title"])->required()->max(100);
             $val->name('writing')->value($cleanWriting)->required()->wordCount(50, "");
             $val->name('prompt')->value($cleanPrompt)->required()->max(500);
+            $val->name('invitees')->value($inviteesData)->maxArrayCount(10, 'invitees')->inviteesFormat();
         }
         
         if ($val->isSuccess()) {
@@ -1249,66 +1233,7 @@ class ControllerText extends Controller{
         }
     }
 
-    /**
-     * Validate invitee data following the same pattern as validateText
-     * Handles the downgrade logic for drafts that fail strict validation
-     * 
-     * @param array $data The input data containing invitees
-     * @param bool $isRoot Whether this is a root text (only root texts can have invitees)
-     * @param string $intended_status The intended text status ('draft' or 'published')
-     * @return mixed Returns the status or error array
-     */
-    private function validateInvitees($data, $isRoot, $intended_status) {
-        // Only root texts can have invitees
-        if (!$isRoot) {
-            return $intended_status; // No invitee validation needed for iterations
-        }
-        
-        // If invitees is not set or is empty string, treat as empty array
-        if (!isset($data['invitees']) || trim($data['invitees']) === '') {
-            $inviteesData = [];
-        } else {
-            $inviteesData = json_decode($data['invitees'], true);           
-            // Handle JSON decode errors
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                return [
-                    'status' => 'error',
-                    'errors' => ['invitees' => ['Invalid invitee data format']]
-                ];
-            }
-        }
-        
-        $inviteeController = new ControllerGameInvitation();
-        
-        // Basic validation first (always runs - allows autosave)
-        $basicValidation = $inviteeController->validateInvitees($inviteesData, 'basic');
-        
-        // If basic validation fails, return error immediately
-        if ($basicValidation['status'] === 'error') {
-            return [
-                'status' => 'error',
-                'errors' => $basicValidation['errors']
-            ];
-        }
-        
-        // Strict validation (always runs - determines if draft should be incomplete_draft)
-        $strictValidation = $inviteeController->validateInvitees($inviteesData, 'strict');
-        
-        if ($strictValidation['status'] === 'success') {
-            return $intended_status; // Keep the intended status
-        } else {
-            // Strict validation failed
-            if ($intended_status == 'draft') {
-                return 'incomplete_draft'; // Downgrade draft to incomplete_draft
-            } else {
-                // For 'published' status, return validation errors
-                return [
-                    'status' => 'error',
-                    'errors' => $strictValidation['errors']
-                ];
-            }
-        }
-    }
+
 
     public function validateNote($data){
         RequirePage::library('Validation');
