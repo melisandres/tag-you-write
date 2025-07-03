@@ -453,7 +453,7 @@ class ControllerText extends Controller{
         // Handle invitees (only for root texts)
         if ($isRootText && isset($input['invitees'])) {
             $inviteesData = json_decode($input['invitees'], true);
-            if (json_last_error() === JSON_ERROR_NONE && !empty($inviteesData)) {
+            if (json_last_error() === JSON_ERROR_NONE) {
                 $inviteeController = new ControllerGameInvitation();
                 $invitationResult = $inviteeController->storeInvitations($input['game_id'], $currentWriterId, $inviteesData);
                 
@@ -972,7 +972,7 @@ class ControllerText extends Controller{
         // Handle invitees (only for root texts)
         if ($isRoot && isset($input['invitees'])) {
             $inviteesData = json_decode($input['invitees'], true);
-            if (json_last_error() === JSON_ERROR_NONE && !empty($inviteesData)) {
+            if (json_last_error() === JSON_ERROR_NONE) {
                 $inviteeController = new ControllerGameInvitation();
                 $invitationResult = $inviteeController->storeInvitations($gameId, $currentWriterId, $inviteesData);
                 
