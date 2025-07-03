@@ -17,6 +17,7 @@ export class InviteeSuggestionsManager {
     constructor() {
         this.selectedCollaboratorIds = new Set(); // Track selected collaborators
         this.lastScrollPosition = 0; // Track scroll position
+        this.suppressNextFocus = false; // Flag to coordinate focus/click events
         
         // DOM elements
         this.suggestionsContainer = null;
@@ -91,11 +92,20 @@ export class InviteeSuggestionsManager {
     setupEventListeners() {
         // Show suggestions when input is focused
         this.inviteeInput.addEventListener('focus', () => {
+            // Skip if we just hid suggestions via click handler
+            if (this.suppressNextFocus) {
+                console.log('HERE: suppressing focus event');
+                this.suppressNextFocus = false;
+                return;
+            }
+            
             if (this.inviteeServices.isCollaboratorsLoaded()) {
+                console.log('HERE: showSuggestions');
                 this.showSuggestions();
             } else {
                 // If not loaded yet, trigger load and then show
                 this.inviteeServices.loadCollaborators().then(() => {
+                    console.log('HERE: showSuggestions after load');
                     this.showSuggestions();
                 });
             }
@@ -103,9 +113,23 @@ export class InviteeSuggestionsManager {
 
         // Hide suggestions when clicking outside
         document.addEventListener('click', (e) => {
-            if (!this.suggestionsContainer.contains(e.target) && 
-                !this.inviteeInput.contains(e.target)) {
+            // Only consider direct clicks on the input element itself as "inside"
+            const isClickOnActualInput = e.target === this.inviteeInput;
+            const isClickInsideSuggestions = this.suggestionsContainer.contains(e.target);
+            const areSuggestionsVisible = this.suggestionsContainer.style.display === 'block';
+            
+            // Hide if suggestions are visible and click is outside both input and suggestions
+            if (areSuggestionsVisible && !isClickOnActualInput && !isClickInsideSuggestions) {
+                console.log('HERE: hideSuggestions');
                 this.hideSuggestions();
+                
+                // Suppress the next focus event to prevent immediate re-showing
+                this.suppressNextFocus = true;
+                
+                // Reset the flag after a short delay as a safety measure
+                setTimeout(() => {
+                    this.suppressNextFocus = false;
+                }, 100);
             }
         });
 
