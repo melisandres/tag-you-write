@@ -173,10 +173,10 @@ export class GameListRenderer {
         } else if (visibleToAll && !joinableByAll) {
             // Public, invite-only - anyone can view, only invited can join
             return {
-                svg: 'visible',
-                svgContent: SVGManager.visibleSVG,
-                tooltipKey: 'general.privacy_visible_tooltip',
-                tooltip: window.i18n.translate('general.privacy_visible_tooltip')
+                svg: 'locked',
+                svgContent: SVGManager.lockedSVG,
+                tooltipKey: 'general.locked_tooltip',
+                tooltip: window.i18n.translate('general.locked_tooltip')
             };
         } else {
             // Private - only invited can view and join

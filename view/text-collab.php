@@ -40,8 +40,8 @@
             {% set privacyInfo = game.visible_to_all and game.joinable_by_all ? 
                 {svg: 'public', key: 'general.privacy_public_tooltip'} : 
                 (game.visible_to_all ? 
-                    {svg: 'visible', key: 'general.privacy_visible_tooltip'} : 
-                    {svg: 'locked', key: 'general.privacy_private_tooltip'}) %}
+                    {svg: 'locked', key: 'general.privacy_locked_tooltip'} : 
+                    {svg: 'invisible', key: 'general.privacy_invisible_tooltip'}) %}
             <div class="story-btn privacy-indicator" data-svg="{{ privacyInfo.svg }}" data-i18n-title="{{ privacyInfo.key }}" title="{{ translate(privacyInfo.key) }}">
             </div>
         </div>
