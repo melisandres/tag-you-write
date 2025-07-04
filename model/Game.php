@@ -139,6 +139,13 @@
                   LEFT JOIN seen s ON t.id = s.text_id AND s.writer_id = :loggedInWriterId
                   LEFT JOIN bookmark b ON rt.id = b.text_id AND b.writer_id = :loggedInWriterId
                   WHERE 1=1 
+                  AND (
+                     g.visible_to_all = 1 
+                     OR (:loggedInWriterId != '' AND (
+                        EXISTS (SELECT 1 FROM game_has_player ghp2 WHERE ghp2.game_id = g.id AND ghp2.player_id = :loggedInWriterId)
+                        OR EXISTS (SELECT 1 FROM game_invitation gi WHERE gi.game_id = g.id AND gi.invitee_id = :loggedInWriterId AND gi.status IN ('pending', 'viewed'))
+                     ))
+                  )
                   $filterString
                   GROUP BY g.id, g.prompt, rt.id, rt.title";
       
@@ -296,6 +303,13 @@
             LEFT JOIN seen s ON t.id = s.text_id AND s.writer_id = :loggedInWriterId
             LEFT JOIN bookmark b ON rt.id = b.text_id AND b.writer_id = :loggedInWriterId
             WHERE CAST(g.modified_at AS DATETIME) > CAST(:lastCheck AS DATETIME)
+            AND (
+               g.visible_to_all = 1 
+               OR (:loggedInWriterId != '' AND (
+                  EXISTS (SELECT 1 FROM game_has_player ghp2 WHERE ghp2.game_id = g.id AND ghp2.player_id = :loggedInWriterId)
+                  OR EXISTS (SELECT 1 FROM game_invitation gi WHERE gi.game_id = g.id AND gi.invitee_id = :loggedInWriterId AND gi.status IN ('pending', 'viewed'))
+               ))
+            )
             $filterString
             GROUP BY g.id, g.prompt, rt.id, rt.title";
 

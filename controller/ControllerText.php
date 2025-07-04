@@ -407,7 +407,7 @@ class ControllerText extends Controller{
         }
 
         //send the writer_id and the game_id to game_has_player
-        if ($status == 'published') {
+        if ($status == 'published' || $isRootText) {
             $gameHasPlayer = new GameHasPlayer;
             $gameHasPlayer->insert([
                 'player_id' => $currentWriterId,
@@ -1081,6 +1081,9 @@ class ControllerText extends Controller{
         if ($response && $isRoot) {
             // If delete text worked now we can safely delete the game
             $game->delete($textData['game_id']);
+            // Delete the game_has_player entry
+            $gameHasPlayer = new GameHasPlayer;
+            $gameHasPlayer->delete(['game_id' => $textData['game_id']]);
         }elseif(!$response && $isRoot){
             // If it failed, update the game to re-add the reference to this text
             $game->update(['id' => $textData['game_id'], 'root_text_id' => $textId]);
