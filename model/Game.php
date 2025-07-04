@@ -19,6 +19,15 @@
 
    public function getGames($order = null, $filters = [], $id = null, $searchTerm = null) {
       $loggedInWriterId = isset($_SESSION['writer_id']) ? $_SESSION['writer_id'] : "";
+      
+      // Extract tokens from session
+      $tokens = [];
+      if (isset($_SESSION['game_invitation_access'])) {
+         foreach ($_SESSION['game_invitation_access'] as $gameId => $accessInfo) {
+            // You could also check if the tokens are valid here...
+            $tokens[] = $accessInfo['token'];
+         }
+      }
 
       // Build filter string
       $filterString = "";
@@ -95,6 +104,21 @@
          )";
       }
 
+      // Build token condition for the main WHERE clause
+      $tokenCondition = "";
+      if (!empty($tokens)) {
+         $tokenPlaceholders = [];
+         foreach ($tokens as $index => $token) {
+            $tokenPlaceholders[] = ":token$index";
+         }
+         $tokenCondition = " OR EXISTS (
+            SELECT 1 FROM game_invitation gi 
+            WHERE gi.game_id = g.id 
+            AND gi.token IN (" . implode(', ', $tokenPlaceholders) . ")
+            AND gi.status IN ('pending', 'viewed')
+         )";
+      }
+
       $sql =   "SELECT  g.id AS game_id, 
                         g.prompt,
                         g.open_for_changes AS openForChanges,
@@ -146,6 +170,7 @@
                         OR EXISTS (SELECT 1 FROM game_invitation gi WHERE gi.game_id = g.id AND gi.invitee_id = :loggedInWriterId AND gi.status IN ('pending', 'viewed'))
                      ))
                   )
+                  $tokenCondition
                   $filterString
                   GROUP BY g.id, g.prompt, rt.id, rt.title";
       
@@ -157,6 +182,11 @@
       
       $stmt = $this->pdo->prepare($sql);
       $stmt->bindValue(':loggedInWriterId', $loggedInWriterId);
+
+      // Bind token parameters
+      foreach ($tokens as $index => $token) {
+         $stmt->bindValue(":token$index", $token);
+      }
 
       if ($searchTerm) {
          $searchValue = '%' . $searchTerm . '%';
@@ -192,6 +222,17 @@
   }
 
    public function getModifiedSince($lastCheck, $filters = [], $searchTerm = null) {
+      $loggedInWriterId = isset($_SESSION['writer_id']) ? $_SESSION['writer_id'] : "";
+      
+      // Extract tokens from session  
+      $tokens = [];
+      if (isset($_SESSION['game_invitation_access'])) {
+         foreach ($_SESSION['game_invitation_access'] as $gameId => $accessInfo) {
+            // You could also check if the tokens are valid here...
+            $tokens[] = $accessInfo['token'];
+         }
+      }
+
       $filterString = "";
       
       if (isset($filters['hasContributed'])) {
@@ -260,6 +301,21 @@
          )";
       }
 
+      // Build token condition
+      $tokenCondition = "";
+      if (!empty($tokens)) {
+         $tokenPlaceholders = [];
+         foreach ($tokens as $index => $token) {
+            $tokenPlaceholders[] = ":token$index";
+         }
+         $tokenCondition = " OR EXISTS (
+            SELECT 1 FROM game_invitation gi 
+            WHERE gi.game_id = g.id 
+            AND gi.token IN (" . implode(', ', $tokenPlaceholders) . ")
+            AND gi.status IN ('pending', 'viewed')
+         )";
+      }
+
       $sql = "SELECT g.id AS game_id, 
                      g.prompt,
                      g.modified_at,
@@ -309,6 +365,7 @@
                   EXISTS (SELECT 1 FROM game_has_player ghp2 WHERE ghp2.game_id = g.id AND ghp2.player_id = :loggedInWriterId)
                   OR EXISTS (SELECT 1 FROM game_invitation gi WHERE gi.game_id = g.id AND gi.invitee_id = :loggedInWriterId AND gi.status IN ('pending', 'viewed'))
                ))
+               $tokenCondition
             )
             $filterString
             GROUP BY g.id, g.prompt, rt.id, rt.title";
@@ -320,8 +377,13 @@
       if ($searchTerm) {
          $stmt->bindValue(':searchTerm', '%' . $searchTerm . '%');
       }
-      $stmt->bindValue(':loggedInWriterId', $_SESSION['writer_id'] ?? 0); 
+      $stmt->bindValue(':loggedInWriterId', $loggedInWriterId);
       
+      // Bind token parameters
+      foreach ($tokens as $index => $token) {
+         $stmt->bindValue(":token$index", $token);
+      }
+
       $stmt->execute();
 
       $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
