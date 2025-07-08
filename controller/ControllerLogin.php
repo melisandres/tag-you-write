@@ -47,6 +47,13 @@ class ControllerLogin extends Controller {
         if($val->isSuccess()){
             $writer = new Writer;
             if($writer->checkWriter($email, $password)){
+                // Process any stored invitation tokens
+                if (isset($_SESSION['game_invitation_access']) && !empty($_SESSION['game_invitation_access'])) {
+                    RequirePage::controller('ControllerGameInvitation');
+                    $invitationController = new ControllerGameInvitation();
+                    $invitationController->processLoggedInInvitation(); // No token needed - uses session
+                }
+                
                 // For JSON requests, send JSON response
                 if (strpos($contentType, 'application/json') !== false) {
                     $this->sendJsonResponse(true, 'auth.login_success', 'text');
@@ -292,6 +299,13 @@ class ControllerLogin extends Controller {
                 $_SESSION['writer_lastName'] = $writerData['lastName'];
                 $_SESSION['writer_userName'] = $writerData['email'];
                 $_SESSION['fingerPrint'] = md5($_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR']);
+                
+                // Process any stored invitation tokens
+                if (isset($_SESSION['game_invitation_access']) && !empty($_SESSION['game_invitation_access'])) {
+                    RequirePage::controller('ControllerGameInvitation');
+                    $invitationController = new ControllerGameInvitation();
+                    $invitationController->processLoggedInInvitation(); // No token needed - uses session
+                }
                 
                 // Send JSON response (similar to ControllerText)
                 $this->sendJsonResponse(true, 'auth.password_reset.password_updated', 'text');

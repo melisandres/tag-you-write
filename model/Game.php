@@ -111,12 +111,7 @@
          foreach ($tokens as $index => $token) {
             $tokenPlaceholders[] = ":token$index";
          }
-         $tokenCondition = " OR EXISTS (
-            SELECT 1 FROM game_invitation gi 
-            WHERE gi.game_id = g.id 
-            AND gi.token IN (" . implode(', ', $tokenPlaceholders) . ")
-            AND gi.status IN ('pending', 'viewed')
-         )";
+         $tokenCondition = "EXISTS (SELECT 1 FROM game_invitation gi WHERE gi.game_id = g.id AND gi.token IN (" . implode(', ', $tokenPlaceholders) . ") AND gi.status IN ('pending', 'accepted'))";
       }
 
       $sql =   "SELECT  g.id AS game_id, 
@@ -165,12 +160,19 @@
                   WHERE 1=1 
                   AND (
                      g.visible_to_all = 1 
-                     OR (:loggedInWriterId != '' AND (
-                        EXISTS (SELECT 1 FROM game_has_player ghp2 WHERE ghp2.game_id = g.id AND ghp2.player_id = :loggedInWriterId)
-                        OR EXISTS (SELECT 1 FROM game_invitation gi WHERE gi.game_id = g.id AND gi.invitee_id = :loggedInWriterId AND gi.status IN ('pending', 'viewed'))
-                     ))
+                     OR (
+                        g.visible_to_all = 0 AND (
+                           -- User is a player in this game
+                           (:loggedInWriterId != '' AND EXISTS (SELECT 1 FROM game_has_player ghp2 WHERE ghp2.game_id = g.id AND ghp2.player_id = :loggedInWriterId))
+                           OR 
+                           -- User has an invitation for this game (by user ID)
+                           (:loggedInWriterId != '' AND EXISTS (SELECT 1 FROM game_invitation gi WHERE gi.game_id = g.id AND gi.invitee_id = :loggedInWriterId AND gi.status IN ('pending', 'accepted')))
+                           OR
+                           -- User has a token for this game (by token)
+                           $tokenCondition
+                        )
+                     )
                   )
-                  $tokenCondition
                   $filterString
                   GROUP BY g.id, g.prompt, rt.id, rt.title";
       
@@ -224,7 +226,7 @@
    public function getModifiedSince($lastCheck, $filters = [], $searchTerm = null) {
       $loggedInWriterId = isset($_SESSION['writer_id']) ? $_SESSION['writer_id'] : "";
       
-      // Extract tokens from session  
+      // Extract tokens from session
       $tokens = [];
       if (isset($_SESSION['game_invitation_access'])) {
          foreach ($_SESSION['game_invitation_access'] as $gameId => $accessInfo) {
@@ -301,19 +303,14 @@
          )";
       }
 
-      // Build token condition
+      // Build token condition for the main WHERE clause
       $tokenCondition = "";
       if (!empty($tokens)) {
          $tokenPlaceholders = [];
          foreach ($tokens as $index => $token) {
             $tokenPlaceholders[] = ":token$index";
          }
-         $tokenCondition = " OR EXISTS (
-            SELECT 1 FROM game_invitation gi 
-            WHERE gi.game_id = g.id 
-            AND gi.token IN (" . implode(', ', $tokenPlaceholders) . ")
-            AND gi.status IN ('pending', 'viewed')
-         )";
+         $tokenCondition = "EXISTS (SELECT 1 FROM game_invitation gi WHERE gi.game_id = g.id AND gi.token IN (" . implode(', ', $tokenPlaceholders) . ") AND gi.status IN ('pending', 'accepted'))";
       }
 
       $sql = "SELECT g.id AS game_id, 
@@ -361,11 +358,18 @@
             WHERE CAST(g.modified_at AS DATETIME) > CAST(:lastCheck AS DATETIME)
             AND (
                g.visible_to_all = 1 
-               OR (:loggedInWriterId != '' AND (
-                  EXISTS (SELECT 1 FROM game_has_player ghp2 WHERE ghp2.game_id = g.id AND ghp2.player_id = :loggedInWriterId)
-                  OR EXISTS (SELECT 1 FROM game_invitation gi WHERE gi.game_id = g.id AND gi.invitee_id = :loggedInWriterId AND gi.status IN ('pending', 'viewed'))
-               ))
-               $tokenCondition
+               OR (
+                  g.visible_to_all = 0 AND (
+                     -- User is a player in this game
+                     (:loggedInWriterId != '' AND EXISTS (SELECT 1 FROM game_has_player ghp2 WHERE ghp2.game_id = g.id AND ghp2.player_id = :loggedInWriterId))
+                     OR 
+                     -- User has an invitation for this game (by user ID)
+                     (:loggedInWriterId != '' AND EXISTS (SELECT 1 FROM game_invitation gi WHERE gi.game_id = g.id AND gi.invitee_id = :loggedInWriterId AND gi.status IN ('pending', 'accepted')))
+                     OR
+                     -- User has a token for this game (by token)
+                     $tokenCondition
+                  )
+               )
             )
             $filterString
             GROUP BY g.id, g.prompt, rt.id, rt.title";

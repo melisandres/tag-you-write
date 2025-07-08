@@ -107,6 +107,13 @@ class ControllerWriter extends Controller{
             $_SESSION['writer_lastName'] = $lastName;
             $_SESSION['writer_userName'] = $email;
         
+            // Process any stored invitation tokens
+            if (isset($_SESSION['game_invitation_access']) && !empty($_SESSION['game_invitation_access'])) {
+                RequirePage::controller('ControllerGameInvitation');
+                $invitationController = new ControllerGameInvitation();
+                $invitationController->processLoggedInInvitation(); // No token needed - uses session
+            }
+        
             // Write and close session immediately
             session_write_close();
 
