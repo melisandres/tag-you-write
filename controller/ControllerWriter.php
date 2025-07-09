@@ -111,7 +111,12 @@ class ControllerWriter extends Controller{
             if (isset($_SESSION['game_invitation_access']) && !empty($_SESSION['game_invitation_access'])) {
                 RequirePage::controller('ControllerGameInvitation');
                 $invitationController = new ControllerGameInvitation();
-                $invitationController->processLoggedInInvitation(); // No token needed - uses session
+                $result = $invitationController->processLoggedInInvitation(); // No token needed - uses session
+                
+                // Store pending confirmations in session for frontend to handle
+                if ($result['success'] && !empty($result['pendingConfirmations'])) {
+                    $_SESSION['pending_invitation_confirmations'] = $result['pendingConfirmations'];
+                }
             }
         
             // Write and close session immediately

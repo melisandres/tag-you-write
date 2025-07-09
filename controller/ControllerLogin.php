@@ -51,7 +51,12 @@ class ControllerLogin extends Controller {
                 if (isset($_SESSION['game_invitation_access']) && !empty($_SESSION['game_invitation_access'])) {
                     RequirePage::controller('ControllerGameInvitation');
                     $invitationController = new ControllerGameInvitation();
-                    $invitationController->processLoggedInInvitation(); // No token needed - uses session
+                    $result = $invitationController->processLoggedInInvitation(); // No token needed - uses session
+                    
+                    // Store pending confirmations in session for frontend to handle
+                    if ($result['success'] && !empty($result['pendingConfirmations'])) {
+                        $_SESSION['pending_invitation_confirmations'] = $result['pendingConfirmations'];
+                    }
                 }
                 
                 // For JSON requests, send JSON response
@@ -304,7 +309,12 @@ class ControllerLogin extends Controller {
                 if (isset($_SESSION['game_invitation_access']) && !empty($_SESSION['game_invitation_access'])) {
                     RequirePage::controller('ControllerGameInvitation');
                     $invitationController = new ControllerGameInvitation();
-                    $invitationController->processLoggedInInvitation(); // No token needed - uses session
+                    $result = $invitationController->processLoggedInInvitation(); // No token needed - uses session
+                    
+                    // Store pending confirmations in session for frontend to handle
+                    if ($result['success'] && !empty($result['pendingConfirmations'])) {
+                        $_SESSION['pending_invitation_confirmations'] = $result['pendingConfirmations'];
+                    }
                 }
                 
                 // Send JSON response (similar to ControllerText)

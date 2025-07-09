@@ -28,7 +28,6 @@ export class Localization {
         basePath = this.basePath.replace(/^https?:\/\/[^\/]+/, '');
       }
     }
-    console.log('PARSED BASE PATH:', basePath);
     
     // Remove the base path to get the application-specific path
     let appPath = fullPath;
@@ -42,7 +41,6 @@ export class Localization {
     
     if (this.supportedLanguages.includes(urlLang)) {
       this.currentLanguage = urlLang;
-      console.log('URL language setting current language:', this.currentLanguage);
     }
     
     // Load translations for current language
@@ -135,12 +133,8 @@ export class Localization {
       
       // Toggle dropdown when clicking the current language
       if (currentLanguageElement) {
-        // Add console log to verify this code is running
-        console.log('Adding click listener to language element', currentLanguageElement);
-        
         currentLanguageElement.addEventListener('click', (e) => {
           e.stopPropagation();
-          console.log('Language clicked, toggling dropdown');
           switcher.classList.toggle('open');
         });
       }
@@ -178,7 +172,6 @@ export class Localization {
   async switchLanguage(lang) {
     // Exit if the lang isn't supported or hasn't changed
     if (!this.supportedLanguages.includes(lang) || lang === this.currentLanguage) {
-        console.log('Language not supported or no change');
         return;
     }
     
@@ -240,7 +233,6 @@ export class Localization {
         
         // Emit an event that language has changed
         if (window.eventBus) {
-            console.log('Emitting languageChanged event');
             window.eventBus.emit('languageChanged', { 
                 from: this.previousLanguage, 
                 to: this.currentLanguage 
@@ -397,7 +389,6 @@ export class Localization {
     });
     
     // Then update all links when language changes
-    console.log('updating page urls', this.previousLanguage, this.currentLanguage);
     this.updatePageUrls(this.previousLanguage, this.currentLanguage);
     this.handleInnerTranslations();
   }
@@ -417,7 +408,6 @@ export class Localization {
    * Update all tooltips on the page
    */
   updateTooltips() {
-    console.log('LOCALIZATION: Updating tooltips');
     const tooltipElements = document.querySelectorAll('[data-i18n-tooltip]');
     tooltipElements.forEach(element => {
       const key = element.getAttribute('data-i18n-tooltip');

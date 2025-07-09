@@ -167,9 +167,9 @@
                            OR 
                            -- User has an invitation for this game (by user ID)
                            (:loggedInWriterId != '' AND EXISTS (SELECT 1 FROM game_invitation gi WHERE gi.game_id = g.id AND gi.invitee_id = :loggedInWriterId AND gi.status IN ('pending', 'accepted')))
-                           OR
+                           " . (!empty($tokens) ? "OR
                            -- User has a token for this game (by token)
-                           $tokenCondition
+                           $tokenCondition" : "") . "
                         )
                      )
                   )
@@ -365,9 +365,9 @@
                      OR 
                      -- User has an invitation for this game (by user ID)
                      (:loggedInWriterId != '' AND EXISTS (SELECT 1 FROM game_invitation gi WHERE gi.game_id = g.id AND gi.invitee_id = :loggedInWriterId AND gi.status IN ('pending', 'accepted')))
-                     OR
+                     " . (!empty($tokens) ? "OR
                      -- User has a token for this game (by token)
-                     $tokenCondition
+                     $tokenCondition" : "") . "
                   )
                )
             )

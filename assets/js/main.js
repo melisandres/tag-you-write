@@ -47,6 +47,7 @@ import { TextFormGameActivityIndicator } from './textFormGameActivityIndicator.j
 import { InviteInputManager } from './inviteInputManager.js';
 import { InviteeSuggestionsManager } from './inviteeSuggestionsManager.js';
 import { FormTogglesManager } from './formTogglesManager.js';
+import { InvitationTokenManager } from './invitationTokenManager.js';
 
 // Make eventBus globally available immediately
 window.eventBus = eventBus;
@@ -110,6 +111,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Initialize VoteManager
   new VoteManager(warningManager);
+
+  // Initialize InvitationTokenManager
+  new InvitationTokenManager(warningManager);
 
   // Initialize BookmarkManager
   new BookmarkManager();

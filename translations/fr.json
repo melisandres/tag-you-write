@@ -267,6 +267,11 @@
     "confirm_game_done": "Compris!",
     "cancel_game_done": "Ignorer..."
   },
+  "invitation": {
+    "confirm_link": "Lier l'invitation",
+    "reject_link": "Rejeter l'invitation",
+    "confirmation_message": "Une invitation, destinée à {invited_email}, a été ouverte depuis ce navigateur. Vous êtes connecté en tant que {current_user_email}. Voulez-vous lier cette invitation à votre compte?"
+  },
   "form_field": {
     "title": "titre",
     "prompt": "texte incitatif",

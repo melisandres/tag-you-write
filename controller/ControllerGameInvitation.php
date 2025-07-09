@@ -531,7 +531,6 @@ class ControllerGameInvitation extends Controller {
             
             // Locate invitation by token
             $invitation = $gameInvitation->selectId($token, 'token');
-            error_log("HERE Invitation lookup - Token: $token, Found: " . json_encode($invitation));
             
             if (!$invitation || !in_array($invitation['status'], ['pending', 'accepted'])) {
                 $notifications = $this->getNotifications();
@@ -545,7 +544,6 @@ class ControllerGameInvitation extends Controller {
             
             // Get game information
             $gameData = $game->selectId($invitation['game_id']);
-            error_log("HERE Game data: " . json_encode($gameData));
             if (!$gameData || !$gameData['root_text_id']) {
                 $notifications = $this->getNotifications();
                 Twig::render('home-error.php', [
@@ -573,11 +571,11 @@ class ControllerGameInvitation extends Controller {
             if (!$alreadyStored) {
                 $_SESSION['game_invitation_access'][$invitation['game_id']] = [
                     'token' => $token,
-                    'invitation_id' => $invitation['id']
+                    'invitation_id' => $invitation['id'],
+                    'invited_email' => $invitation['email'],
+                    'expires_at' => date('Y-m-d H:i:s', strtotime('+2 hours')),
+                    'was_prompted' => false
                 ];
-                error_log("HERE Stored new token for game {$invitation['game_id']}: $token");
-            } else {
-                error_log("HERE Token already stored for game {$invitation['game_id']}: $token");
             }
             
             // Always update visited_at when someone visits via invitation link
@@ -586,9 +584,8 @@ class ControllerGameInvitation extends Controller {
                 'visited_at' => date('Y-m-d H:i:s')
             ]);
             
-            // Process invitation for user ID assignment--and for the creation of invitation notification--if needed  (it will check if the user is logged in)
-            $this->processLoggedInInvitation($token);
-
+            // Don't process invitation immediately - let it be processed during login/account creation
+            // This allows for proper email matching and confirmation
             
             // Show the game collaboration page
             RequirePage::redirect('text/collab/' . $gameData['root_text_id']);
@@ -605,16 +602,16 @@ class ControllerGameInvitation extends Controller {
     }
 
     /**
-     * Process invitation for logged-in users
+     * Process invitation for logged-in users with enhanced safety checks
      * Assigns user ID to email invitations and creates notifications
      * Removes tokens from session when user ID is assigned
      * 
      * @param string $token Optional token to process, or null to process all stored tokens
-     * @return bool Success status
+     * @return array Response with status and any pending confirmations
      */
     public function processLoggedInInvitation($token = null) {
         if (!isset($_SESSION['writer_id'])) {
-            return false;
+            return ['success' => false, 'message' => 'User not logged in'];
         }
         
         try {
@@ -627,14 +624,26 @@ class ControllerGameInvitation extends Controller {
             $writer = new Writer();
             $currentUserId = $_SESSION['writer_id'];
             
+            // Get current user's email
+            $currentUserData = $writer->selectId($currentUserId);
+            $currentUserEmail = $currentUserData['email'] ?? '';
+            
             // Determine which tokens to process
             $tokensToProcess = [];
+            $pendingConfirmations = [];
+            
             if ($token) {
                 // Process specific token
                 $tokensToProcess[] = $token;
             } elseif (isset($_SESSION['game_invitation_access'])) {
                 // Process all stored tokens
-                foreach ($_SESSION['game_invitation_access'] as $accessInfo) {
+                foreach ($_SESSION['game_invitation_access'] as $gameId => $accessInfo) {
+                    // Check if token is expired
+                    if (isset($accessInfo['expires_at']) && strtotime($accessInfo['expires_at']) < time()) {
+                        // Remove expired token
+                        unset($_SESSION['game_invitation_access'][$gameId]);
+                        continue;
+                    }
                     $tokensToProcess[] = $accessInfo['token'];
                 }
             }
@@ -648,45 +657,160 @@ class ControllerGameInvitation extends Controller {
                 
                 // Only process invitations that have no invitee_id (email invitations)
                 if (!$invitation['invitee_id']) {
-                    // Assign current user to this invitation
-                    $gameInvitation->update([
-                        'id' => $invitation['id'],
-                        'invitee_id' => $currentUserId
-                    ]);
+                    // Check if emails match
+                    $invitedEmail = $invitation['email'] ?? '';
+                    $emailsMatch = strtolower(trim($invitedEmail)) === strtolower(trim($currentUserEmail));
                     
-                    // Create notification for this user
-                    $gameData = $game->selectId($invitation['game_id']);
-                    $inviterData = $writer->selectId($invitation['inviter_id']);
-                    
-                    if ($gameData && $inviterData) {
-                        $this->createInvitationNotification(
-                            $currentUserId,  // inviteeId
-                            $invitation['inviter_id'],  // inviterId  
-                            $invitation['game_id'],  // gameId
-                            [
-                                'title' => $gameData['prompt'] ?? 'Untitled Game',
-                                'inviterName' => trim($inviterData['firstName'] . ' ' . $inviterData['lastName'])
-                            ]  // gameData
-                        );
-                    }
-                    
-                    // Remove this token from session since user is now assigned
-                    if (isset($_SESSION['game_invitation_access'])) {
-                        foreach ($_SESSION['game_invitation_access'] as $gameId => $accessInfo) {
-                            if ($accessInfo['token'] === $currentToken) {
-                                unset($_SESSION['game_invitation_access'][$gameId]);
-                                break;
-                            }
-                        }
+                    if ($emailsMatch) {
+                        // Emails match - link silently
+                        $this->linkInvitationToUser($invitation, $currentUserId, $gameInvitation, $game, $writer);
+                        
+                        // Remove token from session
+                        $this->removeTokenFromSession($currentToken);
+                    } else {
+                        // Emails don't match - add to pending confirmations
+                        $pendingConfirmations[] = [
+                            'token' => $currentToken,
+                            'invitation' => $invitation,
+                            'invited_email' => $invitedEmail,
+                            'current_user_email' => $currentUserEmail
+                        ];
+                        
+                        // IMPORTANT: Do NOT remove token from session here - it needs to stay for the modal
                     }
                 }
             }
             
-            return true;
+            return [
+                'success' => true,
+                'pendingConfirmations' => $pendingConfirmations
+            ];
             
         } catch (Exception $e) {
             error_log('Error processing logged-in invitation: ' . $e->getMessage());
-            return false;
+            return ['success' => false, 'message' => $e->getMessage()];
         }
+    }
+    
+    /**
+     * Link an invitation to a user and create notification
+     * 
+     * @param array $invitation The invitation data
+     * @param int $userId The user ID to link
+     * @param GameInvitation $gameInvitation The invitation model
+     * @param Game $game The game model
+     * @param Writer $writer The writer model
+     */
+    private function linkInvitationToUser($invitation, $userId, $gameInvitation, $game, $writer) {
+        // Assign current user to this invitation
+        $gameInvitation->update([
+            'id' => $invitation['id'],
+            'invitee_id' => $userId
+        ]);
+        
+        // Create notification for this user
+        $gameData = $game->selectId($invitation['game_id']);
+        $inviterData = $writer->selectId($invitation['inviter_id']);
+        
+        if ($gameData && $inviterData) {
+            $this->createInvitationNotification(
+                $userId,  // inviteeId
+                $invitation['inviter_id'],  // inviterId  
+                $invitation['game_id'],  // gameId
+                [
+                    'title' => $gameData['prompt'] ?? 'Untitled Game',
+                    'inviterName' => trim($inviterData['firstName'] . ' ' . $inviterData['lastName'])
+                ]  // gameData
+            );
+        }
+    }
+    
+    /**
+     * Remove a token from session
+     * 
+     * @param string $token The token to remove
+     */
+    private function removeTokenFromSession($token) {
+        if (isset($_SESSION['game_invitation_access'])) {
+            foreach ($_SESSION['game_invitation_access'] as $gameId => $accessInfo) {
+                if ($accessInfo['token'] === $token) {
+                    unset($_SESSION['game_invitation_access'][$gameId]);
+                    break;
+                }
+            }
+        }
+    }
+    
+    /**
+     * Handle invitation confirmation from frontend
+     * 
+     * @param string $token The token to confirm
+     * @param bool $confirmed Whether the user confirmed the invitation
+     * @return void Outputs JSON response
+     */
+    public function confirmInvitation($token, $confirmed) {
+        if (!isset($_SESSION['writer_id'])) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'User not logged in']);
+            return;
+        }
+        
+        try {
+            RequirePage::model('GameInvitation');
+            RequirePage::model('Game');
+            RequirePage::model('Writer');
+            
+            $gameInvitation = new GameInvitation();
+            $game = new Game();
+            $writer = new Writer();
+            $currentUserId = $_SESSION['writer_id'];
+            
+            // Convert string parameter to boolean
+            $confirmed = ($confirmed === 'true' || $confirmed === true);
+            
+            if ($confirmed) {
+                // Get invitation
+                $invitation = $gameInvitation->selectId($token, 'token');
+                if ($invitation && !$invitation['invitee_id']) {
+                    // Link the invitation to the user
+                    $this->linkInvitationToUser($invitation, $currentUserId, $gameInvitation, $game, $writer);
+                }
+            }
+            
+            // Remove token from session regardless of confirmation
+            $this->removeTokenFromSession($token);
+            
+            header('Content-Type: application/json');
+            echo json_encode(['success' => true]);
+            
+        } catch (Exception $e) {
+            error_log('Error confirming invitation: ' . $e->getMessage());
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+    
+    /**
+     * Get pending invitation confirmations for frontend
+     * 
+     * @return void Outputs JSON response
+     */
+    public function getPendingConfirmations() {
+        if (!isset($_SESSION['writer_id'])) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'User not logged in']);
+            return;
+        }
+        
+        $pendingConfirmations = $_SESSION['pending_invitation_confirmations'] ?? [];
+        
+        // Clear the session data after retrieving it
+        unset($_SESSION['pending_invitation_confirmations']);
+        
+        header('Content-Type: application/json');
+        echo json_encode([
+            'success' => true,
+            'pendingConfirmations' => $pendingConfirmations
+        ]);
     }
 }

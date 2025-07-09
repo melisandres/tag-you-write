@@ -268,6 +268,11 @@
     "confirm_game_done": "Understood!",
     "cancel_game_done": "Ignore..."
   },
+  "invitation": {
+    "confirm_link": "Link Invitation",
+    "reject_link": "Reject Invitation",
+    "confirmation_message": "An invitation, intended for {invited_email}, has been opened from this browser. You are logged in as {current_user_email}. Do you want to link this invitation to your account?"
+  },
   "form_field": {
     "title": "title",
     "prompt": "prompt",
