@@ -269,9 +269,13 @@
     "cancel_game_done": "Ignore..."
   },
   "invitation": {
-    "confirm_link": "Link Invitation",
-    "reject_link": "Reject Invitation",
-    "confirmation_message": "An invitation for {invited_email}, opened recently on this browser, can be linked to your account ({current_user_email})?"
+    "confirm_link": "Link to My Account",
+    "reject_link": "Continue Temporarily",
+    "confirmation_message": "An invitation for {invited_email}, opened recently on this browser, can be linked to your account ({current_user_email}).",
+    "confirmation_message_plural": "{count} invitations for {invited_email}, opened recently on this browser, can be linked to your account ({current_user_email}).",
+    "immediate_visit_message": "This invitation sent to {invited_email} can be linked to this your account ({current_user_email}).",
+    "immediate_visit_message_plural": "{count} invitations sent to {invited_email} can be linked to your account ({current_user_email}).",
+    "temporary_access_banner": "You are viewing this game via a temporary invitation. Link it to your account for permanent access."
   },
   "form_field": {
     "title": "title",

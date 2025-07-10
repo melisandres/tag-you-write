@@ -43,12 +43,18 @@ export class InvitationTokenManager {
     async showConfirmationModal(confirmation) {
         const invitedEmail = confirmation.invited_email;
         const currentUserEmail = confirmation.current_user_email;
+        const context = confirmation.context || 'post_login';
+        const tokens = confirmation.tokens || [confirmation.token];
         
-        // Create the message using translation keys
-        const messageKey = 'invitation.confirmation_message';
+        // Create the message using translation keys based on context and count
+        const isPlural = tokens.length > 1;
+        const messageKey = context === 'visit' 
+            ? (isPlural ? 'invitation.immediate_visit_message_plural' : 'invitation.immediate_visit_message')
+            : (isPlural ? 'invitation.confirmation_message_plural' : 'invitation.confirmation_message');
         const messageParams = {
             invited_email: invitedEmail,
-            current_user_email: currentUserEmail
+            current_user_email: currentUserEmail,
+            count: tokens.length
         };
         
         return new Promise((resolve) => {
@@ -56,26 +62,30 @@ export class InvitationTokenManager {
                 messageKey,
                 messageParams,
                 async () => {
-                    // User confirmed - link the invitation
+                    // User confirmed - link all invitations for this email
                     try {
-                        const result = await this.confirmInvitation(confirmation.token, true);
-                        if (!result.success) {
-                            console.error('Failed to link invitation:', result.message);
+                        for (const token of tokens) {
+                            const result = await this.confirmInvitation(token, true);
+                            if (!result.success) {
+                                console.error('Failed to link invitation:', result.message);
+                            }
                         }
                     } catch (error) {
-                        console.error('Error confirming invitation:', error);
+                        console.error('Error confirming invitations:', error);
                     }
                     resolve();
                 },
                 async () => {
-                    // User rejected - remove the token
+                    // User rejected - remove all tokens for this email
                     try {
-                        const result = await this.confirmInvitation(confirmation.token, false);
-                        if (!result.success) {
-                            console.error('Failed to reject invitation:', result.message);
+                        for (const token of tokens) {
+                            const result = await this.confirmInvitation(token, false);
+                            if (!result.success) {
+                                console.error('Failed to reject invitation:', result.message);
+                            }
                         }
                     } catch (error) {
-                        console.error('Error rejecting invitation:', error);
+                        console.error('Error rejecting invitations:', error);
                     }
                     resolve();
                 },

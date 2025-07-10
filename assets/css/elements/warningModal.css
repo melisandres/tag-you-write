@@ -59,8 +59,3 @@
     }
 }
 
-@media (min-width: 360px) {
-    .warning-buttons {
-        height: 40px; /* the height of the button svgs which are placed absolutely */
-    }
-}

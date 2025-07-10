@@ -584,10 +584,18 @@ class ControllerGameInvitation extends Controller {
                 'visited_at' => date('Y-m-d H:i:s')
             ]);
             
-            // Don't process invitation immediately - let it be processed during login/account creation
-            // This allows for proper email matching and confirmation
+            // Process invitation immediately - processing checks if the user is logged in, and if not, it will be triggered during login/account creation
+            // Only process the current token, not all stored tokens
+            $result = $this->processLoggedInInvitation($token, 'visit');
             
-            // Show the game collaboration page
+            // If user is logged in and there are pending confirmations, store them and redirect to the game
+            // The frontend will handle showing the confirmation modal when the page loads
+            if ($result['success'] && !empty($result['pendingConfirmations'])) {
+                $_SESSION['pending_invitation_confirmations'] = $result['pendingConfirmations'];
+            }
+            
+            // Always show the game collaboration page
+            // The frontend will check for pending confirmations and show modal if needed
             RequirePage::redirect('text/collab/' . $gameData['root_text_id']);
             
         } catch (Exception $e) {
@@ -607,9 +615,10 @@ class ControllerGameInvitation extends Controller {
      * Removes tokens from session when user ID is assigned
      * 
      * @param string $token Optional token to process, or null to process all stored tokens
+     * @param string $context The context of the invitation processing ('visit', 'login', 'account_creation', 'password_reset')
      * @return array Response with status and any pending confirmations
      */
-    public function processLoggedInInvitation($token = null) {
+    public function processLoggedInInvitation($token = null, $context = 'login') {
         if (!isset($_SESSION['writer_id'])) {
             return ['success' => false, 'message' => 'User not logged in'];
         }
@@ -673,7 +682,8 @@ class ControllerGameInvitation extends Controller {
                             'token' => $currentToken,
                             'invitation' => $invitation,
                             'invited_email' => $invitedEmail,
-                            'current_user_email' => $currentUserEmail
+                            'current_user_email' => $currentUserEmail,
+                            'context' => $context
                         ];
                         
                         // IMPORTANT: Do NOT remove token from session here - it needs to stay for the modal
@@ -681,9 +691,26 @@ class ControllerGameInvitation extends Controller {
                 }
             }
             
+            // Group confirmations by email to avoid repetitive modals
+            $groupedConfirmations = [];
+            foreach ($pendingConfirmations as $confirmation) {
+                $invitedEmail = $confirmation['invited_email'];
+                if (!isset($groupedConfirmations[$invitedEmail])) {
+                    $groupedConfirmations[$invitedEmail] = [
+                        'invited_email' => $invitedEmail,
+                        'current_user_email' => $confirmation['current_user_email'],
+                        'context' => $confirmation['context'],
+                        'tokens' => [],
+                        'invitations' => []
+                    ];
+                }
+                $groupedConfirmations[$invitedEmail]['tokens'][] = $confirmation['token'];
+                $groupedConfirmations[$invitedEmail]['invitations'][] = $confirmation['invitation'];
+            }
+            
             return [
                 'success' => true,
-                'pendingConfirmations' => $pendingConfirmations
+                'pendingConfirmations' => array_values($groupedConfirmations)
             ];
             
         } catch (Exception $e) {
@@ -774,11 +801,9 @@ class ControllerGameInvitation extends Controller {
                 if ($invitation && !$invitation['invitee_id']) {
                     // Link the invitation to the user
                     $this->linkInvitationToUser($invitation, $currentUserId, $gameInvitation, $game, $writer);
+                    $this->removeTokenFromSession($token);
                 }
             }
-            
-            // Remove token from session regardless of confirmation
-            $this->removeTokenFromSession($token);
             
             header('Content-Type: application/json');
             echo json_encode(['success' => true]);

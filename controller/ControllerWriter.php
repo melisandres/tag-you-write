@@ -77,68 +77,68 @@ class ControllerWriter extends Controller{
             extract($_POST);
             unset($_POST['currentPage']);
 
-        //check if the user exists already
-        $writer = new Writer;
-        $answer = $writer->selectId($email, "email");
+            //check if the user exists already
+            $writer = new Writer;
+            $answer = $writer->selectId($email, "email");
 
-        //I'm confused... maybe this was the begining of a solution that was not well implemented? 
-        if($answer){
-            $response['message'] = "error.already_registered";
-            echo json_encode($response);
-            exit();
-        }
-
-        $writer = new Writer;
-        $options =[
-            'cost'=>10,
-        ];
-        $passwordHash = password_hash($password, PASSWORD_BCRYPT, $options);
-        $_POST['password']= $passwordHash;
-
-        $insert = $writer->insert($_POST);
-
-        //it's easier to put it here
-        //for now
-        if($insert) {
-            $_SESSION['writer_id'] = $insert;
-            $_SESSION['privilege'] = 2;
-            $_SESSION['fingerPrint'] = md5($_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR']);
-            $_SESSION['writer_firstName'] = $firstName;
-            $_SESSION['writer_lastName'] = $lastName;
-            $_SESSION['writer_userName'] = $email;
-        
-            // Process any stored invitation tokens
-            if (isset($_SESSION['game_invitation_access']) && !empty($_SESSION['game_invitation_access'])) {
-                RequirePage::controller('ControllerGameInvitation');
-                $invitationController = new ControllerGameInvitation();
-                $result = $invitationController->processLoggedInInvitation(); // No token needed - uses session
-                
-                // Store pending confirmations in session for frontend to handle
-                if ($result['success'] && !empty($result['pendingConfirmations'])) {
-                    $_SESSION['pending_invitation_confirmations'] = $result['pendingConfirmations'];
-                }
+            //I'm confused... maybe this was the begining of a solution that was not well implemented? 
+            if($answer){
+                $response['message'] = "error.already_registered";
+                echo json_encode($response);
+                exit();
             }
-        
-            // Write and close session immediately
-            session_write_close();
 
-            $response['success'] = true;
-            $response['message'] = 'auth.account_created';
-            echo json_encode($response);
+            $writer = new Writer;
+            $options =[
+                'cost'=>10,
+            ];
+            $passwordHash = password_hash($password, PASSWORD_BCRYPT, $options);
+            $_POST['password']= $passwordHash;
 
-            // Send email after response is sent
-            $email = new Email;
-            $name = $firstName . " " .$lastName;
+            $insert = $writer->insert($_POST);
+
+            //it's easier to put it here
+            //for now
+            if($insert) {
+                $_SESSION['writer_id'] = $insert;
+                $_SESSION['privilege'] = 2;
+                $_SESSION['fingerPrint'] = md5($_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR']);
+                $_SESSION['writer_firstName'] = $firstName;
+                $_SESSION['writer_lastName'] = $lastName;
+                $_SESSION['writer_userName'] = $email;
             
-            // Include the translation library explicitly
-            RequirePage::library('languages');
+                // Process any stored invitation tokens
+                if (isset($_SESSION['game_invitation_access']) && !empty($_SESSION['game_invitation_access'])) {
+                    RequirePage::controller('ControllerGameInvitation');
+                    $invitationController = new ControllerGameInvitation();
+                    $result = $invitationController->processLoggedInInvitation(null, 'account_creation'); // No token needed - uses session
+                    
+                    // Store pending confirmations in session for frontend to handle
+                    if ($result['success'] && !empty($result['pendingConfirmations'])) {
+                        $_SESSION['pending_invitation_confirmations'] = $result['pendingConfirmations'];
+                    }
+                }
             
-            $subject = translate('auth.account_created_email.email_title');
-            $message = translate('auth.account_created_email.email_message', ['name' => $name]);
-            
-            $email->welcome($_POST['email'], $name, $subject, $message);
-            exit();
-        }
+                // Write and close session immediately
+                session_write_close();
+
+                $response['success'] = true;
+                $response['message'] = 'auth.account_created';
+                echo json_encode($response);
+
+                // Send email after response is sent
+                $email = new Email;
+                $name = $firstName . " " .$lastName;
+                
+                // Include the translation library explicitly
+                RequirePage::library('languages');
+                
+                $subject = translate('auth.account_created_email.email_title');
+                $message = translate('auth.account_created_email.email_message', ['name' => $name]);
+                
+                $email->welcome($_POST['email'], $name, $subject, $message);
+                exit();
+            }
         } catch (Exception $e) {    
             $response['message'] = $e->getMessage();
         }
