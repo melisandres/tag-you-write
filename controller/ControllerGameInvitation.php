@@ -664,9 +664,9 @@ class ControllerGameInvitation extends Controller {
                     continue;
                 }
                 
-                // Only process invitations that have no invitee_id (email invitations)
+                // Handle all invitations based on their current state
                 if (!$invitation['invitee_id']) {
-                    // Check if emails match
+                    // Email invitation (no invitee_id) - check if emails match
                     $invitedEmail = $invitation['email'] ?? '';
                     $emailsMatch = strtolower(trim($invitedEmail)) === strtolower(trim($currentUserEmail));
                     
@@ -687,6 +687,16 @@ class ControllerGameInvitation extends Controller {
                         ];
                         
                         // IMPORTANT: Do NOT remove token from session here - it needs to stay for the modal
+                    }
+                } else {
+                    // User invitation (has invitee_id) - check if it's for current user
+                    if ($invitation['invitee_id'] == $currentUserId) {
+                        // Token is already linked to current user - remove from session
+                        $this->removeTokenFromSession($currentToken);
+                    } else {
+                        // Token is linked to different user - remove from session for security
+                        $this->removeTokenFromSession($currentToken);
+                        error_log("Removed token linked to different user. Token: $currentToken, Linked to: {$invitation['invitee_id']}, Current user: $currentUserId");
                     }
                 }
             }
