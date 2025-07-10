@@ -270,7 +270,7 @@
   "invitation": {
     "confirm_link": "Lier l'invitation",
     "reject_link": "Rejeter l'invitation",
-    "confirmation_message": "Une invitation, destinée à {invited_email}, a été ouverte depuis ce navigateur. Vous êtes connecté en tant que {current_user_email}. Voulez-vous lier cette invitation à votre compte?"
+    "confirmation_message": "Une invitation pour {invited_email}, ouverte récemment depuis ce navigateur, peut être liée à votre compte ({current_user_email})?"
   },
   "form_field": {
     "title": "titre",

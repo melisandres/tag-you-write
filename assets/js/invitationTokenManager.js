@@ -51,14 +51,10 @@ export class InvitationTokenManager {
             current_user_email: currentUserEmail
         };
         
-        // Get the translated message
-        console.log('About to translate:', messageKey, messageParams);
-        const message = window.i18n.translate(messageKey, messageParams);
-        console.log('Translation result:', message);
-        
         return new Promise((resolve) => {
             this.warningManager.createWarningModal(
-                message,
+                messageKey,
+                messageParams,
                 async () => {
                     // User confirmed - link the invitation
                     try {

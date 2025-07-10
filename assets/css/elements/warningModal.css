@@ -42,6 +42,7 @@
 .warning-buttons {
     display: flex;
     gap: 10px;
+    height: 60px; /* the height of the button svgs which are placed absolutely */
 }
 
 .warning-buttons button {
@@ -55,5 +56,11 @@
     }
     .warning-modal {
         width: 78%;
+    }
+}
+
+@media (min-width: 360px) {
+    .warning-buttons {
+        height: 40px; /* the height of the button svgs which are placed absolutely */
     }
 }

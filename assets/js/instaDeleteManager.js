@@ -22,6 +22,7 @@ export class InstaDeleteManager {
     showDeleteWarning(textId) {
         this.warningManager.createWarningModal(
             "warning.delete",
+            null,
             () => this.instaDelete(textId),
             () => console.log("Delete cancelled")
         );

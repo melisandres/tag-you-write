@@ -234,7 +234,7 @@ export class NotificationManager {
         };
         
         // Create a custom modal with the formatted message
-        this.warningManager.createWarningModal(formattedMessage, onConfirm, onCancel, 'warning.confirm_game_done', 'warning.cancel_game_done');
+        this.warningManager.createWarningModal(formattedMessage, null, onConfirm, onCancel, 'warning.confirm_game_done', 'warning.cancel_game_done');
     }
 
     /**

@@ -8,21 +8,23 @@ export class WarningManager {
   
     /**
      * Create a warning modal with internationalization support
-     * @param {string|object} message - i18n key or string message
+     * @param {string|object} messageKey - i18n key or string message
+     * @param {object} messageParams - Parameters for the translation (optional)
      * @param {Function} onConfirm - Callback for confirmation
      * @param {Function} onCancel - Callback for cancellation
      */
-    createWarningModal(message, onConfirm, onCancel, confirmTextKey = "warning.confirm", cancelTextKey = "warning.cancel") {
+    createWarningModal(messageKey, messageParams = null, onConfirm, onCancel, confirmTextKey = "warning.confirm", cancelTextKey = "warning.cancel") {
       document.body.appendChild(this.modalsContainer);
       
       const modal = document.createElement('div');
       modal.classList.add('warning-modal-wrapper');
 
-      // Check if the message is HTML content
-      const isHtml = typeof message === 'string' && message.includes('<');
+      // Check if the message is HTML content or already translated
+      const isHtml = typeof messageKey === 'string' && messageKey.includes('<');
+      const isAlreadyTranslated = typeof messageKey === 'string' && !messageKey.includes('.') && !isHtml;
       
       // Translate the message and the buttons
-      const translatedText = isHtml ? message : window.i18n.translate(message);
+      const translatedText = isHtml || isAlreadyTranslated ? messageKey : window.i18n.translate(messageKey, messageParams || {});
       const confirmText = window.i18n.translate(confirmTextKey);
       const cancelText = window.i18n.translate(cancelTextKey);
       
@@ -30,7 +32,7 @@ export class WarningManager {
       modal.innerHTML = `
         <div class="warning-modal">
           <div class="warning-content">
-            <div class="warning-message" ${isHtml ? '' : `data-i18n="${message}"`}>${translatedText}</div>
+            <div class="warning-message" ${isHtml || isAlreadyTranslated ? '' : `data-i18n="${messageKey}"`}>${translatedText}</div>
             <div class="warning-buttons">
               <button class="confirm-button">
                 <span class="button-svg confirm-svg">${SVGManager.checkmarkSVG}</span>

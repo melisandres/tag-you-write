@@ -271,7 +271,7 @@
   "invitation": {
     "confirm_link": "Link Invitation",
     "reject_link": "Reject Invitation",
-    "confirmation_message": "An invitation, intended for {invited_email}, has been opened from this browser. You are logged in as {current_user_email}. Do you want to link this invitation to your account?"
+    "confirmation_message": "An invitation for {invited_email}, opened recently on this browser, can be linked to your account ({current_user_email})?"
   },
   "form_field": {
     "title": "title",

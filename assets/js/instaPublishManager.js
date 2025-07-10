@@ -22,6 +22,7 @@ export class InstaPublishManager {
     showPublishWarning(textId) {
         this.warningManager.createWarningModal(
             "warning.publish",
+            null,
             () => this.instaPublish(textId),
             () => console.log("Publish cancelled")
         );

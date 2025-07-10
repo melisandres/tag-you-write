@@ -264,6 +264,7 @@ export class FormManager {
         const warningManager = new WarningManager();
         warningManager.createWarningModal(
             'warning.add_note',
+            null,
             () => {
                 this.statusField.value = 'published';
                 const endpoint = 'text/update';
@@ -278,6 +279,7 @@ export class FormManager {
         const warningManager = new WarningManager();
         warningManager.createWarningModal(
             "warning.publish",
+            null,
             () => {
                 this.statusField.value = 'published';
                 const idValue = this.form.querySelector('input[name="id"]').value;
@@ -293,6 +295,7 @@ export class FormManager {
         const warningManager = new WarningManager();
         warningManager.createWarningModal(
             "warning.new_game",
+            null,
             () => {
                 this.statusField.value = 'published';
                 const idValue = this.form.querySelector('input[name="id"]').value;
@@ -308,6 +311,7 @@ export class FormManager {
         const warningManager = new WarningManager();
         warningManager.createWarningModal(
             "warning.delete",
+            null,
             () => this.submitDelete(),
             () => console.log("Delete cancelled")
         );
