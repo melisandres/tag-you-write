@@ -3,27 +3,33 @@
 }
 
 .warning-buttons button {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  grid-template: "container";
+  place-items: center;
+  place-content: center;
   padding: 15px 20px 10px;
   border: none;
   cursor: pointer;
   overflow: visible;
 }
 
+.warning-buttons button>* {
+  grid-area: container;
+}
+
 .button-content {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
   z-index: 2;
+  place-self: start center;
+}
+
+.warning-buttons button span:last-child {
+  width: 100%;
+  text-align: center;
+  min-width: 0;
 }
 
 .button-svg {
-  position: absolute;
-  top: -50%;
+  place-self: start;
   width: 100%;
   height: 100%;
   z-index: 1;
