@@ -213,20 +213,22 @@
             $game['hasUnseenTexts'] = ($game['unseen_count'] > 0) ? true : false;
             $game['pending'] = ($game['root_text_status'] == 'draft' || $game['root_text_status'] == 'incomplete_draft') ? true : false;
             
-            // Check if this game has temporary access via token
-            // A game has temporary access if it's accessible via token but NOT via user ID
-            $game['hasTemporaryAccess'] = false;
-            if (!empty($tokens) && isset($_SESSION['game_invitation_access'][$game['game_id']])) {
-                $accessInfo = $_SESSION['game_invitation_access'][$game['game_id']];
-                // Check if token is not expired
-                if (!isset($accessInfo['expires_at']) || strtotime($accessInfo['expires_at']) >= time()) {
-                    $game['hasTemporaryAccess'] = true;
-                    $game['temporaryAccessInfo'] = [
-                        'invited_email' => $accessInfo['invited_email'],
-                        'expires_at' => $accessInfo['expires_at']
-                    ];
-                }
-            }
+                     // Check if this game has temporary access via token
+         // A game has temporary access if it's accessible via token but NOT via user ID
+         $game['hasTemporaryAccess'] = false;
+         if (!empty($tokens) && isset($_SESSION['game_invitation_access'][$game['game_id']])) {
+             $accessInfo = $_SESSION['game_invitation_access'][$game['game_id']];
+             // Check if token is not expired
+             if (!isset($accessInfo['expires_at']) || strtotime($accessInfo['expires_at']) >= time()) {
+                 $game['hasTemporaryAccess'] = true;
+                 $game['temporaryAccessInfo'] = [
+                     'invited_email' => $accessInfo['invited_email'],
+                     'expires_at' => $accessInfo['expires_at']
+                 ];
+                 // Add the token for frontend use
+                 $game['invitation_token'] = $accessInfo['token'];
+             }
+         }
       }
    
       return $games;
@@ -433,6 +435,8 @@
                      'invited_email' => $accessInfo['invited_email'],
                      'expires_at' => $accessInfo['expires_at']
                  ];
+                 // Add the token for frontend use
+                 $game['invitation_token'] = $accessInfo['token'];
              }
          }
       }

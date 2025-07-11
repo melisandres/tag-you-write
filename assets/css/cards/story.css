@@ -274,11 +274,45 @@
     margin: 0;
     font-size: 0.55em;
     font-weight: 500;
-    text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     border-radius: 4px 4px 0 0;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     grid-area: banner;
     z-index: 1;
+}
+
+.temporary-access-banner .banner-text {
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.temporary-access-banner .link-button {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.temporary-access-banner .link-button:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.temporary-access-banner .link-button svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
 }
 
 /* Dark mode support */

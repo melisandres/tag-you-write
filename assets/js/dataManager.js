@@ -1028,6 +1028,7 @@ export class DataManager {
                                game.hasTemporaryAccess === true || 
                                game.hasTemporaryAccess === 1,
             temporaryAccessInfo: game.temporaryAccessInfo || null,
+            invitation_token: game.invitation_token || null,
             text_count: parseInt(game.text_count) || 0,
             seen_count: parseInt(game.seen_count) || 0,
             unseen_count: parseInt(game.unseen_count) || 0,

@@ -274,7 +274,8 @@
     "confirmation_message_plural": "{count} invitations pour {invited_email}, ouvertes récemment depuis ce navigateur, peuvent être liées à votre compte ({current_user_email}).",
     "immediate_visit_message": "Cette invitation envoyée à {invited_email} peut-être lié à votre compte ({current_user_email}).",
     "immediate_visit_message_plural": "{count} invitations envoyées à {invited_email} peuvent être liées à votre compte ({current_user_email}).",
-    "temporary_access_banner": "Vous consultez ce jeu via une invitation temporaire. Liez-le à votre compte pour un accès permanent."
+    "temporary_access_banner": "Vous consultez ce jeu via une invitation temporaire. Liez-le à votre compte pour un accès permanent.",
+    "link_to_account": "Lier au compte"
   },
   "form_field": {
     "title": "titre",
@@ -309,6 +310,12 @@
       "error_occurred": "Une erreur est survenue",
       "account_created_successfully": "Compte créé avec succès! Bienvenue!",
       "error_deleting": "Une erreur est survenue lors de la suppression"
+    },
+    "invitation": {
+      "link_success": "Invitation liée avec succès!",
+      "link_failed": "Échec de la liaison de l'invitation. Veuillez réessayer.",
+      "no_token": "Aucun jeton d'invitation trouvé",
+      "confirmation_needed": "Incompatibilité d'email. Veuillez confirmer que vous souhaitez lier cette invitation."
     }
   },
   "front_val": {

@@ -13,8 +13,14 @@
 {% for text in texts %}
     <div class="story {{ text.openForChanges ? '' : 'closed' }}{{ text.hasTemporaryAccess ? ' has-temporary-access' : '' }}" data-game-id="{{ text.game_id }}" data-unseen-count="{{ text.unseen_count }}" data-seen-count="{{ text.seen_count }}" data-text-count="{{ text.text_count }}" data-text-id="{{ text.id }}">
         {% if text.hasTemporaryAccess %}
-        <div class="temporary-access-banner" data-i18n="invitation.temporary_access_banner">
-            {{ translate('invitation.temporary_access_banner') }}
+        <div class="temporary-access-banner">
+            <div class="banner-text" data-i18n="invitation.temporary_access_banner">
+                {{ translate('invitation.temporary_access_banner') }}
+            </div>
+            <button class="link-button" data-action="link-invitation" data-game-id="{{ text.game_id }}" data-token="{{ text.invitation_token }}" data-i18n="invitation.link_to_account" title="{{ translate('invitation.link_to_account') }}">
+                <span class="icon" data-svg="linkGameToAccount"></span>
+                {{ translate('invitation.link_to_account') }}
+            </button>
         </div>
         {% endif %}
         <!-- TODO: The chosen language for "Untitled" or "Sans Titre" should 

@@ -21,8 +21,14 @@
         data-text-count="{{ game.text_count }}" 
         data-text-id="{{ game.id }}">
         {% if game.hasTemporaryAccess %}
-        <div class="temporary-access-banner" data-i18n="invitation.temporary_access_banner">
-            {{ translate('invitation.temporary_access_banner') }}
+        <div class="temporary-access-banner">
+            <div class="banner-text" data-i18n="invitation.temporary_access_banner">
+                {{ translate('invitation.temporary_access_banner') }}
+            </div>
+            <button class="link-button" data-action="link-invitation" data-game-id="{{ game.game_id }}" data-token="{{ game.invitation_token }}" data-i18n="invitation.link_to_account" title="{{ translate('invitation.link_to_account') }}">
+                <span class="icon" data-svg="linkGameToAccount"></span>
+                {{ translate('invitation.link_to_account') }}
+            </button>
         </div>
         {% endif %}
         

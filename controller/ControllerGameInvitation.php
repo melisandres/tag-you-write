@@ -618,8 +618,12 @@ class ControllerGameInvitation extends Controller {
      * @param string $context The context of the invitation processing ('visit', 'login', 'account_creation', 'password_reset')
      * @return array Response with status and any pending confirmations
      */
-    public function processLoggedInInvitation($token = null, $context = 'login') {
+    public function processLoggedInInvitation($token = null, $context = 'manual-linking') {
         if (!isset($_SESSION['writer_id'])) {
+            if ($context === 'manual-linking') {
+                $this->sendJsonResponse(false, 'toast.invitation.link_failed');
+                return;
+            }
             return ['success' => false, 'message' => 'User not logged in'];
         }
         
@@ -658,11 +662,15 @@ class ControllerGameInvitation extends Controller {
             }
             
             foreach ($tokensToProcess as $currentToken) {
-                // Get invitation
-                $invitation = $gameInvitation->selectId($currentToken, 'token');
-                if (!$invitation) {
-                    continue;
+                            // Get invitation
+            $invitation = $gameInvitation->selectId($currentToken, 'token');
+            if (!$invitation) {
+                if ($context === 'manual-linking') {
+                    $this->sendJsonResponse(false, 'toast.invitation.link_failed');
+                    return;
                 }
+                continue;
+            }
                 
                 // Handle all invitations based on their current state
                 if (!$invitation['invitee_id']) {
@@ -676,6 +684,12 @@ class ControllerGameInvitation extends Controller {
                         
                         // Remove token from session
                         $this->removeTokenFromSession($currentToken);
+                        
+                        // For manual linking, return JSON response
+                        if ($context === 'manual-linking') {
+                            $this->sendJsonResponse(true, 'toast.invitation.link_success');
+                            return;
+                        }
                     } else {
                         // Emails don't match - add to pending confirmations
                         $pendingConfirmations[] = [
@@ -699,6 +713,18 @@ class ControllerGameInvitation extends Controller {
                         error_log("Removed token linked to different user. Token: $currentToken, Linked to: {$invitation['invitee_id']}, Current user: $currentUserId");
                     }
                 }
+            }
+            
+            // For manual linking, if we have pending confirmations, store them and let frontend handle
+            if ($context === 'manual-linking' && !empty($pendingConfirmations)) {
+                // Store confirmations in session for the modal to pick up
+                $_SESSION['pending_invitation_confirmations'] = $pendingConfirmations;
+                
+                // Return JSON response indicating confirmation is needed
+                $this->sendJsonResponse(false, 'toast.invitation.confirmation_needed', [
+                    'needsConfirmation' => true
+                ]);
+                return;
             }
             
             // Group confirmations by email to avoid repetitive modals

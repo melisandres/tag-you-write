@@ -48,6 +48,7 @@ import { InviteInputManager } from './inviteInputManager.js';
 import { InviteeSuggestionsManager } from './inviteeSuggestionsManager.js';
 import { FormTogglesManager } from './formTogglesManager.js';
 import { InvitationTokenManager } from './invitationTokenManager.js';
+import { InvitationLinkManager } from './invitationLinkManager.js';
 
 // Make eventBus globally available immediately
 window.eventBus = eventBus;
@@ -113,7 +114,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   new VoteManager(warningManager);
 
   // Initialize InvitationTokenManager
-  new InvitationTokenManager(warningManager);
+  window.invitationTokenManager = new InvitationTokenManager(warningManager);
+
+  // Initialize InvitationLinkManager
+  new InvitationLinkManager();
 
   // Initialize BookmarkManager
   new BookmarkManager();

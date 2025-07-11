@@ -48,7 +48,7 @@ export class InvitationTokenManager {
         
         // Create the message using translation keys based on context and count
         const isPlural = tokens.length > 1;
-        const messageKey = context === 'visit' 
+        const messageKey = context === 'visit' || context === 'manual-linking'
             ? (isPlural ? 'invitation.immediate_visit_message_plural' : 'invitation.immediate_visit_message')
             : (isPlural ? 'invitation.confirmation_message_plural' : 'invitation.confirmation_message');
         const messageParams = {
@@ -110,6 +110,42 @@ export class InvitationTokenManager {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        return await response.json();
+        const result = await response.json();
+        
+        // If confirmation was successful and user confirmed (not rejected), remove the banner
+        if (result.success && confirmed) {
+            // Find the game element that has this token and remove its banner
+            this.removeTemporaryAccessBannerForToken(token);
+        }
+        
+        return result;
+    }
+
+    removeTemporaryAccessBannerForToken(token) {
+        console.log('Attempting to remove banner for token:', token);
+        // Find the button that has this token, then find its parent game element
+        const button = document.querySelector(`[data-token="${token}"]`);
+        console.log('Found button:', button);
+        if (button) {
+            // Find the parent .story element (the actual game container)
+            const gameElement = button.closest('.story');
+            console.log('Found game element:', gameElement);
+            if (gameElement) {
+                const banner = gameElement.querySelector('.temporary-access-banner');
+                console.log('Found banner:', banner);
+                if (banner) {
+                    banner.remove();
+                    // Remove the has-temporary-access class
+                    gameElement.classList.remove('has-temporary-access');
+                    console.log('Banner removed successfully');
+                } else {
+                    console.log('No banner found in game element');
+                }
+            } else {
+                console.log('No .story element found as parent of button');
+            }
+        } else {
+            console.log('No button found with data-token:', token);
+        }
     }
 } 

@@ -275,7 +275,8 @@
     "confirmation_message_plural": "{count} invitations for {invited_email}, opened recently on this browser, can be linked to your account ({current_user_email}).",
     "immediate_visit_message": "This invitation sent to {invited_email} can be linked to this your account ({current_user_email}).",
     "immediate_visit_message_plural": "{count} invitations sent to {invited_email} can be linked to your account ({current_user_email}).",
-    "temporary_access_banner": "You are viewing this game via a temporary invitation. Link it to your account for permanent access."
+    "temporary_access_banner": "You are viewing this game via a temporary invitation. Link it to your account for permanent access.",
+    "link_to_account": "Link to Account"
   },
   "form_field": {
     "title": "title",
@@ -310,6 +311,12 @@
       "error_occurred": "An error occurred",
       "account_created_successfully": "Account created successfully! Welcome!",
       "error_deleting": "An error occurred while deleting."
+    },
+    "invitation": {
+      "link_success": "Invitation linked successfully!",
+      "link_failed": "Failed to link invitation. Please try again.",
+      "no_token": "No invitation token found",
+      "confirmation_needed": "Email mismatch. Please confirm you want to link this invitation."
     }
   },
   "front_val": {
