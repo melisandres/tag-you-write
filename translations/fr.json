@@ -275,6 +275,7 @@
     "immediate_visit_message": "Cette invitation envoyée à {invited_email} peut-être lié à votre compte ({current_user_email}).",
     "immediate_visit_message_plural": "{count} invitations envoyées à {invited_email} peuvent être liées à votre compte ({current_user_email}).",
     "temporary_access_banner": "Vous consultez ce jeu via une invitation temporaire. Liez-le à votre compte pour un accès permanent.",
+    "temporary_access_banner_not_logged_in": "Vous consultez ce jeu via une invitation temporaire. Connectez-vous pour le lier à votre compte pour un accès permanent.",
     "link_to_account": "Lier au compte"
   },
   "form_field": {

@@ -118,13 +118,15 @@ export class GameListRenderer {
                  data-text-id="${game.id || game.text_id}">
                 ${game.hasTemporaryAccess ? `
                 <div class="temporary-access-banner">
-                    <div class="banner-text" data-i18n="invitation.temporary_access_banner">
-                        ${window.i18n.translate('invitation.temporary_access_banner')}
+                    <div class="banner-text" data-i18n="${this.userLoggedIn ? 'invitation.temporary_access_banner' : 'invitation.temporary_access_banner_not_logged_in'}">
+                        ${window.i18n.translate(this.userLoggedIn ? 'invitation.temporary_access_banner' : 'invitation.temporary_access_banner_not_logged_in')}
                     </div>
+                    ${this.userLoggedIn ? `
                     <button class="link-button" data-action="link-invitation" data-game-id="${game.game_id}" data-token="${game.invitation_token || ''}" data-i18n="invitation.link_to_account" title="${window.i18n.translate('invitation.link_to_account')}">
                         <span class="icon" data-svg="linkGameToAccount">${SVGManager.linkGameToAccount}</span>
                         ${window.i18n.translate('invitation.link_to_account')}
                     </button>
+                    ` : ''}
                 </div>
                 ` : ''}
                 <div class="story-title ${game.unseen_count > 0 && this.userLoggedIn ? 'unreads' : ''}" data-refresh-default data-text-id="${game.id || game.text_id}">
@@ -388,27 +390,33 @@ export class GameListRenderer {
             
             const bannerText = document.createElement('div');
             bannerText.className = 'banner-text';
-            bannerText.setAttribute('data-i18n', 'invitation.temporary_access_banner');
-            bannerText.textContent = window.i18n.translate('invitation.temporary_access_banner');
+            const bannerKey = this.userLoggedIn ? 'invitation.temporary_access_banner' : 'invitation.temporary_access_banner_not_logged_in';
+            bannerText.setAttribute('data-i18n', bannerKey);
+            bannerText.textContent = window.i18n.translate(bannerKey);
             
-            const linkButton = document.createElement('button');
-            linkButton.className = 'link-button';
-            linkButton.setAttribute('data-action', 'link-invitation');
-            linkButton.setAttribute('data-game-id', gameData.game_id);
-            linkButton.setAttribute('data-token', gameData.invitation_token || '');
-            linkButton.setAttribute('data-i18n', 'invitation.link_to_account');
-            linkButton.setAttribute('title', window.i18n.translate('invitation.link_to_account'));
+            if (this.userLoggedIn) {
+                const linkButton = document.createElement('button');
+                linkButton.className = 'link-button';
+                linkButton.setAttribute('data-action', 'link-invitation');
+                linkButton.setAttribute('data-game-id', gameData.game_id);
+                linkButton.setAttribute('data-token', gameData.invitation_token || '');
+                linkButton.setAttribute('data-i18n', 'invitation.link_to_account');
+                linkButton.setAttribute('title', window.i18n.translate('invitation.link_to_account'));
+                
+                const iconSpan = document.createElement('span');
+                iconSpan.className = 'icon';
+                iconSpan.setAttribute('data-svg', 'linkGameToAccount');
+                iconSpan.innerHTML = SVGManager.linkGameToAccount;
+                
+                linkButton.appendChild(iconSpan);
+                linkButton.appendChild(document.createTextNode(window.i18n.translate('invitation.link_to_account')));
+                
+                bannerElement.appendChild(bannerText);
+                bannerElement.appendChild(linkButton);
+            } else {
+                bannerElement.appendChild(bannerText);
+            }
             
-            const iconSpan = document.createElement('span');
-            iconSpan.className = 'icon';
-            iconSpan.setAttribute('data-svg', 'linkGameToAccount');
-            iconSpan.innerHTML = SVGManager.linkGameToAccount;
-            
-            linkButton.appendChild(iconSpan);
-            linkButton.appendChild(document.createTextNode(window.i18n.translate('invitation.link_to_account')));
-            
-            bannerElement.appendChild(bannerText);
-            bannerElement.appendChild(linkButton);
             gameElement.insertBefore(bannerElement, gameElement.firstChild);
         } else if (!hasTemporaryAccess && existingBanner) {
             // Remove banner if game no longer has temporary access

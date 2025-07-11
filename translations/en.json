@@ -276,6 +276,7 @@
     "immediate_visit_message": "This invitation sent to {invited_email} can be linked to this your account ({current_user_email}).",
     "immediate_visit_message_plural": "{count} invitations sent to {invited_email} can be linked to your account ({current_user_email}).",
     "temporary_access_banner": "You are viewing this game via a temporary invitation. Link it to your account for permanent access.",
+    "temporary_access_banner_not_logged_in": "You are viewing this game via a temporary invitation. Log in to link it to your account for permanent access.",
     "link_to_account": "Link to Account"
   },
   "form_field": {

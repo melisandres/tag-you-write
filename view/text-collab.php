@@ -22,13 +22,15 @@
         data-text-id="{{ game.id }}">
         {% if game.hasTemporaryAccess %}
         <div class="temporary-access-banner">
-            <div class="banner-text" data-i18n="invitation.temporary_access_banner">
-                {{ translate('invitation.temporary_access_banner') }}
+            <div class="banner-text" data-i18n="{{ session.writer_id ? 'invitation.temporary_access_banner' : 'invitation.temporary_access_banner_not_logged_in' }}">
+                {{ translate(session.writer_id ? 'invitation.temporary_access_banner' : 'invitation.temporary_access_banner_not_logged_in') }}
             </div>
+            {% if session.writer_id %}
             <button class="link-button" data-action="link-invitation" data-game-id="{{ game.game_id }}" data-token="{{ game.invitation_token }}" data-i18n="invitation.link_to_account" title="{{ translate('invitation.link_to_account') }}">
                 <span class="icon" data-svg="linkGameToAccount"></span>
                 {{ translate('invitation.link_to_account') }}
             </button>
+            {% endif %}
         </div>
         {% endif %}
         
