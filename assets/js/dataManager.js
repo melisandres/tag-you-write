@@ -1032,7 +1032,9 @@ export class DataManager {
             text_count: parseInt(game.text_count) || 0,
             seen_count: parseInt(game.seen_count) || 0,
             unseen_count: parseInt(game.unseen_count) || 0,
-            placement_index: parseInt(game.placement_index)
+            placement_index: parseInt(game.placement_index),
+            visible_to_all: game.visible_to_all,
+            joinable_by_all: game.joinable_by_all,
         };
     }
 

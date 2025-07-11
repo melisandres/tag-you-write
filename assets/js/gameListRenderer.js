@@ -164,8 +164,8 @@ export class GameListRenderer {
                 <span class="icon" data-svg="user">${SVGManager.userSVG}</span>
                 <div class="activity-numbers">${this.getActivityNumbers(game)}</div>
             </div>
-            <div class="story-btn privacy-indicator" data-i18n-title="${privacyInfo.tooltipKey}" title="${privacyInfo.tooltip}">
-                <span class="icon" data-svg="${privacyInfo.svg}">${privacyInfo.svgContent}</span>
+            <div class="story-btn privacy-indicator" data-i18n-title="${privacyInfo.tooltipKey}" title="${privacyInfo.tooltip}" data-svg="${privacyInfo.svg}">
+                ${privacyInfo.svgContent}
             </div>
         `;
     }
@@ -188,16 +188,16 @@ export class GameListRenderer {
             return {
                 svg: 'locked',
                 svgContent: SVGManager.lockedSVG,
-                tooltipKey: 'general.locked_tooltip',
-                tooltip: window.i18n.translate('general.locked_tooltip')
+                tooltipKey: 'general.privacy_locked_tooltip',
+                tooltip: window.i18n.translate('general.privacy_locked_tooltip')
             };
         } else {
             // Private - only invited can view and join
             return {
-                svg: 'locked',
-                svgContent: SVGManager.lockedSVG,
-                tooltipKey: 'general.privacy_private_tooltip',
-                tooltip: window.i18n.translate('general.privacy_private_tooltip')
+                svg: 'invisible',
+                svgContent: SVGManager.invisibleSVG,
+                tooltipKey: 'general.privacy_invisible_tooltip',
+                tooltip: window.i18n.translate('general.privacy_invisible_tooltip')
             };
         }
     }
@@ -367,6 +367,22 @@ export class GameListRenderer {
         gameElement.dataset.unseenCount = gameData.unseen_count;
         gameElement.dataset.seenCount = gameData.seen_count;
         gameElement.dataset.textCount = gameData.text_count;
+
+        // Update privacy settings
+        const privacyIndicator = gameElement.querySelector('.privacy-indicator');
+        if (privacyIndicator) {
+            const privacyInfo = this.getPrivacyInfo(gameData);
+            
+            // Update the data-svg attribute
+            privacyIndicator.setAttribute('data-svg', privacyInfo.svg);
+            
+            // Update the tooltip
+            privacyIndicator.setAttribute('data-i18n-title', privacyInfo.tooltipKey);
+            privacyIndicator.setAttribute('title', privacyInfo.tooltip);
+            
+            // Update the SVG content
+            privacyIndicator.innerHTML = privacyInfo.svgContent;
+        }
 
         // Update title and unreads status
         const titleDiv = gameElement.querySelector('.story-title');
