@@ -14,12 +14,17 @@
 </div>
 
 <div data-one-story class="one-story">
-    <div class="story {{ game.openForChanges ? '' : 'closed' }}" 
+    <div class="story {{ game.openForChanges ? '' : 'closed' }}{{ game.hasTemporaryAccess ? ' has-temporary-access' : '' }}" 
         data-game-id="{{ game.game_id }}" 
         data-unseen-count="{{ game.unseen_count }}" 
         data-seen-count="{{ game.seen_count }}" 
         data-text-count="{{ game.text_count }}" 
         data-text-id="{{ game.id }}">
+        {% if game.hasTemporaryAccess %}
+        <div class="temporary-access-banner" data-i18n="invitation.temporary_access_banner">
+            {{ translate('invitation.temporary_access_banner') }}
+        </div>
+        {% endif %}
         
         <div class="story-title {% if session.writer_id and game.unseen_count %}unreads{% endif %}" data-refresh-default data-text-id="{{ game.id }}">
             <h2>

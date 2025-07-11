@@ -1024,6 +1024,10 @@ export class DataManager {
             isBookmarked: game.isBookmarked === '1' || 
                          game.isBookmarked === true || 
                          game.isBookmarked === 1,
+            hasTemporaryAccess: game.hasTemporaryAccess === '1' || 
+                               game.hasTemporaryAccess === true || 
+                               game.hasTemporaryAccess === 1,
+            temporaryAccessInfo: game.temporaryAccessInfo || null,
             text_count: parseInt(game.text_count) || 0,
             seen_count: parseInt(game.seen_count) || 0,
             unseen_count: parseInt(game.unseen_count) || 0,

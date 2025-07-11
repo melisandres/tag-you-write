@@ -11,7 +11,12 @@
 
 <div data-stories class="stories">
 {% for text in texts %}
-    <div class="story {{ text.openForChanges ? '' : 'closed' }}" data-game-id="{{ text.game_id }}" data-unseen-count="{{ text.unseen_count }}" data-seen-count="{{ text.seen_count }}" data-text-count="{{ text.text_count }}" data-text-id="{{ text.id }}">
+    <div class="story {{ text.openForChanges ? '' : 'closed' }}{{ text.hasTemporaryAccess ? ' has-temporary-access' : '' }}" data-game-id="{{ text.game_id }}" data-unseen-count="{{ text.unseen_count }}" data-seen-count="{{ text.seen_count }}" data-text-count="{{ text.text_count }}" data-text-id="{{ text.id }}">
+        {% if text.hasTemporaryAccess %}
+        <div class="temporary-access-banner" data-i18n="invitation.temporary_access_banner">
+            {{ translate('invitation.temporary_access_banner') }}
+        </div>
+        {% endif %}
         <!-- TODO: The chosen language for "Untitled" or "Sans Titre" should 
         be based on the language of that text as defined by the writer. For 
         now, it will be updated based on the language toggle of the website. 

@@ -110,12 +110,17 @@ export class GameListRenderer {
 
         // build the game card
         return `
-            <div class="story ${isOpen ? '' : 'closed'}" 
+            <div class="story ${isOpen ? '' : 'closed'}${game.hasTemporaryAccess ? ' has-temporary-access' : ''}" 
                  data-game-id="${game.game_id}" 
                  data-unseen-count="${game.unseen_count}" 
                  data-seen-count="${game.seen_count}" 
                  data-text-count="${game.text_count}" 
                  data-text-id="${game.id || game.text_id}">
+                ${game.hasTemporaryAccess ? `
+                <div class="temporary-access-banner" data-i18n="invitation.temporary_access_banner">
+                    ${window.i18n.translate('invitation.temporary_access_banner')}
+                </div>
+                ` : ''}
                 <div class="story-title ${game.unseen_count > 0 && this.userLoggedIn ? 'unreads' : ''}" data-refresh-default data-text-id="${game.id || game.text_id}">
                     <h2>
                         ${hasContributed ? `<span class="contributor-star" data-svg="star" data-i18n-tooltip="tooltips.contributor" data-tooltip-text="${translatedTooltip}"></span>` : ''}
@@ -359,6 +364,27 @@ export class GameListRenderer {
         const titleDiv = gameElement.querySelector('.story-title');
         if (titleDiv && this.userLoggedIn) {
             titleDiv.classList.toggle('unreads', gameData.unseen_count > 0);
+        }
+
+        // Update temporary access banner
+        const hasTemporaryAccess = gameData.hasTemporaryAccess === '1' || 
+                                  gameData.hasTemporaryAccess === true || 
+                                  gameData.hasTemporaryAccess === 1;
+        const existingBanner = gameElement.querySelector('.temporary-access-banner');
+        
+        // Update the story class for temporary access
+        gameElement.classList.toggle('has-temporary-access', hasTemporaryAccess);
+        
+        if (hasTemporaryAccess && !existingBanner) {
+            // Add banner if game now has temporary access
+            const bannerElement = document.createElement('div');
+            bannerElement.className = 'temporary-access-banner';
+            bannerElement.setAttribute('data-i18n', 'invitation.temporary_access_banner');
+            bannerElement.textContent = window.i18n.translate('invitation.temporary_access_banner');
+            gameElement.insertBefore(bannerElement, gameElement.firstChild);
+        } else if (!hasTemporaryAccess && existingBanner) {
+            // Remove banner if game no longer has temporary access
+            existingBanner.remove();
         }
 
         // Reapply highlighting if there's an active search

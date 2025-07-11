@@ -3,9 +3,19 @@
     display: grid;
     grid-template-columns: 55% auto;
     grid-template-rows: auto auto;
+    grid-template-areas:
+        "content content";
     box-shadow: var(--story-box-shadow);
     background-color: var(--color-white-lightest);
     margin: 0 0 var(--story-margin-bottom) 0;
+}
+
+/* When story has temporary access, add banner row */
+.story.has-temporary-access {
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+        "banner banner"
+        "content content";
 }
 
 .story-writing {
@@ -20,6 +30,15 @@
         "writing writing writing"
         "showcase showcase showcase";
     border: 10px solid var(--color-black);
+}
+
+.story.story-has-showcase.has-temporary-access {
+    grid-template-rows: auto auto auto auto;
+    grid-template-areas:
+        "banner banner banner"
+        "title title buttons"
+        "writing writing writing"
+        "showcase showcase showcase";
 }
 
 .story.story-has-showcase #showcase {
@@ -40,6 +59,16 @@
         grid-area: writing;
         /* background-color: var(--color-primary-lightest); */
     }
+    
+    /* When story has temporary access and showcase on mobile */
+/*     .story.story-has-showcase.has-temporary-access {
+        grid-template-rows: auto auto auto auto;
+        grid-template-areas:
+            "banner banner"
+            "title title"
+            "writing writing"
+            "showcase showcase";
+    } */
 }
 
 #show-case{
@@ -146,6 +175,14 @@
         "title buttons writing";
         margin-bottom: var(--spacing-medium);
     }
+    
+    /* When story has temporary access, add banner row */
+    .story.has-temporary-access {
+        grid-template-rows: auto auto;
+        grid-template-areas:
+            "banner banner banner"
+            "title buttons writing";
+    }
 
     .story-writing {
         flex-direction: row;
@@ -191,6 +228,15 @@
             "showcase showcase showcase";
     }
     
+    /* When story has temporary access and showcase */
+    .story.story-has-showcase.has-temporary-access {
+        grid-template-rows: auto auto auto;
+        grid-template-areas:
+            "banner banner banner"
+            "title buttons writing"
+            "showcase showcase showcase";
+    }
+    
    /*  .story.story-has-showcase */ .story-title {
         grid-area: title;
     }
@@ -217,3 +263,28 @@
         margin-bottom: var(--spacing-medium);
     }
 }
+
+/* Temporary access banner styling */
+.temporary-access-banner {
+    /* background: linear-gradient(135deg, #ff6b6b, #ff8e8e); */
+    background: linear-gradient(135deg, var(--color-love),rgb(188, 102, 188), rgb(91, 194, 91));
+
+    color: white;
+    padding: 8px 12px;
+    margin: 0;
+    font-size: 0.55em;
+    font-weight: 500;
+    text-align: center;
+    border-radius: 4px 4px 0 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    grid-area: banner;
+    z-index: 1;
+}
+
+/* Dark mode support */
+/* @media (prefers-color-scheme: dark) {
+    .temporary-access-banner {
+        background: linear-gradient(135deg, #d63031, #e17055);
+        color: #f8f9fa;
+    }
+} */
