@@ -26,6 +26,8 @@ class Text extends Crud{
                         writer.lastName AS lastName,
                         game.prompt AS prompt,
                         game.open_for_changes AS openForChanges,
+                        game.joinable_by_all AS joinable_by_all,
+                        game.visible_to_all AS visible_to_all,
                         text_status.status AS text_status,
                         text.modified_at AS modified_at,
                         root_text.title AS game_title,
@@ -50,10 +52,15 @@ class Text extends Crud{
                         CASE 
                             WHEN game_has_player.player_id IS NOT NULL THEN 1 
                             ELSE 0 
-                        END AS hasContributed";
+                        END AS hasContributed,
+                        CASE 
+                            WHEN game_invitation.invitee_id IS NOT NULL THEN 1 
+                            ELSE 0 
+                        END AS hasInvitation";
         } else {
             // When no writer is logged in
-            $sql .= ", 0 AS hasContributed";
+            $sql .= ", 0 AS hasContributed,
+                        0 AS hasInvitation";
         }
     
         $sql .= " FROM text
@@ -75,7 +82,8 @@ class Text extends Crud{
         if ($current_writer) {
             $sql .= "   LEFT JOIN game_has_player ON text.game_id = game_has_player.game_id AND game_has_player.player_id = :currentUserId
                         LEFT JOIN vote ON text.id = vote.text_id AND vote.writer_id = :currentUserId
-                        LEFT JOIN seen ON text.id = seen.text_id AND seen.writer_id = :currentUserId";
+                        LEFT JOIN seen ON text.id = seen.text_id AND seen.writer_id = :currentUserId
+                        LEFT JOIN game_invitation ON text.game_id = game_invitation.game_id AND game_invitation.invitee_id = :currentUserId AND game_invitation.status IN ('pending', 'accepted')";
         } else {
             $sql .= " LEFT JOIN vote ON text.id = vote.text_id";
         }

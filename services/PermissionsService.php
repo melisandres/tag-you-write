@@ -55,11 +55,16 @@ class PermissionsService {
      * 
      * @param array &$node The node data to normalize (passed by reference)
      */
-    public static function normalizeValues(&$node) {
+    private static function normalizeValues(&$node) {
         // Convert integer values to boolean (from Controller->addPermissions)
         $node['hasContributed'] = isset($node['hasContributed']) ? $node['hasContributed'] == 1 : false;
         $node['isWinner'] = isset($node['isWinner']) ? $node['isWinner'] == 1 : false;
         $node['openForChanges'] = isset($node['openForChanges']) ? $node['openForChanges'] == 1 : true;
+        
+        // Normalize game permission fields
+        $node['joinable_by_all'] = isset($node['joinable_by_all']) ? (bool)$node['joinable_by_all'] : true;
+        $node['visible_to_all'] = isset($node['visible_to_all']) ? (bool)$node['visible_to_all'] : true;
+        $node['hasInvitation'] = isset($node['hasInvitation']) ? (bool)$node['hasInvitation'] : false;
         
         // Other boolean fields that might need normalization
         $booleanFields = ['hasVoted', 'is_winner'];
