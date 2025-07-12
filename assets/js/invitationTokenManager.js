@@ -116,6 +116,11 @@ export class InvitationTokenManager {
         if (result.success && confirmed) {
             // Find the game element that has this token and remove its banner
             this.removeTemporaryAccessBannerForToken(token);
+
+            // Call the method to update permissions using data from response
+            if (result.game_id && result.root_id) {
+                window.dataManager.handleEntireTreeUpdate(result.game_id, result.root_id);
+            }
         }
         
         return result;

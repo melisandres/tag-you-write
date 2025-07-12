@@ -838,6 +838,18 @@ class ControllerGameInvitation extends Controller {
                     // Link the invitation to the user
                     $this->linkInvitationToUser($invitation, $currentUserId, $gameInvitation, $game, $writer);
                     $this->removeTokenFromSession($token);
+                    
+                    // Get game data to return game ID and root ID
+                    $gameData = $game->selectId($invitation['game_id']);
+                    $rootId = $gameData['root_text_id'] ?? null;
+                    
+                    header('Content-Type: application/json');
+                    echo json_encode([
+                        'success' => true,
+                        'game_id' => $invitation['game_id'],
+                        'root_id' => $rootId
+                    ]);
+                    return;
                 }
             }
             

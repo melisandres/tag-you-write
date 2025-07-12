@@ -188,6 +188,13 @@ class ControllerText extends Controller{
         // Convert the hierarchical array to JSON format
         $jsonData = json_encode($tree);
 
+        // Check if this is an AJAX request
+        if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+            header('Content-Type: application/json');
+            echo $jsonData;
+            exit;
+        }
+
         return $jsonData;
     }
 

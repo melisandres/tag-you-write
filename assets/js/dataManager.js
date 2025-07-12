@@ -951,11 +951,14 @@ export class DataManager {
         const oldTree = this.cache.trees.get(rootId);
 
         try {
-            // Request full tree update
-            const response = await fetch(`text/getTree/${rootId}`, {
+            // Request full tree update using the standard endpoint
+            const url = window.i18n.createUrl(`text/getTree/${rootId}`);
+            console.log('Fetching tree from URL:', url);
+            const response = await fetch(url, {
                 method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
                 }
             });
             

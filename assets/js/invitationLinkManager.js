@@ -17,7 +17,10 @@ export class InvitationLinkManager {
     }
 
     async handleLinkInvitation(button) {
+        // Retrieve the game Id and the root Id from the button and story element
         const gameId = button.getAttribute('data-game-id');
+        const rootId = button.closest('[data-text-id]').getAttribute('data-text-id');
+
         if (!gameId) {
             console.error('No game ID found for invitation linking');
             return;
@@ -59,6 +62,8 @@ export class InvitationLinkManager {
             const result = await response.json();
             
             if (result.success) {
+                // Note: I think this is currently unreachable... but just in case, there are things that need to happen, if it becomes reachable. 
+                
                 // Remove the banner and update the game
                 this.removeTemporaryAccessBanner(gameId);
                 
@@ -67,6 +72,13 @@ export class InvitationLinkManager {
                     message: result.toastMessage || 'toast.invitation.link_success',
                     type: 'success'
                 });
+
+                // Call the method to update permissions using data from response or fallback to button data
+                const responseGameId = result.game_id || gameId;
+                const responseRootId = result.root_id || rootId;
+                if (responseGameId && responseRootId) {
+                    window.dataManager.handleEntireTreeUpdate(responseGameId, responseRootId);
+                }
                 
             } else if (result.needsConfirmation) {
                 // Trigger the confirmation modal system
