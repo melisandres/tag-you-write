@@ -167,7 +167,7 @@ class ControllerLogin extends Controller {
                     $message = translate('auth.password_reset.email_message');
                     $message .= RequirePage::getBaseUrl() . langUrl('login/resetPassword/' . $token);
                     
-                    $emailer->welcome($email, $writerData['firstName'], $subject, $message);
+                    $emailer->send($email, $writerData['firstName'], $subject, $message);
                     
                     // Send appropriate response based on request type
                     if (strpos($contentType, 'application/json') !== false) {

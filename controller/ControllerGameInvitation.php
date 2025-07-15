@@ -393,7 +393,7 @@ class ControllerGameInvitation extends Controller {
                     ]);
                     
                     // Send email
-                    if ($emailer->welcome($recipientEmail, $recipientName, $subject, $message)) {
+                    if ($emailer->send($recipientEmail, $recipientName, $subject, $message)) {
                         $emailsSent++;
                         
                         // Update invitation with sent timestamp

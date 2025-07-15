@@ -136,7 +136,7 @@ class ControllerWriter extends Controller{
                 $subject = translate('auth.account_created_email.email_title');
                 $message = translate('auth.account_created_email.email_message', ['name' => $name]);
                 
-                $email->welcome($_POST['email'], $name, $subject, $message);
+                $email->send($_POST['email'], $name, $subject, $message);
                 exit();
             }
         } catch (Exception $e) {    
