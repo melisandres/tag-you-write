@@ -475,7 +475,7 @@
     },
     "password_reset": {
       "email_title": "Demande de réinitialisation de mot de passe",
-      "email_message": "Cliquez sur le lien suivant pour réinitialiser votre mot de passe: \n\n",
+      "email_message": "Cliquez sur le lien suivant pour réinitialiser votre mot de passe: \n\n{resetUrl}",
       "email_link": "Réinitialiser le mot de passe",
       "email_sent": "Le lien de réinitialisation de mot de passe a été envoyé à votre email",
       "email_not_found": "Email non trouvé",

@@ -162,12 +162,16 @@ class ControllerLogin extends Controller {
                     RequirePage::library('Email');
                     $emailer = new Email;
                     
-                    // Get translated email content
-                    $subject = translate('auth.password_reset.email_title');
-                    $message = translate('auth.password_reset.email_message');
-                    $message .= RequirePage::getBaseUrl() . langUrl('login/resetPassword/' . $token);
-                    
-                    $emailer->send($email, $writerData['firstName'], $subject, $message);
+                    // Use the new sendWithKeys method for better queuing support
+                    $resetUrl = RequirePage::getBaseUrl() . langUrl('login/resetPassword/' . $token);
+                    $emailer->sendWithKeys(
+                        $email, 
+                        $writerData['firstName'], 
+                        'auth.password_reset.email_title',
+                        'auth.password_reset.email_message', 
+                        [], 
+                        ['resetUrl' => $resetUrl]
+                    );
                     
                     // Send appropriate response based on request type
                     if (strpos($contentType, 'application/json') !== false) {

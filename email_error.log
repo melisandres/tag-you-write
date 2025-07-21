@@ -3841,3 +3841,598 @@ proper dns entries.
 
 2025-07-09 03:58:45pm - PHPMailer Debug: SERVER -> CLIENT: 221 laya.smallvillages.com closing connection
 
+2025-07-15 08:38:19pm - PHPMailer Debug: SERVER -> CLIENT: 220-laya.smallvillages.com ESMTP Exim 4.98.2 #2 Tue, 15 Jul 2025 16:38:19 -0400 
+220-We do not authorize the use of this system to transport unsolicited, 
+220 and/or bulk e-mail.
+
+2025-07-15 08:38:19pm - PHPMailer Debug: CLIENT -> SERVER: EHLO localhost
+
+2025-07-15 08:38:19pm - PHPMailer Debug: SERVER -> CLIENT: 250-laya.smallvillages.com Hello modemcable249.58-163-184.mc.videotron.ca [184.163.58.249]
+250-SIZE 52428800
+250-LIMITS MAILMAX=1000 RCPTMAX=50000
+250-8BITMIME
+250-PIPELINING
+250-PIPECONNECT
+250-AUTH PLAIN LOGIN
+250 HELP
+
+2025-07-15 08:38:19pm - PHPMailer Debug: CLIENT -> SERVER: AUTH LOGIN
+
+2025-07-15 08:38:19pm - PHPMailer Debug: SERVER -> CLIENT: 334 VXNlcm5hbWU6
+
+2025-07-15 08:38:19pm - PHPMailer Debug: CLIENT -> SERVER: [credentials hidden]
+2025-07-15 08:38:19pm - PHPMailer Debug: SERVER -> CLIENT: 334 UGFzc3dvcmQ6
+
+2025-07-15 08:38:19pm - PHPMailer Debug: CLIENT -> SERVER: [credentials hidden]
+2025-07-15 08:38:19pm - PHPMailer Debug: SERVER -> CLIENT: 235 Authentication succeeded
+
+2025-07-15 08:38:19pm - PHPMailer Debug: CLIENT -> SERVER: MAIL FROM:<administration@la-fin.org>
+
+2025-07-15 08:38:19pm - PHPMailer Debug: SERVER -> CLIENT: 250 OK
+
+2025-07-15 08:38:19pm - PHPMailer Debug: CLIENT -> SERVER: RCPT TO:<melisandreschofield@gmail.com>
+
+2025-07-15 08:38:20pm - PHPMailer Debug: SERVER -> CLIENT: 250 Accepted
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: DATA
+
+2025-07-15 08:38:20pm - PHPMailer Debug: SERVER -> CLIENT: 354 Enter message, ending with "." on a line by itself
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: Date: Tue, 15 Jul 2025 20:38:19 +0000
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: To: Mel Scho <melisandreschofield@gmail.com>
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: From: Tag You Write <administration@la-fin.org>
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: Subject: VAUGHN Kneely invites you to collaborate on "smitten kitten"
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: Message-ID: <sQyNUVD4bNJbrXzML8co50RdWoQf5fk4WjSoOmk@localhost>
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: X-Mailer: PHPMailer 6.8.1 (https://github.com/PHPMailer/PHPMailer)
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: MIME-Version: 1.0
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: Content-Type: multipart/alternative;
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER:  boundary="b1=_sQyNUVD4bNJbrXzML8co50RdWoQf5fk4WjSoOmk"
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: 
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: --b1=_sQyNUVD4bNJbrXzML8co50RdWoQf5fk4WjSoOmk
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: Content-Type: text/plain; charset=UTF-8
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: Content-Transfer-Encoding: base64
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: 
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: SGVsbG8gTWVsIFNjaG8sCgpWQVVHSE4gS25lZWx5IGhhcyBpbnZpdGVkIHlvdSB0byBjb2xsYWJv
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: cmF0ZSBvbiBhIHdyaXRpbmcgcHJvamVjdCBjYWxsZWQgInNtaXR0ZW4ga2l0dGVuIi4KClByb21w
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: dDogd2hlbiBzb21ldGhpbmcgaW4gdGhpcyB3b3JsZCBpcyBjdXRlciB0aGFuIHlvdQoKQ2xpY2sg
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: dGhlIGxpbmsgYmVsb3cgdG8gam9pbiB0aGUgY29sbGFib3JhdGlvbjoKaHR0cDovL2xvY2FsaG9z
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: dDo4ODg4L3RhZy15b3Utd3JpdGUtcmVwby90YWcteW91LXdyaXRlLy9lbi9HYW1lSW52aXRhdGlv
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: bi92aXNpdC83YjJjNmM1YWZmN2QzN2MwMmVkNzgxMmFkMTc1MTI1NwoKSGFwcHkgd3JpdGluZyEK
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: ClRoZSBUYWcgWW91IFdyaXRlIFRlYW0=
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: 
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: --b1=_sQyNUVD4bNJbrXzML8co50RdWoQf5fk4WjSoOmk
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: Content-Type: text/html; charset=UTF-8
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: Content-Transfer-Encoding: base64
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: 
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: SGVsbG8gTWVsIFNjaG8sCgpWQVVHSE4gS25lZWx5IGhhcyBpbnZpdGVkIHlvdSB0byBjb2xsYWJv
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: cmF0ZSBvbiBhIHdyaXRpbmcgcHJvamVjdCBjYWxsZWQgInNtaXR0ZW4ga2l0dGVuIi4KClByb21w
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: dDogPHA+d2hlbiBzb21ldGhpbmcgaW4gdGhpcyB3b3JsZCBpcyBjdXRlciB0aGFuIHlvdTwvcD4K
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: CkNsaWNrIHRoZSBsaW5rIGJlbG93IHRvIGpvaW4gdGhlIGNvbGxhYm9yYXRpb246Cmh0dHA6Ly9s
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: b2NhbGhvc3Q6ODg4OC90YWcteW91LXdyaXRlLXJlcG8vdGFnLXlvdS13cml0ZS8vZW4vR2FtZUlu
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: dml0YXRpb24vdmlzaXQvN2IyYzZjNWFmZjdkMzdjMDJlZDc4MTJhZDE3NTEyNTcKCkhhcHB5IHdy
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: aXRpbmchCgpUaGUgVGFnIFlvdSBXcml0ZSBUZWFt
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: 
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: 
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: --b1=_sQyNUVD4bNJbrXzML8co50RdWoQf5fk4WjSoOmk--
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: 
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: .
+
+2025-07-15 08:38:20pm - PHPMailer Debug: SERVER -> CLIENT: 250 OK id=1ubmPs-0000000FGxI-3JRM
+
+2025-07-15 08:38:20pm - PHPMailer Debug: CLIENT -> SERVER: QUIT
+
+2025-07-15 08:38:20pm - PHPMailer Debug: SERVER -> CLIENT: 221 laya.smallvillages.com closing connection
+
+2025-07-15 08:49:32pm - PHPMailer Debug: SERVER -> CLIENT: 220-laya.smallvillages.com ESMTP Exim 4.98.2 #2 Tue, 15 Jul 2025 16:49:32 -0400 
+220-We do not authorize the use of this system to transport unsolicited, 
+220 and/or bulk e-mail.
+
+2025-07-15 08:49:32pm - PHPMailer Debug: CLIENT -> SERVER: EHLO localhost
+
+2025-07-15 08:49:32pm - PHPMailer Debug: SERVER -> CLIENT: 250-laya.smallvillages.com Hello modemcable249.58-163-184.mc.videotron.ca [184.163.58.249]
+250-SIZE 52428800
+250-LIMITS MAILMAX=1000 RCPTMAX=50000
+250-8BITMIME
+250-PIPELINING
+250-PIPECONNECT
+250-AUTH PLAIN LOGIN
+250 HELP
+
+2025-07-15 08:49:32pm - PHPMailer Debug: CLIENT -> SERVER: AUTH LOGIN
+
+2025-07-15 08:49:32pm - PHPMailer Debug: SERVER -> CLIENT: 334 VXNlcm5hbWU6
+
+2025-07-15 08:49:32pm - PHPMailer Debug: CLIENT -> SERVER: [credentials hidden]
+2025-07-15 08:49:32pm - PHPMailer Debug: SERVER -> CLIENT: 334 UGFzc3dvcmQ6
+
+2025-07-15 08:49:32pm - PHPMailer Debug: CLIENT -> SERVER: [credentials hidden]
+2025-07-15 08:49:33pm - PHPMailer Debug: SERVER -> CLIENT: 235 Authentication succeeded
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: MAIL FROM:<administration@la-fin.org>
+
+2025-07-15 08:49:33pm - PHPMailer Debug: SERVER -> CLIENT: 250 OK
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: RCPT TO:<melisandreschofield@gmail.com>
+
+2025-07-15 08:49:33pm - PHPMailer Debug: SERVER -> CLIENT: 250 Accepted
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: DATA
+
+2025-07-15 08:49:33pm - PHPMailer Debug: SERVER -> CLIENT: 354 Enter message, ending with "." on a line by itself
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: Date: Tue, 15 Jul 2025 20:49:32 +0000
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: To: Mel Scho <melisandreschofield@gmail.com>
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: From: Tag You Write <administration@la-fin.org>
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: Subject: VAUGHN Kneely invites you to collaborate on "wine and dine"
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: Message-ID: <IW7Q7Qf9Befvrhykm8bmD5lzIXBg7e7ZosbP6TxBw@localhost>
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: X-Mailer: PHPMailer 6.8.1 (https://github.com/PHPMailer/PHPMailer)
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: MIME-Version: 1.0
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: Content-Type: multipart/alternative;
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER:  boundary="b1=_IW7Q7Qf9Befvrhykm8bmD5lzIXBg7e7ZosbP6TxBw"
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: 
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: --b1=_IW7Q7Qf9Befvrhykm8bmD5lzIXBg7e7ZosbP6TxBw
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: Content-Type: text/plain; charset=UTF-8
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: Content-Transfer-Encoding: base64
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: 
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: SGVsbG8gTWVsIFNjaG8sCgpWQVVHSE4gS25lZWx5IGhhcyBpbnZpdGVkIHlvdSB0byBjb2xsYWJv
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: cmF0ZSBvbiBhIHdyaXRpbmcgcHJvamVjdCBjYWxsZWQgIndpbmUgYW5kIGRpbmUiLgoKUHJvbXB0
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: OiBzdW5kYXlzIGFuZCBkaW5uZXJzCgpDbGljayB0aGUgbGluayBiZWxvdyB0byBqb2luIHRoZSBj
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: b2xsYWJvcmF0aW9uOgpodHRwOi8vbG9jYWxob3N0Ojg4ODgvdGFnLXlvdS13cml0ZS1yZXBvL3Rh
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: Zy15b3Utd3JpdGUvL2VuL0dhbWVJbnZpdGF0aW9uL3Zpc2l0LzA4MDcyMWRmOTVjNGVlMWVkZTlj
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: Zjg5MTcwNzE3MDY4CgpIYXBweSB3cml0aW5nIQoKVGhlIFRhZyBZb3UgV3JpdGUgVGVhbQ==
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: 
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: --b1=_IW7Q7Qf9Befvrhykm8bmD5lzIXBg7e7ZosbP6TxBw
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: Content-Type: text/html; charset=UTF-8
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: Content-Transfer-Encoding: base64
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: 
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: SGVsbG8gTWVsIFNjaG8sCgpWQVVHSE4gS25lZWx5IGhhcyBpbnZpdGVkIHlvdSB0byBjb2xsYWJv
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: cmF0ZSBvbiBhIHdyaXRpbmcgcHJvamVjdCBjYWxsZWQgIndpbmUgYW5kIGRpbmUiLgoKUHJvbXB0
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: OiA8cD5zdW5kYXlzIGFuZCBkaW5uZXJzPC9wPgoKQ2xpY2sgdGhlIGxpbmsgYmVsb3cgdG8gam9p
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: biB0aGUgY29sbGFib3JhdGlvbjoKaHR0cDovL2xvY2FsaG9zdDo4ODg4L3RhZy15b3Utd3JpdGUt
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: cmVwby90YWcteW91LXdyaXRlLy9lbi9HYW1lSW52aXRhdGlvbi92aXNpdC8wODA3MjFkZjk1YzRl
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: ZTFlZGU5Y2Y4OTE3MDcxNzA2OAoKSGFwcHkgd3JpdGluZyEKClRoZSBUYWcgWW91IFdyaXRlIFRl
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: YW0=
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: 
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: 
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: --b1=_IW7Q7Qf9Befvrhykm8bmD5lzIXBg7e7ZosbP6TxBw--
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: 
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: .
+
+2025-07-15 08:49:33pm - PHPMailer Debug: SERVER -> CLIENT: 250 OK id=1ubmaj-0000000FILA-3sxL
+
+2025-07-15 08:49:33pm - PHPMailer Debug: CLIENT -> SERVER: QUIT
+
+2025-07-15 08:49:33pm - PHPMailer Debug: SERVER -> CLIENT: 221 laya.smallvillages.com closing connection
+
+2025-07-16 08:34:45pm - PHPMailer Debug: SERVER -> CLIENT: 220-laya.smallvillages.com ESMTP Exim 4.98.2 #2 Wed, 16 Jul 2025 16:34:45 -0400 
+220-We do not authorize the use of this system to transport unsolicited, 
+220 and/or bulk e-mail.
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: EHLO MacBook-Air
+
+2025-07-16 08:34:45pm - PHPMailer Debug: SERVER -> CLIENT: 250-laya.smallvillages.com Hello MacBook-Air [70.29.242.194]
+250-SIZE 52428800
+250-LIMITS MAILMAX=1000 RCPTMAX=50000
+250-8BITMIME
+250-PIPELINING
+250-PIPECONNECT
+250-AUTH PLAIN LOGIN
+250 HELP
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: AUTH LOGIN
+
+2025-07-16 08:34:45pm - PHPMailer Debug: SERVER -> CLIENT: 334 VXNlcm5hbWU6
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: [credentials hidden]
+2025-07-16 08:34:45pm - PHPMailer Debug: SERVER -> CLIENT: 334 UGFzc3dvcmQ6
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: [credentials hidden]
+2025-07-16 08:34:45pm - PHPMailer Debug: SERVER -> CLIENT: 235 Authentication succeeded
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: MAIL FROM:<administration@la-fin.org>
+
+2025-07-16 08:34:45pm - PHPMailer Debug: SERVER -> CLIENT: 250 OK
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: RCPT TO:<melisandre.schofield@gmail.com>
+
+2025-07-16 08:34:45pm - PHPMailer Debug: SERVER -> CLIENT: 250 Accepted
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: DATA
+
+2025-07-16 08:34:45pm - PHPMailer Debug: SERVER -> CLIENT: 354 Enter message, ending with "." on a line by itself
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: Date: Wed, 16 Jul 2025 20:34:04 +0000
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: To: "melisandre.schofield@gmail.com" <melisandre.schofield@gmail.com>
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: From: Tag You Write <administration@la-fin.org>
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: Subject: {inviterName} invites you to collaborate on "{gameTitle}"
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: Message-ID: <g4YLqa1FZiqmK5H9bXPkGWT6oyLGSgZN9gRvSD1zZ8@MacBook-Air>
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: X-Mailer: PHPMailer 6.8.1 (https://github.com/PHPMailer/PHPMailer)
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: MIME-Version: 1.0
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: Content-Type: multipart/alternative;
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER:  boundary="b1=_g4YLqa1FZiqmK5H9bXPkGWT6oyLGSgZN9gRvSD1zZ8"
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: 
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: --b1=_g4YLqa1FZiqmK5H9bXPkGWT6oyLGSgZN9gRvSD1zZ8
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: Content-Type: text/plain; charset=UTF-8
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: Content-Transfer-Encoding: base64
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: 
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: SGVsbG8gbWVsaXNhbmRyZS5zY2hvZmllbGRAZ21haWwuY29tLAoKTWVsIFNjaG8gaGFzIGludml0
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: ZWQgeW91IHRvIGNvbGxhYm9yYXRlIG9uIGEgd3JpdGluZyBwcm9qZWN0IGNhbGxlZCAiYm9tYnNo
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: ZWxscyBhbmQgY29udGVudHMiLgoKUHJvbXB0OiBib21ieW9sayBmZWVkcyB0aGUgYmFieSBib21i
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: IGJlZm9yZSBpdCBleGl0cyB0aGUgc2hlbGwKCkNsaWNrIHRoZSBsaW5rIGJlbG93IHRvIGpvaW4g
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: dGhlIGNvbGxhYm9yYXRpb246Cmh0dHA6Ly9sb2NhbGhvc3Q6ODg4OC90YWcteW91LXdyaXRlLXJl
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: cG8vdGFnLXlvdS13cml0ZS8vZW4vR2FtZUludml0YXRpb24vdmlzaXQvMDhiOTViMTkyNTQwMjhk
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: MjRiNjUzNjUwNTAwOGMzZGIKCkhhcHB5IHdyaXRpbmchCgpUaGUgVGFnIFlvdSBXcml0ZSBUZWFt
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: 
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: --b1=_g4YLqa1FZiqmK5H9bXPkGWT6oyLGSgZN9gRvSD1zZ8
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: Content-Type: text/html; charset=UTF-8
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: Content-Transfer-Encoding: base64
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: 
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: SGVsbG8gbWVsaXNhbmRyZS5zY2hvZmllbGRAZ21haWwuY29tLAoKTWVsIFNjaG8gaGFzIGludml0
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: ZWQgeW91IHRvIGNvbGxhYm9yYXRlIG9uIGEgd3JpdGluZyBwcm9qZWN0IGNhbGxlZCAiYm9tYnNo
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: ZWxscyBhbmQgY29udGVudHMiLgoKUHJvbXB0OiA8cD5ib21ieW9sayBmZWVkcyB0aGUgYmFieSBi
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: b21iIGJlZm9yZSBpdCBleGl0cyB0aGUgc2hlbGw8L3A+CgpDbGljayB0aGUgbGluayBiZWxvdyB0
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: byBqb2luIHRoZSBjb2xsYWJvcmF0aW9uOgpodHRwOi8vbG9jYWxob3N0Ojg4ODgvdGFnLXlvdS13
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: cml0ZS1yZXBvL3RhZy15b3Utd3JpdGUvL2VuL0dhbWVJbnZpdGF0aW9uL3Zpc2l0LzA4Yjk1YjE5
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: MjU0MDI4ZDI0YjY1MzY1MDUwMDhjM2RiCgpIYXBweSB3cml0aW5nIQoKVGhlIFRhZyBZb3UgV3Jp
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: dGUgVGVhbQ==
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: 
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: 
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: --b1=_g4YLqa1FZiqmK5H9bXPkGWT6oyLGSgZN9gRvSD1zZ8--
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: 
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: .
+
+2025-07-16 08:34:45pm - PHPMailer Debug: SERVER -> CLIENT: 250 OK id=1uc8py-00000000fBE-2NT7
+
+2025-07-16 08:34:45pm - PHPMailer Debug: CLIENT -> SERVER: QUIT
+
+2025-07-16 08:34:45pm - PHPMailer Debug: SERVER -> CLIENT: 221 laya.smallvillages.com closing connection
+
+2025-07-16 08:42:10pm - PHPMailer Debug: SERVER -> CLIENT: 220-laya.smallvillages.com ESMTP Exim 4.98.2 #2 Wed, 16 Jul 2025 16:42:10 -0400 
+220-We do not authorize the use of this system to transport unsolicited, 
+220 and/or bulk e-mail.
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: EHLO MacBook-Air
+
+2025-07-16 08:42:10pm - PHPMailer Debug: SERVER -> CLIENT: 250-laya.smallvillages.com Hello MacBook-Air [70.29.242.194]
+250-SIZE 52428800
+250-LIMITS MAILMAX=1000 RCPTMAX=50000
+250-8BITMIME
+250-PIPELINING
+250-PIPECONNECT
+250-AUTH PLAIN LOGIN
+250 HELP
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: AUTH LOGIN
+
+2025-07-16 08:42:10pm - PHPMailer Debug: SERVER -> CLIENT: 334 VXNlcm5hbWU6
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: [credentials hidden]
+2025-07-16 08:42:10pm - PHPMailer Debug: SERVER -> CLIENT: 334 UGFzc3dvcmQ6
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: [credentials hidden]
+2025-07-16 08:42:10pm - PHPMailer Debug: SERVER -> CLIENT: 235 Authentication succeeded
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: MAIL FROM:<administration@la-fin.org>
+
+2025-07-16 08:42:10pm - PHPMailer Debug: SERVER -> CLIENT: 250 OK
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: RCPT TO:<melisandre.schofield@gmail.com>
+
+2025-07-16 08:42:10pm - PHPMailer Debug: SERVER -> CLIENT: 250 Accepted
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: DATA
+
+2025-07-16 08:42:10pm - PHPMailer Debug: SERVER -> CLIENT: 354 Enter message, ending with "." on a line by itself
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: Date: Wed, 16 Jul 2025 20:41:40 +0000
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: To: "melisandre.schofield@gmail.com" <melisandre.schofield@gmail.com>
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: From: Tag You Write <administration@la-fin.org>
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: Subject: Mel Scho invites you to collaborate on "gymboree jamboree"
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: Message-ID: <tUtjokGT8uWYlXFXoEgBqNBJS2zeZoBvr9g1dLVUmpw@MacBook-Air>
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: X-Mailer: PHPMailer 6.8.1 (https://github.com/PHPMailer/PHPMailer)
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: MIME-Version: 1.0
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: Content-Type: multipart/alternative;
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER:  boundary="b1=_tUtjokGT8uWYlXFXoEgBqNBJS2zeZoBvr9g1dLVUmpw"
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: 
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: --b1=_tUtjokGT8uWYlXFXoEgBqNBJS2zeZoBvr9g1dLVUmpw
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: Content-Type: text/plain; charset=UTF-8
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: Content-Transfer-Encoding: base64
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: 
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: SGVsbG8gbWVsaXNhbmRyZS5zY2hvZmllbGRAZ21haWwuY29tLAoKTWVsIFNjaG8gaGFzIGludml0
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: ZWQgeW91IHRvIGNvbGxhYm9yYXRlIG9uIGEgd3JpdGluZyBwcm9qZWN0IGNhbGxlZCAiZ3ltYm9y
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: ZWUgamFtYm9yZWUiLgoKUHJvbXB0OiBnbyB0byB0aGUgZ3ltLCBwaWNrIHVwIHNvbWUgamFtCgpD
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: bGljayB0aGUgbGluayBiZWxvdyB0byBqb2luIHRoZSBjb2xsYWJvcmF0aW9uOgpodHRwOi8vbG9j
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: YWxob3N0Ojg4ODgvdGFnLXlvdS13cml0ZS1yZXBvL3RhZy15b3Utd3JpdGUvL2VuL0dhbWVJbnZp
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: dGF0aW9uL3Zpc2l0Lzg5ZTU3ODRmYTBlMGMwMjQ0YmZiMjQ1N2Q5MThmZDJlCgpIYXBweSB3cml0
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: aW5nIQoKVGhlIFRhZyBZb3UgV3JpdGUgVGVhbQ==
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: 
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: --b1=_tUtjokGT8uWYlXFXoEgBqNBJS2zeZoBvr9g1dLVUmpw
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: Content-Type: text/html; charset=UTF-8
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: Content-Transfer-Encoding: base64
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: 
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: SGVsbG8gbWVsaXNhbmRyZS5zY2hvZmllbGRAZ21haWwuY29tLAoKTWVsIFNjaG8gaGFzIGludml0
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: ZWQgeW91IHRvIGNvbGxhYm9yYXRlIG9uIGEgd3JpdGluZyBwcm9qZWN0IGNhbGxlZCAiZ3ltYm9y
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: ZWUgamFtYm9yZWUiLgoKUHJvbXB0OiA8cD5nbyB0byB0aGUgZ3ltLCBwaWNrIHVwIHNvbWUgamFt
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: PC9wPgoKQ2xpY2sgdGhlIGxpbmsgYmVsb3cgdG8gam9pbiB0aGUgY29sbGFib3JhdGlvbjoKaHR0
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: cDovL2xvY2FsaG9zdDo4ODg4L3RhZy15b3Utd3JpdGUtcmVwby90YWcteW91LXdyaXRlLy9lbi9H
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: YW1lSW52aXRhdGlvbi92aXNpdC84OWU1Nzg0ZmEwZTBjMDI0NGJmYjI0NTdkOTE4ZmQyZQoKSGFw
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: cHkgd3JpdGluZyEKClRoZSBUYWcgWW91IFdyaXRlIFRlYW0=
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: 
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: 
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: --b1=_tUtjokGT8uWYlXFXoEgBqNBJS2zeZoBvr9g1dLVUmpw--
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: 
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: .
+
+2025-07-16 08:42:10pm - PHPMailer Debug: SERVER -> CLIENT: 250 OK id=1uc8x9-00000000fzj-0ta2
+
+2025-07-16 08:42:10pm - PHPMailer Debug: CLIENT -> SERVER: QUIT
+
+2025-07-16 08:42:10pm - PHPMailer Debug: SERVER -> CLIENT: 221 laya.smallvillages.com closing connection
+
+2025-07-16 08:46:15pm - PHPMailer Debug: SERVER -> CLIENT: 220-laya.smallvillages.com ESMTP Exim 4.98.2 #2 Wed, 16 Jul 2025 16:46:15 -0400 
+220-We do not authorize the use of this system to transport unsolicited, 
+220 and/or bulk e-mail.
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: EHLO MacBook-Air
+
+2025-07-16 08:46:15pm - PHPMailer Debug: SERVER -> CLIENT: 250-laya.smallvillages.com Hello MacBook-Air [70.29.242.194]
+250-SIZE 52428800
+250-LIMITS MAILMAX=1000 RCPTMAX=50000
+250-8BITMIME
+250-PIPELINING
+250-PIPECONNECT
+250-AUTH PLAIN LOGIN
+250 HELP
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: AUTH LOGIN
+
+2025-07-16 08:46:15pm - PHPMailer Debug: SERVER -> CLIENT: 334 VXNlcm5hbWU6
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: [credentials hidden]
+2025-07-16 08:46:15pm - PHPMailer Debug: SERVER -> CLIENT: 334 UGFzc3dvcmQ6
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: [credentials hidden]
+2025-07-16 08:46:15pm - PHPMailer Debug: SERVER -> CLIENT: 235 Authentication succeeded
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: MAIL FROM:<administration@la-fin.org>
+
+2025-07-16 08:46:15pm - PHPMailer Debug: SERVER -> CLIENT: 250 OK
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: RCPT TO:<melisandreschofield@gmail.com>
+
+2025-07-16 08:46:15pm - PHPMailer Debug: SERVER -> CLIENT: 250 Accepted
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: DATA
+
+2025-07-16 08:46:15pm - PHPMailer Debug: SERVER -> CLIENT: 354 Enter message, ending with "." on a line by itself
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: Date: Wed, 16 Jul 2025 20:45:35 +0000
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: To: Mel Scho <melisandreschofield@gmail.com>
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: From: Tag You Write <administration@la-fin.org>
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: Subject: Kevin Bacon invites you to collaborate on "turnstyle"
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: Message-ID: <p3XNFvOONt1SStpp7lrMzSroa7isPpMSDYuPDqvO0@MacBook-Air>
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: X-Mailer: PHPMailer 6.8.1 (https://github.com/PHPMailer/PHPMailer)
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: MIME-Version: 1.0
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: Content-Type: multipart/alternative;
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER:  boundary="b1=_p3XNFvOONt1SStpp7lrMzSroa7isPpMSDYuPDqvO0"
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: 
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: --b1=_p3XNFvOONt1SStpp7lrMzSroa7isPpMSDYuPDqvO0
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: Content-Type: text/plain; charset=UTF-8
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: Content-Transfer-Encoding: base64
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: 
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: SGVsbG8gTWVsIFNjaG8sCgpLZXZpbiBCYWNvbiBoYXMgaW52aXRlZCB5b3UgdG8gY29sbGFib3Jh
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: dGUgb24gYSB3cml0aW5nIHByb2plY3QgY2FsbGVkICJ0dXJuc3R5bGUiLgoKUHJvbXB0OiB0dXJu
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: IHR1cm4gdHVybiwgeW91J3ZlIGdvdCBzdHlsZQoKQ2xpY2sgdGhlIGxpbmsgYmVsb3cgdG8gam9p
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: biB0aGUgY29sbGFib3JhdGlvbjoKaHR0cDovL2xvY2FsaG9zdDo4ODg4L3RhZy15b3Utd3JpdGUt
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: cmVwby90YWcteW91LXdyaXRlLy9lbi9HYW1lSW52aXRhdGlvbi92aXNpdC80MjE5OTlkZDQ4Mzg3
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: ZGMyOTUxMmNjZjAyMzM2OGY3OAoKSGFwcHkgd3JpdGluZyEKClRoZSBUYWcgWW91IFdyaXRlIFRl
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: YW0=
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: 
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: --b1=_p3XNFvOONt1SStpp7lrMzSroa7isPpMSDYuPDqvO0
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: Content-Type: text/html; charset=UTF-8
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: Content-Transfer-Encoding: base64
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: 
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: SGVsbG8gTWVsIFNjaG8sCgpLZXZpbiBCYWNvbiBoYXMgaW52aXRlZCB5b3UgdG8gY29sbGFib3Jh
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: dGUgb24gYSB3cml0aW5nIHByb2plY3QgY2FsbGVkICJ0dXJuc3R5bGUiLgoKUHJvbXB0OiA8cD50
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: dXJuIHR1cm4gdHVybiwgeW91J3ZlIGdvdCBzdHlsZTwvcD4KCkNsaWNrIHRoZSBsaW5rIGJlbG93
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: IHRvIGpvaW4gdGhlIGNvbGxhYm9yYXRpb246Cmh0dHA6Ly9sb2NhbGhvc3Q6ODg4OC90YWcteW91
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: LXdyaXRlLXJlcG8vdGFnLXlvdS13cml0ZS8vZW4vR2FtZUludml0YXRpb24vdmlzaXQvNDIxOTk5
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: ZGQ0ODM4N2RjMjk1MTJjY2YwMjMzNjhmNzgKCkhhcHB5IHdyaXRpbmchCgpUaGUgVGFnIFlvdSBX
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: cml0ZSBUZWFt
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: 
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: 
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: --b1=_p3XNFvOONt1SStpp7lrMzSroa7isPpMSDYuPDqvO0--
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: 
+
+2025-07-16 08:46:15pm - PHPMailer Debug: CLIENT -> SERVER: .
+
+2025-07-16 08:46:16pm - PHPMailer Debug: SERVER -> CLIENT: 250 OK id=1uc916-00000000gO7-35ta
+
+2025-07-16 08:46:16pm - PHPMailer Debug: CLIENT -> SERVER: QUIT
+
+2025-07-16 08:46:16pm - PHPMailer Debug: SERVER -> CLIENT: 221 laya.smallvillages.com closing connection
+

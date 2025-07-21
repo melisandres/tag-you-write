@@ -130,13 +130,15 @@ class ControllerWriter extends Controller{
                 $email = new Email;
                 $name = $firstName . " " .$lastName;
                 
-                // Include the translation library explicitly
-                RequirePage::library('languages');
-                
-                $subject = translate('auth.account_created_email.email_title');
-                $message = translate('auth.account_created_email.email_message', ['name' => $name]);
-                
-                $email->send($_POST['email'], $name, $subject, $message);
+                // Use the new sendWithKeys method for better queuing support
+                $email->sendWithKeys(
+                    $_POST['email'], 
+                    $name, 
+                    'auth.account_created_email.email_title',
+                    'auth.account_created_email.email_message', 
+                    [], 
+                    ['name' => $name]
+                );
                 exit();
             }
         } catch (Exception $e) {    

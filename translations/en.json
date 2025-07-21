@@ -476,7 +476,7 @@
     },
     "password_reset": {
       "email_title": "Password Reset Request",
-      "email_message": "Click the following link to reset your password: \n\n",
+      "email_message": "Click the following link to reset your password: \n\n{resetUrl}",
       "email_link": "Reset Password",
       "email_sent": "Password reset link has been sent to your email", 
       "email_not_found": "Email not found", 

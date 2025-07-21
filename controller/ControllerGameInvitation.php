@@ -376,24 +376,27 @@ class ControllerGameInvitation extends Controller {
                 
                 // Prepare email content
                 try {
-                    $subject = translate('email.game_invitation.subject', [
-                        'inviterName' => $inviterName,
-                        'gameTitle' => $gameData['title'] ?? 'Untitled Game'
-                    ]);
-                    
                     // Generate invitation URL
                     $invitationUrl = RequirePage::getBaseUrl() . langUrl('GameInvitation/visit/' . $invitation['token']);
                     
-                    $message = translate('email.game_invitation.message', [
-                        'recipientName' => $recipientName,
-                        'inviterName' => $inviterName,
-                        'gameTitle' => $gameData['title'] ?? 'Untitled Game',
-                        'gamePrompt' => $gameData['prompt'] ?? '',
-                        'invitationUrl' => $invitationUrl
-                    ]);
-                    
-                    // Send email
-                    if ($emailer->send($recipientEmail, $recipientName, $subject, $message)) {
+                    // Use the new sendWithKeys method for better queuing support
+                    if ($emailer->sendWithKeys(
+                        $recipientEmail, 
+                        $recipientName, 
+                        'email.game_invitation.subject',
+                        'email.game_invitation.message', 
+                        [
+                            'inviterName' => $inviterName,
+                            'gameTitle' => $gameData['title'] ?? 'Untitled Game'
+                        ], 
+                        [
+                            'recipientName' => $recipientName,
+                            'inviterName' => $inviterName,
+                            'gameTitle' => $gameData['title'] ?? 'Untitled Game',
+                            'gamePrompt' => $gameData['prompt'] ?? '',
+                            'invitationUrl' => $invitationUrl
+                        ]
+                    )) {
                         $emailsSent++;
                         
                         // Update invitation with sent timestamp
