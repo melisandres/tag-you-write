@@ -109,8 +109,8 @@
             </a>
         {% endif %}
         
-        <!-- Header Activity Indicator -->
-        <div class="activity-indicator" id="header-activity-indicator">
+        {# Header Activity Indicator #}
+        {# <div class="activity-indicator" id="header-activity-indicator">
             <div class="activity-content">
                 <div class="activity-icon" data-svg="activity"></div>
                 <div class="activity-stats">
@@ -120,7 +120,7 @@
                     <span class="activity-label">activity</span>
                 </div>
             </div>
-        </div>
+        </div> #}
     {% endif %}
 
     {% if not guest and title_key != 'page_title.login' %}

@@ -125,7 +125,7 @@
 
 @media (max-width: 480px) {
     .activity-indicator {
-        padding: 0.25rem;
+        padding: 0;
     }
     
     .activity-icon {
