@@ -653,7 +653,6 @@ export class CurrentActivityManager {
         try {
             const endpoint = 'writerActivity/storeOrUpdate';
             const url = window.i18n.createUrl(endpoint);
-            
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
@@ -661,11 +660,9 @@ export class CurrentActivityManager {
                 },
                 body: JSON.stringify(payload)
             });
-            
+
             if (!response.ok) {
-                const errorText = await response.text();
-                console.error('CurrentActivityManager: Heartbeat failed:', response.status, errorText);
-                throw new Error(`HTTP ${response.status}: ${errorText}`);
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const result = await response.json();
@@ -677,7 +674,7 @@ export class CurrentActivityManager {
             });
 
         } catch (error) {
-            console.error('CurrentActivityManager: Heartbeat error:', error);
+            console.error('💓 CurrentActivityManager: Heartbeat error:', error);
         }
     }
 

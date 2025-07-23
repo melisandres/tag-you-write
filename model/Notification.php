@@ -1,7 +1,12 @@
 <?php
 require_once('Crud.php');
 // Use an absolute path to find the config file regardless of where it's included from
-require_once(dirname(__FILE__) . '/../config/timezone_config.php');
+// Check if we're in the SSE context and adjust the path accordingly
+if (defined('ROOT_DIR')) {
+    require_once(ROOT_DIR . '/config/timezone_config.php');
+} else {
+    require_once(dirname(__FILE__) . '/../config/timezone_config.php');
+}
 
 class Notification extends Crud{
   public $table = 'notification';

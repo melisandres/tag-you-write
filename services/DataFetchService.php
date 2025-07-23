@@ -5,19 +5,31 @@
  * Used by both Redis subscribers and polling mechanisms to fetch game, text, and notification data.
  */
 
-// Ensure RequirePage is available
-if (!class_exists('RequirePage')) {
-    require_once __DIR__ . '/../library/RequirePage.php';
-}
-
-// Ensure PermissionsService is available
-if (!class_exists('PermissionsService')) {
-    require_once __DIR__ . '/../services/PermissionsService.php';
-}
-
-// Ensure WriterActivity model is available
-if (!class_exists('WriterActivity')) {
-    require_once __DIR__ . '/../model/WriterActivity.php';
+// Load models - handle both MVC and SSE contexts
+if (class_exists('RequirePage')) {
+    // MVC context - use RequirePage
+    RequirePage::model('WriterActivity');
+    RequirePage::model('Event');
+    RequirePage::model('Game');
+    RequirePage::model('Text');
+    RequirePage::model('Notification');
+} else {
+    // SSE context - use manual require_once
+    if (!class_exists('WriterActivity')) {
+        require_once __DIR__ . '/../model/WriterActivity.php';
+    }
+    if (!class_exists('Event')) {
+        require_once __DIR__ . '/../model/Event.php';
+    }
+    if (!class_exists('Game')) {
+        require_once __DIR__ . '/../model/Game.php';
+    }
+    if (!class_exists('Text')) {
+        require_once __DIR__ . '/../model/Text.php';
+    }
+    if (!class_exists('Notification')) {
+        require_once __DIR__ . '/../model/Notification.php';
+    }
 }
 
 class DataFetchService {

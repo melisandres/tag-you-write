@@ -85,7 +85,7 @@ class WriterActivity extends Crud {
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute();
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
+
         // Convert to consistent format (strings for IDs, numbers for numeric fields)
         foreach ($results as &$result) {
             $result['writer_id'] = (string)$result['writer_id'];
@@ -95,7 +95,8 @@ class WriterActivity extends Crud {
             $result['timestamp'] = (int)$result['timestamp'];
         }
         
-        return $results;
+            return $results;
+
     }
 }
 ?> 

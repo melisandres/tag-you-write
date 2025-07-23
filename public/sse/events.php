@@ -74,6 +74,7 @@ class EventHandler {
         // Generate unique connection ID for this SSE connection
         $this->connectionId = uniqid('sse_', true);
         
+        
         // Get request parameters
         $this->parseRequestParameters();
         
@@ -191,6 +192,10 @@ class EventHandler {
         try {
             // Load bootstrap file for environment variables and configuration
             require_once('bootstrap.php');
+            
+            // Set the include path to ensure models can find their dependencies
+            $rootDir = realpath(__DIR__ . '/../../');
+            set_include_path(get_include_path() . PATH_SEPARATOR . $rootDir);
             
             // Load models - but don't instantiate them yet (lazy loading)
             require_once('../../model/Crud.php');

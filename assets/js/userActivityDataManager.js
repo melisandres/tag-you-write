@@ -67,6 +67,7 @@ export class UserActivityDataManager {
             console.log(this.getDiagnosticInfo());
             return this.getDiagnosticInfo();
         };
+
         
         // Initialize
         this.init();
@@ -152,7 +153,6 @@ export class UserActivityDataManager {
     handleUserActivityUpdate(userActivityData) {
         // Handle arrays (from initialization) - batch process to avoid multiple emissions
         if (Array.isArray(userActivityData)) {
-            console.log('👤 UserActivityDataManager: Processing', userActivityData.length, 'users from database');
             this.processBatchUserActivities(userActivityData, 'initialization');
             return;
         }
@@ -161,6 +161,8 @@ export class UserActivityDataManager {
         const normalized = this.normalizeUserActivityData(userActivityData, 'sse');
         if (normalized) {
             this.processUserActivity(normalized, 'remote');
+        } else {
+            console.error('UserActivityDataManager: Failed to normalize user activity data');
         }
     }
 
@@ -208,8 +210,6 @@ export class UserActivityDataManager {
         
         // Process all changes at once
         if (allChanges.length > 0) {
-            console.log(`👤 UserActivityDataManager: Batch processing ${allChanges.length} changes from ${userActivityDataArray.length} users`);
-            
             // Recompute affected activities (games, texts, site-wide)
             this.recomputeAffectedActivities(allChanges);
             
@@ -240,11 +240,6 @@ export class UserActivityDataManager {
         const changes = this.detectUserChanges(previousUserActivity, userActivity);
         
         if (changes.length > 0) {
-            // Log significant changes only
-            if (source !== 'initialization') {
-                console.log(`👤 UserActivityDataManager: User ${writerId} changes:`, changes.map(c => c.type));
-            }
-            
             // Recompute affected activities (games, texts, site-wide)
             this.recomputeAffectedActivities(changes);
             
@@ -347,10 +342,12 @@ export class UserActivityDataManager {
             previousActivity.activity_level === 'active' &&
             previousActivity.activity_type !== currentActivity.activity_type) {
             
+
             const prevCategory = this.getActivityCategory(previousActivity.activity_type);
             const currCategory = this.getActivityCategory(currentActivity.activity_type);
             
             if (prevCategory !== currCategory) {
+
                 changes.push({
                     type: 'activity_type_changed',
                     gameId: currGameId,
@@ -367,6 +364,7 @@ export class UserActivityDataManager {
         
         // Text editing started (user begins editing a text)
         if (!this.isEditingText(previousActivity) && this.isEditingText(currentActivity)) {
+
             changes.push({
                 type: 'text_editing_started',
                 gameId: currentActivity.game_id,
@@ -378,6 +376,7 @@ export class UserActivityDataManager {
         
         // Text editing stopped (user stops editing)
         if (this.isEditingText(previousActivity) && !this.isEditingText(currentActivity)) {
+
             changes.push({
                 type: 'text_editing_stopped',
                 gameId: currentActivity.game_id,
@@ -414,6 +413,7 @@ export class UserActivityDataManager {
             }
         }
         
+
         return changes;
     }
     

@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activity Monitoring Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .status.success { background-color: #d4edda; color: #155724; }
+        .status.error { background-color: #f8d7da; color: #721c24; }
+        .status.warning { background-color: #fff3cd; color: #856404; }
+        .status.info { background-color: #d1ecf1; color: #0c5460; }
+        
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #6c757d; cursor: not-allowed; }
+        
+        .activity-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .activity-indicator.active { background-color: #28a745; }
+        .activity-indicator.idle { background-color: #ffc107; }
+        .activity-indicator.inactive { background-color: #dc3545; }
+        
+        .user-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .user-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Activity Monitoring Test</h1>
+    <p>This page helps test the activity monitoring system and SSE connections.</p>
+    
+    <div class="test-section">
+        <h2>1. Connection Status</h2>
+        <div id="connection-status" class="status info">Checking connection...</div>
+        <button onclick="testConnection()">Test Connection</button>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. SSE Connection Test</h2>
+        <div id="sse-status" class="status info">SSE not connected</div>
+        <button onclick="startSSE()">Start SSE</button>
+        <button onclick="stopSSE()">Stop SSE</button>
+        <div class="log" id="sse-log"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Activity Simulation</h2>
+        <div id="activity-status" class="status info">Ready to simulate activity</div>
+        
+        <div style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 4px;">
+            <h4>Test Context Settings:</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0;">
+                <div>
+                    <label>Game ID: <input type="number" id="test-game-id" value="206" style="width: 80px;"></label>
+                </div>
+                <div>
+                    <label>Text ID: <input type="number" id="test-text-id" value="518" style="width: 80px;"></label>
+                </div>
+            </div>
+            <div style="margin: 10px 0;">
+                <label>Page Type: 
+                    <select id="test-page-type" style="width: 150px;">
+                        <option value="game_list">Game List</option>
+                        <option value="text_form">Text Form</option>
+                        <option value="text_show">Text Show</option>
+                        <option value="other">Other</option>
+                    </select>
+                </label>
+            </div>
+            <button onclick="updateTestContext()" style="background: #28a745;">Update Context</button>
+        </div>
+        
+        <button onclick="simulateActivity('browsing')">Simulate Browsing</button>
+        <button onclick="simulateActivity('iterating')">Simulate Writing</button>
+        <button onclick="simulateActivity('idle')">Simulate Idle</button>
+        <button onclick="simulateActivity('active')">Simulate Active</button>
+        <div class="log" id="activity-log"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. Current Activity State</h2>
+        <div id="current-activity">
+            <p><strong>Page Type:</strong> <span id="page-type">Unknown</span></p>
+            <p><strong>Activity Type:</strong> <span id="activity-type">Unknown</span></p>
+            <p><strong>Activity Level:</strong> <span id="activity-level">Unknown</span></p>
+            <p><strong>Game ID:</strong> <span id="game-id">Unknown</span></p>
+            <p><strong>Text ID:</strong> <span id="text-id">Unknown</span></p>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>5. Active Users (Received via SSE)</h2>
+        <div id="active-users">
+            <p>No active users detected yet...</p>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>6. Event Log</h2>
+        <div class="log" id="event-log"></div>
+    </div>
+
+    <script>
+        // Global variables
+        let sseConnection = null;
+        let currentActivity = {
+            page_type: 'other',
+            activity_type: 'browsing',
+            activity_level: 'active',
+            game_id: null,
+            text_id: null
+        };
+        
+        // Get base URL from meta tag or fallback
+        function getBaseUrl() {
+            const baseUrlMeta = document.querySelector('meta[name="base-url"]');
+            if (baseUrlMeta && baseUrlMeta.dataset.baseUrl) {
+                return baseUrlMeta.dataset.baseUrl;
+            }
+            // Fallback to current origin
+            return window.location.origin + '/tag-you-write/';
+        }
+        
+        // Logging functions
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            
+            // Add to event log
+            const eventLog = document.getElementById('event-log');
+            eventLog.innerHTML += logEntry + '\n';
+            eventLog.scrollTop = eventLog.scrollHeight;
+            
+            // Also log to console
+            console.log(logEntry);
+        }
+        
+        function clearLog() {
+            document.getElementById('event-log').innerHTML = '';
+        }
+        
+        // Connection test
+        async function testConnection() {
+            const statusDiv = document.getElementById('connection-status');
+            statusDiv.className = 'status info';
+            statusDiv.textContent = 'Testing connection...';
+            
+            try {
+                // Test basic connectivity
+                const response = await fetch(window.location.origin + '/index.php');
+                if (response.ok) {
+                    statusDiv.className = 'status success';
+                    statusDiv.textContent = '✅ Connection successful';
+                    log('Connection test passed');
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = '❌ Connection failed: ' + error.message;
+                log('Connection test failed: ' + error.message, 'error');
+            }
+        }
+        
+        // SSE connection management
+        function startSSE() {
+            if (sseConnection) {
+                log('SSE already connected');
+                return;
+            }
+            
+            const statusDiv = document.getElementById('sse-status');
+            const logDiv = document.getElementById('sse-log');
+            
+            try {
+                // Create SSE connection with proper base URL
+                const baseUrl = getBaseUrl();
+                const sseUrl = `${baseUrl}public/sse/events.php?writer_id=1&rootStoryId=1&gameSubscriptionType=all_games`;
+                
+                log('Connecting to SSE: ' + sseUrl);
+                sseConnection = new EventSource(sseUrl);
+                
+                sseConnection.onopen = function(event) {
+                    statusDiv.className = 'status success';
+                    statusDiv.textContent = '✅ SSE Connected';
+                    log('SSE connection opened');
+                };
+                
+                sseConnection.onmessage = function(event) {
+                    log('SSE message: ' + event.data);
+                    logDiv.innerHTML += `[${new Date().toLocaleTimeString()}] Message: ${event.data}\n`;
+                    logDiv.scrollTop = logDiv.scrollHeight;
+                };
+                
+                sseConnection.addEventListener('userActivityUpdate', function(event) {
+                    try {
+                        const data = JSON.parse(event.data);
+                        log('User activity update: ' + JSON.stringify(data));
+                        updateActiveUsers(data);
+                    } catch (error) {
+                        log('Error parsing user activity: ' + error.message, 'error');
+                    }
+                });
+                
+                sseConnection.addEventListener('update', function(event) {
+                    try {
+                        const data = JSON.parse(event.data);
+                        log('Update event: ' + JSON.stringify(data));
+                    } catch (error) {
+                        log('Error parsing update: ' + error.message, 'error');
+                    }
+                });
+                
+                sseConnection.addEventListener('keepalive', function(event) {
+                    log('SSE keepalive received');
+                });
+                
+                sseConnection.onerror = function(event) {
+                    statusDiv.className = 'status error';
+                    statusDiv.textContent = '❌ SSE Connection Error';
+                    log('SSE connection error: ' + JSON.stringify(event), 'error');
+                };
+                
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = '❌ SSE Connection Failed: ' + error.message;
+                log('SSE connection failed: ' + error.message, 'error');
+            }
+        }
+        
+        function stopSSE() {
+            if (sseConnection) {
+                sseConnection.close();
+                sseConnection = null;
+                
+                const statusDiv = document.getElementById('sse-status');
+                statusDiv.className = 'status warning';
+                statusDiv.textContent = '⚠️ SSE Disconnected';
+                log('SSE connection closed');
+            }
+        }
+        
+        // Activity simulation
+        async function simulateActivity(activityType) {
+            const statusDiv = document.getElementById('activity-status');
+            const logDiv = document.getElementById('activity-log');
+            
+            try {
+                // Update current activity
+                if (activityType === 'browsing' || activityType === 'iterating') {
+                    currentActivity.activity_type = activityType;
+                } else if (activityType === 'idle' || activityType === 'active') {
+                    currentActivity.activity_level = activityType;
+                }
+                
+                // Prepare payload
+                const payload = {
+                    writer_id: 1, // Test user ID
+                    activity_type: currentActivity.activity_type,
+                    activity_level: currentActivity.activity_level,
+                    page_type: currentActivity.page_type,
+                    game_id: currentActivity.game_id,
+                    text_id: currentActivity.text_id,
+                    parent_id: null
+                };
+                
+                // Send heartbeat using proper base URL
+                const baseUrl = getBaseUrl();
+                const response = await fetch(`${baseUrl}writerActivity/storeOrUpdate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (response.ok) {
+                    statusDiv.className = 'status success';
+                    statusDiv.textContent = '✅ Activity simulated successfully';
+                    log('Activity simulated: ' + activityType);
+                    logDiv.innerHTML += `[${new Date().toLocaleTimeString()}] Simulated: ${activityType}\n`;
+                    logDiv.scrollTop = logDiv.scrollHeight;
+                    
+                    // Update display
+                    updateActivityDisplay();
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+                }
+                
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = '❌ Activity simulation failed: ' + error.message;
+                log('Activity simulation failed: ' + error.message, 'error');
+            }
+        }
+        
+        // Update test context
+        function updateTestContext() {
+            const gameId = document.getElementById('test-game-id').value;
+            const textId = document.getElementById('test-text-id').value;
+            const pageType = document.getElementById('test-page-type').value;
+            
+            currentActivity.game_id = gameId ? parseInt(gameId) : null;
+            currentActivity.text_id = textId ? parseInt(textId) : null;
+            currentActivity.page_type = pageType;
+            
+            updateActivityDisplay();
+            log(`Test context updated: Game ID=${currentActivity.game_id}, Text ID=${currentActivity.text_id}, Page Type=${currentActivity.page_type}`);
+        }
+        
+        // Update activity display
+        function updateActivityDisplay() {
+            document.getElementById('page-type').textContent = currentActivity.page_type || 'Unknown';
+            document.getElementById('activity-type').textContent = currentActivity.activity_type || 'Unknown';
+            document.getElementById('activity-level').textContent = currentActivity.activity_level || 'Unknown';
+            document.getElementById('game-id').textContent = currentActivity.game_id || 'None';
+            document.getElementById('text-id').textContent = currentActivity.text_id || 'None';
+        }
+        
+        // Update active users display
+        function updateActiveUsers(userData) {
+            const container = document.getElementById('active-users');
+            
+            // For now, just log the user data
+            // In a real implementation, you'd maintain a list of active users
+            log('Received user activity: ' + JSON.stringify(userData));
+            
+            // Simple display update
+            container.innerHTML = `
+                <div class="user-card">
+                    <span class="activity-indicator ${userData.activity_level}"></span>
+                    <strong>User ${userData.writer_id}</strong><br>
+                    Activity: ${userData.activity_type}<br>
+                    Level: ${userData.activity_level}<br>
+                    Game: ${userData.game_id || 'None'}<br>
+                    Text: ${userData.text_id || 'None'}
+                </div>
+            `;
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            log('Activity monitoring test page loaded');
+            log('Base URL detected: ' + getBaseUrl());
+            updateTestContext(); // Set initial context
+            updateActivityDisplay();
+            testConnection();
+        });
+        
+        // Clean up on page unload
+        window.addEventListener('beforeunload', function() {
+            if (sseConnection) {
+                sseConnection.close();
+            }
+        });
+    </script>
+</body>
+</html> 

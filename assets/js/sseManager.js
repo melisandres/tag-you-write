@@ -225,8 +225,6 @@ export class SSEManager {
         this.eventSource.addEventListener('userActivityUpdate', (event) => {
             try {
                 const userActivityData = JSON.parse(event.data);
-                console.log('SSE: Parsed user activity data:', userActivityData);
-                
                 // Emit the same event as polling manager for consistency
                 eventBus.emit('userActivityUpdate', userActivityData);
                 
