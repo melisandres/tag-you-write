@@ -1,0 +1,459 @@
+==========================================
+Custom PHP Load Test Results
+==========================================
+
+************************************************************
+TESTING WITH 10 CONCURRENT USERS
+************************************************************
+Testing realistic user scenarios with 10 concurrent users...
+
+Testing: Home Page
+Testing endpoint: /en
+Concurrent users: 10
+Requests per user: 3
+Total requests: 30
+
+Testing: Text Index
+Testing endpoint: /en/text
+Concurrent users: 10
+Requests per user: 3
+Total requests: 30
+
+Testing: Game List
+Testing endpoint: /en/game
+Concurrent users: 10
+Requests per user: 3
+Total requests: 30
+
+Testing: Writer Index
+Testing endpoint: /en/writer
+Concurrent users: 10
+Requests per user: 3
+Total requests: 30
+
+
+============================================================
+SUMMARY REPORT
+============================================================
+Total Scenarios: 4
+Overall Success Rate: 0.00%
+Overall Average Response Time: 2.12 ms
+============================================================
+
+Scenario: Home Page
+
+============================================================
+DETAILED RESULTS
+============================================================
+Total Requests: 30
+Successful Requests: 0
+Failed Requests: 30
+Success Rate: 0.00%
+Total Duration: 0.00 seconds
+Requests per Second: 16,206.74
+Average Response Time: 1.10 ms
+Min Response Time: 0.81 ms
+Max Response Time: 1.51 ms
+Median Response Time: 1.11 ms
+95th Percentile: 1.39 ms
+99th Percentile: 1.51 ms
+============================================================
+
+Scenario: Text Index
+
+============================================================
+DETAILED RESULTS
+============================================================
+Total Requests: 30
+Successful Requests: 0
+Failed Requests: 30
+Success Rate: 0.00%
+Total Duration: 0.01 seconds
+Requests per Second: 5,774.89
+Average Response Time: 3.06 ms
+Min Response Time: 2.22 ms
+Max Response Time: 4.27 ms
+Median Response Time: 3.05 ms
+95th Percentile: 3.86 ms
+99th Percentile: 4.27 ms
+============================================================
+
+Scenario: Game List
+
+============================================================
+DETAILED RESULTS
+============================================================
+Total Requests: 30
+Successful Requests: 0
+Failed Requests: 30
+Success Rate: 0.00%
+Total Duration: 0.00 seconds
+Requests per Second: 6,444.51
+Average Response Time: 2.57 ms
+Min Response Time: 1.63 ms
+Max Response Time: 3.90 ms
+Median Response Time: 2.55 ms
+95th Percentile: 3.57 ms
+99th Percentile: 3.90 ms
+============================================================
+
+Scenario: Writer Index
+
+============================================================
+DETAILED RESULTS
+============================================================
+Total Requests: 30
+Successful Requests: 0
+Failed Requests: 30
+Success Rate: 0.00%
+Total Duration: 0.00 seconds
+Requests per Second: 10,671.62
+Average Response Time: 1.75 ms
+Min Response Time: 1.39 ms
+Max Response Time: 2.27 ms
+Median Response Time: 1.73 ms
+95th Percentile: 2.14 ms
+99th Percentile: 2.27 ms
+============================================================
+
+************************************************************
+TESTING WITH 25 CONCURRENT USERS
+************************************************************
+Testing realistic user scenarios with 25 concurrent users...
+
+Testing: Home Page
+Testing endpoint: /en
+Concurrent users: 25
+Requests per user: 3
+Total requests: 75
+
+Testing: Text Index
+Testing endpoint: /en/text
+Concurrent users: 25
+Requests per user: 3
+Total requests: 75
+
+Testing: Game List
+Testing endpoint: /en/game
+Concurrent users: 25
+Requests per user: 3
+Total requests: 75
+
+Testing: Writer Index
+Testing endpoint: /en/writer
+Concurrent users: 25
+Requests per user: 3
+Total requests: 75
+
+
+============================================================
+SUMMARY REPORT
+============================================================
+Total Scenarios: 4
+Overall Success Rate: 0.00%
+Overall Average Response Time: 5.86 ms
+============================================================
+
+Scenario: Home Page
+
+============================================================
+DETAILED RESULTS
+============================================================
+Total Requests: 75
+Successful Requests: 0
+Failed Requests: 75
+Success Rate: 0.00%
+Total Duration: 0.01 seconds
+Requests per Second: 7,712.76
+Average Response Time: 5.89 ms
+Min Response Time: 4.41 ms
+Max Response Time: 7.84 ms
+Median Response Time: 5.86 ms
+95th Percentile: 7.30 ms
+99th Percentile: 7.84 ms
+============================================================
+
+Scenario: Text Index
+
+============================================================
+DETAILED RESULTS
+============================================================
+Total Requests: 75
+Successful Requests: 0
+Failed Requests: 75
+Success Rate: 0.00%
+Total Duration: 0.01 seconds
+Requests per Second: 7,016.55
+Average Response Time: 5.95 ms
+Min Response Time: 4.51 ms
+Max Response Time: 8.58 ms
+Median Response Time: 5.78 ms
+95th Percentile: 7.81 ms
+99th Percentile: 8.58 ms
+============================================================
+
+Scenario: Game List
+
+============================================================
+DETAILED RESULTS
+============================================================
+Total Requests: 75
+Successful Requests: 0
+Failed Requests: 75
+Success Rate: 0.00%
+Total Duration: 0.01 seconds
+Requests per Second: 7,381.22
+Average Response Time: 5.87 ms
+Min Response Time: 4.44 ms
+Max Response Time: 8.37 ms
+Median Response Time: 5.74 ms
+95th Percentile: 7.64 ms
+99th Percentile: 8.37 ms
+============================================================
+
+Scenario: Writer Index
+
+============================================================
+DETAILED RESULTS
+============================================================
+Total Requests: 75
+Successful Requests: 0
+Failed Requests: 75
+Success Rate: 0.00%
+Total Duration: 0.01 seconds
+Requests per Second: 7,797.07
+Average Response Time: 5.74 ms
+Min Response Time: 4.35 ms
+Max Response Time: 7.87 ms
+Median Response Time: 5.72 ms
+95th Percentile: 7.19 ms
+99th Percentile: 7.87 ms
+============================================================
+
+************************************************************
+TESTING WITH 50 CONCURRENT USERS
+************************************************************
+Testing realistic user scenarios with 50 concurrent users...
+
+Testing: Home Page
+Testing endpoint: /en
+Concurrent users: 50
+Requests per user: 3
+Total requests: 150
+
+Testing: Text Index
+Testing endpoint: /en/text
+Concurrent users: 50
+Requests per user: 3
+Total requests: 150
+
+Testing: Game List
+Testing endpoint: /en/game
+Concurrent users: 50
+Requests per user: 3
+Total requests: 150
+
+Testing: Writer Index
+Testing endpoint: /en/writer
+Concurrent users: 50
+Requests per user: 3
+Total requests: 150
+
+
+============================================================
+SUMMARY REPORT
+============================================================
+Total Scenarios: 4
+Overall Success Rate: 0.00%
+Overall Average Response Time: 10.41 ms
+============================================================
+
+Scenario: Home Page
+
+============================================================
+DETAILED RESULTS
+============================================================
+Total Requests: 150
+Successful Requests: 0
+Failed Requests: 150
+Success Rate: 0.00%
+Total Duration: 0.02 seconds
+Requests per Second: 7,861.27
+Average Response Time: 11.77 ms
+Min Response Time: 8.39 ms
+Max Response Time: 16.65 ms
+Median Response Time: 11.58 ms
+95th Percentile: 15.68 ms
+99th Percentile: 16.27 ms
+============================================================
+
+Scenario: Text Index
+
+============================================================
+DETAILED RESULTS
+============================================================
+Total Requests: 150
+Successful Requests: 0
+Failed Requests: 150
+Success Rate: 0.00%
+Total Duration: 0.02 seconds
+Requests per Second: 7,778.47
+Average Response Time: 11.46 ms
+Min Response Time: 8.29 ms
+Max Response Time: 15.99 ms
+Median Response Time: 11.38 ms
+95th Percentile: 14.86 ms
+99th Percentile: 15.48 ms
+============================================================
+
+Scenario: Game List
+
+============================================================
+DETAILED RESULTS
+============================================================
+Total Requests: 150
+Successful Requests: 0
+Failed Requests: 150
+Success Rate: 0.00%
+Total Duration: 0.02 seconds
+Requests per Second: 7,970.73
+Average Response Time: 12.14 ms
+Min Response Time: 8.27 ms
+Max Response Time: 16.71 ms
+Median Response Time: 12.21 ms
+95th Percentile: 15.86 ms
+99th Percentile: 16.45 ms
+============================================================
+
+Scenario: Writer Index
+
+============================================================
+DETAILED RESULTS
+============================================================
+Total Requests: 150
+Successful Requests: 0
+Failed Requests: 150
+Success Rate: 0.00%
+Total Duration: 0.01 seconds
+Requests per Second: 16,395.53
+Average Response Time: 6.26 ms
+Min Response Time: 4.50 ms
+Max Response Time: 8.10 ms
+Median Response Time: 6.26 ms
+95th Percentile: 7.85 ms
+99th Percentile: 8.02 ms
+============================================================
+
+************************************************************
+TESTING WITH 100 CONCURRENT USERS
+************************************************************
+Testing realistic user scenarios with 100 concurrent users...
+
+Testing: Home Page
+Testing endpoint: /en
+Concurrent users: 100
+Requests per user: 3
+Total requests: 300
+
+Testing: Text Index
+Testing endpoint: /en/text
+Concurrent users: 100
+Requests per user: 3
+Total requests: 300
+
+Testing: Game List
+Testing endpoint: /en/game
+Concurrent users: 100
+Requests per user: 3
+Total requests: 300
+
+Testing: Writer Index
+Testing endpoint: /en/writer
+Concurrent users: 100
+Requests per user: 3
+Total requests: 300
+
+
+============================================================
+SUMMARY REPORT
+============================================================
+Total Scenarios: 4
+Overall Success Rate: 0.00%
+Overall Average Response Time: 20.11 ms
+============================================================
+
+Scenario: Home Page
+
+============================================================
+DETAILED RESULTS
+============================================================
+Total Requests: 300
+Successful Requests: 0
+Failed Requests: 300
+Success Rate: 0.00%
+Total Duration: 0.03 seconds
+Requests per Second: 9,392.90
+Average Response Time: 19.87 ms
+Min Response Time: 12.89 ms
+Max Response Time: 27.40 ms
+Median Response Time: 19.76 ms
+95th Percentile: 26.26 ms
+99th Percentile: 26.84 ms
+============================================================
+
+Scenario: Text Index
+
+============================================================
+DETAILED RESULTS
+============================================================
+Total Requests: 300
+Successful Requests: 0
+Failed Requests: 300
+Success Rate: 0.00%
+Total Duration: 0.03 seconds
+Requests per Second: 9,337.97
+Average Response Time: 20.17 ms
+Min Response Time: 13.58 ms
+Max Response Time: 27.58 ms
+Median Response Time: 20.02 ms
+95th Percentile: 26.29 ms
+99th Percentile: 26.93 ms
+============================================================
+
+Scenario: Game List
+
+============================================================
+DETAILED RESULTS
+============================================================
+Total Requests: 300
+Successful Requests: 0
+Failed Requests: 300
+Success Rate: 0.00%
+Total Duration: 0.03 seconds
+Requests per Second: 9,117.72
+Average Response Time: 20.65 ms
+Min Response Time: 14.00 ms
+Max Response Time: 28.18 ms
+Median Response Time: 20.44 ms
+95th Percentile: 26.76 ms
+99th Percentile: 27.44 ms
+============================================================
+
+Scenario: Writer Index
+
+============================================================
+DETAILED RESULTS
+============================================================
+Total Requests: 300
+Successful Requests: 0
+Failed Requests: 300
+Success Rate: 0.00%
+Total Duration: 0.03 seconds
+Requests per Second: 9,596.92
+Average Response Time: 19.73 ms
+Min Response Time: 13.07 ms
+Max Response Time: 26.73 ms
+Median Response Time: 19.92 ms
+95th Percentile: 25.66 ms
+99th Percentile: 26.23 ms
+============================================================

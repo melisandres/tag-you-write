@@ -1,0 +1,101 @@
+==========================================
+SSE Load Test Results
+==========================================
+Testing SSE connections under different load scenarios...
+
+
+************************************************************
+TESTING Light Load (5 connections)
+************************************************************
+Testing SSE with curl multi: 5 concurrent connections for 15 seconds...
+
+============================================================
+SSE LOAD TEST RESULTS
+============================================================
+Total Connections: 5
+Successful Connections: 0
+Failed Connections: 5
+Success Rate: 0.00%
+Test Duration: 0.00 seconds
+Concurrent Connections: 5
+Average Connect Time: 0.00 ms
+Average Total Time: 0.25 ms
+Min Connect Time: 0.00 ms
+Max Connect Time: 0.00 ms
+Min Total Time: 0.20 ms
+Max Total Time: 0.37 ms
+Total Events Received: 0
+Average Events per Connection: 0.00
+============================================================
+
+************************************************************
+TESTING Medium Load (20 connections)
+************************************************************
+Testing SSE with curl multi: 20 concurrent connections for 30 seconds...
+
+============================================================
+SSE LOAD TEST RESULTS
+============================================================
+Total Connections: 20
+Successful Connections: 0
+Failed Connections: 20
+Success Rate: 0.00%
+Test Duration: 0.00 seconds
+Concurrent Connections: 20
+Average Connect Time: 0.00 ms
+Average Total Time: 0.80 ms
+Min Connect Time: 0.00 ms
+Max Connect Time: 0.00 ms
+Min Total Time: 0.54 ms
+Max Total Time: 1.10 ms
+Total Events Received: 0
+Average Events per Connection: 0.00
+============================================================
+
+************************************************************
+TESTING Heavy Load (50 connections)
+************************************************************
+Testing SSE with curl multi: 50 concurrent connections for 45 seconds...
+
+============================================================
+SSE LOAD TEST RESULTS
+============================================================
+Total Connections: 50
+Successful Connections: 0
+Failed Connections: 50
+Success Rate: 0.00%
+Test Duration: 0.01 seconds
+Concurrent Connections: 50
+Average Connect Time: 0.00 ms
+Average Total Time: 3.53 ms
+Min Connect Time: 0.00 ms
+Max Connect Time: 0.00 ms
+Min Total Time: 2.45 ms
+Max Total Time: 4.81 ms
+Total Events Received: 0
+Average Events per Connection: 0.00
+============================================================
+
+************************************************************
+TESTING Stress Test (100 connections)
+************************************************************
+Testing SSE with curl multi: 100 concurrent connections for 60 seconds...
+
+============================================================
+SSE LOAD TEST RESULTS
+============================================================
+Total Connections: 100
+Successful Connections: 0
+Failed Connections: 100
+Success Rate: 0.00%
+Test Duration: 0.01 seconds
+Concurrent Connections: 100
+Average Connect Time: 0.00 ms
+Average Total Time: 5.93 ms
+Min Connect Time: 0.00 ms
+Max Connect Time: 0.00 ms
+Min Total Time: 4.07 ms
+Max Total Time: 7.91 ms
+Total Events Received: 0
+Average Events per Connection: 0.00
+============================================================
