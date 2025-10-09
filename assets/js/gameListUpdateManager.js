@@ -28,6 +28,7 @@ export class GameListUpdateManager {
     eventBus.on('gameCountsChanged', this.handleGameCountsUpdate.bind(this));
     eventBus.on('gameTitleChanged', this.handleGameTitleUpdate.bind(this));
     eventBus.on('gameActivityChanged', this.handleGameActivityUpdate.bind(this));
+    eventBus.on('gamesRemovedFromView', this.handleGamesRemoved.bind(this));
   }
 
   makeTitlesShorter() {
@@ -331,7 +332,7 @@ export class GameListUpdateManager {
   }
 
   // Test function for debugging activity updates
-  testActivityUpdate(gameId = null, browsing = 2, writing = 1) {
+ /*  testActivityUpdate(gameId = null, browsing = 2, writing = 1) {
     // If no gameId provided, use the first game found
     if (!gameId) {
       const firstGame = document.querySelector('[data-game-id]');
@@ -392,5 +393,69 @@ export class GameListUpdateManager {
     eventBus.emit('gameActivityUpdate', sseData);
     
     console.log('🧪 SSE data test completed');
+  } */
+
+  handleGamesRemoved(gameIds) {
+    console.log('🎮 GameListUpdateManager: handleGamesRemoved called with:', gameIds);
+    
+    if (!Array.isArray(gameIds) || gameIds.length === 0) {
+      console.warn('🎮 GameListUpdateManager: No game IDs provided for removal');
+      return;
+    }
+    
+    gameIds.forEach(gameId => {
+      const gameElement = document.querySelector(`.story[data-game-id="${gameId}"]`);
+      
+      if (!gameElement) {
+        console.warn(`�� GameListUpdateManager: Game element not found for gameId: ${gameId}`);
+        return;
+      }
+      
+      // Show removal message/transition before removing
+      this.showRemovalMessage(gameElement, gameId);
+      
+      // Remove the game element after a brief delay for UX
+      setTimeout(() => {
+        gameElement.remove();
+        console.log(`🎮 GameListUpdateManager: Removed game element for gameId: ${gameId}`);
+        
+        // Check if list is now empty and show empty message
+        this.checkForEmptyList();
+      }, 5000); // 5 second delay for user to see the message
+    });
   }
+  
+  showRemovalMessage(gameElement, gameId) {
+    // Create overlay message
+    const overlay = document.createElement('div');
+    overlay.className = 'game-removal-overlay';
+    overlay.innerHTML = `
+      <div class="removal-message">
+        <p>${window.i18n.translate('general.gameRemoved') || 'Game removed from view'}</p>
+      </div>
+    `;
+    
+    // Add overlay to game element
+    gameElement.appendChild(overlay);
+    
+    // Add removal animation class
+    gameElement.classList.add('removing');
+  }
+  
+  checkForEmptyList() {
+    // Check if the stories container is empty
+    const storiesContainer = document.querySelector('.stories');
+    if (!storiesContainer) return;
+    
+    const gameElements = storiesContainer.querySelectorAll('.story');
+    
+    if (gameElements.length === 0) {
+      console.log('🎮 GameListUpdateManager: List is now empty, showing empty message');
+      
+      // Show the same empty message that gameListRenderer uses
+      const message = window.i18n.translate('games.noGamesMessage');
+      storiesContainer.insertAdjacentHTML('beforeend', `<p class="no-games" data-i18n="games.noGamesMessage">${message}</p>`);
+    }
+  }
+  
 }

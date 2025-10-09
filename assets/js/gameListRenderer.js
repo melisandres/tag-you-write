@@ -151,7 +151,7 @@ export class GameListRenderer {
     renderStoryButtons(game) {
         //translate the tooltips
         const bookmarkTooltip = window.i18n.translate('general.bookmark_tooltip');
-        const activityTooltip = window.i18n.translate('activity.editingVsBrowsing');
+        const activityTooltip = window.i18n.translate('activity.browsingVsEditing');
         const privacyInfo = this.getPrivacyInfo(game);
 
         return `
@@ -160,7 +160,7 @@ export class GameListRenderer {
                     <span class="icon" data-svg="bookmark">${SVGManager.bookmarkSVG}</span>
                 </button>
             ` : ''}
-            <div class="story-btn game-activity-indicator ${this.getActivityState(game)}" data-i18n-title="activity.editingVsBrowsing" title="${activityTooltip}" data-game-id="${game.game_id}">
+            <div class="story-btn game-activity-indicator ${this.getActivityState(game)}" data-i18n-title="activity.browsingVsEditing" title="${activityTooltip}" data-game-id="${game.game_id}">
                 <span class="icon" data-svg="user">${SVGManager.userSVG}</span>
                 <div class="activity-numbers">${this.getActivityNumbers(game)}</div>
             </div>
@@ -272,6 +272,9 @@ export class GameListRenderer {
 
     // Insert new game in correct position
     insertNewGame(gameData) {
+        // Remove any empty list message when a new game is added
+        this.removeEmptyListMessage();
+        
         const newGameElement = this.renderGameCard(gameData);
         const placementIndex = gameData.placement_index;
         
@@ -459,6 +462,9 @@ export class GameListRenderer {
         if (games.length === 0) {
             const message = window.i18n.translate('games.noGamesMessage');
             this.container.insertAdjacentHTML('beforeend', `<p class="no-games" data-i18n="games.noGamesMessage">${message}</p>`);
+            
+            // Emit event even when games list is empty
+            eventBus.emit('gamesListUpdated', games);
             return;
         }
         
@@ -474,7 +480,7 @@ export class GameListRenderer {
         }
 
         // Emit event after rendering is complete
-        eventBus.emit('gamesListUpdated');
+        eventBus.emit('gamesListUpdated', games);
 
         // After rendering, apply any active search highlighting
         const activeSearch = this.dataManager.getSearch();
@@ -593,5 +599,13 @@ export class GameListRenderer {
         
         // Signal that all drawing is complete
         eventBus.emit('gamesListRefreshComplete');
+    }
+    
+    removeEmptyListMessage() {
+        const emptyMessage = this.container.querySelector('.no-games');
+        if (emptyMessage) {
+            console.log('🎮 GameListRenderer: Removing empty list message');
+            emptyMessage.remove();
+        }
     }
 }

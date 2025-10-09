@@ -322,3 +322,49 @@
         color: #f8f9fa;
     }
 } */
+
+  /* Game removal overlay styles */
+.game-removal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    border: 2px solid #ff6b6b;
+    border-radius: 4px;
+  }
+  
+  .removal-message {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 12px 16px;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    text-align: center;
+  }
+  
+  .removal-message p {
+    margin: 0;
+    color: #d63031;
+    font-weight: 500;
+    font-size: 14px;
+  }
+  
+  /* Game removal animation */
+  .story.removing {
+    opacity: 0.5;
+    transform: scale(0.95);
+    transition: all 0.3s ease-out;
+  }
+  
+  /* Ensure game elements can contain absolute positioned overlays */
+  .story {
+    position: relative;
+  }
+  
+  
+  

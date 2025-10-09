@@ -1,0 +1,410 @@
+/* Dashboard Styles - Delicate Aesthetic */
+.dashboard {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--spacing-medium);
+    background: var(--color-white-lightest);
+    min-height: 100vh;
+}
+
+.dashboard-section {
+    margin-bottom: var(--spacing-large);
+    border: 1px solid var(--color-grey-light);
+    box-shadow: var(--story-box-shadow);
+    border-radius: 4px;
+    overflow: hidden;
+    color: var(--color-black);
+}
+
+.dashboard-section h2 {
+    margin: 0;
+    font-family: var(--font-family-secondary);
+    padding: var(--spacing-medium);
+    background: rgba(255, 255, 255, 0.3);
+    color: var(--color-black);
+    font-size: var(--font-size-large);
+    font-weight: 600;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-category {
+    border-radius: 0;
+}
+
+.dashboard-category:last-child {
+    border-bottom: none;
+}
+
+.category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-small) var(--spacing-medium) var(--spacing-small) calc(var(--spacing-medium) + var(--spacing-small));
+    transition: all 0.2s ease;
+    margin-left: var(--spacing-small);
+}
+
+.category-header-left {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-small);
+    flex: 1;
+}
+
+.category-header:hover {
+    opacity: 0.9;
+}
+
+.category-header:hover .collapse-toggle {
+    transform: rotate(-60deg);
+    transition: transform 0.9s cubic-bezier(0.8, 0, 0.4, 1);
+}
+
+.browse-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    background: var(--color-white-lightest);
+    border: 1px solid var(--color-grey-light);
+    color: var(--color-grey-dark);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.browse-button:hover {
+    background: var(--color-primary-light);
+    border-color: var(--color-primary);
+    color: var(--color-primary-dark);
+    transform: scale(1.1);
+}
+
+.browse-button .icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.browse-button .icon svg {
+    width: 14px;
+    height: 14px;
+}
+
+.browse-button .icon svg path {
+    fill: currentColor;
+}
+
+.category-title {
+    margin: 0;
+    font-size: var(--font-size-xsmall);
+    font-weight: 400;
+    color: var(--color-primary-dark);
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.category-title:hover {
+    color: var(--color-primary);
+}
+
+.category-title.has-unreads {
+    color: var(--color-primary-dark);
+    font-weight: 600;
+}
+
+.category-title .count {
+    color: var(--color-grey-dark);
+    font-weight: 300;
+    margin-left: var(--spacing-small);
+    font-size: var(--font-size-xsmall);
+}
+
+.collapse-toggle {
+    font-size: var(--font-size-small);
+    color: var(--color-grey-dark);
+    transition: transform 0.2s ease;
+    font-weight: 300;
+}
+
+.collapse-toggle.collapsed {
+    transform: rotate(-90deg);
+}
+
+
+.category-games {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    background: var(--color-white-lightest);
+    margin-left: calc(var(--spacing-medium) + var(--spacing-small));
+}
+
+.category-games:not(.collapsed) {
+    max-height: 1000px;
+    overflow: scroll;
+}
+
+.dashboard-game-item {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-small) var(--spacing-medium) var(--spacing-small) calc(var(--spacing-medium) + var(--spacing-small));
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    position: relative;
+    margin-bottom: 2px;
+}
+
+.dashboard-game-item:hover .title {
+    color: var(--color-primary-dark);
+}
+
+
+.game-title {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-small);
+    margin-right: var(--spacing-small);
+}
+
+.unread-area {
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.game-title .title {
+    font-weight: 300;
+    color: var(--color-black);
+    font-size: var(--font-size-xsmall);
+    transition: color 0.2s ease;
+    z-index: 0;
+}
+
+.unread-indicator {
+    background: var(--color-primary-dark);
+    color: var(--color-white-lightest);
+    border: none;
+    padding: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    width: 16px;
+    height: 16px;
+    text-align: center;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: var(--spacing-small);
+    margin-top: -12px;
+}
+
+/* Dashboard Game Activity Indicator - specific to dashboard */
+.dashboard .game-activity-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: var(--spacing-extra-small);
+    cursor: default;
+/*     border: 1px solid var(--color-grey-light); */
+    background: var(--color-white-lightest);
+    min-width: 40px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.dashboard .game-activity-indicator .icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.dashboard .game-activity-indicator svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
+.dashboard .game-activity-indicator svg path {
+    fill: var(--color-grey-dark);
+    stroke: none;
+}
+
+.dashboard .activity-numbers {
+    font-size: var(--font-size-xsmall);
+    font-weight: 300;
+    color: var(--color-grey-dark);
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* Active state - when there's activity */
+.dashboard .game-activity-indicator.has-activity {
+    background: var(--color-accent-light);
+    border-color: var(--color-accent);
+}
+
+.dashboard .game-activity-indicator.has-activity svg path {
+    fill: var(--color-accent);
+}
+
+.dashboard .game-activity-indicator.has-activity .activity-numbers {
+    color: var(--color-accent);
+    font-weight: 400;
+}
+
+/* No activity state - subtle appearance */
+.dashboard .game-activity-indicator.no-activity {
+    background: var(--color-white-lightest);
+    border-color: var(--color-grey-light);
+}
+
+.dashboard .game-activity-indicator.no-activity .activity-numbers {
+    opacity: 0.6;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .dashboard {
+        padding: var(--spacing-small);
+    }
+    
+    .dashboard-section {
+        margin-bottom: var(--spacing-medium);
+    }
+    
+    .dashboard-section h2 {
+        padding: var(--spacing-small-medium) var(--spacing-small-medium);
+        font-size: var(--font-size-medium);
+    }
+    
+    .category-header {
+        padding: var(--spacing-extra-small) var(--spacing-small-medium) var(--spacing-extra-small) calc(var(--spacing-small-medium) + var(--spacing-small));
+        margin-left: var(--spacing-extra-small);
+    }
+    
+    .category-header-left {
+        gap: var(--spacing-extra-small);
+    }
+    
+    .browse-button {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .browse-button .icon svg {
+        width: 12px;
+        height: 12px;
+    }
+    
+    .dashboard-game-item {
+        padding: var(--spacing-extra-small) var(--spacing-small-medium) var(--spacing-extra-small) calc(var(--spacing-small-medium) + var(--spacing-small));
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-extra-small);
+    }
+    
+    .dashboard .game-activity-indicator {
+        align-self: flex-end;
+        min-width: 35px;
+    }
+    
+    .dashboard .game-activity-indicator svg {
+        width: 14px;
+        height: 14px;
+    }
+    
+    .dashboard .activity-numbers {
+        font-size: var(--font-size-xsmall);
+    }
+}
+
+/* Dark mode support - maintaining delicate aesthetic */
+@media (prefers-color-scheme: dark) {
+    .dashboard {
+        background: var(--color-greyscale-darkest);
+    }
+    
+    .dashboard-section {
+        background: var(--color-greyscale-dark);
+        border-color: var(--color-grey);
+    }
+    
+    .dashboard-section h2 {
+        background: var(--color-greyscale-dark);
+        color: var(--color-greyscale-lightest);
+        border-bottom-color: var(--color-grey);
+    }
+    
+    .category-header {
+        background: var(--color-greyscale-dark);
+        border-bottom-color: var(--color-grey);
+    }
+    
+    .category-header:hover {
+        background: var(--color-greyscale-medium);
+    }
+    
+    .category-title {
+        color: var(--color-greyscale-lightest);
+    }
+    
+    .category-title.has-unreads {
+        color: var(--color-accent);
+    }
+    
+    .dashboard-game-item {
+        background: var(--color-greyscale-dark);
+    }
+    
+    .dashboard-game-item:hover {
+        background: var(--color-greyscale-medium);
+    }
+    
+    .game-title .title {
+        color: var(--color-greyscale-lightest);
+    }
+    
+    .unread-indicator {
+        background: var(--color-accent);
+        border-color: var(--color-accent);
+        color: var(--color-greyscale-darkest);
+    }
+    
+    .dashboard .game-activity-indicator {
+        background: var(--color-greyscale-dark);
+        border-color: var(--color-grey);
+    }
+    
+    .dashboard .game-activity-indicator svg path {
+        fill: var(--color-greyscale-lightest);
+    }
+    
+    .dashboard .activity-numbers {
+        color: var(--color-greyscale-lightest);
+    }
+    
+    .dashboard .game-activity-indicator.has-activity {
+        background: var(--color-accent-light);
+        border-color: var(--color-accent);
+    }
+    
+    .dashboard .game-activity-indicator.has-activity svg path {
+        fill: var(--color-accent);
+    }
+    
+    .dashboard .game-activity-indicator.has-activity .activity-numbers {
+        color: var(--color-accent);
+    }
+}

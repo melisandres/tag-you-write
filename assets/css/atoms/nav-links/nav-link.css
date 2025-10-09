@@ -1,0 +1,75 @@
+/* Base Nav-Link Styles - Common styles for all nav-link elements */
+
+/* Base nav-link styles for anchor tags */
+a.nav-link {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: var(--font-size-small);
+    padding: 10px 15px;
+    color: white;
+    text-decoration: none;
+    max-width: 150px;
+    border-bottom: black solid 3px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* Base nav-link styles for div elements */
+.nav-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: var(--font-size-small);
+    padding: 7px 15px;
+    color: white;
+    text-decoration: none;
+    max-width: 150px;
+    border-bottom: black solid 3px;
+    transition: all 0.2s ease;
+}
+
+/* Common hover state for all nav-links */
+a.nav-link:hover,
+.nav-link:hover {
+    border-bottom: hotpink solid 3px;
+    color: pink;
+}
+
+/* Common active state for all nav-links */
+a.nav-link.active,
+.nav-link.active {
+    border-bottom: hotpink solid 3px;
+}
+
+/* Common icon container styles */
+a.nav-link .icon,
+.nav-link .icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+/* Common SVG styles for nav-links */
+a.nav-link svg,
+.nav-link .icon svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+    stroke: currentColor;
+}
+
+/* Common SVG hover state */
+a.nav-link:hover svg,
+.nav-link:hover .icon svg {
+    fill: pink;
+    stroke: pink;
+}
+
+/* Hide nav-text by default */
+a.nav-link .nav-text,
+.nav-link .nav-text {
+    display: none;
+}

@@ -161,6 +161,8 @@
     --hover-color: #FFC34E;
     --header-height: 60px;
     --filters-height: 60px;
+    --category-header-height: 40px;
+    --search-height: 60px;
     --body-min-height: 100vh;
     --main-min-height: 100%;
     --general-padding: 10px;

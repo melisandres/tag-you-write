@@ -46,7 +46,7 @@
                 <button data-bookmark-story data-text-id="{{ game.id }}" class="story-btn bookmark-btn {{ game.isBookmarked ? 'bookmarked' : '' }}" data-svg="bookmark"  data-i18n-title="general.bookmark_tooltip" title="{{ translate('general.bookmark_tooltip') }}">
                 </button>
             {% endif %}
-            <div class="story-btn game-activity-indicator no-activity" data-i18n-title="activity.editingVsBrowsing" title="{{ translate('activity.editingVsBrowsing') }}" data-game-id="{{ game.game_id }}">
+            <div class="story-btn game-activity-indicator no-activity" data-i18n-title="activity.browsingVsEditing" title="{{ translate('activity.browsingVsEditing') }}" data-game-id="{{ game.game_id }}">
                 <span class="icon" data-svg="user"></span>
                 <div class="activity-numbers">0:0</div>
             </div>

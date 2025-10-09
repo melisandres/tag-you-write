@@ -5,7 +5,7 @@
     display: flex;
     flex-direction: column;
     z-index: 3;
-    height: 0;
+    height: var(--menu-container-height, 0px);
     overflow: hidden;
     transition: height 0.5s;
 }
@@ -24,19 +24,46 @@
     border-top: 1px solid var(--color-grey-dark);
     padding: 0 20px;
     transform: translateY(-100%);
-}
-
-/* Search menu transitions faster since it only moves one unit */
-.search-menu {
     transition: transform 0.5s;
 }
 
-/* Filter menu transitions slower since it might need to move two units */
-.filter-menu {
-    transition: transform 0.5s;
+/* Height based on visible menus - pure CSS! */
+.menu-container.search-only {
+    height: var(--search-height);
 }
 
-.search-menu.visible,
-.filter-menu.visible {
+.menu-container.filter-only {
+    height: var(--filters-height);
+}
+
+.menu-container.both-visible {
+    height: calc(var(--filters-height) + var(--search-height));
+}
+
+/* Menu positioning states */
+.menu-container.search-only .search-menu.visible {
     transform: translateY(0);
+}
+
+.menu-container.filter-only .filter-menu.visible {
+    transform: translateY(0);
+}
+
+.menu-container.both-visible .search-menu.visible {
+    transform: translateY(0);
+}
+
+.menu-container.both-visible .filter-menu.visible {
+    transform: translateY(var(--filters-height));
+}
+
+/* Hide menus when not visible */
+.search-menu:not(.visible),
+.filter-menu:not(.visible) {
+    transform: translateY(-100%);
+}
+
+/* Category header modifier - adjusts positioning when category header is visible */
+.menu-container.with-categories {
+    top: calc(var(--header-height) + var(--category-header-height));
 }

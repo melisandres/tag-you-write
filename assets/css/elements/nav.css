@@ -1,4 +1,5 @@
-nav{
+/* Base Navigation Container Styles */
+nav {
     max-width: 100vw;
     display: flex;
     flex-wrap: wrap;
@@ -10,45 +11,3 @@ nav{
     height: var(--header-height);
     z-index: 4;
 }
-
-a.nav-link{
-    font-family: 'Courier New', Courier, monospace;
-    font-size: var(--font-size-small);
-    padding:15px;
-    color: white;
-    text-decoration: none;
-    max-width: 150px;
-    border-bottom: black solid 3px;
-    cursor: pointer;
-}
-
-a.nav-link:hover{
-    border-bottom: hotpink solid 3px;
-    color: pink;
-}
-
-a.nav-link svg {
-    width: 20px;
-    height: 20px;
-    fill: white; /* This makes the SVG icon white when in the nav */
-}
-
-a.nav-link:hover svg {
-    fill: pink; /* This changes the SVG color to pink on hover, matching the text color */
-}
-
-.nav-link.filter.active {
-    border-bottom: hotpink solid 3px;
-}
-
-.nav-link.search.active {
-    border-bottom: hotpink solid 3px;
-}
-
-.nav-link.notifications.active {
-    border-bottom: hotpink solid 3px;
-}
-
-.nav-link .nav-text {
-    display: none;
-  }

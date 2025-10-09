@@ -4,10 +4,41 @@
     {{ gamesData|raw }}
 </script>
 
-<div class="filter-menu" id="gameFilters">
+<div class="menu-container">
+    <div class="filter-menu" id="gameFilters">
+    </div>
+    <div class="search-menu" id="gameSearch">
+    </div>
 </div>
-<div class="search-menu" id="gameSearch">
+
+<!-- Category Header -->
+{% if category %}
+    {% set categoryParts = category|split('.') %}
+    {% if categoryParts|length == 1 %}
+        {% set categoryTranslationKey = 'category-header.' ~ category ~ '.' %}
+    {% else %}
+        {% set categoryTranslationKey = 'category-header.' ~ categoryParts[0] ~ '.' ~ categoryParts[1] %}
+    {% endif %}
+    <div class="game-list-category-header visible" id="categoryHeader">
+        <div class="category-breadcrumb">
+            <span class="category-name" data-i18n="{{ categoryTranslationKey }}">{{ translate(categoryTranslationKey) }}</span>
+            <span class="game-count">({{ texts|length }})</span>
+        </div>
+        <div class="header-actions">
+            <!-- Future: Category dropdown button -->
+        </div>
+    </div>
+{% else %}
+<div class="game-list-category-header" id="categoryHeader">
+    <div class="category-breadcrumb">
+        <span class="category-name"></span>
+        <span class="game-count"></span>
+    </div>
+    <div class="header-actions">
+        <!-- Future: Category dropdown button -->
+    </div>
 </div>
+{% endif %}
 
 <div data-stories class="stories">
 {% for text in texts %}
@@ -42,7 +73,7 @@
                 <button data-bookmark-story data-text-id="{{ text.id }}" class="story-btn bookmark-btn {{ text.isBookmarked ? 'bookmarked' : '' }}" data-svg="bookmark" data-i18n-title="{{ 'general.bookmark_tooltip' }}" title="{{ translate('general.bookmark_tooltip') }}">
                 </button>
             {% endif %}
-            <div class="story-btn game-activity-indicator no-activity" data-i18n-title="activity.editingVsBrowsing" title="{{ translate('activity.editingVsBrowsing') }}" data-game-id="{{ text.game_id }}">
+            <div class="story-btn game-activity-indicator no-activity" data-i18n-title="activity.browsingVsEditing" title="{{ translate('activity.browsingVsEditing') }}" data-game-id="{{ text.game_id }}">
                 <span class="icon" data-svg="user"></span>
                 <div class="activity-numbers">0:0</div>
             </div>

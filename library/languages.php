@@ -27,7 +27,7 @@ function translate($key, $replacements = []) {
     if (!defined('ROOT_DIR')) {
         define('ROOT_DIR', dirname(__DIR__));
     }
-    $translations = json_decode(file_get_contents(ROOT_DIR . "translations/{$lang}.json"), true);
+    $translations = json_decode(file_get_contents(ROOT_DIR . "/translations/{$lang}.json"), true);
     
     // Handle nested keys like "header.home"
     if (strpos($key, '.') !== false) {

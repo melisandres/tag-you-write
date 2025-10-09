@@ -29,6 +29,13 @@ class ControllerText extends Controller{
                 ($_GET['bookmarked'] === 'not_bookmarked' ? false : null)) : null
         ];
 
+        // Get category parameter from URL
+        $category = isset($_GET['category']) ? $_GET['category'] : null;
+
+        // Debug logging
+        error_log("ControllerText::index - Category: " . ($category ?? 'null'));
+        error_log("ControllerText::index - Filters: " . print_r($filters, true));
+
         // TODO: Get the sort parameter from URL
         $sort = null;
 
@@ -36,7 +43,9 @@ class ControllerText extends Controller{
 
         // Getting the games
         $game = new Game;
-        $allGames = $game->getGames($sort, $filters);
+        $allGames = $game->getGames($sort, $filters, null, null, $category);
+
+        error_log("ControllerText::index - Returned " . count($allGames) . " games");
 
         // Get the notifications
         $notifications = $this->getNotifications();
@@ -47,9 +56,11 @@ class ControllerText extends Controller{
             'gamesData' => json_encode($allGames),
             'notifications' => $notifications,
             'notificationsData' => json_encode($notifications),
-            'initialFilters' => json_encode($filters) 
+            'initialFilters' => json_encode($filters),
+            'category' => $category
         ]);
     }
+    
 
     public function collab($rootId = null) {
         if ($rootId === null) {

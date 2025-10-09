@@ -72,14 +72,14 @@ export class TextFormGameActivityIndicator {
         console.log('🎮📝 TextFormGameActivityIndicator: Found target container, creating indicator');
 
         // Translte the title
-        const translatedTitle = window.i18n.translate('activity.editingVsBrowsing');
+        const translatedTitle = window.i18n.translate('activity.browsingVsEditing');
 
         // Create the indicator element with all attributes and content in one template
         const tempContainer = document.createElement('div');
         tempContainer.innerHTML = `
             <div class="text-form-game-activity-indicator no-activity" 
                  data-game-id="${this.gameId}"
-                 data-i18n-title="activity.editingVsBrowsing"
+                 data-i18n-title="activity.browsingVsEditing"
                  title="${translatedTitle}">
                 <span class="icon">${SVGManager.userSVG}</span>
                 <div class="activity-numbers">0:0</div>

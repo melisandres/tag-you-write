@@ -49,9 +49,17 @@ import { InviteeSuggestionsManager } from './inviteeSuggestionsManager.js';
 import { FormTogglesManager } from './formTogglesManager.js';
 import { InvitationTokenManager } from './invitationTokenManager.js';
 import { InvitationLinkManager } from './invitationLinkManager.js';
+import { TutorialSwitcherManager } from './tutorialSwitcherManager.js';
+import { DashboardManager } from './dashboardManager.js';
+import { CategoryHeaderManager } from './categoryHeaderManager.js';
+import { HamburgerMenuManager } from './hamburgerMenuManager.js';
+import { SVGManager } from './svgManager.js';
 
 // Make eventBus globally available immediately
 window.eventBus = eventBus;
+
+// Make SVGManager globally available
+window.SVGManager = SVGManager;
 
 document.addEventListener("DOMContentLoaded", async () => {
   // Get the BASE_URL from a data attribute in your HTML
@@ -156,6 +164,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Initialize TooltipManager
     new TooltipManager();
 
+  // Initialize TutorialSwitcherManager
+  new TutorialSwitcherManager();
+
+  // Initialize DashboardManager (only on dashboard pages)
+  if (document.querySelector('.dashboard')) {
+    window.dashboardManager = new DashboardManager();
+  }
+
 
    // Check for pending toasts
    const pendingToast = localStorage.getItem('pendingToast');
@@ -182,6 +198,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   const filterManager = new FilterManager();
   window.searchHighlighter = new SearchHighlighter();
   const searchManager = new SearchManager();
+  
+  // Initialize CategoryHeaderManager AFTER other menu managers
+  window.categoryHeaderManager = new CategoryHeaderManager();
+
+  // Initialize HamburgerMenuManager
+  window.hamburgerMenuManager = new HamburgerMenuManager();
 
   // Initialize CurrentActivityManager
   window.currentActivityManager = new CurrentActivityManager();

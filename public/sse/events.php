@@ -10,7 +10,12 @@
 
 // Start session before any output - this is critical for session continuation
 session_start();
-$sessionWriterId = $_SESSION['writer_id'] ?? null;
+
+// Preserve session data before closing session to prevent blocking
+$preservedSessionData = [
+    'writer_id' => $_SESSION['writer_id'] ?? null,
+    'game_invitation_access' => $_SESSION['game_invitation_access'] ?? []
+];
 
 // Save session values we need and close session to prevent blocking
 session_write_close();
@@ -38,6 +43,9 @@ class EventHandler {
     // Get the game_id from the rootStoryId
     private $gameId;
     
+    // Preserved session data
+    private $preservedSessionData;
+    
     // Configuration
     private $maxExecutionTime = 300; // 5 minutes
     private $keepaliveInterval = 30;
@@ -62,14 +70,17 @@ class EventHandler {
     /**
      * Constructor
      * 
-     * @param int|null $writerId Current user's writer ID from session
+     * @param array $preservedSessionData Preserved session data
      */
-    public function __construct($writerId) {
+    public function __construct($preservedSessionData = []) {
         // Set headers immediately
         $this->setHeaders();
         
-        // Store writer ID securely
-        $this->writerId = $writerId;
+        // Store preserved session data
+        $this->preservedSessionData = $preservedSessionData;
+        
+        // Extract writer ID from preserved session data
+        $this->writerId = $preservedSessionData['writer_id'] ?? null;
         
         // Generate unique connection ID for this SSE connection
         $this->connectionId = uniqid('sse_', true);
@@ -215,7 +226,7 @@ class EventHandler {
             }
             
             // Only initialize data fetch service immediately - models will be lazy loaded
-            $this->pollingService = new DataFetchService();
+            $this->pollingService = new DataFetchService($this->preservedSessionData);
             
         } catch (\Exception $e) {
             $this->sendErrorEvent("Failed to load dependencies: " . $e->getMessage());
@@ -446,10 +457,19 @@ class EventHandler {
                                     $gameUpdates = $this->pollingService->fetchGameData($gameId, $this->filters, $this->search);
                                     
                                     if (!empty($gameUpdates)) {
+                                        // Game still matches current filters/search - send as update
                                         $this->sendEvent('update', [
                                             'modifiedGames' => $gameUpdates, 
                                             'modifiedNodes' => [],
                                             'searchResults' => []
+                                        ]);
+                                    } else {
+                                        // Game no longer matches current filters/search - send for removal
+                                        $this->sendEvent('update', [
+                                            'modifiedGames' => [], 
+                                            'modifiedNodes' => [],
+                                            'searchResults' => [],
+                                            'gameIdsForRemoval' => [$gameId]
                                         ]);
                                     }
                                 } catch (Exception $e) {
@@ -471,6 +491,14 @@ class EventHandler {
                                             'modifiedGames' => $gameUpdates, 
                                             'modifiedNodes' => [],
                                             'searchResults' => []
+                                        ]);
+                                    } else {
+                                        // if the game is not found, send the gameIdsForRemoval... so that the game can be removed if it exists in the cache/view.
+                                        $this->sendEvent('update', [
+                                            'modifiedGames' => [], 
+                                            'modifiedNodes' => [],
+                                            'searchResults' => [],
+                                            'gameIdsForRemoval' => [$gameId]
                                         ]);
                                     }
                                 } catch (Exception $e) {
@@ -621,7 +649,8 @@ class EventHandler {
                 $this->sendEvent('update', [
                     'modifiedGames' => $updates['modifiedGames'],
                     'modifiedNodes' => $updates['modifiedNodes'],
-                    'searchResults' => $updates['searchResults']
+                    'searchResults' => $updates['searchResults'],
+                    'gameIdsForRemoval' => $updates['gameIdsForRemoval'] ?? []
                 ]);
             }
             
@@ -721,7 +750,8 @@ class EventHandler {
                     $this->sendEvent('update', [
                         'modifiedGames' => $updates['modifiedGames'],
                         'modifiedNodes' => $updates['modifiedNodes'],
-                        'searchResults' => $updates['searchResults']
+                        'searchResults' => $updates['searchResults'],
+                        'gameIdsForRemoval' => $updates['gameIdsForRemoval'] ?? []
                     ]);
                 }
                 
@@ -826,7 +856,7 @@ class EventHandler {
 // Run the SSE handler if this file is accessed directly
 if (basename(__FILE__) == basename($_SERVER['SCRIPT_FILENAME'])) {
     try {
-        $handler = new EventHandler($sessionWriterId);
+        $handler = new EventHandler($preservedSessionData);
         $handler->run();
     } catch (\Exception $e) {
         header('Content-Type: text/event-stream');

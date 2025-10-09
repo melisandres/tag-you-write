@@ -42,6 +42,18 @@
                 <a data-language="fr" class="{% if current_language == 'fr' %}active{% endif %}">FR</a>
             </div>
         </div>
+        <div class="nav-link tutorial-switcher" data-i18n-title="nav.tutorial_tooltip" title="{{ translate('nav.tutorial_tooltip') }}">
+            <div class="current-tutorial" data-svg="how" data-i18n-title="nav.tutorial_tooltip" title="{{ translate('nav.tutorial_tooltip') }}">
+            </div>
+            <div class="nav-text" data-i18n="nav.tutorial">
+                {{ translate('nav.tutorial') }}
+            </div>
+            <div class="tutorial-dropdown">
+                <a data-tutorial="start-game" data-i18n="nav.tutorial_start_game" data-i18n-title="nav.tutorial_start_game_tooltip" title="{{ translate('nav.tutorial_start_game_tooltip') }}">{{ translate('nav.tutorial_start_game') }}</a>
+                <a data-tutorial="contribute" data-i18n="nav.tutorial_contribute" data-i18n-title="nav.tutorial_contribute_tooltip" title="{{ translate('nav.tutorial_contribute_tooltip') }}">{{ translate('nav.tutorial_contribute') }}</a>
+                <a data-tutorial="vote" data-i18n="nav.tutorial_vote" data-i18n-title="nav.tutorial_vote_tooltip" title="{{ translate('nav.tutorial_vote_tooltip') }}">{{ translate('nav.tutorial_vote') }}</a>
+            </div>
+        </div>
         {% if title_key != 'page_title.home' %}
         <a class="nav-link home" href="{{ langUrl('') }}">
             <span class="icon" data-svg="home" data-i18n-title="nav.home_tooltip" title="{{ translate('nav.home_tooltip') }}"></span>
@@ -131,10 +143,162 @@
             </span>
         </a>
     {% endif %}
+        <div class="nav-link hamburger" data-i18n-title="nav.menu_tooltip" title="{{ translate('nav.menu_tooltip') }}">
+            <span class="icon" data-svg="hamburger" data-i18n-title="nav.menu_tooltip" title="{{ translate('nav.menu_tooltip') }}"></span>
+            <span class="nav-text" data-i18n="nav.menu">
+                {{ translate('nav.menu') }}
+            </span>
+        </div>
 <!--     {% if session.privilege == 1 or session.privilege == 2 %}
         <a href="{{path}}produit/create">Produits</a>
     {% endif %} -->
     </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu-overlay"></div>
+    <div class="mobile-menu">
+        <div class="mobile-menu-header">
+            <button class="mobile-menu-close" aria-label="Close menu">
+                <span class="icon" data-svg="close"></span>
+            </button>
+        </div>
+        <div class="mobile-menu-content">
+            <!-- Language Switcher -->
+            <div class="mobile-menu-item">
+                <div class="nav-link language-switcher" data-i18n-title="nav.language_tooltip" title="{{ translate('nav.language_tooltip') }}">
+                    <div class="current-language">
+                        {% if current_language == 'en' %}EN{% else %}FR{% endif %}
+                    </div>
+                    <div class="nav-text" data-i18n="nav.language">
+                        {{ translate('nav.language') }}
+                    </div>
+                    <div class="language-dropdown">
+                        <a data-language="en" class="{% if current_language == 'en' %}active{% endif %}">EN</a>
+                        <a data-language="fr" class="{% if current_language == 'fr' %}active{% endif %}">FR</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tutorial Switcher -->
+            <div class="mobile-menu-item">
+                <div class="nav-link tutorial-switcher" data-i18n-title="nav.tutorial_tooltip" title="{{ translate('nav.tutorial_tooltip') }}">
+                    <div class="current-tutorial" data-svg="how" data-i18n-title="nav.tutorial_tooltip" title="{{ translate('nav.tutorial_tooltip') }}">
+                    </div>
+                    <div class="nav-text" data-i18n="nav.tutorial">
+                        {{ translate('nav.tutorial') }}
+                    </div>
+                    <div class="tutorial-dropdown">
+                        <a data-tutorial="start-game" data-i18n="nav.tutorial_start_game" data-i18n-title="nav.tutorial_start_game_tooltip" title="{{ translate('nav.tutorial_start_game_tooltip') }}">{{ translate('nav.tutorial_start_game') }}</a>
+                        <a data-tutorial="contribute" data-i18n="nav.tutorial_contribute" data-i18n-title="nav.tutorial_contribute_tooltip" title="{{ translate('nav.tutorial_contribute_tooltip') }}">{{ translate('nav.tutorial_contribute') }}</a>
+                        <a data-tutorial="vote" data-i18n="nav.tutorial_vote" data-i18n-title="nav.tutorial_vote_tooltip" title="{{ translate('nav.tutorial_vote_tooltip') }}">{{ translate('nav.tutorial_vote') }}</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Home Link -->
+            {% if title_key != 'page_title.home' %}
+            <div class="mobile-menu-item">
+                <a class="nav-link home" href="{{ langUrl('') }}">
+                    <span class="icon" data-svg="home" data-i18n-title="nav.home_tooltip" title="{{ translate('nav.home_tooltip') }}"></span>
+                    <span class="nav-text" data-i18n="nav.home">
+                        {{ translate('nav.home') }}
+                    </span>
+                </a>
+            </div>
+            {% endif %}
+
+            <!-- Browse/Filter Link -->
+            {% if title_key == 'page_title.texts' %}
+            <div class="mobile-menu-item">
+                <a class="nav-link filter">
+                    <span class="icon" data-svg="filter" data-i18n-title="nav.filter_tooltip" title="{{ translate('nav.filter_tooltip') }}"></span>
+                    <span class="nav-text" data-i18n="nav.filter">
+                        {{ translate('nav.filter') }}
+                    </span>
+                </a>
+            </div>
+            {% else %}
+            <div class="mobile-menu-item">
+                <a class="nav-link texts" href="{{ langUrl('text') }}">
+                    <span class="icon" data-svg="browse" data-i18n-title="nav.browse_tooltip" title="{{ translate('nav.browse_tooltip') }}"></span>
+                    <span class="nav-text" data-i18n="nav.browse">
+                        {{ translate('nav.browse') }}
+                    </span>
+                </a>
+            </div>
+            {% endif %}
+
+            <!-- Search Link -->
+            {% if title_key == 'page_title.texts' or title_key == 'page_title.collab' %}
+            <div class="mobile-menu-item">
+                <a class="nav-link search" href="{{ langUrl('search') }}">
+                    <span class="icon" data-svg="search" data-i18n-title="nav.search_tooltip" title="{{ translate('nav.search_tooltip') }}"></span>
+                    <span class="nav-text" data-i18n="nav.search">
+                        {{ translate('nav.search') }}
+                    </span>
+                </a>
+            </div>
+            {% endif %}
+
+            <!-- Login Link (for guests) -->
+            {% if guest and title_key != 'page_title.login' %}
+            <div class="mobile-menu-item">
+                <a class="nav-link writers" href="{{ langUrl('login') }}">
+                    <span class="icon" data-svg="logIn" data-i18n-title="nav.login_tooltip" title="{{ translate('nav.login_tooltip') }}"></span>
+                    <span class="nav-text" data-i18n="nav.login">
+                        {{ translate('nav.login') }}
+                    </span>
+                </a>
+            </div>
+            {% endif %}
+
+            <!-- New Game Link (for logged in users) -->
+            {% if not guest %}
+            <div class="mobile-menu-item">
+                <a class="nav-link newGame" href="{{ langUrl('text/create?new=true') }}">
+                    <span class="icon" data-svg="newGame" data-i18n-title="nav.newGame_tooltip" title="{{ translate('nav.newGame_tooltip') }}"></span>
+                    <span class="nav-text" data-i18n="nav.newGame">
+                        {{ translate('nav.newGame') }}
+                    </span>
+                </a>
+            </div>
+
+            <!-- Notifications Link -->
+            <div class="mobile-menu-item">
+                <a class="nav-link notifications">
+                    <span class="icon" data-svg="notification" data-i18n-title="nav.notifications_tooltip" title="{{ translate('nav.notifications_tooltip') }}"></span>
+                    <span class="nav-text" data-i18n="nav.notifications">
+                        {{ translate('nav.notifications') }}
+                    </span>
+                </a>
+            </div>
+
+            <!-- Journal Link (for admin) -->
+            {% if session.privilege == 1 %}
+            <div class="mobile-menu-item">
+                <a class="nav-link writers" href="{{ langUrl('journal') }}">
+                    <span class="icon" data-svg="journal" data-i18n-title="nav.journal_tooltip" title="{{ translate('nav.journal_tooltip') }}"></span>
+                    <span class="nav-text" data-i18n="nav.journal">
+                        {{ translate('nav.journal') }}
+                    </span>
+                </a>
+            </div>
+            {% endif %}
+
+            <!-- Logout Link -->
+            {% if title_key != 'page_title.login' %}
+            <div class="mobile-menu-item">
+                <a class="nav-link writers" href="{{ langUrl('login/logout') }}">
+                    <span class="icon" data-svg="logOut" data-i18n-title="nav.logout_tooltip" title="{{ translate('nav.logout_tooltip') }}"></span>
+                    <span class="nav-text" data-i18n="nav.logout">
+                        {{ translate('nav.logout') }}
+                    </span>
+                </a>
+            </div>
+            {% endif %}
+            {% endif %}
+        </div>
+    </div>
 
     {% if title_key == 'page_title.texts' or title_key == 'page_title.collab' %}
         <div class="menu-container">

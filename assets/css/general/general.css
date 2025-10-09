@@ -38,6 +38,23 @@ main.with-filters {
     margin-top: calc(var(--header-height) + var(--filters-height));
 }
 
+/* Category header modifier - adjusts margin when category header is visible */
+main.with-categories {
+    margin-top: calc(var(--header-height) + var(--category-header-height));
+}
+
+main.with-categories.with-filters {
+    margin-top: calc(var(--header-height) + var(--category-header-height) + var(--filters-height));
+}
+
+main.with-categories.with-search {
+    margin-top: calc(var(--header-height) + var(--category-header-height) + var(--search-height));
+}
+
+main.with-categories.with-filters-and-search {
+    margin-top: calc(var(--header-height) + var(--category-header-height) + var(--filters-height) + var(--search-height));
+}
+
 td, th, tr, input, textarea, h3, h2, h1, u, p, form {
     padding: var(--general-padding);
 }

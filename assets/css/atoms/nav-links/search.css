@@ -1,0 +1,8 @@
+/* Search Nav-Link Styles */
+/* All base styles inherited from nav-link.css */
+
+/* Search-specific SVG styling - overrides base currentColor */
+.nav-link.search svg,
+.nav-link.search.active svg {
+    fill: var(--color-white);
+}

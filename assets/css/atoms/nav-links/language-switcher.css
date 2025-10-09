@@ -1,14 +1,8 @@
 /* Language Switcher Styles */
-.nav-link.language-switcher {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-}
+/* All base styles inherited from nav-link.css */
 
-.nav-link.language-switcher .current-language {
-    padding: 4px 2px;
+nav .nav-link.language-switcher .current-language {
+    padding: 15px;
     cursor: pointer;
     border-radius: 3px;
     font-size: 0.5em;
@@ -25,7 +19,7 @@
     margin-left: 4px;
 } */
 
-.nav-link.language-switcher .current-language:hover {
+nav .nav-link.language-switcher .current-language:hover {
     background-color: rgba(255, 255, 255, 0.1);
 }
 
@@ -44,7 +38,7 @@
     display: block;
 }
 
-.nav-link.language-switcher .language-dropdown a {
+nav .nav-link.language-switcher .language-dropdown a {
     padding: 6px 5px;
     display: block;
     font-size: 0.5em;
@@ -54,7 +48,7 @@
     cursor: pointer;
 }
 
-.nav-link.language-switcher .language-dropdown a:hover {
+nav .nav-link.language-switcher .language-dropdown a:hover {
     background-color: rgba(255, 255, 255, 0.1);
 }
 

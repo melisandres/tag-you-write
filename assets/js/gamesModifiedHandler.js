@@ -4,9 +4,10 @@ export class GamesModifiedHandler {
     }
 
     initializeEventListeners() {
-        // New event handlers
+        // Listen for game updates
         eventBus.on('gameModified', this.handleGameModified.bind(this));
         eventBus.on('gameAdded', this.handleGameAdded.bind(this));
+        eventBus.on('gamesRemoved', this.handleGamesRemoved.bind(this));
     }
     
     handleGameAdded(game) {
@@ -62,4 +63,18 @@ export class GamesModifiedHandler {
             eventBus.emit('gameContributionChanged', newGame);
         }
     }
+
+    handleGamesRemoved(gameIds) {
+        console.log('GamesModifiedHandler: gamesRemoved event received:', gameIds);
+        
+        if (!Array.isArray(gameIds) || gameIds.length === 0) {
+            console.warn('GamesModifiedHandler: No game IDs provided for removal');
+            return;
+        }
+        
+        // Emit specific removal event for UI handling
+        eventBus.emit('gamesRemovedFromView', gameIds);
+    }
+
+
 }

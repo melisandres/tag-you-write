@@ -1,0 +1,70 @@
+/* Tutorial Switcher Styles */
+/* All base styles inherited from nav-link.css */
+
+.nav-link.tutorial-switcher .current-tutorial {
+    padding: 4px 2px;
+    cursor: pointer;
+    border-radius: 3px;
+    font-size: 0.5em;
+    text-transform: uppercase;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    pointer-events: auto;
+}
+
+/* Style the help SVG icon in the tutorial switcher */
+.nav-link.tutorial-switcher .current-tutorial svg {
+    fill: currentColor;
+    stroke: currentColor;
+    width: 19px;
+    height: 19px;
+}
+
+/* SVG hover state - match other nav elements */
+.nav-link.tutorial-switcher:hover .current-tutorial svg {
+    fill: pink;
+}
+
+.nav-link.tutorial-switcher .current-tutorial:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-link.tutorial-switcher .tutorial-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: #333;
+    border-radius: 3px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    display: none;
+    min-width: 150px;
+    z-index: 10;
+}
+
+.nav-link.tutorial-switcher.open .tutorial-dropdown {
+    display: block;
+}
+
+.nav-link.tutorial-switcher .tutorial-dropdown a {
+    padding: 8px 12px;
+    display: block;
+    font-size: 0.7em;
+    color: #fff;
+    white-space: nowrap;
+    cursor: pointer;
+    border-bottom: 1px solid #444;
+}
+
+.nav-link.tutorial-switcher .tutorial-dropdown a:last-child {
+    border-bottom: none;
+}
+
+.nav-link.tutorial-switcher .tutorial-dropdown a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-link.tutorial-switcher .tutorial-dropdown a.active {
+    font-weight: bold;
+    background-color: rgba(255, 255, 255, 0.2);
+} 

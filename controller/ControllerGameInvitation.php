@@ -343,6 +343,9 @@ class ControllerGameInvitation extends Controller {
             $errors = [];
             $currentTimestamp = date('Y-m-d H:i:s');
             
+            // Close session before sending emails to prevent blocking other requests
+            session_write_close();
+            
             foreach ($pendingInvitations as $invitation) {
                 // Determine recipient email and name
                 $recipientEmail = null;

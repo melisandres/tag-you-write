@@ -20,6 +20,22 @@ export class DataManager {
             games: new Map(),
             trees: new Map(),
             nodesMap: new Map(), // A flat structure to make updates easier
+            dashboardData: { // NEW: Categorized dashboard structure
+                myStories: {
+                    urgent: { games: [], count: 0, hasUnreads: false },
+                    active: { games: [], count: 0, hasUnreads: false },
+                    archives: { games: [], count: 0, hasUnreads: false }
+                },
+                joinableGames: {
+                    invitations: { games: [], count: 0, hasUnreads: false },
+                    suggested: { games: [], count: 0, hasUnreads: false },
+                    other: { games: [], count: 0, hasUnreads: false }
+                },
+                inspiration: {
+                    bookmarked: { games: [], count: 0, hasUnreads: false },
+                    weLiked: { games: [], count: 0, hasUnreads: false }
+                }
+            },
             lastGamesCheck: null,
             currentViewedRootId: null, // Transient - established by URL params/page context
             pagination: {
@@ -28,6 +44,7 @@ export class DataManager {
                 totalItems: 0
             },
             search: '',
+            category: null,
             searchResults: {
                 rootId: null,
                 nodes: {}
@@ -49,6 +66,26 @@ export class DataManager {
         // Ensure nodesMap exists even if loaded from cache
         if (!this.cache.nodesMap) {
             this.cache.nodesMap = new Map();
+        }
+
+        // Ensure dashboardData exists even if loaded from cache
+        if (!this.cache.dashboardData) {
+            this.cache.dashboardData = {
+                myStories: {
+                    urgent: { games: [], count: 0, hasUnreads: false },
+                    active: { games: [], count: 0, hasUnreads: false },
+                    archives: { games: [], count: 0, hasUnreads: false }
+                },
+                joinableGames: {
+                    invitations: { games: [], count: 0, hasUnreads: false },
+                    suggested: { games: [], count: 0, hasUnreads: false },
+                    other: { games: [], count: 0, hasUnreads: false }
+                },
+                inspiration: {
+                    bookmarked: { games: [], count: 0, hasUnreads: false },
+                    weLiked: { games: [], count: 0, hasUnreads: false }
+                }
+            };
         }
 
         // Subscribe to relevant events
@@ -235,7 +272,7 @@ export class DataManager {
     handleUpdateResponse(response, currentlyViewedRootId) {
         console.log('handleUpdateResponse called with:', response);
         
-        const { modifiedGames, modifiedNodes, searchResults } = response;
+        const { modifiedGames, modifiedNodes, searchResults, gameIdsForRemoval } = response;
         let hasUpdates = false;
         let hasTreeUpdates = false;
 
@@ -252,6 +289,11 @@ export class DataManager {
             // this event refreshes the view in gameListRenderer.js
             // LETS TRY TO BE MORE GRANULAR
             // eventBus.emit('gamesModified', modifiedGames);
+            hasUpdates = true;
+        }
+
+        if (gameIdsForRemoval?.length > 0) {
+            this.removeGames(gameIdsForRemoval);
             hasUpdates = true;
         }
 
@@ -633,6 +675,22 @@ export class DataManager {
                     games: new Map(parsed.games || []),
                     trees: new Map(parsed.trees || []),
                     nodesMap: new Map(parsed.nodesMap || []),
+                    dashboardData: parsed.dashboardData || {
+                        myStories: {
+                            urgent: { games: [], count: 0, hasUnreads: false },
+                            active: { games: [], count: 0, hasUnreads: false },
+                            archives: { games: [], count: 0, hasUnreads: false }
+                        },
+                        joinableGames: {
+                            invitations: { games: [], count: 0, hasUnreads: false },
+                            suggested: { games: [], count: 0, hasUnreads: false },
+                            other: { games: [], count: 0, hasUnreads: false }
+                        },
+                        inspiration: {
+                            bookmarked: { games: [], count: 0, hasUnreads: false },
+                            weLiked: { games: [], count: 0, hasUnreads: false }
+                        }
+                    },
                     lastGamesCheck: parsed.lastGamesCheck || Date.now(),
                     currentViewedRootId: null, // Always start fresh - transient state
                     pagination: parsed.pagination,
@@ -667,6 +725,7 @@ export class DataManager {
             games: Array.from(this.cache.games.entries()),
             trees: Array.from(cleanTrees.entries()),
             nodesMap: Array.from(this.cache.nodesMap.entries()),
+            dashboardData: this.cache.dashboardData,
             lastGamesCheck: this.cache.lastGamesCheck,
             currentViewedRootId: null, // Transient - established by URL params/page context
             pagination: this.cache.pagination,
@@ -752,6 +811,22 @@ export class DataManager {
             games: new Map(),
             trees: new Map(),
             nodesMap: new Map(),
+            dashboardData: {
+                myStories: {
+                    urgent: { games: [], count: 0, hasUnreads: false },
+                    active: { games: [], count: 0, hasUnreads: false },
+                    archives: { games: [], count: 0, hasUnreads: false }
+                },
+                joinableGames: {
+                    invitations: { games: [], count: 0, hasUnreads: false },
+                    suggested: { games: [], count: 0, hasUnreads: false },
+                    other: { games: [], count: 0, hasUnreads: false }
+                },
+                inspiration: {
+                    bookmarked: { games: [], count: 0, hasUnreads: false },
+                    weLiked: { games: [], count: 0, hasUnreads: false }
+                }
+            },
             lastGamesCheck: null,
             pagination: {
                 currentPage: 1,
@@ -791,6 +866,7 @@ export class DataManager {
             lastGamesCheck: this.cache.lastGamesCheck || 0,
             filters: this.cache.filters || {},
             search: this.cache.search || '',
+            category: this.cache.category || null,
             rootStoryId: rootId,
             lastTreeCheck: this.cache.trees.get(rootId)?.timestamp || 0,
             // Game subscription context from GameSubscriptionManager
@@ -849,6 +925,29 @@ export class DataManager {
         });
     }
 
+    getCategory() {
+        return this.cache.category;
+    }
+
+    setCategory(category) {
+        // Only proceed if the value has actually changed
+        if (this.cache.category === category) {
+            return;
+        }
+        
+        // Update the value
+        this.cache.category = category;
+        this.saveCache();
+        
+        // Emit event with the new value
+        eventBus.emit('sseParametersChanged', { 
+            type: 'category',
+            value: category 
+        });
+        
+        console.log('🎯 DataManager: Category set to:', category);
+    }
+
      // For full list updates (filters, page refresh)
      replaceAll(games) {
         // Check for any games that were open and are now closed
@@ -876,10 +975,13 @@ export class DataManager {
             });
         });
         this.cache.lastGamesCheck = Date.now();
+        
+        // Update dashboard categories
+        this.updateDashboardCategories();
     }
 
 
-    // For poll updates
+    // For polling or SSE Redis updates
     updateGames(games) {
         if (!Array.isArray(games)) {
             games = [games]; // Convert single game object to array
@@ -921,6 +1023,18 @@ export class DataManager {
                 timestamp: Date.now()
             });
         });
+        
+        // Update dashboard categories
+        this.updateDashboardCategories();
+    }
+
+    // TODO: test this... and create front end logic to handle visualizing the "removal" of a game... (a "ghost" game, with a note on it--not longer fits the filter, search, or category being viewed))
+    removeGames(gameIds) {
+        gameIds.forEach(gameId => {
+            this.cache.games.delete(gameId);
+        });
+        this.saveCache();
+        eventBus.emit('gamesRemoved', gameIds);
     }
 
     // Handle game closure by requesting full tree update
@@ -1009,6 +1123,7 @@ export class DataManager {
         return {
             game_id: String(game.game_id),  // Convert to string
             text_id: String(game.id),       // Convert to string
+            category: game.category,
             title: game.title,
             prompt: game.prompt,
             openForChanges: game.openForChanges,  // Preserve original value type
@@ -1032,6 +1147,9 @@ export class DataManager {
                                game.hasTemporaryAccess === 1,
             temporaryAccessInfo: game.temporaryAccessInfo || null,
             invitation_token: game.invitation_token || null,
+            invited: game.invited === '1' || 
+                    game.invited === true || 
+                    game.invited === 1,
             text_count: parseInt(game.text_count) || 0,
             seen_count: parseInt(game.seen_count) || 0,
             unseen_count: parseInt(game.unseen_count) || 0,
@@ -1176,7 +1294,7 @@ export class DataManager {
         return true;
     }
 
-    // Add this new method
+    // A user has contributed to a game if they have written a node in the tree
     checkUserContributions(gameId) {
         const currentUserId = this.getCurrentUserId();
         if (!currentUserId || currentUserId === 'null') return false;
@@ -1306,5 +1424,133 @@ export class DataManager {
         }
         
         return null;
+    }
+
+    // ===== DASHBOARD CATEGORIZATION METHODS =====
+
+    /**
+     * Set dashboard data (categorized structure)
+     */
+    setDashboardData(categorizedData) {
+        this.cache.dashboardData = categorizedData;
+        this.saveCache();
+    }
+
+    /**
+     * Get dashboard data
+     */
+    getDashboardData() {
+        return this.cache.dashboardData;
+    }
+
+    /**
+     * Categorize games into dashboard structure
+     */
+    categorizeGames(games) {
+        const isGuest = !this.isUserLoggedIn();
+        
+        // Initialize dashboard data structure
+        const dashboardData = {
+            joinableGames: {
+                invitations: { games: [], count: 0, hasUnreads: false },
+                suggested: { games: [], count: 0, hasUnreads: false },
+                other: { games: [], count: 0, hasUnreads: false }
+            },
+            inspiration: {
+                weLiked: { games: [], count: 0, hasUnreads: false }
+            }
+        };
+        
+        // Only add user-specific sections if not a guest
+        if (!isGuest) {
+            dashboardData.myStories = {
+                urgent: { games: [], count: 0, hasUnreads: false },
+                active: { games: [], count: 0, hasUnreads: false },
+                archives: { games: [], count: 0, hasUnreads: false }
+            };
+            
+            // Add bookmarked subsection for logged-in users
+            dashboardData.inspiration.bookmarked = { games: [], count: 0, hasUnreads: false };
+        }
+        
+        // Categorize each game
+        games.forEach(game => {
+            this.categorizeGame(game, dashboardData, isGuest);
+        });
+        
+        return dashboardData;
+    }
+
+    /**
+     * Categorize a single game into the appropriate dashboard sections
+     */
+    categorizeGame(game, dashboardData, isGuest) {
+        // Use the SQL-provided category field directly - much simpler!
+        const category = game.category;
+        const hasUnreads = game.unseen_count > 0;
+        
+        // Map SQL categories to dashboard sections
+        switch (category) {
+            case 'myGames.urgent':
+                if (!isGuest && dashboardData.myStories) {
+                    dashboardData.myStories.urgent.games.push(game);
+                    dashboardData.myStories.urgent.count++;
+                    if (hasUnreads) dashboardData.myStories.urgent.hasUnreads = true;
+                }
+                break;
+                
+            case 'myGames.active':
+                if (!isGuest && dashboardData.myStories) {
+                    dashboardData.myStories.active.games.push(game);
+                    dashboardData.myStories.active.count++;
+                    if (hasUnreads) dashboardData.myStories.active.hasUnreads = true;
+                }
+                break;
+                
+            case 'myGames.archives':
+                if (!isGuest && dashboardData.myStories) {
+                    dashboardData.myStories.archives.games.push(game);
+                    dashboardData.myStories.archives.count++;
+                    if (hasUnreads) dashboardData.myStories.archives.hasUnreads = true;
+                }
+                break;
+                
+            case 'canJoin.invitations':
+                dashboardData.joinableGames.invitations.games.push(game);
+                dashboardData.joinableGames.invitations.count++;
+                if (hasUnreads) dashboardData.joinableGames.invitations.hasUnreads = true;
+                break;
+                
+            case 'canJoin.other':
+                dashboardData.joinableGames.other.games.push(game);
+                dashboardData.joinableGames.other.count++;
+                if (hasUnreads) dashboardData.joinableGames.other.hasUnreads = true;
+                break;
+                
+            case 'inspiration.bookmarked':
+                if (!isGuest && dashboardData.inspiration.bookmarked) {
+                    dashboardData.inspiration.bookmarked.games.push(game);
+                    dashboardData.inspiration.bookmarked.count++;
+                    if (hasUnreads) dashboardData.inspiration.bookmarked.hasUnreads = true;
+                }
+                break;
+                
+            default:
+                console.warn('Unknown category:', category, 'for game:', game.game_id);
+                break;
+        }
+    }
+
+    /**
+     * Update dashboard categories when games change
+     */
+    updateDashboardCategories() {
+        const games = Array.from(this.cache.games.values()).map(g => g.data);
+        const categorizedData = this.categorizeGames(games);
+        this.cache.dashboardData = categorizedData;
+        this.saveCache();
+        
+        // Emit event to notify dashboard
+        eventBus.emit('dashboardCategoriesUpdated', categorizedData);
     }
 }

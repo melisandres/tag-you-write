@@ -5,7 +5,7 @@
     "users_editing": "Utilisateurs qui écrivent",
     "editing": "Écrivant",
     "browsing": "Explorateur",
-    "editingVsBrowsing": "ceux qui écrivent : ceux qui explorent"
+    "browsingVsEditing": "ceux qui explorent : ceux qui ecrivent"
   },
   "nav": {
     "home": "Accueil",
@@ -22,10 +22,17 @@
     "newGame_tooltip": "créer une nouvelle collaboration",
     "notifications": "Notifications",
     "notifications_tooltip": "notifications",
+    "tutorial": "Tutoriel",
+    "tutorial_tooltip": "tutoriel",
+    "tutorial_start_game": "Commencer une partie",
+    "tutorial_contribute": "Contribuer à une partie",
+    "tutorial_vote": "Voter sur les noeuds de texte",
     "login": "Connexion",
     "login_tooltip": "connexion",
     "logout": "Quitter",
-    "logout_tooltip": "déconnexion"
+    "logout_tooltip": "déconnexion",
+    "menu": "Menu",
+    "menu_tooltip": "menu"
   },
   "notifications": {
     "notification_game_won": "Partie Gagnée!",
@@ -45,6 +52,7 @@
   },
   "page_title": {
     "home": "Scratchez-moi ça!",
+    "dashboard": "Tableau de Bord",
     "texts": "Tous les Textes !",
     "story_collab": "Collaboration d'Histoire",
     "login": "Connexion",
@@ -161,6 +169,7 @@
     "exit": "quitter", 
     "game": "COLLAB",
     "closed": "FERMÉE",
+    "gameRemoved": "Le jeu ne correspond plus à votre recherche/filtres",
     "pending": "À VENIR",
     "open": "OUVERTE",
     "view_tree_tooltip": "voir l'arbre",
@@ -209,8 +218,8 @@
   "home_index": {
     "title": "écriture collaborative",
     "add_a_few_words": "Enlevez quelques mots à un texte.",
-    "write_a_sentence": "Voyez-la prendre pied, ajoutez encore...",
-    "write_a_phrase": "voyez sa tête rouler.",
+    "write_a_sentence": "Il s'enracine, ajoutez encore...",
+    "write_a_phrase": "Voyez-le basculer.",
     "login": "connexion",
     "browse": "explorer les collaborations",
     "how": "comment ça marche",
@@ -519,5 +528,34 @@
       "tree": {
       "ghost_title": "tac tac",
       "ghost_name_area": ". . . quelqu'un tape"
+    },
+    "dashboard": {
+      "my_stories": "Mes histoires",
+      "games_i_can_join": "Histoires disponibles",
+      "inspiration": "Inspiration",
+      "urgent": "Urgent",
+      "active": "Actif",
+      "archives": "Archives",
+      "invitations": "Invitations",
+      "other": "Autres",
+      "bookmarked": "Suivis",
+      "browseCategory": "Parcourir cette catégorie"
+    },
+    "category-header": {
+      "myGames": {
+        "": "Mes histoires",
+        "urgent": "Mes histoires > Urgent",
+        "active": "Mes histoires > Actif",
+        "archives": "Mes histoires > Archives"
+      },
+      "canJoin": {
+        "": "Histoires disponibles",
+        "invitations": "Histoires disponibles > Invitations",
+        "other": "Histoires disponibles > Autres"
+      },
+      "inspiration": {
+        "": "Inspiration",
+        "bookmarked": "Inspiration > Suivis"
+      }
     }
 }

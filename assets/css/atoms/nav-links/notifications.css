@@ -1,0 +1,10 @@
+/* Notifications Nav-Link Styles */
+/* All base styles inherited from nav-link.css */
+
+/* Notifications-specific SVG styling - overrides base styles */
+.nav-link.notifications svg {
+    fill: white;
+    stroke: white;
+    transform: scale(1.1);
+    rotate: 10deg;
+}

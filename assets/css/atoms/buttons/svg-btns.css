@@ -90,3 +90,13 @@
     stroke: currentColor;
     transform: scale(1.2);
 }
+
+a.nav-link.help svg{
+    fill: currentColor;
+    stroke: currentColor;
+    transform: scale(1.15);
+}
+
+a.nav-link.help text{
+    display: none;
+}

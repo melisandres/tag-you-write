@@ -137,10 +137,4 @@ g.node > path.search-match {
     border-color: var(--color-primary);
 }
 
-.nav-link.search.active svg {
-    fill: var(--color-white);
-}
-
-.nav-link.search svg {
-    fill: var(--color-white);
-}
+/* Search nav-link styles moved to atoms/search.css */

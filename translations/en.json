@@ -6,7 +6,7 @@
     "users_editing": "Users Editing",
     "editing": "Editing",
     "browsing": "Browsing",
-    "editingVsBrowsing": "users editing : users browsing"
+    "browsingVsEditing": "users browsing : users editing"
   },
   "nav": {
       "home": "Home",
@@ -23,10 +23,17 @@
       "newGame_tooltip": "create a new collaboration",
       "notifications": "Notifications",
       "notifications_tooltip": "notifications",
+      "tutorial": "Tutorial",
+      "tutorial_tooltip": "view tutorials",
+      "tutorial_start_game": "Start a Game",
+      "tutorial_contribute": "Contribute to a Game",
+      "tutorial_vote": "Vote on Text Nodes",
       "login": "Log in",
       "login_tooltip": "log in",
       "logout": "Logout",
-      "logout_tooltip": "logout"
+      "logout_tooltip": "logout",
+      "menu": "Menu",
+      "menu_tooltip": "menu"
   },
   "notifications": {
     "notification_game_won": "Game Won!",
@@ -46,6 +53,7 @@
   },
   "page_title" : {
     "home": "Scratch that!",
+    "dashboard": "Dashboard",
     "texts": "All Texts!",
     "story_collab": "Story Collaboration",
     "login": "Log in",
@@ -164,6 +172,7 @@
     "pending": "PENDING",
     "open": "OPEN",
     "closed": "CLOSED",
+    "gameRemoved": "Game no longer matches your search/filters",
     "view_tree_tooltip": "view tree",
     "view_shelf_tooltip": "view shelf",
     "tree_tooltip": "tree",
@@ -520,5 +529,34 @@
   "tree": {
     "ghost_title": "click clack",
     "ghost_name_area": ". . . someone types"
+  },
+  "dashboard": {
+    "my_stories": "My Stories",
+    "games_i_can_join": "Stories I Can Join",
+    "inspiration": "Inspiration",
+    "urgent": "Urgent",
+    "active": "Active",
+    "archives": "Archives",
+    "invitations": "Invitations",
+    "other": "Other",
+    "bookmarked": "Bookmarked",
+    "browseCategory": "Browse this category"
+  },
+  "category-header": {
+    "myGames": {
+      "": "My Stories",
+      "urgent": "My Stories > Urgent",
+      "active": "My Stories > Active",
+      "archives": "My Stories > Archives"
+    },
+    "canJoin": {
+      "": "Stories I Can Join",
+      "invitations": "Stories I Can Join > Invitations",
+      "other": "Stories I Can Join > Other"
+    },
+    "inspiration": {
+      "": "Inspiration",
+      "bookmarked": "Inspiration > Bookmarked"
+    }
   }
 }

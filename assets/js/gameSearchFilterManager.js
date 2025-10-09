@@ -24,6 +24,7 @@ export class GameSearchFilterManager {
         const urlParams = new URLSearchParams(window.location.search);
         const hasContributed = urlParams.get('hasContributed');
         const bookmarked = urlParams.get('bookmarked');
+        const category = urlParams.get('category');
 
         // Convert URL string values to backend values
         const convertedHasContributed = hasContributed === 'all' ? null :
@@ -44,6 +45,12 @@ export class GameSearchFilterManager {
         // Set initial filters
         this.dataManager.setFilters(initialFilters);
         
+        // Set initial category if present in URL
+        if (category) {
+            console.log('🎯 GameSearchFilterManager: Setting initial category from URL:', category);
+            this.dataManager.setCategory(category);
+        }
+        
         window.gameSearchFilterManagerInstance = this;
     }
 
@@ -58,11 +65,10 @@ export class GameSearchFilterManager {
     }
 
     async refreshGamesList() {
-        console.log('refreshGamesList called from:', new Error().stack);
         try {
             const filters = this.dataManager.getFilters();
             const search = this.dataManager.getSearch();
-            console.log("REFRESHING THE GAME LIST");
+            const category = this.dataManager.getCategory();
             const endpoint = 'game/getGames';
             const url = window.i18n.createUrl(endpoint);
             const response = await fetch(url, {
@@ -70,7 +76,7 @@ export class GameSearchFilterManager {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ filters, search })
+                body: JSON.stringify({ filters, search, category })
             });
 
             if (!response.ok) throw new Error('Failed to fetch games');

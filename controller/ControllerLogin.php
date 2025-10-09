@@ -157,6 +157,9 @@ class ControllerLogin extends Controller {
                     'reset_expiry' => $expiry
                 ]);
     
+                // Close session before sending email to prevent blocking other requests
+                session_write_close();
+                
                 // Send email
                 try {
                     RequirePage::library('Email');

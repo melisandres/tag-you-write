@@ -101,9 +101,16 @@ class ControllerGame extends Controller {
             $data = json_decode($jsonData, true);
             $filters = $data['filters'] ?? [];
             $searchTerm = $data['search'] ?? null;
+            $category = $data['category'] ?? null;
+
+            // Debug logging
+            error_log("ControllerGame::getGames - Category: " . ($category ?? 'null'));
+            error_log("ControllerGame::getGames - Filters: " . print_r($filters, true));
 
             $game = new Game();
-            $games = $game->getGames(null, $filters, null, $searchTerm);  // Pass search term to model
+            $games = $game->getGames(null, $filters, null, $searchTerm, $category);  // Pass category to model
+
+            error_log("ControllerGame::getGames - Returned " . count($games) . " games");
 
             header('Content-Type: application/json');
             echo json_encode($games);
@@ -124,16 +131,17 @@ class ControllerGame extends Controller {
             $lastTreeCheck = date('Y-m-d H:i:s', (int)($data['lastTreeCheck'] / 1000));
             $lastGamesCheck = date('Y-m-d H:i:s', (int)($data['lastGamesCheck'] / 1000));
 
-            // Get the search term, filters and the rootStoryId
+            // Get the search term, filters, category and the rootStoryId
             $searchTerm = $data['search'] ?? null;
             $filters = $data['filters'] ?? [];
+            $category = $data['category'] ?? null;
             $rootStoryId = $data['rootStoryId'] ?? null;
             
             $game = new Game();
             $text = new Text();
             
-            // Get the modified games with search term
-            $modifiedGames = $game->getModifiedSince($lastGamesCheck, $filters, $searchTerm);
+            // Get the modified games with search term and category
+            $modifiedGames = $game->getModifiedSince($lastGamesCheck, $filters, $searchTerm, $category);
 
 /*             // Process the modified games data to ensure boolean fields are properly formatted
             foreach ($modifiedGames as &$game) {

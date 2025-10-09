@@ -38,8 +38,11 @@ class DataFetchService {
     private $textModel;
     private $notificationModel;
     private $writerActivityModel;
+    private $preservedSessionData;
+    private $originalSessionData;
     
-    public function __construct() {
+    public function __construct($preservedSessionData = []) {
+        $this->preservedSessionData = $preservedSessionData;
         $this->eventModel = new Event();
         $this->gameModel = new Game();
         $this->textModel = new Text();
@@ -69,6 +72,7 @@ class DataFetchService {
             'modifiedGames' => [],
             'modifiedNodes' => [],
             'searchResults' => [],
+            'gameIdsForRemoval' => [],
             'notifications' => [],
             'userActivity' => null, // User-centric activity data (primary source)
             'lastEventId' => $lastEventId,
@@ -175,8 +179,11 @@ class DataFetchService {
             case 'game':
                 // Fetch the specific game that changed
                 $gameUpdates = $this->fetchGameData($id, $filters, $search);
-                if (!empty($gameUpdates)) {
-                    $updates['modifiedGames'] = array_merge($updates['modifiedGames'], $gameUpdates);
+                if (!empty($gameUpdates['modifiedGames'])) {
+                    $updates['modifiedGames'] = array_merge($updates['modifiedGames'], $gameUpdates['modifiedGames']);
+                }
+                if (!empty($gameUpdates['gameIdsForRemoval'])) {
+                    $updates['gameIdsForRemoval'] = array_merge($updates['gameIdsForRemoval'] ?? [], $gameUpdates['gameIdsForRemoval']);
                 }
                 error_log("DataFetchService: Fetched game ID $id");
                 break;
@@ -212,7 +219,14 @@ class DataFetchService {
 
     public function fetchGameData($gameId, $filters, $search) {
         return $this->executeWithRetry(function() use ($gameId, $filters, $search) {
-            return $this->gameModel->getGames(null, $filters, $gameId, $search);
+            // Temporarily restore session data for Game->getGames() calls
+            $this->restoreSessionData();
+            try {
+                return $this->gameModel->getGames(null, $filters, $gameId, $search);
+            } finally {
+                // Clean up session data after the call
+                $this->cleanupSessionData();
+            }
         });
     }
 
@@ -355,5 +369,36 @@ class DataFetchService {
         $this->writerActivityModel = new WriterActivity();
         
         error_log("DataFetchService: Models recreated with fresh connections from pool");
+    }
+    
+    /**
+     * Temporarily restore session data for model calls
+     */
+    private function restoreSessionData() {
+        if (!empty($this->preservedSessionData)) {
+            // Store original session data
+            $this->originalSessionData = [
+                'writer_id' => $_SESSION['writer_id'] ?? null,
+                'game_invitation_access' => $_SESSION['game_invitation_access'] ?? []
+            ];
+            
+            // Restore preserved session data
+            $_SESSION['writer_id'] = $this->preservedSessionData['writer_id'] ?? null;
+            $_SESSION['game_invitation_access'] = $this->preservedSessionData['game_invitation_access'] ?? [];
+        }
+    }
+    
+    /**
+     * Clean up session data after model calls
+     */
+    private function cleanupSessionData() {
+        if (isset($this->originalSessionData)) {
+            // Restore original session data
+            $_SESSION['writer_id'] = $this->originalSessionData['writer_id'];
+            $_SESSION['game_invitation_access'] = $this->originalSessionData['game_invitation_access'];
+            
+            // Clear the backup
+            unset($this->originalSessionData);
+        }
     }
 }
