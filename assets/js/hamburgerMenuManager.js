@@ -1,12 +1,12 @@
 /**
- * HamburgerMenuManager - Handles the mobile hamburger menu functionality
+ * HamburgerMenuManager - Handles the overflow menu functionality
  * Manages opening/closing the menu and handling the overlay
  */
 export class HamburgerMenuManager {
     constructor() {
         this.isOpen = false;
         this.hamburgerButton = null;
-        this.mobileMenu = null;
+        this.overflowMenu = null;
         this.closeButton = null;
         this.overlay = null;
         
@@ -18,17 +18,17 @@ export class HamburgerMenuManager {
      */
     init() {
         this.hamburgerButton = document.querySelector('.nav-link.hamburger');
-        this.mobileMenu = document.querySelector('.mobile-menu');
-        this.closeButton = document.querySelector('.mobile-menu-close');
-        this.overlay = document.querySelector('.mobile-menu-overlay');
+        this.overflowMenu = document.querySelector('.overflow-menu');
+        this.closeButton = document.querySelector('.overflow-menu-close');
+        this.overlay = document.querySelector('.overflow-menu-overlay');
 
         if (!this.hamburgerButton) {
             console.warn('HamburgerMenuManager: Hamburger button not found');
             return;
         }
 
-        if (!this.mobileMenu) {
-            console.warn('HamburgerMenuManager: Mobile menu not found');
+        if (!this.overflowMenu) {
+            console.warn('HamburgerMenuManager: Overflow menu not found');
             return;
         }
 
@@ -69,7 +69,7 @@ export class HamburgerMenuManager {
         });
 
         // Close menu when clicking on menu links
-        const menuLinks = this.mobileMenu.querySelectorAll('a');
+        const menuLinks = this.overflowMenu.querySelectorAll('a');
         menuLinks.forEach(link => {
             link.addEventListener('click', () => {
                 this.closeMenu();
@@ -81,6 +81,7 @@ export class HamburgerMenuManager {
      * Toggle the mobile menu
      */
     toggleMenu() {
+        console.log('HamburgerMenuManager: Toggle menu called, isOpen:', this.isOpen);
         if (this.isOpen) {
             this.closeMenu();
         } else {
@@ -92,63 +93,28 @@ export class HamburgerMenuManager {
      * Open the mobile menu
      */
     openMenu() {
+        console.log('HamburgerMenuManager: Opening menu');
         this.isOpen = true;
-        this.mobileMenu.classList.add('active');
+        this.overflowMenu.classList.add('active');
         if (this.overlay) {
             this.overlay.classList.add('active');
         }
-        document.body.classList.add('menu-open');
-        
-        // Update hamburger button icon
-        this.updateHamburgerIcon();
+        document.body.classList.add('overflow-menu-open');
+        console.log('HamburgerMenuManager: Menu opened, overflow menu classes:', this.overflowMenu.className);
     }
 
     /**
-     * Close the mobile menu
+     * Close the overflow menu
      */
     closeMenu() {
         this.isOpen = false;
-        this.mobileMenu.classList.remove('active');
+        this.overflowMenu.classList.remove('active');
         if (this.overlay) {
             this.overlay.classList.remove('active');
         }
-        document.body.classList.remove('menu-open');
-        
-        // Update hamburger button icon
-        this.updateHamburgerIcon();
+        document.body.classList.remove('overflow-menu-open');
     }
 
-    /**
-     * Update the hamburger button icon based on menu state
-     */
-    updateHamburgerIcon() {
-        const icon = this.hamburgerButton.querySelector('.icon');
-        if (icon) {
-            if (this.isOpen) {
-                icon.setAttribute('data-svg', 'close');
-                icon.setAttribute('title', 'Close menu');
-            } else {
-                icon.setAttribute('data-svg', 'hamburger');
-                icon.setAttribute('title', 'Open menu');
-            }
-            
-            // Reload the SVG after changing the data-svg attribute
-            this.reloadSVG(icon);
-        }
-    }
-
-    /**
-     * Reload SVG for a specific element
-     */
-    reloadSVG(element) {
-        const svgType = element.getAttribute('data-svg');
-        if (window.SVGManager && window.SVGManager[svgType + 'SVG']) {
-            element.innerHTML = window.SVGManager[svgType + 'SVG'];
-        } else if (window.uiManager && window.uiManager.populateSvgs) {
-            // Fallback to UIManager method
-            window.uiManager.populateSvgs([element]);
-        }
-    }
 
     /**
      * Check if menu is currently open

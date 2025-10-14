@@ -2,10 +2,10 @@
 /* All base styles inherited from nav-link.css */
 
 nav .nav-link.language-switcher .current-language {
-    padding: 15px;
+    padding: 0;
     cursor: pointer;
     border-radius: 3px;
-    font-size: 0.5em;
+    font-size: 0.7em;
     text-transform: uppercase;
     color: #fff;
     display: flex;

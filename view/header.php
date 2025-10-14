@@ -30,7 +30,7 @@
 </head>
 <body>
     <nav>   
-        <div class="nav-link language-switcher" data-i18n-title="nav.language_tooltip" title="{{ translate('nav.language_tooltip') }}">
+        <div class="nav-link language-switcher" data-item="language" data-i18n-title="nav.language_tooltip" title="{{ translate('nav.language_tooltip') }}">
             <div class="current-language">
                 {% if current_language == 'en' %}EN{% else %}FR{% endif %}
             </div>
@@ -42,7 +42,7 @@
                 <a data-language="fr" class="{% if current_language == 'fr' %}active{% endif %}">FR</a>
             </div>
         </div>
-        <div class="nav-link tutorial-switcher" data-i18n-title="nav.tutorial_tooltip" title="{{ translate('nav.tutorial_tooltip') }}">
+        <div class="nav-link tutorial-switcher" data-item="tutorial" data-i18n-title="nav.tutorial_tooltip" title="{{ translate('nav.tutorial_tooltip') }}">
             <div class="current-tutorial" data-svg="how" data-i18n-title="nav.tutorial_tooltip" title="{{ translate('nav.tutorial_tooltip') }}">
             </div>
             <div class="nav-text" data-i18n="nav.tutorial">
@@ -55,23 +55,31 @@
             </div>
         </div>
         {% if title_key != 'page_title.home' %}
-        <a class="nav-link home" href="{{ langUrl('') }}">
+        <a class="nav-link home" data-item="home" href="{{ langUrl('') }}">
             <span class="icon" data-svg="home" data-i18n-title="nav.home_tooltip" title="{{ translate('nav.home_tooltip') }}"></span>
             <span class="nav-text" data-i18n="nav.home">
                 {{ translate('nav.home') }}
             </span>
-        </a>  
+        </a>
+        {% endif %}
+        {% if title_key != 'page_title.dashboard' %}
+        <a class="nav-link dashboard-nav" data-item="dashboard" href="{{ langUrl('dashboard') }}">
+            <span class="icon" data-svg="dashboard" data-i18n-title="nav.dashboard_tooltip" title="{{ translate('nav.dashboard_tooltip') }}"></span>
+            <span class="nav-text" data-i18n="nav.dashboard">
+                {{ translate('nav.dashboard') }}
+            </span>
+        </a>
         {% endif %}
 
         {% if title_key == 'page_title.texts' %}
-            <a class="nav-link filter">
+            <a class="nav-link filter" data-item="filter">
                 <span class="icon" data-svg="filter" data-i18n-title="nav.filter_tooltip" title="{{ translate('nav.filter_tooltip') }}"></span>
                 <span class="nav-text" data-i18n="nav.filter">
                     {{ translate('nav.filter') }}
                 </span>
             </a> 
         {% else %} 
-            <a class="nav-link texts" href="{{ langUrl('text') }}">
+            <a class="nav-link texts" data-item="browse" href="{{ langUrl('text') }}">
                 <span class="icon" data-svg="browse" data-i18n-title="nav.browse_tooltip" title="{{ translate('nav.browse_tooltip') }}"></span>
                 <span class="nav-text" data-i18n="nav.browse">
                     {{ translate('nav.browse') }}
@@ -80,7 +88,7 @@
         {% endif %}
 
         {% if title_key == 'page_title.texts' or title_key == 'page_title.collab' %}
-            <a class="nav-link search" href="{{ langUrl('search') }}">
+            <a class="nav-link search" data-item="search" href="{{ langUrl('search') }}">
                 <span class="icon" data-svg="search" data-i18n-title="nav.search_tooltip" title="{{ translate('nav.search_tooltip') }}"></span>
                 <span class="nav-text" data-i18n="nav.search">
                     {{ translate('nav.search') }}
@@ -89,7 +97,7 @@
         {% endif %}
 
     {% if guest and title_key != 'page_title.login' %}
-        <a class="nav-link writers" href="{{ langUrl('login') }}">
+        <a class="nav-link writers" data-item="login" href="{{ langUrl('login') }}">
             <span class="icon" data-svg="logIn" data-i18n-title="nav.login_tooltip" title="{{ translate('nav.login_tooltip') }}"></span>
             <span class="nav-text" data-i18n="nav.login">
                 {{ translate('nav.login') }}
@@ -99,21 +107,21 @@
     {% if not guest %}
         <!-- <a class="nav-link writers" href="{{path}}writer">show all writers</a> -->
         <!-- <a class="nav-link newGame" href="{{path}}text/create?new=true"> -->
-        <a class="nav-link newGame" href="{{ langUrl('text/create?new=true') }}">
+        <a class="nav-link newGame" data-item="newGame" href="{{ langUrl('text/create?new=true') }}">
             <span class="icon" data-svg="newGame" data-i18n-title="nav.newGame_tooltip" title="{{ translate('nav.newGame_tooltip') }}"></span>
             <span class="nav-text" data-i18n="nav.newGame">
                 {{ translate('nav.newGame') }}
             </span>
         </a>
 
-        <a class="nav-link notifications">
+        <a class="nav-link notifications" data-item="notifications">
             <span class="icon" data-svg="notification" data-i18n-title="nav.notifications_tooltip" title="{{ translate('nav.notifications_tooltip') }}"></span>
             <span class="nav-text" data-i18n="nav.notifications">
                 {{ translate('nav.notifications') }}
             </span>
         </a>
         {% if session.privilege == 1 %}
-            <a class="nav-link writers" href="{{ langUrl('journal') }}">
+            <a class="nav-link writers" data-item="journal" href="{{ langUrl('journal') }}">
                 <span class="icon" data-svg="journal" data-i18n-title="nav.journal_tooltip" title="{{ translate('nav.journal_tooltip') }}"></span>
                 <span class="nav-text" data-i18n="nav.journal">
                     {{ translate('nav.journal') }}
@@ -136,14 +144,14 @@
     {% endif %}
 
     {% if not guest and title_key != 'page_title.login' %}
-        <a class="nav-link writers" href="{{ langUrl('login/logout') }}">
+        <a class="nav-link writers" data-item="logout" href="{{ langUrl('login/logout') }}">
             <span class="icon" data-svg="logOut" data-i18n-title="nav.logout_tooltip" title="{{ translate('nav.logout_tooltip') }}"></span>
             <span class="nav-text" data-i18n="nav.logout">
                 {{ translate('nav.logout') }}
             </span>
         </a>
     {% endif %}
-        <div class="nav-link hamburger" data-i18n-title="nav.menu_tooltip" title="{{ translate('nav.menu_tooltip') }}">
+        <div class="nav-link hamburger" data-item="hamburger" data-i18n-title="nav.menu_tooltip" title="{{ translate('nav.menu_tooltip') }}">
             <span class="icon" data-svg="hamburger" data-i18n-title="nav.menu_tooltip" title="{{ translate('nav.menu_tooltip') }}"></span>
             <span class="nav-text" data-i18n="nav.menu">
                 {{ translate('nav.menu') }}
@@ -154,51 +162,53 @@
     {% endif %} -->
     </nav>
 
-    <!-- Mobile Menu -->
-    <div class="mobile-menu-overlay"></div>
-    <div class="mobile-menu">
-        <div class="mobile-menu-header">
-            <button class="mobile-menu-close" aria-label="Close menu">
+    <!-- Overflow Menu -->
+    <div class="overflow-menu-overlay"></div>
+    <div class="overflow-menu">
+        <div class="overflow-menu-header">
+            <!-- Back Button (hidden by default, shown when submenu is active) -->
+            <button class="overflow-menu-back" aria-label="Back to main menu" style="display: none;">
+                <span class="back-arrow">←</span>
+                <span class="back-text" data-i18n="nav.back">{{ translate('nav.back') }}</span>
+            </button>
+            
+            <!-- Close Button -->
+            <button class="overflow-menu-close" aria-label="Close menu">
                 <span class="icon" data-svg="close"></span>
             </button>
         </div>
-        <div class="mobile-menu-content">
-            <!-- Language Switcher -->
-            <div class="mobile-menu-item">
-                <div class="nav-link language-switcher" data-i18n-title="nav.language_tooltip" title="{{ translate('nav.language_tooltip') }}">
-                    <div class="current-language">
-                        {% if current_language == 'en' %}EN{% else %}FR{% endif %}
-                    </div>
-                    <div class="nav-text" data-i18n="nav.language">
-                        {{ translate('nav.language') }}
-                    </div>
-                    <div class="language-dropdown">
-                        <a data-language="en" class="{% if current_language == 'en' %}active{% endif %}">EN</a>
-                        <a data-language="fr" class="{% if current_language == 'fr' %}active{% endif %}">FR</a>
+        <div class="overflow-menu-content">
+            <!-- Main Menu Column -->
+            <div class="overflow-menu-main">
+                <!-- Language Switcher -->
+                <div class="overflow-menu-item">
+                    <div class="nav-link language-switcher" data-item="language" data-i18n-title="nav.language_tooltip" title="{{ translate('nav.language_tooltip') }}">
+                        <div class="current-language">
+                            {% if current_language == 'en' %}EN{% else %}FR{% endif %}
+                        </div>
+                        <div class="nav-text" data-i18n="nav.language">
+                            {{ translate('nav.language') }}
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Tutorial Switcher -->
-            <div class="mobile-menu-item">
-                <div class="nav-link tutorial-switcher" data-i18n-title="nav.tutorial_tooltip" title="{{ translate('nav.tutorial_tooltip') }}">
-                    <div class="current-tutorial" data-svg="how" data-i18n-title="nav.tutorial_tooltip" title="{{ translate('nav.tutorial_tooltip') }}">
-                    </div>
-                    <div class="nav-text" data-i18n="nav.tutorial">
-                        {{ translate('nav.tutorial') }}
-                    </div>
-                    <div class="tutorial-dropdown">
-                        <a data-tutorial="start-game" data-i18n="nav.tutorial_start_game" data-i18n-title="nav.tutorial_start_game_tooltip" title="{{ translate('nav.tutorial_start_game_tooltip') }}">{{ translate('nav.tutorial_start_game') }}</a>
-                        <a data-tutorial="contribute" data-i18n="nav.tutorial_contribute" data-i18n-title="nav.tutorial_contribute_tooltip" title="{{ translate('nav.tutorial_contribute_tooltip') }}">{{ translate('nav.tutorial_contribute') }}</a>
-                        <a data-tutorial="vote" data-i18n="nav.tutorial_vote" data-i18n-title="nav.tutorial_vote_tooltip" title="{{ translate('nav.tutorial_vote_tooltip') }}">{{ translate('nav.tutorial_vote') }}</a>
+                <!-- Tutorial Switcher -->
+                <div class="overflow-menu-item">
+                    <div class="nav-link tutorial-switcher" data-item="tutorial" data-i18n-title="nav.tutorial_tooltip" title="{{ translate('nav.tutorial_tooltip') }}">
+                        <div class="current-tutorial" data-svg="how" data-i18n-title="nav.tutorial_tooltip" title="{{ translate('nav.tutorial_tooltip') }}">
+                        </div>
+                        <div class="nav-text" data-i18n="nav.tutorial">
+                            {{ translate('nav.tutorial') }}
+                        </div>
                     </div>
                 </div>
-            </div>
+
+            
 
             <!-- Home Link -->
             {% if title_key != 'page_title.home' %}
-            <div class="mobile-menu-item">
-                <a class="nav-link home" href="{{ langUrl('') }}">
+            <div class="overflow-menu-item">
+                <a class="nav-link home" data-item="home" href="{{ langUrl('') }}">
                     <span class="icon" data-svg="home" data-i18n-title="nav.home_tooltip" title="{{ translate('nav.home_tooltip') }}"></span>
                     <span class="nav-text" data-i18n="nav.home">
                         {{ translate('nav.home') }}
@@ -207,10 +217,22 @@
             </div>
             {% endif %}
 
+            <!-- Dashboard Link -->
+            {% if title_key != 'page_title.dashboard' %}
+            <div class="overflow-menu-item">
+                <a class="nav-link dashboard-nav" data-item="dashboard" href="{{ langUrl('dashboard') }}">
+                    <span class="icon" data-svg="dashboard" data-i18n-title="nav.dashboard_tooltip" title="{{ translate('nav.dashboard_tooltip') }}"></span>
+                    <span class="nav-text" data-i18n="nav.dashboard">
+                        {{ translate('nav.dashboard') }}
+                    </span>
+                </a>
+            </div>
+            {% endif %}
+
             <!-- Browse/Filter Link -->
             {% if title_key == 'page_title.texts' %}
-            <div class="mobile-menu-item">
-                <a class="nav-link filter">
+            <div class="overflow-menu-item">
+                <a class="nav-link filter" data-item="filter">
                     <span class="icon" data-svg="filter" data-i18n-title="nav.filter_tooltip" title="{{ translate('nav.filter_tooltip') }}"></span>
                     <span class="nav-text" data-i18n="nav.filter">
                         {{ translate('nav.filter') }}
@@ -218,8 +240,8 @@
                 </a>
             </div>
             {% else %}
-            <div class="mobile-menu-item">
-                <a class="nav-link texts" href="{{ langUrl('text') }}">
+            <div class="overflow-menu-item">
+                <a class="nav-link texts" data-item="browse" href="{{ langUrl('text') }}">
                     <span class="icon" data-svg="browse" data-i18n-title="nav.browse_tooltip" title="{{ translate('nav.browse_tooltip') }}"></span>
                     <span class="nav-text" data-i18n="nav.browse">
                         {{ translate('nav.browse') }}
@@ -230,8 +252,8 @@
 
             <!-- Search Link -->
             {% if title_key == 'page_title.texts' or title_key == 'page_title.collab' %}
-            <div class="mobile-menu-item">
-                <a class="nav-link search" href="{{ langUrl('search') }}">
+            <div class="overflow-menu-item">
+                <a class="nav-link search" data-item="search" href="{{ langUrl('search') }}">
                     <span class="icon" data-svg="search" data-i18n-title="nav.search_tooltip" title="{{ translate('nav.search_tooltip') }}"></span>
                     <span class="nav-text" data-i18n="nav.search">
                         {{ translate('nav.search') }}
@@ -242,8 +264,8 @@
 
             <!-- Login Link (for guests) -->
             {% if guest and title_key != 'page_title.login' %}
-            <div class="mobile-menu-item">
-                <a class="nav-link writers" href="{{ langUrl('login') }}">
+            <div class="overflow-menu-item">
+                <a class="nav-link writers" data-item="login" href="{{ langUrl('login') }}">
                     <span class="icon" data-svg="logIn" data-i18n-title="nav.login_tooltip" title="{{ translate('nav.login_tooltip') }}"></span>
                     <span class="nav-text" data-i18n="nav.login">
                         {{ translate('nav.login') }}
@@ -254,8 +276,8 @@
 
             <!-- New Game Link (for logged in users) -->
             {% if not guest %}
-            <div class="mobile-menu-item">
-                <a class="nav-link newGame" href="{{ langUrl('text/create?new=true') }}">
+            <div class="overflow-menu-item">
+                <a class="nav-link newGame" data-item="newGame" href="{{ langUrl('text/create?new=true') }}">
                     <span class="icon" data-svg="newGame" data-i18n-title="nav.newGame_tooltip" title="{{ translate('nav.newGame_tooltip') }}"></span>
                     <span class="nav-text" data-i18n="nav.newGame">
                         {{ translate('nav.newGame') }}
@@ -264,8 +286,8 @@
             </div>
 
             <!-- Notifications Link -->
-            <div class="mobile-menu-item">
-                <a class="nav-link notifications">
+            <div class="overflow-menu-item">
+                <a class="nav-link notifications" data-item="notifications">
                     <span class="icon" data-svg="notification" data-i18n-title="nav.notifications_tooltip" title="{{ translate('nav.notifications_tooltip') }}"></span>
                     <span class="nav-text" data-i18n="nav.notifications">
                         {{ translate('nav.notifications') }}
@@ -275,8 +297,8 @@
 
             <!-- Journal Link (for admin) -->
             {% if session.privilege == 1 %}
-            <div class="mobile-menu-item">
-                <a class="nav-link writers" href="{{ langUrl('journal') }}">
+            <div class="overflow-menu-item">
+                <a class="nav-link writers" data-item="journal" href="{{ langUrl('journal') }}">
                     <span class="icon" data-svg="journal" data-i18n-title="nav.journal_tooltip" title="{{ translate('nav.journal_tooltip') }}"></span>
                     <span class="nav-text" data-i18n="nav.journal">
                         {{ translate('nav.journal') }}
@@ -285,10 +307,20 @@
             </div>
             {% endif %}
 
+            <!-- About Link -->
+            <div class="overflow-menu-item">
+                <button class="nav-link about" data-item="about" data-i18n-title="nav.about_tooltip" title="{{ translate('nav.about_tooltip') }}">
+                    <span class="icon" data-svg="about" data-i18n-title="nav.about_tooltip" title="{{ translate('nav.about_tooltip') }}"></span>
+                    <span class="nav-text" data-i18n="nav.about">
+                        {{ translate('nav.about') }}
+                    </span>
+                </button>
+            </div>
+
             <!-- Logout Link -->
             {% if title_key != 'page_title.login' %}
-            <div class="mobile-menu-item">
-                <a class="nav-link writers" href="{{ langUrl('login/logout') }}">
+            <div class="overflow-menu-item">
+                <a class="nav-link writers" data-item="logout" href="{{ langUrl('login/logout') }}">
                     <span class="icon" data-svg="logOut" data-i18n-title="nav.logout_tooltip" title="{{ translate('nav.logout_tooltip') }}"></span>
                     <span class="nav-text" data-i18n="nav.logout">
                         {{ translate('nav.logout') }}
@@ -297,6 +329,25 @@
             </div>
             {% endif %}
             {% endif %}
+            </div>
+            
+            <!-- Submenu Column -->
+            <div class="overflow-menu-submenu">
+                <!-- Language Submenu -->
+                <div class="submenu-content language-submenu" data-submenu="language">
+                    <h3 data-i18n="nav.language">{{ translate('nav.language') }}</h3>
+                    <a data-language="en" class="{% if current_language == 'en' %}active{% endif %}">English</a>
+                    <a data-language="fr" class="{% if current_language == 'fr' %}active{% endif %}">Français</a>
+                </div>
+                
+                <!-- Tutorial Submenu -->
+                <div class="submenu-content tutorial-submenu" data-submenu="tutorial">
+                    <h3 data-i18n="nav.tutorial">{{ translate('nav.tutorial') }}</h3>
+                    <a data-tutorial="start-game" data-i18n="nav.tutorial_start_game">{{ translate('nav.tutorial_start_game') }}</a>
+                    <a data-tutorial="contribute" data-i18n="nav.tutorial_contribute">{{ translate('nav.tutorial_contribute') }}</a>
+                    <a data-tutorial="vote" data-i18n="nav.tutorial_vote">{{ translate('nav.tutorial_vote') }}</a>
+                </div>
+            </div>
         </div>
     </div>
 

@@ -39,6 +39,33 @@ export class TutorialSwitcherManager {
                 switcher.classList.remove('open');
             });
         });
+        
+        // Handle submenu tutorial links (overflow menu)
+        const submenuTutorialLinks = document.querySelectorAll('.submenu-content.tutorial-submenu a[data-tutorial]');
+        submenuTutorialLinks.forEach(link => {
+            const tutorialType = link.getAttribute('data-tutorial');
+            
+            // Add click event listener
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.startTutorial(tutorialType);
+            });
+        });
+        
+        // Update active states for all tutorial links
+        this.updateTutorialActiveStates();
+
+        // Listen for overflow menu tutorial selection events
+        document.addEventListener('submenu:tutorial:selected', (e) => {
+            console.log('TutorialSwitcherManager: Received submenu tutorial selection:', e.detail.tutorial);
+            this.startTutorial(e.detail.tutorial);
+        });
+        
+        // Listen for tutorial closed events
+        eventBus.on('tutorialClosed', () => {
+            this.clearTutorialActiveStates();
+        });
 
         // if there is an active tutorial in local storage, then load the tutorial modal
         if (localStorage.getItem('activeTutorial')) {
@@ -54,9 +81,11 @@ export class TutorialSwitcherManager {
         if (!this.tutorialModal) {
             this.initTutorialModal().then(() => {
                 this.tutorialModal.showTutorial(tutorialType);
+                this.updateTutorialActiveStates();
             });
         } else {
             this.tutorialModal.showTutorial(tutorialType);
+            this.updateTutorialActiveStates();
         }
     }
 
@@ -102,5 +131,64 @@ export class TutorialSwitcherManager {
         
         document.body.appendChild(modalElement);
         return modalElement;
+    }
+    
+    /**
+     * Update active states for all tutorial links (main nav and overflow menu)
+     */
+    updateTutorialActiveStates() {
+        // Get current active tutorial from localStorage
+        const activeTutorial = localStorage.getItem('activeTutorial');
+        let currentTutorialType = null;
+        
+        if (activeTutorial) {
+            try {
+                const tutorialData = JSON.parse(activeTutorial);
+                currentTutorialType = tutorialData.tutorialType;
+            } catch (e) {
+                console.warn('Failed to parse activeTutorial from localStorage:', e);
+            }
+        }
+        
+        // Update main nav tutorial links
+        const mainNavTutorialLinks = document.querySelectorAll('.tutorial-dropdown a[data-tutorial]');
+        mainNavTutorialLinks.forEach(link => {
+            const linkTutorialType = link.getAttribute('data-tutorial');
+            
+            if (linkTutorialType === currentTutorialType) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
+        
+        // Update overflow menu tutorial links
+        const submenuTutorialLinks = document.querySelectorAll('.submenu-content.tutorial-submenu a[data-tutorial]');
+        submenuTutorialLinks.forEach(link => {
+            const linkTutorialType = link.getAttribute('data-tutorial');
+            
+            if (linkTutorialType === currentTutorialType) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
+    }
+    
+    /**
+     * Clear active states for all tutorial links (main nav and overflow menu)
+     */
+    clearTutorialActiveStates() {
+        // Clear main nav tutorial links
+        const mainNavTutorialLinks = document.querySelectorAll('.tutorial-dropdown a[data-tutorial]');
+        mainNavTutorialLinks.forEach(link => {
+            link.classList.remove('active');
+        });
+        
+        // Clear overflow menu tutorial links
+        const submenuTutorialLinks = document.querySelectorAll('.submenu-content.tutorial-submenu a[data-tutorial]');
+        submenuTutorialLinks.forEach(link => {
+            link.classList.remove('active');
+        });
     }
 } 

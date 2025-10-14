@@ -25,6 +25,8 @@
       "notifications_tooltip": "notifications",
       "tutorial": "Tutorial",
       "tutorial_tooltip": "view tutorials",
+      "dashboard": "Dashboard",
+      "dashboard_tooltip": "view dashboard",
       "tutorial_start_game": "Start a Game",
       "tutorial_contribute": "Contribute to a Game",
       "tutorial_vote": "Vote on Text Nodes",
@@ -33,7 +35,10 @@
       "logout": "Logout",
       "logout_tooltip": "logout",
       "menu": "Menu",
-      "menu_tooltip": "menu"
+      "menu_tooltip": "menu",
+      "back": "Back",
+      "about": "About",
+      "about_tooltip": "about this site"
   },
   "notifications": {
     "notification_game_won": "Game Won!",
@@ -50,6 +55,13 @@
   },
   "footer": {
     "made_with_love": "Made with love by Melisandre"
+  },
+  "about": {
+    "title": "About Tag You Write",
+    "description": "A collaborative writing platform where creativity meets community.",
+    "creator": {
+      "bio": "Created by Mélisandre, a developer who believes in the power of collaborative storytelling."
+    }
   },
   "page_title" : {
     "home": "Scratch that!",

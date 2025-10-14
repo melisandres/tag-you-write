@@ -22,8 +22,10 @@
     "newGame_tooltip": "créer une nouvelle collaboration",
     "notifications": "Notifications",
     "notifications_tooltip": "notifications",
-    "tutorial": "Tutoriel",
-    "tutorial_tooltip": "tutoriel",
+      "tutorial": "Tutoriel",
+      "tutorial_tooltip": "tutoriel",
+      "dashboard": "Tableau de Bord",
+      "dashboard_tooltip": "voir le tableau de bord",
     "tutorial_start_game": "Commencer une partie",
     "tutorial_contribute": "Contribuer à une partie",
     "tutorial_vote": "Voter sur les noeuds de texte",
@@ -32,7 +34,10 @@
     "logout": "Quitter",
     "logout_tooltip": "déconnexion",
     "menu": "Menu",
-    "menu_tooltip": "menu"
+    "menu_tooltip": "menu",
+    "back": "Retour",
+    "about": "À propos",
+    "about_tooltip": "à propos de ce site"
   },
   "notifications": {
     "notification_game_won": "Partie Gagnée!",
@@ -49,6 +54,13 @@
   },
   "footer": {
     "made_with_love": "programmé avec amour, Mélisandre"
+  },
+  "about": {
+    "title": "À propos de Tag You Write",
+    "description": "Une plateforme d'écriture collaborative où la créativité rencontre la communauté.",
+    "creator": {
+      "bio": "Créé par Mélisandre, une développeuse qui croit au pouvoir de la narration collaborative."
+    }
   },
   "page_title": {
     "home": "Scratchez-moi ça!",

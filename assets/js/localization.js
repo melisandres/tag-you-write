@@ -127,6 +127,9 @@ export class Localization {
     const languageSwitchers = document.querySelectorAll('.language-switcher');
     if (languageSwitchers.length === 0) return;
     
+    // Also find all submenu language links (overflow menu)
+    const submenuLanguageLinks = document.querySelectorAll('.submenu-content.language-submenu a[data-language]');
+    
     languageSwitchers.forEach(switcher => {
       const currentLanguageElement = switcher.querySelector('.current-language');
       const languageLinks = switcher.querySelectorAll('.language-dropdown a[data-language]');
@@ -164,6 +167,27 @@ export class Localization {
         switcher.classList.remove('open');
       });
     });
+    
+    // Handle submenu language links (overflow menu)
+    submenuLanguageLinks.forEach(link => {
+      const lang = link.getAttribute('data-language');
+      
+      // Add active class to current language
+      if (lang === this.currentLanguage) {
+        link.classList.add('active');
+      } else {
+        link.classList.remove('active');
+      }
+      
+      // Add click event listener
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.switchLanguage(lang);
+      });
+    });
+
+    // Language submenu clicks are handled directly above, no need for event listeners
   }
 
   /**
@@ -277,6 +301,7 @@ export class Localization {
    */
   updateLanguageSwitcherUI(lang) {
     const languageSwitchers = document.querySelectorAll('.language-switcher');
+    const submenuLanguageLinks = document.querySelectorAll('.submenu-content.language-submenu a[data-language]');
     
     languageSwitchers.forEach(switcher => {
       const currentLanguageElement = switcher.querySelector('.current-language');
@@ -300,6 +325,17 @@ export class Localization {
       
       // Close the dropdown
       switcher.classList.remove('open');
+    });
+    
+    // Update submenu language links (overflow menu)
+    submenuLanguageLinks.forEach(link => {
+      const linkLang = link.getAttribute('data-language');
+      
+      if (linkLang === lang) {
+        link.classList.add('active');
+      } else {
+        link.classList.remove('active');
+      }
     });
   }
 

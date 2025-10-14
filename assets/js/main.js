@@ -47,12 +47,15 @@ import { TextFormGameActivityIndicator } from './textFormGameActivityIndicator.j
 import { InviteInputManager } from './inviteInputManager.js';
 import { InviteeSuggestionsManager } from './inviteeSuggestionsManager.js';
 import { FormTogglesManager } from './formTogglesManager.js';
+import { AboutManager } from './aboutManager.js';
 import { InvitationTokenManager } from './invitationTokenManager.js';
 import { InvitationLinkManager } from './invitationLinkManager.js';
 import { TutorialSwitcherManager } from './tutorialSwitcherManager.js';
 import { DashboardManager } from './dashboardManager.js';
 import { CategoryHeaderManager } from './categoryHeaderManager.js';
 import { HamburgerMenuManager } from './hamburgerMenuManager.js';
+import { ResponsiveNavManager } from './responsiveNavManager.js';
+import { UniversalSubmenuManager } from './universalSubmenuManager.js';
 import { SVGManager } from './svgManager.js';
 
 // Make eventBus globally available immediately
@@ -94,6 +97,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Initialize NotificationsMenuManager and make it globally available
   window.notificationsMenuManager = new NotificationsMenuManager();
+
+  // Initialize AboutManager and make it globally available
+  window.aboutManager = new AboutManager();
 
   // Only initialize GameListManager if we're on the games list page
   //const gamesContainer = document.querySelector('.stories');
@@ -205,6 +211,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Initialize HamburgerMenuManager
   window.hamburgerMenuManager = new HamburgerMenuManager();
 
+  // Initialize ResponsiveNavManager
+  window.responsiveNavManager = new ResponsiveNavManager();
+
+  // Initialize UniversalSubmenuManager
+  window.universalSubmenuManager = new UniversalSubmenuManager();
+
   // Initialize CurrentActivityManager
   window.currentActivityManager = new CurrentActivityManager();
 
@@ -243,7 +255,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Initialize update handling
   new NodesModifiedHandler();
   const gamesModifiedHandler = new GamesModifiedHandler();
-
 
 
 });

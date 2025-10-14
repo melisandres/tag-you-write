@@ -1,3 +1,5 @@
+import { eventBus } from './eventBus.js';
+
 export class TutorialModal {
     constructor(modalElement) {
         this.modalElement = modalElement;
@@ -460,6 +462,10 @@ export class TutorialModal {
         this.modalElement.classList.add('display-none');
         this.removePageMargin();
         this.clearTutorialState();
+        
+        // Emit event to clear tutorial active states
+        eventBus.emit('tutorialClosed');
+        
         console.log('Tutorial hidden');
     }
 

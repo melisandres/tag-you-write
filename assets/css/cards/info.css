@@ -36,7 +36,7 @@ section.info{
     background-color: var(--color-primary-lightest);
     padding: 1em;
     padding-top: 2em;
-    width: 100%;
+    width: 98%;
     position: relative;
     max-width: min(75ch, 600px);
     box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);

@@ -1,0 +1,22 @@
+/* Dashboard Nav-Link Styles */
+/* All base styles inherited from nav-link.css */
+
+/* Dashboard-specific SVG styling - adjust size to match other icons */
+.nav-link.dashboard-nav svg,
+.nav-link.dashboard-nav .icon svg {
+    width: 24px;
+    height: 24px;
+    transform: scale(1.1);
+}
+
+/* Ensure proper color inheritance */
+.nav-link.dashboard-nav svg path {
+    fill: currentColor;
+    stroke: currentColor;
+}
+
+/* Hover state */
+.nav-link.dashboard-nav:hover svg path {
+    fill: pink;
+    stroke: pink;
+}

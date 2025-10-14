@@ -1,0 +1,358 @@
+/* Overflow Menu Styles */
+
+/* Overflow Menu Overlay */
+.overflow-menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 998;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.overflow-menu-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Overflow Menu Container */
+.overflow-menu {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 300px;
+    max-width: 80vw;
+    height: 100vh;
+    background-color: var(--bg-color, #ffffff);
+    z-index: 999;
+    transition: right 0.3s ease;
+    overflow-y: auto;
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.overflow-menu.active {
+    right: 0;
+}
+
+/* Overflow Menu Header */
+.overflow-menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color, #e0e0e0);
+    background-color: var(--bg-color, #ffffff);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.overflow-menu-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.overflow-menu-close .icon:hover svg{
+    color: var(--color-love);
+}
+
+.overflow-menu-close .icon svg{
+    width: 24px;
+    height: 24px;
+    fill: var(--color-black);
+}
+
+/* Overflow Menu Content - Flexbox Layout */
+.overflow-menu-content {
+    padding: 1rem 0;
+    display: flex;
+    transition: all 0.3s ease;
+}
+
+/* Main menu column - takes full width by default */
+.overflow-menu-main {
+    flex: 1;
+    min-width: 0; /* Allow flex item to shrink */
+}
+
+/* Submenu column - hidden by default */
+.overflow-menu-submenu {
+    flex: 0 0 0; /* Don't grow, don't shrink, 0 width */
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+/* Header Back Button Styling */
+.overflow-menu-back {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+    color: var(--text-color, #333333);
+    font-size: 0.9rem;
+    margin-right: auto; /* Push to left side */
+}
+
+.overflow-menu-back:hover {
+    background-color: var(--hover-bg-color, #f5f5f5);
+}
+
+.overflow-menu-back .back-arrow {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--color-love, #ff69b4);
+}
+
+.overflow-menu-back .back-text {
+    font-weight: 500;
+}
+
+/* When submenu is active, show submenu column */
+.overflow-menu-content.submenu-active .overflow-menu-main {
+    flex: 0 0 50%; /* Take up 50% of width */
+}
+
+.overflow-menu-content.submenu-active .overflow-menu-submenu {
+    flex: 0 0 50%; /* Take up 50% of width */
+}
+
+/* Submenu Content */
+.submenu-content {
+    display: none;
+    padding: 1rem;
+}
+
+.submenu-content.active {
+    display: block;
+}
+
+.submenu-content h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-color, #333333);
+    border-bottom: 2px solid var(--color-love);
+    padding-bottom: 0.5rem;
+}
+
+.submenu-content a {
+    display: block;
+    padding: 0.75rem 0;
+    color: var(--text-color, #333333);
+    text-decoration: none;
+    font-size: 1rem;
+    transition: color 0.2s ease, background-color 0.2s ease;
+    border-radius: 4px;
+    margin: 0.25rem 0;
+}
+
+.submenu-content a:hover {
+    color: var(--color-love);
+    cursor: pointer;
+    /* background-color: var(--hover-bg-color, #f5f5f5); */
+}
+
+.submenu-content a.active {
+    color: var(--color-love);
+    font-weight: 600;
+    /* background-color: var(--hover-bg-color, #f5f5f5); */
+}
+
+.overflow-menu-item {
+    margin-bottom: 0.5rem;
+}
+
+.overflow-menu-item:last-child {
+    margin-bottom: 0;
+}
+
+/* Overflow Menu Nav Links */
+.overflow-menu .nav-link {
+    display: flex;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    text-decoration: none;
+    color: var(--text-color, #333333);
+    transition: background-color 0.2s ease, border-bottom-color 0.2s ease;
+    border: none;
+    border-bottom: 3px solid transparent; /* Transparent border to prevent layout shift */
+    background: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    max-width: none; /* Override nav-link max-width */
+}
+
+.overflow-menu .nav-link:hover {
+    background-color: var(--hover-bg-color, #f5f5f5);
+    border-bottom-color: var(--color-love); /* Colored border on hover */
+}
+
+.overflow-menu .nav-link .icon {
+    width: 20px;
+    height: 20px;
+    fill: var(--text-color, #333333);
+    flex-shrink: 0; /* Prevent icon from shrinking */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.overflow-menu .nav-link .icon svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+    stroke: currentColor;
+}
+
+.overflow-menu .nav-link .nav-text {
+    font-size: 1rem;
+    font-weight: 500;
+    flex: 1; /* Allow text to take remaining space */
+}
+
+/* Fix tutorial switcher alignment */
+.overflow-menu .tutorial-switcher {
+    display: flex;
+    align-items: center;
+}
+
+.overflow-menu .language-switcher .current-language,
+.overflow-menu .tutorial-switcher .current-tutorial {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+.overflow-menu .tutorial-switcher .current-tutorial svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+    stroke: none; /* Remove stroke to prevent outline */
+}
+
+/* Ensure nav-text is visible in overflow menu for ALL items */
+.overflow-menu .nav-link .nav-text {
+    display: flex;
+    align-items: center;
+    margin-left: 0.75rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-color, #333333);
+}
+
+/* Hide nav-text when submenu is active (icons only) */
+.overflow-menu-content.submenu-active .nav-link .nav-text {
+    display: none;
+}
+
+/* Style active submenu icons - only when their trigger has the active class */
+/* When language switcher is active, style the icon */
+.overflow-menu .nav-link.language-switcher.active .current-language {
+    background-color: var(--color-love, #ff69b4);
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* When tutorial switcher is active, style the icon */
+.overflow-menu .nav-link.tutorial-switcher.active .current-tutorial {
+    background-color: var(--color-love, #ff69b4);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.overflow-menu .nav-link.tutorial-switcher.active .current-tutorial svg {
+    fill: white;
+    width: 18px;
+    height: 18px;
+}
+
+
+/* Old dropdown styles removed - using new flexbox structure */
+
+/* Body scroll lock when menu is open */
+body.overflow-menu-open {
+    overflow: hidden;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .overflow-menu {
+        width: 100%;
+        max-width: 100vw;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .overflow-menu {
+        background-color: var(--dark-bg-color, #1a1a1a);
+        color: var(--dark-text-color, #ffffff);
+    }
+    
+    .overflow-menu-header {
+        background-color: var(--dark-bg-color, #1a1a1a);
+        border-bottom-color: var(--dark-border-color, #333333);
+    }
+    
+    .overflow-menu .nav-link {
+        color: var(--dark-text-color, #ffffff);
+    }
+    
+    .overflow-menu .nav-link:hover {
+        background-color: var(--dark-hover-bg-color, #333333);
+    }
+    
+    .overflow-menu .nav-link .icon {
+        fill: var(--dark-text-color, #ffffff);
+    }
+    
+    .overflow-menu .language-dropdown a,
+    .overflow-menu .tutorial-dropdown a {
+        color: var(--dark-text-color, #ffffff);
+    }
+    
+    .overflow-menu .language-dropdown a:hover,
+    .overflow-menu .tutorial-dropdown a:hover {
+        color: var(--dark-primary-color, #4dabf7);
+    }
+    
+    .overflow-menu .language-dropdown a.active,
+    .overflow-menu .tutorial-dropdown a.active {
+        color: var(--dark-primary-color, #4dabf7);
+    }
+    
+    /* Active tutorial submenu links */
+    .overflow-menu .submenu-content.tutorial-submenu a.active {
+        color: var(--dark-primary-color, #4dabf7);
+        font-weight: bold;
+        background-color: rgba(77, 171, 247, 0.1);
+    }
+}
