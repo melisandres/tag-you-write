@@ -948,11 +948,12 @@ export class ValidationManager {
         // Only emit if there's a change in canAutosave or canPublish
         if (this.lastValidationStatus?.canAutosave !== canAutosave || 
             this.lastValidationStatus?.canPublish !== canPublish) {
+            console.log('ValidationManager: Emitting validationChanged event', newValidationStatus);
             eventBus.emit('validationChanged', newValidationStatus);
             this.lastValidationStatus = newValidationStatus;
             //console.log('newValidationStatus', newValidationStatus);
         } else {
-            //console.log('ValidationManager: No change in validation status, not emitting');
+            console.log('ValidationManager: No change in validation status, not emitting');
         }
     }
 
@@ -962,5 +963,17 @@ export class ValidationManager {
             .filter(([_, fieldStatus]) => !fieldStatus.canAutosave)
             .map(([fieldName, _]) => fieldName)
             .sort(); // Sort for consistent comparison
+    }
+
+    // Get current validation state for external systems
+    getCurrentValidationState() {
+        const canAutosave = Object.values(this.formValidity).every(field => field.canAutosave);
+        const canPublish = Object.values(this.formValidity).every(field => field.canPublish);
+        
+        return {
+            canAutosave,
+            canPublish,
+            fields: this.formValidity
+        };
     }
 }

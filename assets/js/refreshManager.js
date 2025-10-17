@@ -22,7 +22,8 @@ export class RefreshManager {
             form: {
                 data: null,
                 type: null,
-                lastDatabaseState: null
+                lastDatabaseState: null,
+                validity: null // Store form validity state
             },
             scroll: {
                 x: 0,
@@ -56,6 +57,13 @@ export class RefreshManager {
         // Listen for any changes to the form
         //console.log('Initializing custom events');
         eventBus.on('inputChanged', this.handleInputChanged.bind(this));
+        
+        // Listen for validation changes to store form validity state
+        eventBus.on('validationChanged', (validationStatus) => {
+            this.state.form.validity = validationStatus;
+            console.log('RefreshManager: Updated form validity state from validationChanged event', validationStatus);
+            console.log('RefreshManager: Current state.form.validity:', this.state.form.validity);
+        });
         eventBus.on('formUpdated', this.handleFormUpdated.bind(this));
         eventBus.on('manualSave', this.handleManualSave.bind(this));
 /*         // Add event listener for restoringState for story page and forms   
@@ -345,14 +353,42 @@ export class RefreshManager {
             eventBus.emit('hasUnsavedChanges', hasChanges);
         }
 
+        // Restore form validity from saved state
+        if (savedState.form.validity) {
+            this.state.form.validity = savedState.form.validity;
+        }
+        
         // Emit events
         eventBus.emit('formRestored', formData);
         eventBus.emit('formUpdated');
+        
+        // Store form validity in state for tutorial system (if not already restored)
+        if (!this.state.form.validity) {
+            this.storeFormValidity();
+        }
     }
     
 
     handleInputChanged() {
         this.saveFormData();
+    }
+    
+    /**
+     * Store current form validity state for tutorial system
+     */
+    storeFormValidity() {
+        if (window.validationManager) {
+            const validityState = window.validationManager.getCurrentValidationState();
+            this.state.form.validity = validityState;
+            console.log('RefreshManager: Stored form validity state', validityState);
+        }
+    }
+    
+    /**
+     * Get stored form validity state
+     */
+    getFormValidity() {
+        return this.state.form.validity;
     }
 
     //TODO:  Check if this is saving all the fields of all the forms on input... it's called by inputChanged... but is inputChanged called for EVERY input? on every field? 
@@ -384,6 +420,7 @@ export class RefreshManager {
         pageState.form.data = formDataObj;
         pageState.form.type = formType;
         pageState.form.lastDatabaseState = this.autoSaveManager.lastSavedContent;
+        pageState.form.validity = this.state.form.validity; // Save form validity state
         localStorage.setItem('pageState', JSON.stringify(pageState));
     }
 

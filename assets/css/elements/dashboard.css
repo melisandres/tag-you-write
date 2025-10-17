@@ -4,7 +4,6 @@
     margin: 0 auto;
     padding: var(--spacing-medium);
     background: var(--color-white-lightest);
-    min-height: 100vh;
 }
 
 .dashboard-section {
@@ -310,8 +309,7 @@
     
     .dashboard-game-item {
         padding: var(--spacing-extra-small) var(--spacing-small-medium) var(--spacing-extra-small) calc(var(--spacing-small-medium) + var(--spacing-small));
-        flex-direction: column;
-        align-items: flex-start;
+        align-items: center;
         gap: var(--spacing-extra-small);
     }
     

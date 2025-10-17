@@ -5,6 +5,9 @@ export class TutorialSwitcherManager {
         this.tutorialSwitchers = document.querySelectorAll('.tutorial-switcher');
         this.tutorialModal = null;
         this.initTutorialSwitcher();
+        
+        // Set up validation listener immediately so we can track form state
+        this.setupValidationListener();
     }
 
     initTutorialSwitcher() {
@@ -88,6 +91,19 @@ export class TutorialSwitcherManager {
             this.updateTutorialActiveStates();
         }
     }
+
+    setupValidationListener() {
+        console.log('TutorialSwitcherManager: Setting up validation listener');
+        // Listen for validation changes and pass them to the tutorial modal if it exists
+        eventBus.on('validationChanged', (validationStatus) => {
+            console.log('TutorialSwitcherManager: Received validationChanged event', validationStatus);
+            if (this.tutorialModal) {
+                // Pass the validation event to the tutorial modal
+                this.tutorialModal.handleValidationChange(validationStatus);
+            }
+        });
+    }
+    
 
     initTutorialModal() {
         let modalElement = document.querySelector('.tutorial-modal-background');

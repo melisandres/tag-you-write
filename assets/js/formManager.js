@@ -414,6 +414,15 @@ export class FormManager {
                 }
 
                 if (responseData.redirectUrl) {
+                    // Emit tutorial completion event if this is a publish action
+                    if (this.statusField && this.statusField.value === 'published') {
+                        eventBus.emit('publishSuccess', {
+                            action: this.formType, // 'root' for new game, 'iteration' for contribution
+                            textId: responseData.textId,
+                            message: responseData.toastMessage
+                        });
+                    }
+                    
                     localStorage.setItem('pendingToast', JSON.stringify({
                         message: responseData.toastMessage,
                         type: responseData.toastType

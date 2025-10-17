@@ -569,5 +569,99 @@
         "": "Inspiration",
         "bookmarked": "Inspiration > Suivis"
       }
+    },
+    "tutorial": {
+      "shared_steps": {
+        "login": {
+          "title": "Connexion",
+          "substeps": {
+            "navigation": "Cliquez sur le bouton de connexion <span class='info-icon' data-svg='logIn'></span> dans la navigation.",
+            "credentials": "Entrez vos identifiants ou créez un compte."
+          }
+        }
+      },
+      "start-game": {
+        "title": "Comment commencer une histoire",
+        "steps": {
+          "find": {
+            "title": "Trouver...",
+            "substeps": {
+              "symbol": "Cliquez sur le symbole <span class='info-icon' data-svg='newGame'></span>. Où est-il? Navigation supérieure, ou menu déroulant <span class='info-icon' data-svg='hamburger'></span> (selon la taille de votre écran)."
+            }
+          },
+          "write": {
+            "title": "Écrire",
+            "substeps": {
+              "create": "Choisissez un titre. Créez un texte incitatif. Écrivez un texte de départ. Considérez la relation entre ces éléments comme un terrain de jeu--favorisez la tension, le conflit, la poésie, les questions existentielles.",
+              "publish": "Quand vous êtes prêt, <span class='info-icon' data-svg='publish'></span> \"publiez\" pour lancer l'expérience, ou vous pouvez toujours douter de vous-même et <span class='info-icon' data-svg='delete'></span> tout supprimer, ou sauvegarder <span class='info-icon' data-svg='save'></span> ce que vous avez comme brouillon."
+            }
+          },
+          "success": {
+            "title": "Vous l'avez fait!",
+            "substeps": {
+              "congratulations": "🎉 Félicitations! Vous avez réussi à commencer un jeu! Le tutoriel est maintenant terminé."
+            }
+          }
+        }
+      },
+      "contribute": {
+        "title": "Comment contribuer à un jeu",
+        "steps": {
+          "browse": {
+            "title": "Parcourir",
+            "substeps": {
+              "dashboard": "Cliquez sur l'icône <span class='info-icon' data-svg='dashboard'></span> tableau de bord dans la navigation ou dans le menu déroulant <span class='info-icon' data-svg='hamburger'></span>.",
+              "explore": "Explorez \"Histoires disponibles\". Cliquez sur l'icône <span class='info-icon' data-svg='browse'></span> bibliothèque pour une vue détaillée OU directement sur le nom de la catégorie, puis sur n'importe quel titre, pour voir cette histoire.",
+              "view": "Cliquez sur un titre pour voir l'arbre <span class='info-icon' data-svg='tree'></span> ou le rayon <span class='info-icon' data-svg='shelf'></span> de l'histoire."
+            }
+          },
+          "choose": {
+            "title": "Choisir...",
+            "substeps": {
+              "explore": "Cliquez sur les cœurs <span class='info-icon' data-svg='heartOutline'></span> / titres. Explorez les histoires en évolution. Choisissez un texte que vous aimeriez pousser dans une nouvelle direction.",
+              "iterate": "Cliquez sur le bouton <span class='info-icon' data-svg='iterate'></span> \"itérer\", pour commencer à écrire."
+            }
+          },
+          "contribute": {
+            "title": "Contribuer",
+            "substeps": {
+              "write": "Changez le texte. Faites-le judicieusement et sans crainte. Décrivez vos changements en trois mots. Si vous voulez, ajoutez un mot-clé ou deux... nous pourrions les utiliser pour organiser les histoires un jour.",
+              "publish": "Quand vous êtes prêt, <span class='info-icon' data-svg='publish'></span> \"publiez\" pour rendre votre itération disponible aux autres, ou vous pouvez supprimer <span class='info-icon' data-svg='delete'></span> votre itération, ou sauvegarder <span class='info-icon' data-svg='save'></span> ce que vous avez comme brouillon."
+            }
+          },
+          "success": {
+            "title": "Vous l'avez fait!",
+            "substeps": {
+              "congratulations": "🎉 Félicitations! Vous avez réussi à publier votre contribution! Le tutoriel est maintenant terminé."
+            }
+          }
+        }
+      },
+      "vote": {
+        "title": "Comment voter sur les nœuds de texte",
+        "steps": {
+          "browse": {
+            "title": "Parcourir",
+            "substeps": {
+              "dashboard": "Pour voter sur les histoires auxquelles vous avez contribué, commencez par visiter votre <span class='info-icon' data-svg='dashboard'></span> tableau de bord (depuis la navigation ou le menu déroulant <span class='info-icon' data-svg='hamburger'></span>). *Nouveau? Le tutoriel \"Contribuer à une histoire\" vous aidera à commencer.",
+              "active": "Dans \"Mes histoires\" > \"Actif\", cherchez les collaborations partagées. Cliquez sur l'icône <span class='info-icon' data-svg='browse'></span> bibliothèque \"Actif\" pour une liste détaillée OU directement sur le nom de la catégorie, puis sur n'importe quel titre.",
+              "view": "Cliquez sur un titre pour voir l'arbre <span class='info-icon' data-svg='tree'></span> ou le rayon <span class='info-icon' data-svg='shelf'></span> de l'histoire."
+            }
+          },
+          "vote": {
+            "title": "Voter",
+            "substeps": {
+              "explore": "Cliquez sur les cœurs <span class='info-icon' data-svg='heartOutline'></span>/ titres. Explorez comment une histoire évolue. Déterminez quelles contributions vous aimez.",
+              "vote_action": "Cliquez sur la palette <span class='info-icon' data-svg='vote'></span> cœur pour voter/ne pas voter. Vous ne voyez pas de palette cœur? Ce nœud est-il le vôtre? Avez-vous seulement rédigé (non publié) une contribution?"
+            }
+          },
+          "success": {
+            "title": "Vous l'avez fait!",
+            "substeps": {
+              "congratulations": "🎉 Excellent! Vous avez émis ou retiré votre vote! Le tutoriel est maintenant terminé."
+            }
+          }
+        }
+      }
     }
-}
+  }

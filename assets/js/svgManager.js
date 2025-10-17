@@ -1531,6 +1531,16 @@ export class SVGManager{
       `;
    }
 
+   static get heartOutlineSVG() {
+      return `
+      <svg viewBox="-50 -50 100 100" xmlns="http://www.w3.org/2000/svg">
+         <path d="M 0,-10 C -6.57,-17.05 -17.14,-17.05 -23.71,-10 -30.27,-2.95 -30.27,8.39 -23.71,15.45 L 0,41.27 23.71,15.45 C 30.27,8.39 30.27,-2.95 23.71,-10 17.14,-17.05 6.57,-17.05 0,-10 Z" 
+             fill="none"
+             stroke="currentColor"
+             stroke-width="3"/>
+      </svg>`;
+   }
+
    static get newGameSVG(){
       return `
          <?xml version="1.0" encoding="UTF-8" standalone="no"?>

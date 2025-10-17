@@ -148,7 +148,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Buttons and forms listen for validation emitions... 
   new ButtonUpdateManager(autoSaveManager);
   new FormManager(autoSaveManager);
-  new ValidationManager();
+  
+  //The validation manager needs to be initialized before the tutorial switcher manager
+  window.validationManager = new ValidationManager();
+  new TutorialSwitcherManager();
+  
+
   new FormTogglesManager();
   
   // Initialize InviteInputManager for text creation forms
@@ -170,8 +175,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Initialize TooltipManager
     new TooltipManager();
 
-  // Initialize TutorialSwitcherManager
-  new TutorialSwitcherManager();
+  // TutorialSwitcherManager already initialized above
 
   // Initialize DashboardManager (only on dashboard pages)
   if (document.querySelector('.dashboard')) {

@@ -69,6 +69,7 @@
     --color-secondary-darkest: rgb(80, 3, 25); 
 
     --color-write: #99ededea; 
+    --color-accent-no-transparency: #f2f47b;
     --color-accent: #f2f47be6; 
     --color-save: rgba(122, 122, 229);
     --color-love: rgba(243, 119, 225); 

@@ -570,5 +570,99 @@
       "": "Inspiration",
       "bookmarked": "Inspiration > Bookmarked"
     }
+  },
+  "tutorial": {
+    "shared_steps": {
+      "login": {
+        "title": "Log in",
+        "substeps": {
+          "navigation": "Click the login button <span class='info-icon' data-svg='logIn'></span> in the navigation.",
+          "credentials": "Enter your credentials or create an account."
+        }
+      }
+    },
+    "start-game": {
+      "title": "How to Start a Story",
+      "steps": {
+        "find": {
+          "title": "Find...",
+          "substeps": {
+            "symbol": "Click the <span class='info-icon' data-svg='newGame'></span> symbol. Where is it? Top navigation, or overflow menu <span class='info-icon' data-svg='hamburger'></span> (depends on your screen size)."
+          }
+        },
+        "write": {
+          "title": "Write",
+          "substeps": {
+            "create": "Choose a title. Create a prompt. Write a starter text. Consider the relationship between these as a playground--foster tension, conflict, poetry, existential questions.",
+            "publish": "When ready, <span class='info-icon' data-svg='publish'></span> \"publish\" to launch the experience, or you can always second guess yourself and <span class='info-icon' data-svg='delete'></span> delete everything, or save <span class='info-icon' data-svg='save'></span> what you have as a draft."
+          }
+        },
+        "success": {
+          "title": "You did it!",
+          "substeps": {
+            "congratulations": "🎉 Congratulations! You've successfully started a game! The tutorial is now complete."
+          }
+        }
+      }
+    },
+    "contribute": {
+      "title": "How to Contribute to a Game",
+      "steps": {
+        "browse": {
+          "title": "Browse",
+          "substeps": {
+            "dashboard": "Click on the <span class='info-icon' data-svg='dashboard'></span> dashboard icon in the navigation or in the overflow menu <span class='info-icon' data-svg='hamburger'></span>.",
+            "explore": "Explore \"Stories I Can Join\". Click on the <span class='info-icon' data-svg='browse'></span> library icon for a detailed list view OR directly on the category name, and then on any title, to view just that story.",
+            "view": "Click on a title to view the story tree <span class='info-icon' data-svg='tree'></span> or shelf&nbsp;<span class='info-icon' data-svg='shelf'></span>."
+          }
+        },
+        "choose": {
+          "title": "Choose...",
+          "substeps": {
+            "explore": "Click on hearts <span class='info-icon' data-svg='heartOutline'></span> / titles. Explore evolving stories. Choose a text you'd like to push in a new direction.",
+            "iterate": "Click the <span class='info-icon' data-svg='iterate'></span> \"iterate\" button, to start writing."
+          }
+        },
+        "contribute": {
+          "title": "Contribute",
+          "substeps": {
+            "write": "Change the text. Do so judiciously and fearlessly. Describe your changes in three words. If you want, add a keyword or two... we might use them to organize the stories some day.",
+            "publish": "When ready, <span class='info-icon' data-svg='publish'></span> \"publish\" to make your iteration available to others, or you can delete <span class='info-icon' data-svg='delete'></span> your iteration, or save <span class='info-icon' data-svg='save'></span> what you have as a draft."
+          }
+        },
+        "success": {
+          "title": "You did it!",
+          "substeps": {
+            "congratulations": "🎉 Congratulations! You've successfully published your contribution! The tutorial is now complete."
+          }
+        }
+      }
+    },
+    "vote": {
+      "title": "How to Vote on Text Nodes",
+      "steps": {
+        "browse": {
+          "title": "Browse",
+          "substeps": {
+            "dashboard": "To vote on stories you've contributed to, start by visiting your <span class='info-icon' data-svg='dashboard'></span> dashboard (from the navigation or overflow menu <span class='info-icon' data-svg='hamburger'></span>). *New? The \"Contribute to a Story\" tutorial will help you get started.",
+            "active": "In \"My Stories\" > \"Active\", look for shared collaborations. Click on the <span class='info-icon' data-svg='browse'></span> \"Active\" library icon for a detailed list OR directly on the category name, and then on any title.",
+            "view": "Click on a title to view the story tree <span class='info-icon' data-svg='tree'></span> or shelf <span class='info-icon' data-svg='shelf'></span>."
+          }
+        },
+        "vote": {
+          "title": "Vote",
+          "substeps": {
+            "explore": "Click on hearts <span class='info-icon' data-svg='heartOutline'></span>/ titles. Explore how a story evolves. Determine which contributions you like.",
+            "vote_action": "Click on the <span class='info-icon' data-svg='vote'></span> heart paddle to vote/unvote. Don't see a heart paddle? Is this node yours? Have you only drafted (not published) a contribution?"
+          }
+        },
+        "success": {
+          "title": "You did it!",
+          "substeps": {
+            "congratulations": "🎉 Great! You've cast or uncast your vote! The tutorial is now complete."
+          }
+        }
+      }
+    }
   }
 }

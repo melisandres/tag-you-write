@@ -224,6 +224,37 @@ section.info{
     background-color: var(--color-save);
 }
 
+.info-icon[data-svg="heartOutline"] svg path {
+    fill: var(--color-white);
+    stroke: var(--color-black);
+    stroke-width: 3px;
+}
+
+.info-icon[data-svg="heartOutline"] {
+    background-color: var(--color-love);
+}
+.info-icon[data-svg="delete"] {
+    background-color: var(--color-error);
+}
+
+.info-icon[data-svg="dashboard"] {
+    background-color: var(--color-black);
+}
+.info-icon[data-svg="dashboard"] svg path {
+    fill: var(--color-white);
+    stroke: var(--color-white);
+}
+
+.info-icon[data-svg="hamburger"] {
+    background-color: var(--color-black);
+}
+.info-icon[data-svg="hamburger"] svg {
+    fill: var(--color-white);
+    stroke: var(--color-white);
+}
+
+
+
 /* SVG size */
 .info-icon svg {
     width: 1.5em;
