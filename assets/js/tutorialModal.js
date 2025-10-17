@@ -366,6 +366,14 @@ export class TutorialModal {
         // Only reset completion state if we're starting a completely new tutorial (not just checking completion)
         if (this.currentTutorial !== tutorialType) {
             this.tutorialSuccess = false;
+            // Reset step/substep when switching to a different tutorial
+            this.currentStep = 0;
+            this.currentSubstep = 0;
+            // Clear visited substeps from previous tutorial
+            this.visitedSubsteps.clear();
+            // Save the reset state to localStorage
+            this.saveTutorialState();
+            console.log('TutorialModal: Switched to different tutorial, resetting step/substep to 0/0 and clearing visited substeps');
         }
 
         this.currentTutorial = tutorialType;
@@ -564,15 +572,8 @@ export class TutorialModal {
         // Mark this substep as visited (general logic)
         this.markSubstepAsVisited(this.currentStep, availableSubstepIndex);
         
-        // Update content with current substep using data-i18n pattern
-        const textKey = step.substeps[availableSubstepIndex].text;
-        this.setTranslatedContent(this.elements.explanation, textKey);
-        
-        // Update all navigation elements
-        this.updateAllNavigation();
-        
-        // Save state
-        this.saveTutorialState();
+        // Update tutorial display (step name, content, navigation)
+        this.updateTutorialDisplay();
     }
 
 
