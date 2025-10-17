@@ -372,15 +372,7 @@ export class TutorialModal {
         const tutorial = this.tutorials[tutorialType];
         
         // Set validation state BEFORE getting context
-        if (window.refreshManager && window.refreshManager.getFormValidity()) {
-            const storedValidityState = window.refreshManager.getFormValidity();
-            this.formValidationState.canPublish = storedValidityState.canPublish;
-            console.log('TutorialModal: Set validation state before context evaluation', storedValidityState);
-        } else if (window.validationManager) {
-            const currentValidationState = window.validationManager.getCurrentValidationState();
-            this.formValidationState.canPublish = currentValidationState.canPublish;
-            console.log('TutorialModal: Set validation state from ValidationManager before context evaluation', currentValidationState);
-        }
+        this.updateValidationState();
         
         const context = this.getCachedContext();
         
@@ -488,6 +480,9 @@ export class TutorialModal {
             console.log('🎯 TUTORIAL: Tutorial completed, skipping context update');
             return;
         }
+        
+        // Ensure validation state is up to date before context evaluation
+        this.updateValidationState();
         
         const tutorial = this.tutorials[this.currentTutorial];
         const context = this.getCachedContext();
@@ -1058,6 +1053,28 @@ export class TutorialModal {
     invalidateContext() {
         this.contextValid = false;
         this.context = null;
+    }
+
+    /**
+     * Update validation state from available sources
+     */
+    updateValidationState() {
+        console.log('TutorialModal: Checking validation state sources...');
+        console.log('TutorialModal: refreshManager exists:', !!window.refreshManager);
+        console.log('TutorialModal: refreshManager.getFormValidity():', window.refreshManager ? window.refreshManager.getFormValidity() : 'N/A');
+        console.log('TutorialModal: validationManager exists:', !!window.validationManager);
+        
+        if (window.refreshManager && window.refreshManager.getFormValidity() !== null) {
+            const storedValidityState = window.refreshManager.getFormValidity();
+            this.formValidationState.canPublish = storedValidityState.canPublish;
+            console.log('TutorialModal: Set validation state from RefreshManager', storedValidityState);
+        } else if (window.validationManager) {
+            const currentValidationState = window.validationManager.getCurrentValidationState();
+            this.formValidationState.canPublish = currentValidationState.canPublish;
+            console.log('TutorialModal: Set validation state from ValidationManager', currentValidationState);
+        } else {
+            console.log('TutorialModal: No validation state available, using default canPublish: false');
+        }
     }
 
     getUnifiedCategory(page) {
