@@ -3,12 +3,12 @@
     <div class="home">
     <section class="home-container">
         <div class="background-svg" data-svg="heart"></div>
-        <div class="text-container">
+        <div class="text-container" data-text-switcher="true">
            <!--  <p>{{message}}</p> -->
             <h1 data-i18n="home_index.title">{{ translate('home_index.title') }}</h1>
-            <p data-i18n="home_index.add_a_few_words">{{ translate('home_index.add_a_few_words') }}</p>
-            <p data-i18n="home_index.write_a_sentence">{{ translate('home_index.write_a_sentence') }}</p>
-            <p data-i18n="home_index.write_a_phrase">{{ translate('home_index.write_a_phrase') }}</p>
+            <p data-i18n="home_index.add_a_few_words" data-switchable="true">{{ translate('home_index.add_a_few_words') }}</p>
+            <p data-i18n="home_index.write_a_sentence" data-switchable="true">{{ translate('home_index.write_a_sentence') }}</p>
+            <p data-i18n="home_index.write_a_phrase" data-switchable="true">{{ translate('home_index.write_a_phrase') }}</p>
         </div>
         <div class="buttons-container">
             <a class="home-button login" href="{{ langUrl('login') }}">

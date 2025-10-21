@@ -30,6 +30,9 @@ export class ShowcaseManager {
 
         if (rootStoryId) {
             eventBus.emit('createShowcaseContainer', { rootStoryId, showcaseType });
+            
+            // Scroll to the story element when opening a showcase
+            this.scrollToStoryElement(rootStoryId);
         }
 
         const modalTextId = params.get('modalTextId');
@@ -78,5 +81,32 @@ export class ShowcaseManager {
             type: urlParams.get('showcase'),
             rootStoryId: urlParams.get('rootStoryId')
         };
+    }
+
+    /**
+     * Scroll to a specific story element by its text ID
+     * @param {string} textId - The text ID of the story to scroll to
+     */
+    scrollToStoryElement(textId) {
+        const storyElement = document.querySelector(`[data-text-id="${textId}"]`);
+        
+        if (storyElement) {
+            console.log(`ShowcaseManager: Scrolling to story element with text-id: ${textId}`);
+            
+            // Use scrollIntoView with smooth behavior
+            storyElement.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start',
+                inline: 'nearest'
+            });
+            
+            // Add a subtle highlight effect to draw attention
+            storyElement.classList.add('highlight-scroll-target');
+            setTimeout(() => {
+                storyElement.classList.remove('highlight-scroll-target');
+            }, 2000);
+        } else {
+            console.warn(`ShowcaseManager: Story element with text-id ${textId} not found`);
+        }
     }
 }

@@ -366,5 +366,27 @@
     position: relative;
   }
   
+  /* Highlight effect for scroll target */
+  .story.highlight-scroll-target {
+    animation: highlightScrollTarget 2s ease-out;
+    border: 2px solid var(--color-primary);
+    box-shadow: 0 0 20px rgba(var(--color-primary-rgb), 0.3);
+  }
+  
+  @keyframes highlightScrollTarget {
+    0% {
+      background-color: var(--color-primary-lightest);
+      transform: scale(1.02);
+    }
+    50% {
+      background-color: var(--color-primary-light);
+      transform: scale(1.01);
+    }
+    100% {
+      background-color: transparent;
+      transform: scale(1);
+    }
+  }
+  
   
   

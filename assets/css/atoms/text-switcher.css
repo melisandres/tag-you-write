@@ -1,0 +1,191 @@
+/**
+ * TextSwitcher CSS - Distortion and transition effects
+ * Separate file to keep effects isolated and experimental
+ */
+
+/* Base styles for text elements that will be animated */
+.text-container p {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform, filter;
+}
+
+/* Distortion effect during transition */
+.text-switcher-distorting {
+    transform: 
+        translateX(var(--distort-x, 0)) 
+        translateY(var(--distort-y, 0)) 
+        rotate(var(--distort-rotation, 0)) 
+        scale(var(--distort-scale, 1));
+    
+    filter: 
+        blur(1px) 
+        contrast(1.2) 
+        brightness(1.1);
+    
+    opacity: 0.7;
+    
+    animation: 
+        textDistortion 0.4s ease-in-out,
+        textGlitch 0.2s ease-in-out 0.1s;
+}
+
+/* Settling animation after content change */
+.text-switcher-settling {
+    transform: translateX(0) translateY(0) rotate(0) scale(1);
+    filter: blur(0) contrast(1) brightness(1);
+    opacity: 1;
+    
+    animation: textSettle 0.4s ease-out;
+}
+
+/* Keyframe animations */
+@keyframes textDistortion {
+    0% {
+        transform: translateX(0) translateY(0) rotate(0) scale(1);
+        filter: blur(0) contrast(1) brightness(1);
+    }
+    
+    25% {
+        transform: 
+            translateX(calc(var(--distort-x, 0) * 0.5)) 
+            translateY(calc(var(--distort-y, 0) * 0.5)) 
+            rotate(calc(var(--distort-rotation, 0) * 0.3)) 
+            scale(calc(1 + (var(--distort-scale, 1) - 1) * 0.3));
+        filter: blur(0.5px) contrast(1.1) brightness(1.05);
+    }
+    
+    50% {
+        transform: 
+            translateX(var(--distort-x, 0)) 
+            translateY(var(--distort-y, 0)) 
+            rotate(var(--distort-rotation, 0)) 
+            scale(var(--distort-scale, 1));
+        filter: blur(1px) contrast(1.2) brightness(1.1);
+    }
+    
+    75% {
+        transform: 
+            translateX(calc(var(--distort-x, 0) * 0.7)) 
+            translateY(calc(var(--distort-y, 0) * 0.7)) 
+            rotate(calc(var(--distort-rotation, 0) * 0.7)) 
+            scale(calc(1 + (var(--distort-scale, 1) - 1) * 0.7));
+        filter: blur(0.8px) contrast(1.15) brightness(1.08);
+    }
+    
+    100% {
+        transform: 
+            translateX(var(--distort-x, 0)) 
+            translateY(var(--distort-y, 0)) 
+            rotate(var(--distort-rotation, 0)) 
+            scale(var(--distort-scale, 1));
+        filter: blur(1px) contrast(1.2) brightness(1.1);
+    }
+}
+
+@keyframes textGlitch {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    
+    20% {
+        transform: translateX(-2px);
+    }
+    
+    40% {
+        transform: translateX(2px);
+    }
+    
+    60% {
+        transform: translateX(-1px);
+    }
+    
+    80% {
+        transform: translateX(1px);
+    }
+}
+
+@keyframes textSettle {
+    0% {
+        transform: 
+            translateX(var(--distort-x, 0)) 
+            translateY(var(--distort-y, 0)) 
+            rotate(var(--distort-rotation, 0)) 
+            scale(var(--distort-scale, 1));
+        filter: blur(1px) contrast(1.2) brightness(1.1);
+        opacity: 0.7;
+    }
+    
+    50% {
+        transform: 
+            translateX(calc(var(--distort-x, 0) * 0.3)) 
+            translateY(calc(var(--distort-y, 0) * 0.3)) 
+            rotate(calc(var(--distort-rotation, 0) * 0.3)) 
+            scale(calc(1 + (var(--distort-scale, 1) - 1) * 0.3));
+        filter: blur(0.3px) contrast(1.1) brightness(1.05);
+        opacity: 0.9;
+    }
+    
+    100% {
+        transform: translateX(0) translateY(0) rotate(0) scale(1);
+        filter: blur(0) contrast(1) brightness(1);
+        opacity: 1;
+    }
+}
+
+/* Hover effects for manual interaction */
+.text-container:hover p {
+    cursor: pointer;
+    transform: scale(1.02);
+    transition: transform 0.2s ease;
+}
+
+/* Removed the rotating arrow - was too distracting */
+
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .text-switcher-distorting {
+        filter: 
+            blur(0.5px) 
+            contrast(1.1) 
+            brightness(1.05);
+    }
+    
+    .text-container:hover p::before {
+        display: none; /* Hide on mobile to avoid clutter */
+    }
+}
+
+/* Accessibility: Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+    .text-switcher-distorting,
+    .text-switcher-settling {
+        animation: none;
+        transform: none;
+        filter: none;
+        transition: opacity 0.3s ease;
+    }
+    
+    .text-container:hover p {
+        transform: none;
+    }
+}
+
+/* Debug mode - uncomment to see the switching more clearly */
+/*
+.text-container p {
+    border: 1px dashed rgba(255, 0, 0, 0.3);
+    position: relative;
+}
+
+.text-container p::after {
+    content: attr(data-i18n);
+    position: absolute;
+    top: -20px;
+    left: 0;
+    font-size: 10px;
+    color: red;
+    background: white;
+    padding: 2px;
+}
+*/

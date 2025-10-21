@@ -57,6 +57,7 @@ import { HamburgerMenuManager } from './hamburgerMenuManager.js';
 import { ResponsiveNavManager } from './responsiveNavManager.js';
 import { UniversalSubmenuManager } from './universalSubmenuManager.js';
 import { SVGManager } from './svgManager.js';
+import { TextSwitcherManager } from './textSwitcherManager.js';
 
 // Make eventBus globally available immediately
 window.eventBus = eventBus;
@@ -260,5 +261,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   new NodesModifiedHandler();
   const gamesModifiedHandler = new GamesModifiedHandler();
 
+  // Initialize TextSwitcherManager only on home page
+  if (document.querySelector('.text-container')) {
+    window.textSwitcher = new TextSwitcherManager();
+  }
 
 });

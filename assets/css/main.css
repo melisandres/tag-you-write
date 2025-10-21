@@ -21,6 +21,7 @@
 @import url(./atoms/tooltip.css);
 @import url(./atoms/game-activity-indicator.css);
 @import url(./atoms/ghost-node.css);
+@import url(./atoms/text-switcher.css);
 
 /* atoms/buttons */
 @import url(./atoms/buttons/btns.css);
@@ -73,6 +74,7 @@
 /* layouts: darkMode / lightMode */
 @import url(./layouts/darkMode.css);
 @import url(./layouts/lightMode.css);
+
 
 
 

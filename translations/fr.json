@@ -232,9 +232,12 @@
   },
   "home_index": {
     "title": "écriture collaborative",
-    "add_a_few_words": "Arrachez à un text, par petit bouts.",
+    "add_a_few_words": "Arrachez à un text, par la poignée.",
     "write_a_sentence": "Ajoutez-lui des mots plein la bouche,",
     "write_a_phrase": "et attendez qu'il se défende.",
+    "add_a_few_words2": "Passez un texte au peigne fin.",
+    "write_a_sentence2": "Glissez-lui un doux secret à l'oreille,",
+    "write_a_phrase2": "et attendez qu'il se déplie.",
     "login": "connexion",
     "browse": "explorer les collaborations",
     "how": "comment ça marche",

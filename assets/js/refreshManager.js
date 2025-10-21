@@ -569,17 +569,66 @@ export class RefreshManager {
                     await this.storyManager.showStoryInModal(savedState.modal.textId);
                 }
 
-                // Restore scroll position (only on stories pages)
-                if (savedState.scroll) {
-                    setTimeout(() => {
-                        window.scrollTo(savedState.scroll.x, savedState.scroll.y);
-                    }, 100);
-                }
+                // Handle scroll restoration (only on stories pages)
+                this.handleScrollRestoration(priorityRootStoryId, savedState);
             }
         } catch (error) {
             console.error('Error restoring state:', error);
         } finally {
             this.isRestoring = false;
+        }
+    }
+
+    /**
+     * Handle scroll restoration with priority for specific story elements
+     * @param {string} rootStoryId - The root story ID from URL or saved state
+     * @param {Object} savedState - The saved state object
+     */
+    handleScrollRestoration(rootStoryId, savedState) {
+        // If we have a specific rootStoryId, scroll to that story element
+        if (rootStoryId) {
+            this.scrollToStoryElement(rootStoryId);
+        } 
+        // Otherwise, restore the generic scroll position
+        else if (savedState.scroll) {
+            setTimeout(() => {
+                window.scrollTo(savedState.scroll.x, savedState.scroll.y);
+            }, 100);
+        }
+    }
+
+    /**
+     * Scroll to a specific story element by its text ID
+     * @param {string} textId - The text ID of the story to scroll to
+     */
+    scrollToStoryElement(textId) {
+        const storyElement = document.querySelector(`[data-text-id="${textId}"]`);
+        
+        if (storyElement) {
+            console.log(`Scrolling to story element with text-id: ${textId}`);
+            
+            // Use scrollIntoView with smooth behavior
+            storyElement.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start',
+                inline: 'nearest'
+            });
+            
+            // Add a subtle highlight effect to draw attention
+            storyElement.classList.add('highlight-scroll-target');
+            setTimeout(() => {
+                storyElement.classList.remove('highlight-scroll-target');
+            }, 2000);
+        } else {
+            console.warn(`Story element with text-id ${textId} not found`);
+            
+            // Fallback to generic scroll restoration if story not found
+            const savedState = JSON.parse(localStorage.getItem('pageState') || '{}');
+            if (savedState.scroll) {
+                setTimeout(() => {
+                    window.scrollTo(savedState.scroll.x, savedState.scroll.y);
+                }, 100);
+            }
         }
     }
 

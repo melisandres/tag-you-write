@@ -234,9 +234,12 @@
   },
   "home_index": {
     "title": "collaborative writing",
-    "add_a_few_words": "Remove from a text, by the chunk.",
+    "add_a_few_words": "Remove from a text, by the handful.",
     "write_a_sentence": "Then, fill its mouth with words,",
     "write_a_phrase": "and wait for it to fight back.",
+    "add_a_few_words2": "Tend to a text with a fine tooth comb.",
+    "write_a_sentence2": "Whisper a secret in its ear,",
+    "write_a_phrase2": "and wait for it to unfold.",
     "login": "log in",
     "browse": "browse collaborations",
     "how": "how it works",

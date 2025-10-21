@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Switcher Test</title>
+    <link rel="stylesheet" href="../assets/css/text-switcher.css">
+    <style>
+        body {
+            font-family: 'Livvic', sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .text-container {
+            text-align: center;
+            margin: 40px 0;
+        }
+        .text-container h1 {
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        .text-container p {
+            font-size: 1.2em;
+            line-height: 1.6;
+            margin: 15px 0;
+            color: #666;
+        }
+        .controls {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 0 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .status {
+            text-align: center;
+            margin: 20px 0;
+            padding: 10px;
+            background: #e9ecef;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Text Switcher Test Page</h1>
+        
+        <div class="status" id="status">
+            Status: Initializing...
+        </div>
+        
+        <div class="text-container" data-text-switcher="true">
+            <h1 data-i18n="home_index.title">collaborative writing</h1>
+            <p data-i18n="home_index.add_a_few_words" data-switchable="true">Remove from a text, by the handful.</p>
+            <p data-i18n="home_index.write_a_sentence" data-switchable="true">Then, fill its mouth with words,</p>
+            <p data-i18n="home_index.write_a_phrase" data-switchable="true">and wait for it to fight back.</p>
+        </div>
+        
+        <div class="controls">
+            <button class="btn" onclick="manualSwitch()">Manual Switch</button>
+            <button class="btn" onclick="toggleAuto()">Toggle Auto</button>
+            <button class="btn" onclick="setVersion(1)">Version 1</button>
+            <button class="btn" onclick="setVersion(2)">Version 2</button>
+        </div>
+        
+        <div class="status">
+            <p><strong>Instructions:</strong></p>
+            <ul style="text-align: left; max-width: 600px; margin: 0 auto;">
+                <li>Click anywhere in the text area to manually trigger a switch</li>
+                <li>Hover over the text area to pause auto-switching</li>
+                <li>Use the buttons to control the switcher manually</li>
+                <li>The distortion effect should be visible during transitions</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Mock translation data for testing
+        const mockTranslations = {
+            'home_index': {
+                'title': 'collaborative writing',
+                'add_a_few_words': 'Remove from a text, by the handful.',
+                'add_a_few_words2': 'Tend to a text with a fine tooth comb.',
+                'write_a_sentence': 'Then, fill its mouth with words,',
+                'write_a_sentence2': 'Whisper a secret in its ear,',
+                'write_a_phrase': 'and wait for it to fight back.',
+                'write_a_phrase2': 'and wait for it to unfold.'
+            }
+        };
+
+        // Override the translation fetching for testing
+        window.fetch = function(url) {
+            if (url.includes('/language/translations/')) {
+                return Promise.resolve({
+                    ok: true,
+                    json: () => Promise.resolve(mockTranslations)
+                });
+            }
+            return originalFetch(url);
+        };
+
+        const originalFetch = window.fetch;
+
+        // Test functions
+        function manualSwitch() {
+            if (window.textSwitcher) {
+                window.textSwitcher.manualSwitch();
+                updateStatus('Manual switch triggered');
+            }
+        }
+
+        function toggleAuto() {
+            if (window.textSwitcher) {
+                if (window.textSwitcher.intervalId) {
+                    window.textSwitcher.stop();
+                    updateStatus('Auto-switching paused');
+                } else {
+                    window.textSwitcher.start();
+                    updateStatus('Auto-switching resumed');
+                }
+            }
+        }
+
+        function setVersion(version) {
+            if (window.textSwitcher) {
+                window.textSwitcher.setVersion(version);
+                updateStatus(`Switched to version ${version}`);
+            }
+        }
+
+        function updateStatus(message) {
+            document.getElementById('status').textContent = `Status: ${message}`;
+        }
+
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            updateStatus('DOM loaded, initializing TextSwitcher...');
+            
+            // Wait a bit for the script to load
+            setTimeout(() => {
+                if (window.textSwitcher) {
+                    updateStatus(`TextSwitcher initialized with ${window.textSwitcher.elements.size} elements`);
+                } else {
+                    updateStatus('TextSwitcher not found - check console for errors');
+                }
+            }, 1000);
+        });
+    </script>
+    
+    <script src="../assets/js/textSwitcherManager.js"></script>
+</body>
+</html>
