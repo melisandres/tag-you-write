@@ -5,7 +5,7 @@
     {{ gamesData|raw }}
 </script>
 
-<main class="dashboard" data-stories>
+<main class="dashboard">
     {% set sections = [] %}
     
     {% if not guest %}

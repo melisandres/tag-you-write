@@ -704,6 +704,7 @@ export class DataManager {
                         gameState: 'all',
                         bookmarked: null
                     },
+                    category: parsed.category || null,
                 };
                 return cache;
             }

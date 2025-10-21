@@ -234,9 +234,9 @@
   },
   "home_index": {
     "title": "collaborative writing",
-    "add_a_few_words": "Add a few words to someone else's.",
-    "write_a_sentence": "Write a sentence, and see it grow legs.",
-    "write_a_phrase": "Write a phrase, and watch its head roll away.",
+    "add_a_few_words": "Remove from a text, by the chunk.",
+    "write_a_sentence": "Then, fill its mouth with words,",
+    "write_a_phrase": "and wait for it to fight back.",
     "login": "log in",
     "browse": "browse collaborations",
     "how": "how it works",

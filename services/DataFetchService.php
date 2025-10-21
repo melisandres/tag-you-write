@@ -13,6 +13,7 @@ if (class_exists('RequirePage')) {
     RequirePage::model('Game');
     RequirePage::model('Text');
     RequirePage::model('Notification');
+    RequirePage::service('PermissionsService');
 } else {
     // SSE context - use manual require_once
     if (!class_exists('WriterActivity')) {
@@ -29,6 +30,9 @@ if (class_exists('RequirePage')) {
     }
     if (!class_exists('Notification')) {
         require_once __DIR__ . '/../model/Notification.php';
+    }
+    if (!class_exists('PermissionsService')) {
+        require_once __DIR__ . '/PermissionsService.php';
     }
 }
 

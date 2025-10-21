@@ -178,7 +178,14 @@ export class SearchManager {
         const searchValue = params.get('search') || '';
         console.log('Updating search cache with:', searchValue);
         this.dataManager.setSearch(searchValue);
-        if (searchValue !== '') {
+        
+        // Don't trigger refresh during page initialization if we're restoring a showcase
+        const isRestoring = window.refreshManager && window.refreshManager.isRestoring;
+        const hasShowcase = document.querySelector('#showcase-wrapper');
+        const hasRootStoryId = params.get('rootStoryId');
+        
+        // Skip refresh if we're restoring OR if there's a rootStoryId in URL (indicating showcase should be restored)
+        if (searchValue !== '' && !isRestoring && !hasRootStoryId) {
             eventBus.emit('refreshGames'); // Emit event to trigger data refresh
         }
     }

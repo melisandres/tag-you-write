@@ -593,10 +593,19 @@ export class TreeVisualizer {
                 }
             })
             .on("end", () => {
+                // Only emit transform change if we're not applying a saved transform
+                if (!this.isApplyingSavedTransform) {
+                    const transform = d3.zoomTransform(this.svg.node());
+                    eventBus.emit('treeTransformChanged', {
+                        x: transform.x,
+                        y: transform.y,
+                        k: transform.k
+                    });
+                }
+                
                 // Reapply search highlighting when zoom/drag ends
                 const searchTerm = this.dataManager.getSearch();
                 if (searchTerm) {
-                    console.log('🔍 Reapplying search highlights after zoom end');
                     this.svg.selectAll('.node').each((d) => {
                         this.handleTitleHighlight(d.data.id, searchTerm, true);
                     });
@@ -612,6 +621,12 @@ export class TreeVisualizer {
 
         // Apply zoom to SVG
         this.svg.call(this.zoom);
+        
+        // Store saved transform for later application (after search updates)
+        if (shouldUseSavedTransform) {
+            console.log('Storing saved transform for tree:', data.id);
+            this.pendingSavedTransform = savedState.showcase.transform;
+        }
         
         // After bounds are calculated, handle positioning
         if (shouldUseSavedTransform) {
@@ -638,10 +653,8 @@ export class TreeVisualizer {
         this.treeData = data;
 
         //TODO: make sure this works
-        console.log('About to call applySearchMatches');
         // After tree is completely drawn, apply search matches
         this.applySearchMatches();
-        console.log('After calling applySearchMatches');
         
         // Explicitly translate all "Untitled" nodes immediately after drawing the tree
         // TODO: This ensures that the "Untitled" text is always translated on first draw... which is not working otherwise... it's annoying. 
@@ -652,6 +665,19 @@ export class TreeVisualizer {
         
         console.log('Tree drawing complete, translations applied'); */
 
+        // Apply saved transform after any redraw (including search updates)
+        if (this.pendingSavedTransform && !shouldUseSavedTransform) {
+            console.log('Applying pending saved transform after redraw');
+            this.isApplyingSavedTransform = true;
+            const transform = d3.zoomIdentity
+                .translate(this.pendingSavedTransform.x, this.pendingSavedTransform.y)
+                .scale(this.pendingSavedTransform.k);
+            this.svg.call(this.zoom.transform, transform);
+            setTimeout(() => {
+                this.isApplyingSavedTransform = false;
+            }, 100);
+        }
+        
         // After drawing we want to add any activity indicators:
         eventBus.emit('treeRendered', this.container);
     }
@@ -1794,6 +1820,7 @@ export class TreeVisualizer {
             }
         });
     }
+
 
     // New method to handle language changes
     handleLanguageChange() {

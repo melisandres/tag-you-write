@@ -71,6 +71,7 @@ export class RefreshManager {
         //console.log('Custom events initialized');
         eventBus.on('editorReady', this.handleEditorReady.bind(this));
         eventBus.on('showcaseChanged', (newShowcaseAndId) => this.setShowcaseState(newShowcaseAndId));
+        eventBus.on('treeTransformChanged', (transform) => this.handleTreeTransformChange(transform));
     }
 
     init() {    
@@ -436,12 +437,14 @@ export class RefreshManager {
         }
 
         // Single source of truth for view state
+        // Preserve existing transform values from localStorage
+        const existingState = JSON.parse(localStorage.getItem('pageState') || '{}');
         this.state = {
             showcase: {
                 type: null,        // 'tree' or 'shelf'
                 rootStoryId: null, // text_id of the root story
                 drawers: [],       // array of open drawer IDs
-                transform: null    // zoom/pan state for tree view
+                transform: existingState.showcase?.transform || null    // preserve existing transform
             },
             // Modal state
             modal: {
@@ -523,12 +526,6 @@ export class RefreshManager {
 
         try {
             let savedState = JSON.parse(localStorage.getItem('pageState'));
-            console.log('Saved state:', {
-                hasShowcase: !!savedState?.showcase,
-                showcaseType: savedState?.showcase?.type,
-                transform: savedState?.showcase?.transform
-            });
-
             // Check for saved state
             savedState = JSON.parse(localStorage.getItem('pageState'));
             console.log('Initial savedState:', savedState);
@@ -540,13 +537,8 @@ export class RefreshManager {
             const urlShowcaseType = urlParams.get('showcase');
             const urlRootStoryId = urlParams.get('rootStoryId');
 
-            console.log('URL params:', { urlShowcaseType, urlRootStoryId });
-
             // Priority is URL params, then saved state
             const priorityShowcaseType = urlShowcaseType || savedState.showcase.type;
-            console.log('priorityShowcaseType:', priorityShowcaseType, 
-                'from URL:', urlShowcaseType, 
-                'from savedState:', savedState.showcase.type);
             const priorityRootStoryId = urlRootStoryId || savedState.showcase.rootStoryId;
 
             // Handle form state restoration
@@ -557,27 +549,19 @@ export class RefreshManager {
             // Create showcase container and restore view state
             if (this.isStoriesPage()) {
                 if (!priorityRootStoryId) {
-                    console.log('No root story ID found, skipping showcase container creation');
                     return;
                 }
                 const container = this.uiManager.createShowcaseContainer(priorityRootStoryId, false);
                 if (container) {
-                    console.log('container exists, drawing showcase content');
-                    console.log('priorityShowcaseType:', priorityShowcaseType);
                     if (priorityShowcaseType === 'shelf') {
-                        console.log('Restoring shelf view');
                         await this.uiManager.drawShelf(priorityRootStoryId, container);
                         this.restoreDrawers(savedState);
                     } else if (priorityShowcaseType === 'tree') {
-                        console.log('Restoring tree view');
                         await this.uiManager.drawTree(priorityRootStoryId, container);
                     } else {
                         // Default to tree view if no type specified
-                        console.log('No showcase type specified, defaulting to tree view');
                         await this.uiManager.drawTree(priorityRootStoryId, container);
                     }
-                } else {
-                    console.warn('Failed to create showcase container for rootStoryId:', priorityRootStoryId);
                 }
 
                 // Restore modal state (only on stories pages)
@@ -596,6 +580,33 @@ export class RefreshManager {
             console.error('Error restoring state:', error);
         } finally {
             this.isRestoring = false;
+        }
+    }
+
+    // Handle tree transform changes from treeVisualizer
+    handleTreeTransformChange(transform) {
+        if (!this.isStoriesPage()) return;
+        
+        try {
+            const currentState = JSON.parse(localStorage.getItem('pageState') || '{}');
+            
+            // Update the transform in the current state
+            if (!currentState.showcase) {
+                currentState.showcase = {};
+            }
+            currentState.showcase.transform = {
+                x: transform.x,
+                y: transform.y,
+                k: transform.k
+            };
+            
+            // Save back to localStorage
+            localStorage.setItem('pageState', JSON.stringify(currentState));
+            
+            // Verify it was saved
+            const savedState = JSON.parse(localStorage.getItem('pageState'));
+        } catch (error) {
+            console.error('Error saving tree transform:', error);
         }
     }
 

@@ -140,7 +140,13 @@ export class FormManager {
     async handleCancel() {
         try {
             const redirectUrl = await this.getRedirectUrlWithFilters();
-            window.location.href = redirectUrl;
+            
+            // Handle special history.back case
+            if (redirectUrl === 'history.back') {
+                window.history.back();
+            } else {
+                window.location.href = redirectUrl;
+            }
         } catch (error) {
             console.error('Error generating redirect URL:', error);
             // Fallback to simple redirect
@@ -249,7 +255,13 @@ export class FormManager {
         if (!idInput || !idInput.value) {
             // Create a redirect with filters
             const redirectUrl = await this.getRedirectUrlWithFilters();
-            window.location.href = redirectUrl;
+            
+            // Handle special history.back case
+            if (redirectUrl === 'history.back') {
+                window.history.back();
+            } else {
+                window.location.href = redirectUrl;
+            }
 
             localStorage.setItem('pendingToast', JSON.stringify({
                 message: 'Creation aborted',
@@ -429,7 +441,13 @@ export class FormManager {
                     }));
 
                     const redirectUrl = await this.getRedirectUrlWithFilters(response, responseData.redirectUrl);
-                    window.location.href = redirectUrl;
+                    
+                    // Handle special history.back case
+                    if (redirectUrl === 'history.back') {
+                        window.history.back();
+                    } else {
+                        window.location.href = redirectUrl;
+                    }
                 } else {
                     eventBus.emit('showToast', {
                         message: responseData.toastMessage,
@@ -489,7 +507,13 @@ export class FormManager {
 
                 // Redirect to the text page
                 const redirectUrl = await this.getRedirectUrlWithFilters(response);
-                window.location.href = redirectUrl;
+                
+                // Handle special history.back case
+                if (redirectUrl === 'history.back') {
+                    window.history.back();
+                } else {
+                    window.location.href = redirectUrl;
+                }
             } else {
                 eventBus.emit('showToast', {
                     message: data.message || 'toast.form_manager.error_occurred',
@@ -535,7 +559,13 @@ export class FormManager {
 
                 // Get the redirect URL with filters
                 const redirectUrl = await this.getRedirectUrlWithFilters(response);
-                window.location.href = redirectUrl;
+                
+                // Handle special history.back case
+                if (redirectUrl === 'history.back') {
+                    window.history.back();
+                } else {
+                    window.location.href = redirectUrl;
+                }
             } else {
                 // Handle error
                 console.error('Delete failed:', result.message);
@@ -555,24 +585,54 @@ export class FormManager {
         this.isIntentionalNavigation = false;
     }
 
+    /**
+     * Simple smart redirect logic using browser history and form context
+     */
+    async getSmartRedirectUrl(response = null, defaultRedirect = 'text') {
+        // 1. Try browser history first (most natural)
+        if (window.history.length > 1) {
+            console.log('Smart redirect: Using browser history');
+            return 'history.back';
+        }
+
+        // 2. Get root text ID for collab page redirect
+        const rootTextId = this.getRootTextId();
+        if (rootTextId) {
+            console.log('Smart redirect: Redirecting to collab page', rootTextId);
+            return window.i18n.createUrl(`text/collab/${rootTextId}`);
+        }
+
+        // 3. Fallback to default
+        console.log('Smart redirect: Using default fallback', defaultRedirect);
+        return window.i18n.createUrl(defaultRedirect);
+    }
+
+    /**
+     * Get root text ID using form fields and dataManager
+     */
+    getRootTextId() {
+        // Get form field values
+        const id = this.form?.querySelector('input[name="id"]')?.value;
+        const parentId = this.form?.querySelector('input[name="parent_id"]')?.value;
+        const gameId = this.form?.querySelector('input[name="game_id"]')?.value;
+
+        // If parent_id is null/empty, this is a root text - use the id
+        if (!parentId || parentId === '') {
+            return id;
+        }
+
+        // If we have a game_id, use dataManager to get root text ID
+        if (gameId) {
+            return window.dataManager.getGameRootId(gameId);
+        }
+
+        return null;
+    }
+
+    /**
+     * Legacy method - now uses smart redirect logic
+     */
     async getRedirectUrlWithFilters(response = null, redirectUrl = 'text') {
-        const filters = window.dataManager.getFilters();
-        
-        const queryParams = {};
-        if (filters.hasContributed !== null) {
-            queryParams.hasContributed = filters.hasContributed;
-        }
-        if (filters.gameState !== 'all') {
-            queryParams.gameState = filters.gameState;
-        }
-        if (filters.bookmarked !== null) {
-            queryParams.bookmarked = filters.bookmarked === true ? 'bookmarked' : 'not_bookmarked';
-        }
-        
-        // Use the localization utility
-        const finalUrl = window.i18n.createUrl(redirectUrl, queryParams);
-        console.log('Constructed redirect URL:', finalUrl);
-        
-        return finalUrl;
+        return await this.getSmartRedirectUrl(response, redirectUrl);
     }
 }

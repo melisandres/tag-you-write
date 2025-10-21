@@ -290,8 +290,9 @@ export class TreeUpdateManager {
       // Get the node
       const node = container.querySelector(`.node path[data-id="${id}"]`);
 
+      //TODO: this is to prevent a change in the node status to prevent the tree from being rendered... but lets keep an eye on this, until we're sure it doesn't break anything. 
       // If the node is read, mark it as unread
-      if (node.classList.contains('read')) {
+      if (node && node.classList.contains('read')) {
         node.classList.remove('read');
         node.classList.add('unread');
       }

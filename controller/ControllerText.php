@@ -31,9 +31,13 @@ class ControllerText extends Controller{
 
         // Get category parameter from URL
         $category = isset($_GET['category']) ? $_GET['category'] : null;
+        
+        // Get search parameter from URL
+        $searchTerm = isset($_GET['search']) ? $_GET['search'] : null;
 
         // Debug logging
         error_log("ControllerText::index - Category: " . ($category ?? 'null'));
+        error_log("ControllerText::index - Search: " . ($searchTerm ?? 'null'));
         error_log("ControllerText::index - Filters: " . print_r($filters, true));
 
         // TODO: Get the sort parameter from URL
@@ -43,7 +47,7 @@ class ControllerText extends Controller{
 
         // Getting the games
         $game = new Game;
-        $allGames = $game->getGames($sort, $filters, null, null, $category);
+        $allGames = $game->getGames($sort, $filters, null, $searchTerm, $category);
 
         error_log("ControllerText::index - Returned " . count($allGames) . " games");
 
