@@ -551,7 +551,7 @@
       "my_stories": "Mes histoires",
       "games_i_can_join": "Histoires disponibles",
       "inspiration": "Inspiration",
-      "urgent": "Urgent",
+      "drafts": "Brouillons",
       "active": "Actif",
       "archives": "Archives",
       "invitations": "Invitations",
@@ -562,7 +562,7 @@
     "category-header": {
       "myGames": {
         "": "Mes histoires",
-        "urgent": "Mes histoires > Urgent",
+        "drafts": "Mes histoires > Brouillons",
         "active": "Mes histoires > Actif",
         "archives": "Mes histoires > Archives"
       },

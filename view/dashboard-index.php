@@ -15,7 +15,7 @@
                 title: 'dashboard.my_stories',
                 cssClass: 'my-stories',
                 subcategories: [
-                    { key: 'urgent', title: 'dashboard.urgent' },
+                    { key: 'drafts', title: 'dashboard.drafts' },
                     { key: 'active', title: 'dashboard.active' },
                     { key: 'archives', title: 'dashboard.archives' }
                 ]

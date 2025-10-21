@@ -22,7 +22,7 @@ export class DataManager {
             nodesMap: new Map(), // A flat structure to make updates easier
             dashboardData: { // NEW: Categorized dashboard structure
                 myStories: {
-                    urgent: { games: [], count: 0, hasUnreads: false },
+                    drafts: { games: [], count: 0, hasUnreads: false },
                     active: { games: [], count: 0, hasUnreads: false },
                     archives: { games: [], count: 0, hasUnreads: false }
                 },
@@ -72,7 +72,7 @@ export class DataManager {
         if (!this.cache.dashboardData) {
             this.cache.dashboardData = {
                 myStories: {
-                    urgent: { games: [], count: 0, hasUnreads: false },
+                    drafts: { games: [], count: 0, hasUnreads: false },
                     active: { games: [], count: 0, hasUnreads: false },
                     archives: { games: [], count: 0, hasUnreads: false }
                 },
@@ -677,7 +677,7 @@ export class DataManager {
                     nodesMap: new Map(parsed.nodesMap || []),
                     dashboardData: parsed.dashboardData || {
                         myStories: {
-                            urgent: { games: [], count: 0, hasUnreads: false },
+                            drafts: { games: [], count: 0, hasUnreads: false },
                             active: { games: [], count: 0, hasUnreads: false },
                             archives: { games: [], count: 0, hasUnreads: false }
                         },
@@ -814,7 +814,7 @@ export class DataManager {
             nodesMap: new Map(),
             dashboardData: {
                 myStories: {
-                    urgent: { games: [], count: 0, hasUnreads: false },
+                    drafts: { games: [], count: 0, hasUnreads: false },
                     active: { games: [], count: 0, hasUnreads: false },
                     archives: { games: [], count: 0, hasUnreads: false }
                 },
@@ -1465,7 +1465,7 @@ export class DataManager {
         // Only add user-specific sections if not a guest
         if (!isGuest) {
             dashboardData.myStories = {
-                urgent: { games: [], count: 0, hasUnreads: false },
+                drafts: { games: [], count: 0, hasUnreads: false },
                 active: { games: [], count: 0, hasUnreads: false },
                 archives: { games: [], count: 0, hasUnreads: false }
             };
@@ -1492,11 +1492,11 @@ export class DataManager {
         
         // Map SQL categories to dashboard sections
         switch (category) {
-            case 'myGames.urgent':
+            case 'myGames.drafts':
                 if (!isGuest && dashboardData.myStories) {
-                    dashboardData.myStories.urgent.games.push(game);
-                    dashboardData.myStories.urgent.count++;
-                    if (hasUnreads) dashboardData.myStories.urgent.hasUnreads = true;
+                    dashboardData.myStories.drafts.games.push(game);
+                    dashboardData.myStories.drafts.count++;
+                    if (hasUnreads) dashboardData.myStories.drafts.hasUnreads = true;
                 }
                 break;
                 

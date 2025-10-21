@@ -552,7 +552,7 @@
     "my_stories": "My Stories",
     "games_i_can_join": "Stories I Can Join",
     "inspiration": "Inspiration",
-    "urgent": "Urgent",
+    "drafts": "Drafts",
     "active": "Active",
     "archives": "Archives",
     "invitations": "Invitations",
@@ -563,7 +563,7 @@
   "category-header": {
     "myGames": {
       "": "My Stories",
-      "urgent": "My Stories > Urgent",
+      "drafts": "My Stories > Drafts",
       "active": "My Stories > Active",
       "archives": "My Stories > Archives"
     },

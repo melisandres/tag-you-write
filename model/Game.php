@@ -173,7 +173,7 @@
                         ) THEN 1 ELSE 0 END) AS invited,
                         (CASE WHEN b.text_id IS NOT NULL THEN 1 ELSE 0 END) AS isBookmarked,
                         (CASE 
-                            WHEN EXISTS (SELECT 1 FROM text t2 WHERE t2.game_id = g.id AND t2.writer_id = :loggedInWriterId) AND ts.status IN ('draft', 'incomplete_draft') THEN 'myGames.urgent'
+                            WHEN EXISTS (SELECT 1 FROM text t2 WHERE t2.game_id = g.id AND t2.writer_id = :loggedInWriterId) AND ts.status IN ('draft', 'incomplete_draft') THEN 'myGames.drafts'
                             WHEN EXISTS (SELECT 1 FROM text t2 WHERE t2.game_id = g.id AND t2.writer_id = :loggedInWriterId) AND g.open_for_changes = 1 THEN 'myGames.active'
                             WHEN EXISTS (SELECT 1 FROM text t2 WHERE t2.game_id = g.id AND t2.writer_id = :loggedInWriterId) AND g.open_for_changes = 0 THEN 'myGames.archives'
                             WHEN EXISTS (SELECT 1 FROM game_invitation gi WHERE gi.game_id = g.id AND gi.invitee_id = :loggedInWriterId AND gi.status = 'pending') THEN 'canJoin.invitations'
@@ -448,7 +448,7 @@
                      ) THEN 1 ELSE 0 END) AS invited,
                      (CASE WHEN b.text_id IS NOT NULL THEN 1 ELSE 0 END) AS isBookmarked,
                      (CASE 
-                        WHEN EXISTS (SELECT 1 FROM text t2 WHERE t2.game_id = g.id AND t2.writer_id = :loggedInWriterId) AND ts.status IN ('draft', 'incomplete_draft') THEN 'myGames.urgent'
+                        WHEN EXISTS (SELECT 1 FROM text t2 WHERE t2.game_id = g.id AND t2.writer_id = :loggedInWriterId) AND ts.status IN ('draft', 'incomplete_draft') THEN 'myGames.drafts'
                         WHEN EXISTS (SELECT 1 FROM text t2 WHERE t2.game_id = g.id AND t2.writer_id = :loggedInWriterId) AND g.open_for_changes = 1 THEN 'myGames.active'
                         WHEN EXISTS (SELECT 1 FROM text t2 WHERE t2.game_id = g.id AND t2.writer_id = :loggedInWriterId) AND g.open_for_changes = 0 THEN 'myGames.archives'
                         WHEN EXISTS (SELECT 1 FROM game_invitation gi WHERE gi.game_id = g.id AND gi.invitee_id = :loggedInWriterId AND gi.status = 'pending') THEN 'canJoin.invitations'

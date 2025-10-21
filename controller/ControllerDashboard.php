@@ -56,7 +56,7 @@ class ControllerDashboard extends Controller {
         // Only add user-specific sections if not a guest
         if (!$this->isGuest()) {
             $dashboardData['myGames'] = [
-                'urgent' => ['games' => [], 'count' => 0, 'hasUnreads' => false],
+                'drafts' => ['games' => [], 'count' => 0, 'hasUnreads' => false],
                 'active' => ['games' => [], 'count' => 0, 'hasUnreads' => false],
                 'archives' => ['games' => [], 'count' => 0, 'hasUnreads' => false]
             ];
@@ -92,11 +92,11 @@ class ControllerDashboard extends Controller {
         
         // Map SQL categories to dashboard sections
         switch ($category) {
-            case 'myGames.urgent':
+            case 'myGames.drafts':
                 if (!$isGuest && isset($dashboardData['myGames'])) {
-                    $dashboardData['myGames']['urgent']['games'][] = $game;
-                    $dashboardData['myGames']['urgent']['count']++;
-                    if ($hasUnreads) $dashboardData['myGames']['urgent']['hasUnreads'] = true;
+                    $dashboardData['myGames']['drafts']['games'][] = $game;
+                    $dashboardData['myGames']['drafts']['count']++;
+                    if ($hasUnreads) $dashboardData['myGames']['drafts']['hasUnreads'] = true;
                 }
                 break;
                 
