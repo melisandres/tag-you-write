@@ -1470,9 +1470,10 @@ export class DataManager {
                 archives: { games: [], count: 0, hasUnreads: false }
             };
             
-            // Add bookmarked subsection for logged-in users
-            dashboardData.inspiration.bookmarked = { games: [], count: 0, hasUnreads: false };
         }
+        
+        // Add closed subsection for all users (closed games for inspiration)
+        dashboardData.inspiration.closed = { games: [], count: 0, hasUnreads: false };
         
         // Categorize each game
         games.forEach(game => {
@@ -1528,11 +1529,11 @@ export class DataManager {
                 if (hasUnreads) dashboardData.joinableGames.other.hasUnreads = true;
                 break;
                 
-            case 'inspiration.bookmarked':
-                if (!isGuest && dashboardData.inspiration.bookmarked) {
-                    dashboardData.inspiration.bookmarked.games.push(game);
-                    dashboardData.inspiration.bookmarked.count++;
-                    if (hasUnreads) dashboardData.inspiration.bookmarked.hasUnreads = true;
+            case 'inspiration.closed':
+                if (dashboardData.inspiration.closed) {
+                    dashboardData.inspiration.closed.games.push(game);
+                    dashboardData.inspiration.closed.count++;
+                    if (hasUnreads) dashboardData.inspiration.closed.hasUnreads = true;
                 }
                 break;
                 

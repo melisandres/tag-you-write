@@ -556,7 +556,7 @@
       "archives": "Archives",
       "invitations": "Invitations",
       "other": "Autres",
-      "bookmarked": "Suivis",
+      "closed": "Fermées",
       "browseCategory": "Parcourir cette catégorie"
     },
     "category-header": {
@@ -572,8 +572,7 @@
         "other": "Histoires disponibles > Autres"
       },
       "inspiration": {
-        "": "Inspiration",
-        "bookmarked": "Inspiration > Suivis"
+        "": "Inspiration"
       }
     },
     "tutorial": {

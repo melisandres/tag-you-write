@@ -306,7 +306,7 @@
                 </a>
             </div>
             {% endif %}
-
+        {% endif %}
             <!-- About Link -->
             <div class="overflow-menu-item">
                 <button class="nav-link about" data-item="about" data-i18n-title="nav.about_tooltip" title="{{ translate('nav.about_tooltip') }}">
@@ -316,7 +316,7 @@
                     </span>
                 </button>
             </div>
-
+        {% if not guest %}
             <!-- Logout Link -->
             {% if title_key != 'page_title.login' %}
             <div class="overflow-menu-item">

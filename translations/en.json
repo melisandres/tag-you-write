@@ -557,7 +557,7 @@
     "archives": "Archives",
     "invitations": "Invitations",
     "other": "Other",
-    "bookmarked": "Bookmarked",
+    "closed": "Closed",
     "browseCategory": "Browse this category"
   },
   "category-header": {
@@ -573,8 +573,7 @@
       "other": "Stories I Can Join > Other"
     },
     "inspiration": {
-      "": "Inspiration",
-      "bookmarked": "Inspiration > Bookmarked"
+      "": "Inspiration"
     }
   },
   "tutorial": {

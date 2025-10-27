@@ -37,11 +37,9 @@
     
     {% set inspirationSubcategories = [] %}
     
-    {% if not guest %}
-        {% set inspirationSubcategories = inspirationSubcategories|merge([
-            { key: 'bookmarked', title: 'dashboard.bookmarked' }
-        ]) %}
-    {% endif %}
+    {% set inspirationSubcategories = inspirationSubcategories|merge([
+        { key: 'closed', title: 'dashboard.closed' }
+    ]) %}
     
     {% set sections = sections|merge([
         {

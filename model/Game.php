@@ -173,11 +173,11 @@
                         ) THEN 1 ELSE 0 END) AS invited,
                         (CASE WHEN b.text_id IS NOT NULL THEN 1 ELSE 0 END) AS isBookmarked,
                         (CASE 
-                            WHEN EXISTS (SELECT 1 FROM text t2 WHERE t2.game_id = g.id AND t2.writer_id = :loggedInWriterId) AND ts.status IN ('draft', 'incomplete_draft') THEN 'myGames.drafts'
+                            WHEN EXISTS (SELECT 1 FROM text t2 INNER JOIN text_status ts2 ON t2.status_id = ts2.id WHERE t2.game_id = g.id AND t2.writer_id = :loggedInWriterId AND ts2.status IN ('draft', 'incomplete_draft')) THEN 'myGames.drafts'
                             WHEN EXISTS (SELECT 1 FROM text t2 WHERE t2.game_id = g.id AND t2.writer_id = :loggedInWriterId) AND g.open_for_changes = 1 THEN 'myGames.active'
                             WHEN EXISTS (SELECT 1 FROM text t2 WHERE t2.game_id = g.id AND t2.writer_id = :loggedInWriterId) AND g.open_for_changes = 0 THEN 'myGames.archives'
                             WHEN EXISTS (SELECT 1 FROM game_invitation gi WHERE gi.game_id = g.id AND gi.invitee_id = :loggedInWriterId AND gi.status = 'pending') THEN 'canJoin.invitations'
-                            WHEN b.text_id IS NOT NULL THEN 'inspiration.bookmarked'
+                            WHEN g.open_for_changes = 0 AND g.visible_to_all = 1 AND NOT EXISTS (SELECT 1 FROM text t2 WHERE t2.game_id = g.id AND t2.writer_id = :loggedInWriterId) THEN 'inspiration.closed'
                             ELSE 'canJoin.other'
                         END) AS category
                   FROM (SELECT @row_num := 0) r,
@@ -448,11 +448,11 @@
                      ) THEN 1 ELSE 0 END) AS invited,
                      (CASE WHEN b.text_id IS NOT NULL THEN 1 ELSE 0 END) AS isBookmarked,
                      (CASE 
-                        WHEN EXISTS (SELECT 1 FROM text t2 WHERE t2.game_id = g.id AND t2.writer_id = :loggedInWriterId) AND ts.status IN ('draft', 'incomplete_draft') THEN 'myGames.drafts'
+                        WHEN EXISTS (SELECT 1 FROM text t2 INNER JOIN text_status ts2 ON t2.status_id = ts2.id WHERE t2.game_id = g.id AND t2.writer_id = :loggedInWriterId AND ts2.status IN ('draft', 'incomplete_draft')) THEN 'myGames.drafts'
                         WHEN EXISTS (SELECT 1 FROM text t2 WHERE t2.game_id = g.id AND t2.writer_id = :loggedInWriterId) AND g.open_for_changes = 1 THEN 'myGames.active'
                         WHEN EXISTS (SELECT 1 FROM text t2 WHERE t2.game_id = g.id AND t2.writer_id = :loggedInWriterId) AND g.open_for_changes = 0 THEN 'myGames.archives'
                         WHEN EXISTS (SELECT 1 FROM game_invitation gi WHERE gi.game_id = g.id AND gi.invitee_id = :loggedInWriterId AND gi.status = 'pending') THEN 'canJoin.invitations'
-                        WHEN b.text_id IS NOT NULL THEN 'inspiration.bookmarked'
+                        WHEN g.open_for_changes = 0 AND g.visible_to_all = 1 AND NOT EXISTS (SELECT 1 FROM text t2 WHERE t2.game_id = g.id AND t2.writer_id = :loggedInWriterId) THEN 'inspiration.closed'
                         ELSE 'canJoin.other'
                      END) AS category
             FROM (SELECT @row_num := 0) r,
