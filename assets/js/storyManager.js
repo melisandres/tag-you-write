@@ -25,7 +25,7 @@ export class StoryManager {
   }
 
 
-  async fetchTree(id) {
+/*   async fetchTree(id) {
     // Abort any existing fetch
     if (this.currentFetch) {
       this.currentFetch.abort();
@@ -55,9 +55,9 @@ export class StoryManager {
     } finally {
       this.currentFetch = null;
     }
-  }
+  } */
 
-  async fetchTreeUpdates(treeId, lastTreeCheck) {
+/*   async fetchTreeUpdates(treeId, lastTreeCheck) {
     console.log('Fetching updates with timestamp:', {
         timestamp: lastTreeCheck,
         timestampDate: new Date(lastTreeCheck).toISOString(),
@@ -93,7 +93,7 @@ export class StoryManager {
         console.error('Error fetching tree updates:', error);
         return null;
     }
-  }
+  } */
 
   // TODO: It might be nice to check in the dataManager.cache... to see if it exists there before fetching it from the server. 
   async fetchStoryNode(id){
@@ -109,7 +109,10 @@ export class StoryManager {
 
   // A tree is requested, this is where we check the cache
   async prepareData(id) {
-    let cachedData = this.dataManager.getTree(id);
+    console.log(`StoryManager: prepareData called for ${id}`);
+    // First ensure data is prepared (this will be called by DataManager)
+    const preparedData = await this.dataManager.prepareDataForRootStory(id);
+    console.log(`StoryManager: preparedData received:`, preparedData);
 
     // Showing a new tree/shelfmeans updating search results IF there's an active search
     if (this.dataManager.getSearch()) {
@@ -120,49 +123,8 @@ export class StoryManager {
       }
     }
 
-    // If no cached data, or if it's just the timestamp without data get tree from server
-    if (!cachedData || !cachedData.data) {
-        console.log(`No valid cached data, fetching fresh tree data`);
-        const freshData = await this.fetchTree(id);
-
-        if (!freshData || !freshData[0]) {
-            console.error('No tree data received from server');
-            return null;
-        }
-
-        this.dataManager.setFullTree(id, freshData[0]);
-        console.log('freshData:', freshData);
-        return this.dataManager.getTree(id).data;
-    }
-
-    // If there is data in the cache, determine if updates are needed
-    const gameId = cachedData.data.game_id;
-    const gameData = this.dataManager.getGame(gameId);
-    console.log('gameData:', gameData);
-
-    // Add defensive check
-    if (!gameData) {
-        console.warn(`No game data found for gameId: ${gameId}`);
-        return cachedData.data;
-    }
-
-    const lastGameUpdate = gameData.timestamp;
-    const needsUpdate = lastGameUpdate && cachedData.timestamp 
-        ? new Date(lastGameUpdate).getTime() > cachedData.timestamp
-        : false;
-
-    if (needsUpdate) {
-        const updates = await this.fetchTreeUpdates(id, cachedData.timestamp);
-
-        if (!updates || updates.length === 0) {
-            console.warn('No updates found for tree, using cached data');
-            return cachedData.data;
-        }
-        this.dataManager.updateTreeData(updates, id);
-        return this.dataManager.getTree(id).data;
-    }
-
-    return cachedData.data;
+    console.log(`StoryManager: returning preparedData:`, preparedData);
+    return preparedData;
   }
 
 /*   async drawTree(id, container) {

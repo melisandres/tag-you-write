@@ -87,36 +87,19 @@ export class DataManager {
                 }
             };
         }
-
-        // Subscribe to relevant events
-        eventBus.on('requestGameData', (gameId) => {
-            const gameData = this.cache.games.get(gameId)?.data;
-            console.log('GAME DATA in requestGameData', gameData);
-            eventBus.emit('gameDataResponse', { gameId, data: gameData });
-        });
-
-        // Update the data cache with passed parameter
-        eventBus.on('updateGame', (gameData) => {
-            this.updateGamesData([gameData]);
-        });
-
-        // Update the data cache for a node
-        eventBus.on('updateNode', (nodeData) => {
-            this.updateNode(nodeData.id, nodeData);
-        });
-
-        // Delete a node, and maybe the whole tree/game if its the root
-        eventBus.on('deleteNode', (nodeId) => {
-            this.deleteNode(nodeId);
-        });
         
         this.saveCache();
         this.initAuthState();
         DataManager.instance = this;
 
+        // Set up DataManager event listeners immediately
+        this.setupEventListeners();
+
         // TODO: help with testing
         //this.clearCache();
 
+        // Initialize root story ID from URL/form parameters
+        // This may trigger data preparation events, so event listeners must be set up first
         this.initializeCurrentViewedRootIdFromUrl();
         this.initializeCurrentViewedRootIdFromForm();
     }
@@ -164,13 +147,14 @@ export class DataManager {
     }
 
     // To keep track of the currently viewed root story id
+    // This method triggers data preparation before update systems (SSE/Polling) start listening
     setCurrentViewedRootStoryId(rootStoryId) {
         // Only proceed if the value has actually changed
         if (this.cache.currentViewedRootId === rootStoryId) {
             return;
         }
         
-        // Ensure tree exists in cache
+        // Ensure tree exists in cache with initial structure
         if (!this.cache.trees.has(rootStoryId)) {
             this.cache.trees.set(rootStoryId, {
                 data: null,  // Will be populated by setFullTree later
@@ -178,19 +162,74 @@ export class DataManager {
             });
         }
         
-        // Update the value
+        // Update the value and persist to cache
         this.cache.currentViewedRootId = rootStoryId;
         this.saveCache();
         
-        // Emit event with the new value
-        eventBus.emit('sseParametersChanged', { 
-            type: 'rootStoryId',
-            value: rootStoryId 
+        // CRITICAL: Emit event to prepare data BEFORE starting update systems
+        // This prevents race conditions where stale events reset timestamps before
+        // fresh data can be fetched (fixes draft visibility issues)
+        // 
+        // Note: Using event bus instead of direct async call to avoid making
+        // setCurrentViewedRootStoryId async, which would require updating 8+ callers
+        // across multiple files and creating an async cascade
+        eventBus.emit('prepareDataBeforeUpdates', { 
+            rootStoryId: rootStoryId 
         });
     }
 
     getCurrentViewedRootStoryId() {
         return this.cache.currentViewedRootId;
+    }
+
+    // Set up event listeners for data preparation
+    setupEventListeners() {
+        // CRITICAL: Data preparation before update systems start
+        // This listener ensures fresh data is fetched before SSE/Polling systems
+        // begin listening for live updates, preventing race conditions where stale
+        // events reset cache timestamps before fresh data can be loaded
+        eventBus.on('prepareDataBeforeUpdates', async (event) => {
+            console.log(`DataManager: Preparing data for rootStoryId ${event.rootStoryId} before starting updates`);
+            try {
+                await this.prepareDataForRootStory(event.rootStoryId);
+                console.log(`DataManager: Data preparation complete for rootStoryId ${event.rootStoryId}`);
+                
+                // Now safe to start update systems - emit sseParametersChanged
+                eventBus.emit('sseParametersChanged', { 
+                    type: 'rootStoryId',
+                    value: event.rootStoryId 
+                });
+            } catch (error) {
+                console.error(`DataManager: Error preparing data for rootStoryId ${event.rootStoryId}:`, error);
+                // Still emit the event even if preparation failed to avoid blocking updates
+                eventBus.emit('sseParametersChanged', { 
+                    type: 'rootStoryId',
+                    value: event.rootStoryId 
+                });
+            }
+        });
+
+        // Subscribe to relevant events
+        eventBus.on('requestGameData', (gameId) => {
+            const gameData = this.cache.games.get(gameId)?.data;
+            console.log('GAME DATA in requestGameData', gameData);
+            eventBus.emit('gameDataResponse', { gameId, data: gameData });
+        });
+
+        // Update the data cache with passed parameter
+        eventBus.on('updateGame', (gameData) => {
+            this.updateGamesData([gameData]);
+        });
+
+        // Update the data cache for a node
+        eventBus.on('updateNode', (nodeData) => {
+            this.updateNode(nodeData.id, nodeData);
+        });
+
+        // Delete a node, and maybe the whole tree/game if its the root
+        eventBus.on('deleteNode', (nodeId) => {
+            this.deleteNode(nodeId);
+        });
     }
 
     getInitialCache() {
@@ -265,6 +304,127 @@ export class DataManager {
         } catch (error) {
             console.error('Error checking for updates:', error);
             return false;
+        }
+    }
+
+    // Core data preparation method - ensures fresh data before update systems start
+    // This method handles both initial data loading and incremental updates based on timestamps
+    // It's called before SSE/Polling systems start to prevent race conditions
+    async prepareDataForRootStory(rootStoryId) {
+        console.log(`DataManager: prepareDataForRootStory called for ${rootStoryId}`);
+        let cachedData = this.cache.trees.get(rootStoryId);
+        console.log(`DataManager: cachedData for ${rootStoryId}:`, cachedData);
+    
+        // If no cached data, fetch fresh tree data from server
+        if (!cachedData || !cachedData.data) {
+            console.log(`DataManager: No valid cached data, fetching fresh tree data for ${rootStoryId}`);
+            const freshData = await this.fetchTree(rootStoryId);
+            console.log(`DataManager: freshData received:`, freshData);
+            
+            if (!freshData || !freshData[0]) {
+                console.error('DataManager: No tree data received from server');
+                return null;
+            }
+            
+            // Store the fresh data in both flat map and hierarchical structure
+            this.setFullTree(rootStoryId, freshData[0]);
+            const result = this.getTree(rootStoryId).data;
+            console.log(`DataManager: setFullTree result:`, result);
+            return result;
+        }
+    
+        // Check if incremental updates are needed based on timestamps
+        // This prevents stale events from overriding fresh data by ensuring
+        // we fetch any updates that occurred while the user was away
+        const gameId = cachedData.data.game_id;
+        const gameData = this.cache.games.get(gameId);
+        
+        if (!gameData) {
+            console.warn(`DataManager: No game data found for gameId: ${gameId}`);
+            return cachedData.data;
+        }
+    
+        // Compare timestamps to determine if updates are needed
+        const lastGameUpdate = gameData.timestamp;
+        const needsUpdate = lastGameUpdate && cachedData.timestamp 
+            ? new Date(lastGameUpdate).getTime() > cachedData.timestamp
+            : false;
+    
+        if (needsUpdate) {
+            console.log(`DataManager: Updates needed for rootStoryId ${rootStoryId}, fetching...`);
+            const updates = await this.fetchTreeUpdates(rootStoryId, cachedData.timestamp);
+            
+            if (!updates || updates.length === 0) {
+                console.warn('DataManager: No updates found for tree, using cached data');
+                return cachedData.data;
+            }
+            
+            // Apply incremental updates to the cached tree data
+            this.updateTreeData(updates, rootStoryId);
+            return this.getTree(rootStoryId).data;
+        }
+    
+        console.log(`DataManager: Data is fresh for rootStoryId ${rootStoryId}`);
+        return cachedData.data;
+    }
+
+    // Fetch complete tree data from server for initial loading
+    // Used when no cached data exists or when full refresh is needed
+    async fetchTree(rootStoryId) {
+        try {
+            const endpoint = `text/getTree/${rootStoryId}`;
+            const url = window.i18n.createUrl(endpoint);
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            return await response.json();
+        } catch (error) {
+            console.error('DataManager: Error fetching tree:', error);
+            throw error;
+        }
+    }
+
+    // Fetch incremental updates from server based on timestamp
+    // Used to get only changes that occurred since last check, preventing
+    // the need to refetch entire tree data when only small changes exist
+    async fetchTreeUpdates(treeId, lastTreeCheck) {
+        console.log('Fetching updates with timestamp:', {
+            timestamp: lastTreeCheck,
+            timestampDate: new Date(lastTreeCheck).toISOString(),
+            currentTime: new Date().toISOString()
+        });
+        const endpoint = `text/checkTreeUpdates`;
+        const url = window.i18n.createUrl(endpoint);
+        const payload = {
+            rootId: treeId,
+            lastTreeCheck: lastTreeCheck,
+        };
+    
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            });
+    
+            const responseText = await response.text(); // Get the raw response text
+    
+            if (!response.ok) {
+                console.error(`Failed to fetch tree updates: ${response.status} ${response.statusText}`);
+                return null;
+            }
+    
+            const data = JSON.parse(responseText); // Parse the JSON from the response
+    
+            return data;
+        } catch (error) {
+            console.error('Error fetching tree updates:', error);
+            return null;
         }
     }
 
