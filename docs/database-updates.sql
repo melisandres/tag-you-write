@@ -55,4 +55,13 @@ AFTER joinable_by_all;
 -- Add subject_params column to email_queue table
 ALTER TABLE email_queue 
 ADD COLUMN subject_params JSON NULL 
-AFTER subject; 
+AFTER subject;
+
+-- ============================================================================
+-- Activity Tracking System Updates
+-- ============================================================================
+
+-- Update writer_activity.activity_type ENUM to include new activity types
+-- This fixes the "Data truncated" error when storing 'other', 'iterating', 'adding_note'
+ALTER TABLE writer_activity 
+MODIFY COLUMN activity_type ENUM('browsing', 'editing', 'starting_game', 'iterating', 'adding_note', 'other') NOT NULL; 

@@ -63,8 +63,8 @@ class ControllerWriterActivity extends Controller {
                 }
             }
 
-            // Validate activity_type (updated to exclude 'idle')
-            $validActivityTypes = ['browsing', 'iterating', 'starting_game', 'adding_note'];
+            // Validate activity_type (updated to include 'other' for general pages)
+            $validActivityTypes = ['browsing', 'iterating', 'starting_game', 'adding_note', 'other'];
             if (!in_array($input['activity_type'], $validActivityTypes)) {
                 http_response_code(400);
                 echo json_encode(['error' => 'Invalid activity_type']);

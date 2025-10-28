@@ -23,7 +23,7 @@ export class UIManager {
         this.drawTree(rootStoryId, container);
       } else if (showcaseType === 'shelf') {
         this.drawShelf(rootStoryId, container);
-      }
+      } 
     });
 
     eventBus.on('showStoryInModal', (textId) => {
