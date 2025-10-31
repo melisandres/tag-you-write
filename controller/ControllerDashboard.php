@@ -8,19 +8,16 @@ class ControllerDashboard extends Controller {
         // Get notifications
         $notifications = $this->getNotifications();
         
-        // Read filters/search from URL (SSR respects incoming params)
-        $filters = [];
-        if (isset($_GET['hasContributed'])) {
-            // normalize values: 'true'|'false'|'mine'|''
-            $val = $_GET['hasContributed'];
-            $filters['hasContributed'] = $val === '' ? null : $val;
-        }
-        if (isset($_GET['bookmarked'])) {
-            $filters['bookmarked'] = $_GET['bookmarked'] === '' ? null : $_GET['bookmarked'];
-        }
-        if (isset($_GET['gameState'])) {
-            $filters['gameState'] = $_GET['gameState'] === '' ? null : $_GET['gameState'];
-        }
+        // Get filter parameters from URL
+        $filters = [
+            'hasContributed' => isset($_GET['hasContributed']) ? 
+                ($_GET['hasContributed'] === 'true' || $_GET['hasContributed'] === 'contributor' ? true : 
+                ($_GET['hasContributed'] === 'mine' ? 'mine' : null)) : null,
+            'gameState' => isset($_GET['gameState']) ? $_GET['gameState'] : 'all',
+            'bookmarked' => isset($_GET['bookmarked']) ? 
+                ($_GET['bookmarked'] === 'bookmarked' ? true : 
+                ($_GET['bookmarked'] === 'not_bookmarked' ? false : null)) : null
+        ];
         $search = isset($_GET['search']) ? $_GET['search'] : null;
 
         // Get all games (flat array for DataManager compatibility), applying filters/search when present

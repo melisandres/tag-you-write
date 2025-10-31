@@ -210,16 +210,9 @@ export class DataManager {
         });
 
         // Reactive data store: Listen to filter/search changes and automatically refresh
-        eventBus.on('filtersChanged', (filters) => {
-            // Note: FilterManager.button handlers call setFilters() directly and emit refreshGames
-            // But handleFiltersUpdated() method emits filtersChanged for external updates
-            console.log('📦 DataManager: filtersChanged received, refreshing games');
-            // Filters may already be set, but ensure they're synced
-            if (filters && JSON.stringify(this.cache.filters) !== JSON.stringify(filters)) {
-                this.setFilters(filters);
-            }
-            this.refreshGamesFromBackend();
-        });
+        // Note: filtersChanged listener removed - event was never emitted
+        // All filter changes go through: FilterManager buttons → filterApplied + refreshGames
+        // The refreshGames listener below handles all data refresh needs
         
         eventBus.on('searchApplied', (searchValue) => {
             // SearchManager already calls setSearch() before emitting, so we just need to refresh

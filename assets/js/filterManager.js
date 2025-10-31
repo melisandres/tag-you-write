@@ -88,7 +88,7 @@ export class FilterManager {
         
         // Set up event listeners
         eventBus.on('filterApplied', () => this.updateNavLink());
-        eventBus.on('filtersUpdated', (filters) => this.handleFiltersUpdated(filters));
+        // Note: filtersUpdated event was never emitted, listener removed as dead code
         this.menuManager = window.menuManager;
     }
 
@@ -261,23 +261,9 @@ export class FilterManager {
         });
     }
 
-    /**
-     * Handle filter updates from external sources
-     * @param {Object} filters - The updated filters
-     */
-    handleFiltersUpdated(filters) {
-        // Update UI to reflect new filter values
-        this.updateFilterButton(filters.hasContributed);
-        this.updateGameStateButton(filters.gameState);
-        this.updateBookmarkButton(filters.bookmarked);
-        this.updateNavLink();
-        eventBus.emit('filtersChanged', filters);
-        
-        // Apply translations after updating the UI
-        if (window.i18n && this.filterMenu) {
-            window.i18n.updatePageTranslations(this.filterMenu);
-        }
-    }
+    // Note: handleFiltersUpdated() method removed - it was never called
+    // The filtersUpdated event it listened for was never emitted
+    // All filter updates go through button clicks → filterApplied + refreshGames
 
     /**
      * Update the filter nav link to show active state
