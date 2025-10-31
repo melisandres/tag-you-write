@@ -15,10 +15,9 @@ export class GameSearchFilterManager {
         
         this.renderer = new GameListRenderer(this.container, this.uiManager);
 
-        // Event listeners
-        eventBus.on('refreshGames', () => this.refreshGamesList());
-        eventBus.on('filtersChanged', (filters) => this.handleFiltersChanged(filters));
-        eventBus.on('searchApplied', (searchValue) => this.handleSearchApplied(searchValue));
+        // DataManager handles filtersChanged/searchApplied/refreshGames automatically
+        // We only listen to DataManager's rendering events
+        eventBus.on('gamesRefreshed', (games) => this.renderGames(games));
 
         // Get initial filters from URL parameters
         const urlParams = new URLSearchParams(window.location.search);
@@ -54,39 +53,11 @@ export class GameSearchFilterManager {
         window.gameSearchFilterManagerInstance = this;
     }
 
-    handleFiltersChanged(filters) {
-        console.log('handleFiltersChanged called from:', new Error().stack);
-        this.dataManager.setFilters(filters);
-        this.refreshGamesList();
-    }
-
-    handleSearchApplied(searchValue) {
-        this.refreshGamesList();
-    }
-
-    async refreshGamesList() {
-        try {
-            const filters = this.dataManager.getFilters();
-            const search = this.dataManager.getSearch();
-            const category = this.dataManager.getCategory();
-            const endpoint = 'game/getGames';
-            const url = window.i18n.createUrl(endpoint);
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ filters, search, category })
-            });
-
-            if (!response.ok) throw new Error('Failed to fetch games');
-            
-            const games = await response.json();
-            const normalizedGames = this.dataManager.updateGamesData(games, true);
-            this.renderer.renderGamesList(normalizedGames);
-            
-        } catch (error) {
-            console.error('Error refreshing games list:', error);
-        }
+    /**
+     * Render games list - called when DataManager emits 'gamesRefreshed'
+     * DataManager automatically handles filtersChanged/searchApplied events
+     */
+    renderGames(games) {
+        this.renderer.renderGamesList(games);
     }
 }

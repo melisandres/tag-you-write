@@ -11,7 +11,7 @@
     {% if not guest %}
         {% set sections = sections|merge([
             {
-                key: 'myGames',
+                key: 'myStories',
                 title: 'dashboard.my_stories',
                 cssClass: 'my-stories',
                 subcategories: [

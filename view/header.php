@@ -71,7 +71,7 @@
         </a>
         {% endif %}
 
-        {% if title_key == 'page_title.texts' %}
+        {% if title_key == 'page_title.texts' or title_key == 'page_title.dashboard' %}
             <a class="nav-link filter" data-item="filter">
                 <span class="icon" data-svg="filter" data-i18n-title="nav.filter_tooltip" title="{{ translate('nav.filter_tooltip') }}"></span>
                 <span class="nav-text" data-i18n="nav.filter">
@@ -87,7 +87,7 @@
             </a>  
         {% endif %}
 
-        {% if title_key == 'page_title.texts' or title_key == 'page_title.collab' %}
+        {% if title_key == 'page_title.texts' or title_key == 'page_title.collab' or title_key == 'page_title.dashboard' %}
             <a class="nav-link search" data-item="search" href="{{ langUrl('search') }}">
                 <span class="icon" data-svg="search" data-i18n-title="nav.search_tooltip" title="{{ translate('nav.search_tooltip') }}"></span>
                 <span class="nav-text" data-i18n="nav.search">
@@ -351,7 +351,7 @@
         </div>
     </div>
 
-    {% if title_key == 'page_title.texts' or title_key == 'page_title.collab' %}
+    {% if title_key == 'page_title.texts' or title_key == 'page_title.collab' or title_key == 'page_title.dashboard' %}
         <div class="menu-container">
             <div class="filter-menu">
                 <!-- filter menu content -->

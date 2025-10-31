@@ -12,7 +12,7 @@ import { eventBus } from './eventBus.js';
 export class PageTypeManager {
     /**
      * Detect the current page type based on DOM elements
-     * @returns {string} One of: 'game_list', 'text_form', 'collab_page', 'home', 'other'
+     * @returns {string} One of: 'game_list', 'text_form', 'collab_page', 'home', 'dashboard', 'other'
      */
     static getCurrentPageType() {
         if (document.querySelector('[data-stories]')) return 'game_list';
@@ -21,6 +21,7 @@ export class PageTypeManager {
         if (document.querySelector('[data-form-type="addingNote"]')) return 'text_form';
         if (document.querySelector('[data-one-story]')) return 'collab_page';
         if (document.querySelector('.home-container')) return 'home';
+        if (document.querySelector('.dashboard')) return 'dashboard';
         return 'other';
     }
 
@@ -34,6 +35,7 @@ export class PageTypeManager {
             case 'game_list':
             case 'collab_page':
             case 'home':
+            case 'dashboard':
                 return 'browsing';
             case 'text_form':
                 if (document.querySelector('[data-form-type="root"]')) return 'starting_game';

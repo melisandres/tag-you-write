@@ -8,19 +8,36 @@ class ControllerDashboard extends Controller {
         // Get notifications
         $notifications = $this->getNotifications();
         
-        // Get all games (flat array for DataManager compatibility)
+        // Read filters/search from URL (SSR respects incoming params)
+        $filters = [];
+        if (isset($_GET['hasContributed'])) {
+            // normalize values: 'true'|'false'|'mine'|''
+            $val = $_GET['hasContributed'];
+            $filters['hasContributed'] = $val === '' ? null : $val;
+        }
+        if (isset($_GET['bookmarked'])) {
+            $filters['bookmarked'] = $_GET['bookmarked'] === '' ? null : $_GET['bookmarked'];
+        }
+        if (isset($_GET['gameState'])) {
+            $filters['gameState'] = $_GET['gameState'] === '' ? null : $_GET['gameState'];
+        }
+        $search = isset($_GET['search']) ? $_GET['search'] : null;
+
+        // Get all games (flat array for DataManager compatibility), applying filters/search when present
         $game = new Game;
-        $allGames = $game->getGames();
+        $allGames = $game->getGames(null, $filters, null, $search);
         
         // Get dashboard data (categorized for initial server-side render)
-        $dashboardData = $this->buildDashboardData();
+        $dashboardData = $this->buildDashboardData($filters, $search);
         
         // Render dashboard view
         Twig::render('dashboard-index.php', [
             'dashboardData' => $dashboardData, // Categorized data for server-side render
             'gamesData' => json_encode($allGames), // Flat array for DataManager
             'notifications' => $notifications,
-            'notificationsData' => json_encode($notifications)
+            'notificationsData' => json_encode($notifications),
+            'initialFilters' => $filters,
+            'initialSearch' => $search
         ]);
     }
     
@@ -38,11 +55,11 @@ class ControllerDashboard extends Controller {
     /**
      * Get categorized dashboard data
      */
-    private function buildDashboardData() {
+    private function buildDashboardData($filters = [], $search = null) {
         $game = new Game;
         
         // Get all games (we'll categorize them)
-        $allGames = $game->getGames();
+        $allGames = $game->getGames(null, $filters, null, $search);
         
         // Initialize dashboard data structure
         $dashboardData = [
@@ -55,7 +72,8 @@ class ControllerDashboard extends Controller {
         
         // Only add user-specific sections if not a guest
         if (!$this->isGuest()) {
-            $dashboardData['myGames'] = [
+            // Use 'myStories' as section key to match frontend/templates
+            $dashboardData['myStories'] = [
                 'drafts' => ['games' => [], 'count' => 0, 'hasUnreads' => false],
                 'active' => ['games' => [], 'count' => 0, 'hasUnreads' => false],
                 'archives' => ['games' => [], 'count' => 0, 'hasUnreads' => false]
@@ -94,26 +112,26 @@ class ControllerDashboard extends Controller {
         // Map SQL categories to dashboard sections
         switch ($category) {
             case 'myGames.drafts':
-                if (!$isGuest && isset($dashboardData['myGames'])) {
-                    $dashboardData['myGames']['drafts']['games'][] = $game;
-                    $dashboardData['myGames']['drafts']['count']++;
-                    if ($hasUnreads) $dashboardData['myGames']['drafts']['hasUnreads'] = true;
+                if (!$isGuest && isset($dashboardData['myStories'])) {
+                    $dashboardData['myStories']['drafts']['games'][] = $game;
+                    $dashboardData['myStories']['drafts']['count']++;
+                    if ($hasUnreads) $dashboardData['myStories']['drafts']['hasUnreads'] = true;
                 }
                 break;
                 
             case 'myGames.active':
-                if (!$isGuest && isset($dashboardData['myGames'])) {
-                    $dashboardData['myGames']['active']['games'][] = $game;
-                    $dashboardData['myGames']['active']['count']++;
-                    if ($hasUnreads) $dashboardData['myGames']['active']['hasUnreads'] = true;
+                if (!$isGuest && isset($dashboardData['myStories'])) {
+                    $dashboardData['myStories']['active']['games'][] = $game;
+                    $dashboardData['myStories']['active']['count']++;
+                    if ($hasUnreads) $dashboardData['myStories']['active']['hasUnreads'] = true;
                 }
                 break;
                 
             case 'myGames.archives':
-                if (!$isGuest && isset($dashboardData['myGames'])) {
-                    $dashboardData['myGames']['archives']['games'][] = $game;
-                    $dashboardData['myGames']['archives']['count']++;
-                    if ($hasUnreads) $dashboardData['myGames']['archives']['hasUnreads'] = true;
+                if (!$isGuest && isset($dashboardData['myStories'])) {
+                    $dashboardData['myStories']['archives']['games'][] = $game;
+                    $dashboardData['myStories']['archives']['count']++;
+                    if ($hasUnreads) $dashboardData['myStories']['archives']['hasUnreads'] = true;
                 }
                 break;
                 

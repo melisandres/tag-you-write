@@ -80,7 +80,7 @@ class ControllerWriterActivity extends Controller {
             }
 
             // Validate page_type
-            $validPageTypes = ['game_list', 'text_form', 'collab_page', 'home', 'other'];
+            $validPageTypes = ['game_list', 'text_form', 'collab_page', 'home', 'dashboard', 'other'];
             if (!in_array($input['page_type'], $validPageTypes)) {
                 http_response_code(400);
                 echo json_encode(['error' => 'Invalid page_type']);

@@ -35,21 +35,12 @@ class ControllerText extends Controller{
         // Get search parameter from URL
         $searchTerm = isset($_GET['search']) ? $_GET['search'] : null;
 
-        // Debug logging
-        error_log("ControllerText::index - Category: " . ($category ?? 'null'));
-        error_log("ControllerText::index - Search: " . ($searchTerm ?? 'null'));
-        error_log("ControllerText::index - Filters: " . print_r($filters, true));
-
         // TODO: Get the sort parameter from URL
         $sort = null;
-
-        /* error_log('Sort: ' . $sort); */
 
         // Getting the games
         $game = new Game;
         $allGames = $game->getGames($sort, $filters, null, $searchTerm, $category);
-
-        error_log("ControllerText::index - Returned " . count($allGames) . " games");
 
         // Get the notifications
         $notifications = $this->getNotifications();

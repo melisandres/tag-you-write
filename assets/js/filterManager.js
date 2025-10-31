@@ -88,7 +88,7 @@ export class FilterManager {
         
         // Set up event listeners
         eventBus.on('filterApplied', () => this.updateNavLink());
-        eventBus.on('filtersUpdated', (filters) => this.handlefiltersUpdated(filters));
+        eventBus.on('filtersUpdated', (filters) => this.handleFiltersUpdated(filters));
         this.menuManager = window.menuManager;
     }
 

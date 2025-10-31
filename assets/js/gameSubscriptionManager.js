@@ -8,6 +8,7 @@ import { PageTypeManager } from './pageTypeManager.js';
  * 
  * SIMPLIFIED LOGIC:
  * - Game list pages: subscribe to all games
+ * - Dashboard pages: subscribe to all games (to show new games)
  * - Collaboration pages: subscribe to single game  
  * - Text forms: NO subscriptions (simplified - no game updates, no text updates)
  * - Everything else: no subscriptions
@@ -57,12 +58,18 @@ export class GameSubscriptionManager {
             hasFormTypeIteration: !!document.querySelector('[data-form-type="iteration"]'),
             hasFormTypeAddingNote: !!document.querySelector('[data-form-type="addingNote"]'),
             hasHomeContainer: !!document.querySelector('.home-container'),
+            hasDashboard: !!document.querySelector('.dashboard'),
             currentUrl: window.location.href
         });
         
         // Determine subscription type based on page context
         switch (pageType) {
             case 'game_list':
+                this.subscriptionType = 'all_games';
+                break;
+                
+            case 'dashboard':
+                // Dashboard needs to receive all game updates to show new games
                 this.subscriptionType = 'all_games';
                 break;
                 

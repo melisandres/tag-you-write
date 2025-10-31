@@ -1,5 +1,11 @@
+import { PageTypeManager } from './pageTypeManager.js';
+
 export class GamesModifiedHandler {
     constructor() {
+        // Only activate on game list pages
+        if (PageTypeManager.getCurrentPageType() !== 'game_list') {
+            return;
+        }
         this.initializeEventListeners();
     }
 

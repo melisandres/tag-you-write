@@ -65,3 +65,4 @@ AFTER subject;
 -- This fixes the "Data truncated" error when storing 'other', 'iterating', 'adding_note'
 ALTER TABLE writer_activity 
 MODIFY COLUMN activity_type ENUM('browsing', 'editing', 'starting_game', 'iterating', 'adding_note', 'other') NOT NULL; 
+MODIFY COLUMN page_type ENUM('game_list', 'text_form', 'collab_page', 'home', 'dashboard', 'other') NOT NULL;

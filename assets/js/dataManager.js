@@ -26,7 +26,7 @@ export class DataManager {
                     active: { games: [], count: 0, hasUnreads: false },
                     archives: { games: [], count: 0, hasUnreads: false }
                 },
-                joinableGames: {
+                canJoin: {
                     invitations: { games: [], count: 0, hasUnreads: false },
                     suggested: { games: [], count: 0, hasUnreads: false },
                     other: { games: [], count: 0, hasUnreads: false }
@@ -76,7 +76,7 @@ export class DataManager {
                     active: { games: [], count: 0, hasUnreads: false },
                     archives: { games: [], count: 0, hasUnreads: false }
                 },
-                joinableGames: {
+                canJoin: {
                     invitations: { games: [], count: 0, hasUnreads: false },
                     suggested: { games: [], count: 0, hasUnreads: false },
                     other: { games: [], count: 0, hasUnreads: false }
@@ -207,6 +207,30 @@ export class DataManager {
                     value: event.rootStoryId 
                 });
             }
+        });
+
+        // Reactive data store: Listen to filter/search changes and automatically refresh
+        eventBus.on('filtersChanged', (filters) => {
+            // Note: FilterManager.button handlers call setFilters() directly and emit refreshGames
+            // But handleFiltersUpdated() method emits filtersChanged for external updates
+            console.log('📦 DataManager: filtersChanged received, refreshing games');
+            // Filters may already be set, but ensure they're synced
+            if (filters && JSON.stringify(this.cache.filters) !== JSON.stringify(filters)) {
+                this.setFilters(filters);
+            }
+            this.refreshGamesFromBackend();
+        });
+        
+        eventBus.on('searchApplied', (searchValue) => {
+            // SearchManager already calls setSearch() before emitting, so we just need to refresh
+            console.log('📦 DataManager: searchApplied received, refreshing games');
+            this.refreshGamesFromBackend();
+        });
+        
+        eventBus.on('refreshGames', () => {
+            // This is emitted by FilterManager after calling setFilters() and by other systems
+            console.log('📦 DataManager: refreshGames received, refreshing games');
+            this.refreshGamesFromBackend();
         });
 
         // Subscribe to relevant events
@@ -535,6 +559,55 @@ export class DataManager {
             .sort((a, b) => a.placement_index - b.placement_index);
     }
 
+    /**
+     * Fetch games from backend with current filters/search/category and update cache
+     * Emits 'gamesRefreshed' event so view managers can render
+     * Includes debouncing to batch rapid calls
+     */
+    async refreshGamesFromBackend() {
+        // Debounce: Clear any pending refresh and schedule a new one
+        if (this.refreshTimeout) {
+            clearTimeout(this.refreshTimeout);
+        }
+        
+        return new Promise((resolve, reject) => {
+            this.refreshTimeout = setTimeout(async () => {
+                try {
+                    const filters = this.getFilters();
+                    const search = this.getSearch();
+                    const category = this.getCategory();
+                    const endpoint = 'game/getGames';
+                    const url = window.i18n.createUrl(endpoint);
+                    
+                    console.log('📦 DataManager: refreshGamesFromBackend fetching with', { filters, search, category });
+                    
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ filters, search, category })
+                    });
+                    
+                    if (!response.ok) throw new Error('Failed to fetch games');
+                    
+                    const games = await response.json();
+                    
+                    // Update games will rebuild the dashboard categories, and that will emit the dashboardCategoriesUpdated event
+                    const normalizedGames = this.updateGamesData(games, true);
+                    
+                    // Emit event for view managers to render
+                    eventBus.emit('gamesRefreshed', normalizedGames);
+                    
+                    resolve(normalizedGames);
+                } catch (error) {
+                    console.error('DataManager: Error refreshing games from backend', error);
+                    reject(error);
+                } finally {
+                    this.refreshTimeout = null;
+                }
+            }, 100); // 100ms debounce to batch rapid duplicate calls
+        });
+    }
+
     updateTreeNodes(modifiedNodes, rootId) {
         // Try both string and number versions of the key
         let rootNode = this.cache.nodesMap.get(String(rootId)) || 
@@ -841,7 +914,7 @@ export class DataManager {
                             active: { games: [], count: 0, hasUnreads: false },
                             archives: { games: [], count: 0, hasUnreads: false }
                         },
-                        joinableGames: {
+                        canJoin: {
                             invitations: { games: [], count: 0, hasUnreads: false },
                             suggested: { games: [], count: 0, hasUnreads: false },
                             other: { games: [], count: 0, hasUnreads: false }
@@ -978,7 +1051,7 @@ export class DataManager {
                     active: { games: [], count: 0, hasUnreads: false },
                     archives: { games: [], count: 0, hasUnreads: false }
                 },
-                joinableGames: {
+                canJoin: {
                     invitations: { games: [], count: 0, hasUnreads: false },
                     suggested: { games: [], count: 0, hasUnreads: false },
                     other: { games: [], count: 0, hasUnreads: false }
@@ -1612,7 +1685,7 @@ export class DataManager {
         
         // Initialize dashboard data structure
         const dashboardData = {
-            joinableGames: {
+            canJoin: {
                 invitations: { games: [], count: 0, hasUnreads: false },
                 suggested: { games: [], count: 0, hasUnreads: false },
                 other: { games: [], count: 0, hasUnreads: false }
@@ -1678,15 +1751,15 @@ export class DataManager {
                 break;
                 
             case 'canJoin.invitations':
-                dashboardData.joinableGames.invitations.games.push(game);
-                dashboardData.joinableGames.invitations.count++;
-                if (hasUnreads) dashboardData.joinableGames.invitations.hasUnreads = true;
+                dashboardData.canJoin.invitations.games.push(game);
+                dashboardData.canJoin.invitations.count++;
+                if (hasUnreads) dashboardData.canJoin.invitations.hasUnreads = true;
                 break;
                 
             case 'canJoin.other':
-                dashboardData.joinableGames.other.games.push(game);
-                dashboardData.joinableGames.other.count++;
-                if (hasUnreads) dashboardData.joinableGames.other.hasUnreads = true;
+                dashboardData.canJoin.other.games.push(game);
+                dashboardData.canJoin.other.count++;
+                if (hasUnreads) dashboardData.canJoin.other.hasUnreads = true;
                 break;
                 
             case 'inspiration.closed':

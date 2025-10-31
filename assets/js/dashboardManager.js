@@ -4,224 +4,74 @@ export class DashboardManager {
     constructor() {
         this.container = document.querySelector('.dashboard');
         if (!this.container) {
-            console.log('DashboardManager: No dashboard container found');
+            console.log('DashboardManager: No dashboard container found - exiting silently');
             return;
         }
 
-        // Singleton pattern
-        if (window.dashboardManagerInstance) {
-            return window.dashboardManagerInstance;
-        }
-
+        // Get DataManager from global scope (it's already initialized)
         this.dataManager = window.dataManager;
-        this.flatGamesData = this.getFlatGamesData();
+        if (!this.dataManager) {
+            console.error('DashboardManager: DataManager not found on window object');
+            return;
+        }
         
-        // Initialize DataManager with flat games data
-        this.initializeDataManager();
-        
-        // Initialize event listeners
+        // Initialize event listeners for dashboard-specific functionality
         this.initEventListeners();
         
-        // Set up collapsible functionality
+        // Set up UI interactions
         this.setupCollapsibleCategories();
-        
-        // Set up game navigation
         this.setupGameNavigation();
         
-        
-        window.dashboardManagerInstance = this;
-        console.log('🎮🎮🎮 DashboardManager CONSTRUCTOR CALLED - Event listeners should be set up!');
-    }
-
-
-    /**
-     * Categorize games and populate dashboard
-     */
-    categorizeAndPopulateDashboard() {
-        if (!this.flatGamesData || this.flatGamesData.length === 0) {
-            console.warn('DashboardManager: No games data available for categorization');
-            return;
-        }
-
-        // Categorize games using the same logic as backend
-        const categorizedData = this.categorizeGames(this.flatGamesData);
-        
-        // Populate dashboard with categorized data
-        this.updateDashboardDisplay(categorizedData);
-        
-        console.log('DashboardManager: Categorized and populated dashboard with', this.flatGamesData.length, 'games');
-    }
-
-    /**
-     * Get flat games data for DataManager compatibility
-     */
-    getFlatGamesData() {
-        const scriptTag = document.getElementById('games-data');
-        if (!scriptTag) {
-            console.error('DashboardManager: No games-data script tag found');
-            return [];
-        }
-        
-        try {
-            return JSON.parse(scriptTag.textContent);
-        } catch (error) {
-            console.error('DashboardManager: Error parsing games data:', error);
-            return [];
-        }
-    }
-
-    /**
-     * Initialize DataManager with flat games data
-     */
-    initializeDataManager() {
-        if (this.flatGamesData && this.flatGamesData.length > 0) {
-            // Initialize DataManager cache with flat games data
-            this.dataManager.updateGamesData(this.flatGamesData, true);
-            console.log('DashboardManager: Initialized DataManager with', this.flatGamesData.length, 'games');
-        }
-    }
-
-    /**
-     * Categorize games using the same logic as backend
-     */
-    categorizeGames(games) {
-        const isGuest = !this.dataManager.isUserLoggedIn();
-        
-        // Initialize dashboard data structure
-        const dashboardData = {
-            joinableGames: {
-                invitations: { games: [], count: 0, hasUnreads: false },
-                suggested: { games: [], count: 0, hasUnreads: false },
-                other: { games: [], count: 0, hasUnreads: false }
-            },
-            inspiration: {
-                weLiked: { games: [], count: 0, hasUnreads: false }
-            }
-        };
-        
-        // Only add user-specific sections if not a guest
-        if (!isGuest) {
-            dashboardData.myStories = {
-                drafts: { games: [], count: 0, hasUnreads: false },
-                active: { games: [], count: 0, hasUnreads: false },
-                archives: { games: [], count: 0, hasUnreads: false }
-            };
-            
-        }
-        
-        // Add closed subsection for all users (closed games for inspiration)
-        dashboardData.inspiration.closed = { games: [], count: 0, hasUnreads: false };
-        
-        // Categorize each game
-        games.forEach(game => {
-            this.categorizeGame(game, dashboardData, isGuest);
-        });
-        
-        return dashboardData;
-    }
-
-    /**
-     * Categorize a single game into the appropriate dashboard sections
-     */
-    categorizeGame(game, dashboardData, isGuest) {
-        // Use the SQL-provided category field directly - much simpler!
-        const category = game.category;
-        const hasUnreads = game.unseen_count > 0;
-        
-        // Map SQL categories to dashboard sections
-        switch (category) {
-            case 'myGames.drafts':
-                if (!isGuest && dashboardData.myStories) {
-                    dashboardData.myStories.drafts.games.push(game);
-                    dashboardData.myStories.drafts.count++;
-                    if (hasUnreads) dashboardData.myStories.drafts.hasUnreads = true;
-                }
-                break;
-                
-            case 'myGames.active':
-                if (!isGuest && dashboardData.myStories) {
-                    dashboardData.myStories.active.games.push(game);
-                    dashboardData.myStories.active.count++;
-                    if (hasUnreads) dashboardData.myStories.active.hasUnreads = true;
-                }
-                break;
-                
-            case 'myGames.archives':
-                if (!isGuest && dashboardData.myStories) {
-                    dashboardData.myStories.archives.games.push(game);
-                    dashboardData.myStories.archives.count++;
-                    if (hasUnreads) dashboardData.myStories.archives.hasUnreads = true;
-                }
-                break;
-                
-            case 'canJoin.invitations':
-                dashboardData.joinableGames.invitations.games.push(game);
-                dashboardData.joinableGames.invitations.count++;
-                if (hasUnreads) dashboardData.joinableGames.invitations.hasUnreads = true;
-                break;
-                
-            case 'canJoin.other':
-                dashboardData.joinableGames.other.games.push(game);
-                dashboardData.joinableGames.other.count++;
-                if (hasUnreads) dashboardData.joinableGames.other.hasUnreads = true;
-                break;
-                
-            case 'inspiration.closed':
-                if (dashboardData.inspiration.closed) {
-                    dashboardData.inspiration.closed.games.push(game);
-                    dashboardData.inspiration.closed.count++;
-                    if (hasUnreads) dashboardData.inspiration.closed.hasUnreads = true;
-                }
-                break;
-                
-            default:
-                console.warn('Unknown category:', category, 'for game:', game.game_id);
-                break;
-        }
+        console.log('🎮 DashboardManager: Initialized successfully');
     }
 
     /**
      * Initialize event listeners for search/filter integration
      */
     initEventListeners() {
-        // Listen for search and filter changes
-        eventBus.on('searchApplied', (searchValue) => this.handleSearchApplied(searchValue));
-        eventBus.on('filtersChanged', (filters) => this.handleFiltersChanged(filters));
+        // DataManager handles filtersChanged/searchApplied/refreshGames automatically
+        // We only listen to DataManager's rendering events
+        
+        // Listen for dashboard category updates from DataManager (main rendering event)
+        eventBus.on('dashboardCategoriesUpdated', (categorizedData) => {
+            this.redrawAllCategories(categorizedData);
+        });
         
         // Listen for game updates
         eventBus.on('gameModified', (data) => this.handleGameModified(data));
         eventBus.on('gameAdded', (game) => this.handleGameAdded(game));
+        // Pluralized removal events come from DataManager and other handlers
+        eventBus.on('gamesRemoved', (gameIds) => {
+            if (Array.isArray(gameIds)) {
+                gameIds.forEach((id) => this.removeGameFromDashboard(String(id)));
+            }
+        });
+        // Note: search/filter handling will decide view-removal events later
         
         // Listen for game activity changes (same as game list)
         eventBus.on('gameActivityChanged', (data) => this.handleGameActivityUpdate(data));
         console.log('🎮🎮🎮 DashboardManager: gameActivityChanged event listener SET UP!');
-        
-        // Test event bus connectivity
-        setTimeout(() => {
-            console.log('🎮🎮🎮 DashboardManager: Testing event bus...');
-            eventBus.emit('gameActivityChanged', { gameId: 'test', browsing: 1, writing: 1 });
-        }, 1000);
-        
-        // NEW: Listen for category updates from DataManager
-        eventBus.on('dashboardCategoriesUpdated', (categorizedData) => {
-            this.updateDashboardDisplay(categorizedData);
-        });
     }
 
     /**
-     * Set up collapsible functionality for categories
+     * Set up collapsible functionality for categories and browse buttons
      */
     setupCollapsibleCategories() {
-        const categoryHeaders = this.container.querySelectorAll('.category-header');
-        
-        categoryHeaders.forEach(header => {
-            header.addEventListener('click', () => {
-                this.toggleCategory(header);
-            });
+        // Use event delegation for better performance and dynamic content support
+        this.container.addEventListener('click', (e) => {
+            const browseButton = e.target.closest('.browse-button');
+            if (browseButton) {
+                // Prevent click from bubbling to category header
+                e.stopPropagation();
+                // Let the <a> tag handle navigation naturally
+                return;
+            }
+            
+            const categoryHeader = e.target.closest('.category-header');
+            if (categoryHeader) {
+                this.toggleCategory(categoryHeader);
+            }
         });
-        
-        // Set up browse button event handlers to prevent bubbling
-        this.setupBrowseButtons();
     }
 
     /**
@@ -247,38 +97,22 @@ export class DashboardManager {
     }
 
     /**
-     * Set up browse button event handlers to prevent event bubbling
-     */
-    setupBrowseButtons() {
-        const browseButtons = this.container.querySelectorAll('.browse-button');
-        
-        browseButtons.forEach(button => {
-            button.addEventListener('click', (event) => {
-                // Prevent the click from bubbling up to the category header
-                event.stopPropagation();
-                // The href will handle navigation naturally
-            });
-        });
-    }
-
-    /**
-     * Set up game navigation
+     * Set up game navigation using event delegation
      */
     setupGameNavigation() {
-        const gameItems = this.container.querySelectorAll('.dashboard-game-item');
-        
-        gameItems.forEach(item => {
-            item.addEventListener('click', (e) => {
+        // Use event delegation for better performance and dynamic content support
+        this.container.addEventListener('click', (e) => {
+            const gameItem = e.target.closest('.dashboard-game-item');
+            if (gameItem) {
                 e.preventDefault();
-                const gameId = item.dataset.gameId;
-                const textId = item.dataset.textId;
+                const textId = gameItem.dataset.textId;
                 
                 if (textId) {
                     this.navigateToGame(textId);
                 } else {
                     console.warn('DashboardManager: No text ID found for game item');
                 }
-            });
+            }
         });
     }
 
@@ -299,204 +133,109 @@ export class DashboardManager {
         window.location.href = url;
     }
 
-    /**
-     * Handle search applied - update dashboard with filtered results
-     */
-    handleSearchApplied(searchValue) {
-        console.log('DashboardManager: Search applied:', searchValue);
-        
-        if (!searchValue || searchValue.trim() === '') {
-            // Clear search - restore original data
-            this.restoreOriginalData();
-        } else {
-            // Apply search filter
-            this.applySearchFilter(searchValue);
-        }
-    }
 
     /**
-     * Handle filters changed - update dashboard with filtered results
+     * Remove a game from the dashboard and update count
      */
-    handleFiltersChanged(filters) {
-        console.log('DashboardManager: Filters changed:', filters);
-        this.applyFilters(filters);
-    }
-
-    /**
-     * Apply search filter to dashboard
-     */
-    applySearchFilter(searchValue) {
-        if (!this.flatGamesData) return;
+    removeGameFromDashboard(gameId) {
+        const gameElements = this.container.querySelectorAll(`[data-game-id="${gameId}"]`);
         
-        // Get current games from DataManager
-        const currentGames = this.getCurrentGamesFromDataManager();
-        const filteredData = this.filterDashboardData(this.categorizeGames(currentGames), { search: searchValue });
-        this.updateDashboardDisplay(filteredData);
-    }
-
-    /**
-     * Apply filters to dashboard
-     */
-    applyFilters(filters) {
-        if (!this.flatGamesData) return;
-        
-        // Get current games from DataManager
-        const currentGames = this.getCurrentGamesFromDataManager();
-        const filteredData = this.filterDashboardData(this.categorizeGames(currentGames), { filters });
-        this.updateDashboardDisplay(filteredData);
-    }
-
-    /**
-     * Filter dashboard data based on search and filters
-     */
-    filterDashboardData(data, options = {}) {
-        const { search, filters } = options;
-        const filteredData = JSON.parse(JSON.stringify(data)); // Deep clone
-        
-        // Apply search filter
-        if (search) {
-            this.applySearchToData(filteredData, search);
-        }
-        
-        // Apply other filters
-        if (filters) {
-            this.applyFiltersToData(filteredData, filters);
-        }
-        
-        return filteredData;
-    }
-
-    /**
-     * Apply search to dashboard data
-     */
-    applySearchToData(data, searchTerm) {
-        const searchLower = searchTerm.toLowerCase();
-        
-        Object.keys(data).forEach(sectionKey => {
-            const section = data[sectionKey];
-            Object.keys(section).forEach(subcategoryKey => {
-                const subcategory = section[subcategoryKey];
-                if (subcategory.games) {
-                    subcategory.games = subcategory.games.filter(game => {
-                        const title = (game.title || '').toLowerCase();
-                        return title.includes(searchLower);
-                    });
-                    subcategory.count = subcategory.games.length;
-                    subcategory.hasUnreads = subcategory.games.some(game => game.unseen_count > 0);
-                }
-            });
+        gameElements.forEach(gameElement => {
+            // Find the category header via the games container's previous sibling
+            const gamesContainer = gameElement.parentElement;
+            const categoryElement = gamesContainer ? gamesContainer.previousElementSibling : null;
+            const category = categoryElement ? categoryElement.dataset.category : null;
+            
+            gameElement.remove();
+            if (category) {
+                this.updateCategoryCountByCategory(category);
+            }
         });
+        
+        console.log(`🎮 DashboardManager: Removed game ${gameId} from dashboard`);
     }
 
     /**
-     * Apply filters to dashboard data
+     * Add a game to the dashboard and update count
      */
-    applyFiltersToData(data, filters) {
-        // This would implement the same filtering logic as the game list
-        // For now, we'll implement basic filtering
-        
-        Object.keys(data).forEach(sectionKey => {
-            const section = data[sectionKey];
-            Object.keys(section).forEach(subcategoryKey => {
-                const subcategory = section[subcategoryKey];
-                if (subcategory.games) {
-                    let filteredGames = subcategory.games;
-                    
-                    // Apply hasContributed filter
-                    if (filters.hasContributed !== null && filters.hasContributed !== undefined) {
-                        if (filters.hasContributed === true) {
-                            filteredGames = filteredGames.filter(game => game.hasContributed);
-                        } else if (filters.hasContributed === 'mine') {
-                            filteredGames = filteredGames.filter(game => game.isMine);
-                        }
-                    }
-                    
-                    // Apply bookmarked filter
-                    if (filters.bookmarked !== null && filters.bookmarked !== undefined) {
-                        filteredGames = filteredGames.filter(game => 
-                            filters.bookmarked ? game.isBookmarked : !game.isBookmarked
-                        );
-                    }
-                    
-                    // Apply game state filter
-                    if (filters.gameState && filters.gameState !== 'all') {
-                        filteredGames = filteredGames.filter(game => {
-                            switch (filters.gameState) {
-                                case 'open':
-                                    return game.openForChanges;
-                                case 'closed':
-                                    return !game.openForChanges && !game.pending;
-                                case 'pending':
-                                    return game.pending;
-                                default:
-                                    return true;
-                            }
-                        });
-                    }
-                    
-                    subcategory.games = filteredGames;
-                    subcategory.count = filteredGames.length;
-                    subcategory.hasUnreads = filteredGames.some(game => game.unseen_count > 0);
-                }
-            });
-        });
-    }
-
-    /**
-     * Update dashboard display with new data
-     */
-    updateDashboardDisplay(data) {
-        console.log('🎮 DashboardManager: updateDashboardDisplay called - this will replace server-side HTML!');
-        console.log('🎮 DashboardManager: Data sections:', Object.keys(data));
-        
-        // Check if server-side HTML already has games
-        const existingGames = this.container.querySelectorAll('[data-game-id]');
-        console.log('🎮 DashboardManager: Existing games in server-side HTML:', existingGames.length);
-        
-        if (existingGames.length > 0) {
-            console.log('🎮 DashboardManager: Server-side HTML already has games, skipping replacement to preserve activity indicators');
+    addGameToDashboard(game, category) {
+        const categoryElement = this.container.querySelector(`[data-category="${category}"]`);
+        if (!categoryElement) {
+            console.warn('🎮 DashboardManager: Category element not found for:', category);
             return;
         }
         
-        // Update counts and unread indicators
-        Object.keys(data).forEach(sectionKey => {
-            const section = data[sectionKey];
-            Object.keys(section).forEach(subcategoryKey => {
-                const subcategory = section[subcategoryKey];
-                const categoryElement = this.container.querySelector(`[data-category="${sectionKey}.${subcategoryKey}"]`);
-                
-                if (categoryElement) {
+        const gamesContainer = categoryElement.nextElementSibling;
+        if (!gamesContainer) {
+            console.warn('🎮 DashboardManager: Games container not found for category:', category);
+            return;
+        }
+        
+        // Check if game already exists
+        const existingGame = gamesContainer.querySelector(`[data-game-id="${game.game_id}"]`);
+        if (existingGame) {
+            console.log('🎮 DashboardManager: Game already exists, skipping add');
+            return;
+        }
+        
+        // Create and add game element
+        const gameElement = this.createGameElement(game);
+        gamesContainer.appendChild(gameElement);
+        
                     // Update count
-                    const countElement = categoryElement.querySelector('.count');
-                    if (countElement) {
-                        countElement.textContent = `(${subcategory.count})`;
-                    }
-                    
-                    // Update unread indicator
-                    const titleElement = categoryElement.querySelector('.category-title');
-                    if (titleElement) {
-                        if (subcategory.hasUnreads) {
-                            titleElement.classList.add('has-unreads');
-                        } else {
-                            titleElement.classList.remove('has-unreads');
-                        }
-                    }
-                    
-                    // Update game list
-                    this.updateGameList(categoryElement, subcategory.games);
-                }
-            });
-        });
+        this.updateCategoryCountByCategory(category);
+        
+        console.log(`🎮 DashboardManager: Added game ${game.game_id} to category ${category}`);
     }
 
     /**
-     * Update game list for a specific category
+     * Update category count by delta (+1, -1, etc.)
      */
-    updateGameList(categoryElement, games) {
+    updateCategoryCountByCategory(category) {
+        const categoryElement = this.container.querySelector(`[data-category="${category}"]`);
+        if (!categoryElement) return;
+        
+                    const countElement = categoryElement.querySelector('.count');
+        if (!countElement) return;
+        
+        // Get current count from DOM
+        const gamesContainer = categoryElement.nextElementSibling;
+        const currentCount = gamesContainer ? gamesContainer.querySelectorAll('.dashboard-game-item').length : 0;
+        
+        // Update count
+        countElement.textContent = `(${currentCount})`;
+        
+        console.log(`🎮 DashboardManager: Updated count for ${category}: ${currentCount}`);
+    }
+
+    /**
+     * Update category unread indicator
+     */
+    updateCategoryUnread(category, hasUnreads) {
+        const categoryElement = this.container.querySelector(`[data-category="${category}"]`);
+        if (!categoryElement) return;
+        
+                    const titleElement = categoryElement.querySelector('.category-title');
+        if (!titleElement) return;
+        
+        if (hasUnreads) {
+                            titleElement.classList.add('has-unreads');
+                        } else {
+                            titleElement.classList.remove('has-unreads');
+        }
+        
+        console.log(`🎮 DashboardManager: Updated unread for ${category}: ${hasUnreads}`);
+    }
+
+    /**
+     * Redraw all games for a specific category (full replace)
+     * Intended for filter/search results, not realtime updates
+     */
+    redrawGamesForCategory(categoryElement, games) {
         const gamesContainer = categoryElement.nextElementSibling;
         if (!gamesContainer) return;
         
-        console.log('🎮 DashboardManager: updateGameList called - REPLACING server-side HTML with JS-generated content');
+        console.log('🎮 DashboardManager: redrawGamesForCategory called - REPLACING category contents');
         console.log('🎮 DashboardManager: Games to add:', games.length);
         console.log('🎮 DashboardManager: Game IDs:', games.map(g => g.game_id));
         
@@ -509,9 +248,28 @@ export class DashboardManager {
             gamesContainer.appendChild(gameElement);
         });
         
-        // Re-setup navigation for new elements
-        this.setupGameNavigation();
+        // Navigation is handled by event delegation - no need to re-setup
     }
+
+    /**
+     * Redraw all categories from categorized data
+     */
+    redrawAllCategories(categorizedData) {
+        if (!categorizedData) return;
+        Object.keys(categorizedData).forEach(sectionKey => {
+            const section = categorizedData[sectionKey];
+            Object.keys(section).forEach(subKey => {
+                const subcategory = section[subKey];
+                const categoryPath = `${sectionKey}.${subKey}`;
+                const headerEl = this.container.querySelector(`[data-category="${categoryPath}"]`);
+                if (!headerEl) return;
+                this.redrawGamesForCategory(headerEl, subcategory.games || []);
+                this.updateCategoryCountByCategory(categoryPath);
+                this.updateCategoryUnread(categoryPath, !!subcategory.hasUnreads);
+            });
+        });
+    }
+
 
     /**
      * Create a game element
@@ -551,28 +309,6 @@ export class DashboardManager {
         return gameElement;
     }
 
-    /**
-     * Get current games from DataManager
-     */
-    getCurrentGamesFromDataManager() {
-        // Get all games from DataManager cache
-        const games = [];
-        this.dataManager.cache.games.forEach((gameData, gameId) => {
-            games.push(gameData.data);
-        });
-        return games;
-    }
-
-    /**
-     * Restore original dashboard data
-     */
-    restoreOriginalData() {
-        // For hybrid approach, we don't need to restore since server-side render is already there
-        // This method is called when search is cleared, so we just re-categorize current data
-        const currentGames = this.getCurrentGamesFromDataManager();
-        const categorizedData = this.categorizeGames(currentGames);
-        this.updateDashboardDisplay(categorizedData);
-    }
 
     /**
      * Handle game modified event
@@ -581,16 +317,33 @@ export class DashboardManager {
         const { newGame, oldGame } = data;
         
         // Check if the game's categorization might have changed
-        const oldCategory = this.getGameCategory(oldGame);
-        const newCategory = this.getGameCategory(newGame);
+        // Use backend-provided category field (single source of truth)
+        const oldCategory = oldGame.category;
+        const newCategory = newGame.category;
         
         if (oldCategory !== newCategory) {
-            // Game moved between categories - use updated categories from DataManager
+            // Game moved between categories - need to move the DOM element
             console.log(`DashboardManager: Game ${newGame.game_id} moved from ${oldCategory} to ${newCategory}`);
             
             // Get updated categories (already rebuilt by DataManager)
             const updatedCategories = this.dataManager.getDashboardData();
-            this.updateDashboardDisplay(updatedCategories);
+            
+            // Move the game element to the new category
+            this.moveGameBetweenCategories(newGame, oldCategory, newCategory, updatedCategories);
+
+            // Update unread flags for both old and new categories based on current categorized data
+            const [oldSection, oldSub] = (oldCategory || '').split('.');
+            const [newSection, newSub] = (newCategory || '').split('.');
+            try {
+                if (oldSection && oldSub && updatedCategories[oldSection] && updatedCategories[oldSection][oldSub]) {
+                    this.updateCategoryUnread(oldCategory, !!updatedCategories[oldSection][oldSub].hasUnreads);
+                }
+                if (newSection && newSub && updatedCategories[newSection] && updatedCategories[newSection][newSub]) {
+                    this.updateCategoryUnread(newCategory, !!updatedCategories[newSection][newSub].hasUnreads);
+                }
+            } catch (e) {
+                console.warn('🎮 DashboardManager: Unable to update unread flags after move', e);
+            }
         } else {
             // Same category - just update the game details
             this.updateGameInDashboard(newGame);
@@ -598,13 +351,82 @@ export class DashboardManager {
     }
 
     /**
+     * Move a game element between categories
+     */
+    moveGameBetweenCategories(game, oldCategory, newCategory, categorizedData) {
+        console.log('🎮 DashboardManager: moveGameBetweenCategories called');
+        
+        // Find the existing game element
+        const gameElement = this.container.querySelector(`[data-game-id="${game.game_id}"]`);
+        if (!gameElement) {
+            console.warn('🎮 DashboardManager: Game element not found for moving:', game.game_id);
+            return;
+        }
+        
+        // Find the new category container
+        const newCategoryElement = this.container.querySelector(`[data-category="${newCategory}"]`);
+        if (!newCategoryElement) {
+            console.warn('🎮 DashboardManager: New category element not found:', newCategory);
+            return;
+        }
+        
+        const newGamesContainer = newCategoryElement.nextElementSibling;
+        if (!newGamesContainer) {
+            console.warn('🎮 DashboardManager: New games container not found for category:', newCategory);
+            return;
+        }
+        
+        // Move the game element to the new container
+        newGamesContainer.appendChild(gameElement);
+        
+        // Update counts for both old and new categories using surgical approach
+        this.updateCategoryCountByCategory(oldCategory);
+        this.updateCategoryCountByCategory(newCategory);
+        
+        console.log('🎮 DashboardManager: Successfully moved game between categories');
+    }
+
+    /**
      * Handle game added event
      */
     handleGameAdded(game) {
+        console.log('🎮 DashboardManager: handleGameAdded called with game:', game);
+        console.log('🎮 DashboardManager: Game category:', game.category);
+        console.log('🎮 DashboardManager: Game data:', {
+            game_id: game.game_id,
+            text_id: game.text_id,
+            title: game.title,
+            category: game.category // Use backend-provided category
+        });
+        
         // Get updated categories (already rebuilt by DataManager)
         const updatedCategories = this.dataManager.getDashboardData();
-        this.updateDashboardDisplay(updatedCategories);
+        
+        // Instead of replacing all content, add the new game to the appropriate category
+        this.addNewGameToDashboard(game, updatedCategories);
     }
+
+    /**
+     * Add a new game to the dashboard without replacing existing content
+     */
+    addNewGameToDashboard(game, categorizedData) {
+        console.log('🎮 DashboardManager: addNewGameToDashboard called with game:', game);
+        
+        // Use backend-provided category field (single source of truth)
+        const gameCategory = game.category;
+        if (!gameCategory) {
+            console.warn('🎮 DashboardManager: Game missing category field:', game);
+            return;
+        }
+        
+        console.log('🎮 DashboardManager: Game category:', gameCategory);
+        
+        // Use surgical add method
+        this.addGameToDashboard(game, gameCategory);
+        
+        console.log('🎮 DashboardManager: Successfully added new game to dashboard');
+    }
+    
 
     /**
      * Update a specific game in the dashboard
@@ -637,6 +459,19 @@ export class DashboardManager {
         } else if (unreadElement) {
             unreadElement.remove();
         }
+
+        // Also refresh category-level unread flag based on DataManager's categorized data
+        try {
+            const category = game.category;
+            if (category) {
+                const [sectionKey, subKey] = category.split('.');
+                const categorized = this.dataManager.getDashboardData();
+                const hasUnreads = !!(categorized[sectionKey] && categorized[sectionKey][subKey] && categorized[sectionKey][subKey].hasUnreads);
+                this.updateCategoryUnread(category, hasUnreads);
+            }
+        } catch (e) {
+            console.warn('🎮 DashboardManager: Unable to update category unread flag after game update', e);
+        }
     }
 
     /**
@@ -647,12 +482,24 @@ export class DashboardManager {
         
         const { gameId, browsing, writing } = activityData;
         
+        // Debug: Check if game exists in DataManager cache
+        const gameInCache = this.dataManager.cache.games.get(String(gameId));
+        console.log('🎮 DashboardManager: Game in cache:', !!gameInCache, gameInCache?.data);
+        
+        // Debug: List all visible games on dashboard
+        const allGameElements = this.container.querySelectorAll('.dashboard-game-item[data-game-id]');
+        const visibleGameIds = Array.from(allGameElements).map(el => el.dataset.gameId);
+        console.log('🎮 DashboardManager: Visible game IDs on dashboard:', visibleGameIds);
         
         // Look for ALL game containers with this game ID (games can appear in multiple categories)
         const gameElements = this.container.querySelectorAll(`.dashboard-game-item[data-game-id="${gameId}"]`);
         
         if (gameElements.length === 0) {
             console.warn('🎮 DashboardManager: No game elements found for gameId:', gameId);
+            console.warn('🎮 DashboardManager: This could mean:');
+            console.warn('  - Game was published but not yet added to dashboard');
+            console.warn('  - Game exists but is in a collapsed category');
+            console.warn('  - Game doesn\'t match current user\'s categories/permissions');
             return;
         }
         
@@ -682,74 +529,4 @@ export class DashboardManager {
         console.log('🎮 DashboardManager: Updated', gameElements.length, 'activity indicators for game:', gameId);
     }
 
-    /**
-     * Get the category path for a game (e.g., "myStories.active" or "joinableGames.invitations")
-     */
-    getGameCategory(game) {
-        const hasContributed = game.hasContributed;
-        const hasJoined = game.hasJoined;
-        const isInvited = game.invited;
-        const hasTemporaryAccess = game.hasTemporaryAccess;
-        const isBookmarked = game.isBookmarked;
-        const isOpen = game.openForChanges;
-        const isPending = game.pending;
-        const isGuest = !this.dataManager.isUserLoggedIn();
-        
-        // Determine if this is an invitation (token-based or pending invitation)
-        const isInvitation = hasTemporaryAccess || (isInvited && !hasJoined && !hasContributed);
-        
-        // My Stories (games I've contributed to) - only for logged-in users
-        if (!isGuest && hasContributed) {
-            if (isPending) {
-                return 'myStories.drafts';
-            } else if (isOpen) {
-                return 'myStories.active';
-            } else {
-                return 'myStories.archives';
-            }
-        }
-        // Games I can join (games I haven't contributed to, or all games for guests)
-        else {
-            if (isInvitation) {
-                return 'joinableGames.invitations';
-            } else {
-                return 'joinableGames.other';
-            }
-        }
-    }
-
-    /**
-     * Refresh the entire dashboard
-     */
-    async refreshDashboard() {
-        try {
-            // Fetch fresh games data from the server
-            const endpoint = 'game/getGames';
-            const url = window.i18n.createUrl(endpoint);
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ 
-                    filters: this.dataManager.getFilters(),
-                    search: this.dataManager.getSearch()
-                })
-            });
-
-            if (!response.ok) throw new Error('Failed to fetch games data');
-            
-            const games = await response.json();
-            
-            // Update DataManager with fresh data (this will automatically update categories)
-            this.dataManager.updateGamesData(games, true);
-            
-            // Get updated categories from DataManager
-            const categorizedData = this.dataManager.getDashboardData();
-            this.updateDashboardDisplay(categorizedData);
-            
-        } catch (error) {
-            console.error('DashboardManager: Error refreshing dashboard:', error);
-        }
-    }
 }
