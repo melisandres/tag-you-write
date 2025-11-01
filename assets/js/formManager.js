@@ -136,17 +136,18 @@ export class FormManager {
         }
     }
 
-    //  Redirect to the text page, with filters if they exist
+    /**
+     * REDIRECT: Cancel button clicked
+     * Uses smart redirect logic: history.back → collab page → text page
+     */
     async handleCancel() {
         try {
-            const redirectUrl = await this.getRedirectUrlWithFilters();
-            
-            // Handle special history.back case
-            if (redirectUrl === 'history.back') {
-                window.history.back();
-            } else {
-                window.location.href = redirectUrl;
-            }
+            // In the this.getSmartRedirectUrl params, we could pass "back" but... the issue is that if there are filters on a gameLIst... and the story no longer matches those filters it isn't included... 
+            const redirectUrl = await this.getSmartRedirectUrl();
+            // Check if a draft was saved (has id) - if so, prepare showcase state
+            const idInput = this.form?.querySelector('[data-id]');
+            const textId = idInput?.value || null;
+            this.executeRedirect(redirectUrl, textId);
         } catch (error) {
             console.error('Error generating redirect URL:', error);
             // Fallback to simple redirect
@@ -250,18 +251,16 @@ export class FormManager {
 
     
 
+    /**
+     * REDIRECT: Delete button clicked (for new/unsaved texts only)
+     * Uses smart redirect logic when aborting creation of unsaved text
+     */
     async handleDelete() {
         const idInput = this.form.querySelector('[data-id]');
         if (!idInput || !idInput.value) {
             // Create a redirect with filters
-            const redirectUrl = await this.getRedirectUrlWithFilters();
-            
-            // Handle special history.back case
-            if (redirectUrl === 'history.back') {
-                window.history.back();
-            } else {
-                window.location.href = redirectUrl;
-            }
+            const redirectUrl = await this.getSmartRedirectUrl();
+            this.executeRedirect(redirectUrl);
 
             localStorage.setItem('pendingToast', JSON.stringify({
                 message: 'Creation aborted',
@@ -379,7 +378,19 @@ export class FormManager {
     }
 
     
-    // Submits the form to store OR update.
+    /**
+     * Submit form with backend-first redirect architecture
+     * 
+     * ARCHITECTURE: Backend determines redirects, frontend executes them
+     * 
+     * Flow:
+     * - Backend sends redirectUrl in JSON response (or null if no redirect)
+     * - Frontend respects backend's redirectUrl completely
+     * - If backend sends null/missing redirectUrl, frontend uses smart fallback
+     * 
+     * This ensures business logic (who goes where) stays in backend,
+     * while frontend handles UX enhancements (preserving query params, etc.)
+     */
     async submitForm(actionUrl) {
         try {
             console.log('submitForm called with URL:', actionUrl);
@@ -425,30 +436,29 @@ export class FormManager {
                     eventBus.emit('manualSave');
                 }
 
+                // Emit tutorial completion event if this is a publish action
+                if (this.statusField && this.statusField.value === 'published') {
+                    eventBus.emit('publishSuccess', {
+                        action: this.formType, // 'root' for new game, 'iteration' for contribution
+                        textId: responseData.textId,
+                        message: responseData.toastMessage
+                    });
+                }
+                
                 if (responseData.redirectUrl) {
-                    // Emit tutorial completion event if this is a publish action
-                    if (this.statusField && this.statusField.value === 'published') {
-                        eventBus.emit('publishSuccess', {
-                            action: this.formType, // 'root' for new game, 'iteration' for contribution
-                            textId: responseData.textId,
-                            message: responseData.toastMessage
-                        });
-                    }
-                    
+                    // Backend wants to redirect - use unified redirect logic
                     localStorage.setItem('pendingToast', JSON.stringify({
                         message: responseData.toastMessage,
                         type: responseData.toastType
                     }));
 
-                    const redirectUrl = await this.getRedirectUrlWithFilters(response, responseData.redirectUrl);
-                    
-                    // Handle special history.back case
-                    if (redirectUrl === 'history.back') {
-                        window.history.back();
-                    } else {
-                        window.location.href = redirectUrl;
-                    }
+                    // Unified redirect logic (applies to all form types)
+                    const redirectUrl = await this.getSmartRedirectUrl(response, responseData.redirectUrl);
+                    // Pass textId for showcase state preparation (publish or save scenarios)
+                    const textId = responseData.textId || idInput?.value || null;
+                    this.executeRedirect(redirectUrl, textId);
                 } else {
+                    // No redirect - just show toast and stay on page
                     eventBus.emit('showToast', {
                         message: responseData.toastMessage,
                         type: responseData.toastType
@@ -505,15 +515,10 @@ export class FormManager {
                     type: 'success'
                 }));
 
-                // Redirect to the text page
-                const redirectUrl = await this.getRedirectUrlWithFilters(response);
-                
-                // Handle special history.back case
-                if (redirectUrl === 'history.back') {
-                    window.history.back();
-                } else {
-                    window.location.href = redirectUrl;
-                }
+                // REDIRECT: New account created
+                // Uses smart redirect logic (no backend redirectUrl in response)
+                const redirectUrl = await this.getSmartRedirectUrl(response);
+                this.executeRedirect(redirectUrl);
             } else {
                 eventBus.emit('showToast', {
                     message: data.message || 'toast.form_manager.error_occurred',
@@ -557,15 +562,10 @@ export class FormManager {
                     type: result.toastType
                 }));
 
-                // Get the redirect URL with filters
-                const redirectUrl = await this.getRedirectUrlWithFilters(response);
-                
-                // Handle special history.back case
-                if (redirectUrl === 'history.back') {
-                    window.history.back();
-                } else {
-                    window.location.href = redirectUrl;
-                }
+                // REDIRECT: Text successfully deleted
+                // Uses smart redirect logic (no backend redirectUrl in response)
+                const redirectUrl = await this.getSmartRedirectUrl(response);
+                this.executeRedirect(redirectUrl);
             } else {
                 // Handle error
                 console.error('Delete failed:', result.message);
@@ -586,25 +586,143 @@ export class FormManager {
     }
 
     /**
-     * Simple smart redirect logic using browser history and form context
+     * Prepare showcase state before redirecting back to a showcase page
+     * Updates modal.textId or drawers array based on showcase type
+     * 
+     * @param {string|null} textId - The text ID to show in the showcase
+     * @returns {boolean} True if showcase state was updated
      */
-    async getSmartRedirectUrl(response = null, defaultRedirect = 'text') {
-        // 1. Try browser history first (most natural)
-        if (window.history.length > 1) {
-            console.log('Smart redirect: Using browser history');
-            return 'history.back';
+    prepareShowcaseState(textId) {
+        if (!textId) return false;
+
+        // Check if we're going back to a showcase page by checking referrer
+        const referrer = document.referrer;
+        if (!referrer) return false;
+
+        // Check if referrer is a showcase page (collab or text index, but not edit/create)
+        const isCollabPage = referrer.includes('/text/collab/');
+        const isTextIndex = referrer.includes('/text') && 
+                            !referrer.includes('/text/edit') && 
+                            !referrer.includes('/text/create') &&
+                            !referrer.includes('/text/iterate');
+        
+        if (!isCollabPage && !isTextIndex) return false;
+
+        // Get current pageState
+        const pageState = JSON.parse(localStorage.getItem('pageState') || '{}');
+        const showcase = pageState.showcase || {};
+        const modal = pageState.modal || {};
+
+        // Check showcase type from URL params or pageState
+        const referrerUrl = new URL(referrer);
+        const showcaseParam = referrerUrl.searchParams.get('showcase');
+        const showcaseType = showcaseParam || showcase.type;
+
+        let stateUpdated = false;
+
+        if (showcaseType === 'shelf') {
+            // For shelf: add textId to drawers array if not already present
+            const drawers = showcase.drawers || [];
+            if (!drawers.includes(textId)) {
+                drawers.push(textId);
+                if (window.refreshManager) {
+                    window.refreshManager.setShowcaseState({ drawers });
+                } else {
+                    // Fallback: update localStorage directly
+                    pageState.showcase = { ...showcase, drawers };
+                    localStorage.setItem('pageState', JSON.stringify(pageState));
+                }
+                stateUpdated = true;
+                console.log('Showcase: Added textId to shelf drawers', textId);
+            }
+        } else {
+            // For tree or default: set modal.textId if modal was open (or should be opened)
+            // If modal wasn't explicitly set to false, we assume it should be open to show the new text
+            if (modal.isOpen !== false) {
+                // Update modal state in pageState
+                pageState.modal = { ...modal, isOpen: true, textId };
+                localStorage.setItem('pageState', JSON.stringify(pageState));
+                stateUpdated = true;
+                console.log('Showcase: Set modal.textId to', textId);
+            }
         }
 
-        // 2. Get root text ID for collab page redirect
+        return stateUpdated;
+    }
+
+    /**
+     * Execute redirect based on URL string (handles 'history.back' special case)
+     * Also prepares showcase state if going back to a showcase page
+     * 
+     * @param {string} redirectUrl - The redirect URL or 'history.back' string
+     * @param {string|null} textId - Optional text ID to show in showcase (for publish/exit scenarios)
+     */
+    executeRedirect(redirectUrl, textId = null) {
+        if (redirectUrl === 'history.back') {
+            // Before going back, prepare showcase state if we have a textId
+            if (textId) {
+                this.prepareShowcaseState(textId);
+            }
+            window.history.back();
+        } else {
+            window.location.href = redirectUrl;
+        }
+    }
+
+    /**
+     * Get redirect URL - Backend-First Architecture
+     * 
+     * ARCHITECTURE PRINCIPLE: Backend determines WHERE to go based on business logic.
+     * Frontend only executes the redirect or provides fallback if backend doesn't specify.
+     * 
+     * Priority order:
+     * 1. Backend redirectUrl (ALWAYS respected if provided - backend knows best)
+     *    - Can be: 'dashboard', 'text', 'back' (for history.back), or full URL
+     * 2. Smart fallback (only if backend doesn't provide redirectUrl):
+     *    - Collab page (if editing contribution/note)
+     *    - Dashboard (if logged in) or text page (fallback)
+     * 
+     * @param {Response} response - Fetch response (currently unused, kept for compatibility)
+     * @param {string|null} backendRedirectUrl - Backend's redirect instruction
+     * @returns {Promise<string>} The final redirect URL or 'history.back' string
+     */
+    async getSmartRedirectUrl(response = null, backendRedirectUrl = null) {
+        // 1. Backend redirectUrl - ALWAYS respect it (backend is source of truth)
+        if (backendRedirectUrl) {
+            // Special value "back" means use browser history
+            if (backendRedirectUrl === 'back') {
+                console.log('Redirect: Backend requested history.back');
+                return 'history.back';
+            }
+            
+            console.log('Redirect: Using backend redirect', backendRedirectUrl);
+            return window.i18n.createUrl(backendRedirectUrl);
+        }
+
+        // 2. Fallback: Only used if backend doesn't provide redirectUrl
+        //    This is a UX enhancement, not a business logic decision
+        
+        // 2a. Collab page (if editing a contribution/note)
         const rootTextId = this.getRootTextId();
         if (rootTextId) {
-            console.log('Smart redirect: Redirecting to collab page', rootTextId);
+            console.log('Redirect: Fallback - going to collab page for root text', rootTextId);
             return window.i18n.createUrl(`text/collab/${rootTextId}`);
         }
 
-        // 3. Fallback to default
-        console.log('Smart redirect: Using default fallback', defaultRedirect);
-        return window.i18n.createUrl(defaultRedirect);
+        // 2b. Dashboard if logged in, otherwise text page
+        const isLoggedIn = this.isUserLoggedIn();
+        const fallbackUrl = isLoggedIn ? 'dashboard' : 'text';
+        console.log('Redirect: Fallback - using', fallbackUrl, '(logged in:', isLoggedIn, ')');
+        return window.i18n.createUrl(fallbackUrl);
+    }
+
+    /**
+     * Check if user is logged in
+     * @returns {boolean}
+     */
+    isUserLoggedIn() {
+        const userMeta = document.querySelector('meta[name="user"]');
+        return userMeta && userMeta.dataset.userId !== 'null';
     }
 
     /**
@@ -627,12 +745,5 @@ export class FormManager {
         }
 
         return null;
-    }
-
-    /**
-     * Legacy method - now uses smart redirect logic
-     */
-    async getRedirectUrlWithFilters(response = null, redirectUrl = 'text') {
-        return await this.getSmartRedirectUrl(response, redirectUrl);
     }
 }

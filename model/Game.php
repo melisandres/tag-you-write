@@ -216,9 +216,9 @@
       }
       
       if ($order) {
-         $sql .= " ORDER BY hasContributed DESC, $this->primaryKey $order";
+         $sql .= " ORDER BY modified_at DESC, $this->primaryKey $order";
      } else {
-         $sql .= " ORDER BY hasContributed DESC";
+         $sql .= " ORDER BY modified_at DESC";
      }
       
       // Handle broad category pattern matching before preparing statement

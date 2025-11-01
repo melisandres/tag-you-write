@@ -58,22 +58,21 @@ class ControllerText extends Controller{
     
 
     public function collab($rootId = null) {
+        $notifications = $this->getNotifications(); 
         if ($rootId === null) {
-            $notifications = $this->getNotifications();
             Twig::render('home-error.php', [
                 'message' => "error.no_game_specified",
                 'notifications' => $notifications,
-                'notificationsData' => json_encode($notifications)
+                'notificationsData' => json_encode($notifications)   
             ]);
             exit();
-        }
+        }   
 
         // First get the game ID from the text ID
         $text = new Text;
         $gameId = $text->selectGameId($rootId);
 
         if (!$gameId) {
-            $notifications = $this->getNotifications();
             Twig::render('home-error.php', [
                 'message' => "error.text_not_found",
                 'notifications' => $notifications,
@@ -88,7 +87,6 @@ class ControllerText extends Controller{
         $gameData = $game->getGames(null, $filters, $gameId);
 
         if (empty($gameData)) {
-            $notifications = $this->getNotifications();
             Twig::render('home-error.php', [
                 'message' => "error.game_not_found",
                 'notifications' => $notifications,
@@ -100,8 +98,6 @@ class ControllerText extends Controller{
         // Get the tree data
         $treeData = $this->getTree($rootId);
 
-        // Get the notifications
-        $notifications = $this->getNotifications();
 
         // Render the collaboration view
         Twig::render('text-collab.php', [

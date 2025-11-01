@@ -61,7 +61,7 @@ class ControllerLogin extends Controller {
                 
                 // For JSON requests, send JSON response
                 if (strpos($contentType, 'application/json') !== false) {
-                    $this->sendJsonResponse(true, 'auth.login_success', 'text');
+                    $this->sendJsonResponse(true, 'auth.login_success', 'dashboard');
                 } else {
                     // For traditional form requests, redirect
                     RequirePage::redirect('text');
