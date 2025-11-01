@@ -283,13 +283,15 @@ export class DataManager {
     }
 
     // Add method to check if games need refresh
-    async checkForUpdates() {
+    // @param {string|null} rootStoryId - Optional root story ID to use instead of current viewed root
+    async checkForUpdates(rootStoryId = null) {
         if (!navigator.onLine) {
             console.log('Browser is offline, skipping update check');
             return false;
         }
 
-        const rootId = this.getCurrentViewedRootStoryId();
+        // Use provided rootStoryId or fall back to current viewed root
+        const rootId = rootStoryId || this.getCurrentViewedRootStoryId();
         console.log('Root ID:', rootId);
         const lastGamesCheck = this.cache.lastGamesCheck || 0;
 
@@ -331,6 +333,12 @@ export class DataManager {
         console.log(`DataManager: prepareDataForRootStory called for ${rootStoryId}`);
         let cachedData = this.cache.trees.get(rootStoryId);
         console.log(`DataManager: cachedData for ${rootStoryId}:`, cachedData);
+    
+        // CRITICAL FIX: Check for updates (including drafts) via getModifiedSince endpoint
+        // BEFORE SSE connects and potentially resets timestamps via handleUpdateResponse
+        // This ensures drafts are fetched and processed before any SSE updates reset the timestamp
+        console.log(`DataManager: Checking for updates (including drafts) before preparing data for ${rootStoryId}`);
+        await this.checkForUpdates(rootStoryId);
     
         // If no cached data, fetch fresh tree data from server
         if (!cachedData || !cachedData.data) {
