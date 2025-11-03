@@ -143,7 +143,7 @@ export class FormManager {
     async handleCancel() {
         try {
             // In the this.getSmartRedirectUrl params, we could pass "back" but... the issue is that if there are filters on a gameLIst... and the story no longer matches those filters it isn't included... 
-            const redirectUrl = await this.getSmartRedirectUrl();
+            const redirectUrl = await this.getSmartRedirectUrl(null, 'back');
             // Check if a draft was saved (has id) - if so, prepare showcase state
             const idInput = this.form?.querySelector('[data-id]');
             const textId = idInput?.value || null;

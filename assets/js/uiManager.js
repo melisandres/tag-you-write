@@ -29,6 +29,9 @@ export class UIManager {
     eventBus.on('showStoryInModal', (textId) => {
       this.storyManager.showStoryInModal(textId);
     });
+
+    // Auto-open showcase on collab page if not already open
+    this.autoOpenCollabShowcase();
   }
 
   initSvgs(){
@@ -68,6 +71,11 @@ export class UIManager {
     // Users now open showcases via title clicks and switch views via tabs
     const storyTitleTarget = event.target.closest(".story-title");
     const promptTitleTarget = event.target.closest(".story-writing");
+
+    // On collab page, title clicks don't control the showcase (it's always open)
+    if (this.isCollabPage() && (storyTitleTarget || promptTitleTarget)) {
+      return;
+    }
 
     // Determine target type - now only title clicks open the showcase
     let targetType;
@@ -324,5 +332,39 @@ export class UIManager {
     }
 
     return container;
+  }
+
+  /**
+   * Check if we're on a collab page
+   * @returns {boolean}
+   */
+  isCollabPage() {
+    return document.querySelector('[data-one-story]') !== null;
+  }
+
+  /**
+   * Initialize the showcase on collab page - showcase is always open here
+   */
+  autoOpenCollabShowcase() {
+    // Only proceed if we're on a collab page
+    if (!this.isCollabPage()) return;
+
+    // Check if showcase is already open (e.g., from URL params)
+    const existingShowcase = document.querySelector('#showcase-wrapper');
+    if (existingShowcase) return;
+
+    // Find the story element and get the textId
+    const story = document.querySelector('[data-one-story] .story');
+    if (!story) return;
+
+    const textId = story.dataset.textId;
+    if (!textId) return;
+
+    // Create and open the showcase directly (no toggle behavior on collab page)
+    const container = this.createShowcaseContainer(textId, false);
+    if (container) {
+      // Use default view (tree) for collab page
+      this.handleDefaultRefresh(textId, container);
+    }
   }
 }
