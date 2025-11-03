@@ -108,7 +108,7 @@ class ControllerDashboard extends Controller {
         
         // Map SQL categories to dashboard sections
         switch ($category) {
-            case 'myGames.drafts':
+            case 'myStories.drafts':
                 if (!$isGuest && isset($dashboardData['myStories'])) {
                     $dashboardData['myStories']['drafts']['games'][] = $game;
                     $dashboardData['myStories']['drafts']['count']++;
@@ -116,7 +116,7 @@ class ControllerDashboard extends Controller {
                 }
                 break;
                 
-            case 'myGames.active':
+            case 'myStories.active':
                 if (!$isGuest && isset($dashboardData['myStories'])) {
                     $dashboardData['myStories']['active']['games'][] = $game;
                     $dashboardData['myStories']['active']['count']++;
@@ -124,7 +124,7 @@ class ControllerDashboard extends Controller {
                 }
                 break;
                 
-            case 'myGames.archives':
+            case 'myStories.archives':
                 if (!$isGuest && isset($dashboardData['myStories'])) {
                     $dashboardData['myStories']['archives']['games'][] = $game;
                     $dashboardData['myStories']['archives']['count']++;

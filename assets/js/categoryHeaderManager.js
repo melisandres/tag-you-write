@@ -53,10 +53,10 @@ export class CategoryHeaderManager {
             let translationKey;
             
             if (categoryParts.length === 1) {
-                // Broad category like "myGames" -> "category-header.myGames."
+                // Broad category like "myStories" -> "category-header.myStories."
                 translationKey = `category-header.${category}.`;
             } else {
-                // Subcategory like "myGames.urgent" -> "category-header.myGames.urgent"
+                // Subcategory like "myStories.urgent" -> "category-header.myStories.urgent"
                 translationKey = `category-header.${categoryParts[0]}.${categoryParts[1]}`;
             }
             

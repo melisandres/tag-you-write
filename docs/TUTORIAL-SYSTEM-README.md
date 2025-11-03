@@ -176,7 +176,7 @@ The tutorial system evaluates these context variables to determine what content 
     canPublish: boolean,       // Whether form is valid for publishing
     showcase: string,         // 'tree', 'shelf', or null
     showcaseVisible: boolean,  // Whether showcase is currently visible
-    category: string,          // 'canJoin', 'myGames', 'other', or null
+    category: string,          // 'canJoin', 'myStories', 'other', or null
     gameId: string,           // Current Root story Id, from the URL -- to check the category of a single story (collab page)
     modalOpen: boolean,       // Whether story modal is open
     modalTextId: string,      // ID of open modal's text

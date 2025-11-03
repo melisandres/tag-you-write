@@ -111,9 +111,9 @@ export class FilterManager {
                 <div class="filter-options">
                     <button class="close-filter">${SVGManager.xSVG}</button>
                     ${ this.currentWriterId !== 'null' ? `
-                    <button class="filter-button my-games-filter" aria-label="Filter My Games">
+                    <button class="filter-button my-games-filter" aria-label="Filter My Stories">
                         <span class="filter-icon ${hasContributedClass}">
-                            ${SVGManager.myGamesSVG}
+                            ${SVGManager.myStoriesSVG}
                         </span>
                         <span class="filter-text" data-i18n="filters.contribution.${this.getContributionStateKey(hasContributed)}">
                             ${this.getContributionStateText(String(hasContributed))}

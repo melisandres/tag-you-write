@@ -112,10 +112,10 @@
       // Handle category filter - disabled for subquery case
       if ($category && false) {
          if (strpos($category, '.') !== false) {
-            // Specific subcategory (e.g., 'myGames.active')
+            // Specific subcategory (e.g., 'myStories.active')
             $filterString .= " AND category = :category";
          } else {
-            // Broad category (e.g., 'myGames')
+            // Broad category (e.g., 'myStories')
             $filterString .= " AND category LIKE :categoryPattern";
          }
       }
@@ -173,9 +173,9 @@
                         ) THEN 1 ELSE 0 END) AS invited,
                         (CASE WHEN b.text_id IS NOT NULL THEN 1 ELSE 0 END) AS isBookmarked,
                         (CASE 
-                            WHEN EXISTS (SELECT 1 FROM text t2 INNER JOIN text_status ts2 ON t2.status_id = ts2.id WHERE t2.game_id = g.id AND t2.writer_id = :loggedInWriterId AND ts2.status IN ('draft', 'incomplete_draft')) THEN 'myGames.drafts'
-                            WHEN EXISTS (SELECT 1 FROM text t2 WHERE t2.game_id = g.id AND t2.writer_id = :loggedInWriterId) AND g.open_for_changes = 1 THEN 'myGames.active'
-                            WHEN EXISTS (SELECT 1 FROM text t2 WHERE t2.game_id = g.id AND t2.writer_id = :loggedInWriterId) AND g.open_for_changes = 0 THEN 'myGames.archives'
+                            WHEN EXISTS (SELECT 1 FROM text t2 INNER JOIN text_status ts2 ON t2.status_id = ts2.id WHERE t2.game_id = g.id AND t2.writer_id = :loggedInWriterId AND ts2.status IN ('draft', 'incomplete_draft')) THEN 'myStories.drafts'
+                            WHEN EXISTS (SELECT 1 FROM text t2 WHERE t2.game_id = g.id AND t2.writer_id = :loggedInWriterId) AND g.open_for_changes = 1 THEN 'myStories.active'
+                            WHEN EXISTS (SELECT 1 FROM text t2 WHERE t2.game_id = g.id AND t2.writer_id = :loggedInWriterId) AND g.open_for_changes = 0 THEN 'myStories.archives'
                             WHEN EXISTS (SELECT 1 FROM game_invitation gi WHERE gi.game_id = g.id AND gi.invitee_id = :loggedInWriterId AND gi.status = 'pending') THEN 'canJoin.invitations'
                             WHEN g.open_for_changes = 0 AND g.visible_to_all = 1 AND NOT EXISTS (SELECT 1 FROM text t2 WHERE t2.game_id = g.id AND t2.writer_id = :loggedInWriterId) THEN 'inspiration.closed'
                             ELSE 'canJoin.other'
@@ -223,7 +223,7 @@
       
       // Handle broad category pattern matching before preparing statement
       if ($category && strpos($category, '.') === false) {
-         // Broad category (e.g., 'myGames') - need to update the WHERE clause
+         // Broad category (e.g., 'myStories') - need to update the WHERE clause
          $sql = str_replace('WHERE category = :category', 'WHERE category LIKE :categoryPattern', $sql);
       }
       
@@ -251,10 +251,10 @@
       // Bind category parameters
       if ($category) {
          if (strpos($category, '.') !== false) {
-            // Specific subcategory (e.g., 'myGames.active')
+            // Specific subcategory (e.g., 'myStories.active')
             $stmt->bindValue(':category', $category);
          } else {
-            // Broad category (e.g., 'myGames')
+            // Broad category (e.g., 'myStories')
             $stmt->bindValue(':categoryPattern', $category . '.%');
          }
       }
@@ -388,10 +388,10 @@
       // Handle category filter - disabled for subquery case
       if ($category && false) {
          if (strpos($category, '.') !== false) {
-            // Specific subcategory (e.g., 'myGames.active')
+            // Specific subcategory (e.g., 'myStories.active')
             $filterString .= " AND category = :category";
          } else {
-            // Broad category (e.g., 'myGames')
+            // Broad category (e.g., 'myStories')
             $filterString .= " AND category LIKE :categoryPattern";
          }
       }
@@ -448,9 +448,9 @@
                      ) THEN 1 ELSE 0 END) AS invited,
                      (CASE WHEN b.text_id IS NOT NULL THEN 1 ELSE 0 END) AS isBookmarked,
                      (CASE 
-                        WHEN EXISTS (SELECT 1 FROM text t2 INNER JOIN text_status ts2 ON t2.status_id = ts2.id WHERE t2.game_id = g.id AND t2.writer_id = :loggedInWriterId AND ts2.status IN ('draft', 'incomplete_draft')) THEN 'myGames.drafts'
-                        WHEN EXISTS (SELECT 1 FROM text t2 WHERE t2.game_id = g.id AND t2.writer_id = :loggedInWriterId) AND g.open_for_changes = 1 THEN 'myGames.active'
-                        WHEN EXISTS (SELECT 1 FROM text t2 WHERE t2.game_id = g.id AND t2.writer_id = :loggedInWriterId) AND g.open_for_changes = 0 THEN 'myGames.archives'
+                        WHEN EXISTS (SELECT 1 FROM text t2 INNER JOIN text_status ts2 ON t2.status_id = ts2.id WHERE t2.game_id = g.id AND t2.writer_id = :loggedInWriterId AND ts2.status IN ('draft', 'incomplete_draft')) THEN 'myStories.drafts'
+                        WHEN EXISTS (SELECT 1 FROM text t2 WHERE t2.game_id = g.id AND t2.writer_id = :loggedInWriterId) AND g.open_for_changes = 1 THEN 'myStories.active'
+                        WHEN EXISTS (SELECT 1 FROM text t2 WHERE t2.game_id = g.id AND t2.writer_id = :loggedInWriterId) AND g.open_for_changes = 0 THEN 'myStories.archives'
                         WHEN EXISTS (SELECT 1 FROM game_invitation gi WHERE gi.game_id = g.id AND gi.invitee_id = :loggedInWriterId AND gi.status = 'pending') THEN 'canJoin.invitations'
                         WHEN g.open_for_changes = 0 AND g.visible_to_all = 1 AND NOT EXISTS (SELECT 1 FROM text t2 WHERE t2.game_id = g.id AND t2.writer_id = :loggedInWriterId) THEN 'inspiration.closed'
                         ELSE 'canJoin.other'
@@ -492,7 +492,7 @@
 
       // Handle broad category pattern matching before preparing statement
       if ($category && strpos($category, '.') === false) {
-         // Broad category (e.g., 'myGames') - need to update the WHERE clause
+         // Broad category (e.g., 'myStories') - need to update the WHERE clause
          $sql = str_replace('WHERE category = :category', 'WHERE category LIKE :categoryPattern', $sql);
       }
 
@@ -513,10 +513,10 @@
       // Bind category parameters
       if ($category) {
          if (strpos($category, '.') !== false) {
-            // Specific subcategory (e.g., 'myGames.active')
+            // Specific subcategory (e.g., 'myStories.active')
             $stmt->bindValue(':category', $category);
          } else {
-            // Broad category (e.g., 'myGames')
+            // Broad category (e.g., 'myStories')
             $stmt->bindValue(':categoryPattern', $category . '.%');
          }
       }

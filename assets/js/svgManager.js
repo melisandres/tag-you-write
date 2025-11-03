@@ -1393,7 +1393,7 @@ export class SVGManager{
       `;
    }
 
-   static get myGamesSVG() {
+   static get myStoriesSVG() {
       return SVGManager.starSVG;
    }
 

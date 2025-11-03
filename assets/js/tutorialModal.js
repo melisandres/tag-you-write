@@ -175,11 +175,11 @@ export class TutorialModal {
                     this.sharedSteps.login, // Use shared login step
                     {
                         title: 'tutorial.vote.steps.browse.title',
-                        skipStep: '((page === "texts" && category === "myGames") || (page === "collab" && category === "myGames")) && showcaseVisible',
+                        skipStep: '((page === "texts" && category === "myStories") || (page === "collab" && category === "myStories")) && showcaseVisible',
                         substeps: [
                             {
                                 text: 'tutorial.vote.steps.browse.substeps.dashboard',
-                                showWhen: 'page !== "dashboard" && category !== "myGames" && userLoggedIn'
+                                showWhen: 'page !== "dashboard" && category !== "myStories" && userLoggedIn'
                             },
                             {
                                 text: 'tutorial.vote.steps.browse.substeps.active',
@@ -187,7 +187,7 @@ export class TutorialModal {
                             },
                             {
                                 text: 'tutorial.vote.steps.browse.substeps.view',
-                                showWhen: '((page === "texts" && category === "myGames") || (page === "collab" && category === "myGames")) && userLoggedIn && !showcaseVisible'
+                                showWhen: '((page === "texts" && category === "myStories") || (page === "collab" && category === "myStories")) && userLoggedIn && !showcaseVisible'
                             }
                         ]
                     },
@@ -197,11 +197,11 @@ export class TutorialModal {
                         substeps: [
                             {
                                 text: 'tutorial.vote.steps.vote.substeps.explore',
-                                showWhen: '((page === "texts" && category === "myGames") || (page === "collab" && category === "myGames")) && userLoggedIn && showcaseVisible && (!modalOpen && !hasOpenShelf)'
+                                showWhen: '((page === "texts" && category === "myStories") || (page === "collab" && category === "myStories")) && userLoggedIn && showcaseVisible && (!modalOpen && !hasOpenShelf)'
                             },
                             {
                                 text: 'tutorial.vote.steps.vote.substeps.vote_action',
-                                showWhen: '((page === "texts" && category === "myGames") || (page === "collab" && category === "myGames")) && userLoggedIn && (modalOpen || hasOpenShelf)'
+                                showWhen: '((page === "texts" && category === "myStories") || (page === "collab" && category === "myStories")) && userLoggedIn && (modalOpen || hasOpenShelf)'
                             }
                         ]
                     },
@@ -1026,7 +1026,7 @@ export class TutorialModal {
             canPublish: this.formValidationState.canPublish,
             showcase: showcase, // 'tree', 'shelf', or null
             showcaseVisible: showcaseVisible, // Whether showcase is actually visible in DOM
-            category: category, // 'canJoin', 'myGames', 'other', or null
+            category: category, // 'canJoin', 'myStories', 'other', or null
             gameId: gameId, // Current game ID if viewing a specific game
             modalOpen: this.uiState.modalOpen, // Whether a story modal is open
             modalTextId: this.uiState.modalTextId, // ID of the open modal's text

@@ -1727,7 +1727,7 @@ export class DataManager {
         
         // Map SQL categories to dashboard sections
         switch (category) {
-            case 'myGames.drafts':
+            case 'myStories.drafts':
                 if (!isGuest && dashboardData.myStories) {
                     dashboardData.myStories.drafts.games.push(game);
                     dashboardData.myStories.drafts.count++;
@@ -1735,7 +1735,7 @@ export class DataManager {
                 }
                 break;
                 
-            case 'myGames.active':
+            case 'myStories.active':
                 if (!isGuest && dashboardData.myStories) {
                     dashboardData.myStories.active.games.push(game);
                     dashboardData.myStories.active.count++;
@@ -1743,7 +1743,7 @@ export class DataManager {
                 }
                 break;
                 
-            case 'myGames.archives':
+            case 'myStories.archives':
                 if (!isGuest && dashboardData.myStories) {
                     dashboardData.myStories.archives.games.push(game);
                     dashboardData.myStories.archives.count++;
