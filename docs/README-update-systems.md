@@ -195,6 +195,44 @@ Initial game lists and tree data are also server-side rendered, providing immedi
 - **Action**: Queries database for events since `lastEventId`
 - **Recovery**: Processes any missed events before starting Redis subscription
 
+## Game Removal Detection
+
+### Overview
+
+When a game that was previously visible (matching current filters/search/category) gets updated in a way that removes it from the current view, the system needs to detect this and signal the frontend to remove it.
+
+**Examples:**
+- User searches for "dragon", finds a game with "dragon" in a note. Another user edits the note, removing "dragon". The game should be removed from search results.
+- User views "myStories.active" category. Another player casts a winning vote, closing the game. The game should be removed from the active list (it now belongs to "myStories.archives").
+
+### Implementation
+
+The system handles game removals differently for Redis/SSE and polling:
+
+**Redis/SSE (Real-time updates):**
+- When a game update arrives via Redis, the system checks if the game still matches current filters
+- If the game doesn't match → sends `gameIdsForRemoval` to frontend
+- Frontend handles removal gracefully (no-op if game not in cache)
+
+**Polling (Backend & Frontend fallback):**
+- Uses a two-query approach for detection:
+  1. Query `getModifiedSince()` WITH filters/search/category → gets games that match AND were modified
+  2. Query `getModifiedSince()` WITHOUT filters → gets ALL modified games
+  3. Compare: games in #2 but not in #1 = games that were modified but no longer match
+  4. Send these as `gameIdsForRemoval`
+
+**Frontend Handling:**
+- `DataManager.removeGames()` safely removes games from cache
+- If game not in cache, operation is a no-op (no errors)
+- Emits `gamesRemoved` event for UI updates
+
+### Benefits
+
+- **Simple**: No need to track displayed games separately
+- **Efficient**: Only sends removals when games are actually modified
+- **Resilient**: Works across all update systems (Redis, SSE, polling)
+- **Safe**: Frontend handles removals gracefully
+
 ## Context-Aware Architecture
 
 ### Overview

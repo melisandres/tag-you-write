@@ -286,8 +286,9 @@ export class DashboardManager {
         gameElement.setAttribute('data-text-id', game.text_id || game.id);
         
         const title = game.title || window.i18n.translate('general.untitled');
-        const activityTooltip = window.i18n.translate('activity.browsingVsEditing');
         
+        // Activity indicators are not included initially - they will be added dynamically
+        // when activity updates come in via handleGameActivityUpdate()
         gameElement.innerHTML = `
             <div class="game-title">
                 <div class="unread-area">
@@ -295,13 +296,9 @@ export class DashboardManager {
                 </div>
                 <span class="title">${title}</span>
             </div>
-            <div class="game-activity-indicator no-activity" data-i18n-title="activity.browsingVsEditing" title="${activityTooltip}" data-game-id="${game.game_id}">
-                <span class="icon" data-svg="user"></span>
-                <div class="activity-numbers">0:0</div>
-            </div>
         `;
         
-        // Populate SVG icons
+        // Populate SVG icons (if any are present)
         if (window.uiManager && window.uiManager.populateSvgs) {
             window.uiManager.populateSvgs([gameElement]);
         }
@@ -475,7 +472,33 @@ export class DashboardManager {
     }
 
     /**
-     * Handle game activity updates (same logic as GameListUpdateManager)
+     * Create an activity indicator element
+     */
+    createActivityIndicator(gameId, browsing, writing) {
+        const activityTooltip = window.i18n.translate('activity.browsingVsEditing');
+        const hasActivity = (browsing > 0 || writing > 0);
+        
+        const indicator = document.createElement('div');
+        indicator.className = `game-activity-indicator ${hasActivity ? 'has-activity' : 'no-activity'}`;
+        indicator.setAttribute('data-i18n-title', 'activity.browsingVsEditing');
+        indicator.setAttribute('title', activityTooltip);
+        indicator.setAttribute('data-game-id', gameId);
+        
+        indicator.innerHTML = `
+            <span class="icon" data-svg="user"></span>
+            <div class="activity-numbers">${browsing || 0}:${writing || 0}</div>
+        `;
+        
+        // Populate SVG icons
+        if (window.uiManager && window.uiManager.populateSvgs) {
+            window.uiManager.populateSvgs([indicator]);
+        }
+        
+        return indicator;
+    }
+
+    /**
+     * Handle game activity updates - dynamically add/remove activity indicators
      */
     handleGameActivityUpdate(activityData) {
         console.log('🎮 DashboardManager: handleGameActivityUpdate called with:', activityData);
@@ -505,25 +528,38 @@ export class DashboardManager {
         
         console.log('🎮 DashboardManager: Found', gameElements.length, 'game elements for gameId:', gameId);
         
+        const hasActivity = (browsing > 0 || writing > 0);
+        
         // Update ALL game elements with this game ID
         gameElements.forEach((gameElement, index) => {
-            const activityIndicator = gameElement.querySelector('.game-activity-indicator');
-            if (!activityIndicator) {
-                console.warn('🎮 DashboardManager: No activity indicator found in game element', index);
-                return;
-            }
+            const existingIndicator = gameElement.querySelector('.game-activity-indicator');
             
-            // Update activity numbers
-            const activityNumbers = activityIndicator.querySelector('.activity-numbers');
-            if (activityNumbers) {
-                const newText = `${browsing || 0}:${writing || 0}`;
-                activityNumbers.textContent = newText;
+            if (hasActivity) {
+                // Activity exists - add or update indicator
+                if (existingIndicator) {
+                    // Update existing indicator
+                    const activityNumbers = existingIndicator.querySelector('.activity-numbers');
+                    if (activityNumbers) {
+                        const newText = `${browsing || 0}:${writing || 0}`;
+                        activityNumbers.textContent = newText;
+                    }
+                    
+                    // Update activity state classes
+                    existingIndicator.classList.toggle('has-activity', true);
+                    existingIndicator.classList.toggle('no-activity', false);
+                } else {
+                    // Create and add new indicator
+                    const newIndicator = this.createActivityIndicator(gameId, browsing, writing);
+                    gameElement.appendChild(newIndicator);
+                    console.log('🎮 DashboardManager: Added activity indicator to game element', index);
+                }
+            } else {
+                // No activity - remove indicator if it exists
+                if (existingIndicator) {
+                    existingIndicator.remove();
+                    console.log('🎮 DashboardManager: Removed activity indicator from game element', index);
+                }
             }
-            
-            // Update activity state classes
-            const hasActivity = (browsing > 0 || writing > 0);
-            activityIndicator.classList.toggle('has-activity', hasActivity);
-            activityIndicator.classList.toggle('no-activity', !hasActivity);
         });
         
         console.log('🎮 DashboardManager: Updated', gameElements.length, 'activity indicators for game:', gameId);

@@ -81,10 +81,6 @@
                                     </div>
                                     <span class="title">{{ game.title ? game.title : translate('general.untitled') }}</span>
                                 </div>
-                                <div class="game-activity-indicator no-activity" data-i18n-title="activity.browsingVsEditing" title="{{ translate('activity.browsingVsEditing') }}" data-game-id="{{ game.game_id }}">
-                                    <span class="icon" data-svg="user"></span>
-                                    <div class="activity-numbers">0:0</div>
-                                </div>
                             </div>
                         {% endfor %}
                     </div>

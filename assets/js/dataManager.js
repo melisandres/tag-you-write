@@ -307,6 +307,7 @@ export class DataManager {
                     lastGamesCheck: lastGamesCheck,
                     filters: this.cache.filters || {},
                     search: this.cache.search || '',
+                    category: this.cache.category || null,
                     rootStoryId: rootId,
                     lastTreeCheck: this.cache.trees.get(rootId)?.timestamp || 0,
                 })

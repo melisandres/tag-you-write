@@ -124,6 +124,53 @@ class ControllerGame extends Controller {
         }
     }
 
+    /**
+     * Detect games that should be removed from the current view
+     * 
+     * Uses a two-query approach:
+     * 1. Query with filters → gets games that match AND were modified
+     * 2. Query without filters → gets ALL modified games
+     * 3. Compare to find games that were modified but no longer match filters
+     * 
+     * @param Game $gameModel Game model instance
+     * @param string $lastGamesCheck Timestamp of last check
+     * @param array $filters Current filters
+     * @param string|null $searchTerm Current search term
+     * @param string|null $category Current category
+     * @param int|null $rootStoryId Current root story ID (for showcase)
+     * @param array $modifiedGames Games that match filters (from first query)
+     * @return array Array of game IDs that should be removed
+     */
+    private function detectGameRemovals($gameModel, $lastGamesCheck, $filters, $searchTerm, $category, $rootStoryId, $modifiedGames) {
+        // If no filters/search/category are active, no removals needed
+        // Check if filters array has any non-null values
+        $hasActiveFilters = false;
+        if (is_array($filters)) {
+            foreach ($filters as $value) {
+                if ($value !== null && $value !== '') {
+                    $hasActiveFilters = true;
+                    break;
+                }
+            }
+        }
+        $hasFilters = $hasActiveFilters || !empty($searchTerm) || !empty($category);
+        if (!$hasFilters) {
+            return [];
+        }
+        
+        // Get all modified games (without filters) to compare
+        $allModifiedGames = $gameModel->getModifiedSince($lastGamesCheck, [], null, null, $rootStoryId);
+        
+        // Extract game IDs from both lists
+        $matchingGameIds = array_column($modifiedGames, 'game_id');
+        $allModifiedGameIds = array_column($allModifiedGames, 'game_id');
+        
+        // Find games that were modified but don't match current filters
+        $gameIdsForRemoval = array_diff($allModifiedGameIds, $matchingGameIds);
+        
+        return array_values($gameIdsForRemoval);
+    }
+
     //TODO: this is where you are at: check for modified nodes also... if you are sent a rootStoryId, and a timestamp... no time stamp means all the tree... .
     public function modifiedSince() {
         try {
@@ -150,6 +197,9 @@ class ControllerGame extends Controller {
             // Pass rootStoryId as showcaseRootStoryId to ensure showcase game is included even if it doesn't match filters
             $modifiedGames = $game->getModifiedSince($lastGamesCheck, $filters, $searchTerm, $category, $rootStoryId);
 
+            // Detect games that should be removed (modified but no longer match filters)
+            $gameIdsForRemoval = $this->detectGameRemovals($game, $lastGamesCheck, $filters, $searchTerm, $category, $rootStoryId, $modifiedGames);
+
 /*             // Process the modified games data to ensure boolean fields are properly formatted
             foreach ($modifiedGames as &$game) {
                 $game['hasContributed'] = (bool)$game['hasContributed'];
@@ -175,7 +225,8 @@ class ControllerGame extends Controller {
             $response = [
                 'modifiedGames' => $modifiedGames,
                 'modifiedNodes' => $modifiedNodes,
-                'searchResults' => $searchResults
+                'searchResults' => $searchResults,
+                'gameIdsForRemoval' => $gameIdsForRemoval
             ];
 
             // Add logging after getting modified nodes
