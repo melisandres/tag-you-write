@@ -187,7 +187,7 @@
     "gameRemoved": "Le jeu ne correspond plus à votre recherche/filtres",
     "filterMismatchBanner": "Ce jeu ne correspond pas à vos filtres, recherche ou catégorie actuels, mais il est affiché car il est actuellement ouvert dans la vitrine.",
     "filterMismatchPlaceholder": "Ce jeu ne correspond plus à vos filtres, recherche ou catégorie actuels.",
-    "filterMismatchViewGame": "Voir ce jeu sur sa page de collaboration",
+    "filterMismatchViewGame": "page du jeu...",
     "pending": "À VENIR",
     "open": "OUVERTE",
     "view_tree_tooltip": "voir l'arbre",
@@ -556,7 +556,7 @@
       "inspiration": "Inspiration",
       "drafts": "Brouillons",
       "active": "Actif (aucun brouillon en attente)",
-      "archives": "Archives",
+      "archives": "Archives (aucun brouillon en attente)",
       "invitations": "Invitations",
       "other": "Autres",
       "closed": "Fermées",
@@ -567,7 +567,7 @@
         "": "Mes histoires",
         "drafts": "Mes histoires > Brouillons",
         "active": "Mes histoires > Actif (aucun brouillon en attente)",
-        "archives": "Mes histoires > Archives"
+        "archives": "Mes histoires > Archives (aucun brouillon en attente)"
       },
       "canJoin": {
         "": "Histoires disponibles",

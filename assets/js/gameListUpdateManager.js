@@ -1,4 +1,5 @@
 import { eventBus } from './eventBus.js';
+import { SVGManager } from './svgManager.js';
 
 export class GameListUpdateManager {
   constructor() {
@@ -411,35 +412,83 @@ export class GameListUpdateManager {
         return;
       }
       
-      // Show removal message/transition before removing
-      this.showRemovalMessage(gameElement, gameId);
+      // Skip if already a placeholder (shouldn't happen, but safety check)
+      if (gameElement.classList.contains('filter-mismatch-placeholder')) {
+        console.warn('🎮 GameListUpdateManager: Game element already a placeholder, skipping');
+        return;
+      }
       
-      // Remove the game element after a brief delay for UX
-      setTimeout(() => {
-        gameElement.remove();
-        console.log(`🎮 GameListUpdateManager: Removed game element for gameId: ${gameId}`);
-        
-        // Check if list is now empty and show empty message
-        this.checkForEmptyList();
-      }, 5000); // 5 second delay for user to see the message
+      // Get the root text ID for the collab link
+      const rootTextId = gameElement.dataset.textId;
+      if (!rootTextId) {
+        console.warn('🎮 GameListUpdateManager: No text ID found for game removal');
+        return;
+      }
+      
+      // Get game title for the placeholder (if available, before we replace content)
+      const titleElement = gameElement.querySelector('.story-title h2 a');
+      const gameTitle = titleElement ? (titleElement.textContent || titleElement.innerText).trim() : null;
+      
+      // Replace with placeholder instead of removing
+      this.replaceWithPlaceholder(gameElement, rootTextId, gameTitle);
+      
+      console.log(`🎮 GameListUpdateManager: Replaced game element for gameId: ${gameId} with placeholder`);
     });
   }
   
-  showRemovalMessage(gameElement, gameId) {
-    // Create overlay message
-    const overlay = document.createElement('div');
-    overlay.className = 'game-removal-overlay';
-    overlay.innerHTML = `
-      <div class="removal-message">
-        <p>${window.i18n.translate('general.gameRemoved') || 'Game removed from view'}</p>
-      </div>
-    `;
+  /**
+   * Replace game element with placeholder (same as gameListRenderer)
+   * @param {HTMLElement} gameElement - The game element to replace
+   * @param {string} rootTextId - The root text ID for the collab link
+   * @param {string|null} gameTitle - The game title (optional)
+   */
+  replaceWithPlaceholder(gameElement, rootTextId, gameTitle = null) {
+    // Add transition class for smooth animation
+    gameElement.classList.add('filter-mismatch-placeholder-transition');
     
-    // Add overlay to game element
-    gameElement.appendChild(overlay);
-    
-    // Add removal animation class
-    gameElement.classList.add('removing');
+    // Wait for transition to start, then replace content
+    setTimeout(() => {
+      // Create placeholder HTML
+      const placeholderMessage = window.i18n.translate('general.filterMismatchPlaceholder');
+      const viewGameText = window.i18n.translate('general.filterMismatchViewGame');
+      const collabUrl = window.i18n.createUrl(`text/collab/${rootTextId}`);
+      
+      // Keep the game ID for reference, but replace content
+      const gameId = gameElement.dataset.gameId;
+      const placeholderHTML = `
+        <div class="title-button-row">
+          <div class="story-title placeholder-title">
+            <h2>${gameTitle || ''}</h2>
+          </div>
+          <div class="story-btns">
+            <a href="${collabUrl}" class="placeholder-link" data-i18n="general.filterMismatchViewGame">${viewGameText}</a>
+            <button class="placeholder-close" aria-label="Remove placeholder" title="Remove placeholder">${SVGManager.closeSVG}</button>
+          </div>
+        </div>
+        <div class="story-writing placeholder-message">
+          <p data-i18n="general.filterMismatchPlaceholder">${placeholderMessage}</p>
+        </div>
+      `;
+      
+      // Replace inner content but keep the element structure
+      gameElement.innerHTML = placeholderHTML;
+      gameElement.classList.remove('filter-mismatch', 'filter-mismatch-placeholder-transition');
+      gameElement.classList.add('filter-mismatch-placeholder');
+      
+      // Remove grid classes that are no longer needed
+      gameElement.classList.remove('closed', 'has-temporary-access', 'story-has-showcase', 'open', 'pending');
+      
+      // Add click handler for close button
+      const closeButton = gameElement.querySelector('.placeholder-close');
+      if (closeButton) {
+        closeButton.addEventListener('click', () => {
+          gameElement.remove();
+          console.log(`🎮 GameListUpdateManager: Removed placeholder for gameId: ${gameId}`);
+        });
+      }
+      
+      console.log(`🎮 GameListUpdateManager: Replaced game (textId: ${rootTextId}) with placeholder`);
+    }, 50); // Small delay to ensure transition starts
   }
   
   checkForEmptyList() {

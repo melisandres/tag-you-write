@@ -709,12 +709,17 @@ export class GameListRenderer {
             // Keep the game ID for reference, but replace content
             const gameId = gameElement.dataset.gameId;
             const placeholderHTML = `
-                <div class="filter-mismatch-placeholder">
-                    <div class="placeholder-content">
-                        <p class="placeholder-message">${placeholderMessage}</p>
-                        ${gameTitle ? `<p class="placeholder-title">${gameTitle}</p>` : ''}
-                        <a href="${collabUrl}" class="placeholder-link">${viewGameText}</a>
+                <div class="title-button-row">
+                    <div class="story-title placeholder-title">
+                        <h2>${gameTitle || ''}</h2>
                     </div>
+                    <div class="story-btns">
+                        <a href="${collabUrl}" class="placeholder-link" data-i18n="general.filterMismatchViewGame">${viewGameText}</a>
+                        <button class="placeholder-close" aria-label="Remove placeholder" title="Remove placeholder">${SVGManager.closeSVG}</button>
+                    </div>
+                </div>
+                <div class="story-writing placeholder-message">
+                    <p data-i18n="general.filterMismatchPlaceholder">${placeholderMessage}</p>
                 </div>
             `;
             
@@ -725,6 +730,15 @@ export class GameListRenderer {
             
             // Remove grid classes that are no longer needed
             gameElement.classList.remove('closed', 'has-temporary-access', 'story-has-showcase');
+            
+            // Add click handler for close button
+            const closeButton = gameElement.querySelector('.placeholder-close');
+            if (closeButton) {
+                closeButton.addEventListener('click', () => {
+                    gameElement.remove();
+                    console.log(`GameListRenderer: Removed placeholder for gameId: ${gameId}`);
+                });
+            }
             
             console.log(`GameListRenderer: Replaced filter mismatch game (textId: ${rootTextId}) with placeholder`);
         }, 50); // Small delay to ensure transition starts

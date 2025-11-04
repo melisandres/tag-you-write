@@ -21,6 +21,31 @@ export class ShowcaseManager {
             console.log('showcaseTypeChanged event:', { type, rootStoryId });
             this.updateShowcaseParams(rootStoryId, type);
         });
+        
+        // Listen for game list updates (after filters/category/search changes)
+        // Scroll to showcase if it's open
+        eventBus.on('gamesListUpdated', () => {
+            this.scrollToShowcaseIfOpen();
+        });
+        
+        // Also listen for gamesRefreshed as a backup
+        eventBus.on('gamesRefreshed', () => {
+            this.scrollToShowcaseIfOpen();
+        });
+    }
+    
+    /**
+     * Scroll to showcase if it's currently open
+     * Called after game list is refreshed (filter/category/search changes)
+     */
+    scrollToShowcaseIfOpen() {
+        const params = this.getShowcaseParams();
+        if (params.rootStoryId) {
+            // Small delay to ensure DOM is fully updated
+            setTimeout(() => {
+                this.scrollToStoryElement(params.rootStoryId);
+            }, 100);
+        }
     }
 
     handleUrlChange() {

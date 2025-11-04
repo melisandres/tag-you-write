@@ -190,7 +190,7 @@
     "gameRemoved": "Game no longer matches your search/filters",
     "filterMismatchBanner": "This game doesn't match your current filters, search, or category, but it's shown because it's currently open in the showcase.",
     "filterMismatchPlaceholder": "This game no longer matches your current filters, search, or category.",
-    "filterMismatchViewGame": "View this game on its collaboration page",
+    "filterMismatchViewGame": "game page...",
     "view_tree_tooltip": "view tree",
     "view_shelf_tooltip": "view shelf",
     "tree_tooltip": "tree",
@@ -557,7 +557,7 @@
     "inspiration": "Inspiration",
     "drafts": "Drafts",
     "active": "Active (no drafts pending)",
-    "archives": "Archives",
+    "archives": "Archives (no drafts pending)",
     "invitations": "Invitations",
     "other": "Other",
     "closed": "Closed",
@@ -568,7 +568,7 @@
       "": "My Stories",
       "drafts": "My Stories > Drafts",
       "active": "My Stories > Active (no drafts pending)",
-      "archives": "My Stories > Archives"
+      "archives": "My Stories > Archives (no drafts pending)"
     },
     "canJoin": {
       "": "Stories I Can Join",

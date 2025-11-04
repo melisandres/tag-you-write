@@ -1393,6 +1393,7 @@ export class DataManager {
             placement_index: parseInt(game.placement_index),
             visible_to_all: game.visible_to_all,
             joinable_by_all: game.joinable_by_all,
+            filter_mismatch: game.filter_mismatch === true || game.filter_mismatch === '1' || game.filter_mismatch === 1 || game.filter_mismatch === 'true',
         };
     }
 
