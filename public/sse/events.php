@@ -37,6 +37,7 @@ class EventHandler {
     private $rootStoryId;
     private $filters;
     private $search;
+    private $category;
     private $lastTreeCheck;
     private $lastGameCheck;
 
@@ -131,6 +132,7 @@ class EventHandler {
         $this->rootStoryId = isset($_GET['rootStoryId']) ? $_GET['rootStoryId'] : null;
         $this->filters = isset($_GET['filters']) ? json_decode($_GET['filters'], true) : [];
         $this->search = isset($_GET['search']) ? $_GET['search'] : '';
+        $this->category = isset($_GET['category']) ? $_GET['category'] : null;
         $this->lastTreeCheck = isset($_GET['lastTreeCheck']) ? $_GET['lastTreeCheck'] : null;
         $this->lastGameCheck = isset($_GET['lastGameCheck']) ? $_GET['lastGameCheck'] : null;
         
@@ -454,7 +456,8 @@ class EventHandler {
                                 $gameId = $data['related_id'];
                                 
                                 try {
-                                    $gameUpdates = $this->pollingService->fetchGameData($gameId, $this->filters, $this->search);
+                                    // Pass category and showcaseRootStoryId to ensure showcase game is included even if it doesn't match filters
+                                    $gameUpdates = $this->pollingService->fetchGameData($gameId, $this->filters, $this->search, $this->category, $this->rootStoryId);
                                     
                                     if (!empty($gameUpdates)) {
                                         // Game still matches current filters/search - send as update
@@ -484,7 +487,8 @@ class EventHandler {
                                 $gameId = $data['related_id'];
                                 
                                 try {
-                                    $gameUpdates = $this->pollingService->fetchGameData($gameId, $this->filters, $this->search);
+                                    // Pass category and showcaseRootStoryId to ensure showcase game is included even if it doesn't match filters
+                                    $gameUpdates = $this->pollingService->fetchGameData($gameId, $this->filters, $this->search, $this->category, $this->rootStoryId);
                                     
                                     if (!empty($gameUpdates)) {
                                         $this->sendEvent('update', [
@@ -626,10 +630,11 @@ class EventHandler {
             // Get updates directly using the polling service
             $updates = $this->pollingService->getUpdates(
                 $this->lastEventId,
-                $this->writerId, 
+                $this->writerId,
                 $this->rootStoryId,
                 $this->filters,
                 $this->search,
+                $this->category,
                 $this->lastTreeCheck,
                 $this->lastGameCheck
             );
@@ -727,10 +732,11 @@ class EventHandler {
                 // Get updates directly using the polling service
                 $updates = $this->pollingService->getUpdates(
                     $this->lastEventId,
-                    $this->writerId, 
+                    $this->writerId,
                     $this->rootStoryId,
                     $this->filters,
                     $this->search,
+                    $this->category,
                     $this->lastTreeCheck,
                     $this->lastGameCheck
                 );
@@ -812,7 +818,10 @@ class EventHandler {
             $this->writerId, 
             $this->rootStoryId,
             $this->filters,
-            $this->search
+            $this->search,
+            $this->category,
+            $this->lastTreeCheck,
+            $this->lastGameCheck
         );
         
         // Send notification updates if any

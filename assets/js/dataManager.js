@@ -577,15 +577,16 @@ export class DataManager {
                     const filters = this.getFilters();
                     const search = this.getSearch();
                     const category = this.getCategory();
+                    const showcaseRootStoryId = this.getCurrentViewedRootStoryId(); // Get current showcase rootStoryId
                     const endpoint = 'game/getGames';
                     const url = window.i18n.createUrl(endpoint);
                     
-                    console.log('📦 DataManager: refreshGamesFromBackend fetching with', { filters, search, category });
+                    console.log('📦 DataManager: refreshGamesFromBackend fetching with', { filters, search, category, rootStoryId: showcaseRootStoryId });
                     
                     const response = await fetch(url, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ filters, search, category })
+                        body: JSON.stringify({ filters, search, category, rootStoryId: showcaseRootStoryId })
                     });
                     
                     if (!response.ok) throw new Error('Failed to fetch games');

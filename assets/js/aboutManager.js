@@ -39,7 +39,7 @@ export class AboutManager {
             <div class="about-modal-body">
                 <div class="about-content">
                     <h1 class="about-title" data-i18n="about.title">About Tag You Write</h1>
-                    <p class="about-description" data-i18n="about.description">A collaborative writing platform where creativity meets community.</p>
+                    <p class="about-description" data-i18n="about.description" data-i18n-html="true">A collaborative writing platform where creativity meets community.</p>
                     
                     <div class="about-creator">
                         <div class="about-creator-image">
@@ -190,14 +190,9 @@ export class AboutManager {
             return;
         }
 
-        const translatableElements = this.aboutModal.querySelectorAll('[data-i18n]');
-        translatableElements.forEach(element => {
-            const key = element.getAttribute('data-i18n');
-            const translation = window.i18n.translate(key);
-            if (translation && translation !== key) {
-                element.textContent = translation;
-            }
-        });
+        // Use the localization system's updatePageTranslations method
+        // which properly handles HTML content when data-i18n-html="true" is set
+        window.i18n.updatePageTranslations(this.aboutModal);
     }
 
     /**

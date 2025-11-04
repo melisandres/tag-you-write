@@ -102,13 +102,17 @@ class ControllerGame extends Controller {
             $filters = $data['filters'] ?? [];
             $searchTerm = $data['search'] ?? null;
             $category = $data['category'] ?? null;
+            
+            // Get showcase parameters from POST data
+            $showcaseRootStoryId = $data['rootStoryId'] ?? null; // This is the root text_id (rt.id in SQL)
 
             // Debug logging
             error_log("ControllerGame::getGames - Category: " . ($category ?? 'null'));
             error_log("ControllerGame::getGames - Filters: " . print_r($filters, true));
+            error_log("ControllerGame::getGames - ShowcaseRootStoryId: " . ($showcaseRootStoryId ?? 'null'));
 
             $game = new Game();
-            $games = $game->getGames(null, $filters, null, $searchTerm, $category);  // Pass category to model
+            $games = $game->getGames(null, $filters, null, $searchTerm, $category, $showcaseRootStoryId);
 
             error_log("ControllerGame::getGames - Returned " . count($games) . " games");
 
@@ -136,12 +140,15 @@ class ControllerGame extends Controller {
             $filters = $data['filters'] ?? [];
             $category = $data['category'] ?? null;
             $rootStoryId = $data['rootStoryId'] ?? null;
+            // Note: rootStoryId is used for tree nodes, but should also be passed as showcaseRootStoryId
+            // to getModifiedSince() in Step 2b to ensure showcase game is included even if it doesn't match filters
             
             $game = new Game();
             $text = new Text();
             
             // Get the modified games with search term and category
-            $modifiedGames = $game->getModifiedSince($lastGamesCheck, $filters, $searchTerm, $category);
+            // Pass rootStoryId as showcaseRootStoryId to ensure showcase game is included even if it doesn't match filters
+            $modifiedGames = $game->getModifiedSince($lastGamesCheck, $filters, $searchTerm, $category, $rootStoryId);
 
 /*             // Process the modified games data to ensure boolean fields are properly formatted
             foreach ($modifiedGames as &$game) {

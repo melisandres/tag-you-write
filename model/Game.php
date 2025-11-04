@@ -17,7 +17,7 @@
                         'modified_at'
                         ];
 
-   public function getGames($order = null, $filters = [], $id = null, $searchTerm = null, $category = null) {
+   public function getGames($order = null, $filters = [], $id = null, $searchTerm = null, $category = null, $showcaseRootStoryId = null) {
       $loggedInWriterId = isset($_SESSION['writer_id']) ? $_SESSION['writer_id'] : "";
       
       // Extract tokens from session
@@ -286,6 +286,51 @@
          }
       }
    
+      // Post-query merge: If showcaseRootStoryId is provided and not in results, fetch it separately
+      // BUT: Only do this if we're not asking for a specific gameId, OR if the requested gameId IS the showcase game
+      if ($showcaseRootStoryId) {
+         // If a specific gameId was requested, check if it matches the showcase game
+         $shouldIncludeShowcase = true;
+         if ($id) {
+            // We're asking for a specific game - only include showcase if it's the same game
+            $showcaseGameId = $this->selectGameId($showcaseRootStoryId);
+            if ($showcaseGameId && $showcaseGameId != $id) {
+               // Requested game is different from showcase game - don't include showcase
+               $shouldIncludeShowcase = false;
+            }
+         }
+         
+         if ($shouldIncludeShowcase) {
+            $showcaseGameInResults = false;
+            
+            // Check if showcase game is already in results
+            foreach ($games as $game) {
+               if (isset($game['id']) && $game['id'] == $showcaseRootStoryId) {
+                  $showcaseGameInResults = true;
+                  break;
+               }
+            }
+            
+            if (!$showcaseGameInResults) {
+               // Showcase game not in results - it was excluded by filters/category/search
+               // Get gameId from rootTextId, then fetch using getGames() recursively
+               $showcaseGameId = $this->selectGameId($showcaseRootStoryId);
+               if ($showcaseGameId) {
+                  // Recursively call getGames with just the gameId (no filters/search/category)
+                  // This ensures all calculations and checks are done the same way
+                  $showcaseGame = $this->getGames(null, [], $showcaseGameId, null, null, null);
+                  if ($showcaseGame && !empty($showcaseGame)) {
+                     // Mark it as filter mismatch - it doesn't match current filters/category/search
+                     $showcaseGame[0]['filter_mismatch'] = true;
+                     // Insert into results at correct sorted position (modified_at DESC)
+                     $this->insertGameInSortedPosition($games, $showcaseGame[0]);
+                  }
+               }
+            }
+            // If showcase game IS in results, it matched all filters - no flag needed
+         }
+      }
+   
       return $games;
    }
 
@@ -300,7 +345,7 @@
       return $stmt->fetchAll();
   }
 
-   public function getModifiedSince($lastCheck, $filters = [], $searchTerm = null, $category = null) {
+   public function getModifiedSince($lastCheck, $filters = [], $searchTerm = null, $category = null, $showcaseRootStoryId = null, $id = null) {
       $loggedInWriterId = isset($_SESSION['writer_id']) ? $_SESSION['writer_id'] : "";
       
       // Extract tokens from session
@@ -353,6 +398,11 @@
          } elseif ($filters['bookmarked'] === false) {
             $filterString .= " AND b.text_id IS NULL";
          }
+      }
+
+      // Handle gameId filter
+      if ($id) {
+         $filterString .= " AND g.id = :id";
       }
 
       // Handle search term
@@ -503,6 +553,9 @@
       if ($searchTerm) {
          $stmt->bindValue(':searchTerm', '%' . $searchTerm . '%');
       }
+      if ($id) {
+         $stmt->bindValue(':id', $id);
+      }
       $stmt->bindValue(':loggedInWriterId', $loggedInWriterId);
       
       // Bind token parameters
@@ -547,6 +600,52 @@
          }
       }
 
+      // Post-query merge: If showcaseRootStoryId is provided and not in results, 
+      // check if it was modified and fetch it separately if needed
+      // BUT: Only do this if we're not asking for a specific gameId, OR if the requested gameId IS the showcase game
+      if ($showcaseRootStoryId) {
+         // If a specific gameId was requested, check if it matches the showcase game
+         $shouldIncludeShowcase = true;
+         if ($id) {
+            // We're asking for a specific game - only include showcase if it's the same game
+            $showcaseGameId = $this->selectGameId($showcaseRootStoryId);
+            if ($showcaseGameId && $showcaseGameId != $id) {
+               // Requested game is different from showcase game - don't include showcase
+               $shouldIncludeShowcase = false;
+            }
+         }
+         
+         if ($shouldIncludeShowcase) {
+            $showcaseGameInResults = false;
+            
+            // Check if showcase game is already in results
+            foreach ($results as $game) {
+               if (isset($game['id']) && $game['id'] == $showcaseRootStoryId) {
+                  $showcaseGameInResults = true;
+                  break;
+               }
+            }
+            
+            if (!$showcaseGameInResults) {
+               // Get gameId from rootTextId, then fetch using getModifiedSince() recursively
+               $showcaseGameId = $this->selectGameId($showcaseRootStoryId);
+               if ($showcaseGameId) {
+                  // Recursively call getModifiedSince with just the gameId (no filters/search/category)
+                  // Pass null for showcaseRootStoryId to prevent infinite recursion
+                  // This ensures all calculations and checks are done the same way, and checks modified_at
+                  $showcaseGame = $this->getModifiedSince($lastCheck, [], null, null, null, $showcaseGameId);
+                  if ($showcaseGame && !empty($showcaseGame)) {
+                     // Mark it as filter mismatch - it doesn't match current filters/category/search
+                     $showcaseGame[0]['filter_mismatch'] = true;
+                     // Insert into results at correct sorted position (modified_at DESC)
+                     $this->insertGameInSortedPosition($results, $showcaseGame[0]);
+                  }
+               }
+            }
+            // If showcase game IS in results, it matched all filters - no flag needed
+         }
+      }
+
       return $results;
    }
 
@@ -557,6 +656,30 @@
       $stmt->execute();
       $result = $stmt->fetchColumn();
       return $result;
+   }
+
+   /**
+    * Insert a game into a sorted array at the correct position based on modified_at (DESC order)
+    * @param array &$games Array of games (passed by reference)
+    * @param array $newGame Game to insert
+    */
+   private function insertGameInSortedPosition(&$games, $newGame) {
+      $newGameModifiedAt = $newGame['modified_at'] ?? '';
+      
+      // Find the correct position to insert (DESC order: most recent first)
+      // Insert before the first game with a modified_at less than the new game's modified_at
+      $insertIndex = count($games);
+      for ($i = 0; $i < count($games); $i++) {
+         $gameModifiedAt = $games[$i]['modified_at'] ?? '';
+         // For DESC order: if new game's modified_at is greater than or equal to current game, insert here
+         if ($newGameModifiedAt >= $gameModifiedAt) {
+            $insertIndex = $i;
+            break;
+         }
+      }
+      
+      // Insert at the found position
+      array_splice($games, $insertIndex, 0, [$newGame]);
    }
 
    public function getRootText($game_id) {

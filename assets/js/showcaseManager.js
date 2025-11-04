@@ -44,6 +44,8 @@ export class ShowcaseManager {
     updateShowcaseParams(rootStoryId, type = null) {
         const urlParams = new URLSearchParams(window.location.search);
         
+        // Preserve all existing params (like category, filters, etc.)
+        // Only modify showcase-related params
         if (!rootStoryId) {
             // Remove showcase params if showcase is closed
             urlParams.delete('showcase');
@@ -71,6 +73,7 @@ export class ShowcaseManager {
         }
 
         // Update URL without pushing to history
+        // urlParams.toString() preserves all existing params (category, filters, etc.)
         const newUrl = `${window.location.pathname}${urlParams.toString() ? '?' + urlParams.toString() : ''}`;
         window.history.replaceState({}, '', newUrl);
     }

@@ -60,9 +60,9 @@
   },
   "about": {
     "title": "À propos de Tag You Write",
-    "description": "Une plateforme d'écriture collaborative où la créativité rencontre la communauté.",
+    "description": "<p>Tag You Write est une expérience en mouvement, une exploration de l’écriture comme jeu. Un lieu où les histoires changent de peau, essayent des voix nouvelles, se laissent bousculer, polir, transformer.</p><p>On y brasse les mots, on introduit des dissonances, on efface des fioritures, on change le ton — et surtout, on observe ce que d’autres feront de ce petit reste de sens.</p><p>C’est une plateforme où l’on confie un texte non pas à l’esprit collectif, ni à l’esprit artificiel, mais à quelques esprits singuliers et imparfaits — pour qu’ils le revisitent, l’augmentent, le réduisent, ou le métamorphosent de façon inattendue.</p><p>Il n’existe pas de voie tracée d’avance. Tag You Write cherche plutôt à ouvrir le passage — à laisser place aux détours, aux bifurcations, et aux voyages qu’ils peuvent inspirer.</p>",
     "creator": {
-      "bio": "Créé par Mélisandre, une développeuse qui croit au pouvoir de la narration collaborative."
+      "bio": "Créé par Melisandre Schofield, une écrivaine et développeuse web avec un background en arts visuels et narratologie expérimentale. Elle crée des outils et des expériences qui réunissent les gens — pas seulement pour écrire, mais pour jouer, surprendre l'un l'autre, et redécouvrir la chimie étrange de l'imagination partagée."
     }
   },
   "page_title": {
@@ -185,6 +185,9 @@
     "game": "COLLAB",
     "closed": "FERMÉE",
     "gameRemoved": "Le jeu ne correspond plus à votre recherche/filtres",
+    "filterMismatchBanner": "Ce jeu ne correspond pas à vos filtres, recherche ou catégorie actuels, mais il est affiché car il est actuellement ouvert dans la vitrine.",
+    "filterMismatchPlaceholder": "Ce jeu ne correspond plus à vos filtres, recherche ou catégorie actuels.",
+    "filterMismatchViewGame": "Voir ce jeu sur sa page de collaboration",
     "pending": "À VENIR",
     "open": "OUVERTE",
     "view_tree_tooltip": "voir l'arbre",
@@ -552,7 +555,7 @@
       "games_i_can_join": "Histoires disponibles",
       "inspiration": "Inspiration",
       "drafts": "Brouillons",
-      "active": "Actif",
+      "active": "Actif (aucun brouillon en attente)",
       "archives": "Archives",
       "invitations": "Invitations",
       "other": "Autres",
@@ -563,7 +566,7 @@
       "myStories": {
         "": "Mes histoires",
         "drafts": "Mes histoires > Brouillons",
-        "active": "Mes histoires > Actif",
+        "active": "Mes histoires > Actif (aucun brouillon en attente)",
         "archives": "Mes histoires > Archives"
       },
       "canJoin": {

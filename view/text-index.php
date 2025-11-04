@@ -42,7 +42,14 @@
 
 <div data-stories class="stories">
 {% for text in texts %}
-    <div class="story {{ text.openForChanges ? '' : 'closed' }}{{ text.hasTemporaryAccess ? ' has-temporary-access' : '' }}" data-game-id="{{ text.game_id }}" data-unseen-count="{{ text.unseen_count }}" data-seen-count="{{ text.seen_count }}" data-text-count="{{ text.text_count }}" data-text-id="{{ text.id }}">
+    <div class="story {{ text.openForChanges ? '' : 'closed' }}{{ text.hasTemporaryAccess ? ' has-temporary-access' : '' }}{{ text.filter_mismatch ? ' filter-mismatch' : '' }}" data-game-id="{{ text.game_id }}" data-unseen-count="{{ text.unseen_count }}" data-seen-count="{{ text.seen_count }}" data-text-count="{{ text.text_count }}" data-text-id="{{ text.id }}">
+        {% if text.filter_mismatch %}
+        <div class="filter-mismatch-banner">
+            <div class="banner-text" data-i18n="general.filterMismatchBanner">
+                {{ translate('general.filterMismatchBanner') }}
+            </div>
+        </div>
+        {% endif %}
         {% if text.hasTemporaryAccess %}
         <div class="temporary-access-banner">
             <div class="banner-text" data-i18n="{{ session.writer_id ? 'invitation.temporary_access_banner' : 'invitation.temporary_access_banner_not_logged_in' }}">

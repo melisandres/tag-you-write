@@ -18,6 +18,47 @@
         "content content";
 }
 
+/* When story has filter mismatch, add banner row and visual styling */
+.story.filter-mismatch {
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+        "filter-mismatch-banner filter-mismatch-banner"
+        "content content";
+    opacity: 0.85;
+    position: relative;
+}
+
+.story.filter-mismatch::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 2px dashed var(--color-warning, #ff9800);
+    pointer-events: none;
+    z-index: 1;
+    animation: filterMismatchPulse 2s ease-in-out infinite;
+}
+
+@keyframes filterMismatchPulse {
+    0%, 100% {
+        opacity: 0.5;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+/* When story has both filter mismatch and temporary access */
+.story.filter-mismatch.has-temporary-access {
+    grid-template-rows: auto auto auto auto;
+    grid-template-areas:
+        "filter-mismatch-banner filter-mismatch-banner"
+        "banner banner"
+        "content content";
+}
+
 .story-writing {
     cursor:pointer;
 }
@@ -32,9 +73,42 @@
     border: 10px solid var(--color-black);
 }
 
+/* When showcase game has filter mismatch, change border and grid layout */
+.story.story-has-showcase.filter-mismatch {
+    grid-template-rows: auto auto auto auto;
+    grid-template-areas:
+        "filter-mismatch-banner filter-mismatch-banner filter-mismatch-banner"
+        "title title buttons"
+        "writing writing writing"
+        "showcase showcase showcase";
+    border: 10px solid var(--color-warning, #ff9800);
+    animation: filterMismatchShowcase 2s ease-in-out infinite;
+}
+
+@keyframes filterMismatchShowcase {
+    0%, 100% {
+        border-color: var(--color-warning, #ff9800);
+    }
+    50% {
+        border-color: var(--color-warning-dark, #f57c00);
+    }
+}
+
 .story.story-has-showcase.has-temporary-access {
     grid-template-rows: auto auto auto auto;
     grid-template-areas:
+        "banner banner banner"
+        "title title buttons"
+        "writing writing writing"
+        "showcase showcase showcase";
+}
+
+
+/* When showcase has both filter mismatch and temporary access */
+.story.story-has-showcase.filter-mismatch.has-temporary-access {
+    grid-template-rows: auto auto auto auto auto;
+    grid-template-areas:
+        "filter-mismatch-banner filter-mismatch-banner filter-mismatch-banner"
         "banner banner banner"
         "title title buttons"
         "writing writing writing"
@@ -184,6 +258,23 @@
             "title buttons writing";
     }
 
+    /* When story has filter mismatch on desktop */
+    .story.filter-mismatch {
+        grid-template-rows: auto auto;
+        grid-template-areas:
+            "filter-mismatch-banner filter-mismatch-banner filter-mismatch-banner"
+            "title buttons writing";
+    }
+
+    /* When story has both filter mismatch and temporary access on desktop */
+    .story.filter-mismatch.has-temporary-access {
+        grid-template-rows: auto auto auto;
+        grid-template-areas:
+            "filter-mismatch-banner filter-mismatch-banner filter-mismatch-banner"
+            "banner banner banner"
+            "title buttons writing";
+    }
+
     .story-writing {
         flex-direction: row;
         align-items: center;
@@ -232,6 +323,25 @@
     .story.story-has-showcase.has-temporary-access {
         grid-template-rows: auto auto auto;
         grid-template-areas:
+            "banner banner banner"
+            "title buttons writing"
+            "showcase showcase showcase";
+    }
+
+    /* When showcase has filter mismatch on desktop */
+    .story.story-has-showcase.filter-mismatch {
+        grid-template-rows: auto auto auto;
+        grid-template-areas:
+            "filter-mismatch-banner filter-mismatch-banner filter-mismatch-banner"
+            "title buttons writing"
+            "showcase showcase showcase";
+    }
+
+    /* When showcase has both filter mismatch and temporary access on desktop */
+    .story.story-has-showcase.filter-mismatch.has-temporary-access {
+        grid-template-rows: auto auto auto auto;
+        grid-template-areas:
+            "filter-mismatch-banner filter-mismatch-banner filter-mismatch-banner"
             "banner banner banner"
             "title buttons writing"
             "showcase showcase showcase";
@@ -323,6 +433,88 @@
     }
 } */
 
+/* Filter mismatch banner styles */
+.filter-mismatch-banner {
+    background: linear-gradient(135deg, var(--color-warning, #ff9800), var(--color-warning-dark, #f57c00));
+    color: white;
+    padding: 8px 12px;
+    margin: 0;
+    font-size: 0.55em;
+    font-weight: 500;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 4px 4px 0 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    grid-area: filter-mismatch-banner;
+    z-index: 1;
+}
+
+.filter-mismatch-banner .banner-text {
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+/* Filter mismatch placeholder styles */
+.story.filter-mismatch-placeholder-transition {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    opacity: 0.5;
+    transform: scale(0.98);
+}
+
+.story.filter-mismatch-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 120px;
+    padding: 20px;
+    background-color: var(--color-white-lightest);
+    border: 2px dashed var(--color-warning, #ff9800);
+    border-radius: 4px;
+    box-shadow: var(--story-box-shadow);
+    opacity: 0.9;
+}
+
+.filter-mismatch-placeholder {
+    width: 100%;
+}
+
+.filter-mismatch-placeholder .placeholder-content {
+    text-align: center;
+    max-width: 500px;
+}
+
+.filter-mismatch-placeholder .placeholder-message {
+    font-size: 0.9em;
+    color: var(--color-text-secondary, #666);
+    margin-bottom: 8px;
+}
+
+.filter-mismatch-placeholder .placeholder-title {
+    font-size: 1em;
+    font-weight: 600;
+    color: var(--color-text-primary, #333);
+    margin-bottom: 12px;
+    font-style: italic;
+}
+
+.filter-mismatch-placeholder .placeholder-link {
+    display: inline-block;
+    padding: 8px 16px;
+    background-color: var(--color-primary, #007bff);
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 0.9em;
+    transition: background-color 0.2s ease;
+    margin-top: 8px;
+}
+
+.filter-mismatch-placeholder .placeholder-link:hover {
+    background-color: var(--color-primary-dark, #0056b3);
+}
+
   /* Game removal overlay styles */
 .game-removal-overlay {
     position: absolute;
@@ -361,10 +553,6 @@
     transition: all 0.3s ease-out;
   }
   
-  /* Ensure game elements can contain absolute positioned overlays */
-  .story {
-    position: relative;
-  }
   
   /* Highlight effect for scroll target */
   .story.highlight-scroll-target {

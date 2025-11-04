@@ -443,6 +443,7 @@ export class FormManager {
                         textId: responseData.textId,
                         message: responseData.toastMessage
                     });
+                    responseData.reidrectUrl = 'back';
                 }
                 
                 if (responseData.redirectUrl) {

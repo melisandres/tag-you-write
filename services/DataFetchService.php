@@ -62,11 +62,12 @@ class DataFetchService {
      * @param int|null $rootStoryId Current story being viewed
      * @param array $filters Any active filters
      * @param string $search Search term if any
+     * @param string|null $category Category filter if any
      * @param string|null $lastTreeCheck Last tree check timestamp
      * @param string|null $lastGameCheck Last game check timestamp
      * @return array Updates including modified games, nodes, and search results
      */
-    public function getUpdates($lastEventId, $writerId, $rootStoryId, $filters = [], $search = '', $lastTreeCheck = null, $lastGameCheck = null) {
+    public function getUpdates($lastEventId, $writerId, $rootStoryId, $filters = [], $search = '', $category = null, $lastTreeCheck = null, $lastGameCheck = null) {
         error_log("DataFetchService: getUpdates called with lastEventId=$lastEventId, writerId=$writerId, rootStoryId=$rootStoryId");
         error_log("DataFetchService: Filters: " . json_encode($filters) . ", Search: $search");
         error_log("DataFetchService: lastTreeCheck: $lastTreeCheck, lastGameCheck: $lastGameCheck");
@@ -113,7 +114,7 @@ class DataFetchService {
             error_log("DataFetchService: Updated lastEventId to " . $lastEventId);
             
             // Process events to gather updates
-            $this->processEvents($events, $updates, $writerId, $rootStoryId, $filters, $search, $lastTreeCheck, $lastGameCheck);
+            $this->processEvents($events, $updates, $writerId, $rootStoryId, $filters, $search, $category, $lastTreeCheck, $lastGameCheck);
             
             // Log the results
             error_log("DataFetchService: Found " . count($updates['modifiedGames']) . " modified games");
@@ -131,7 +132,7 @@ class DataFetchService {
     /**
      * Process events and fetch related data
      */
-    private function processEvents($events, &$updates, $writerId, $rootStoryId, $filters, $search, $lastTreeCheck, $lastGameCheck) {
+    private function processEvents($events, &$updates, $writerId, $rootStoryId, $filters, $search, $category, $lastTreeCheck, $lastGameCheck) {
         // Pre-filter events to get unique IDs per table
         $uniqueEvents = [];
         foreach ($events as $event) {
@@ -153,7 +154,7 @@ class DataFetchService {
         foreach ($uniqueEvents as $table => $tableEvents) {
             foreach ($tableEvents as $id => $event) {
                 try {
-                    $this->processEventByTable($table, $id, $updates, $writerId, $rootStoryId, $filters, $search);
+                    $this->processEventByTable($table, $id, $updates, $writerId, $rootStoryId, $filters, $search, $category);
                 } catch (Exception $e) {
                     error_log("DataFetchService ERROR processing $table/$id: " . $e->getMessage());
                 }
@@ -178,11 +179,12 @@ class DataFetchService {
     /**
      * Process a single event based on its related table
      */
-    private function processEventByTable($table, $id, &$updates, $writerId, $rootStoryId, $filters, $search) {
+    private function processEventByTable($table, $id, &$updates, $writerId, $rootStoryId, $filters, $search, $category = null) {
         switch ($table) {
             case 'game':
                 // Fetch the specific game that changed
-                $gameUpdates = $this->fetchGameData($id, $filters, $search);
+                // Pass category and showcaseRootStoryId to ensure showcase game is included even if it doesn't match filters
+                $gameUpdates = $this->fetchGameData($id, $filters, $search, $category, $rootStoryId);
                 if (!empty($gameUpdates['modifiedGames'])) {
                     $updates['modifiedGames'] = array_merge($updates['modifiedGames'], $gameUpdates['modifiedGames']);
                 }
@@ -221,8 +223,8 @@ class DataFetchService {
         }
     }
 
-    public function fetchGameData($gameId, $filters, $search) {
-        return $this->executeWithRetry(function() use ($gameId, $filters, $search) {
+    public function fetchGameData($gameId, $filters, $search, $category = null, $showcaseRootStoryId = null) {
+        return $this->executeWithRetry(function() use ($gameId, $filters, $search, $category, $showcaseRootStoryId) {
             // Temporarily restore session data for Game->getGames() calls
             $this->restoreSessionData();
             try {

@@ -38,6 +38,7 @@ class ControllerEvent extends Controller {
         $rootStoryId = isset($_GET['rootStoryId']) ? $_GET['rootStoryId'] : null;
         $filters = isset($_GET['filters']) ? json_decode($_GET['filters'], true) : [];
         $search = isset($_GET['search']) ? $_GET['search'] : '';
+        $category = isset($_GET['category']) ? $_GET['category'] : null;
         $lastTreeCheck = isset($_GET['lastTreeCheck']) ? $_GET['lastTreeCheck'] : null;
         $lastGameCheck = isset($_GET['lastGameCheck']) ? $_GET['lastGameCheck'] : null;
         
@@ -45,7 +46,7 @@ class ControllerEvent extends Controller {
         $gameSubscriptionType = isset($_GET['gameSubscriptionType']) ? $_GET['gameSubscriptionType'] : 'all_games';
         
         // Log parameters for debugging
-        error_log("ControllerEvent: getUpdates parameters - lastEventId=$lastEventId, currentUserId=$currentUserId, rootStoryId=$rootStoryId, search=$search");
+        error_log("ControllerEvent: getUpdates parameters - lastEventId=$lastEventId, currentUserId=$currentUserId, rootStoryId=$rootStoryId, search=$search, category=" . ($category ?? 'null'));
         error_log("ControllerEvent: lastTreeCheck=$lastTreeCheck, lastGameCheck=$lastGameCheck");
         error_log("ControllerEvent: gameSubscriptionType=$gameSubscriptionType");
         
@@ -57,6 +58,7 @@ class ControllerEvent extends Controller {
             $rootStoryId,
             $filters,
             $search,
+            $category,
             $lastTreeCheck,
             $lastGameCheck
         );

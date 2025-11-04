@@ -38,9 +38,13 @@ class ControllerText extends Controller{
         // TODO: Get the sort parameter from URL
         $sort = null;
 
+        // Get showcase parameters from URL
+        $showcase = isset($_GET['showcase']) ? $_GET['showcase'] : null; // 'default', 'tree', 'shelf', or null
+        $showcaseRootStoryId = isset($_GET['rootStoryId']) ? $_GET['rootStoryId'] : null; // This is the root text_id (rt.id in SQL)
+
         // Getting the games
         $game = new Game;
-        $allGames = $game->getGames($sort, $filters, null, $searchTerm, $category);
+        $allGames = $game->getGames($sort, $filters, null, $searchTerm, $category, $showcaseRootStoryId);
 
         // Get the notifications
         $notifications = $this->getNotifications();
@@ -495,7 +499,9 @@ class ControllerText extends Controller{
         // Same action in both cases. Not an autosave, doing it here, Yes an autosave, doing it in the autosave method.
         if ($autoSaveInput == null) {
             if ($status == 'published') {
-                $this->sendJsonResponse(true, 'toast.text.publish_success', 'text');
+                $this->sendJsonResponse(true, 'toast.text.publish_success', [
+                    'redirectUrl' => 'back'
+                ]);
             } else {
                 $this->sendJsonResponse(true, 'toast.text.success', ['textId' => $textIdFromInsert]);
             }
@@ -758,12 +764,12 @@ class ControllerText extends Controller{
             $gameData = $game->getGames(null, [], $gameId);
             $gameData[0]['isNewPlayer'] = !$existingPlayer; 
         }
-
+        
         $this->sendJsonResponse(
             $success, 
             $success ? 'toast.text.publish_success' : 'toast.text.publish_failed',
             [
-                'gameData' => $gameData, 
+                'gameData' => $gameData,
             ]
         );
     }
@@ -1008,8 +1014,10 @@ class ControllerText extends Controller{
                 $this->sendGameInvitations($gameId, $input['title'], $input['prompt'] ?? '');
             }
 
-            // Send a success message
-            $this->sendJsonResponse(true, 'toast.text.publish_success', 'text');
+            // Send a success message with redirectUrl to preserve filters/category
+            $this->sendJsonResponse(true, 'toast.text.publish_success', [
+                'redirectUrl' => 'back'
+            ]);
         }else{
             // give a "autosaved" message if it's an autosave
             if( $autoSaveInput !== null){

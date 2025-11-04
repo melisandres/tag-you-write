@@ -221,6 +221,9 @@ export class FilterManager {
         const updateUrlWithFilters = (filters) => {
             const params = new URLSearchParams(window.location.search);
             
+            // Preserve category and other non-filter params
+            // (URLSearchParams already preserves all params, we just modify filter-related ones)
+            
             // Convert backend values to URL strings
             const urlHasContributed = filters.hasContributed === null ? 'all' :
                                      filters.hasContributed === true ? 'contributor' :
@@ -250,6 +253,7 @@ export class FilterManager {
             }
             
             // Update URL without reloading the page
+            // params.toString() preserves all existing params (category, showcase, etc.)
             const newUrl = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`;
             window.history.pushState({}, '', newUrl);
         };

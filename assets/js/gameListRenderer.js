@@ -49,6 +49,14 @@ export class GameListRenderer {
         
         // Add listener for new games
         eventBus.on('gameAddedToRender', (game) => this.insertNewGame(game));
+        
+        // Listen for showcase closing - handle filter mismatch games
+        eventBus.on('showcaseChanged', (rootStoryId) => {
+            // When showcase closes (rootStoryId is null), check if the closed game has filter_mismatch
+            if (rootStoryId === null) {
+                this.handleShowcaseClosed();
+            }
+        });
     }
 
     initializeFromServerData() {
@@ -109,13 +117,21 @@ export class GameListRenderer {
         const translatedTooltip = window.i18n ? window.i18n.translate('tooltips.contributor') : '☆ contributor';
 
         // build the game card
+        const hasFilterMismatch = game.filter_mismatch === true || game.filter_mismatch === '1' || game.filter_mismatch === 1;
         return `
-            <div class="story ${isOpen ? '' : 'closed'}${game.hasTemporaryAccess ? ' has-temporary-access' : ''}" 
+            <div class="story ${isOpen ? '' : 'closed'}${game.hasTemporaryAccess ? ' has-temporary-access' : ''}${hasFilterMismatch ? ' filter-mismatch' : ''}" 
                  data-game-id="${game.game_id}" 
                  data-unseen-count="${game.unseen_count}" 
                  data-seen-count="${game.seen_count}" 
                  data-text-count="${game.text_count}" 
                  data-text-id="${game.id || game.text_id}">
+                ${hasFilterMismatch ? `
+                <div class="filter-mismatch-banner">
+                    <div class="banner-text" data-i18n="general.filterMismatchBanner">
+                        ${window.i18n.translate('general.filterMismatchBanner')}
+                    </div>
+                </div>
+                ` : ''}
                 ${game.hasTemporaryAccess ? `
                 <div class="temporary-access-banner">
                     <div class="banner-text" data-i18n="${this.userLoggedIn ? 'invitation.temporary_access_banner' : 'invitation.temporary_access_banner_not_logged_in'}">
@@ -315,6 +331,33 @@ export class GameListRenderer {
         const isOpen = gameData.openForChanges === '1' || gameData.openForChanges === true || gameData.openForChanges === 1;
         console.log("isOpen", isOpen);
         const hasContributed = gameData.hasContributed === '1' || gameData.hasContributed === true || gameData.hasContributed === 1;
+        
+        // Update filter_mismatch class and banner
+        const hasFilterMismatch = gameData.filter_mismatch === true || gameData.filter_mismatch === '1' || gameData.filter_mismatch === 1;
+        gameElement.classList.toggle('filter-mismatch', hasFilterMismatch);
+        
+        // Update filter mismatch banner
+        const filterMismatchBanner = gameElement.querySelector('.filter-mismatch-banner');
+        if (hasFilterMismatch && !filterMismatchBanner) {
+            // Add banner if it doesn't exist
+            const banner = document.createElement('div');
+            banner.className = 'filter-mismatch-banner';
+            banner.innerHTML = `
+                <div class="banner-text" data-i18n="general.filterMismatchBanner">
+                    ${window.i18n.translate('general.filterMismatchBanner')}
+                </div>
+            `;
+            // Insert at the beginning (before temporary-access-banner if it exists)
+            const firstChild = gameElement.firstChild;
+            if (firstChild) {
+                gameElement.insertBefore(banner, firstChild);
+            } else {
+                gameElement.appendChild(banner);
+            }
+        } else if (!hasFilterMismatch && filterMismatchBanner) {
+            // Remove banner if it exists
+            filterMismatchBanner.remove();
+        }
 
         // Update story class for open/closed status
         const gameStatusIndicator = gameElement.querySelector('.game-status-indicator');
@@ -607,5 +650,68 @@ export class GameListRenderer {
             console.log('🎮 GameListRenderer: Removing empty list message');
             emptyMessage.remove();
         }
+    }
+    
+    /**
+     * Handle showcase closing - replace filter mismatch games with placeholder
+     */
+    handleShowcaseClosed() {
+        // Find all games with filter-mismatch class
+        // The one that just had showcase closed will have filter-mismatch but no longer story-has-showcase
+        const filterMismatchGames = this.container.querySelectorAll('.story.filter-mismatch:not(.story-has-showcase)');
+        
+        filterMismatchGames.forEach((gameElement) => {
+            // Get the root text ID for the collab link
+            const rootTextId = gameElement.dataset.textId;
+            if (!rootTextId) {
+                console.warn('GameListRenderer: No text ID found for filter mismatch game');
+                return;
+            }
+            
+            // Get game title for the placeholder (if available)
+            const titleElement = gameElement.querySelector('.story-title h2 a');
+            const gameTitle = titleElement ? (titleElement.textContent || titleElement.innerText).trim() : null;
+            
+            // Replace with placeholder
+            this.replaceWithPlaceholder(gameElement, rootTextId, gameTitle);
+        });
+    }
+    
+    /**
+     * Replace game element with placeholder (with transition)
+     */
+    replaceWithPlaceholder(gameElement, rootTextId, gameTitle = null) {
+        // Add transition class for smooth animation
+        gameElement.classList.add('filter-mismatch-placeholder-transition');
+        
+        // Wait for transition to start, then replace content
+        setTimeout(() => {
+            // Create placeholder HTML
+            const placeholderMessage = window.i18n.translate('general.filterMismatchPlaceholder');
+            const viewGameText = window.i18n.translate('general.filterMismatchViewGame');
+            const collabUrl = window.i18n.createUrl(`text/collab/${rootTextId}`);
+            
+            // Keep the game ID for reference, but replace content
+            const gameId = gameElement.dataset.gameId;
+            const placeholderHTML = `
+                <div class="filter-mismatch-placeholder">
+                    <div class="placeholder-content">
+                        <p class="placeholder-message">${placeholderMessage}</p>
+                        ${gameTitle ? `<p class="placeholder-title">${gameTitle}</p>` : ''}
+                        <a href="${collabUrl}" class="placeholder-link">${viewGameText}</a>
+                    </div>
+                </div>
+            `;
+            
+            // Replace inner content but keep the element structure
+            gameElement.innerHTML = placeholderHTML;
+            gameElement.classList.remove('filter-mismatch', 'filter-mismatch-placeholder-transition');
+            gameElement.classList.add('filter-mismatch-placeholder');
+            
+            // Remove grid classes that are no longer needed
+            gameElement.classList.remove('closed', 'has-temporary-access', 'story-has-showcase');
+            
+            console.log(`GameListRenderer: Replaced filter mismatch game (textId: ${rootTextId}) with placeholder`);
+        }, 50); // Small delay to ensure transition starts
     }
 }

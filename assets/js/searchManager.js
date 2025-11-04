@@ -193,6 +193,9 @@ export class SearchManager {
     updateUrlWithSearch(search) {
         const params = new URLSearchParams(window.location.search);
         
+        // Preserve category and other non-search params
+        // (URLSearchParams already preserves all params, we just modify search param)
+        
         if (search) {
             params.set('search', search);
         } else {
@@ -200,6 +203,7 @@ export class SearchManager {
         }
         
         // Update URL without reload
+        // params.toString() preserves all existing params (category, filters, showcase, etc.)
         const newUrl = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`;
         window.history.replaceState({}, '', newUrl);
     }
