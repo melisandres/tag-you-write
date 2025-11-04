@@ -653,12 +653,14 @@ export class GameListRenderer {
     }
     
     /**
-     * Handle showcase closing - replace filter mismatch games with placeholder
+     * Handle showcase closing - replace filter mismatch games with placeholder and remove from cache
      */
     handleShowcaseClosed() {
         // Find all games with filter-mismatch class
         // The one that just had showcase closed will have filter-mismatch but no longer story-has-showcase
         const filterMismatchGames = this.container.querySelectorAll('.story.filter-mismatch:not(.story-has-showcase)');
+        
+        const gameIdsToRemove = [];
         
         filterMismatchGames.forEach((gameElement) => {
             // Get the root text ID for the collab link
@@ -668,6 +670,12 @@ export class GameListRenderer {
                 return;
             }
             
+            // Get game ID for cache removal
+            const gameId = gameElement.dataset.gameId;
+            if (gameId) {
+                gameIdsToRemove.push(gameId);
+            }
+            
             // Get game title for the placeholder (if available)
             const titleElement = gameElement.querySelector('.story-title h2 a');
             const gameTitle = titleElement ? (titleElement.textContent || titleElement.innerText).trim() : null;
@@ -675,6 +683,13 @@ export class GameListRenderer {
             // Replace with placeholder
             this.replaceWithPlaceholder(gameElement, rootTextId, gameTitle);
         });
+        
+        // Remove games from cache if they don't match filters
+        // When showcase closes, these games should be removed from cache since they won't be in future updates
+        if (gameIdsToRemove.length > 0) {
+            console.log('GameListRenderer: Removing filter mismatch games from cache after showcase closed:', gameIdsToRemove);
+            this.dataManager.removeGames(gameIdsToRemove);
+        }
     }
     
     /**
