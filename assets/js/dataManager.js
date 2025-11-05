@@ -594,8 +594,11 @@ export class DataManager {
                     
                     const games = await response.json();
                     
-                    // Update games will rebuild the dashboard categories, and that will emit the dashboardCategoriesUpdated event
+                    // Update games will rebuild the dashboard categories via replaceAll -> updateDashboardCategories(true)
+                    // For refreshGamesFromBackend (filter/search changes), we DO want full redraw
                     const normalizedGames = this.updateGamesData(games, true);
+                    
+                    // updateGamesData -> replaceAll already calls updateDashboardCategories(true) for full redraw
                     
                     // Emit event for view managers to render
                     eventBus.emit('gamesRefreshed', normalizedGames);
@@ -1213,8 +1216,8 @@ export class DataManager {
         });
         this.cache.lastGamesCheck = Date.now();
         
-        // Update dashboard categories
-        this.updateDashboardCategories();
+        // Update dashboard categories - full refresh, so emit event for full redraw
+        this.updateDashboardCategories(true);
     }
 
 
@@ -1261,8 +1264,8 @@ export class DataManager {
             });
         });
         
-        // Update dashboard categories
-        this.updateDashboardCategories();
+        // Update dashboard categories - real-time update, don't emit (surgical updates handle UI)
+        this.updateDashboardCategories(false);
     }
 
     // TODO: test this... and create front end logic to handle visualizing the "removal" of a game... (a "ghost" game, with a note on it--not longer fits the filter, search, or category being viewed))
@@ -1271,6 +1274,10 @@ export class DataManager {
             this.cache.games.delete(gameId);
         });
         this.saveCache();
+        
+        // Update dashboard categories cache - real-time update, don't emit (surgical updates handle UI)
+        this.updateDashboardCategories(false);
+        
         eventBus.emit('gamesRemoved', gameIds);
     }
 
@@ -1782,14 +1789,19 @@ export class DataManager {
 
     /**
      * Update dashboard categories when games change
+     * @param {boolean} shouldEmit - If true, emit dashboardCategoriesUpdated event (for full redraw)
+     *                               If false, just update cache (for surgical updates)
      */
-    updateDashboardCategories() {
+    updateDashboardCategories(shouldEmit = true) {
         const games = Array.from(this.cache.games.values()).map(g => g.data);
         const categorizedData = this.categorizeGames(games);
         this.cache.dashboardData = categorizedData;
         this.saveCache();
         
-        // Emit event to notify dashboard
-        eventBus.emit('dashboardCategoriesUpdated', categorizedData);
+        // Only emit event if requested (for filter/search changes that need full redraw)
+        // Real-time updates use surgical approach (gameAdded/gameModified/gamesRemoved events)
+        if (shouldEmit) {
+            eventBus.emit('dashboardCategoriesUpdated', categorizedData);
+        }
     }
 }

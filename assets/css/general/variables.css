@@ -16,6 +16,7 @@
     --icon-size: 44px;
 
     /* Font Sizes */
+    --font-size-xxsmall: clamp(10px, 1vw + 8px, 14px);
     --font-size-xsmall: clamp(14px, 1vw + 10px, 16px);
     --font-size-small: clamp(16px, 1.2vw + 12px, 20px);
     --font-size-medium-small: clamp(18px, 1.3vw + 14px, 22px);

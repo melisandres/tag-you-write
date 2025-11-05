@@ -144,8 +144,9 @@
 }
 
 .category-games:not(.collapsed) {
-    max-height: 1000px;
-    overflow: scroll;
+    max-height: 20vh; /* Limit height to 60% of viewport */
+    overflow-y: auto; /* Show scrollbar only when needed */
+    overflow-x: hidden;
 }
 
 .dashboard-game-item {
@@ -153,9 +154,19 @@
     align-items: center;
     padding: var(--spacing-small) var(--spacing-medium) var(--spacing-small) calc(var(--spacing-medium) + var(--spacing-small));
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: color 0.2s ease;
     position: relative;
     margin-bottom: 2px;
+    background-color: transparent;
+}
+
+/* Make game items and category-games container transparent during flash so flash color shows through */
+.dashboard-category.flash-warning .category-games {
+    background-color: transparent;
+}
+
+.dashboard-category.flash-warning .dashboard-game-item {
+    background-color: transparent;
 }
 
 .dashboard-game-item:hover .title {
@@ -202,7 +213,7 @@
     align-items: center;
     justify-content: center;
     margin-left: var(--spacing-small);
-    margin-top: -12px;
+    margin-top: -11px;
 }
 
 /* Dashboard Game Activity Indicator - specific to dashboard */
@@ -214,8 +225,6 @@
     gap: 2px;
     padding: var(--spacing-extra-small);
     cursor: default;
-/*     border: 1px solid var(--color-grey-light); */
-    background: var(--color-white-lightest);
     min-width: 40px;
     border-radius: 2px;
     flex-shrink: 0;
@@ -240,8 +249,8 @@
 }
 
 .dashboard .activity-numbers {
-    font-size: var(--font-size-xsmall);
-    font-weight: 300;
+    font-size: var(--font-size-xxsmall);
+    font-weight: 200;
     color: var(--color-grey-dark);
     line-height: 1;
     text-align: center;
@@ -250,27 +259,33 @@
 
 /* Active state - when there's activity */
 .dashboard .game-activity-indicator.has-activity {
-    background: var(--color-accent-light);
-    border-color: var(--color-accent);
+    /* background: var(--color-secondary-dark); */
+    border-color: var(--color-love);
 }
 
 .dashboard .game-activity-indicator.has-activity svg path {
-    fill: var(--color-accent);
+    fill: var(--color-love);
 }
 
 .dashboard .game-activity-indicator.has-activity .activity-numbers {
-    color: var(--color-accent);
+    color: var(--color-love);
+    font-size: 8px;
     font-weight: 400;
 }
 
-/* No activity state - subtle appearance */
+/* No activity state - transparent but still takes up space */
 .dashboard .game-activity-indicator.no-activity {
-    background: var(--color-white-lightest);
-    border-color: var(--color-grey-light);
+    opacity: 0.3; /* Transparent when no activity */
+    pointer-events: none; /* Don't interfere with clicks */
+}
+
+.dashboard .game-activity-indicator.no-activity svg path {
+    fill: var(--color-grey-medium); /* Muted color */
 }
 
 .dashboard .game-activity-indicator.no-activity .activity-numbers {
-    opacity: 0.6;
+    opacity: 0.5;
+    color: var(--color-grey-medium);
 }
 
 /* Responsive Design */
@@ -404,5 +419,198 @@
     
     .dashboard .game-activity-indicator.has-activity .activity-numbers {
         color: var(--color-accent);
+    }
+}
+
+/* Flash warning animation - smooth and gradual */
+/* Applied to entire dashboard-category element (always visible) */
+/* Duration: 700ms (200ms warning + 500ms animation overlap) */
+.dashboard-category.flash-warning {
+    animation: flashWarning 0.7s ease-in-out;
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.2);
+}
+
+@keyframes flashWarning {
+    0% {
+        background-color: transparent;
+        box-shadow: 0 0 10px rgba(0, 123, 255, 0);
+    }
+    15% {
+        background-color: var(--color-primary-lightest);
+        box-shadow: 0 0 15px rgba(0, 123, 255, 0.3);
+    }
+    85% {
+        background-color: var(--color-primary-lightest);
+        box-shadow: 0 0 15px rgba(0, 123, 255, 0.3);
+    }
+    100% {
+        background-color: transparent;
+        box-shadow: 0 0 10px rgba(0, 123, 255, 0);
+    }
+}
+
+/* Dark mode flash */
+@media (prefers-color-scheme: dark) {
+    .dashboard-category.flash-warning {
+        animation: flashWarningDark 0.7s ease-in-out;
+        box-shadow: 0 0 10px rgba(255, 193, 7, 0.2);
+    }
+    
+    @keyframes flashWarningDark {
+        0% {
+            background-color: transparent;
+            box-shadow: 0 0 10px rgba(255, 193, 7, 0);
+        }
+        15% {
+            background-color: var(--color-accent-light);
+            box-shadow: 0 0 15px rgba(255, 193, 7, 0.3);
+        }
+        85% {
+            background-color: var(--color-accent-light);
+            box-shadow: 0 0 15px rgba(255, 193, 7, 0.3);
+        }
+        100% {
+            background-color: transparent;
+            box-shadow: 0 0 10px rgba(255, 193, 7, 0);
+        }
+    }
+}
+
+/* Entrance animation (fade in, slide in from left) */
+/* Opposite direction of removal animation (which goes left) */
+.dashboard-game-item.entering {
+    animation: entranceAnimation 0.5s ease;
+    /* Start invisible to prevent flash before animation */
+    opacity: 0;
+    transform: translateX(-20px);
+}
+
+@keyframes entranceAnimation {
+    0% {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Update animation (highlight flash) */
+.dashboard-game-item.updating {
+    animation: updateAnimation 0.5s ease;
+}
+
+@keyframes updateAnimation {
+    0%, 100% {
+        background-color: transparent;
+    }
+    50% {
+        background-color: var(--color-primary-lightest);
+    }
+}
+
+/* Dark mode update animation */
+@media (prefers-color-scheme: dark) {
+    @keyframes updateAnimation {
+        0%, 100% {
+            background-color: transparent;
+        }
+        50% {
+            background-color: var(--color-accent-light);
+        }
+    }
+}
+
+/* Removal animation (fade out, slide out) */
+.dashboard-game-item.removing {
+    animation: removalAnimation 0.5s ease forwards;
+}
+
+@keyframes removalAnimation {
+    0% {
+        opacity: 1;
+        transform: translateX(0);
+        max-height: 100px;
+        margin-bottom: 2px;
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-20px);
+        max-height: 0;
+        margin-bottom: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+}
+
+/* Count animation (number changes) */
+.category-title .count {
+    transition: all 0.3s ease;
+}
+
+.category-title .count.animating {
+    animation: countPulse 0.5s ease;
+}
+
+@keyframes countPulse {
+    0%, 100% {
+        transform: scale(1);
+        color: var(--color-grey-dark);
+    }
+    50% {
+        transform: scale(1.2);
+        color: var(--color-primary);
+        font-weight: 600;
+    }
+}
+
+/* Unread indicator animation (appear/disappear) */
+.unread-indicator {
+    animation: unreadAppear 0.3s ease;
+}
+
+@keyframes unreadAppear {
+    0% {
+        opacity: 0;
+        transform: scale(0);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.unread-indicator.removing {
+    animation: unreadDisappear 0.3s ease forwards;
+}
+
+@keyframes unreadDisappear {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0);
+    }
+}
+
+/* Category unread indicator animation */
+.category-title.has-unreads {
+    transition: all 0.3s ease;
+}
+
+.category-title.has-unreads.animating {
+    animation: unreadTitlePulse 0.5s ease;
+}
+
+@keyframes unreadTitlePulse {
+    0%, 100% {
+        color: var(--color-primary-dark);
+    }
+    50% {
+        color: var(--color-primary);
+        transform: scale(1.05);
     }
 }

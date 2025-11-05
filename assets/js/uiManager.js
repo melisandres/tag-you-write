@@ -1,5 +1,6 @@
 import { SVGManager } from './svgManager.js';
 import { ShowcaseManager } from './showcaseManager.js';
+import { eventBus } from './eventBus.js';
 
 export class UIManager {
   constructor(storyManager, modal) {
@@ -15,20 +16,6 @@ export class UIManager {
       this.stories = this.oneStory;
     }
     this.dataManager = window.dataManager;
-
-    // Listen for events from ShowcaseManager
-    eventBus.on('createShowcaseContainer', ({ rootStoryId, showcaseType }) => {
-      const container = this.createShowcaseContainer(rootStoryId);
-      if (showcaseType === 'tree') {
-        this.drawTree(rootStoryId, container);
-      } else if (showcaseType === 'shelf') {
-        this.drawShelf(rootStoryId, container);
-      } 
-    });
-
-    eventBus.on('showStoryInModal', (textId) => {
-      this.storyManager.showStoryInModal(textId);
-    });
 
     // Auto-open showcase on collab page if not already open
     this.autoOpenCollabShowcase();
@@ -58,12 +45,35 @@ export class UIManager {
   }
 
   initEventListeners() {
+    // Listen for SVG population requests via eventBus
+    eventBus.on('populateSvgs', (data) => {
+      if (Array.isArray(data.elements)) {
+        this.populateSvgs(data.elements);
+      } else if (data.container) {
+        this.populateSvgsInContainer(data.container);
+      }
+    });
+    
     // Checking for any UI changes comming from the ".stories" div 
-    const storiesContainer = document.querySelector('[data-stories]');
-    const oneStoryContainer = document.querySelector('[data-one-story]');
+/*     const storiesContainer = document.querySelector('[data-stories]');
+    const oneStoryContainer = document.querySelector('[data-one-story]'); */
 
-    storiesContainer ? storiesContainer.addEventListener('click', (event) => this.handleStoriesRefresh(event)) : "";
-    oneStoryContainer ? oneStoryContainer.addEventListener('click', (event) => this.handleStoriesRefresh(event)) : "";
+    this.stories ? this.stories.addEventListener('click', (event) => this.handleStoriesRefresh(event)) : "";
+    this.oneStory ? this.oneStory.addEventListener('click', (event) => this.handleStoriesRefresh(event)) : "";
+
+    // Listen for events from ShowcaseManager
+    eventBus.on('createShowcaseContainer', ({ rootStoryId, showcaseType }) => {
+      const container = this.createShowcaseContainer(rootStoryId);
+      if (showcaseType === 'tree') {
+        this.drawTree(rootStoryId, container);
+      } else if (showcaseType === 'shelf') {
+        this.drawShelf(rootStoryId, container);
+      } 
+    });
+
+    eventBus.on('showStoryInModal', (textId) => {
+      this.storyManager.showStoryInModal(textId);
+    });
   }
 
   handleStoriesRefresh(event) {

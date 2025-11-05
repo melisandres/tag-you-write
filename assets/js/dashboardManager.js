@@ -15,6 +15,13 @@ export class DashboardManager {
             return;
         }
         
+        // Animation timing constants (in milliseconds)
+        this.ANIMATION_DURATION = 500; // Duration for game element animations (entering/updating/removing)
+        this.FLASH_TO_ANIMATION_DELAY = 200; // Delay between flash start and animation start (warning time)
+        // Flash duration = delay + animation duration (so flash covers warning + animation)
+        this.FLASH_DURATION = this.FLASH_TO_ANIMATION_DELAY + this.ANIMATION_DURATION; // 700ms total
+        this.UNREAD_REMOVAL_DELAY = 300; // Delay before removing unread indicator element
+        
         // Initialize event listeners for dashboard-specific functionality
         this.initEventListeners();
         
@@ -46,7 +53,6 @@ export class DashboardManager {
                 gameIds.forEach((id) => this.removeGameFromDashboard(String(id)));
             }
         });
-        // Note: search/filter handling will decide view-removal events later
         
         // Listen for game activity changes (same as game list)
         eventBus.on('gameActivityChanged', (data) => this.handleGameActivityUpdate(data));
@@ -84,6 +90,7 @@ export class DashboardManager {
         if (!categoryGames || !toggle) return;
         
         const isCollapsed = categoryGames.classList.contains('collapsed');
+        const category = header.dataset.category;
         
         if (isCollapsed) {
             // Expand
@@ -94,6 +101,25 @@ export class DashboardManager {
             categoryGames.classList.add('collapsed');
             toggle.classList.add('collapsed');
         }
+    }
+    
+    /**
+     * Flash the category to warn user before a change
+     * Flashes the entire dashboard-category element (always visible)
+     */
+    flashCategory(category) {
+        const categoryElement = this.container.querySelector(`[data-category="${category}"]`);
+        if (!categoryElement) return;
+        
+        // Find the parent dashboard-category element
+        const dashboardCategory = categoryElement.closest('.dashboard-category');
+        if (!dashboardCategory) return;
+        
+        // Add flash class, remove after animation
+        dashboardCategory.classList.add('flash-warning');
+        setTimeout(() => {
+            dashboardCategory.classList.remove('flash-warning');
+        }, this.FLASH_DURATION);
     }
 
     /**
@@ -133,7 +159,6 @@ export class DashboardManager {
         window.location.href = url;
     }
 
-
     /**
      * Remove a game from the dashboard and update count
      */
@@ -146,9 +171,23 @@ export class DashboardManager {
             const categoryElement = gamesContainer ? gamesContainer.previousElementSibling : null;
             const category = categoryElement ? categoryElement.dataset.category : null;
             
-            gameElement.remove();
             if (category) {
-                this.updateCategoryCountByCategory(category);
+                // Flash category to warn user, then animate out
+                this.flashCategory(category);
+                setTimeout(() => {
+                    gameElement.classList.add('removing');
+                    
+                    // Update count when animation starts (count will decrement)
+                    this.updateCategoryCountByCategory(category);
+                    
+                    // Remove after animation
+                    setTimeout(() => {
+                        gameElement.remove();
+                    }, this.ANIMATION_DURATION);
+                }, this.FLASH_TO_ANIMATION_DELAY);
+            } else {
+                // No category found - remove directly
+                gameElement.remove();
             }
         });
         
@@ -178,29 +217,49 @@ export class DashboardManager {
             return;
         }
         
-        // Create and add game element
+        // Create element but don't add to DOM yet - add it after flash delay starts
         const gameElement = this.createGameElement(game);
-        gamesContainer.appendChild(gameElement);
         
-                    // Update count
-        this.updateCategoryCountByCategory(category);
+        // Flash category to warn user first
+        this.flashCategory(category);
+        
+        // After flash delay, add element and animate
+        setTimeout(() => {
+            // Add element to DOM (starts invisible, will animate in)
+            gamesContainer.appendChild(gameElement);
+            
+            // Start game animation and count update together
+            gameElement.classList.add('entering');
+            this.updateCategoryCountByCategory(category);
+            
+            setTimeout(() => {
+                gameElement.classList.remove('entering');
+            }, this.ANIMATION_DURATION);
+        }, this.FLASH_TO_ANIMATION_DELAY);
         
         console.log(`🎮 DashboardManager: Added game ${game.game_id} to category ${category}`);
     }
 
     /**
      * Update category count by delta (+1, -1, etc.)
+     * Category headers are always visible, so always animate count changes
      */
     updateCategoryCountByCategory(category) {
         const categoryElement = this.container.querySelector(`[data-category="${category}"]`);
         if (!categoryElement) return;
         
-                    const countElement = categoryElement.querySelector('.count');
+        const countElement = categoryElement.querySelector('.count');
         if (!countElement) return;
         
         // Get current count from DOM
         const gamesContainer = categoryElement.nextElementSibling;
-        const currentCount = gamesContainer ? gamesContainer.querySelectorAll('.dashboard-game-item').length : 0;
+        const currentCount = gamesContainer ? gamesContainer.querySelectorAll('.dashboard-game-item:not(.removing)').length : 0;
+        
+        // Category headers are always visible, so always animate count updates
+        countElement.classList.add('animating');
+        setTimeout(() => {
+            countElement.classList.remove('animating');
+        }, this.ANIMATION_DURATION);
         
         // Update count
         countElement.textContent = `(${currentCount})`;
@@ -210,18 +269,29 @@ export class DashboardManager {
 
     /**
      * Update category unread indicator
+     * Category headers are always visible, so always animate unread changes
      */
     updateCategoryUnread(category, hasUnreads) {
         const categoryElement = this.container.querySelector(`[data-category="${category}"]`);
         if (!categoryElement) return;
         
-                    const titleElement = categoryElement.querySelector('.category-title');
+        const titleElement = categoryElement.querySelector('.category-title');
         if (!titleElement) return;
         
+        const hadUnreads = titleElement.classList.contains('has-unreads');
+        
         if (hasUnreads) {
-                            titleElement.classList.add('has-unreads');
-                        } else {
-                            titleElement.classList.remove('has-unreads');
+            titleElement.classList.add('has-unreads');
+        } else {
+            titleElement.classList.remove('has-unreads');
+        }
+        
+        // Category headers are always visible, so always animate if state changed
+        if (hasUnreads !== hadUnreads) {
+            titleElement.classList.add('animating');
+            setTimeout(() => {
+                titleElement.classList.remove('animating');
+            }, this.ANIMATION_DURATION);
         }
         
         console.log(`🎮 DashboardManager: Updated unread for ${category}: ${hasUnreads}`);
@@ -253,9 +323,11 @@ export class DashboardManager {
 
     /**
      * Redraw all categories from categorized data
+     * This is called on filter/search changes - full redraw, no animations
      */
     redrawAllCategories(categorizedData) {
         if (!categorizedData) return;
+        
         Object.keys(categorizedData).forEach(sectionKey => {
             const section = categorizedData[sectionKey];
             Object.keys(section).forEach(subKey => {
@@ -287,8 +359,9 @@ export class DashboardManager {
         
         const title = game.title || window.i18n.translate('general.untitled');
         
-        // Activity indicators are not included initially - they will be added dynamically
-        // when activity updates come in via handleGameActivityUpdate()
+        // Create activity indicator placeholder (always present, transparent when no activity)
+        const activityIndicator = this.createActivityIndicator(game.game_id, 0, 0);
+        
         gameElement.innerHTML = `
             <div class="game-title">
                 <div class="unread-area">
@@ -298,9 +371,13 @@ export class DashboardManager {
             </div>
         `;
         
-        // Populate SVG icons (if any are present)
-        if (window.uiManager && window.uiManager.populateSvgs) {
-            window.uiManager.populateSvgs([gameElement]);
+        // Append activity indicator (always present, will be updated when activity changes)
+        gameElement.appendChild(activityIndicator);
+        
+        // Populate SVG icons via eventBus (includes activity indicator SVG)
+        const svgElements = gameElement.querySelectorAll('[data-svg]');
+        if (svgElements.length > 0) {
+            eventBus.emit('populateSvgs', { elements: Array.from(svgElements) });
         }
         
         return gameElement;
@@ -373,12 +450,50 @@ export class DashboardManager {
             return;
         }
         
-        // Move the game element to the new container
-        newGamesContainer.appendChild(gameElement);
-        
-        // Update counts for both old and new categories using surgical approach
-        this.updateCategoryCountByCategory(oldCategory);
-        this.updateCategoryCountByCategory(newCategory);
+        // Handle old category removal animation
+        if (oldCategory) {
+            // Flash old category to warn user, then animate out
+            this.flashCategory(oldCategory);
+            setTimeout(() => {
+                gameElement.classList.add('removing');
+                
+                // Update old category count when animation starts
+                this.updateCategoryCountByCategory(oldCategory);
+                
+                // Wait for animation, then move
+                setTimeout(() => {
+                    gameElement.classList.remove('removing');
+                    newGamesContainer.appendChild(gameElement);
+                    
+                    // Flash new category, wait, then animate in
+                    this.flashCategory(newCategory);
+                    setTimeout(() => {
+                        gameElement.classList.add('entering');
+                        // Update new category count when animation starts
+                        this.updateCategoryCountByCategory(newCategory);
+                        
+                        setTimeout(() => {
+                            gameElement.classList.remove('entering');
+                        }, this.ANIMATION_DURATION);
+                    }, this.FLASH_TO_ANIMATION_DELAY);
+                }, this.ANIMATION_DURATION);
+            }, this.FLASH_TO_ANIMATION_DELAY);
+        } else {
+            // No old category - just add to new category
+            newGamesContainer.appendChild(gameElement);
+            
+            // Flash new category, wait, then animate in
+            this.flashCategory(newCategory);
+            setTimeout(() => {
+                gameElement.classList.add('entering');
+                // Update count when animation starts
+                this.updateCategoryCountByCategory(newCategory);
+                
+                setTimeout(() => {
+                    gameElement.classList.remove('entering');
+                }, this.ANIMATION_DURATION);
+            }, this.FLASH_TO_ANIMATION_DELAY);
+        }
         
         console.log('🎮 DashboardManager: Successfully moved game between categories');
     }
@@ -388,26 +503,6 @@ export class DashboardManager {
      */
     handleGameAdded(game) {
         console.log('🎮 DashboardManager: handleGameAdded called with game:', game);
-        console.log('🎮 DashboardManager: Game category:', game.category);
-        console.log('🎮 DashboardManager: Game data:', {
-            game_id: game.game_id,
-            text_id: game.text_id,
-            title: game.title,
-            category: game.category // Use backend-provided category
-        });
-        
-        // Get updated categories (already rebuilt by DataManager)
-        const updatedCategories = this.dataManager.getDashboardData();
-        
-        // Instead of replacing all content, add the new game to the appropriate category
-        this.addNewGameToDashboard(game, updatedCategories);
-    }
-
-    /**
-     * Add a new game to the dashboard without replacing existing content
-     */
-    addNewGameToDashboard(game, categorizedData) {
-        console.log('🎮 DashboardManager: addNewGameToDashboard called with game:', game);
         
         // Use backend-provided category field (single source of truth)
         const gameCategory = game.category;
@@ -416,14 +511,9 @@ export class DashboardManager {
             return;
         }
         
-        console.log('🎮 DashboardManager: Game category:', gameCategory);
-        
-        // Use surgical add method
+        // Add the game to the appropriate category
         this.addGameToDashboard(game, gameCategory);
-        
-        console.log('🎮 DashboardManager: Successfully added new game to dashboard');
     }
-    
 
     /**
      * Update a specific game in the dashboard
@@ -431,6 +521,11 @@ export class DashboardManager {
     updateGameInDashboard(game) {
         const gameElement = this.container.querySelector(`[data-game-id="${game.game_id}"]`);
         if (!gameElement) return;
+        
+        // Get category for animation logic
+        const gamesContainer = gameElement.parentElement;
+        const categoryElement = gamesContainer ? gamesContainer.previousElementSibling : null;
+        const category = categoryElement ? categoryElement.dataset.category : null;
         
         // Update title
         const titleElement = gameElement.querySelector('.title');
@@ -450,24 +545,41 @@ export class DashboardManager {
                 unreadSpan.textContent = game.unseen_count;
                 unreadArea.appendChild(unreadSpan);
             } else {
+                const oldCount = parseInt(unreadElement.dataset.unreadCount || '0');
                 unreadElement.textContent = game.unseen_count;
                 unreadElement.dataset.unreadCount = game.unseen_count;
+                // Already has animation from CSS
             }
         } else if (unreadElement) {
-            unreadElement.remove();
+            // Animate out before removing
+            unreadElement.classList.add('removing');
+            setTimeout(() => {
+                unreadElement.remove();
+            }, this.UNREAD_REMOVAL_DELAY);
+        }
+        
+        // Handle animations - always flash and animate (even if container is hidden)
+        if (category) {
+            // Flash category, wait, then animate update
+            this.flashCategory(category);
+            setTimeout(() => {
+                gameElement.classList.add('updating');
+                setTimeout(() => {
+                    gameElement.classList.remove('updating');
+                }, this.ANIMATION_DURATION);
+            }, this.FLASH_TO_ANIMATION_DELAY);
         }
 
         // Also refresh category-level unread flag based on DataManager's categorized data
-        try {
-            const category = game.category;
-            if (category) {
+        if (category) {
+            try {
                 const [sectionKey, subKey] = category.split('.');
                 const categorized = this.dataManager.getDashboardData();
                 const hasUnreads = !!(categorized[sectionKey] && categorized[sectionKey][subKey] && categorized[sectionKey][subKey].hasUnreads);
                 this.updateCategoryUnread(category, hasUnreads);
+            } catch (e) {
+                console.warn('🎮 DashboardManager: Unable to update category unread flag after game update', e);
             }
-        } catch (e) {
-            console.warn('🎮 DashboardManager: Unable to update category unread flag after game update', e);
         }
     }
 
@@ -489,10 +601,8 @@ export class DashboardManager {
             <div class="activity-numbers">${browsing || 0}:${writing || 0}</div>
         `;
         
-        // Populate SVG icons
-        if (window.uiManager && window.uiManager.populateSvgs) {
-            window.uiManager.populateSvgs([indicator]);
-        }
+        // Note: SVG population happens after indicator is added to DOM (in handleGameActivityUpdate)
+        // This ensures the element is in the DOM before we try to populate it
         
         return indicator;
     }
@@ -532,34 +642,31 @@ export class DashboardManager {
         
         // Update ALL game elements with this game ID
         gameElements.forEach((gameElement, index) => {
-            const existingIndicator = gameElement.querySelector('.game-activity-indicator');
+            let existingIndicator = gameElement.querySelector('.game-activity-indicator');
             
-            if (hasActivity) {
-                // Activity exists - add or update indicator
-                if (existingIndicator) {
-                    // Update existing indicator
-                    const activityNumbers = existingIndicator.querySelector('.activity-numbers');
-                    if (activityNumbers) {
-                        const newText = `${browsing || 0}:${writing || 0}`;
-                        activityNumbers.textContent = newText;
-                    }
-                    
-                    // Update activity state classes
-                    existingIndicator.classList.toggle('has-activity', true);
-                    existingIndicator.classList.toggle('no-activity', false);
-                } else {
-                    // Create and add new indicator
-                    const newIndicator = this.createActivityIndicator(gameId, browsing, writing);
-                    gameElement.appendChild(newIndicator);
-                    console.log('🎮 DashboardManager: Added activity indicator to game element', index);
+            // If indicator doesn't exist, create it (shouldn't happen, but just in case)
+            if (!existingIndicator) {
+                existingIndicator = this.createActivityIndicator(gameId, browsing, writing);
+                gameElement.appendChild(existingIndicator);
+                
+                // Populate SVG for new indicator
+                const iconElement = existingIndicator.querySelector('.icon[data-svg]');
+                if (iconElement) {
+                    eventBus.emit('populateSvgs', { elements: [iconElement] });
                 }
             } else {
-                // No activity - remove indicator if it exists
-                if (existingIndicator) {
-                    existingIndicator.remove();
-                    console.log('🎮 DashboardManager: Removed activity indicator from game element', index);
+                // Update existing indicator
+                const activityNumbers = existingIndicator.querySelector('.activity-numbers');
+                if (activityNumbers) {
+                    activityNumbers.textContent = `${browsing || 0}:${writing || 0}`;
                 }
+                
+                // Update activity state classes
+                existingIndicator.classList.toggle('has-activity', hasActivity);
+                existingIndicator.classList.toggle('no-activity', !hasActivity);
             }
+            
+            console.log(`🎮 DashboardManager: Updated activity indicator for game element ${index} (activity: ${hasActivity})`);
         });
         
         console.log('🎮 DashboardManager: Updated', gameElements.length, 'activity indicators for game:', gameId);
