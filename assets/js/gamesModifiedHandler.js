@@ -2,8 +2,9 @@ import { PageTypeManager } from './pageTypeManager.js';
 
 export class GamesModifiedHandler {
     constructor() {
-        // Only activate on game list pages
-        if (PageTypeManager.getCurrentPageType() !== 'game_list') {
+        // Only activate on game list pages and collab pages
+        this.pageType = PageTypeManager.getCurrentPageType();
+        if (this.pageType !== 'game_list' && this.pageType !== 'collab_page') {
             return;
         }
         this.initializeEventListeners();
@@ -66,12 +67,13 @@ export class GamesModifiedHandler {
         
         if (String(newGame.hasContributed) !== String(oldGame.hasContributed)) {
             console.log(`Game ${newGame.game_id} contribution status changed from ${oldGame.hasContributed} to ${newGame.hasContributed}`);
-            eventBus.emit('gameContributionChanged', newGame);
+            eventBus.emit('gameContributionStatusChanged', newGame);
         }
     }
 
     handleGamesRemoved(gameIds) {
         console.log('GamesModifiedHandler: gamesRemoved event received:', gameIds);
+        if (this.pageType === 'collab_page') return;
         
         if (!Array.isArray(gameIds) || gameIds.length === 0) {
             console.warn('GamesModifiedHandler: No game IDs provided for removal');

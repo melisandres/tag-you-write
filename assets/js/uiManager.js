@@ -8,13 +8,13 @@ export class UIManager {
     this.modal = modal;
     this.SVGManager = SVGManager;
     this.showcaseManager = new ShowcaseManager();
-    this.initSvgs();
-    this.initEventListeners();
     this.stories = document.querySelector(".stories");
     this.oneStory = document.querySelector('[data-one-story]');
     if (!this.stories && this.oneStory){
       this.stories = this.oneStory;
     }
+    this.initSvgs();
+    this.initEventListeners();
     this.dataManager = window.dataManager;
 
     // Auto-open showcase on collab page if not already open

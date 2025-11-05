@@ -258,7 +258,13 @@ export class GameListUpdateManager {
     const gameElement = document.querySelector(`.story[data-game-id="${newGame.game_id}"]`);
     if (!gameElement) return;
     
-    const titleElement = gameElement.querySelector('.story-title h2 a');
+    const h2Element = gameElement.querySelector('.story-title h2');
+    if (!h2Element) return;
+    
+    // On game list pages, the title is inside an <a> tag; on collab pages it's directly in the <h2>
+    // We need to update the <a> if it exists, otherwise the <h2> itself
+    const titleLink = h2Element.querySelector('a');
+    const titleElement = titleLink || h2Element;
     if (!titleElement) return;
     
     // Update the title
@@ -313,8 +319,12 @@ export class GameListUpdateManager {
   reapplySearchHighlighting() {
     const activeSearch = window.dataManager.getSearch();
     if (activeSearch) {
+      const container = document.querySelector('[data-stories]') ? document.querySelector('[data-stories]') : document.querySelector('[data-one-story]');
+
+      if (!container) return;
+    
       eventBus.emit('highlightSearchMatches', {
-        container: document.querySelector('.stories'),
+        container: container,
         searchTerm: activeSearch
       });
     }
