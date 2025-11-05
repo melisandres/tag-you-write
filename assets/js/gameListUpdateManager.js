@@ -279,46 +279,34 @@ export class GameListUpdateManager {
   
   // New method to handle game activity updates
   handleGameActivityUpdate(activityData) {
-    console.log('🎮 GameListUpdateManager: handleGameActivityUpdate called with:', activityData);
-    
     const { gameId, browsing, writing } = activityData;
     const gameElement = document.querySelector(`.story[data-game-id="${gameId}"]`);
     
-    console.log('🎮 GameListUpdateManager: Looking for game element with gameId:', gameId);
-    console.log('🎮 GameListUpdateManager: Found game element:', !!gameElement);
-    
+    // Silently ignore if game not visible (normal when search/filters hide games)
     if (!gameElement) {
-      console.warn('🎮 GameListUpdateManager: No game element found for gameId:', gameId);
       return;
     }
     
     const activityIndicator = gameElement.querySelector('.game-activity-indicator');
-    console.log('🎮 GameListUpdateManager: Found activity indicator:', !!activityIndicator);
     
+    // Silently ignore if no activity indicator (shouldn't happen, but handle gracefully)
     if (!activityIndicator) {
-      console.warn('🎮 GameListUpdateManager: No activity indicator found in game element');
       return;
     }
     
     // Update activity numbers
     const activityNumbers = activityIndicator.querySelector('.activity-numbers');
-    console.log('🎮 GameListUpdateManager: Found activity numbers element:', !!activityNumbers);
-    
     if (activityNumbers) {
       const newText = `${browsing || 0}:${writing || 0}`;
-      console.log('🎮 GameListUpdateManager: Updating activity numbers from', activityNumbers.textContent, 'to', newText);
+
       activityNumbers.textContent = newText;
     }
     
     // Update activity state classes
     const hasActivity = (browsing > 0 || writing > 0);
-    console.log('🎮 GameListUpdateManager: hasActivity:', hasActivity, 'browsing:', browsing, 'writing:', writing);
     
     activityIndicator.classList.toggle('has-activity', hasActivity);
     activityIndicator.classList.toggle('no-activity', !hasActivity);
-    
-    console.log('🎮 GameListUpdateManager: Activity indicator classes after update:', Array.from(activityIndicator.classList));
-    console.log('🎮 GameListUpdateManager: Activity update completed for game:', gameId);
   }
 
   // New method to reapply search highlighting after updates

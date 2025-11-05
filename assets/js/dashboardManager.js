@@ -161,6 +161,86 @@ export class DashboardManager {
     }
 
     /**
+     * Animate a game element out of its category
+     * @param {HTMLElement} gameElement - The game element to animate out
+     * @param {string} category - The category the game is leaving
+     * @param {Function} onAnimationComplete - Callback after animation completes
+     * @param {Object} options - Optional: { showMessage: boolean, messageReason: string, messageCategory: string }
+     */
+    animateGameOut(gameElement, category, onAnimationComplete, options = {}) {
+        // Flash category to warn user first
+        this.flashCategory(category);
+        
+        setTimeout(() => {
+            // Show removal message if requested
+            if (options.showMessage) {
+                this.showRemovalMessage(gameElement, options.messageReason || 'filterMismatch', options.messageCategory || null);
+            }
+            
+            // Start removal animation
+            gameElement.classList.add('removing');
+            
+            // Update count when animation starts
+            this.updateCategoryCountByCategory(category);
+            
+            // Call callback after animation completes
+            setTimeout(() => {
+                if (onAnimationComplete) {
+                    onAnimationComplete();
+                }
+            }, this.ANIMATION_DURATION);
+        }, this.FLASH_TO_ANIMATION_DELAY);
+    }
+
+    /**
+     * Animate a game element into its category
+     * @param {HTMLElement} gameElement - The game element to animate in
+     * @param {HTMLElement} gamesContainer - The container to insert the game into
+     * @param {string} category - The category the game is entering
+     * @param {Function} onAnimationComplete - Callback after animation completes
+     */
+    animateGameIn(gameElement, gamesContainer, category, onAnimationComplete) {
+        // Flash category to warn user first
+        this.flashCategory(category);
+        
+        setTimeout(() => {
+            // Insert game in ordered position
+            this.insertGameInOrderedPosition(gameElement, gamesContainer);
+            
+            // Start entrance animation and update count together
+            gameElement.classList.add('entering');
+            this.updateCategoryCountByCategory(category);
+            
+            // Call callback after animation completes
+            setTimeout(() => {
+                gameElement.classList.remove('entering');
+                if (onAnimationComplete) {
+                    onAnimationComplete();
+                }
+            }, this.ANIMATION_DURATION);
+        }, this.FLASH_TO_ANIMATION_DELAY);
+    }
+
+    /**
+     * Insert a game element in the correct position based on sort order
+     * TODO: When sort functionality is implemented, check sort value here
+     * (e.g., from dataManager.getSort() or similar) to determine insertion position
+     * Currently defaults to "most recently updated first" (insert at top)
+     * 
+     * @param {HTMLElement} gameElement - The game element to insert
+     * @param {HTMLElement} gamesContainer - The container to insert into
+     */
+    insertGameInOrderedPosition(gameElement, gamesContainer) {
+        // TODO: Get sort preference (e.g., const sort = this.dataManager?.getSort() || 'recent')
+        // For now, default to "most recently updated first" (insert at top)
+        if (gamesContainer.firstChild) {
+            gamesContainer.insertBefore(gameElement, gamesContainer.firstChild);
+        } else {
+            gamesContainer.appendChild(gameElement);
+        }
+    }
+
+    /**
      * Remove a game from the dashboard and update count
      * Shows a message explaining why the game was removed
      */
@@ -174,28 +254,20 @@ export class DashboardManager {
             const category = categoryElement ? categoryElement.dataset.category : null;
             
             if (category) {
-                // Flash category to warn user, then animate out
-                this.flashCategory(category);
-                setTimeout(() => {
-                    // Show removal message before animating out
-                    this.showRemovalMessage(gameElement, reason, null);
-                    
-                    gameElement.classList.add('removing');
-                    
-                    // Update count when animation starts (count will decrement)
-                    this.updateCategoryCountByCategory(category);
-                    
+                // Animate out, then handle message and final removal
+                this.animateGameOut(gameElement, category, () => {
                     // After animation completes, keep message visible for readable duration
+                    // Transform game element to message-only state
+                    this.transformToMessageOnly(gameElement);
+                    
+                    // Remove message after readable duration
                     setTimeout(() => {
-                        // Transform game element to message-only state
-                        this.transformToMessageOnly(gameElement);
-                        
-                        // Remove message after readable duration
-                        setTimeout(() => {
-                            gameElement.remove();
-                        }, this.REMOVAL_MESSAGE_DURATION);
-                    }, this.ANIMATION_DURATION);
-                }, this.FLASH_TO_ANIMATION_DELAY);
+                        gameElement.remove();
+                    }, this.REMOVAL_MESSAGE_DURATION);
+                }, {
+                    showMessage: true,
+                    messageReason: reason
+                });
             } else {
                 // No category found - remove directly
                 gameElement.remove();
@@ -283,25 +355,11 @@ export class DashboardManager {
             return;
         }
         
-        // Create element but don't add to DOM yet - add it after flash delay starts
+        // Create element but don't add to DOM yet - will be added by animateGameIn
         const gameElement = this.createGameElement(game);
         
-        // Flash category to warn user first
-        this.flashCategory(category);
-        
-        // After flash delay, add element and animate
-        setTimeout(() => {
-            // Add element to DOM (starts invisible, will animate in)
-            gamesContainer.appendChild(gameElement);
-            
-            // Start game animation and count update together
-            gameElement.classList.add('entering');
-            this.updateCategoryCountByCategory(category);
-            
-            setTimeout(() => {
-                gameElement.classList.remove('entering');
-            }, this.ANIMATION_DURATION);
-        }, this.FLASH_TO_ANIMATION_DELAY);
+        // Animate game in
+        this.animateGameIn(gameElement, gamesContainer, category);
         
         console.log(`🎮 DashboardManager: Added game ${game.game_id} to category ${category}`);
     }
@@ -518,56 +576,26 @@ export class DashboardManager {
         
         // Handle old category removal animation
         if (oldCategory) {
-            // Flash old category to warn user, then animate out
-            this.flashCategory(oldCategory);
-            setTimeout(() => {
-                // Show removal message about category move
-                this.showRemovalMessage(gameElement, 'categoryMoved', newCategory);
+            // Animate out from old category with message
+            this.animateGameOut(gameElement, oldCategory, () => {
+                // After removal animation completes, remove message and move to new category
+                const messageElement = gameElement.querySelector('.removal-message');
+                if (messageElement) {
+                    messageElement.remove();
+                }
                 
-                gameElement.classList.add('removing');
+                gameElement.classList.remove('removing');
                 
-                // Update old category count when animation starts
-                this.updateCategoryCountByCategory(oldCategory);
-                
-                // Wait for animation, then move
-                setTimeout(() => {
-                    // Remove message element before moving (we'll show it in new location if needed)
-                    const messageElement = gameElement.querySelector('.removal-message');
-                    if (messageElement) {
-                        messageElement.remove();
-                    }
-                    
-                    gameElement.classList.remove('removing');
-                    newGamesContainer.appendChild(gameElement);
-                    
-                    // Flash new category, wait, then animate in
-                    this.flashCategory(newCategory);
-                    setTimeout(() => {
-                        gameElement.classList.add('entering');
-                        // Update new category count when animation starts
-                        this.updateCategoryCountByCategory(newCategory);
-                        
-                        setTimeout(() => {
-                            gameElement.classList.remove('entering');
-                        }, this.ANIMATION_DURATION);
-                    }, this.FLASH_TO_ANIMATION_DELAY);
-                }, this.ANIMATION_DURATION);
-            }, this.FLASH_TO_ANIMATION_DELAY);
+                // Animate into new category
+                this.animateGameIn(gameElement, newGamesContainer, newCategory);
+            }, {
+                showMessage: true,
+                messageReason: 'categoryMoved',
+                messageCategory: newCategory
+            });
         } else {
-            // No old category - just add to new category
-            newGamesContainer.appendChild(gameElement);
-            
-            // Flash new category, wait, then animate in
-            this.flashCategory(newCategory);
-            setTimeout(() => {
-                gameElement.classList.add('entering');
-                // Update count when animation starts
-                this.updateCategoryCountByCategory(newCategory);
-                
-                setTimeout(() => {
-                    gameElement.classList.remove('entering');
-                }, this.ANIMATION_DURATION);
-            }, this.FLASH_TO_ANIMATION_DELAY);
+            // No old category - just animate into new category
+            this.animateGameIn(gameElement, newGamesContainer, newCategory);
         }
         
         console.log('🎮 DashboardManager: Successfully moved game between categories');
@@ -686,33 +714,28 @@ export class DashboardManager {
      * Handle game activity updates - dynamically add/remove activity indicators
      */
     handleGameActivityUpdate(activityData) {
-        console.log('🎮 DashboardManager: handleGameActivityUpdate called with:', activityData);
-        
         const { gameId, browsing, writing } = activityData;
         
-        // Debug: Check if game exists in DataManager cache
+        // Check if game exists in cache first (most efficient check)
         const gameInCache = this.dataManager.cache.games.get(String(gameId));
-        console.log('🎮 DashboardManager: Game in cache:', !!gameInCache, gameInCache?.data);
-        
-        // Debug: List all visible games on dashboard
-        const allGameElements = this.container.querySelectorAll('.dashboard-game-item[data-game-id]');
-        const visibleGameIds = Array.from(allGameElements).map(el => el.dataset.gameId);
-        console.log('🎮 DashboardManager: Visible game IDs on dashboard:', visibleGameIds);
-        
-        // Look for ALL game containers with this game ID (games can appear in multiple categories)
-        const gameElements = this.container.querySelectorAll(`.dashboard-game-item[data-game-id="${gameId}"]`);
-        
-        if (gameElements.length === 0) {
-            console.warn('🎮 DashboardManager: No game elements found for gameId:', gameId);
-            console.warn('🎮 DashboardManager: This could mean:');
-            console.warn('  - Game was published but not yet added to dashboard');
-            console.warn('  - Game exists but is in a collapsed category');
-            console.warn('  - Game doesn\'t match current user\'s categories/permissions');
+        if (!gameInCache) {
+            // Game not in cache - this is normal when:
+            // - Game doesn't match current search/filters/categories
+            // - Game was removed from view
+            // Silently ignore (activity updates broadcast for all games, not just visible ones)
             return;
         }
         
-        console.log('🎮 DashboardManager: Found', gameElements.length, 'game elements for gameId:', gameId);
+        // Look for game elements in the DOM (games can appear in multiple categories)
+        const gameElements = this.container.querySelectorAll(`.dashboard-game-item[data-game-id="${gameId}"]`);
         
+        if (gameElements.length === 0) {
+            // Game is in cache but not visible - could be in collapsed category
+            // This is also normal, silently ignore
+            return;
+        }
+        
+        // Game is visible - update activity indicators
         const hasActivity = (browsing > 0 || writing > 0);
         
         // Update ALL game elements with this game ID
@@ -741,7 +764,6 @@ export class DashboardManager {
                 existingIndicator.classList.toggle('no-activity', !hasActivity);
             }
             
-            console.log(`🎮 DashboardManager: Updated activity indicator for game element ${index} (activity: ${hasActivity})`);
         });
         
         console.log('🎮 DashboardManager: Updated', gameElements.length, 'activity indicators for game:', gameId);
