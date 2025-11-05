@@ -21,6 +21,7 @@ export class DashboardManager {
         // Flash duration = delay + animation duration (so flash covers warning + animation)
         this.FLASH_DURATION = this.FLASH_TO_ANIMATION_DELAY + this.ANIMATION_DURATION; // 700ms total
         this.UNREAD_REMOVAL_DELAY = 300; // Delay before removing unread indicator element
+        this.REMOVAL_MESSAGE_DURATION = 3000; // How long to show removal message (3 seconds)
         
         // Initialize event listeners for dashboard-specific functionality
         this.initEventListeners();
@@ -161,8 +162,9 @@ export class DashboardManager {
 
     /**
      * Remove a game from the dashboard and update count
+     * Shows a message explaining why the game was removed
      */
-    removeGameFromDashboard(gameId) {
+    removeGameFromDashboard(gameId, reason = 'filterMismatch') {
         const gameElements = this.container.querySelectorAll(`[data-game-id="${gameId}"]`);
         
         gameElements.forEach(gameElement => {
@@ -175,14 +177,23 @@ export class DashboardManager {
                 // Flash category to warn user, then animate out
                 this.flashCategory(category);
                 setTimeout(() => {
+                    // Show removal message before animating out
+                    this.showRemovalMessage(gameElement, reason, null);
+                    
                     gameElement.classList.add('removing');
                     
                     // Update count when animation starts (count will decrement)
                     this.updateCategoryCountByCategory(category);
                     
-                    // Remove after animation
+                    // After animation completes, keep message visible for readable duration
                     setTimeout(() => {
-                        gameElement.remove();
+                        // Transform game element to message-only state
+                        this.transformToMessageOnly(gameElement);
+                        
+                        // Remove message after readable duration
+                        setTimeout(() => {
+                            gameElement.remove();
+                        }, this.REMOVAL_MESSAGE_DURATION);
                     }, this.ANIMATION_DURATION);
                 }, this.FLASH_TO_ANIMATION_DELAY);
             } else {
@@ -192,6 +203,61 @@ export class DashboardManager {
         });
         
         console.log(`🎮 DashboardManager: Removed game ${gameId} from dashboard`);
+    }
+    
+    /**
+     * Show a removal message in the game element
+     */
+    showRemovalMessage(gameElement, reason, newCategory = null) {
+        let messageKey;
+        let messageText;
+        let params = null;
+        
+        if (reason === 'categoryMoved' && newCategory) {
+            // Format category name for display
+            const [section, sub] = newCategory.split('.');
+            const categoryPath = section && sub ? `dashboard.${sub}` : 'dashboard.my_stories';
+            const categoryName = window.i18n.translate(categoryPath);
+            messageKey = 'general.gameMovedToCategory';
+            params = { category: categoryName };
+            messageText = window.i18n.translate(messageKey, params);
+        } else {
+            // Filter mismatch
+            messageKey = 'general.gameRemovedFilterMismatch';
+            messageText = window.i18n.translate(messageKey);
+        }
+        
+        // Create message element
+        const messageElement = document.createElement('div');
+        messageElement.className = 'removal-message';
+        messageElement.setAttribute('data-i18n', messageKey);
+        if (params) {
+            messageElement.setAttribute('data-i18n-params', JSON.stringify(params));
+        }
+        messageElement.textContent = messageText;
+        
+        // Add to game element (will be visible during animation)
+        gameElement.appendChild(messageElement);
+    }
+    
+    /**
+     * Transform game element to message-only state after animation
+     */
+    transformToMessageOnly(gameElement) {
+        // Hide all content except the message
+        const allChildren = Array.from(gameElement.children);
+        allChildren.forEach(child => {
+            if (!child.classList.contains('removal-message')) {
+                child.style.display = 'none';
+            }
+        });
+        
+        // Make the message element prominent
+        gameElement.classList.add('removal-message-only');
+        
+        // Adjust styling to make message visible
+        gameElement.style.minHeight = 'auto';
+        gameElement.style.padding = 'var(--spacing-small) var(--spacing-medium)';
     }
 
     /**
@@ -455,6 +521,9 @@ export class DashboardManager {
             // Flash old category to warn user, then animate out
             this.flashCategory(oldCategory);
             setTimeout(() => {
+                // Show removal message about category move
+                this.showRemovalMessage(gameElement, 'categoryMoved', newCategory);
+                
                 gameElement.classList.add('removing');
                 
                 // Update old category count when animation starts
@@ -462,6 +531,12 @@ export class DashboardManager {
                 
                 // Wait for animation, then move
                 setTimeout(() => {
+                    // Remove message element before moving (we'll show it in new location if needed)
+                    const messageElement = gameElement.querySelector('.removal-message');
+                    if (messageElement) {
+                        messageElement.remove();
+                    }
+                    
                     gameElement.classList.remove('removing');
                     newGamesContainer.appendChild(gameElement);
                     

@@ -535,12 +535,67 @@
         margin-bottom: 2px;
     }
     100% {
+        opacity: 0.5; /* Keep visible so message shows */
+        transform: translateX(-15px); /* Less movement to keep message readable */
+        max-height: 70px; /* Keep height for message */
+        margin-bottom: 2px;
+    }
+}
+
+/* Message-only state after removal animation */
+.dashboard-game-item.removal-message-only {
+    opacity: 1 !important; /* Override removal animation opacity */
+    transform: translateX(0) !important; /* Reset transform */
+    max-height: 70px !important;
+    background-color: var(--color-primary-lightest);
+    border-left: 3px solid var(--color-primary);
+    animation: messageFadeIn 0.3s ease;
+    margin-bottom: 2px;
+}
+
+@keyframes messageFadeIn {
+    0% {
+        opacity: 0.3;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+/* Removal message styling */
+.dashboard-game-item .removal-message {
+    font-size: var(--font-size-xsmall);
+    color: var(--color-grey-dark);
+    font-style: italic;
+    padding: var(--spacing-extra-small) 0;
+    line-height: 1.4;
+    opacity: 0;
+    animation: messageAppear 0.3s ease 0.5s forwards; /* Appear during removal animation */
+}
+
+@keyframes messageAppear {
+    0% {
         opacity: 0;
-        transform: translateX(-20px);
-        max-height: 0;
-        margin-bottom: 0;
-        padding-top: 0;
-        padding-bottom: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.dashboard-game-item.removal-message-only .removal-message {
+    opacity: 1;
+    animation: none;
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .dashboard-game-item.removal-message-only {
+        background-color: var(--color-greyscale-dark);
+        border-left-color: var(--color-accent);
+    }
+    
+    .dashboard-game-item .removal-message {
+        color: var(--color-greyscale-lightest);
     }
 }
 
