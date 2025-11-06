@@ -1,0 +1,70 @@
+/* Dev Mode Toggle Styles */
+/* All base styles inherited from nav-link.css */
+
+nav .nav-link.dev-mode-toggle .current-privilege {
+    padding: 0;
+    cursor: pointer;
+    border-radius: 3px;
+    font-size: 0.7em;
+    text-transform: uppercase;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    pointer-events: auto;
+}
+
+nav .nav-link.dev-mode-toggle .current-privilege:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-link.dev-mode-toggle .dev-mode-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: #333;
+    border-radius: 3px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    display: none;
+    min-width: 150px;
+    z-index: 10;
+}
+
+.nav-link.dev-mode-toggle.open .dev-mode-dropdown {
+    display: block;
+}
+
+nav .nav-link.dev-mode-toggle .dev-mode-dropdown a {
+    padding: 8px 12px;
+    display: block;
+    font-size: 0.7em;
+    color: #fff;
+    white-space: nowrap;
+    cursor: pointer;
+    border-bottom: 1px solid #444;
+}
+
+.nav-link.dev-mode-toggle .dev-mode-dropdown a:last-child {
+    border-bottom: none;
+}
+
+.nav-link.dev-mode-toggle .dev-mode-dropdown a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-link.dev-mode-toggle .dev-mode-dropdown a.active {
+    font-weight: bold;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Overflow menu styles - similar to language switcher */
+.overflow-menu .nav-link.dev-mode-toggle.active .current-privilege {
+    background-color: var(--color-love, #ff69b4);
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+

@@ -135,6 +135,22 @@
                         <input type="hidden" name="joinable_by_all" value="{{ data.joinable_by_all|default('1') }}">
                     </div>
                 </div>
+                
+                <!-- Test Game Settings (Admin/Dev only) -->
+                {% if session.privilege == 1 %}
+                <div class="toggle-setting">
+                    <span class="setting-label" data-i18n="game_settings.test_game_settings">
+                        {{ translate('game_settings.test_game_settings') }}
+                    </span>
+                    <div class="test-game-select">
+                        <select name="is_test" id="is_test_select">
+                            <option value="" {% if not data.is_test %}selected{% endif %} data-i18n="game_settings.production_game">{{ translate('game_settings.production_game') }}</option>
+                            <option value="dev" {% if data.is_test == 'dev' %}selected{% endif %} data-i18n="game_settings.dev_test_game">{{ translate('game_settings.dev_test_game') }}</option>
+                            <option value="beta" {% if data.is_test == 'beta' %}selected{% endif %} data-i18n="game_settings.beta_test_game">{{ translate('game_settings.beta_test_game') }}</option>
+                        </select>
+                    </div>
+                </div>
+                {% endif %}
             </div>
         </div>
         <label>

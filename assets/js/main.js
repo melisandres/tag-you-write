@@ -58,6 +58,7 @@ import { ResponsiveNavManager } from './responsiveNavManager.js';
 import { UniversalSubmenuManager } from './universalSubmenuManager.js';
 import { SVGManager } from './svgManager.js';
 import { TextSwitcherManager } from './textSwitcherManager.js';
+import { DevModeManager } from './devModeManager.js';
 
 // Make eventBus globally available immediately
 window.eventBus = eventBus;
@@ -221,6 +222,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Initialize UniversalSubmenuManager
   window.universalSubmenuManager = new UniversalSubmenuManager();
+
+  // Initialize DevModeManager (for admin privilege toggle)
+  new DevModeManager();
 
   // Initialize CurrentActivityManager
   window.currentActivityManager = new CurrentActivityManager();

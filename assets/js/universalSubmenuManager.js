@@ -34,6 +34,11 @@ export class UniversalSubmenuManager {
                     trigger: '.tutorial-switcher', 
                     submenu: '.tutorial-dropdown',
                     items: 'a[data-tutorial]'
+                },
+                'devMode': {
+                    trigger: '.dev-mode-toggle',
+                    submenu: '.dev-mode-dropdown',
+                    items: 'a[data-privilege]'
                 }
             }
         });
@@ -51,6 +56,11 @@ export class UniversalSubmenuManager {
                     trigger: '.tutorial-switcher',
                     submenu: '.tutorial-submenu', 
                     items: 'a[data-tutorial]'
+                },
+                'devMode': {
+                    trigger: '.dev-mode-toggle',
+                    submenu: '.dev-mode-submenu',
+                    items: 'a[data-privilege]'
                 }
             }
         });
@@ -109,7 +119,7 @@ export class UniversalSubmenuManager {
             }
             
             // Check for clicks on icon elements
-            const iconElements = document.querySelectorAll(`${config.trigger} .current-language, ${config.trigger} .current-tutorial`);
+            const iconElements = document.querySelectorAll(`${config.trigger} .current-language, ${config.trigger} .current-tutorial, ${config.trigger} .current-privilege`);
             for (const icon of iconElements) {
                 if (icon.contains(e.target)) {
                     console.log(`UniversalSubmenuManager: ${submenuType} icon clicked in overflow (capture)`);
@@ -332,6 +342,14 @@ export class UniversalSubmenuManager {
                 detail: { tutorial: tutorial }
             });
             document.dispatchEvent(event);
+        } else if (type === 'devMode') {
+            const privilegeId = item.getAttribute('data-privilege');
+            console.log(`UniversalSubmenuManager: Dispatching dev mode privilege change: ${privilegeId}`);
+            
+            const event = new CustomEvent('submenu:devMode:selected', {
+                detail: { privilege_id: privilegeId }
+            });
+            document.dispatchEvent(event);
         }
     }
 
@@ -360,7 +378,7 @@ export class UniversalSubmenuManager {
             content.classList.remove('submenu-active');
             
             // Remove active classes from all submenu triggers
-            const triggers = content.querySelectorAll('.nav-link.language-switcher, .nav-link.tutorial-switcher');
+            const triggers = content.querySelectorAll('.nav-link.language-switcher, .nav-link.tutorial-switcher, .nav-link.dev-mode-toggle');
             triggers.forEach(trigger => {
                 trigger.classList.remove('active');
             });

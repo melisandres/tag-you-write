@@ -153,7 +153,11 @@
     "joinable_by_invited": "invitees only",
     "joinable_by_invited_description": "Only invited people can contribute to this collaboration",
     "access_control": "Access Control",
-    "collaboration_settings": "Collaboration Settings"
+    "collaboration_settings": "Collaboration Settings",
+    "test_game_settings": "test game type",
+    "production_game": "Production",
+    "dev_test_game": "Dev Test",
+    "beta_test_game": "Beta Test"
   },
   "note-edit": {
     "here_is_what_you_wrote": "Here's your text: ",

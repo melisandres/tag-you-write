@@ -85,6 +85,64 @@ class ControllerUser extends Controller {
             ]);
         };
     }
+
+    /**
+     * Toggle test privilege for dev mode testing
+     * Only available to admin/dev users (privilege_id = 1)
+     * Allows switching between privilege levels for testing purposes
+     */
+    public function toggleTestPrivilege() {
+        // Check if user is authenticated
+        if (!isset($_SESSION['writer_id'])) {
+            http_response_code(401);
+            echo json_encode(['error' => 'User not authenticated']);
+            return;
+        }
+
+        // Check if user is admin/dev (only they can use this feature)
+        if (!isset($_SESSION['privilege']) || $_SESSION['privilege'] != 1) {
+            http_response_code(403);
+            echo json_encode(['error' => 'Access denied. Admin privileges required.']);
+            return;
+        }
+
+        // Get JSON input
+        $input = json_decode(file_get_contents('php://input'), true);
+        
+        if (!$input || !isset($input['privilege_id'])) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid input. privilege_id required.']);
+            return;
+        }
+
+        $privilegeId = (int)$input['privilege_id'];
+        
+        // Validate privilege_id (must be 1, 2, or 4)
+        $validPrivileges = [1, 2, 4]; // admin, regular user, beta tester
+        if (!in_array($privilegeId, $validPrivileges)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid privilege_id. Must be 1 (admin), 2 (regular), or 4 (beta tester).']);
+            return;
+        }
+
+        // If setting to actual privilege (1), remove test_privilege (use real privilege)
+        if ($privilegeId == $_SESSION['privilege']) {
+            unset($_SESSION['test_privilege']);
+        } else {
+            // Set test privilege for testing
+            $_SESSION['test_privilege'] = $privilegeId;
+        }
+
+        // Return success with current effective privilege
+        RequirePage::library('Permissions');
+        $effectivePrivilege = Permissions::getEffectivePrivilege();
+        
+        echo json_encode([
+            'success' => true,
+            'privilege_id' => $effectivePrivilege,
+            'is_test_mode' => isset($_SESSION['test_privilege'])
+        ]);
+    }
 }
 
 ?>

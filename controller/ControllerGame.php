@@ -10,6 +10,18 @@ class ControllerGame extends Controller {
     public function index(){
     }
 
+    /**
+     * Auto-set is_test for beta testers
+     * TODO: Remove this method when beta testing ends
+     * This automatically sets is_test = 'beta' for users with beta_tester privilege
+     */
+    private function autoSetBetaTestGame(&$data) {
+        // Only auto-set if user is beta tester and is_test not already set
+        if (!isset($data['is_test']) && isset($_SESSION['privilege']) && $_SESSION['privilege'] == 4) {
+            $data['is_test'] = 'beta';
+        }
+    }
+
     public function createGame($data) {
         $game = new Game;
         
@@ -17,10 +29,31 @@ class ControllerGame extends Controller {
         $visibleToAll = isset($data['visible_to_all']) ? (int)$data['visible_to_all'] : 1; // Default: visible to all
         $joinableByAll = isset($data['joinable_by_all']) ? (int)$data['joinable_by_all'] : 1; // Default: joinable by all
         
+        // Auto-set is_test for beta testers (if not already set by admin)
+        $this->autoSetBetaTestGame($data);
+        
+        // Handle is_test parameter (NULL, 'dev', or 'beta')
+        $isTest = null;
+        if (isset($data['is_test'])) {
+            $isTestValue = $data['is_test'];
+            // Validate: must be NULL, 'dev', or 'beta'
+            if ($isTestValue === 'dev' || $isTestValue === 'beta') {
+                $isTest = $isTestValue;
+            } elseif ($isTestValue === null || $isTestValue === '') {
+                $isTest = null; // Production game
+            } else {
+                // Invalid value, log warning and default to NULL
+                error_log("Invalid is_test value: " . $isTestValue . ". Defaulting to NULL (production game).");
+                $isTest = null;
+            }
+        }
+        // Default: NULL (production game) if not provided
+        
         $gameData = [
             'prompt' => $data['prompt'],
             'visible_to_all' => $visibleToAll,
-            'joinable_by_all' => $joinableByAll
+            'joinable_by_all' => $joinableByAll,
+            'is_test' => $isTest
         ];
 
         $gameId = $game->insert($gameData);

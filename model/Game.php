@@ -1,5 +1,6 @@
 <?php
  require_once('Crud.php');
+ require_once(__DIR__ . '/../library/Permissions.php');
 
  class Game extends Crud{
    public $table = 'game';
@@ -11,6 +12,7 @@
                         'open_for_changes',
                         'joinable_by_all',
                         'visible_to_all',
+                        'is_test',
                         'winner',
                         'mvp',
                         'public',
@@ -19,6 +21,10 @@
 
    public function getGames($order = null, $filters = [], $id = null, $searchTerm = null, $category = null, $showcaseRootStoryId = null) {
       $loggedInWriterId = isset($_SESSION['writer_id']) ? $_SESSION['writer_id'] : "";
+      
+      // Check user privilege for test game filtering
+      $isDevOrAdmin = Permissions::isDevOrAdmin();
+      $isBetaTester = Permissions::isBetaTester();
       
       // Extract tokens from session
       $tokens = [];
@@ -120,7 +126,7 @@
          }
       }
 
-      // Build token condition for the main WHERE clause
+      // Build token condition for the main WHERE clause (also used in test game filter)
       $tokenCondition = "";
       if (!empty($tokens)) {
          $tokenPlaceholders = [];
@@ -130,11 +136,45 @@
          $tokenCondition = "EXISTS (SELECT 1 FROM game_invitation gi WHERE gi.game_id = g.id AND gi.token IN (" . implode(', ', $tokenPlaceholders) . ") AND gi.status IN ('pending', 'accepted'))";
       }
 
+      // Build test game filter condition (outside of main query for clarity)
+      // Now that $tokenCondition is available, we can build the test game filter
+      $testGameFilter = "";
+      if (!$isDevOrAdmin) {
+         // Build invitation/access condition (used in test game filter)
+         $invitationAccessCondition = "(
+            -- User is a player in this game
+            (:loggedInWriterId != '' AND EXISTS (SELECT 1 FROM game_has_player ghp_test WHERE ghp_test.game_id = g.id AND ghp_test.player_id = :loggedInWriterId))
+            OR 
+            -- User has an invitation for this game (by user ID)
+            (:loggedInWriterId != '' AND EXISTS (SELECT 1 FROM game_invitation gi_test WHERE gi_test.game_id = g.id AND gi_test.invitee_id = :loggedInWriterId AND gi_test.status IN ('pending', 'accepted')))
+            " . (!empty($tokens) ? "OR
+            -- User has a token for this game (by token)
+            $tokenCondition" : "") . "
+         )";
+         
+         if ($isBetaTester) {
+            // Beta tester: can see production games OR 'beta' test games OR games they're invited to
+            $testGameFilter = "AND (
+               g.is_test IS NULL 
+               OR g.is_test = 'beta'
+               OR $invitationAccessCondition
+            )";
+         } else {
+            // Regular user: can see production games OR games they're invited to
+            $testGameFilter = "AND (
+               g.is_test IS NULL 
+               OR $invitationAccessCondition
+            )";
+         }
+      }
+      // Admin/dev: no test game filter (see all games)
+
       // Build the base query (always the same)
       $baseQuery = "SELECT  g.id AS game_id, 
                         g.prompt,
                         g.open_for_changes AS openForChanges,
                         g.visible_to_all,
+                        g.is_test,
                         g.joinable_by_all,
                         g.modified_at,
                         rt.id AS id,
@@ -189,6 +229,7 @@
                   LEFT JOIN seen s ON t.id = s.text_id AND s.writer_id = :loggedInWriterId
                   LEFT JOIN bookmark b ON rt.id = b.text_id AND b.writer_id = :loggedInWriterId
                   WHERE 1=1 
+                  $testGameFilter
                   AND (
                      g.visible_to_all = 1 
                      OR (
@@ -348,6 +389,10 @@
    public function getModifiedSince($lastCheck, $filters = [], $searchTerm = null, $category = null, $showcaseRootStoryId = null, $id = null) {
       $loggedInWriterId = isset($_SESSION['writer_id']) ? $_SESSION['writer_id'] : "";
       
+      // Check user privilege for test game filtering
+      $isDevOrAdmin = Permissions::isDevOrAdmin();
+      $isBetaTester = Permissions::isBetaTester();
+      
       // Extract tokens from session
       $tokens = [];
       if (isset($_SESSION['game_invitation_access'])) {
@@ -446,7 +491,7 @@
          }
       }
 
-      // Build token condition for the main WHERE clause
+      // Build token condition for the main WHERE clause (also used in test game filter)
       $tokenCondition = "";
       if (!empty($tokens)) {
          $tokenPlaceholders = [];
@@ -456,12 +501,46 @@
          $tokenCondition = "EXISTS (SELECT 1 FROM game_invitation gi WHERE gi.game_id = g.id AND gi.token IN (" . implode(', ', $tokenPlaceholders) . ") AND gi.status IN ('pending', 'accepted'))";
       }
 
+      // Build test game filter condition (outside of main query for clarity)
+      // Now that $tokenCondition is available, we can build the test game filter
+      $testGameFilter = "";
+      if (!$isDevOrAdmin) {
+         // Build invitation/access condition (used in test game filter)
+         $invitationAccessCondition = "(
+            -- User is a player in this game
+            (:loggedInWriterId != '' AND EXISTS (SELECT 1 FROM game_has_player ghp_test WHERE ghp_test.game_id = g.id AND ghp_test.player_id = :loggedInWriterId))
+            OR 
+            -- User has an invitation for this game (by user ID)
+            (:loggedInWriterId != '' AND EXISTS (SELECT 1 FROM game_invitation gi_test WHERE gi_test.game_id = g.id AND gi_test.invitee_id = :loggedInWriterId AND gi_test.status IN ('pending', 'accepted')))
+            " . (!empty($tokens) ? "OR
+            -- User has a token for this game (by token)
+            $tokenCondition" : "") . "
+         )";
+         
+         if ($isBetaTester) {
+            // Beta tester: can see production games OR 'beta' test games OR games they're invited to
+            $testGameFilter = "AND (
+               g.is_test IS NULL 
+               OR g.is_test = 'beta'
+               OR $invitationAccessCondition
+            )";
+         } else {
+            // Regular user: can see production games OR games they're invited to
+            $testGameFilter = "AND (
+               g.is_test IS NULL 
+               OR $invitationAccessCondition
+            )";
+         }
+      }
+      // Admin/dev: no test game filter (see all games)
+
       // Build the base query (always the same)
       $baseQuery = "SELECT g.id AS game_id, 
                      g.prompt,
                      g.modified_at,
                      g.open_for_changes AS openForChanges,
                      g.visible_to_all,
+                     g.is_test,
                      g.joinable_by_all,
                      rt.id AS id,
                      rt.title AS title,
@@ -514,6 +593,7 @@
             LEFT JOIN seen s ON t.id = s.text_id AND s.writer_id = :loggedInWriterId
             LEFT JOIN bookmark b ON rt.id = b.text_id AND b.writer_id = :loggedInWriterId
             WHERE CAST(g.modified_at AS DATETIME) > CAST(:lastCheck AS DATETIME)
+            $testGameFilter
             AND (
                g.visible_to_all = 1 
                OR (

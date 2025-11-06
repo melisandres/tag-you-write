@@ -120,13 +120,28 @@
                 {{ translate('nav.notifications') }}
             </span>
         </a>
-        {% if session.privilege == 1 %}
+        {% if session.privilege == 3 %}
             <a class="nav-link writers" data-item="journal" href="{{ langUrl('journal') }}">
                 <span class="icon" data-svg="journal" data-i18n-title="nav.journal_tooltip" title="{{ translate('nav.journal_tooltip') }}"></span>
                 <span class="nav-text" data-i18n="nav.journal">
                     {{ translate('nav.journal') }}
                 </span>
             </a>
+        {% endif %}
+        {% if session.privilege == 1 %}
+            <div class="nav-link dev-mode-toggle" data-item="devMode" data-i18n-title="nav.dev_mode_tooltip" title="{{ translate('nav.dev_mode_tooltip') }}">
+                <div class="current-privilege">
+                    {% if session.test_privilege == 2 %}REG{% elseif session.test_privilege == 4 %}BETA{% else %}ADM{% endif %}
+                </div>
+                <div class="nav-text" data-i18n="nav.dev_mode">
+                    {{ translate('nav.dev_mode') }}
+                </div>
+                <div class="dev-mode-dropdown">
+                    <a data-privilege="1" class="{% if not session.test_privilege or session.test_privilege == 1 %}active{% endif %}" data-i18n="nav.dev_mode_admin">Admin</a>
+                    <a data-privilege="2" class="{% if session.test_privilege == 2 %}active{% endif %}" data-i18n="nav.dev_mode_regular">Regular User</a>
+                    <a data-privilege="4" class="{% if session.test_privilege == 4 %}active{% endif %}" data-i18n="nav.dev_mode_beta">Beta Tester</a>
+                </div>
+            </div>
         {% endif %}
         
         {# Header Activity Indicator #}
@@ -305,6 +320,18 @@
                     </span>
                 </a>
             </div>
+
+            <!-- Dev Mode Toggle (for admin) -->
+            <div class="overflow-menu-item">
+                <div class="nav-link dev-mode-toggle" data-item="devMode" data-i18n-title="nav.dev_mode_tooltip" title="{{ translate('nav.dev_mode_tooltip') }}">
+                    <div class="current-privilege">
+                        {% if session.test_privilege == 2 %}REG{% elseif session.test_privilege == 4 %}BETA{% else %}ADM{% endif %}
+                    </div>
+                    <div class="nav-text" data-i18n="nav.dev_mode">
+                        {{ translate('nav.dev_mode') }}
+                    </div>
+                </div>
+            </div>
             {% endif %}
         {% endif %}
             <!-- About Link -->
@@ -347,6 +374,16 @@
                     <a data-tutorial="contribute" data-i18n="nav.tutorial_contribute">{{ translate('nav.tutorial_contribute') }}</a>
                     <a data-tutorial="vote" data-i18n="nav.tutorial_vote">{{ translate('nav.tutorial_vote') }}</a>
                 </div>
+                
+                <!-- Dev Mode Submenu (for admin) -->
+                {% if session.privilege == 1 %}
+                <div class="submenu-content dev-mode-submenu" data-submenu="devMode">
+                    <h3 data-i18n="nav.dev_mode">{{ translate('nav.dev_mode') }}</h3>
+                    <a data-privilege="1" class="{% if not session.test_privilege or session.test_privilege == 1 %}active{% endif %}" data-i18n="nav.dev_mode_admin">{{ translate('nav.dev_mode_admin') }}</a>
+                    <a data-privilege="2" class="{% if session.test_privilege == 2 %}active{% endif %}" data-i18n="nav.dev_mode_regular">{{ translate('nav.dev_mode_regular') }}</a>
+                    <a data-privilege="4" class="{% if session.test_privilege == 4 %}active{% endif %}" data-i18n="nav.dev_mode_beta">{{ translate('nav.dev_mode_beta') }}</a>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>

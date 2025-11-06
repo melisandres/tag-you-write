@@ -15,29 +15,37 @@ class Permissions {
             return true;
         }
 
-        $joinableByAll = (bool)$data['joinable_by_all'];
+        // Check if user is a player or has invitation first (they should have access regardless of test status)
+        if ($currentUserId !== null) {
+            $hasContributed = isset($data['hasContributed']) ? (bool)$data['hasContributed'] : false;
+            $hasInvitation = isset($data['hasInvitation']) ? (bool)$data['hasInvitation'] : false;
+            
+            // If user is already a player or has invitation, they have access
+            if ($hasContributed || $hasInvitation) {
+                return true;
+            }
+        }
+
+        // Check is_test status (test game visibility based on privilege)
+        $isTest = isset($data['is_test']) ? $data['is_test'] : null;
+        if (!empty($isTest)) {
+            // This is a test game - check if user has privilege to see it
+            if (!self::canViewTestGame($isTest)) {
+                // User doesn't have privilege to see this test game level
+                // (They would have been filtered out in the query, but this is a safety check)
+                return false;
+            }
+        }
+
+        // Check visible_to_all (standard visibility check)
         $visibleToAll = (bool)$data['visible_to_all'];
-        
-        // If game is visible to all, user has access
         if ($visibleToAll) {
             return true;
         }
         
-        // If game is not visible to all, user must be a player or have invitation
+        // If game is not visible to all and user is not a player/has no invitation, deny access
         if ($currentUserId === null) {
             return false;
-        }
-        
-        // Check if user is a player in this game
-        $hasContributed = isset($data['hasContributed']) ? (bool)$data['hasContributed'] : false;
-        if ($hasContributed) {
-            return true;
-        }
-        
-        // Check if user has an invitation to this game
-        $hasInvitation = isset($data['hasInvitation']) ? (bool)$data['hasInvitation'] : false;
-        if ($hasInvitation) {
-            return true;
         }
         
         return false;
@@ -204,6 +212,71 @@ class Permissions {
             'canJoinGame' => self::canJoinGame($data, $currentUserId)
         ];
         return $data;
+    }
+
+    /**
+     * Get the effective privilege ID for the current user
+     * Checks test_privilege session var first (for dev mode toggle), then actual privilege
+     * 
+     * @return int Privilege ID (1=admin, 2=writer, 3=editor, 4=beta_tester, 0=guest)
+     */
+    public static function getEffectivePrivilege() {
+        // Check for dev mode test privilege first (for Step 8: dev mode toggle)
+        if (isset($_SESSION['test_privilege'])) {
+            return (int)$_SESSION['test_privilege'];
+        }
+        
+        // Otherwise use actual privilege
+        return isset($_SESSION['privilege']) ? (int)$_SESSION['privilege'] : 0;
+    }
+
+    /**
+     * Check if current user is admin/dev (privilege_id = 1)
+     * Supports dev mode toggle via test_privilege session var
+     * 
+     * @return bool
+     */
+    public static function isDevOrAdmin() {
+        return self::getEffectivePrivilege() == 1;
+    }
+
+    /**
+     * Check if current user is beta tester (privilege_id = 4)
+     * Supports dev mode toggle via test_privilege session var
+     * 
+     * @return bool
+     */
+    public static function isBetaTester() {
+        return self::getEffectivePrivilege() == 4;
+    }
+
+    /**
+     * Check if current user can view a specific test game level
+     * 
+     * @param string|null $isTestValue The is_test value ('dev', 'beta', or NULL)
+     * @return bool True if user can view this test game level
+     */
+    public static function canViewTestGame($isTestValue) {
+        // NULL or empty = production game, everyone can view (based on visible_to_all)
+        if (empty($isTestValue)) {
+            return true;
+        }
+
+        $privilege = self::getEffectivePrivilege();
+
+        // Admin/dev can see all test games
+        if ($privilege == 1) {
+            return true;
+        }
+
+        // Beta testers can see 'beta' test games
+        if ($isTestValue === 'beta' && $privilege == 4) {
+            return true;
+        }
+
+        // Regular users cannot see test games (unless they have invitation - handled in query)
+        // 'dev' test games are only visible to admin/dev
+        return false;
     }
 }
 
