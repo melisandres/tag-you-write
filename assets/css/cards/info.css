@@ -6,6 +6,8 @@ section.info{
     padding: 10px;    
     padding-top: var(--spacing-extra-extra-large);
     gap: 2em;
+    position: relative;
+    overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
 /* Apply same styling to div.info in form pages */
@@ -161,6 +163,22 @@ section.info{
     position: relative;
 }
 
+/* Giant heart under info section - always large */
+section.info > .info-heart-svg {
+    position: absolute;
+    width: 1800px; /* Increase this value to make it larger (e.g., 800px, 1000px, 1200px) */
+    height: auto;
+    bottom: 150px; /* Adjust this value: more negative = lower, less negative/positive = higher */
+    right: -40vw; /* Adjust this value: more negative = further right, less negative/positive = further left */
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* Target the rect inside the SVG (the heart uses a mask, so we style the rect) */
+section.info > .info-heart-svg svg rect {
+    fill: var(--color-secondary-lightest);
+}
+
 /* Heart SVG decorations for info containers */
 .info-container .info-heart-svg {
     position: absolute;
@@ -174,22 +192,21 @@ section.info{
 .info-container .info-heart-svg svg {
     width: 100%;
     height: 100%;
-    fill: white;
 }
 
 /* First info-container: heart underneath and to the right */
-.info-container:first-of-type .info-heart-svg {
+/* .info-container:first-of-type .info-heart-svg {
     bottom: -80px;
     right: -15vw;
     transform: translateY(50%);
-}
+} */
 
 /* Second info-container: heart underneath and to the left */
-.info-container ~ .info-container .info-heart-svg {
+/* .info-container ~ .info-container .info-heart-svg {
     bottom: -80px;
     left: -15vw;
     transform: translateY(50%);
-}
+} */
 
 .info li .icons {
     display: flex;
@@ -323,12 +340,35 @@ section.info{
 .about-section {
     padding-top: var(--spacing-extra-extra-large);
     padding-bottom: var(--spacing-extra-extra-large);
+    position: relative;
+    overflow-x: hidden; /* Prevent horizontal scroll */
+    overflow-y: hidden; /* Prevent vertical scroll from large heart */
 }
 
 .about-container {
     max-width: min(75ch, 800px);
     margin: 0 auto;
     padding: 2rem 1rem;
+    position: relative;
+    z-index: 1; /* Above the heart */
+}
+
+/* Giant heart to the right of about section */
+.about-section .about-heart-svg {
+    position: absolute;
+    width: 1800px; /* Large size, same as info heart */
+    height: auto;
+    top: 50%;
+    left: -10vw; /* Positioned to the right - extends from right edge */
+    transform: translateY(-50%);
+    z-index: 0;
+    mix-blend-mode: multiply; /* You can change this blend mode */
+    pointer-events: none;
+}
+
+.about-section .about-heart-svg svg rect {
+    fill: var(--color-secondary-lightest);
+    stroke: var(--color-secondary-lightest);
 }
 
 .about-section .about-title {

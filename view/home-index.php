@@ -27,7 +27,6 @@
         </section>
         <section class="info" id="how">
             <div class="info-container">
-                <div class="info-heart-svg" data-svg="heart"></div>
                 <h2 data-i18n="home_index.how_to_collaborate">{{ translate('home_index.how_to_collaborate') }}</h2>
                 <ol>
                     <li>                
@@ -72,7 +71,6 @@
                 </ol>
             </div>
             <div class="info-container">
-                <div class="info-heart-svg" data-svg="heart"></div>
     <!--             <h2 data-i18n="home_index.how_to_start_new_collaboration">{{ translate('home_index.how_to_start_new_collaboration') }}</h2> -->
                 <ol>
                     <li>
@@ -104,8 +102,10 @@
                     </li>
                 </ol>
             </div>
+            <div class="info-heart-svg" data-svg="heart"></div>
         </section>
         <section class="info about-section" id="about">
+            <div class="about-heart-svg" data-svg="heart"></div>
             <div class="about-container">
                 <h2 class="about-title" data-i18n="about.title">{{ translate('about.title') }}</h2>
                 <div class="about-description" data-i18n-html="true" data-i18n="about.description">
