@@ -71,12 +71,12 @@
             </ol>
         </div>
         <div class="info-container">
-            <h2 data-i18n="home_index.how_to_start_new_collaboration">{{ translate('home_index.how_to_start_new_collaboration') }}</h2>
+<!--             <h2 data-i18n="home_index.how_to_start_new_collaboration">{{ translate('home_index.how_to_start_new_collaboration') }}</h2> -->
             <ol>
                 <li>
                     <h3>
                         <span data-i18n="home_index.create_collaboration_step_one_title">{{ translate('home_index.create_collaboration_step_one_title') }}</span>
-                        <span class="info-icon" data-svg="logIn" {# data-i18n-title="general.login_tooltip" title="{{ translate('general.login_tooltip') }}" #}></span>
+                        <span class="info-icon" data-svg="newGame" {# data-i18n-title="general.login_tooltip" title="{{ translate('general.login_tooltip') }}" #}></span>
                     </h3>
                     <div class="info-text-container" data-i18n="home_index.create_collaboration_step_one_text">    
                         {{ translate('home_index.create_collaboration_step_one_text') }}
@@ -85,7 +85,7 @@
                 <li>
                     <h3>
                         <span data-i18n="home_index.create_collaboration_step_two_title">{{ translate('home_index.create_collaboration_step_two_title') }}</span>
-                        <span class="info-icon" data-svg="newGame" {# title="{{ translate('general.new_game_tooltip') }}" data-i18n-title="general.new_game_tooltip" #} ></span>
+                        <span class="info-icon" data-svg="invisible" {# title="{{ translate('general.new_game_tooltip') }}" data-i18n-title="general.new_game_tooltip" #} ></span>
                     </h3>
                     <div class="info-text-container" data-i18n-html="true" data-i18n="home_index.create_collaboration_step_two_text">    
                         {{ translate('home_index.create_collaboration_step_two_text') | raw }}
@@ -96,8 +96,8 @@
                         <span data-i18n="home_index.create_collaboration_step_three_title">{{ translate('home_index.create_collaboration_step_three_title') }}</span>
                         <span class="info-icon" data-svg="heart"></span>
                     </h3>
-                    <div class="info-text-container" data-i18n="home_index.create_collaboration_step_three_text">    
-                        {{ translate('home_index.create_collaboration_step_three_text') }}
+                    <div class="info-text-container" data-i18n-html="true" data-i18n="home_index.create_collaboration_step_three_text">    
+                        {{ translate('home_index.create_collaboration_step_three_text') | raw }}
                     </div>
                 </li>
             </ol>

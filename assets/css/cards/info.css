@@ -36,6 +36,7 @@ section.info{
     background-color: var(--color-primary-lightest);
     padding: 1em;
     padding-top: 2em;
+    margin-top: 0.3px;
     width: 98%;
     position: relative;
     max-width: min(75ch, 600px);
@@ -109,7 +110,7 @@ section.info{
     position: absolute;
     top: -0.62em;
     left: 0;
-    padding: 0 0.5em;
+    padding: 0 0.2em 0 0.2em;
     margin-left: 0.5em;
     z-index: 1;
     background-image: linear-gradient(
@@ -121,6 +122,7 @@ section.info{
 
 .info h3 span {
     font-family: var(--font-family-secondary);
+    font-size: 0.85em;
 }
 
 .iterate.info h3 {
@@ -133,7 +135,7 @@ section.info{
 
 /* adjust the top if there is a list */
 .info li h3 {
-    top: -0.25em;
+    top: -2px;
 }
 
 .info ol {
@@ -253,7 +255,33 @@ section.info{
     stroke: var(--color-white);
 }
 
+/* Hide text elements in SVG icons (attribution text) */
+.info-icon svg text {
+    display: none;
+}
 
+/* Background colors for locked, invisible, and how icons */
+.info-icon[data-svg="locked"] {
+    background-color: var(--color-grey-light);
+}
+
+
+.info-icon[data-svg="invisible"] {
+    background-color: var(--color-ghost-heart);
+}
+
+.info-icon[data-svg="invisible"] svg {
+    transform: scale(1.4);
+}
+
+.info-icon[data-svg="invisible"] svg path {
+    fill: var(--color-white-dark);
+    stroke: var(--color-white-dark);
+}
+
+.info-icon[data-svg="how"] {
+    background-color: var(--color-primary);
+}
 
 /* SVG size */
 .info-icon svg {
