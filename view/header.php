@@ -336,12 +336,12 @@
         {% endif %}
             <!-- About Link -->
             <div class="overflow-menu-item">
-                <button class="nav-link about" data-item="about" data-i18n-title="nav.about_tooltip" title="{{ translate('nav.about_tooltip') }}">
+                <a class="nav-link about" href="{{ langUrl('') }}#about" data-item="about" data-i18n-title="nav.about_tooltip" title="{{ translate('nav.about_tooltip') }}">
                     <span class="icon" data-svg="about" data-i18n-title="nav.about_tooltip" title="{{ translate('nav.about_tooltip') }}"></span>
                     <span class="nav-text" data-i18n="nav.about">
                         {{ translate('nav.about') }}
                     </span>
-                </button>
+                </a>
             </div>
         {% if not guest %}
             <!-- Logout Link -->

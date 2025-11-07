@@ -1,6 +1,6 @@
 section.info{
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     flex-wrap: wrap;
     justify-content: space-evenly;
     padding: 10px;    
@@ -161,6 +161,36 @@ section.info{
     position: relative;
 }
 
+/* Heart SVG decorations for info containers */
+.info-container .info-heart-svg {
+    position: absolute;
+    width: clamp(100px, 40vw, 500px);
+    height: auto;
+    z-index: -1;
+    mix-blend-mode: multiply;
+    pointer-events: none;
+}
+
+.info-container .info-heart-svg svg {
+    width: 100%;
+    height: 100%;
+    fill: white;
+}
+
+/* First info-container: heart underneath and to the right */
+.info-container:first-of-type .info-heart-svg {
+    bottom: -80px;
+    right: -15vw;
+    transform: translateY(50%);
+}
+
+/* Second info-container: heart underneath and to the left */
+.info-container ~ .info-container .info-heart-svg {
+    bottom: -80px;
+    left: -15vw;
+    transform: translateY(50%);
+}
+
 .info li .icons {
     display: flex;
     flex-direction: row;
@@ -287,4 +317,127 @@ section.info{
 .info-icon svg {
     width: 1.5em;
     height: 1.5em;
+}
+
+/* About Section Styles */
+.about-section {
+    padding-top: var(--spacing-extra-extra-large);
+    padding-bottom: var(--spacing-extra-extra-large);
+}
+
+.about-container {
+    max-width: min(75ch, 800px);
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.about-section .about-title {
+    text-align: left;
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--color-black, #333333);
+    font-family: var(--font-family-primary, 'Livvic', sans-serif);
+    margin-bottom: 1.5rem;
+}
+
+.about-section .about-description {
+    font-size: 1.3rem;
+    line-height: 1.8;
+    color: var(--color-black);
+    margin-bottom: 2.5rem;
+    text-align: left;
+}
+
+.about-section .about-description p {
+    margin-bottom: 1rem;
+}
+
+.about-section .about-description p:last-child {
+    margin-bottom: 0;
+}
+
+.about-creator {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background-color: var(--color-white-lightest, #f8f9fa);
+    border-radius: 8px;
+    border: 1px solid var(--color-grey-light, #e0e0e0);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.about-creator-image {
+    flex-shrink: 0;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.creator-photo {
+    width: 200%;
+    height: 200%;
+    object-fit: cover;
+    object-position: center;
+    transform: translate(-25%, -30%);
+}
+
+.about-creator-info {
+    flex: 1;
+    text-align: left;
+}
+
+.creator-text {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--color-secondary, #666666);
+}
+
+/* Responsive Design for About Section */
+@media (max-width: 768px) {
+    .about-container {
+        padding: 1.5rem 1rem;
+    }
+    
+    .about-section .about-title {
+        font-size: 1.75rem;
+    }
+    
+    .about-section .about-description {
+        font-size: 1.1rem;
+    }
+    
+    .about-creator {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .about-creator-info {
+        text-align: center;
+    }
+    
+    .about-creator-image {
+        width: 80px;
+        height: 80px;
+    }
+}
+
+@media (max-width: 480px) {
+    .about-section .about-title {
+        font-size: 1.5rem;
+    }
+    
+    .about-section .about-description {
+        font-size: 1.1rem;
+    }
+    
+    .about-creator {
+        padding: 1rem;
+    }
 }

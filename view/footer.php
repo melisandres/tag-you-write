@@ -7,10 +7,10 @@
             </div>
         </div>
         <div class="footer-right">
-            <button class="footer-about-btn" data-item="about" data-i18n-title="nav.about_tooltip" title="{{ translate('nav.about_tooltip') }}">
+            <a class="footer-about-btn" href="{{ langUrl('') }}#about" data-item="about" data-i18n-title="nav.about_tooltip" title="{{ translate('nav.about_tooltip') }}">
                 <span class="icon" data-svg="about"></span>
                 <span class="footer-about-text" data-i18n="nav.about">{{ translate('nav.about') }}</span>
-            </button>
+            </a>
             <div class="footer-activity-indicator" id="footer-activity-indicator" title="{{ translate('activity.browsingVsEditing') }}" data-i18n-title="activity.browsingVsEditing">
                 <div class="icon" data-svg="user"></div>
                 <div class="activity-numbers">0:0</div>

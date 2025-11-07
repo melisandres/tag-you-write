@@ -41,7 +41,10 @@
       "menu_tooltip": "menu",
       "back": "Back",
       "about": "About",
-      "about_tooltip": "about this site"
+      "about_tooltip": "about this site",
+      "dev_mode_admin": "Admin",
+      "dev_mode_regular": "Regular User",
+      "dev_mode_beta": "Beta Tester"
   },
   "notifications": {
     "notification_game_won": "Game Won!",
@@ -61,9 +64,9 @@
   },
   "about": {
     "title": "About Tag You Write",
-    "description": "<p>Tag You Write is an evolving experiment in writing as play. It’s a space where stories can try on different hats — where players can shuffle words, introduce dissonance, tidy up flourishes, change the style, and watch where others might take the remaining heap of meaning.</p><p>It’s a platform for submitting a small text not to the hive mind, nor to the artificial mind, but to a few singular, imperfect minds — for revision, addition, subtraction, and surprising transformation.</p><p>There’s no single right path. Tag You Write is an attempt to clear the way for paths — any paths — and for the journeys they might incite.</p>",
+    "description": "<p>Tag You Write is an evolving experiment in writing as play. It’s a space where short texts can be shaped and reshaped by different hands, until the process becomes etched into the text, and it finds its own voice. It’s a space for offering a small text — not to the hive mind, nor the artificial one, but to a few singular, imperfect minds, for revision, erasure, and surprise. There’s no single right path. Tag You Write tries to clear the way for many — and for the journeys they might incite.</p>",
     "creator": {
-      "bio": "Created by Melisandre Schofield, a writer and web developer with a background in visual arts and experimental narrative. She creates tools and experiences that bring people together — not just to write, but to play, surprise one another, and rediscover the strange alchemy of shared imagination."
+      "bio": "Created by Melisandre Schofield, a writer and web developer with a background in visual arts and experimental narrative. She builds tools and experiences that bring people together — not just to write, but to play, surprise one another, and rediscover the strange alchemy of shared imagination."
     }
   },
   "page_title" : {
@@ -256,18 +259,18 @@
     "collaborate_step_one_title": "1. Give us a name",
     "collaborate_step_one_text": "Your own, or a pseudonym—and a short bio, real or imagined.",
     "collaborate_step_two_title": "2. Explore",
-    "collaborate_step_two_text": "Climb a textual tree <span class='info-icon' data-svg='browse'></span>, read through the leaves, let your feet swing off a branch <span class='info-icon' data-svg='dashboard'></span>. Each branch is a new version, written by a new frienemy.",
+    "collaborate_step_two_text": "Climb a story tree <span class='info-icon' data-svg='browse'></span>. Read through the leaves. Let your feet swing off a branch <span class='info-icon' data-svg='dashboard'></span>. Each branch is a new version, written by a new friend—or rival.",
     "collaborate_step_three_title": "3. Add your voice",
     "collaborate_step_three_text": "Each version is both an homage and a transgression. <span class='info-icon' data-svg='publish'></span> Find your balance.",
     "collaborate_step_four_title": "4. Mark your path",
-    "collaborate_step_four_text": "Each story is written and rewritten, branching out and out and out, until, somewhere, a version feels right—to everyone.",
+    "collaborate_step_four_text": "Leave a mark on the texts that mark you, as you wander. Somewhere, a version will feel right — to everyone.",
     "how_to_start_new_collaboration": "",
-    "create_collaboration_step_one_title": "5. Go first",
-    "create_collaboration_step_one_text": "Plant a seed and watch it grow, or keep branching, writing, and wandering until you end up somewhere uncharted.",
-    "create_collaboration_step_two_title": "6. Take it slow",
-    "create_collaboration_step_two_text": "You can plant something and hold it invisibly in your hands. <span class='info-icon' data-svg='locked'></span> Part your fingers for a friend or two, keep the scribbles to a whisper.",
-    "create_collaboration_step_three_title": "7. Need a guide?",
-    "create_collaboration_step_three_text": "We’ve drawn you a map. <span class='info-icon' data-svg='how'></span>. You can pull it out at any time—or fold us a note."
+    "create_collaboration_step_one_title": "Go first",
+    "create_collaboration_step_one_text": "Plant a handful of words, watch them stretch up and out, and follow them until you end up somewhere uncharted.",
+    "create_collaboration_step_two_title": "Take it slow",
+    "create_collaboration_step_two_text": "You can cobble together a sentence or two, and hold it invisibly in your hands <span class='info-icon' data-svg='locked'></span>. Part your fingers for a friend or two, keep the scribbles to a whisper.",
+    "create_collaboration_step_three_title": "Need a guide?",
+    "create_collaboration_step_three_text": "We’ve drawn you a map. <span class='info-icon' data-svg='how'></span>. You can pull it out at any time—or fold us a note of your own."
   },
   "filters": {
     "contribution": {

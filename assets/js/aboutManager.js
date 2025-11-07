@@ -83,22 +83,39 @@ export class AboutManager {
             }
         });
 
-        // About button event listeners
+        // About button event listeners - handle smooth scrolling to anchor
         document.addEventListener('click', (e) => {
-            // Handle overflow menu about button
-            if (e.target.closest('.overflow-menu .nav-link.about')) {
-                e.preventDefault();
-                e.stopPropagation();
-                this.showModal();
-            }
+            const aboutLink = e.target.closest('.overflow-menu .nav-link.about, .footer-about-btn');
             
-            // Handle footer about button
-            if (e.target.closest('.footer-about-btn')) {
-                e.preventDefault();
-                e.stopPropagation();
-                this.showModal();
+            if (aboutLink && aboutLink.href) {
+                const url = new URL(aboutLink.href);
+                const isHomePage = window.location.pathname === url.pathname || 
+                                  window.location.pathname === url.pathname + '/' ||
+                                  url.pathname === '/' || url.pathname === '';
+                
+                // If we're on the home page and link has #about anchor, scroll smoothly
+                if (isHomePage && url.hash === '#about') {
+                    e.preventDefault();
+                    const aboutSection = document.getElementById('about');
+                    if (aboutSection) {
+                        aboutSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }
+                // Otherwise, let the browser handle navigation normally
             }
         });
+        
+        // Handle initial page load with #about anchor
+        if (window.location.hash === '#about') {
+            window.addEventListener('load', () => {
+                setTimeout(() => {
+                    const aboutSection = document.getElementById('about');
+                    if (aboutSection) {
+                        aboutSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }, 100);
+            });
+        }
     }
 
     /**

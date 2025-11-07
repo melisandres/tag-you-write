@@ -40,7 +40,10 @@
     "menu_tooltip": "menu",
     "back": "Retour",
     "about": "À propos",
-    "about_tooltip": "à propos de ce site"
+    "about_tooltip": "à propos de ce site",
+    "dev_mode_admin": "Administrateur",
+    "dev_mode_regular": "Utilisateur Régulier",
+    "dev_mode_beta": "Testeur Bêta"
   },
   "notifications": {
     "notification_game_won": "Partie Gagnée!",
@@ -60,9 +63,9 @@
   },
   "about": {
     "title": "À propos de Tag You Write",
-    "description": "<p>Tag You Write est une expérience en mouvement, une exploration de l’écriture comme jeu. Un lieu où les histoires changent de peau, essayent des voix nouvelles, se laissent bousculer, polir, transformer.</p><p>On y brasse les mots, on introduit des dissonances, on efface des fioritures, on change le ton — et surtout, on observe ce que d’autres feront de ce petit reste de sens.</p><p>C’est une plateforme où l’on confie un texte non pas à l’esprit collectif, ni à l’esprit artificiel, mais à quelques esprits singuliers et imparfaits — pour qu’ils le revisitent, l’augmentent, le réduisent, ou le métamorphosent de façon inattendue.</p><p>Il n’existe pas de voie tracée d’avance. Tag You Write cherche plutôt à ouvrir le passage — à laisser place aux détours, aux bifurcations, et aux voyages qu’ils peuvent inspirer.</p>",
+    "description": "<p>Tag You Write est une expérience en mouvement — une exploration de l’écriture comme jeu. C’est un espace où de courts textes se façonnent et se re-façonnent entre plusieurs mains, jusqu’à ce que le processus s’inscrive dans le texte lui-même et qu’il trouve sa propre voix. C’est un lieu où confier un petit texte — non pas à l’esprit collectif, ni à l’esprit artificiel, mais à quelques esprits singuliers, imparfaits — pour la réécriture, la soustraction, et la surprise. Il n’existe pas de voie tracée d’avance. Tag You Write cherche plutôt à ouvrir le passage — à laisser place aux détours, aux bifurcations, et aux voyages qu’ils peuvent inspirer.</p>",
     "creator": {
-      "bio": "Créé par Melisandre Schofield, une écrivaine et développeuse web avec un background en arts visuels et narratologie expérimentale. Elle crée des outils et des expériences qui réunissent les gens — pas seulement pour écrire, mais pour jouer, surprendre l'un l'autre, et redécouvrir la chimie étrange de l'imagination partagée."
+      "bio": "Créé par Melisandre Schofield, une écrivaine et développeuse web avec un parcours en arts visuels et narratologie expérimentale. Elle conçoit des outils et des expériences qui réunissent les gens — pas seulement pour écrire, mais pour jouer, se surprendre mutuellement, et redécouvrir la chimie étrange de l'imagination partagée."
     }
   },
   "page_title": {
@@ -255,18 +258,18 @@
     "collaborate_step_one_title": "1. Inscris un nom",
     "collaborate_step_one_text": "Le tien, ou un pseudonyme — et une courte bio, réelle ou inventée.",
     "collaborate_step_two_title": "2. Explore",
-    "collaborate_step_two_text": "Grimpe dans un arbre à histoires, lis entre les feuilles <span class='info-icon' data-svg='browse'></span>, laisse tes jambes se balancer du haut d’une branche <span class='info-icon' data-svg='dashboard'></span>. Chaque branche est une nouvelle version, écrite par un nouveau complice-adversaire.",
+    "collaborate_step_two_text": "Grimpe dans un arbre à histoires. Lis entre les feuilles <span class='info-icon' data-svg='browse'></span>. Laisse tes jambes se balancer du haut d’une branche <span class='info-icon' data-svg='dashboard'></span>. Chaque branche est une nouvelle version, écrite par un nouvel ami — ou un rival.",
     "collaborate_step_three_title": "3. Ajoute ta voix ",
     "collaborate_step_three_text": "Chaque version est à la fois un hommage et une transgression <span class='info-icon' data-svg='publish'></span>. Trouve ton équilibre.",
-    "collaborate_step_four_title": "4. Laisse une trace",
-    "collaborate_step_four_text": "Chaque histoire s’écrit et se réécrit, se ramifie encore et encore, jusqu’à ce qu’une version résonne — pour tout le monde.",
+    "collaborate_step_four_title": "4. Trace ton chemin",
+    "collaborate_step_four_text": "Laisse une empreinte sur les textes qui t’en laissent une. Quelque part, une version finira par résonner — pour tout le monde.",
     "how_to_start_new_collaboration": "",
-    "create_collaboration_step_one_title": "5. Vas-y premier",
-    "create_collaboration_step_one_text": "Plante une graine et regarde-la pousser, ou continue à t’égarer, à écrire et à bifurquer,jusqu’à tomber sur un territoire inexploré.",
-    "create_collaboration_step_two_title": "6. Prends ton temps",
-    "create_collaboration_step_two_text": "Tu peux planter quelque chose et le garder invisible dans tes mains. <span class='info-icon' data-svg='locked'></span> Entrouvre les doigts pour un ami ou deux — garde le reste à voix basse.",
+    "create_collaboration_step_one_title": "Vas-y en premier",
+    "create_collaboration_step_one_text": "Sème une poignée de mots, regarde-les pousser, et s’étirer vers des endroits inexplorés.",
+    "create_collaboration_step_two_title": "Prends ton temps",
+    "create_collaboration_step_two_text": "Tu peux bricoler un amas de mots et les garder, invisibles, dans tes mains. <span class='info-icon' data-svg='locked'></span> Écarte un peu les doigts pour un ami ou deux; on peut griffonner à voix basse.",
     "create_collaboration_step_three_title": "Besoin d’un guide?",
-    "create_collaboration_step_three_text": "Nous t’avons dessiné une carte. <span class='info-icon' data-svg='how'></span>. Tu peux la déplier quand tu veux — ou nous envoyer un mot plié en retour."
+    "create_collaboration_step_three_text": "On t’a dessiné une carte <span class='info-icon' data-svg='how'></span>. Tu peux la déplier quand tu veux — ou nous glisser un mot plié en retour."
   },
   "filters": {
     "contribution": {
