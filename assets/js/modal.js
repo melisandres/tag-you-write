@@ -23,6 +23,7 @@ export class Modal {
       // translate some strings
       let ps = window.i18n ? window.i18n.translate("modal.ps") : "P.S...";
       let draft = window.i18n ? window.i18n.translate("modal.draft") : "DRAFT";
+      let publishedLate = window.i18n ? window.i18n.translate("modal.published_late") : "PUBLISHED LATE";
       let winner = window.i18n ? window.i18n.translate("modal.winner") : "WINNER";
       let noteHtml = data.note ? `<p class="ps" data-i18n="modal.ps">${ps}</p> ${data.note}` : '';
       const untitledText = window.i18n && window.i18n.translate("general.untitled") || "Untitled";
@@ -41,6 +42,7 @@ export class Modal {
               </div>
               <div class="top-info-middle">
                ${data.text_status=='draft' || data.text_status=='incomplete_draft' ? `<span class="status draft" data-i18n="modal.draft">${draft}</span>` : ''}
+               ${data.text_status=='published_late' ? `<span class="status published-late" data-i18n="modal.published_late">${publishedLate}</span>` : ''}
                 ${data.isWinner ? `<span class="status winner" data-i18n="modal.winner">${winner}</span>` : ''}
               </div>
               <button class="close-modal top-info-close">×</button>
@@ -94,8 +96,8 @@ export class Modal {
         </form>
       ` : ''}
 
-       ${data.permissions.canPublish ? `
-        <button data-text-id="${data.id}" data-insta-publish-button class="publish" data-i18n-title="general.publish" title="${publishTitle}">
+       ${(data.permissions.canPublish || data.permissions.canPublishTooLate) ? `
+        <button data-text-id="${data.id}" data-insta-publish-button class="publish ${data.permissions.canPublishTooLate ? 'publish-late' : ''}" data-i18n-title="${data.permissions.canPublishTooLate ? 'general.publish_late' : 'general.publish'}" title="${data.permissions.canPublishTooLate ? (window.i18n ? window.i18n.translate('general.publish_late_tooltip') : 'Publish Late') : publishTitle}">
           ${SVGManager.publishSVG}
         </button>
       ` : ''}
@@ -132,6 +134,7 @@ export class Modal {
     const voteCount = parseInt(data.voteCount || 0);
     const colorScale = createColorScale(maxVotes);
     const fillColor = colorScale(voteCount);
+    // Only show votes for 'published' status, not 'published_late' (they weren't in the running for winner)
     const published = data.text_status == 'published';
 
     return `

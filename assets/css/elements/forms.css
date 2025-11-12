@@ -139,12 +139,19 @@ label .ck.ck-content.ck-editor__editable {
     font-family: var(--font-family-secondary);
 }
 
+/* Ensure spacing between two-word titles when displayed inline */
+.form-btns .btn-2wordtitle {
+    display: inline-flex;
+    gap: 0.25em;
+}
+
 @media screen and (max-width: 700px) {
     .form-btns .btn-2wordtitle {
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        gap: 0;
     }
 }
 

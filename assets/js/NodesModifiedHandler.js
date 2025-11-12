@@ -101,8 +101,11 @@ export class NodesModifiedHandler {
       if (oldNode) {
         console.log('oldNode', oldNode);
         console.log('newNode', newNode);
-        // Only process if permissions have changed
-        if (JSON.stringify(oldNode.permissions) !== JSON.stringify(newNode.permissions)) {
+        // Process if permissions OR winner status have changed
+        const permissionsChanged = JSON.stringify(oldNode.permissions) !== JSON.stringify(newNode.permissions);
+        const winnerStatusChanged = oldNode.isWinner !== newNode.isWinner;
+        
+        if (permissionsChanged || winnerStatusChanged) {
           this.handleNodeUpdate({ oldNode, newNode });
         }
       } else {

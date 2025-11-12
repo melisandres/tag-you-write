@@ -13,6 +13,10 @@
     background-color: var(--color-success);
 }
 
+.with-shelf button.publish.publish-late {
+    background-color: var(--color-secondary-light);
+}
+
 .with-shelf button.delete {
     background-color: var(--color-error);
 }

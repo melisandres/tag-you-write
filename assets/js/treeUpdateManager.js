@@ -53,29 +53,34 @@ export class TreeUpdateManager {
       // Update heart path - fixed duplicate class and added proper class toggling
       d3.select(heart)
         .classed('tree-node-draft', newStatus === 'draft' || newStatus === 'incomplete_draft')
-        .classed('tree-node-published', newStatus === 'published');
+        .classed('tree-node-published', newStatus === 'published')
+        .classed('tree-node-published-late', newStatus === 'published_late');
 
       // Update title
       const titleText = nodeGroup.querySelector('text:not(.text-by)');
-      d3.select(titleText)
-        .classed('tree-title-draft', newStatus === 'draft')
-        .classed('tree-title-draft', newStatus === 'incomplete_draft')
-        .classed('tree-title-published', newStatus === 'published');
+      if (titleText) {
+        d3.select(titleText)
+          .classed('tree-title-draft', newStatus === 'draft' || newStatus === 'incomplete_draft')
+          .classed('tree-title-published', newStatus === 'published')
+          .classed('tree-title-published-late', newStatus === 'published_late');
+      }
 
-      // Update author text
+      // Update author text using formatAuthorName to get proper translation
       const authorText = nodeGroup.querySelector('text.text-by');
-      d3.select(authorText)
-        .classed('tree-author-draft', newStatus === 'draft')
-        .classed('tree-author-draft', newStatus === 'incomplete_draft')
-        .classed('tree-author-published', newStatus === 'published');
-
-      // Update the "DRAFT" text in the author line if necessary
-      if (authorText) {
-        let authorContent = authorText.textContent;
-        if ((newStatus === 'draft' || newStatus === 'incomplete_draft') && !authorContent.startsWith('DRAFT')) {
-          authorText.textContent = 'DRAFT ' + authorContent;
-        } else if (newStatus === 'published' && authorContent.startsWith('DRAFT')) {
-          authorText.textContent = authorContent.replace('DRAFT ', '');
+      if (authorText && this.treeVisualizer) {
+        // Get the node data from dataManager to pass to formatAuthorName
+        const nodeData = this.dataManager.getNode(textId);
+        if (nodeData) {
+          // Update the status in the node data temporarily for formatting
+          const originalStatus = nodeData.text_status;
+          nodeData.text_status = newStatus;
+          
+          // Use formatAuthorName to get properly formatted text ("by you" for published/published_late)
+          const formattedAuthorName = this.treeVisualizer.formatAuthorName(nodeData);
+          authorText.textContent = formattedAuthorName;
+          
+          // Restore original status (though it will be updated by the backend anyway)
+          nodeData.text_status = originalStatus;
         }
       }
     } else {
@@ -110,28 +115,29 @@ export class TreeUpdateManager {
   handleChooseWinner({ textId }) {
     const container = document.querySelector('#showcase-wrapper[data-showcase="tree"] #showcase');
     if (container) {
-      // Update selector to find path instead of circle
-      const heart = container.querySelector(`path[data-id="${textId}"]`);
+      // Update selector to find path (heart) but exclude link paths, matching handleInstaPublish
+      const heart = container.querySelector(`path[data-id="${textId}"]:not(.link)`);
       if (heart) {
         const nodeGroup = heart.closest('g');
         if (nodeGroup) {
+          // Remove the heart path
           heart.remove();
 
+          // Create and add the star using d3
+          const baseColor = "#ff009b";
+          const starPath = d3.select(nodeGroup)
+            .append("path")
+            .attr("d", d3.symbol().type(d3.symbolStar).size(200))
+            .attr('class', 'star read')
+            .attr('data-id', textId)
+            .attr("fill", baseColor);
 
-          // Create and add the star
-          const star = document.createElementNS("http://www.w3.org/2000/svg", "path");
-          star.setAttribute("d", d3.symbol().type(d3.symbolStar).size(200)());
-          star.setAttribute("class", "star read");
-          star.setAttribute("data-id", textId);
-          star.setAttribute("fill", "#ff009b"); // Use the baseColor
-
-          // Insert the star as the first child of the nodeGroup
-          nodeGroup.insertBefore(star, nodeGroup.firstChild);
-
-          // Update class
+          // Update class on nodeGroup
           d3.select(nodeGroup)
             .classed('winner', true);
         }
+      } else {
+        console.warn(`Tree winner: Could not find heart path for textId ${textId}`);
       }
     }
   }

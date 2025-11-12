@@ -1,4 +1,9 @@
 {{ include('header.php', {title_key: data.id ? 'page_title.text_edit' : (data.parent_id ? 'page_title.text_iterate' : 'page_title.text_create')})}}
+{% if data.permissions is defined %}
+<script type="application/json" id="text-permissions-data">
+{{ data.permissions|json_encode|raw }}
+</script>
+{% endif %}
 <section class="form-page">
     <div class="form-info">
     {% if errors is defined %}
@@ -185,11 +190,22 @@
         {% endif %}
 
         <div class="form-btns">
-            <button class="publish" type="button" data-status="published" data-button-type="publish">
-                <span dat-svg="publish" class="icon" data-i18n-title="general.publish_tooltip"></span>
-                <span class="title" data-i18n="general.publish">
-                    {{ translate('general.publish') }}
-                </span>
+            <button class="publish {% if data.permissions.canPublishTooLate %}publish-late{% endif %}" type="button" data-status="published" data-button-type="publish">
+                <span dat-svg="publish" class="icon" data-i18n-title="{% if data.permissions.canPublishTooLate %}general.publish_late_tooltip{% else %}general.publish_tooltip{% endif %}"></span>
+                {% if data.permissions.canPublishTooLate %}
+                    <div class="btn-2wordtitle">
+                        <span class="title" data-i18n="general.publish">
+                            {{ translate('general.publish') }}
+                        </span>
+                        <span class="title" data-i18n="general.late">
+                            {{ translate('general.late') }}
+                        </span>
+                    </div>
+                {% else %}
+                    <span class="title" data-i18n="general.publish">
+                        {{ translate('general.publish') }}
+                    </span>
+                {% endif %}
             </button>
             <button class="save" type="button" data-status="draft" data-button-type="save">
                 <span data-svg="save" class="icon" data-i18n-title="general.save_tooltip"></span>

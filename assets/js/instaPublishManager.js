@@ -46,10 +46,13 @@ export class InstaPublishManager {
           try {
             const result = JSON.parse(rawText); // Try to parse it as JSON
             if (result.success) {
+              // Get the actual status from backend response ('published' or 'published_late')
+              const actualStatus = result.text_status || 'published';
+              
               // Emit multiple events for different aspects of the update
               eventBus.emit('instaPublish', { 
                 textId, 
-                newStatus: 'published',
+                newStatus: actualStatus,
                 gameData: result.gameData
               });
               
@@ -64,7 +67,7 @@ export class InstaPublishManager {
               eventBus.emit('updateNode', {
                 id: textId,
                 playerCount: result.playerCount, 
-                text_status: 'published'
+                text_status: actualStatus
               });
 
               // update the game data

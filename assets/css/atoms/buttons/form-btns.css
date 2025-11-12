@@ -41,6 +41,7 @@
 
 
 .form-btns button.publish .icon { background-color: var(--color-success); }
+.form-btns button.publish.publish-late .icon { background-color: var(--color-secondary-light); }
 .form-btns button.save .icon { background-color: var(--color-save); }
 .form-btns button.delete .icon { background-color: var(--color-error); }
 .form-btns button.cancel .icon { background-color: var(--color-grey); }

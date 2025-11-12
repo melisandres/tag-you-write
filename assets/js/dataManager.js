@@ -706,8 +706,10 @@ export class DataManager {
         return sortedNodes;
     }
 
-    updateNode(nodeId, updateData) {        
+    updateNode(nodeId, updateData) {
         // Always convert nodeId to string for consistency
+        // Note: updateData may include text_status updates (e.g., 'published' -> 'published_late')
+        // All status values are preserved as-is
         const stringId = String(nodeId);
 
         // Look up only using string ID
@@ -792,6 +794,8 @@ export class DataManager {
         const stringId = String(nodeId);
 
         // Normalize the data
+        // Note: text_status can be: 'draft', 'incomplete_draft', 'published', 'published_late'
+        // All status values are preserved as-is from the backend
         const normalizedData = {
             ...nodeData,
             id: stringId,

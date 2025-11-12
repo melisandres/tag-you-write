@@ -57,11 +57,22 @@
     opacity: 30%;
 }
 
+.tree-title-published-late{
+    opacity: 70%;
+}
+
 path.tree-node-draft {
     fill: var(--color-grey) !important;
     stroke: var(--color-love) !important;
     stroke-width: 1px !important;
     opacity: 50% !important;
+}
+
+path.tree-node-published-late {
+    fill: var(--color-secondary-light) !important;
+    stroke: var(--color-secondary-dark) !important;
+    stroke-width: 1.5px !important;
+    opacity: 75% !important;
 }
 
 /* === Tree Activity Indicators === */

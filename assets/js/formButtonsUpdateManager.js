@@ -18,6 +18,10 @@ export class ButtonUpdateManager {
         this.deleteButton = this.form.querySelector('[data-button-type="delete"]');
         this.cancelButton = this.form.querySelector('[data-button-type="exit"]');
         this.idInput = this.form.querySelector('input[name="id"]');
+        this.gameIdInput = this.form.querySelector('input[name="game_id"]');
+        
+        // Load initial permissions from script tag if available
+        this.loadInitialPermissions();
         
         // Check initial ID state
         this.hasAnId = !!(this.idInput && this.idInput.value);
@@ -34,6 +38,9 @@ export class ButtonUpdateManager {
             this.updateDeleteButton();
             //this.updateExitButton();
         }
+        
+        // Note: Button structure is already rendered correctly by PHP based on permissions
+        // updatePublishButtonForLatePublication() is only called when permissions change dynamically
 
         // Add a MutationObserver to watch for changes to the id input value
         if (this.idInput) {
@@ -68,6 +75,57 @@ export class ButtonUpdateManager {
             }
         });
 
+        // Listen for game ending modal (when game_closed notification is shown)
+        // Note: gameStatusChanged event only fires on game_list and collab_page pages,
+        // not on text_form pages, so we rely on the game ending modal
+        eventBus.on('gameEndingModalShown', (notification) => {
+            // Check if this is the game we're editing
+            const currentGameId = this.gameIdInput?.value;
+            if (currentGameId && currentGameId === String(notification.game_id)) {
+                this.fetchUpdatedPermissions();
+            }
+        });
+
+    }
+    
+    /**
+     * Load initial permissions from script tag if available
+     */
+    loadInitialPermissions() {
+        const permissionsScript = document.getElementById('text-permissions-data');
+        if (permissionsScript) {
+            try {
+                this.permissions = JSON.parse(permissionsScript.textContent);
+            } catch (e) {
+                console.error('Error parsing permissions data:', e);
+                this.permissions = null;
+            }
+        } else {
+            this.permissions = null;
+        }
+    }
+    
+    /**
+     * Fetch updated permissions when game status changes
+     */
+    async fetchUpdatedPermissions() {
+        const textId = this.idInput?.value;
+        if (!textId) return; // Can't fetch without text ID
+        
+        try {
+            const endpoint = `text/getStoryNode/${textId}`;
+            const url = window.i18n.createUrl(endpoint);
+            const response = await fetch(url);
+            if (response.ok) {
+                const data = await response.json();
+                if (data && data.permissions) {
+                    this.permissions = data.permissions;
+                    this.updatePublishButtonForLatePublication();
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching updated permissions:', error);
+        }
     }
 
     updateButtons() {
@@ -120,6 +178,118 @@ export class ButtonUpdateManager {
     updatePublishButton(canPublish) {
         if (this.publishButton) {
             this.publishButton.classList.toggle('disabled', !canPublish);
+        }
+    }
+    
+    /**
+     * Update publish button text and styling for late publication
+     * Called when permissions change dynamically (e.g., when game closes)
+     */
+    updatePublishButtonForLatePublication() {
+        if (!this.publishButton) return;
+        
+        const canPublishTooLate = this.permissions?.canPublishTooLate || false;
+        const canPublish = this.permissions?.canPublish || false;
+        
+        // Only update if we have canPublishTooLate permission
+        if (canPublishTooLate) {
+            // Add publish-late class for styling
+            this.publishButton.classList.add('publish-late');
+            
+            // Check if button already has two-line structure
+            const titleContainer = this.publishButton.querySelector('.btn-2wordtitle');
+            const titleSpan = this.publishButton.querySelector('span.title:not(.btn-2wordtitle .title)');
+            
+            if (!titleContainer && titleSpan) {
+                // Need to convert from single-line to two-line structure
+                const wrapper = document.createElement('div');
+                wrapper.className = 'btn-2wordtitle';
+                titleSpan.parentNode.insertBefore(wrapper, titleSpan);
+                wrapper.appendChild(titleSpan);
+                
+                // Create second line span for "late"
+                const secondLineSpan = document.createElement('span');
+                secondLineSpan.className = 'title';
+                secondLineSpan.setAttribute('data-i18n', 'general.late');
+                wrapper.appendChild(secondLineSpan);
+                
+                // Update first line to "publish"
+                titleSpan.setAttribute('data-i18n', 'general.publish');
+                
+                // Trigger translations
+                if (eventBus) {
+                    eventBus.emit('requestTranslation', {
+                        element: titleSpan,
+                        key: 'general.publish'
+                    });
+                    eventBus.emit('requestTranslation', {
+                        element: secondLineSpan,
+                        key: 'general.late'
+                    });
+                }
+            } else if (titleContainer) {
+                // Already has two-line structure - just update translations
+                const spans = titleContainer.querySelectorAll('span.title');
+                if (spans.length >= 2) {
+                    spans[0].setAttribute('data-i18n', 'general.publish');
+                    spans[1].setAttribute('data-i18n', 'general.late');
+                    if (eventBus) {
+                        eventBus.emit('requestTranslation', { element: spans[0], key: 'general.publish' });
+                        eventBus.emit('requestTranslation', { element: spans[1], key: 'general.late' });
+                    }
+                }
+            }
+            
+            // Update tooltip
+            const iconSpan = this.publishButton.querySelector('span.icon');
+            if (iconSpan) {
+                iconSpan.setAttribute('data-i18n-title', 'general.publish_late_tooltip');
+                if (window.i18n) {
+                    iconSpan.setAttribute('title', window.i18n.translate('general.publish_late_tooltip'));
+                }
+            }
+        } else if (canPublish) {
+            // Game is open - ensure normal styling
+            this.publishButton.classList.remove('publish-late');
+            
+            // Check if button has two-line structure that needs to be converted back
+            const titleContainer = this.publishButton.querySelector('.btn-2wordtitle');
+            if (titleContainer) {
+                // Convert from two-line to single-line structure
+                const titleSpan = titleContainer.querySelector('span.title');
+                if (titleSpan) {
+                    titleContainer.parentNode.insertBefore(titleSpan, titleContainer);
+                    titleContainer.remove();
+                    titleSpan.setAttribute('data-i18n', 'general.publish');
+                    if (eventBus) {
+                        eventBus.emit('requestTranslation', {
+                            element: titleSpan,
+                            key: 'general.publish'
+                        });
+                    }
+                }
+            } else {
+                // Already single-line, just update text
+                const titleSpan = this.publishButton.querySelector('span.title');
+                if (titleSpan) {
+                    titleSpan.setAttribute('data-i18n', 'general.publish');
+                    if (eventBus) {
+                        eventBus.emit('requestTranslation', {
+                            element: titleSpan,
+                            key: 'general.publish'
+                        });
+                    }
+                }
+            }
+            
+            // Restore normal tooltip
+            const iconSpan = this.publishButton.querySelector('span.icon');
+            if (iconSpan) {
+                iconSpan.setAttribute('data-i18n-title', 'general.publish_tooltip');
+                if (window.i18n) {
+                    iconSpan.setAttribute('title', window.i18n.translate('general.publish_tooltip'));
+                }
+            }
         }
     }
 

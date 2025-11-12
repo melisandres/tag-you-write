@@ -42,32 +42,59 @@ export class ModalUpdateManager {
       // Update status
       const topInfo = modal.querySelector('.top-info');
       if (topInfo) {
-        topInfo.classList.remove('draft');
-        topInfo.classList.add('published');
-        const statusSpan = topInfo.querySelector('.status');
-        if (statusSpan) statusSpan.remove();
+        // Remove all status classes
+        topInfo.classList.remove('draft', 'published', 'published-late');
+        
+        // Add appropriate status class
+        if (newStatus === 'published') {
+          topInfo.classList.add('published');
+        } else if (newStatus === 'published_late') {
+          topInfo.classList.add('published-late');
+        } else {
+          topInfo.classList.add('draft');
+        }
+        
+        // Update status badge in top-info-middle
+        const topInfoMiddle = topInfo.querySelector('.top-info-middle');
+        if (topInfoMiddle) {
+          // Remove existing status spans
+          const existingStatus = topInfoMiddle.querySelector('.status');
+          if (existingStatus) existingStatus.remove();
+          
+          // Add new status badge if needed
+          if (newStatus === 'published_late') {
+            const publishedLateText = window.i18n ? window.i18n.translate("modal.published_late") : "PUBLISHED LATE";
+            topInfoMiddle.insertAdjacentHTML('afterbegin', `<span class="status published-late" data-i18n="modal.published_late">${publishedLateText}</span>`);
+          }
+          // Note: 'published' status doesn't show a badge (only draft, published_late, and winner do)
+        }
 
-        // Update the votes section instead of replacing it
+        // Update the votes section - only show votes for 'published' status, not 'published_late'
         const votesDiv = topInfo.querySelector('.votes');
         if (votesDiv) {
-          // Keep existing player count
-          const playerCount = votesDiv.querySelector('.vote-count').dataset.playerCount;
-          
-          // Just update visibility and initial vote count
-          votesDiv.classList.remove('hidden');
-          votesDiv.setAttribute('data-fill-color', 'rgb(255, 255, 255)');
-          
-          const voteCountSpan = votesDiv.querySelector('.vote-count');
-          voteCountSpan.classList.remove('hidden');
-          voteCountSpan.textContent = `0/${playerCount} votes`;
-          voteCountSpan.setAttribute('data-vote-count', '0');
-          
-          // Set the SVG colors
-          const svgPath = votesDiv.querySelector('svg path');
-          if (svgPath) {
-            svgPath.setAttribute('fill', 'rgb(255, 255, 255)');
-            svgPath.setAttribute('stroke', 'black');
-            svgPath.setAttribute('stroke-width', '2');
+          if (newStatus === 'published') {
+            // Keep existing player count
+            const playerCount = votesDiv.querySelector('.vote-count').dataset.playerCount;
+            
+            // Show votes and update initial vote count
+            votesDiv.classList.remove('hidden');
+            votesDiv.setAttribute('data-fill-color', 'rgb(255, 255, 255)');
+            
+            const voteCountSpan = votesDiv.querySelector('.vote-count');
+            voteCountSpan.classList.remove('hidden');
+            voteCountSpan.textContent = `0/${playerCount} votes`;
+            voteCountSpan.setAttribute('data-vote-count', '0');
+            
+            // Set the SVG colors
+            const svgPath = votesDiv.querySelector('svg path');
+            if (svgPath) {
+              svgPath.setAttribute('fill', 'rgb(255, 255, 255)');
+              svgPath.setAttribute('stroke', 'black');
+              svgPath.setAttribute('stroke-width', '2');
+            }
+          } else if (newStatus === 'published_late') {
+            // Hide votes for published_late texts (they weren't in the running for winner)
+            votesDiv.classList.add('hidden');
           }
         }
       }
@@ -124,17 +151,25 @@ export class ModalUpdateManager {
     if (topInfo) {
 
       // translate the strings
-      const winnerTitle = window.i18n.translate('general.winner');
+      const winnerTitle = window.i18n.translate('modal.winner');
 
       // add winner class
       topInfo.classList.add('winner');
 
-      // add winner status span with localization
-      const statusSpan = topInfo.querySelector('.status') || document.createElement('span');
-      statusSpan.className = 'status winner';
-      statusSpan.setAttribute('data-i18n', 'general.winner');
-      statusSpan.textContent = winnerTitle;
-      topInfo.appendChild(statusSpan);
+      // add winner status span with localization - must be added to top-info-middle, not topInfo
+      const topInfoMiddle = topInfo.querySelector('.top-info-middle');
+      if (topInfoMiddle) {
+        // Remove any existing status badges first
+        const existingStatus = topInfoMiddle.querySelector('.status');
+        if (existingStatus) existingStatus.remove();
+        
+        // Add winner status span to top-info-middle
+        const statusSpan = document.createElement('span');
+        statusSpan.className = 'status winner';
+        statusSpan.setAttribute('data-i18n', 'modal.winner');
+        statusSpan.textContent = winnerTitle;
+        topInfoMiddle.appendChild(statusSpan);
+      }
 
       // change the vote count to +1
       const voteCountSpan = topInfo.querySelector('.vote-count');
@@ -483,8 +518,8 @@ export class ModalUpdateManager {
         </form>
       ` : ''}
 
-       ${data.permissions.canPublish ? `
-        <button data-text-id="${data.id}" data-insta-publish-button class="publish" data-i18n-title="general.publish" title="${publishTitle}">
+       ${(data.permissions.canPublish || data.permissions.canPublishTooLate) ? `
+        <button data-text-id="${data.id}" data-insta-publish-button class="publish ${data.permissions.canPublishTooLate ? 'publish-late' : ''}" data-i18n-title="${data.permissions.canPublishTooLate ? 'general.publish_late' : 'general.publish'}" title="${data.permissions.canPublishTooLate ? (window.i18n ? window.i18n.translate('general.publish_late_tooltip') : 'Publish Late') : publishTitle}">
           ${SVGManager.publishSVG}
         </button>
       ` : ''}

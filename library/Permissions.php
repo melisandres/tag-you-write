@@ -111,12 +111,13 @@ class Permissions {
         }
         
         $isMyText = $data['writer_id'] == $currentUserId;
-        $openForChanges = $data['openForChanges'];
-        $isPublished = $data['text_status'] == "published";
+        // Allow notes on both published and published_late texts (published_late texts can still have notes added)
+        $isPublished = $data['text_status'] == "published" || $data['text_status'] == "published_late";
+        // Note: Removed $openForChanges requirement - users can add notes to their own texts even after game closes
+        // This is similar to how canEdit allows editing drafts after game closes
 
         return  $currentUserId !== null 
                 && $isMyText
-                && $openForChanges
                 && $isPublished;
     }
 
@@ -199,6 +200,33 @@ class Permissions {
                 && $isDraft;
     }
 
+    /**
+     * Check if user can publish a draft after the game has closed
+     * This allows publishing existing drafts with 'published_late' status
+     * Only allows valid drafts (not incomplete_draft) since incomplete drafts
+     * don't meet the quality requirements for publishing
+     * 
+     * @param array $data Text data including game permissions
+     * @param int|null $currentUserId Current user ID
+     * @return bool True if user can publish too late
+     */
+    public static function canPublishTooLate($data, $currentUserId) {
+        // First check game-level access (user must have access to the game)
+        if (!self::hasGameAccess($data, $currentUserId)) {
+            return false;
+        }
+        
+        $isMyText = $data['writer_id'] == $currentUserId;
+        $openForChanges = $data['openForChanges'];
+        $isDraft = $data['text_status'] == "draft";
+        // Note: incomplete_draft is NOT allowed - only valid drafts can be published too late
+ 
+        return  $currentUserId !== null 
+                && $isMyText 
+                && !$openForChanges  // Game must be CLOSED
+                && $isDraft;  // Text must be a valid draft (not incomplete_draft)
+    }
+
     public static function aggregatePermissions($data, $currentUserId) { 
         $data['permissions'] = [
             'canEdit' => self::canEdit($data, $currentUserId),
@@ -208,6 +236,7 @@ class Permissions {
             'isMyText' => $data['writer_id'] == $currentUserId,
             'canVote' => self::canVote($data, $currentUserId),
             'canPublish' => self::canPublish($data, $currentUserId),
+            'canPublishTooLate' => self::canPublishTooLate($data, $currentUserId),
             'hasGameAccess' => self::hasGameAccess($data, $currentUserId),
             'canJoinGame' => self::canJoinGame($data, $currentUserId)
         ];

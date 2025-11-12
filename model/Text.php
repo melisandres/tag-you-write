@@ -225,7 +225,7 @@ class Text extends Crud{
                     LEFT JOIN text_has_keyword ON text.id = text_has_keyword.text_id
                     LEFT JOIN keyword ON text_has_keyword.keyword_id = keyword.id
                     WHERE game_id = :gameId 
-                    AND (text_status.status = 'published' 
+                    AND (text_status.status IN ('published', 'published_late')
                         OR (text_status.status IN ('draft', 'incomplete_draft') 
                             AND writer_id = :currentWriterId))";
 

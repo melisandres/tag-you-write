@@ -481,7 +481,15 @@ export class TreeVisualizer {
                     .attr('class', d => {
                         // Concatenate multiple classes based on conditions
                         let classes = `${d.data.text_seen == 1 ? 'read' : 'unread'}`;
-                        classes += ` ${d.data.text_status == 'draft' || d.data.text_status == 'incomplete_draft' ? 'tree-node-draft' : ''}`; 
+                        
+                        // Add status-based classes
+                        if (d.data.text_status == 'draft' || d.data.text_status == 'incomplete_draft') {
+                            classes += ' tree-node-draft';
+                        } else if (d.data.text_status == 'published_late') {
+                            classes += ' tree-node-published-late';
+                        } else if (d.data.text_status == 'published') {
+                            classes += ' tree-node-published';
+                        }
                         
                         // Then replace the search condition with
                         if (self.dataManager && self.dataManager.getSearch() && 
@@ -1206,6 +1214,16 @@ export class TreeVisualizer {
                 .attr("x", nodeData && nodeData.children ? -13 : 13)
                 .style("text-anchor", nodeData && nodeData.children ? "end" : "start")
                 .style("font-size", `${fontSize}px`);
+            
+            // Add status-based classes to title text (only for draft and published_late - published uses default styling)
+            if (nodeData && nodeData.data) {
+                const status = nodeData.data.text_status;
+                if (status == 'draft' || status == 'incomplete_draft') {
+                    textEl.classed('tree-title-draft', true);
+                } else if (status == 'published_late') {
+                    textEl.classed('tree-title-published-late', true);
+                }
+            }
                 
             // Add data-i18n attribute for translatable titles
             if (title === window.i18n?.translate("general.untitled") || title === "Untitled") {
@@ -1368,7 +1386,15 @@ export class TreeVisualizer {
                         if (!d.data) return 'unread';
                         
                         let classes = `${d.data.text_seen == 1 ? 'read' : 'unread'}`;
-                        classes += ` ${d.data.text_status == 'draft' || d.data.text_status == 'incomplete_draft' ? 'tree-node-draft' : ''}`; 
+                        
+                        // Add status-based classes
+                        if (d.data.text_status == 'draft' || d.data.text_status == 'incomplete_draft') {
+                            classes += ' tree-node-draft';
+                        } else if (d.data.text_status == 'published_late') {
+                            classes += ' tree-node-published-late';
+                        } else if (d.data.text_status == 'published') {
+                            classes += ' tree-node-published';
+                        }
                         
                         // Add search-match class if applicable
                         if (this.dataManager && this.dataManager.getSearch() && 

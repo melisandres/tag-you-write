@@ -119,6 +119,22 @@ div.writing.visible{
     opacity: 50%;
 }
 
+.node.published-late .votes path{
+    fill: var(--color-secondary-light);
+    stroke: var(--color-secondary-dark);
+    opacity: 75%;
+}
+
+.with-shelf .node.published-late .writing {
+    border-left: 2px solid var(--color-secondary-light);
+    opacity: 0.85;
+}
+
+.with-shelf .status.published-late {
+    color: var(--color-secondary-dark);
+    font-style: italic;
+}
+
 .with-shelf .votes {
     position: relative;
 }

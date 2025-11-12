@@ -181,6 +181,9 @@
     "untitled": "sans titre",
     "publish": "publier",
     "publish_tooltip": "publier votre texte",
+    "publish_late": "publier tard",
+    "publish_late_tooltip": "publier tard (la finale est déjà choisie)",
+    "late": "tard",
     "save": "garder",
     "save_tooltip": "sauvegarder comme brouillon",
     "delete": "jeter",
@@ -188,6 +191,7 @@
     "cancel": "annuler",
     "cancel_tooltip": "quitter sans sauvegarder",
     "draft": "brouillon",
+    "published_late": "publié en retard",
     "exit": "quitter", 
     "game": "COLLAB",
     "closed": "FERMÉE",
@@ -546,6 +550,7 @@
   },
   "modal": {
     "draft": "BROUILLON",
+    "published_late": "PUBLIÉ EN RETARD",
     "winner": "GAGNANT",
     "ps": "P.S..."
   },

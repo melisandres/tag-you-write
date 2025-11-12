@@ -182,6 +182,9 @@
     "untitled": "untitled",
     "publish": "publish",
     "publish_tooltip": "publish your text",
+    "publish_late": "publish late",
+    "publish_late_tooltip": "publish late (finalist already chosen)",
+    "late": "late",
     "save": "save",
     "save_tooltip": "save as draft",
     "delete": "delete",
@@ -189,6 +192,7 @@
     "cancel": "cancel",
     "cancel_tooltip": "exit without saving",
     "draft": "draft",
+    "published_late": "published late",
     "exit": "exit",
     "game": "COLLAB",
     "pending": "PENDING",
@@ -547,6 +551,7 @@
   },
   "modal": {
     "draft": "DRAFT",
+    "published_late": "PUBLISHED LATE",
     "winner": "WINNER",
     "ps": "P.S..."
   },

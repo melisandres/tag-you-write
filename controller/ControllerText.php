@@ -420,6 +420,8 @@ class ControllerText extends Controller{
         }
 
         //send the writer_id and the game_id to game_has_player
+        // Note: published_late texts should NOT be added to game_has_player since they weren't in the running for winner
+        // Only 'published' texts (and root texts regardless of status) should add players
         if ($status == 'published' || $isRootText) {
             $gameHasPlayer = new GameHasPlayer;
             $gameHasPlayer->insert([
@@ -480,6 +482,9 @@ class ControllerText extends Controller{
         // EVENTS! But only when a text is published. And if the text is a root, Two events: game and text--because this is "Store" not "update".
 
         // NOTE: This is assuming that the writer does not need to see their draft on a representation of the game while editing, and that leaving the form page to return to the game page will go through the modifiedSince endpoint, and bypass the events system, which will not carry any events for drafts but only for publishing. 
+        // Note: store() creates NEW texts, which can only be created when game is open (canIterate requires openForChanges).
+        // Therefore, store() will NEVER receive 'published_late' status - only 'published' is possible here.
+        // Only existing drafts can be published late via update() or instaPublish().
         if ($status == 'published') {
             // Create events for the published text
             $eventType = $isRootText ? 'ROOT_PUBLISH' : 'CONTRIB_PUBLISH';
@@ -629,8 +634,8 @@ class ControllerText extends Controller{
 
         $notifications = $this->getNotifications();
 
-        if ($status == 'published') {
-            // Render the view for adding notes to published texts
+        if ($status == 'published' || $status == 'published_late') {
+            // Render the view for adding notes to published texts (including published_late)
             Twig::render('text-note-edit.php', [
                 'data' => $textData, 
                 'keywords' => $keywords,
@@ -687,27 +692,48 @@ class ControllerText extends Controller{
         $textId = $_POST['id'];
         $textData = $text->selectTexts($currentWriterId, $textId);
 
-        $this->addPermissions($textData, $currentWriterId);
-
-
-        //TODO: you may want to revisit the inability to edit if the game is closed... just for writers who are writing at the moment the game closes... especially if what is out there is public, like a note! you wouldn't want to stop the writer from making their public note legible. I feel it should be possible to edit a note, even if the game is closed. In this case... permission to publish would be reliant of the game being open for changes, and the text being neither an incomplete draft, nor a published text. 
-
-        // Check user's permission to edit (myText && openForChanges && isDraft -- a validated draft)
-        if (!Permissions::canPublish($textData, $currentWriterId)) {
+        // instaPublish only works with validated drafts (not incomplete_draft)
+        // Validation has already been done when the text was saved as 'draft'
+        if ($textData['text_status'] !== 'draft') {
             $this->sendJsonResponse(false, 'toast.text.permission_denied_publish');
         }
 
+        // addPermissions normalizes boolean values and adds permissions object
+        // This is needed for permission checks to work correctly
+        $this->addPermissions($textData, $currentWriterId);
 
+        // Determine if game is closed
+        $isGameClosed = !$textData['openForChanges'];
+        
+        // Check permissions based on game state
+        if ($isGameClosed) {
+            // Game is closed - check canPublishTooLate permission
+            if (!Permissions::canPublishTooLate($textData, $currentWriterId)) {
+                $this->sendJsonResponse(false, 'toast.text.permission_denied_publish');
+            }
+            // Use 'published_late' status for closed games
+            $statusName = 'published_late';
+        } else {
+            // Game is open - check canPublish permission
+            if (!Permissions::canPublish($textData, $currentWriterId)) {
+                $this->sendJsonResponse(false, 'toast.text.permission_denied_publish');
+            }
+            // Use 'published' status for open games
+            $statusName = 'published';
+        }
 
-        // Get the 'published' status_id dynamically
+        // Get the status_id dynamically based on game state
         $textStatus = new TextStatus;
-        $statusData = $textStatus->selectStatusByName('published');
+        $statusData = $textStatus->selectStatusByName($statusName);
+        if (!$statusData) {
+            $this->sendJsonResponse(false, 'toast.text.status_not_found');
+        }
         $statusId = $statusData['id'];
 
         // Prepare the Text data for update
         $data = [
             'id' => $textId,
-            'status_id' => $statusId, // Dynamically retrieved 'published' status_id
+            'status_id' => $statusId, // Dynamically retrieved status_id ('published' or 'published_late')
             'modified_at' => date('Y-m-d H:i:s')
         ];
 
@@ -716,24 +742,29 @@ class ControllerText extends Controller{
         // If the publish was a success, make modifications to the game
         // Add the player BUT only if they are not already in it.
         // Update the game's modified_at--but only if the text is a root text.
+        // Note: published_late texts should NOT be added to game_has_player since they weren't in the running for winner
+        // Only 'published' texts should add players
         if ($success) { 
             $gameId = $text->selectGameId($textId);
 
-            // Check if the player is already in the game
-            $gameHasPlayer = new GameHasPlayer;
-            $existingPlayer = $gameHasPlayer->selectCompositeId([
-                'game_id' => $gameId, 
-                'player_id' => $currentWriterId
-            ]);
+            // Only add player if status is 'published' (not 'published_late')
+            if ($statusName == 'published') {
+                // Check if the player is already in the game
+                $gameHasPlayer = new GameHasPlayer;
+                $existingPlayer = $gameHasPlayer->selectCompositeId([
+                    'game_id' => $gameId, 
+                    'player_id' => $currentWriterId
+                ]);
 
-            // Insert only if the player is not already in the game
-            if (!$existingPlayer) {
-                $gameHasPlayerData = [
-                    'player_id' => $currentWriterId,
-                    'game_id' => $gameId,
-                    'active' => 1
-                ];
-                $gameHasPlayer->insert($gameHasPlayerData);
+                // Insert only if the player is not already in the game
+                if (!$existingPlayer) {
+                    $gameHasPlayerData = [
+                        'player_id' => $currentWriterId,
+                        'game_id' => $gameId,
+                        'active' => 1
+                    ];
+                    $gameHasPlayer->insert($gameHasPlayerData);
+                }
             }  
             
             // Update the game's modified_at--because any new game will change the "seen" count.
@@ -755,8 +786,9 @@ class ControllerText extends Controller{
                 'isRoot' => $isRoot
             ], 'insta_publish');
 
-            // Send email invitations for root texts when published (game is "started")
-            if ($isRoot) {
+            // Send email invitations for root texts when published (only if game is open)
+            // Don't send invitations for published_late texts since the game is already closed
+            if ($isRoot && !$isGameClosed) {
                 $this->sendGameInvitations($gameId, $textData['title'], $textData['prompt'] ?? '');
             }
 
@@ -770,6 +802,7 @@ class ControllerText extends Controller{
             $success ? 'toast.text.publish_success' : 'toast.text.publish_failed',
             [
                 'gameData' => $gameData,
+                'text_status' => $statusName, // Return the actual status ('published' or 'published_late')
             ]
         );
     }
@@ -876,7 +909,20 @@ class ControllerText extends Controller{
             exit;
         }
 
-
+        // If game is closed and user is trying to publish, change status to 'published_late'
+        // This happens after validation, so we know the text is ready to publish
+        if ($status == 'published' && !$textData['openForChanges']) {
+            // Check if user has permission to publish too late
+            if (!Permissions::canPublishTooLate($textData, $currentWriterId)) {
+                $this->sendJsonResponse(false, 'toast.text.permission_denied_publish');
+            }
+            $status = 'published_late';
+        } elseif ($status == 'published' && $textData['openForChanges']) {
+            // Game is open - check normal publish permission
+            if (!Permissions::canPublish($textData, $currentWriterId)) {
+                $this->sendJsonResponse(false, 'toast.text.permission_denied_publish');
+            }
+        }
 
         // Root texts need to update the game prompt and access control settings
         if ($isRoot) {
@@ -921,6 +967,8 @@ class ControllerText extends Controller{
 
         // If the publish was a success, add the player to the game
         // BUT only if they are not already in it
+        // Note: published_late texts should NOT be added to game_has_player since they weren't in the running for winner
+        // Only 'published' texts should add players
         if ($update && $status == 'published') { 
             // Check if the player is already in the game
             $gameHasPlayer = new GameHasPlayer;
@@ -999,7 +1047,7 @@ class ControllerText extends Controller{
         }
 
         // Final events and messages
-        if ($status == "published"){
+        if ($status == "published" || $status == "published_late"){
             // Create events for the published text
             $eventType = $isRoot ? 'ROOT_PUBLISH' : 'CONTRIB_PUBLISH';
             $this->createEvents($eventType, [
@@ -1009,8 +1057,9 @@ class ControllerText extends Controller{
                 'isRoot' => $isRoot
             ], 'update');
 
-            // Send email invitations for root texts when published (game is "started")
-            if ($isRoot) {
+            // Send email invitations for root texts when published (only if game is open)
+            // Don't send invitations for published_late texts since the game is already closed
+            if ($isRoot && $status == "published") {
                 $this->sendGameInvitations($gameId, $input['title'], $input['prompt'] ?? '');
             }
 

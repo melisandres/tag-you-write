@@ -110,8 +110,16 @@ export class ShelfVisualizer {
 
     const untitledText = window.i18n ? window.i18n.translate("general.untitled") : "Untitled";
 
+    // Determine node class based on status
+    let statusClass = "draft";
+    if (node.text_status === "published") {
+      statusClass = "published";
+    } else if (node.text_status === "published_late") {
+      statusClass = "published-late";
+    }
+
     return `
-      <li class="node ${node.text_status === "published" ? "published" : "draft"}" data-story-id="${node.id}" style="--node-depth: ${depth}">
+      <li class="node ${statusClass}" data-story-id="${node.id}" style="--node-depth: ${depth}">
         <div class="node-headline ${isWinner}">
           <div class="arrow closed arrow-right"></div>
           <div class="shelf-heart ${unread}"> ${this.getNumberOfVotes(node)}</div>
@@ -132,7 +140,7 @@ export class ShelfVisualizer {
             ${node.permissions.canEdit ? this.getEditForm(node) : ''}
             ${node.permissions.canAddNote ? this.getNoteForm(node) : ''}
             ${node.permissions.canVote ? this.getVoteButton(node) : ''}
-            ${node.permissions.canPublish ? this.getPublishForm(node) : ''}
+            ${(node.permissions.canPublish || node.permissions.canPublishTooLate) ? this.getPublishForm(node) : ''}
             ${node.permissions.canDelete ? this.getDeleteForm(node) : ''}
           </div>
           <p>
@@ -236,11 +244,15 @@ export class ShelfVisualizer {
   }
 
   getPublishForm(node) {
-    const publishTitle = window.i18n.translate('general.publish');
+    const isPublishLate = node.permissions?.canPublishTooLate || false;
+    const publishTitle = isPublishLate 
+      ? window.i18n.translate('general.publish_late_tooltip')
+      : window.i18n.translate('general.publish_tooltip');
+    const publishI18nKey = isPublishLate ? 'general.publish_late' : 'general.publish';
 
     return `
         <button data-text-id="${node.id}" 
-        data-insta-publish-button class="publish" data-i18n-title="general.publish" title="${publishTitle}">
+        data-insta-publish-button class="publish ${isPublishLate ? 'publish-late' : ''}" data-i18n-title="${publishI18nKey}" title="${publishTitle}">
           ${SVGManager.publishSVG}
         </button>
     `;
@@ -317,6 +329,14 @@ export class ShelfVisualizer {
 
       return `
       <span data-status class="status winner" data-i18n="general.winner"}>
+        ${status}
+      </span>`;
+    }
+    else if(node.text_status === "published_late"){
+      // translate the string
+      const status = window.i18n ? window.i18n.translate("general.published_late") : "published late";
+      return `
+      <span data-status class="status published-late" data-i18n="general.published_late"}>
         ${status}
       </span>`;
     }

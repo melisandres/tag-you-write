@@ -26,6 +26,7 @@ section.info{
     align-items: flex-end;
     max-width: 75ch;
     margin: 0 auto;
+    padding-bottom: 1.9em; /* so the activity indicator is not hidden in the form */
 }
 
 .iterate .info-container {

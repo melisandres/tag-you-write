@@ -161,9 +161,15 @@ export class ShelfUpdateManager {
     if (container) {
       const drawer = container.querySelector(`li[data-story-id="${textId}"]`);
       if (drawer) {
-        // Update the drawer's status
-        drawer.classList.remove('draft');
-        drawer.classList.add(newStatus);
+        // Update the drawer's status class
+        drawer.classList.remove('draft', 'published', 'published-late');
+        if (newStatus === 'published') {
+          drawer.classList.add('published');
+        } else if (newStatus === 'published_late') {
+          drawer.classList.add('published-late');
+        } else {
+          drawer.classList.add('draft');
+        }
 
         // Update vote count display using existing data attributes
         const votesDiv = drawer.querySelector('.votes');
@@ -187,10 +193,20 @@ export class ShelfUpdateManager {
           }
         }
 
-        // Remove "draft" text
+        // Update status badge
         const statusSpan = drawer.querySelector('.status');
         if (statusSpan) {
-          statusSpan.innerHTML = '';
+          if (newStatus === 'published_late') {
+            const statusText = window.i18n ? window.i18n.translate("general.published_late") : "published late";
+            statusSpan.innerHTML = `<span data-status class="status published-late" data-i18n="general.published_late">${statusText}</span>`;
+          } else if (newStatus === 'published') {
+            // Published texts don't show a status badge
+            statusSpan.innerHTML = '';
+          } else {
+            // Draft status
+            const statusText = window.i18n ? window.i18n.translate("general.draft") : "draft";
+            statusSpan.innerHTML = `<span data-status class="status draft" data-i18n="general.draft">${statusText}</span>`;
+          }
         }
 
         // Update available actions
@@ -639,7 +655,7 @@ export class ShelfUpdateManager {
     if (data.permissions.canVote) {
       nodeButtons.innerHTML += this.getVoteButton(data);
     }
-    if (data.permissions.canPublish) {
+    if (data.permissions.canPublish || data.permissions.canPublishTooLate) {
       nodeButtons.innerHTML += this.getPublishForm(data);
     }
     if (data.permissions.canDelete) {
@@ -705,11 +721,15 @@ export class ShelfUpdateManager {
   }
 
   getPublishForm(node) {
-    const publishTitle = window.i18n.translate('general.publish');
+    const isPublishLate = node.permissions?.canPublishTooLate || false;
+    const publishTitle = isPublishLate 
+      ? window.i18n.translate('general.publish_late_tooltip')
+      : window.i18n.translate('general.publish_tooltip');
+    const publishI18nKey = isPublishLate ? 'general.publish_late' : 'general.publish';
 
     return `
         <button data-text-id="${node.id}" 
-        data-insta-publish-button class="publish" data-i18n-title="general.publish" title="${publishTitle}">
+        data-insta-publish-button class="publish ${isPublishLate ? 'publish-late' : ''}" data-i18n-title="${publishI18nKey}" title="${publishTitle}">
           ${SVGManager.publishSVG}
         </button>
     `;

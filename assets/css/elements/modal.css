@@ -30,21 +30,22 @@
 }
 
 .modal .top-info{
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    grid-template-rows: auto;
     align-items: center;
     position: relative;
+    gap: 0.5rem;
 }
 
 .modal .top-info .top-info-left {
     display: flex;
     align-items: center;
+    justify-self: start;
 }
 
 .modal .top-info .top-info-middle {
-    position: absolute;
-    left: 0;
-    right: 0;
+    grid-column: 2;
     text-align: center;
     pointer-events: none; /* Allow clicks to pass through to underlying elements */
 }
@@ -65,6 +66,8 @@
     cursor: pointer;
     opacity: var(--modal-button-opacity, 1);
     flex-shrink: 0;
+    justify-self: end;
+    grid-column: 3;
 }
 
 /* this is the buttons area -- the close button is always there */
@@ -95,6 +98,9 @@
     width: 60%; /* Adjust width as needed */
     overflow-y: auto;
     max-height: 100%;
+    /* Enable container queries - base layout changes on modal width, not screen width */
+    container-type: inline-size;
+    container-name: modal;
 }
 
 /* this is everything on the "paper" */
@@ -147,6 +153,45 @@
 .modal .votes.hidden {
     opacity: 0;
     visibility: hidden;
+}
+
+/* Stack votes vertically when modal is narrower */
+@container modal (max-width: 400px) {
+    .modal .top-info .top-info-left .votes {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .modal .top-info .top-info-left .votes .vote-count {
+        font-size: 0.5rem; /* 8px equivalent */
+        line-height: 1.2;
+    }
+}
+
+/* Move middle section to second row when modal is very narrow to prevent overlap */
+@container modal (max-width: 450px) {
+    .modal .top-info {
+        grid-template-columns: 1fr auto;
+        grid-template-rows: auto auto;
+        gap: 0.25rem;
+    }
+    
+    .modal .top-info .top-info-left {
+        grid-column: 1;
+        grid-row: 1;
+    }
+    
+    .modal .top-info .top-info-middle {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        justify-self: center;
+    }
+    
+    .modal .top-info .top-info-close {
+        grid-column: 2;
+        grid-row: 1;
+    }
 }
 
 /* === Modal Text Activity Indicators === */

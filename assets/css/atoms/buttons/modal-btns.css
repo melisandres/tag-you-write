@@ -31,6 +31,10 @@
     padding: 4px 11px 5px 6px;
 }
 
+.modal-btns .publish.publish-late{
+    background-color: var(--color-secondary-light);
+}
+
 .modal-btns .delete{
     background-color: var(--color-error);
     width: 47px;

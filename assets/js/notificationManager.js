@@ -235,6 +235,11 @@ export class NotificationManager {
         
         // Create a custom modal with the formatted message
         this.warningManager.createWarningModal(formattedMessage, null, onConfirm, onCancel, 'warning.confirm_game_done', 'warning.cancel_game_done');
+        
+        // Emit event for form button updates when game ending modal is shown
+        if (notification.notification_type === 'game_closed' && window.eventBus) {
+            window.eventBus.emit('gameEndingModalShown', notification);
+        }
     }
 
     /**
