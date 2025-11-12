@@ -41,6 +41,8 @@
     "back": "Retour",
     "about": "À propos",
     "about_tooltip": "à propos de ce site",
+    "contact": "Contact",
+    "contact_tooltip": "nous contacter",
     "dev_mode_admin": "Administrateur",
     "dev_mode_regular": "Utilisateur Régulier",
     "dev_mode_beta": "Testeur Bêta"
@@ -63,10 +65,29 @@
   },
   "about": {
     "title": "À propos de Tag You Write",
-    "description": "<p>Tag You Write est une expérience en mouvement — une exploration de l’écriture comme jeu. C’est un espace où de courts textes se façonnent et se re-façonnent entre plusieurs mains, jusqu’à ce que le processus s’inscrive dans le texte lui-même et qu’il trouve sa propre voix. C’est un lieu où confier un petit texte — non pas à l’esprit collectif, ni à l’esprit artificiel, mais à quelques esprits singuliers, imparfaits — pour la réécriture, la soustraction, et la surprise. Il n’existe pas de voie tracée d’avance. Tag You Write cherche plutôt à ouvrir le passage — à laisser place aux détours, aux bifurcations, et aux voyages qu’ils peuvent inspirer.</p>",
+    "description": "<p>Tag You Write est une expérience en mouvement — une exploration de l'écriture comme jeu. C'est un espace où de courts textes se façonnent et se re-façonnent entre plusieurs mains, jusqu'à ce que le processus s'inscrive dans le texte lui-même et qu'il trouve sa propre voix. C'est un lieu où confier un petit texte — non pas à l'esprit collectif, ni à l'esprit artificiel, mais à quelques esprits singuliers, imparfaits — pour la réécriture, la soustraction, et la surprise. Il n'existe pas de voie tracée d'avance. Tag You Write cherche plutôt à ouvrir le passage — à laisser place aux détours, aux bifurcations, et aux voyages qu'ils peuvent inspirer.</p>",
     "creator": {
       "bio": "Créé par Melisandre Schofield, une écrivaine et développeuse web avec un parcours en arts visuels et narratologie expérimentale. Elle conçoit des outils et des expériences qui réunissent les gens — pas seulement pour écrire, mais pour jouer, se surprendre mutuellement, et redécouvrir la chimie étrange de l'imagination partagée."
     }
+  },
+  "contact": {
+    "title": "Contactez-nous",
+    "description": "Écrivez-moi ! Questions, préoccupations, etc.",
+    "email_label": "Adresse courriel",
+    "email_placeholder": "votre.courriel@exemple.com",
+    "subject_label": "Sujet",
+    "subject_select": "Sélectionnez un sujet...",
+    "subject_love_this": "J'adore !",
+    "subject_question": "Question",
+    "subject_feedback": "Commentaires",
+    "subject_other": "Autre",
+    "subject_other_custom_label": "Sujet personnalisé",
+    "subject_other_placeholder": "Entrez votre sujet...",
+    "message_label": "Message",
+    "message_placeholder": "Votre message ici...",
+    "newsletter_label": "Je souhaite recevoir des informations sur les événements, y compris le lancement du jeu, les ateliers en personne, etc.",
+    "send": "Envoyer",
+    "send_tooltip": "envoyer le message"
   },
   "page_title": {
     "home": "Scratchez-moi ça!",

@@ -343,6 +343,16 @@
                     </span>
                 </a>
             </div>
+
+            <!-- Contact Link -->
+            <div class="overflow-menu-item">
+                <a class="nav-link contact" href="#" data-item="contact" data-i18n-title="nav.contact_tooltip" title="{{ translate('nav.contact_tooltip') }}">
+                    <span class="icon" data-svg="contact" data-i18n-title="nav.contact_tooltip" title="{{ translate('nav.contact_tooltip') }}"></span>
+                    <span class="nav-text" data-i18n="nav.contact">
+                        {{ translate('nav.contact') }}
+                    </span>
+                </a>
+            </div>
         {% if not guest %}
             <!-- Logout Link -->
             {% if title_key != 'page_title.login' %}

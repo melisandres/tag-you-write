@@ -47,7 +47,7 @@ import { TextFormGameActivityIndicator } from './textFormGameActivityIndicator.j
 import { InviteInputManager } from './inviteInputManager.js';
 import { InviteeSuggestionsManager } from './inviteeSuggestionsManager.js';
 import { FormTogglesManager } from './formTogglesManager.js';
-import { AboutManager } from './aboutManager.js';
+import { ContactModalManager } from './contactModalManager.js';
 import { InvitationTokenManager } from './invitationTokenManager.js';
 import { InvitationLinkManager } from './invitationLinkManager.js';
 import { TutorialSwitcherManager } from './tutorialSwitcherManager.js';
@@ -100,8 +100,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Initialize NotificationsMenuManager and make it globally available
   window.notificationsMenuManager = new NotificationsMenuManager();
 
-  // Initialize AboutManager and make it globally available
-  window.aboutManager = new AboutManager();
+  // Initialize ContactModalManager and make it globally available
+  window.contactModalManager = new ContactModalManager();
 
   // Only initialize GameListManager if we're on the games list page
   //const gamesContainer = document.querySelector('.stories');

@@ -13,7 +13,8 @@ export class ResponsiveNavManager {
             'language': 6,
             'tutorial': 7,
             'newGame': 8,
-            'logout': 9
+            'contact': 9,
+            'logout': 10
         };
         this.init();
     }
@@ -67,6 +68,7 @@ export class ResponsiveNavManager {
         if (item.classList.contains('language-switcher')) return 'language';
         if (item.classList.contains('notifications')) return 'notifications';
         if (item.classList.contains('newGame')) return 'newGame';
+        if (item.classList.contains('contact')) return 'contact';
         if (item.classList.contains('writers') && item.href && item.href.includes('logout')) return 'logout';
         
         return 'unknown';

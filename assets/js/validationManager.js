@@ -15,7 +15,9 @@ export class ValidationManager {
         this.formValidity = {};
 
         this.lastValidationStatus = {};
-        this.form = document.querySelector('#main-form');
+        // Check for main page form first, then modal forms
+        this.form = document.querySelector('#main-form') || 
+                    document.querySelector('[data-modal-form-type]');
 
         this.init();
     }
@@ -26,7 +28,9 @@ export class ValidationManager {
         const form = this.form;
         const activity = form.dataset.formActivity;
         if (this.textElement) this.updateWordCount(this.textElement.value);
-        const formType = this.form.dataset.formType;
+        // Get formType from either data-form-type (page forms) or data-modal-form-type (modal forms)
+        const formType = this.form.getAttribute('data-form-type') || 
+                        this.form.getAttribute('data-modal-form-type');
 
         // if you are initializing in editing mode, validate all the fields
         if (activity === 'editing') {

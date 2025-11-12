@@ -11,6 +11,10 @@
                 <span class="icon" data-svg="about"></span>
                 <span class="footer-about-text" data-i18n="nav.about">{{ translate('nav.about') }}</span>
             </a>
+            <a class="footer-contact-btn" href="#" data-item="contact" data-i18n-title="nav.contact_tooltip" title="{{ translate('nav.contact_tooltip') }}">
+                <span class="icon" data-svg="contact"></span>
+                <span class="footer-contact-text" data-i18n="nav.contact">{{ translate('nav.contact') }}</span>
+            </a>
             <div class="footer-activity-indicator" id="footer-activity-indicator" title="{{ translate('activity.browsingVsEditing') }}" data-i18n-title="activity.browsingVsEditing">
                 <div class="icon" data-svg="user"></div>
                 <div class="activity-numbers">0:0</div>

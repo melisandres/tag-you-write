@@ -12,7 +12,8 @@
     .nav-link[data-priority-nav="6"],
     .nav-link[data-priority-nav="7"],
     .nav-link[data-priority-nav="8"],
-    .nav-link[data-priority-nav="9"] {
+    .nav-link[data-priority-nav="9"],
+    .nav-link[data-priority-nav="10"] {
         display: none;
     }
 
@@ -23,7 +24,8 @@
     .overflow-menu .nav-link[data-priority-overflow="6"],
     .overflow-menu .nav-link[data-priority-overflow="7"],
     .overflow-menu .nav-link[data-priority-overflow="8"],
-    .overflow-menu .nav-link[data-priority-overflow="9"] {
+    .overflow-menu .nav-link[data-priority-overflow="9"],
+    .overflow-menu .nav-link[data-priority-overflow="10"] {
         display: flex;
     }
 }
@@ -32,7 +34,8 @@
 @media (max-width: 420px) {
     .nav-link[data-priority-nav="7"],
     .nav-link[data-priority-nav="8"],
-    .nav-link[data-priority-nav="9"] {
+    .nav-link[data-priority-nav="9"],
+    .nav-link[data-priority-nav="10"] {
         display: none;
     }
 
@@ -42,7 +45,8 @@
 
     .overflow-menu .nav-link[data-priority-overflow="7"],
     .overflow-menu .nav-link[data-priority-overflow="8"],
-    .overflow-menu .nav-link[data-priority-overflow="9"] {
+    .overflow-menu .nav-link[data-priority-overflow="9"],
+    .overflow-menu .nav-link[data-priority-overflow="10"] {
         display: flex;
     }
 }
@@ -50,7 +54,8 @@
 /* Medium screens (480px and below) - show only 5 items */
 @media (max-width: 480px) {
     .nav-link[data-priority-nav="8"],
-    .nav-link[data-priority-nav="9"] {
+    .nav-link[data-priority-nav="9"],
+    .nav-link[data-priority-nav="10"] {
         display: none;
     }
 
@@ -59,14 +64,16 @@
     }
 
     .overflow-menu .nav-link[data-priority-overflow="8"],
-    .overflow-menu .nav-link[data-priority-overflow="9"] {
+    .overflow-menu .nav-link[data-priority-overflow="9"],
+    .overflow-menu .nav-link[data-priority-overflow="10"] {
         display: flex;
     }
 }
 
 /* Large screens (600px and below) - show only 6 items */
 @media (max-width: 600px) {
-    .nav-link[data-priority-nav="9"] {
+    .nav-link[data-priority-nav="9"],
+    .nav-link[data-priority-nav="10"] {
         display: none;
     }
 
@@ -74,7 +81,8 @@
         display: flex;
     }
 
-    .overflow-menu .nav-link[data-priority-overflow="9"] {
+    .overflow-menu .nav-link[data-priority-overflow="9"],
+    .overflow-menu .nav-link[data-priority-overflow="10"] {
         display: flex;
     }
 }
@@ -82,8 +90,9 @@
 
 /* Hamburger is always visible - no hiding logic needed */
 
-/* About button is always visible in overflow menu - no hiding logic needed */
-.overflow-menu .nav-link.about {
+/* About and Contact buttons are always visible in overflow menu - no hiding logic needed */
+.overflow-menu .nav-link.about,
+.overflow-menu .nav-link.contact {
     display: flex !important;
 }
 

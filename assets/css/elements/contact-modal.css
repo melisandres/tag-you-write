@@ -1,0 +1,343 @@
+/* Contact Modal Styles - Based on About Modal */
+
+/* Modal Background */
+.contact-modal-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.contact-modal-background[data-contact-modal="visible"] {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Modal Content */
+.contact-modal-content {
+    background-color: var(--color-white, #ffffff);
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    transform: scale(0.95);
+    transition: transform 0.3s ease;
+}
+
+.contact-modal-background[data-contact-modal="visible"] .contact-modal-content {
+    transform: scale(1);
+}
+
+/* Modal Header */
+.contact-modal-header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 1rem;
+}
+
+.contact-modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+    color: var(--color-secondary, #666666);
+}
+
+.contact-modal-close:hover {
+    background-color: var(--color-grey-light, #f5f5f5);
+}
+
+.contact-modal-close .icon {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.contact-modal-close .icon svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+}
+
+/* Modal Body */
+.contact-modal-body {
+    padding: 2rem;
+}
+
+/* Content Section */
+.contact-content {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.contact-title {
+    margin: 0 0 1rem 0;
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--color-black, #333333);
+    font-family: var(--font-family-primary, 'Livvic', sans-serif);
+}
+
+.contact-description {
+    margin: 0 0 2rem 0;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: var(--color-secondary, #666666);
+}
+
+/* Contact Form Styles - Following main form patterns */
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1em;
+}
+
+.contact-form label {
+    display: block;
+    width: 100%;
+    max-width: 75ch;
+    position: relative;
+}
+
+.contact-form label span.headline {
+    display: block;
+    font-family: var(--font-family-secondary);
+    margin-top: var(--spacing-extra-extra-large);
+}
+
+.contact-form input[type="email"],
+.contact-form input[type="text"],
+.contact-form select,
+.contact-form textarea {
+    display: block;
+    padding: var(--spacing-medium);
+    font-size: clamp(1rem, 2vw, 1.2rem);
+    border: 1px solid var(--color-grey-light);
+    max-width: 100%;
+    min-width: 100%;
+    background-color: var(--color-white-lightest);
+    font-family: inherit;
+}
+
+.contact-form select {
+    margin-bottom: 35px;
+}
+
+/* Focus styles - matching main form patterns */
+.contact-form label:not(.has-feedback) input:focus,
+.contact-form label:not(.has-feedback) textarea:focus,
+.contact-form label:not(.has-feedback) select:focus {
+    outline: var(--color-accent) solid 1px;
+    outline-offset: -1px;
+    background-color: white;
+}
+
+.contact-form label.has-feedback input:focus,
+.contact-form label.has-feedback textarea:focus,
+.contact-form label.has-feedback select:focus {
+    box-shadow: 0px 20px 7px 9px var(--color-primary-lightest) !important;
+    outline: var(--color-white) solid 3px;
+    outline-offset: 1px;
+    background-color: white;
+    border-color: var(--color-white);
+}
+
+/* Feedback element - space for validation messages */
+.contact-form .feedback {
+    margin-top: 0.5em;
+    font-family: var(--font-family-secondary);
+    background-color: transparent;
+    font-size: var(--font-size-small);
+    position: absolute;
+}
+
+.contact-form .feedback.error {
+    color: var(--color-error);
+}
+
+.contact-form .feedback.critical {
+    color: var(--color-critical);
+}
+
+.contact-form .feedback.info {
+    color: var(--color-info);
+}
+
+.contact-form .feedback.warning {
+    color: var(--color-warning);
+}
+
+.contact-form textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+/* Placeholder styling */
+.contact-form input::placeholder,
+.contact-form textarea::placeholder {
+    color: var(--color-primary-dark) !important;
+    opacity: 0.6;
+    font-family: var(--font-family-secondary);
+}
+
+/* Newsletter checkbox label */
+.contact-newsletter-label {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.contact-newsletter-label input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+    min-width: auto;
+    max-width: none;
+}
+
+/* Form buttons - using form-btns pattern */
+.contact-form .form-btns {
+    width: 100%;
+    max-width: 75ch;
+    margin-top: var(--spacing-extra-large);
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+.contact-form .form-btns button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--form-button-font-size);
+    border: none;
+    background-color: transparent;
+    margin: 0 auto;
+    padding-top: var(--form-btns-padding-top);
+    cursor: pointer;
+}
+
+.contact-form .form-btns .title {
+    color: var(--color-grey);
+}
+
+.contact-form .form-btns .icon {
+    width: var(--form-button-icon-size);
+    height: var(--form-button-icon-size);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.contact-form .form-btns svg {
+    width: var(--form-button-svg-size);
+    height: var(--form-button-svg-size);
+}
+
+.contact-form .form-btns button.cancel .icon {
+    background-color: var(--color-grey);
+}
+
+.contact-form .form-btns button.contact-submit-btn .icon {
+    background-color: var(--color-success);
+}
+
+/* Body scroll lock */
+body.contact-modal-open {
+    overflow: hidden;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .contact-modal-content {
+        width: 95%;
+        margin: 1rem;
+    }
+    
+    .contact-modal-header {
+        padding: 1.5rem 1.5rem 1rem 1.5rem;
+    }
+    
+    .contact-title {
+        font-size: 1.5rem;
+    }
+    
+    .contact-modal-body {
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .contact-modal-content {
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+        max-height: 100vh;
+    }
+    
+    .contact-modal-header {
+        border-radius: 0;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .contact-modal-content {
+        background-color: var(--dark-bg-color, #1a1a1a);
+        color: var(--dark-text-color, #ffffff);
+    }
+    
+    .contact-title {
+        color: var(--dark-text-color, #ffffff);
+    }
+    
+    .contact-description {
+        color: var(--dark-text-color-secondary, #cccccc);
+    }
+    
+    .contact-form input[type="email"],
+    .contact-form input[type="text"],
+    .contact-form select,
+    .contact-form textarea {
+        background-color: var(--dark-bg-color-secondary, #2a2a2a);
+        border-color: var(--dark-border-color, #333333);
+        color: var(--dark-text-color, #ffffff);
+    }
+    
+    .contact-form input[type="email"]:focus,
+    .contact-form input[type="text"]:focus,
+    .contact-form select:focus,
+    .contact-form textarea:focus {
+        border-color: var(--color-love, #ff69b4);
+    }
+    
+    .contact-cancel-btn {
+        background-color: var(--dark-bg-color-secondary, #2a2a2a);
+        color: var(--dark-text-color, #ffffff);
+    }
+    
+    .contact-cancel-btn:hover {
+        background-color: var(--dark-hover-bg-color, #333333);
+    }
+}
+

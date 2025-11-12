@@ -69,6 +69,42 @@ footer {
     font-weight: 500;
 }
 
+.footer-contact-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    color: var(--text-color-secondary, #666666);
+    font-size: 0.9rem;
+    text-decoration: none;
+}
+
+.footer-contact-btn:hover {
+    color: var(--color-love, #ff69b4);
+}
+
+.footer-contact-btn .icon {
+    width: 14px;
+    height: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.footer-contact-btn .icon svg {
+    width: 12px;
+    height: 12px;
+    fill: currentColor;
+}
+
+.footer-contact-text {
+    font-weight: 500;
+}
+
 .footer-activity-indicator {
     display: flex;
     align-items: center;
@@ -113,7 +149,8 @@ footer {
         gap: 0.75rem;
     }
     
-    .footer-about-btn {
+    .footer-about-btn,
+    .footer-contact-btn {
         padding: 0.75rem 1.5rem;
         font-size: 1rem;
     }
@@ -128,7 +165,8 @@ footer {
         padding: 0 0.5rem;
     }
     
-    .footer-about-btn {
+    .footer-about-btn,
+    .footer-contact-btn {
         padding: 0.5rem 1rem;
         font-size: 0.9rem;
     }
@@ -154,10 +192,16 @@ footer {
         border-color: var(--dark-border-color, #333333);
     }
     
-    .footer-about-btn:hover {
+    .footer-about-btn:hover,
+    .footer-contact-btn:hover {
         background-color: var(--color-love, #ff69b4);
         color: white;
         border-color: var(--color-love, #ff69b4);
+    }
+    
+    .footer-contact-btn {
+        color: var(--dark-text-color, #ffffff);
+        border-color: var(--dark-border-color, #333333);
     }
     
     .footer-activity-indicator {
