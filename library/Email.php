@@ -165,7 +165,7 @@ class Email {
      * @return bool True if emails should be queued
      */
     private function shouldQueueEmails() {
-        // Check for environment variable
+        // Check for environment variable first (explicit control)
         if (isset($_ENV['EMAIL_QUEUE_ENABLED'])) {
             return filter_var($_ENV['EMAIL_QUEUE_ENABLED'], FILTER_VALIDATE_BOOLEAN);
         }
@@ -187,6 +187,7 @@ class Email {
             }
         }
         
+        // Default to not queuing (send immediately) for safety
         return false;
     }
 

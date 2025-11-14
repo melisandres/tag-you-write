@@ -248,6 +248,52 @@ class ControllerWriter extends Controller{
         }
     }
 
+    /**
+     * Get current user's email for contact form auto-fill
+     * Returns JSON with email if logged in, error if not
+     */
+    public function getCurrentUserEmail() {
+        // Check if user is logged in
+        if (!isset($_SESSION['writer_id'])) {
+            header('Content-Type: application/json');
+            http_response_code(401);
+            echo json_encode([
+                'success' => false,
+                'error' => 'User not authenticated'
+            ]);
+            return;
+        }
+
+        try {
+            $writer = new Writer();
+            $writerData = $writer->selectId($_SESSION['writer_id']);
+            
+            if (!$writerData || !isset($writerData['email'])) {
+                header('Content-Type: application/json');
+                http_response_code(404);
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'User email not found'
+                ]);
+                return;
+            }
+
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => true,
+                'email' => $writerData['email']
+            ]);
+        } catch (Exception $e) {
+            error_log('Error in getCurrentUserEmail: ' . $e->getMessage());
+            header('Content-Type: application/json');
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'error' => 'Failed to fetch user email'
+            ]);
+        }
+    }
+
     public function validateWriter($data, $password="default"){
         extract($data);
 

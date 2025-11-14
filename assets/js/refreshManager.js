@@ -60,8 +60,20 @@ export class RefreshManager {
         
         // Listen for validation changes to store form validity state
         eventBus.on('validationChanged', (validationStatus) => {
-            this.state.form.validity = validationStatus;
-            console.log('RefreshManager: Updated form validity state from validationChanged event', validationStatus);
+            // Store validity per formType to support parallel forms
+            if (!this.state.form.validity) {
+                this.state.form.validity = {};
+            }
+            
+            // If formType is specified, store per formType; otherwise store at root level (backwards compatibility)
+            if (validationStatus.formType) {
+                this.state.form.validity[validationStatus.formType] = validationStatus;
+                console.log('RefreshManager: Updated form validity state for formType', validationStatus.formType, validationStatus);
+            } else {
+                // Backwards compatibility: store at root level for forms without formType
+                this.state.form.validity = validationStatus;
+                console.log('RefreshManager: Updated form validity state (legacy, no formType)', validationStatus);
+            }
             console.log('RefreshManager: Current state.form.validity:', this.state.form.validity);
         });
         eventBus.on('formUpdated', this.handleFormUpdated.bind(this));
@@ -422,6 +434,15 @@ export class RefreshManager {
         pageState.form.type = formType;
         pageState.form.lastDatabaseState = this.autoSaveManager.lastSavedContent;
         pageState.form.validity = this.state.form.validity; // Save form validity state
+        
+        // Also save contact modal state if it exists (for form pages)
+        if (window.contactModalManager && window.contactModalManager.isOpen) {
+            if (!pageState.contactForm) {
+                pageState.contactForm = {};
+            }
+            pageState.contactForm.isOpen = true;
+        }
+        
         localStorage.setItem('pageState', JSON.stringify(pageState));
     }
 
@@ -494,7 +515,42 @@ export class RefreshManager {
             console.log('Saving showcase state:', this.state.showcase);
         }
 
-        localStorage.setItem('pageState', JSON.stringify(this.state));
+        // Save contact modal state if it exists
+        // Get existing pageState first to preserve contactForm.data
+        let pageState = JSON.parse(localStorage.getItem('pageState') || '{}');
+        
+        if (window.contactModalManager && window.contactModalManager.isOpen) {
+            // Save the current contact form data first (ensures latest data is saved)
+            if (window.contactModalManager.saveContactFormData) {
+                window.contactModalManager.saveContactFormData();
+                // Re-read pageState after saveContactFormData() to get the updated data
+                pageState = JSON.parse(localStorage.getItem('pageState') || '{}');
+            }
+            
+            // Ensure contactForm object exists
+            if (!pageState.contactForm) {
+                pageState.contactForm = {};
+            }
+            pageState.contactForm.isOpen = true;
+            
+            // Preserve contactForm in this.state
+            this.state.contactForm = pageState.contactForm;
+        } else {
+            // Ensure contactForm state is cleared if modal is not open
+            if (pageState.contactForm) {
+                pageState.contactForm.isOpen = false;
+                // Keep the data even when modal is closed (user might reopen it)
+                // Only clear isOpen flag
+            }
+        }
+
+        // Merge pageState with this.state to preserve contactForm.data
+        const finalState = { ...this.state };
+        if (pageState.contactForm) {
+            finalState.contactForm = pageState.contactForm;
+        }
+        
+        localStorage.setItem('pageState', JSON.stringify(finalState));
     }
 
     captureD3Transform() {
@@ -544,6 +600,15 @@ export class RefreshManager {
             // Handle form state restoration
             if (savedState.form.data && savedState.form.type && this.isAPageRefresh) {
                await this.restoreFormState(savedState);
+            }
+
+            // Handle contact modal restoration
+            if (savedState.contactForm?.isOpen && window.contactModalManager && this.isAPageRefresh) {
+                // Use setTimeout to ensure DOM is ready and ContactModalManager is initialized
+                setTimeout(() => {
+                    window.contactModalManager.showModal();
+                    console.log('RefreshManager: Restored contact modal');
+                }, 100);
             }
 
             // Create showcase container and restore view state

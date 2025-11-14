@@ -147,6 +147,14 @@ export class ButtonUpdateManager {
 
     handleValidationChanged(results) {    
         //console.log('handleValidationChanged called with results:', results);
+        
+        // Only respond to validation events for this form's formType
+        // If formType is not specified in results, assume it's for this form (backwards compatibility)
+        if (results.formType && results.formType !== this.formType) {
+            console.log('FormButtonsUpdateManager: Ignoring validationChanged event for different formType', results.formType, 'expected', this.formType);
+            return;
+        }
+        
         if (this.formType === 'writerCreate') {
             this.updateSaveButton(results.canPublish);
         } else {

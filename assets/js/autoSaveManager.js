@@ -60,6 +60,13 @@ export class AutoSaveManager {
 
     // If validation allows/disallows autosave, make it so
     handleValidationChanged(results) {
+        // Only respond to validation events for page forms (root, iteration)
+        // Contact form doesn't use autosave, so ignore it
+        if (results.formType && results.formType !== this.formType) {
+            console.log('AutoSaveManager: Ignoring validationChanged event for different formType', results.formType, 'expected', this.formType);
+            return;
+        }
+        
         this.canAutosave = results.canAutosave;
     }
 

@@ -39,8 +39,14 @@ export class FormManager {
         // Initialize the global CKEditor instances container if it doesn't exist
         window.CKEditorInstances = window.CKEditorInstances || {};
 
-        const textareas = document.querySelectorAll('textarea');
+        // Get all textareas, but exclude those in modal forms (like contact form)
+        const textareas = document.querySelectorAll('textarea:not([data-modal-form-type] textarea)');
         textareas.forEach(textarea => {
+            // Also skip textareas that are inside forms with data-modal-form-type
+            const form = textarea.closest('[data-modal-form-type]');
+            if (form) {
+                return; // Skip this textarea - it's in a modal form
+            }
             const container = document.createElement('div');
             container.className = textarea.className + ' editor-wrapper';
             textarea.parentNode.insertBefore(container, textarea);
@@ -80,6 +86,14 @@ export class FormManager {
 
     handleValidationChanged(results) {
         console.log('in form: validation changed', results);
+        
+        // Only respond to validation events for this form's formType
+        // If formType is not specified in results, assume it's for this form (backwards compatibility)
+        if (results.formType && results.formType !== this.formType) {
+            console.log('FormManager: Ignoring validationChanged event for different formType', results.formType, 'expected', this.formType);
+            return;
+        }
+        
         this.canPublish = results.canPublish;
         this.canAutosave = results.canAutosave;
     }

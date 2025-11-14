@@ -97,6 +97,14 @@ export class TutorialSwitcherManager {
         // Listen for validation changes and pass them to the tutorial modal if it exists
         eventBus.on('validationChanged', (validationStatus) => {
             console.log('TutorialSwitcherManager: Received validationChanged event', validationStatus);
+            
+            // Only pass validation for page forms (not modal forms like contact)
+            // Tutorials are for page forms, not contact forms
+            if (validationStatus.formType && validationStatus.formType === 'contact') {
+                console.log('TutorialSwitcherManager: Ignoring contact form validation');
+                return;
+            }
+            
             if (this.tutorialModal) {
                 // Pass the validation event to the tutorial modal
                 this.tutorialModal.handleValidationChange(validationStatus);

@@ -84,11 +84,26 @@
     "subject_other": "Other",
     "subject_other_custom_label": "Custom Subject",
     "subject_other_placeholder": "Enter your subject...",
+    "change_subject": "Change",
     "message_label": "Message",
     "message_placeholder": "Your message here...",
     "newsletter_label": "I would like to receive information about events including game launch, in person workshops, etc.",
+    "newsletter_confirmed": "Yes, I would like to receive information about events",
     "send": "Send",
-    "send_tooltip": "send message"
+    "send_tooltip": "send message",
+    "delete": "Delete",
+    "delete_tooltip": "clear form",
+    "confirmation_title": "Review Your Message",
+    "confirm": "Confirm & Send",
+    "confirm_tooltip": "confirm and send message",
+    "return": "Return to Edit",
+    "return_tooltip": "return to edit form",
+    "submit_success": "Your message has been sent successfully!",
+    "submit_error": "An error occurred while sending your message. Please try again.",
+    "validation_failed": "Please check your form and try again.",
+    "method_not_allowed": "Invalid request method.",
+    "config_error": "Server configuration error. Please contact the administrator.",
+    "invalid_json": "Invalid request format."
   },
   "page_title" : {
     "home": "Scratch that!",
@@ -508,6 +523,25 @@
         "min_character_count": "*6 characters min",
         "pattern": "*only letters and numbers allowed"
       }
+    },
+    "contact": {
+      "email": {
+        "required": "*email address required",
+        "email": "*must be a valid email address",
+        "max_character_count": "*email address is too long"
+      },
+      "subject": {
+        "required": "*please select a subject"
+      },
+      "subject_other": {
+        "required": "*custom subject is required",
+        "max_character_count": "*subject is too long (max 200 characters)"
+      },
+      "message": {
+        "required": "*message is required",
+        "min_character_count": "*message must be at least 10 characters",
+        "max_character_count": "*message is too long (max 5000 characters)"
+      }
     }
   },
   "error": {
@@ -552,6 +586,10 @@
     "game_invitation": {
       "subject": "{inviterName} invites you to collaborate on \"{gameTitle}\"",
       "message": "Hello {recipientName},\n\n{inviterName} has invited you to collaborate on a writing project called \"{gameTitle}\".\n\nPrompt: {gamePrompt}\n\nClick the link below to join the collaboration:\n{invitationUrl}\n\nHappy writing!\n\nThe Tag You Write Team"
+    },
+    "contact_form": {
+      "subject": "Contact Form: {subject}",
+      "message": "<h2>New Contact Form Submission</h2><p><strong>From:</strong> {userName} ({userEmail})</p><p><strong>Subject:</strong> {subject}</p><p><strong>Message:</strong></p><div style=\"background-color: #f5f5f5; padding: 1rem; border-radius: 4px; margin: 1rem 0;\">{message}</div><p><strong>Newsletter Subscription:</strong> {newsletter}</p><p><strong>User Logged In:</strong> {isLoggedIn}</p>"
     }
   },
 

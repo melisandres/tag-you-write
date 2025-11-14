@@ -4,6 +4,13 @@ export class ValidationManager {
     constructor() {
         eventBus.on('inputChanged', (data) => this.handleInputChanged(data));
         eventBus.on('formRestored', (formData) => this.handleFormRestored(formData));
+        
+        // Listen for context changes from modals (e.g., contact modal opening/closing)
+        eventBus.on('formContextChanged', (data) => {
+            this.activeFormType = data.formType;
+            console.log('ValidationManager: Context switched to', data.formType);
+        });
+        
         this.wordCountDisplayElement = document.querySelector('[data-word-count-display]');
         this.maxWords = 50;
         this.textElement = document.querySelector('textarea[name="writing"] , textarea[name="note"]');
@@ -12,9 +19,15 @@ export class ValidationManager {
         this.parentWordCount = this.parentText ? this.countWords(this.parentText) : 0;
 
         this.isFormValid = false;
-        this.formValidity = {};
+        // Store validity per formType to support parallel forms (page forms + modal forms)
+        this.formValidity = {}; // Structure: { formType: { fieldName: { canAutosave, canPublish } } }
 
-        this.lastValidationStatus = {};
+        this.lastValidationStatus = {}; // Store last status per formType: { formType: { canAutosave, canPublish } }
+        this.lastFieldValidityStatus = {}; // Store last field validity status per formType: { formType: { fieldName: {...} } }
+        
+        // Track which form is currently active (for context-based validation)
+        this.activeFormType = null; // Track which form is currently active
+        
         // Check for main page form first, then modal forms
         this.form = document.querySelector('#main-form') || 
                     document.querySelector('[data-modal-form-type]');
@@ -32,16 +45,29 @@ export class ValidationManager {
         const formType = this.form.getAttribute('data-form-type') || 
                         this.form.getAttribute('data-modal-form-type');
 
+        // Set initial activeFormType if form exists and not already set
+        if (formType && !this.activeFormType) {
+            this.activeFormType = formType;
+        }
+
+        // Initialize form validity for this formType if it doesn't exist
+        if (!this.formValidity[formType]) {
+            this.formValidity[formType] = {};
+        }
+
         // if you are initializing in editing mode, validate all the fields
         if (activity === 'editing') {
-            this.formValidity = {};
+            // Ensure formType structure exists (don't reset entire formValidity)
+            if (!this.formValidity[formType]) {
+                this.formValidity[formType] = {};
+            }
             const visibleFields = this.form.querySelectorAll('input:not([type="hidden"]):not([data-ui-helper]), textarea:not([type="hidden"])');
             visibleFields.forEach(field => {
-                this.formValidity[field.name] = false;
+                this.formValidity[formType][field.name] = false;
                 this.validateField({
                     fieldName: field.name,
                     fieldValue: field.value,
-                    formType: this.form.dataset.formType,
+                    formType: formType,
                     init: true
                 });
             });
@@ -52,9 +78,9 @@ export class ValidationManager {
             visibleFields.forEach(field => {
                 // keywords is a special case, because you should be able to publish without adding anything there. 
                 if(field.name === 'keywords') {
-                    this.formValidity[field.name] = { canAutosave: true, canPublish: true };
+                    this.formValidity[formType][field.name] = { canAutosave: true, canPublish: true };
                 }else{
-                    this.formValidity[field.name] = { canAutosave: true, canPublish: false };
+                    this.formValidity[formType][field.name] = { canAutosave: true, canPublish: false };
                 }
             });
 
@@ -63,7 +89,7 @@ export class ValidationManager {
             // there are other forms... like the signup form... 
             const visibleFields = form.querySelectorAll('input:not([type="hidden"]):not([data-ui-helper]), textarea:not([type="hidden"])');
             visibleFields.forEach(field => {
-                this.formValidity[field.name] = { canAutosave: false, canPublish: false };
+                this.formValidity[formType][field.name] = { canAutosave: false, canPublish: false };
             });
         }
     }
@@ -73,6 +99,20 @@ export class ValidationManager {
         console.log('Form restored, validating fields');
         if (!this.form) return;
         
+        // Get formType from form attributes (same as in init())
+        const formType = this.form.getAttribute('data-form-type') || 
+                        this.form.getAttribute('data-modal-form-type');
+        
+        if (!formType) {
+            console.warn('ValidationManager: Cannot determine formType for handleFormRestored');
+            return;
+        }
+        
+        // Initialize formValidity for this formType if it doesn't exist
+        if (!this.formValidity[formType]) {
+            this.formValidity[formType] = {};
+        }
+        
         // Get all visible fields in the form
         const visibleFields = this.form.querySelectorAll('input:not([type="hidden"]):not([data-ui-helper]), textarea:not([type="hidden"])');
         
@@ -80,17 +120,24 @@ export class ValidationManager {
             this.validateField({
                 fieldName: field.name,
                 fieldValue: field.value,
-                formType: this.form.dataset.formType,
+                formType: formType,
                 init: true
             });
         });
         
         // Check overall form validity after all fields are validated
-        this.checkOverallValidity();
+        this.checkOverallValidity(formType);
     }
 
     // inputChange is being fired by the formManager
     handleInputChanged(data) {
+        // If activeFormType is set, only validate active form
+        // If not set (backwards compatibility), validate any form
+        if (this.activeFormType && this.activeFormType !== data.formType) {
+            console.log('ValidationManager: Ignoring input from inactive form', data.formType);
+            return;
+        }
+        
         this.validateField(data);
         if (data.fieldName === 'writing' || data.fieldName === 'note') {
             this.updateWordCount(data.fieldValue);
@@ -105,6 +152,9 @@ export class ValidationManager {
             root: {
                 'visible_to_all': ['invitees', 'joinable_by_all'],
                 'joinable_by_all': ['invitees']
+            },
+            contact: {
+                'subject': ['subject_other'] // When subject changes, re-validate subject_other
             }
         };
 
@@ -113,6 +163,12 @@ export class ValidationManager {
 
     validateField({ fieldName, fieldValue, formType, init = false}) {
         console.log('Validating field:', fieldName, 'with value:', fieldValue, 'for form type:', formType);
+        
+        // Initialize formValidity for this formType if it doesn't exist
+        if (!this.formValidity[formType]) {
+            this.formValidity[formType] = {};
+        }
+        
         const validators = this.getValidatorsForForm(formType);
         
         // Validate the main field
@@ -127,7 +183,7 @@ export class ValidationManager {
             const infos = validationResults.filter(result => result.severity === 'info');
             const successes = validationResults.filter(result => result.isValid && (result.severity === 'warning' || result.severity === 'info' || result.severity === 'success'));
 
-            this.showValidationResult(fieldName, criticalErrors, errors, warnings, infos, successes);
+            this.showValidationResult(fieldName, criticalErrors, errors, warnings, infos, successes, formType);
 
             const canAutosave = criticalErrors.length === 0;
             const canPublish = criticalErrors.length === 0 && errors.length === 0;
@@ -135,7 +191,8 @@ export class ValidationManager {
             // Debug: Log final validity state
             console.log(`${fieldName} final validity:`, { canAutosave, canPublish });
 
-            this.formValidity[fieldName] = { canAutosave, canPublish };
+            // Store validity per formType
+            this.formValidity[formType][fieldName] = { canAutosave, canPublish };
         }
 
         // Validate dependent fields automatically (only for non-init calls to prevent recursion)
@@ -165,9 +222,10 @@ export class ValidationManager {
         }
 
         // Always call checkOverallValidity, even during initialization
-        if (!init) this.checkOverallValidity();
+        if (!init) this.checkOverallValidity(formType);
         
-        return this.formValidity[fieldName] || { canAutosave: true, canPublish: true }; 
+        // Return validity from formType structure
+        return this.formValidity[formType]?.[fieldName] || { canAutosave: true, canPublish: true }; 
     }
 
     getValidatorsForForm(formType) {
@@ -288,6 +346,25 @@ export class ValidationManager {
                     this.validateMinCharacterCount(6, 'front_val.writerCreate.password.min_character_count', 'critical'),
                     this.validatePattern('alphanum', 'front_val.writerCreate.password.pattern', 'critical'),
                 ]
+            },
+            contact: {
+                email: [
+                    this.validateRequired('front_val.contact.email.required', 'error'),
+                    this.validateEmail('front_val.contact.email.email', 'error'),
+                    this.validateMaxCharacterCount(255, 'front_val.contact.email.max_character_count', 'error')
+                ],
+                subject: [
+                    this.validateRequired('front_val.contact.subject.required', 'error')
+                ],
+                subject_other: [
+                    this.validateConditionalRequired('subject', 'other', 'front_val.contact.subject_other.required', 'error'),
+                    this.validateMaxCharacterCount(200, 'front_val.contact.subject_other.max_character_count', 'error')
+                ],
+                message: [
+                    this.validateRequired('front_val.contact.message.required', 'error'),
+                    this.validateMinCharacterCount(10, 'front_val.contact.message.min_character_count', 'error'),
+                    this.validateMaxCharacterCount(5000, 'front_val.contact.message.max_character_count', 'error')
+                ]
             }
         };
 
@@ -298,6 +375,32 @@ export class ValidationManager {
     // Required field validation
     validateRequired(errorMessage, severity = 'error') {
         return function (value) {
+            const isValid = value && value.trim().length > 0;
+            return {
+                isValid: isValid,
+                message: isValid ? '' : errorMessage,
+                severity: severity
+            };
+        };
+    }
+
+    // Conditional required validation - only required when another field has a specific value
+    validateConditionalRequired(triggerFieldName, triggerValue, errorMessage, severity = 'error') {
+        return (value) => {
+            // Find the trigger field to check its value
+            const triggerField = document.querySelector(`[name="${triggerFieldName}"][data-modal-form-type="contact"]`) ||
+                                document.querySelector(`#contact-${triggerFieldName}`);
+            
+            // If trigger field doesn't have the required value, this field is not required (always valid)
+            if (!triggerField || triggerField.value !== triggerValue) {
+                return {
+                    isValid: true,
+                    message: '',
+                    severity: severity
+                };
+            }
+            
+            // Trigger field has the required value, so this field is required
             const isValid = value && value.trim().length > 0;
             return {
                 isValid: isValid,
@@ -422,21 +525,42 @@ export class ValidationManager {
         };
     }
 
+    /**
+     * Strip HTML tags and entities from text for character counting
+     * @param {string} text - Text that may contain HTML
+     * @returns {string} - Plain text with HTML removed
+     */
+    stripHtmlForCounting(text) {
+        if (!text) return '';
+        // Create a temporary DOM element to parse HTML
+        const doc = new DOMParser().parseFromString(text, 'text/html');
+        // Get text content (automatically strips HTML tags)
+        let plainText = doc.body.textContent || doc.body.innerText || '';
+        // Replace HTML entities like &nbsp; with spaces, then normalize whitespace
+        plainText = plainText.replace(/\u00A0/g, ' '); // Replace non-breaking spaces
+        plainText = plainText.replace(/\s+/g, ' '); // Normalize whitespace
+        return plainText.trim();
+    }
+
     validateMaxCharacterCount(maxCount, errorMessage, severity = 'error') {
-        return function (value) {
+        return (value) => {
+            // Strip HTML for accurate character counting (important for WYSIWYG content)
+            const plainText = this.stripHtmlForCounting(value);
             return {
-                isValid: value.length <= maxCount,
-                message: value.length <= maxCount ? '' : errorMessage,
+                isValid: plainText.length <= maxCount,
+                message: plainText.length <= maxCount ? '' : errorMessage,
                 severity: severity
             };
         };
     }
     
     validateMinCharacterCount(minCount, errorMessage, severity = 'error') {
-        return function (value) {
+        return (value) => {
+            // Strip HTML for accurate character counting (important for WYSIWYG content)
+            const plainText = this.stripHtmlForCounting(value);
             return {
-                isValid: value.length >= minCount,
-                message: value.length >= minCount ? '' : errorMessage,
+                isValid: plainText.length >= minCount,
+                message: plainText.length >= minCount ? '' : errorMessage,
                 severity: severity
             };
         };
@@ -826,8 +950,26 @@ export class ValidationManager {
     }
 
     // Handle displaying the validation results
-    showValidationResult(fieldName, criticalErrors, errors, warnings, infos, successes) {
-        const field = document.querySelector(`[name="${fieldName}"]`);
+    showValidationResult(fieldName, criticalErrors, errors, warnings, infos, successes, formType = null) {
+        // Scope field query to the specific form to avoid conflicts when multiple forms have fields with the same name
+        let field = null;
+        if (formType) {
+            // Try to find the form first based on formType
+            const modalForm = document.querySelector(`[data-modal-form-type="${formType}"]`);
+            const pageForm = document.querySelector(`#main-form[data-form-type="${formType}"]`);
+            const formElement = modalForm || pageForm;
+            
+            if (formElement) {
+                // Scope field query to the specific form
+                field = formElement.querySelector(`[name="${fieldName}"]`);
+            }
+        }
+        
+        // Fallback to global query if formType not provided or form not found
+        if (!field) {
+            field = document.querySelector(`[name="${fieldName}"]`);
+        }
+        
         if (!field) return;
 
         const { labelElement, targetElement } = this.getDisplayTarget(fieldName, field);
@@ -917,44 +1059,75 @@ export class ValidationManager {
         return text.trim().split(/\s+/).filter(word => word.length > 0).length;
     }
    
-    checkOverallValidity() {
-        console.log('checking overall validity');
-        const canAutosave = Object.values(this.formValidity).every(field => 
+    checkOverallValidity(formType = null) {
+        // Use provided formType, or activeFormType, or try to determine from this.form
+        const targetFormType = formType || this.activeFormType || 
+            (this.form?.getAttribute('data-form-type') || this.form?.getAttribute('data-modal-form-type'));
+        
+        if (!targetFormType) {
+            console.warn('ValidationManager: Cannot determine formType for checkOverallValidity');
+            return;
+        }
+        
+        // Initialize formValidity for this formType if it doesn't exist
+        if (!this.formValidity[targetFormType]) {
+            this.formValidity[targetFormType] = {};
+        }
+        
+        console.log('checking overall validity for formType:', targetFormType);
+        const formValidity = this.formValidity[targetFormType];
+        const canAutosave = Object.values(formValidity).every(field => 
             field.canAutosave
         );
-        const canPublish = Object.values(this.formValidity).every(field => 
+        const canPublish = Object.values(formValidity).every(field => 
             field.canPublish
         );
 
         const newValidationStatus = {
+            formType: targetFormType,
             canAutosave,
             canPublish,
-            fields: this.formValidity
+            fields: formValidity
         };
-        console.log('this.formValidity', this.formValidity);
+        console.log('this.formValidity[targetFormType]', formValidity);
         /* console.log('newValidationStatus', newValidationStatus); */
 
+        // Initialize lastFieldValidityStatus and lastValidationStatus per formType if needed
+        if (!this.lastFieldValidityStatus) {
+            this.lastFieldValidityStatus = {};
+        }
+        if (!this.lastValidationStatus) {
+            this.lastValidationStatus = {};
+        }
+        if (!this.lastFieldValidityStatus[targetFormType]) {
+            this.lastFieldValidityStatus[targetFormType] = {};
+        }
+        if (!this.lastValidationStatus[targetFormType]) {
+            this.lastValidationStatus[targetFormType] = {};
+        }
+        
         // Check for changes in field validation status related to autosave
-        const autoSaveFieldsChanged = !this.lastFieldValidityStatus || 
-            JSON.stringify(this.getFailedAutoSaveFields(this.formValidity)) !== 
-            JSON.stringify(this.getFailedAutoSaveFields(this.lastFieldValidityStatus || {}));
+        const autoSaveFieldsChanged = !this.lastFieldValidityStatus[targetFormType] || 
+            JSON.stringify(this.getFailedAutoSaveFields(formValidity)) !== 
+            JSON.stringify(this.getFailedAutoSaveFields(this.lastFieldValidityStatus[targetFormType] || {}));
         
         // Emit field validation changes event if needed
         if (autoSaveFieldsChanged) {
             console.log('autoSaveFieldsChanged', autoSaveFieldsChanged);
             eventBus.emit('autoSaveFieldValidationChanged', {
-                failedAutoSaveFields: this.getFailedAutoSaveFields(this.formValidity),
-                fields: this.formValidity
+                formType: targetFormType,
+                failedAutoSaveFields: this.getFailedAutoSaveFields(formValidity),
+                fields: formValidity
             });
-            this.lastFieldValidityStatus = {...this.formValidity};
+            this.lastFieldValidityStatus[targetFormType] = {...formValidity};
         }
 
         // Only emit if there's a change in canAutosave or canPublish
-        if (this.lastValidationStatus?.canAutosave !== canAutosave || 
-            this.lastValidationStatus?.canPublish !== canPublish) {
+        if (this.lastValidationStatus[targetFormType]?.canAutosave !== canAutosave || 
+            this.lastValidationStatus[targetFormType]?.canPublish !== canPublish) {
             console.log('ValidationManager: Emitting validationChanged event', newValidationStatus);
             eventBus.emit('validationChanged', newValidationStatus);
-            this.lastValidationStatus = newValidationStatus;
+            this.lastValidationStatus[targetFormType] = newValidationStatus;
             //console.log('newValidationStatus', newValidationStatus);
         } else {
             console.log('ValidationManager: No change in validation status, not emitting');
