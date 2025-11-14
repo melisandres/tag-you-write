@@ -38,6 +38,14 @@ main.with-filters {
     margin-top: calc(var(--header-height) + var(--filters-height));
 }
 
+main.with-search {
+    margin-top: calc(var(--header-height) + var(--search-height));
+}
+
+main.with-filters-and-search {
+    margin-top: calc(var(--header-height) + var(--filters-height) + var(--search-height));
+}
+
 /* Category header modifier - adjusts margin when category header is visible */
 main.with-categories {
     margin-top: calc(var(--header-height) + var(--category-header-height));
