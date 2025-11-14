@@ -15,6 +15,9 @@ export class DashboardManager {
             return;
         }
         
+        // Track activity per category: Map<category, { browsing: number, writing: number }>
+        this.categoryActivity = new Map();
+        
         // Animation timing constants (in milliseconds)
         this.ANIMATION_DURATION = 500; // Duration for game element animations (entering/updating/removing)
         this.FLASH_TO_ANIMATION_DELAY = 200; // Delay between flash start and animation start (warning time)
@@ -29,6 +32,12 @@ export class DashboardManager {
         // Set up UI interactions
         this.setupCollapsibleCategories();
         this.setupGameNavigation();
+        
+        // Initialize activity indicators for games already in DOM (from template)
+        this.initializeGameActivityIndicators();
+        
+        // Initialize category activity indicators (populate SVGs)
+        this.initializeCategoryActivityIndicators();
         
         console.log('🎮 DashboardManager: Initialized successfully');
     }
@@ -263,6 +272,10 @@ export class DashboardManager {
                     // Remove message after readable duration
                     setTimeout(() => {
                         gameElement.remove();
+                        // Recompute category activity after removal
+                        if (category) {
+                            this.recomputeCategoryActivity(category);
+                        }
                     }, this.REMOVAL_MESSAGE_DURATION);
                 }, {
                     showMessage: true,
@@ -359,7 +372,12 @@ export class DashboardManager {
         const gameElement = this.createGameElement(game);
         
         // Animate game in
-        this.animateGameIn(gameElement, gamesContainer, category);
+        this.animateGameIn(gameElement, gamesContainer, category, () => {
+            // After animation completes, recompute category activity
+            // (game starts with 0:0 activity, so this won't change anything initially,
+            // but ensures consistency if activity updates come in before animation completes)
+            this.recomputeCategoryActivity(category);
+        });
         
         console.log(`🎮 DashboardManager: Added game ${game.game_id} to category ${category}`);
     }
@@ -442,6 +460,10 @@ export class DashboardManager {
             gamesContainer.appendChild(gameElement);
         });
         
+        // Initialize activity indicators for newly added games (SVGs already populated in createGameElement)
+        // But we need to ensure they're ready to receive activity updates
+        // (createGameElement already creates indicators, so this is just for safety)
+        
         // Navigation is handled by event delegation - no need to re-setup
     }
 
@@ -464,6 +486,10 @@ export class DashboardManager {
                 this.updateCategoryUnread(categoryPath, !!subcategory.hasUnreads);
             });
         });
+        
+        // Recompute all category activity after redraw
+        // (games may have been filtered, so activity totals may have changed)
+        this.recomputeAllCategoryActivity();
     }
 
 
@@ -587,7 +613,13 @@ export class DashboardManager {
                 gameElement.classList.remove('removing');
                 
                 // Animate into new category
-                this.animateGameIn(gameElement, newGamesContainer, newCategory);
+                this.animateGameIn(gameElement, newGamesContainer, newCategory, () => {
+                    // Recompute activity for both old and new categories after move
+                    if (oldCategory) {
+                        this.recomputeCategoryActivity(oldCategory);
+                    }
+                    this.recomputeCategoryActivity(newCategory);
+                });
             }, {
                 showMessage: true,
                 messageReason: 'categoryMoved',
@@ -595,7 +627,10 @@ export class DashboardManager {
             });
         } else {
             // No old category - just animate into new category
-            this.animateGameIn(gameElement, newGamesContainer, newCategory);
+            this.animateGameIn(gameElement, newGamesContainer, newCategory, () => {
+                // Recompute activity for new category after move
+                this.recomputeCategoryActivity(newCategory);
+            });
         }
         
         console.log('🎮 DashboardManager: Successfully moved game between categories');
@@ -716,22 +751,16 @@ export class DashboardManager {
     handleGameActivityUpdate(activityData) {
         const { gameId, browsing, writing } = activityData;
         
-        // Check if game exists in cache first (most efficient check)
-        const gameInCache = this.dataManager.cache.games.get(String(gameId));
-        if (!gameInCache) {
-            // Game not in cache - this is normal when:
-            // - Game doesn't match current search/filters/categories
-            // - Game was removed from view
-            // Silently ignore (activity updates broadcast for all games, not just visible ones)
-            return;
-        }
-        
-        // Look for game elements in the DOM (games can appear in multiple categories)
+        // Look for game elements in the DOM first (more reliable than cache check)
+        // Games might be in DOM even if not in cache (e.g., from template)
         const gameElements = this.container.querySelectorAll(`.dashboard-game-item[data-game-id="${gameId}"]`);
         
         if (gameElements.length === 0) {
-            // Game is in cache but not visible - could be in collapsed category
-            // This is also normal, silently ignore
+            // Game not visible in dashboard - this is normal when:
+            // - Game doesn't match current search/filters/categories
+            // - Game was removed from view
+            // - Game is in a different view
+            // Silently ignore (activity updates broadcast for all games, not just visible ones)
             return;
         }
         
@@ -742,8 +771,9 @@ export class DashboardManager {
         gameElements.forEach((gameElement, index) => {
             let existingIndicator = gameElement.querySelector('.game-activity-indicator');
             
-            // If indicator doesn't exist, create it (shouldn't happen, but just in case)
+            // If indicator doesn't exist, create it (shouldn't happen after initialization, but handle it)
             if (!existingIndicator) {
+                console.warn('🎮 DashboardManager: Activity indicator missing for game', gameId, '- creating it');
                 existingIndicator = this.createActivityIndicator(gameId, browsing, writing);
                 gameElement.appendChild(existingIndicator);
                 
@@ -766,7 +796,211 @@ export class DashboardManager {
             
         });
         
-        console.log('🎮 DashboardManager: Updated', gameElements.length, 'activity indicators for game:', gameId);
+        console.log('🎮 DashboardManager: Updated', gameElements.length, 'activity indicators for game:', gameId, 'activity:', browsing, ':', writing);
+        
+        // Update category-level activity indicators (only if they exist)
+        if (this.container.querySelector('.category-activity-indicator')) {
+            this.updateCategoryActivityIndicators(gameId, browsing, writing);
+        }
+    }
+
+    /**
+     * Get the category for a game element
+     * @param {HTMLElement} gameElement - The game element
+     * @returns {string|null} The category path (e.g., "myStories.active") or null
+     */
+    getCategoryForGameElement(gameElement) {
+        const gamesContainer = gameElement.parentElement;
+        if (!gamesContainer) return null;
+        
+        const categoryHeader = gamesContainer.previousElementSibling;
+        if (!categoryHeader) return null;
+        
+        return categoryHeader.dataset.category || null;
+    }
+
+    /**
+     * Update category activity indicators based on a game's activity change
+     * @param {string|number} gameId - The game ID
+     * @param {number} browsing - Browsing count
+     * @param {number} writing - Writing count
+     */
+    updateCategoryActivityIndicators(gameId, browsing, writing) {
+        // Find all game elements with this game ID
+        const gameElements = this.container.querySelectorAll(`.dashboard-game-item[data-game-id="${gameId}"]`);
+        
+        if (gameElements.length === 0) return;
+        
+        // Track which categories this game appears in
+        const affectedCategories = new Set();
+        
+        gameElements.forEach(gameElement => {
+            const category = this.getCategoryForGameElement(gameElement);
+            if (category) {
+                affectedCategories.add(category);
+            }
+        });
+        
+        // Update activity for each affected category
+        affectedCategories.forEach(category => {
+            // Get all games in this category
+            const categoryHeader = this.container.querySelector(`[data-category="${category}"]`);
+            if (!categoryHeader) return;
+            
+            const gamesContainer = categoryHeader.nextElementSibling;
+            if (!gamesContainer) return;
+            
+            const gameItems = gamesContainer.querySelectorAll('.dashboard-game-item');
+            
+            // Sum up activity from all games in this category
+            let totalBrowsing = 0;
+            let totalWriting = 0;
+            
+            gameItems.forEach(gameItem => {
+                const gameItemId = gameItem.dataset.gameId;
+                if (!gameItemId) return;
+                
+                // Get current activity for this game from its indicator
+                const gameIndicator = gameItem.querySelector('.game-activity-indicator');
+                if (gameIndicator) {
+                    const activityNumbers = gameIndicator.querySelector('.activity-numbers');
+                    if (activityNumbers) {
+                        const [b, w] = activityNumbers.textContent.split(':').map(n => parseInt(n) || 0);
+                        totalBrowsing += b;
+                        totalWriting += w;
+                    }
+                }
+            });
+            
+            // Update the category activity indicator
+            this.updateCategoryActivityIndicator(category, totalBrowsing, totalWriting);
+        });
+    }
+
+    /**
+     * Update a specific category's activity indicator
+     * @param {string} category - The category path (e.g., "myStories.active")
+     * @param {number} browsing - Total browsing count for the category
+     * @param {number} writing - Total writing count for the category
+     */
+    updateCategoryActivityIndicator(category, browsing, writing) {
+        const categoryHeader = this.container.querySelector(`[data-category="${category}"]`);
+        if (!categoryHeader) return;
+        
+        const indicator = categoryHeader.querySelector('.category-activity-indicator');
+        if (!indicator) return;
+        
+        // Update activity numbers
+        const activityNumbers = indicator.querySelector('.activity-numbers');
+        if (activityNumbers) {
+            activityNumbers.textContent = `${browsing || 0}:${writing || 0}`;
+        }
+        
+        // Update activity state classes
+        const hasActivity = (browsing > 0 || writing > 0);
+        indicator.classList.toggle('has-activity', hasActivity);
+        indicator.classList.toggle('no-activity', !hasActivity);
+    }
+
+    /**
+     * Initialize activity indicators for all games already in the DOM
+     * (Games rendered from template don't have indicators, so we add them here)
+     */
+    initializeGameActivityIndicators() {
+        const gameElements = this.container.querySelectorAll('.dashboard-game-item');
+        const svgElements = [];
+        
+        gameElements.forEach(gameElement => {
+            const gameId = gameElement.dataset.gameId;
+            if (!gameId) return;
+            
+            // Check if indicator already exists
+            let indicator = gameElement.querySelector('.game-activity-indicator');
+            if (!indicator) {
+                // Create indicator with initial 0:0 activity
+                indicator = this.createActivityIndicator(gameId, 0, 0);
+                gameElement.appendChild(indicator);
+                
+                // Collect SVG element for population
+                const iconElement = indicator.querySelector('.icon[data-svg]');
+                if (iconElement) {
+                    svgElements.push(iconElement);
+                }
+            }
+        });
+        
+        // Populate all SVGs at once
+        if (svgElements.length > 0) {
+            eventBus.emit('populateSvgs', { elements: svgElements });
+            console.log('🎮 DashboardManager: Initialized', svgElements.length, 'game activity indicators');
+        }
+    }
+
+    /**
+     * Initialize category activity indicators (populate SVGs)
+     */
+    initializeCategoryActivityIndicators() {
+        const indicators = this.container.querySelectorAll('.category-activity-indicator');
+        const svgElements = [];
+        
+        indicators.forEach(indicator => {
+            const iconElement = indicator.querySelector('.icon[data-svg]');
+            if (iconElement) {
+                svgElements.push(iconElement);
+            }
+        });
+        
+        if (svgElements.length > 0) {
+            eventBus.emit('populateSvgs', { elements: svgElements });
+        }
+        
+        // Also compute initial category activity from visible games
+        this.recomputeAllCategoryActivity();
+    }
+
+    /**
+     * Recompute activity for a specific category based on current game indicators
+     * @param {string} category - The category path (e.g., "myStories.active")
+     */
+    recomputeCategoryActivity(category) {
+        const categoryHeader = this.container.querySelector(`[data-category="${category}"]`);
+        if (!categoryHeader) return;
+        
+        const gamesContainer = categoryHeader.nextElementSibling;
+        if (!gamesContainer) return;
+        
+        const gameItems = gamesContainer.querySelectorAll('.dashboard-game-item');
+        
+        let totalBrowsing = 0;
+        let totalWriting = 0;
+        
+        gameItems.forEach(gameItem => {
+            const gameIndicator = gameItem.querySelector('.game-activity-indicator');
+            if (gameIndicator) {
+                const activityNumbers = gameIndicator.querySelector('.activity-numbers');
+                if (activityNumbers) {
+                    const [b, w] = activityNumbers.textContent.split(':').map(n => parseInt(n) || 0);
+                    totalBrowsing += b;
+                    totalWriting += w;
+                }
+            }
+        });
+        
+        this.updateCategoryActivityIndicator(category, totalBrowsing, totalWriting);
+    }
+
+    /**
+     * Recompute activity for all categories based on current game indicators
+     */
+    recomputeAllCategoryActivity() {
+        const categoryHeaders = this.container.querySelectorAll('.category-header');
+        
+        categoryHeaders.forEach(header => {
+            const category = header.dataset.category;
+            if (category) {
+                this.recomputeCategoryActivity(category);
+            }
+        });
     }
 
 }

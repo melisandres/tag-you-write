@@ -67,6 +67,10 @@
                                 <span data-i18n="dashboard.{{ subcategory.key }}">{{ translate('dashboard.' ~ subcategory.key) }}</span>
                                 <span class="count">({{ categoryData.count }})</span>
                             </h3>
+                            <div class="category-activity-indicator no-activity" data-category="{{ section.key }}.{{ subcategory.key }}" data-i18n-title="activity.browsingVsEditing" title="{{ translate('activity.browsingVsEditing') }}">
+                                <span class="icon" data-svg="user"></span>
+                                <div class="activity-numbers">0:0</div>
+                            </div>
                         </div>
                         <span class="collapse-toggle collapsed">▼</span>
                     </div>

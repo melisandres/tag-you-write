@@ -123,6 +123,74 @@
     font-size: var(--font-size-xsmall);
 }
 
+/* Category Header Activity Indicator */
+.category-activity-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: var(--spacing-extra-small);
+    cursor: default;
+    min-width: 36px;
+    border-radius: 2px;
+    flex-shrink: 0;
+    margin-left: var(--spacing-small);
+}
+
+.category-activity-indicator .icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.category-activity-indicator svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+
+.category-activity-indicator svg path {
+    fill: var(--color-grey-dark);
+    stroke: none;
+}
+
+.category-activity-indicator .activity-numbers {
+    font-size: var(--font-size-xxsmall);
+    font-weight: 200;
+    color: var(--color-grey-dark);
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* Active state - when there's activity */
+.category-activity-indicator.has-activity svg path {
+    fill: var(--color-love);
+}
+
+.category-activity-indicator.has-activity .activity-numbers {
+    color: var(--color-love);
+    font-size: 8px;
+    font-weight: 400;
+}
+
+/* No activity state - transparent but still takes up space */
+.category-activity-indicator.no-activity {
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.category-activity-indicator.no-activity svg path {
+    fill: var(--color-grey-medium);
+}
+
+.category-activity-indicator.no-activity .activity-numbers {
+    opacity: 0.5;
+    color: var(--color-grey-medium);
+}
+
 .collapse-toggle {
     font-size: var(--font-size-small);
     color: var(--color-grey-dark);
@@ -419,6 +487,30 @@
     
     .dashboard .game-activity-indicator.has-activity .activity-numbers {
         color: var(--color-accent);
+    }
+    
+    .category-activity-indicator svg path {
+        fill: var(--color-greyscale-lightest);
+    }
+    
+    .category-activity-indicator .activity-numbers {
+        color: var(--color-greyscale-lightest);
+    }
+    
+    .category-activity-indicator.has-activity svg path {
+        fill: var(--color-accent);
+    }
+    
+    .category-activity-indicator.has-activity .activity-numbers {
+        color: var(--color-accent);
+    }
+    
+    .category-activity-indicator.no-activity svg path {
+        fill: var(--color-grey-medium);
+    }
+    
+    .category-activity-indicator.no-activity .activity-numbers {
+        color: var(--color-grey-medium);
     }
 }
 
