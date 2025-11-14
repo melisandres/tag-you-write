@@ -37,6 +37,8 @@ export class ContactModalManager {
         this.emailLabel = null;
         this.formView = null;
         this.confirmationView = null;
+        this.contactTitle = null; // Header title (H1)
+        this.contactDescription = null; // Description paragraph
         this.confirmationEmail = null;
         this.confirmationSubject = null;
         this.confirmationMessage = null;
@@ -63,6 +65,10 @@ export class ContactModalManager {
      */
     cacheDOMElements() {
         if (!this.contactModal) return;
+        
+        // Header elements
+        this.contactTitle = this.contactModal.querySelector('.contact-title');
+        this.contactDescription = this.contactModal.querySelector('.contact-description');
         
         // Form elements
         this.contactForm = this.contactModal.querySelector('#contact-form');
@@ -159,17 +165,17 @@ export class ContactModalManager {
                             <textarea name="message" id="contact-message" rows="8" cols="50" data-i18n-placeholder="contact.message_placeholder" placeholder="Your message here..." required></textarea>
                         </label>
 
+                        <label id="contact-email-label" class="${isLoggedIn ? 'display-none' : ''}">
+                            <span class="headline" data-i18n="contact.email_label">Email Address</span>
+                            <input type="email" name="email" id="contact-email" data-i18n-placeholder="contact.email_placeholder" placeholder="your.email@example.com" required>
+                        </label>
+
                         ${!isLoggedIn ? `
                         <label class="contact-newsletter-label">
                             <input type="checkbox" name="newsletter" id="contact-newsletter" checked>
                             <span data-i18n="contact.newsletter_label">I would like to receive information about events including game launch, in person workshops, etc.</span>
                         </label>
                         ` : ''}
-
-                        <label id="contact-email-label" class="${isLoggedIn ? 'display-none' : ''}">
-                            <span class="headline" data-i18n="contact.email_label">Email Address</span>
-                            <input type="email" name="email" id="contact-email" data-i18n-placeholder="contact.email_placeholder" placeholder="your.email@example.com" required>
-                        </label>
 
                         <div class="form-btns contact-form-buttons">
                             <button type="submit" class="contact-submit-btn publish" data-i18n-title="contact.send_tooltip">
@@ -189,7 +195,6 @@ export class ContactModalManager {
                     
                     <!-- Confirmation View (hidden by default) -->
                     <div class="contact-confirmation-view display-none" id="contact-confirmation-view">
-                        <h2 class="contact-confirmation-title" data-i18n="contact.confirmation_title">Review Your Message</h2>
                         <div class="contact-confirmation-content">
                             <div class="contact-confirmation-field">
                                 <span class="contact-confirmation-label" data-i18n="contact.email_label">Email Address</span>
@@ -552,6 +557,38 @@ export class ContactModalManager {
         // This ensures button state is correct even if validation state changed during restore
         if (window.validationManager) {
             setTimeout(() => {
+                // Initialize validation for all contact form fields (even if empty)
+                // This ensures formValidity is populated and empty forms are correctly marked as invalid
+                const isLoggedIn = this.isUserLoggedIn();
+                const fieldsToValidate = ['subject', 'message'];
+                
+                // Only validate email if user is not logged in (it's auto-filled and hidden for logged-in users)
+                if (!isLoggedIn) {
+                    fieldsToValidate.push('email');
+                }
+                
+                // Trigger validation for each field to populate formValidity
+                fieldsToValidate.forEach(fieldName => {
+                    const field = this.contactForm?.querySelector(`[name="${fieldName}"]`);
+                    if (field) {
+                        eventBus.emit('inputChanged', {
+                            formType: ContactModalManager.FORM_TYPE,
+                            fieldName: fieldName,
+                            fieldValue: field.value || ''
+                        });
+                    }
+                });
+                
+                // Also validate subject_other if subject is "other"
+                if (this.subjectSelect?.value === 'other' && this.subjectOtherInput) {
+                    eventBus.emit('inputChanged', {
+                        formType: ContactModalManager.FORM_TYPE,
+                        fieldName: 'subject_other',
+                        fieldValue: this.subjectOtherInput.value || ''
+                    });
+                }
+                
+                // Check overall validity after initializing all field validations
                 window.validationManager.checkOverallValidity(ContactModalManager.FORM_TYPE);
             }, ContactModalManager.VALIDATION_INIT_DELAY);
         }
@@ -679,11 +716,8 @@ export class ContactModalManager {
             return true;
         }
         
-        // Check newsletter checkbox
-        const newsletterInput = this.contactForm.querySelector('#contact-newsletter');
-        if (newsletterInput && newsletterInput.checked) {
-            return true;
-        }
+        // Note: Newsletter checkbox is not considered "content" since it starts checked by default
+        // Only user-entered content (email, subject, message) should enable the delete button
         
         return false;
     }
@@ -832,6 +866,21 @@ export class ContactModalManager {
     showConfirmationView() {
         if (!this.formView || !this.confirmationView || !this.pendingFormData) return;
         
+        // Update header title to "Review Your Message"
+        if (this.contactTitle) {
+            this.contactTitle.setAttribute('data-i18n', 'contact.confirmation_title');
+            if (window.i18n) {
+                this.contactTitle.textContent = window.i18n.translate('contact.confirmation_title');
+            } else {
+                this.contactTitle.textContent = 'Review Your Message';
+            }
+        }
+        
+        // Hide description
+        if (this.contactDescription) {
+            this.contactDescription.classList.add('display-none');
+        }
+        
         // Populate confirmation view with form data
         if (this.confirmationEmail) this.confirmationEmail.textContent = this.pendingFormData.email;
         if (this.confirmationSubject) this.confirmationSubject.textContent = this.pendingFormData.subject;
@@ -852,6 +901,10 @@ export class ContactModalManager {
         // Update translations for confirmation view (pattern from searchManager/filterManager)
         if (window.i18n) {
             window.i18n.updatePageTranslations(this.confirmationView);
+            // Also update header title translation
+            if (this.contactTitle) {
+                window.i18n.updatePageTranslations(this.contactTitle);
+            }
         }
         
         // Populate SVGs for confirmation buttons
@@ -867,9 +920,29 @@ export class ContactModalManager {
     showFormView() {
         if (!this.formView || !this.confirmationView) return;
         
+        // Restore header title to "Contact Us"
+        if (this.contactTitle) {
+            this.contactTitle.setAttribute('data-i18n', 'contact.title');
+            if (window.i18n) {
+                this.contactTitle.textContent = window.i18n.translate('contact.title');
+            } else {
+                this.contactTitle.textContent = 'Contact Us';
+            }
+        }
+        
+        // Show description
+        if (this.contactDescription) {
+            this.contactDescription.classList.remove('display-none');
+        }
+        
         // Show form, hide confirmation
         this.formView.classList.remove('display-none');
         this.confirmationView.classList.add('display-none');
+        
+        // Update translations for form view
+        if (window.i18n && this.contactTitle) {
+            window.i18n.updatePageTranslations(this.contactTitle);
+        }
         
         // Clear pending form data
         this.pendingFormData = null;
@@ -1005,27 +1078,20 @@ export class ContactModalManager {
     resetForm() {
         if (!this.contactForm) return;
         
-        // Check if user is logged in (email field is hidden for logged-in users)
+        // Check if user is logged in (email will be re-auto-filled after reset)
         const isLoggedIn = this.isUserLoggedIn();
-        const isEmailVisible = !isLoggedIn && this.emailLabel && !this.emailLabel.classList.contains('display-none');
         
-        // Save email value if user is logged in (email field is hidden)
-        let savedEmail = null;
-        if (!isEmailVisible && this.emailInput && this.emailInput.value) {
-            savedEmail = this.emailInput.value;
-        }
-        
-        // Reset all form fields
+        // Reset all form fields (email field is in the form, validation handles requirements)
         this.contactForm.reset();
-        
-        // Restore email value if user is logged in (should remain auto-filled)
-        if (!isEmailVisible && savedEmail && this.emailInput) {
-            this.emailInput.value = savedEmail;
-        }
         
         // Reset subject field using component
         if (this.subjectFieldManager) {
             this.subjectFieldManager.reset();
+        }
+        
+        // Re-auto-fill email if user is logged in (email field is in form, just needs value)
+        if (isLoggedIn) {
+            this.autoFillEmail();
         }
         
         // Clear pending form data

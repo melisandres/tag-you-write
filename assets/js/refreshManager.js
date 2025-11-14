@@ -71,7 +71,7 @@ export class RefreshManager {
                 console.log('RefreshManager: Updated form validity state for formType', validationStatus.formType, validationStatus);
             } else {
                 // Backwards compatibility: store at root level for forms without formType
-                this.state.form.validity = validationStatus;
+            this.state.form.validity = validationStatus;
                 console.log('RefreshManager: Updated form validity state (legacy, no formType)', validationStatus);
             }
             console.log('RefreshManager: Current state.form.validity:', this.state.form.validity);

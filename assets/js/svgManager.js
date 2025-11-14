@@ -1891,7 +1891,7 @@ export class SVGManager{
          </svg>
       `;
    }
-
+      
    static get contactSVG() {
       return `
          <svg fill="currentColor" stroke="currentColor" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">

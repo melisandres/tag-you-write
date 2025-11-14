@@ -1076,10 +1076,30 @@ export class ValidationManager {
         
         console.log('checking overall validity for formType:', targetFormType);
         const formValidity = this.formValidity[targetFormType];
-        const canAutosave = Object.values(formValidity).every(field => 
+        const fieldValues = Object.values(formValidity);
+        
+        // If no fields have been validated yet, treat form as invalid
+        // This prevents empty formValidity from being treated as valid (empty array .every() returns true)
+        if (fieldValues.length === 0) {
+            const newValidationStatus = {
+                formType: targetFormType,
+                canAutosave: false,
+                canPublish: false,
+                fields: formValidity
+            };
+            // Still emit the event so button states are updated correctly
+            if (this.lastValidationStatus[targetFormType]?.canPublish !== false) {
+                console.log('ValidationManager: Emitting validationChanged event (empty formValidity)', newValidationStatus);
+                eventBus.emit('validationChanged', newValidationStatus);
+                this.lastValidationStatus[targetFormType] = newValidationStatus;
+            }
+            return;
+        }
+        
+        const canAutosave = fieldValues.every(field => 
             field.canAutosave
         );
-        const canPublish = Object.values(formValidity).every(field => 
+        const canPublish = fieldValues.every(field => 
             field.canPublish
         );
 
@@ -1105,7 +1125,7 @@ export class ValidationManager {
         if (!this.lastValidationStatus[targetFormType]) {
             this.lastValidationStatus[targetFormType] = {};
         }
-        
+
         // Check for changes in field validation status related to autosave
         const autoSaveFieldsChanged = !this.lastFieldValidityStatus[targetFormType] || 
             JSON.stringify(this.getFailedAutoSaveFields(formValidity)) !== 

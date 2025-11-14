@@ -48,6 +48,11 @@
     padding: 2rem 3rem 0rem 3rem;
 }
 
+/* Modal Body */
+.contact-modal-body {
+    padding: 0 3rem 2rem 3rem;
+}
+
 .contact-modal-close {
     background: none;
     border: none;
@@ -77,15 +82,10 @@
     stroke: var(--color-black, #666666);
 }
 
-/* Modal Body */
-.contact-modal-body {
-    padding: 2rem;
-}
-
 /* Content Section */
 .contact-content {
     max-width: 500px;
-    margin: 0 auto;
+/*     margin: 0 auto; */
 }
 
 .contact-title {
@@ -248,9 +248,8 @@
 }
 
 /* Subject dropdown specific styling */
-#contact-subject-label {
-    margin-bottom: 1em;
-}
+/* Note: margin-bottom removed to maintain consistent spacing between all form fields */
+/* The headline's margin-top handles spacing consistently */
 
 /* Focus styles - matching main form patterns */
 .contact-form label:not(.has-feedback) input:focus,
@@ -310,11 +309,16 @@
 }
 
 /* Newsletter checkbox label */
-.contact-newsletter-label {
+label.contact-newsletter-label {
     display: flex;
+    margin-top: var(--spacing-large);
     flex-direction: row;
     align-items: center;
     gap: 0.5rem;
+}
+
+label.contact-newsletter-label span {
+    font-size: var(--font-size-xxsmall);
 }
 
 .contact-newsletter-label input[type="checkbox"] {
@@ -394,7 +398,18 @@ body.contact-modal-open {
     }
     
     .contact-modal-body {
-        padding: 1.5rem;
+        padding: 0 2.5rem 1.5rem 2.5rem;
+    }
+}
+
+/* Fine-tune alignment for mid-range tablet sizes (615px - 765px) */
+@media (max-width: 765px) and (min-width: 615px) {
+    .contact-modal-header {
+        padding: 2rem 1.75rem 1rem 1.75rem;
+    }
+    
+    .contact-modal-body {
+        padding: 0 1.75rem 1.5rem 1.75rem;
     }
 }
 
@@ -407,7 +422,12 @@ body.contact-modal-open {
     }
     
     .contact-modal-header {
+        padding: 1.5rem 1.5rem 1rem 1.5rem;
         border-radius: 0;
+    }
+    
+    .contact-modal-body {
+        padding: 0 1.5rem 1.5rem 1.5rem;
     }
 }
 
@@ -459,14 +479,6 @@ body.contact-modal-open {
     gap: 1.5rem;
 }
 
-.contact-confirmation-title {
-    margin: 0 0 1.5rem 0;
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--color-black, #333333);
-    font-family: var(--font-family-primary, 'Livvic', sans-serif);
-}
-
 .contact-confirmation-content {
     display: flex;
     flex-direction: column;
@@ -513,10 +525,6 @@ body.contact-modal-open {
 
 /* Dark mode for confirmation view */
 /* @media (prefers-color-scheme: dark) {
-    .contact-confirmation-title {
-        color: var(--dark-text-color, #ffffff);
-    }
-    
     .contact-confirmation-content {
         background-color: var(--dark-bg-color-secondary, #2a2a2a);
     }

@@ -73,7 +73,7 @@
   },
   "contact": {
     "title": "Contact Us",
-    "description": "Please write to me! Questions, concerns, etc.",
+    "description": "Please write to me! Tell me what you think, or ask a question.",
     "email_label": "Email Address",
     "email_placeholder": "your.email@example.com",
     "subject_label": "Subject",
