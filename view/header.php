@@ -87,7 +87,7 @@
             </a>  
         {% endif %}
 
-        {% if title_key == 'page_title.texts' or title_key == 'page_title.collab' or title_key == 'page_title.dashboard' %}
+        {% if title_key == 'page_title.texts' or title_key == 'page_title.story_collab' or title_key == 'page_title.dashboard' %}
             <a class="nav-link search" data-item="search" href="{{ langUrl('search') }}">
                 <span class="icon" data-svg="search" data-i18n-title="nav.search_tooltip" title="{{ translate('nav.search_tooltip') }}"></span>
                 <span class="nav-text" data-i18n="nav.search">

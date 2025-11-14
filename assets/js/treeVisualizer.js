@@ -1573,6 +1573,23 @@ export class TreeVisualizer {
         console.log('SEARCH RESULTS:', searchResults);
         //console.log('Search results structure:', JSON.stringify(searchResults, null, 2));
 
+        // Check if we're on a collab page
+        const isCollabPage = document.querySelector('[data-one-story]') !== null;
+
+        // On collab page, clear all highlights first (since game element doesn't get redrawn)
+        if (isCollabPage) {
+            console.log('Collab page detected - clearing all highlights first');
+            const allNodes = this.svg.selectAll('.node path[data-id]:not(.link)');
+            allNodes.each(function(d) {
+                const nodeId = d.data.id;
+                d3.select(this).classed('search-match', false);
+            });
+            // Also clear title highlights
+            this.svg.selectAll('.node').each((d) => {
+                this.handleTitleHighlight(d.data.id, '', false);
+            });
+        }
+
         if (!searchTerm || !searchResults || !searchResults.nodes) {
             console.log('Exiting early - missing data:', {
                 searchTerm,

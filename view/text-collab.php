@@ -8,9 +8,11 @@
     {{ treeData|raw }}
 </script>
 
+<div class="menu-container">
 <div class="filter-menu" id="gameFilters">
 </div>
 <div class="search-menu" id="gameSearch">
+    </div>
 </div>
 
 <div data-one-story class="one-story">
