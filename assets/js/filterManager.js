@@ -82,6 +82,10 @@ export class FilterManager {
             'false': { text: 'not bookmarked', key: 'not_bookmarked' }
         };
 
+        // CRITICAL: Read filters from URL first (like SearchManager does)
+        // This ensures URL is the source of truth on page load
+        this.updateFiltersFromUrl();
+        
         // Initialize UI and bind events
         this.initializeUI();
         this.bindEvents();
@@ -263,11 +267,50 @@ export class FilterManager {
             const currentFilters = this.dataManager.getFilters();
             updateUrlWithFilters(currentFilters);
         });
+        
+        // Listen for popstate event to update filters from URL (like SearchManager does)
+        window.addEventListener('popstate', () => {
+            this.updateFiltersFromUrl();
+            this.initializeUI(); // Re-initialize UI to reflect URL state
+        });
     }
 
     // Note: handleFiltersUpdated() method removed - it was never called
     // The filtersUpdated event it listened for was never emitted
     // All filter updates go through button clicks → filterApplied + refreshGames
+
+    /**
+     * Read filters from URL and update cache
+     * URL is the single source of truth - cache is just for updates via polling/Redis
+     * Similar to SearchManager.updateSearchCacheFromUrl()
+     */
+    updateFiltersFromUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const hasContributed = urlParams.get('hasContributed');
+        const bookmarked = urlParams.get('bookmarked');
+        const gameState = urlParams.get('gameState');
+        
+        // Convert URL string values to backend values
+        const convertedHasContributed = hasContributed === null || hasContributed === 'all' ? null :
+                                       hasContributed === 'contributor' ? true :
+                                       hasContributed === 'mine' ? 'mine' :
+                                       null;
+        
+        const convertedBookmarked = bookmarked === null || bookmarked === 'all' ? null :
+                                   bookmarked === 'bookmarked' ? true :
+                                   bookmarked === 'not_bookmarked' ? false :
+                                   null;
+        
+        const urlFilters = {
+            hasContributed: convertedHasContributed,
+            gameState: gameState || 'all',
+            bookmarked: convertedBookmarked
+        };
+        
+        // Update cache from URL (URL is source of truth)
+        this.dataManager.setFilters(urlFilters);
+        // Don't trigger refresh - backend already rendered filtered games in #games-data
+    }
 
     /**
      * Update the filter nav link to show active state

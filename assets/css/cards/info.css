@@ -42,7 +42,7 @@ section.info{
     margin-top: 0.3px;
     width: 98%;
     position: relative;
-    max-width: min(75ch, 600px);
+    max-width: min(75ch, 800px);
     box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
     font-size: 1rem;
 }
@@ -162,6 +162,7 @@ section.info{
 
 .info-container {
     position: relative;
+    margin: 0 auto;
 }
 
 /* Giant heart under info section - always large */
@@ -376,6 +377,7 @@ section.info > .info-heart-svg svg rect {
     text-align: left;
     font-size: 2rem;
     font-weight: 600;
+    padding: 0px;
     color: var(--color-black, #333333);
     font-family: var(--font-family-primary, 'Livvic', sans-serif);
     margin-bottom: 1.5rem;
@@ -391,6 +393,7 @@ section.info > .info-heart-svg svg rect {
 
 .about-section .about-description p {
     margin-bottom: 1rem;
+    padding: 0px;
 }
 
 .about-section .about-description p:last-child {
@@ -441,7 +444,7 @@ section.info > .info-heart-svg svg rect {
 /* Responsive Design for About Section */
 @media (max-width: 768px) {
     .about-container {
-        padding: 1.5rem 1rem;
+        padding: 0rem 0rem;
     }
     
     .about-section .about-title {
