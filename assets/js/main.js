@@ -52,6 +52,7 @@ import { InvitationTokenManager } from './invitationTokenManager.js';
 import { InvitationLinkManager } from './invitationLinkManager.js';
 import { TutorialSwitcherManager } from './tutorialSwitcherManager.js';
 import { DashboardManager } from './dashboardManager.js';
+import { LinkFilterPreserver } from './linkFilterPreserver.js';
 import { CategoryHeaderManager } from './categoryHeaderManager.js';
 import { HamburgerMenuManager } from './hamburgerMenuManager.js';
 import { ResponsiveNavManager } from './responsiveNavManager.js';
@@ -183,6 +184,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (document.querySelector('.dashboard')) {
     window.dashboardManager = new DashboardManager();
   }
+  
+  // Initialize LinkFilterPreserver (checks for dashboard internally)
+  new LinkFilterPreserver();
 
 
    // Check for pending toasts

@@ -35,6 +35,37 @@ class Twig{
             return $basePath . $lang . '/' . $path;
         }));
 
+        // a function to build query string with filters/search
+        $twig->addFunction(new \Twig\TwigFunction('buildQueryString', function($filters = [], $search = null, $category = null) {
+            $params = [];
+            
+            // Add category if provided
+            if ($category) {
+                $params['category'] = $category;
+            }
+            
+            // Add filters if provided
+            if (isset($filters['hasContributed']) && $filters['hasContributed'] !== null) {
+                $params['hasContributed'] = $filters['hasContributed'] === true ? 'contributor' : 
+                                           ($filters['hasContributed'] === 'mine' ? 'mine' : 'all');
+            }
+            
+            if (isset($filters['gameState']) && $filters['gameState'] !== 'all') {
+                $params['gameState'] = $filters['gameState'];
+            }
+            
+            if (isset($filters['bookmarked']) && $filters['bookmarked'] !== null) {
+                $params['bookmarked'] = $filters['bookmarked'] === true ? 'bookmarked' : 'not_bookmarked';
+            }
+            
+            // Add search if provided
+            if ($search) {
+                $params['search'] = $search;
+            }
+            
+            return http_build_query($params);
+        }));
+        
         // a function to translate a text
         $twig->addFunction(new \Twig\TwigFunction('translate', function($key, $replacements = [], $raw = false) {
             $lang = getCurrentLanguage();

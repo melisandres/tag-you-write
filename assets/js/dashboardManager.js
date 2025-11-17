@@ -31,7 +31,6 @@ export class DashboardManager {
         
         // Set up UI interactions
         this.setupCollapsibleCategories();
-        this.setupGameNavigation();
         
         // Initialize activity indicators for games already in DOM (from template)
         this.initializeGameActivityIndicators();
@@ -132,42 +131,6 @@ export class DashboardManager {
         }, this.FLASH_DURATION);
     }
 
-    /**
-     * Set up game navigation using event delegation
-     */
-    setupGameNavigation() {
-        // Use event delegation for better performance and dynamic content support
-        this.container.addEventListener('click', (e) => {
-            const gameItem = e.target.closest('.dashboard-game-item');
-            if (gameItem) {
-                e.preventDefault();
-                const textId = gameItem.dataset.textId;
-                
-                if (textId) {
-                    this.navigateToGame(textId);
-                } else {
-                    console.warn('DashboardManager: No text ID found for game item');
-                }
-            }
-        });
-    }
-
-    /**
-     * Navigate to a specific game
-     */
-    navigateToGame(textId) {
-        if (!textId) {
-            console.error('DashboardManager: No text ID provided for navigation');
-            return;
-        }
-        
-        // Use the existing i18n system to create the URL
-        const url = window.i18n.createUrl(`text/collab/${textId}`);
-        console.log('DashboardManager: Navigating to game:', url);
-        
-        // Navigate to the game
-        window.location.href = url;
-    }
 
     /**
      * Animate a game element out of its category

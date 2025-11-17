@@ -60,7 +60,8 @@
                 <div class="dashboard-category">
                     <div class="category-header" data-category="{{ section.key }}.{{ subcategory.key }}">
                         <div class="category-header-left">
-                            <a href="{{ langUrl('text?category=' ~ categoryUrl) }}" class="browse-button" data-i18n-title="dashboard.browseCategory" title="{{ translate('dashboard.browseCategory') }}">
+                            {% set queryString = buildQueryString(initialFilters, initialSearch, categoryUrl) %}
+                            <a href="{{ langUrl('text' ~ (queryString ? '?' ~ queryString : '')) }}" class="browse-button" data-preserve-filters="true" data-category="{{ categoryUrl }}" data-i18n-title="dashboard.browseCategory" title="{{ translate('dashboard.browseCategory') }}">
                                 <span class="icon" data-svg="browse"></span>
                             </a>
                             <h3 class="category-title {{ categoryData.hasUnreads ? 'has-unreads' : '' }}">
@@ -76,7 +77,8 @@
                     </div>
                     <div class="category-games collapsed">
                         {% for game in categoryData.games %}
-                            <div class="dashboard-game-item" data-game-id="{{ game.game_id }}" data-text-id="{{ game.id }}">
+                            {% set gameQueryString = buildQueryString(initialFilters, initialSearch) %}
+                            <a href="{{ langUrl('text/collab/' ~ game.id ~ (gameQueryString ? '?' ~ gameQueryString : '')) }}" class="dashboard-game-item" data-preserve-filters="true" data-game-id="{{ game.game_id }}" data-text-id="{{ game.id }}">
                                 <div class="game-title">
                                     <div class="unread-area">
                                         {% if game.unseen_count > 0 %}
@@ -85,7 +87,7 @@
                                     </div>
                                     <span class="title">{{ game.title ? game.title : translate('general.untitled') }}</span>
                                 </div>
-                            </div>
+                            </a>
                         {% endfor %}
                     </div>
                 </div>
