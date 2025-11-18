@@ -10,6 +10,10 @@
   "nav": {
     "home": "Accueil",
     "home_tooltip": "accueil",
+    "category": "Catégorie",
+    "category_tooltip": "filtrer par catégorie",
+    "filters": "Filtres",
+    "filters_tooltip": "options de filtre, recherche et catégorie",
     "filter": "Filtrer",
     "filter_tooltip": "filtrer les textes",
     "browse": "Explorer",

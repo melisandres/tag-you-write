@@ -1908,5 +1908,68 @@ export class SVGManager{
          </svg>
       `;
    }
+
+   static get categorySVG() {
+      return `
+         <svg
+            xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+            xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+            xmlns="http://www.w3.org/2000/svg"
+            xmlns:svg="http://www.w3.org/2000/svg"
+            viewBox="0 0 25.134769 31.41846125"
+            version="1.1"
+            x="0px"
+            y="0px"
+            fill="currentColor"
+            stroke="currentColor">
+            <g transform="translate(-112.67358,-139.51093)">
+               <path
+                  d="m 118.44727,144.80273 a 0.39691468,0.39691468 0 0 0 -0.39844,0.39649 v 5.68555 a 0.39691468,0.39691468 0 0 0 0.39844,0.39648 h 5.68554 a 0.39691468,0.39691468 0 0 0 0.39649,-0.39648 v -5.68555 a 0.39691468,0.39691468 0 0 0 -0.39649,-0.39649 z m 0.39648,0.79297 h 4.89258 v 4.89258 h -4.89258 z"
+                  fill="currentColor" stroke="currentColor"/>
+               <path
+                  d="m 126.40039,144.80273 a 0.39691468,0.39691468 0 0 0 -0.39648,0.39649 v 5.68555 a 0.39691468,0.39691468 0 0 0 0.39648,0.39648 h 5.6875 a 0.39691468,0.39691468 0 0 0 0.39648,-0.39648 v -5.68555 a 0.39691468,0.39691468 0 0 0 -0.39648,-0.39649 z m 0.39649,0.79297 h 4.89453 v 4.89258 h -4.89453 z"
+                  fill="currentColor" stroke="currentColor"/>
+               <path
+                  d="m 129.24414,152.875 c -1.78817,0 -3.24023,1.45209 -3.24023,3.24023 0,1.78815 1.45206,3.24024 3.24023,3.24024 1.78817,0 3.24023,-1.45209 3.24023,-3.24024 0,-1.78814 -1.45206,-3.24023 -3.24023,-3.24023 z m 0,0.79297 c 1.36218,0 2.44727,1.08513 2.44727,2.44726 0,1.36214 -1.08509,2.44532 -2.44727,2.44532 -1.36217,0 -2.44726,-1.08318 -2.44726,-2.44532 0,-1.36213 1.08509,-2.44726 2.44726,-2.44726 z"
+                  fill="currentColor" stroke="currentColor"/>
+               <path
+                  d="m 118.39453,152.875 a 0.39691468,0.39691468 0 0 0 -0.39648,0.39648 v 5.68555 a 0.39691468,0.39691468 0 0 0 0.39648,0.39844 h 5.6875 a 0.39691468,0.39691468 0 0 0 0.39649,-0.39844 v -5.68555 a 0.39691468,0.39691468 0 0 0 -0.39649,-0.39648 z m 0.39649,0.79297 h 4.89257 v 4.89258 h -4.89257 z"
+                  fill="currentColor" stroke="currentColor"/>
+            </g>
+            <text
+               x="0"
+               y="40.134769"
+               fill="#000000"
+               font-size="5px"
+               font-weight="bold"
+               font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif"
+               style="display: none;">
+               Created by Meko
+            </text>
+            <text
+               x="0"
+               y="45.134769"
+               fill="#000000"
+               font-size="5px"
+               font-weight="bold"
+               font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif"
+               style="display: none;">
+               from the Noun Project
+            </text>
+         </svg>
+      `;
+   }
+
+   static get filtersSVG() {
+      return `
+         <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-5.0 -10.0 110.0 135.0" fill="currentColor" stroke="none">
+            <path d="m30.16 20c-3.5391 0-6.4297 2.8789-6.4297 6.4297 0 3.1719 2.3984 5.8984 5.5117 6.3594v47.141h1.8398v-47.141c3.1211-0.44922 5.5117-3.1797 5.5117-6.3594 0-3.5508-2.8789-6.4297-6.4297-6.4297z" fill="currentColor" stroke="none"/>
+            <path d="m47.68 20.07v47.141c-3.1094 0.46094-5.5117 3.1914-5.5117 6.3594 0 3.5508 2.8906 6.4297 6.4297 6.4297 3.5391 0 6.4414-2.8789 6.4414-6.4297 0-3.1797-2.3984-5.9102-5.5195-6.3594v-47.141z" fill="currentColor" stroke="none"/>
+            <path d="m70.75 43.641v-23.57h-1.8398v23.57c-3.1094 0.46094-5.5 3.1914-5.5 6.3594 0 3.1719 2.3906 5.8984 5.5 6.3594v23.57h1.8398v-23.57c3.1211-0.44922 5.5195-3.1797 5.5195-6.3594s-2.3984-5.9102-5.5195-6.3594z" fill="currentColor" stroke="none"/>
+            <text x="0.0" y="117.5" font-size="5.0" font-weight="bold" font-family="Arbeit Regular, Helvetica, Arial-Unicode, Arial, Sans-serif" fill="#000000" style="display: none;">Created by Kang panjai</text>
+            <text x="0.0" y="122.5" font-size="5.0" font-weight="bold" font-family="Arbeit Regular, Helvetica, Arial-Unicode, Arial, Sans-serif" fill="#000000" style="display: none;">from Noun Project</text>
+         </svg>
+      `;
+   }
       
 }

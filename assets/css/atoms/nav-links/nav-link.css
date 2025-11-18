@@ -11,6 +11,10 @@ a.nav-link {
     border-bottom: black solid 3px;
     cursor: pointer;
     transition: all 0.2s ease;
+    height: 100%; /* Fill nav container height so border-bottom aligns */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Base nav-link styles for div elements */
@@ -28,6 +32,7 @@ a.nav-link {
     max-width: 150px;
     border-bottom: black solid 3px;
     transition: all 0.2s ease;
+    height: 100%; /* Fill nav container height so border-bottom aligns */
 }
 
 /* Common hover state for all nav-links */

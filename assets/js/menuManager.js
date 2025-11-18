@@ -3,6 +3,7 @@ export class MenuManager {
         this.menuContainer = document.querySelector('.menu-container');
         this.searchMenu = document.querySelector('.search-menu');
         this.filterMenu = document.querySelector('.filter-menu');
+        this.categoryHeader = document.getElementById('categoryHeader');
         
         if (!this.menuContainer || !this.searchMenu || !this.filterMenu) {
             console.warn('MenuManager: Required elements not found');
@@ -15,6 +16,8 @@ export class MenuManager {
             this.toggleSearchMenu();
         } else if (menuName === 'filter') {
             this.toggleFilterMenu();
+        } else if (menuName === 'category') {
+            this.toggleCategoryHeader();
         } else {
             console.error('Unknown menu:', menuName);
         }
@@ -56,6 +59,29 @@ export class MenuManager {
     closeFilterMenu() {
         this.filterMenu.classList.remove('visible');
         this.updateMenuState();
+    }
+    
+    toggleCategoryHeader() {
+        if (!this.categoryHeader) return;
+        
+        const isVisible = this.categoryHeader.classList.contains('visible');
+        if (isVisible) {
+            this.closeCategoryHeader();
+        } else {
+            this.openCategoryHeader();
+        }
+    }
+    
+    openCategoryHeader() {
+        if (!this.categoryHeader) return;
+        this.categoryHeader.classList.add('visible');
+        this.setCategoryHeaderVisible(true);
+    }
+    
+    closeCategoryHeader() {
+        if (!this.categoryHeader) return;
+        this.categoryHeader.classList.remove('visible');
+        this.setCategoryHeaderVisible(false);
     }
 
     updateMenuState() {

@@ -3,12 +3,58 @@ import { eventBus } from './eventBus.js';
 export class CategoryHeaderManager {
     constructor() {
         this.categoryHeader = document.getElementById('categoryHeader');
+        this.categoryNavLink = document.querySelector('.nav-link.category');
         this.menuManager = window.menuManager; // Assuming MenuManager is global
         
         // No mapping needed - we'll construct the translation key directly
         
         this.initializeFromURL();
         this.setupEventListeners();
+        this.bindNavLink();
+        // Set initial nav link state
+        this.updateNavLink();
+    }
+    
+    /**
+     * Bind click event to category nav link
+     */
+    bindNavLink() {
+        if (!this.categoryNavLink) {
+            return;
+        }
+        
+        // Toggle category header when nav link is clicked
+        this.categoryNavLink.addEventListener('click', (e) => {
+            e.preventDefault(); // Prevent default link behavior if it's an anchor
+            this.toggleCategoryHeader();
+        });
+    }
+    
+    /**
+     * Toggle the category header visibility
+     */
+    toggleCategoryHeader() {
+        if (this.menuManager) {
+            // Toggle via MenuManager
+            this.menuManager.toggleMenu('category');
+            // Note: updateNavLink is called separately based on category selection, not visibility
+        }
+    }
+    
+    /**
+     * Update the category nav link to show active state
+     * Active = category is selected (not just header visible)
+     */
+    updateNavLink(isVisible = null) {
+        if (!this.categoryNavLink) return;
+        
+        // Check if a category is currently selected (from URL or DataManager)
+        const urlParams = new URLSearchParams(window.location.search);
+        const category = urlParams.get('category');
+        const hasCategory = category !== null && category !== '';
+        
+        // Use 'active' class when a category is selected (like filter's active state)
+        this.categoryNavLink.classList.toggle('active', hasCategory);
     }
     
     /**
@@ -18,6 +64,7 @@ export class CategoryHeaderManager {
         // Listen for category changes from DataManager
         eventBus.on('categoryChanged', (category) => {
             this.updateCategoryHeader(category);
+            this.updateNavLink(); // Update nav link active state when category changes
         });
         
         // Listen for game list updates to update the count
@@ -91,7 +138,12 @@ export class CategoryHeaderManager {
         this.categoryHeader.classList.add('visible');
         
         // Update menu positions and category header state
-        this.menuManager.setCategoryHeaderVisible(true);
+        if (this.menuManager) {
+            this.menuManager.setCategoryHeaderVisible(true);
+        }
+        
+        // Update nav link active state (based on category selection)
+        this.updateNavLink();
     }
     
     /**
@@ -104,7 +156,12 @@ export class CategoryHeaderManager {
         this.categoryHeader.classList.remove('visible');
         
         // Update menu positions and category header state
-        this.menuManager.setCategoryHeaderVisible(false);
+        if (this.menuManager) {
+            this.menuManager.setCategoryHeaderVisible(false);
+        }
+        
+        // Update nav link active state (based on category selection)
+        this.updateNavLink();
     }
     
     /**

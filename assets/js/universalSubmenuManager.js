@@ -152,6 +152,12 @@ export class UniversalSubmenuManager {
         for (const [submenuType, config] of Object.entries(context.submenuTypes)) {
             const trigger = e.target.closest(config.trigger);
             if (trigger) {
+                // Skip language and tutorial - they have their own direct handlers
+                // Only handle devMode in main nav
+                if (submenuType === 'language' || submenuType === 'tutorial') {
+                    return; // Let their own handlers work
+                }
+                
                 console.log(`UniversalSubmenuManager: ${submenuType} trigger clicked in nav`);
                 e.preventDefault();
                 e.stopPropagation();

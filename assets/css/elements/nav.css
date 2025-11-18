@@ -2,12 +2,15 @@
 nav {
     max-width: 100vw;
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap; /* Prevent wrapping to avoid horizontal scroll */
     justify-content: center;
+    align-items: center;
     background-color: black;
     position: fixed;
     top: 0;
     width: 100%;
     height: var(--header-height);
     z-index: 4;
+    overflow-x: hidden; /* Prevent horizontal scroll */
+    /* overflow-y: hidden; */ /* Prevent vertical scroll */
 }

@@ -26,13 +26,12 @@ export class FilterManager {
         // Get DOM elements
         this.filterMenu = document.querySelector('.filter-menu');
         this.filterNavLink = document.querySelector('.nav-link.filter');
-        if (!this.filterMenu || !this.filterNavLink) {
+        if (!this.filterMenu) {
             return;
         }
         
         // Store references to required managers and DOM elements
         this.dataManager = window.dataManager;
-        this.filterNavLink = document.querySelector('.nav-link.filter');
         this.filterMenu = document.querySelector('.filter-menu');
         this.storiesContainer = document.querySelector('.stories');
         const userIdMeta = document.querySelector('meta[name="user"]');
@@ -163,14 +162,19 @@ export class FilterManager {
             return;
         }
 
-        // Toggle filter menu when nav link is clicked
-        this.filterNavLink.addEventListener('click', () => {
-            this.toggleFilterMenu();
-        });
+        // Toggle filter menu when nav link is clicked (if nav link exists)
+        // Note: Nav link may not exist if using filters submenu
+        if (this.filterNavLink) {
+            this.filterNavLink.addEventListener('click', () => {
+                this.toggleFilterMenu();
+            });
+        }
         
         // Close button event
         const closeButton = this.filterMenu.querySelector('.close-filter');
-        closeButton.addEventListener('click', () => this.toggleFilterMenu());
+        if (closeButton) {
+            closeButton.addEventListener('click', () => this.toggleFilterMenu());
+        }
 
         // Contribution filter button event
         const filterButton = this.filterMenu.querySelector('.my-games-filter');
@@ -316,6 +320,9 @@ export class FilterManager {
      * Update the filter nav link to show active state
      */
     updateNavLink() {
+        // Nav link may not exist if using filters submenu
+        if (!this.filterNavLink) return;
+        
         // Check if there are active filters
         const hasActiveFilters = this.dataManager.cache.filters.hasContributed !== null || 
                                 this.dataManager.cache.filters.gameState !== 'all' ||
@@ -332,7 +339,10 @@ export class FilterManager {
         const isVisible = this.filterMenu.classList.contains('visible');
         
         // Use 'menu-open' instead of 'active' for menu state
-        this.filterNavLink.classList.toggle('menu-open', isVisible);
+        // Nav link may not exist if using filters submenu
+        if (this.filterNavLink) {
+            this.filterNavLink.classList.toggle('menu-open', isVisible);
+        }
     }
 
     /**

@@ -7,7 +7,7 @@
     z-index: 3;
     height: var(--menu-container-height, 0px);
     overflow: hidden;
-    transition: height 0.5s;
+    transition: height 0.5s, top 0.5s; /* Animate both height and top position */
 }
 
 .search-menu, .filter-menu {

@@ -7,13 +7,41 @@
 }
 
 /* Progressive hiding based on screen width and priority */
-/* Very small screens (360px and below) - show only 3 items */
+/* Very small screens (360px and below) - show 5 items (priorities 1-4: category, dashboard, browse, search/filter) */
 @media (max-width: 360px) {
+    .nav-link[data-priority-nav="5"],
     .nav-link[data-priority-nav="6"],
     .nav-link[data-priority-nav="7"],
     .nav-link[data-priority-nav="8"],
     .nav-link[data-priority-nav="9"],
-    .nav-link[data-priority-nav="10"] {
+    .nav-link[data-priority-nav="10"],
+    .nav-link[data-priority-nav="11"] {
+        display: none;
+    }
+
+    .nav-link.hamburger {
+        display: flex;
+    }
+
+    .overflow-menu .nav-link[data-priority-overflow="5"],
+    .overflow-menu .nav-link[data-priority-overflow="6"],
+    .overflow-menu .nav-link[data-priority-overflow="7"],
+    .overflow-menu .nav-link[data-priority-overflow="8"],
+    .overflow-menu .nav-link[data-priority-overflow="9"],
+    .overflow-menu .nav-link[data-priority-overflow="10"],
+    .overflow-menu .nav-link[data-priority-overflow="11"] {
+        display: flex;
+    }
+}
+
+/* Small screens (420px and below) - show 6 items (priorities 1-5: adds notifications) */
+@media (max-width: 420px) {
+    .nav-link[data-priority-nav="6"],
+    .nav-link[data-priority-nav="7"],
+    .nav-link[data-priority-nav="8"],
+    .nav-link[data-priority-nav="9"],
+    .nav-link[data-priority-nav="10"],
+    .nav-link[data-priority-nav="11"] {
         display: none;
     }
 
@@ -25,17 +53,19 @@
     .overflow-menu .nav-link[data-priority-overflow="7"],
     .overflow-menu .nav-link[data-priority-overflow="8"],
     .overflow-menu .nav-link[data-priority-overflow="9"],
-    .overflow-menu .nav-link[data-priority-overflow="10"] {
+    .overflow-menu .nav-link[data-priority-overflow="10"],
+    .overflow-menu .nav-link[data-priority-overflow="11"] {
         display: flex;
     }
 }
 
-/* Small screens (420px and below) - show only 4 items */
-@media (max-width: 420px) {
+/* Medium screens (480px and below) - show 7 items (priorities 1-6: adds language) */
+@media (max-width: 480px) {
     .nav-link[data-priority-nav="7"],
     .nav-link[data-priority-nav="8"],
     .nav-link[data-priority-nav="9"],
-    .nav-link[data-priority-nav="10"] {
+    .nav-link[data-priority-nav="10"],
+    .nav-link[data-priority-nav="11"] {
         display: none;
     }
 
@@ -46,16 +76,18 @@
     .overflow-menu .nav-link[data-priority-overflow="7"],
     .overflow-menu .nav-link[data-priority-overflow="8"],
     .overflow-menu .nav-link[data-priority-overflow="9"],
-    .overflow-menu .nav-link[data-priority-overflow="10"] {
+    .overflow-menu .nav-link[data-priority-overflow="10"],
+    .overflow-menu .nav-link[data-priority-overflow="11"] {
         display: flex;
     }
 }
 
-/* Medium screens (480px and below) - show only 5 items */
-@media (max-width: 480px) {
+/* Large screens (600px and below) - show 8 items (priorities 1-7: adds tutorial) */
+@media (max-width: 600px) {
     .nav-link[data-priority-nav="8"],
     .nav-link[data-priority-nav="9"],
-    .nav-link[data-priority-nav="10"] {
+    .nav-link[data-priority-nav="10"],
+    .nav-link[data-priority-nav="11"] {
         display: none;
     }
 
@@ -65,24 +97,8 @@
 
     .overflow-menu .nav-link[data-priority-overflow="8"],
     .overflow-menu .nav-link[data-priority-overflow="9"],
-    .overflow-menu .nav-link[data-priority-overflow="10"] {
-        display: flex;
-    }
-}
-
-/* Large screens (600px and below) - show only 6 items */
-@media (max-width: 600px) {
-    .nav-link[data-priority-nav="9"],
-    .nav-link[data-priority-nav="10"] {
-        display: none;
-    }
-
-    .nav-link.hamburger {
-        display: flex;
-    }
-
-    .overflow-menu .nav-link[data-priority-overflow="9"],
-    .overflow-menu .nav-link[data-priority-overflow="10"] {
+    .overflow-menu .nav-link[data-priority-overflow="10"],
+    .overflow-menu .nav-link[data-priority-overflow="11"] {
         display: flex;
     }
 }

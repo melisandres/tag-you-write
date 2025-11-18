@@ -19,6 +19,7 @@
 @import url(./atoms/nav-links/newgame.css);
 @import url(./atoms/nav-links/logout.css);
 @import url(./atoms/nav-links/dashboard.css);
+@import url(./atoms/nav-links/category.css);
 @import url(./atoms/tooltip.css);
 @import url(./atoms/game-activity-indicator.css);
 @import url(./atoms/ghost-node.css);

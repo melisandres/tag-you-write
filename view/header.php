@@ -71,6 +71,15 @@
         </a>
         {% endif %}
 
+        {% if title_key == 'page_title.texts' %}
+            <a class="nav-link category" data-item="category">
+                <span class="icon" data-svg="category" data-i18n-title="nav.category_tooltip" title="{{ translate('nav.category_tooltip') }}"></span>
+                <span class="nav-text" data-i18n="nav.category">
+                    {{ translate('nav.category') }}
+                </span>
+            </a>
+        {% endif %}
+
         {% if title_key == 'page_title.texts' or title_key == 'page_title.dashboard' %}
             <a class="nav-link filter" data-item="filter">
                 <span class="icon" data-svg="filter" data-i18n-title="nav.filter_tooltip" title="{{ translate('nav.filter_tooltip') }}"></span>
@@ -239,6 +248,18 @@
                     <span class="icon" data-svg="dashboard" data-i18n-title="nav.dashboard_tooltip" title="{{ translate('nav.dashboard_tooltip') }}"></span>
                     <span class="nav-text" data-i18n="nav.dashboard">
                         {{ translate('nav.dashboard') }}
+                    </span>
+                </a>
+            </div>
+            {% endif %}
+
+            <!-- Category Link -->
+            {% if title_key == 'page_title.texts' %}
+            <div class="overflow-menu-item">
+                <a class="nav-link category" data-item="category">
+                    <span class="icon" data-svg="category" data-i18n-title="nav.category_tooltip" title="{{ translate('nav.category_tooltip') }}"></span>
+                    <span class="nav-text" data-i18n="nav.category">
+                        {{ translate('nav.category') }}
                     </span>
                 </a>
             </div>

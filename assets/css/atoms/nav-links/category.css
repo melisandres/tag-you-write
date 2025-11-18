@@ -1,0 +1,35 @@
+/* Category Nav-Link Styles */
+/* All base styles inherited from nav-link.css */
+
+/* Category-specific SVG styling - make it bigger and remove stroke */
+.nav-link.category svg,
+.nav-link.category .icon svg {
+    width: 24px;
+    height: 24px;
+    transform: scale(1.7) translateY(2px); /* Scale and shift down slightly to center */
+    fill: currentColor;
+    stroke: none; /* Remove stroke for cleaner look */
+}
+
+/* Ensure proper color inheritance for all paths */
+.nav-link.category svg path {
+    fill: currentColor;
+    stroke: none;
+}
+
+/* Hover state */
+.nav-link.category:hover svg,
+.nav-link.category:hover svg path {
+    fill: pink;
+    stroke: none;
+}
+
+/* Overflow menu specific styling */
+.overflow-menu .nav-link.category .icon svg {
+    width: 24px;
+    height: 24px;
+    transform: scale(1.2) translateY(1px); /* Scale and shift down slightly to center */
+    fill: currentColor;
+    stroke: none;
+}
+

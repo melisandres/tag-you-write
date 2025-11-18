@@ -37,29 +37,29 @@ export class SearchManager {
     }
 
     bindEvents() {
-        if (!this.searchNavLink) {
-            //console.error('Search nav link not found');
-            return;
-        }
-
         console.log('Binding search events');
-        // Toggle search menu
-        this.searchNavLink.addEventListener('click', (e) => {
-            console.log('Search link clicked');
-            e.preventDefault(); // Prevent default link behavior
-            this.toggleSearchMenu();
-        });
+        // Toggle search menu when nav link is clicked (if nav link exists)
+        // Note: Nav link may not exist if using filters submenu
+        if (this.searchNavLink) {
+            this.searchNavLink.addEventListener('click', (e) => {
+                console.log('Search link clicked');
+                e.preventDefault(); // Prevent default link behavior
+                this.toggleSearchMenu();
+            });
+        }
         
         const closeButton = this.searchMenu.querySelector('.close-search');
-        closeButton.addEventListener('click', () => {
-            this.toggleSearchMenu();
-            if (this.searchInput) {
-                this.searchInput.value = '';
-                this.updateNavLink();
-                this.updateUrlWithSearch('');
-                this.handleSearchInput('');
-            }
-        });
+        if (closeButton) {
+            closeButton.addEventListener('click', () => {
+                this.toggleSearchMenu();
+                if (this.searchInput) {
+                    this.searchInput.value = '';
+                    this.updateNavLink();
+                    this.updateUrlWithSearch('');
+                    this.handleSearchInput('');
+                }
+            });
+        }
 
         // Listen for filter menu changes
         eventBus.on('filterMenuToggled', (isFilterVisible) => {
@@ -158,6 +158,9 @@ export class SearchManager {
     }
 
     updateNavLink() {
+        // Nav link may not exist if using filters submenu
+        if (!this.searchNavLink) return;
+        
         const hasSearchText = this.searchInput && this.searchInput.value.trim().length > 0;
         this.searchNavLink.classList.toggle('has-search', hasSearchText);
         this.searchNavLink.classList.toggle('active', hasSearchText);

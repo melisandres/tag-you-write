@@ -5,16 +5,18 @@
 export class ResponsiveNavManager {
     constructor() {
         this.priorities = {
-            'home': 1,
-            'dashboard': 2,
-            'browse': 3,
-            'search': 4,
+            'dashboard': 1,
+            'search': 2,
+            'filter': 3,
+            'category': 4,
             'notifications': 5,
-            'language': 6,
-            'tutorial': 7,
-            'newGame': 8,
-            'contact': 9,
-            'logout': 10
+            'browse': 6,
+            'language': 7,
+            'tutorial': 8,
+            'home': 8,
+            'newGame': 9,
+            'contact': 10,
+            'logout': 11
         };
         this.init();
     }
@@ -60,10 +62,12 @@ export class ResponsiveNavManager {
         }
         
         // Check for class names that might indicate item type
+        if (item.classList.contains('category')) return 'category';
         if (item.classList.contains('home')) return 'home';
         if (item.classList.contains('dashboard-nav')) return 'dashboard';
         if (item.classList.contains('texts') || item.classList.contains('browse')) return 'browse';
         if (item.classList.contains('search')) return 'search';
+        if (item.classList.contains('filter')) return 'filter';
         if (item.classList.contains('tutorial-switcher')) return 'tutorial';
         if (item.classList.contains('language-switcher')) return 'language';
         if (item.classList.contains('notifications')) return 'notifications';
