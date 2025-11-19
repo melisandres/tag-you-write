@@ -1,3 +1,4 @@
+
 /**
  * Simple localization system for language-aware routing
  */
@@ -138,6 +139,10 @@ export class Localization {
       if (currentLanguageElement) {
         currentLanguageElement.addEventListener('click', (e) => {
           e.stopPropagation();
+          
+          // Emit event to close all other dropdowns before opening this one
+          eventBus.emit('dropdownOpening', { element: switcher });
+          
           switcher.classList.toggle('open');
         });
       }

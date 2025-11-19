@@ -29,6 +29,10 @@ export class FiltersSwitcherManager {
             if (currentFiltersElement) {
                 currentFiltersElement.addEventListener('click', (e) => {
                     e.stopPropagation();
+                    
+                    // Emit event to close all other dropdowns before opening this one
+                    eventBus.emit('dropdownOpening', { element: switcher });
+                    
                     switcher.classList.toggle('open');
                 });
             }
@@ -276,5 +280,6 @@ export class FiltersSwitcherManager {
             this.menuManager.toggleMenu('category');
         }
     }
+
 }
 

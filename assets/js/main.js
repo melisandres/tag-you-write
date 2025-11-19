@@ -58,6 +58,7 @@ import { CategoryHeaderManager } from './categoryHeaderManager.js';
 import { HamburgerMenuManager } from './hamburgerMenuManager.js';
 import { ResponsiveNavManager } from './responsiveNavManager.js';
 import { UniversalSubmenuManager } from './universalSubmenuManager.js';
+import { DropdownCoordinator } from './dropdownCoordinator.js';
 import { SVGManager } from './svgManager.js';
 import { TextSwitcherManager } from './textSwitcherManager.js';
 import { DevModeManager } from './devModeManager.js';
@@ -69,6 +70,9 @@ window.eventBus = eventBus;
 window.SVGManager = SVGManager;
 
 document.addEventListener("DOMContentLoaded", async () => {
+  // Initialize DropdownCoordinator FIRST (before managers that emit dropdown events)
+  window.dropdownCoordinator = new DropdownCoordinator();
+
   // Get the BASE_URL from a data attribute in your HTML
   const path = document.querySelector('[data-base-url]').dataset.baseUrl;
   window.i18n = new Localization(path);

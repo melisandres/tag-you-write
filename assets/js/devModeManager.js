@@ -1,3 +1,5 @@
+import { eventBus } from './eventBus.js';
+
 /**
  * DevModeManager - Handles dev mode privilege toggle for admin users
  * Allows switching between privilege levels for testing purposes
@@ -40,6 +42,10 @@ export class DevModeManager {
             // Toggle dropdown when clicking the current privilege
             currentPrivilege.addEventListener('click', (e) => {
                 e.stopPropagation();
+                
+                // Emit event to close all other dropdowns before opening this one
+                eventBus.emit('dropdownOpening', { element: toggle });
+                
                 toggle.classList.toggle('open');
             });
 

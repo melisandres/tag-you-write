@@ -21,6 +21,10 @@ export class TutorialSwitcherManager {
             if (currentTutorialElement) {
                 currentTutorialElement.addEventListener('click', (e) => {
                     e.stopPropagation();
+                    
+                    // Emit event to close all other dropdowns before opening this one
+                    eventBus.emit('dropdownOpening', { element: switcher });
+                    
                     switcher.classList.toggle('open');
                 });
             }
