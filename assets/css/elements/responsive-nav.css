@@ -7,15 +7,16 @@
 }
 
 /* Progressive hiding based on screen width and priority */
-/* Very small screens (360px and below) - show 5 items (priorities 1-4: category, dashboard, browse, search/filter) */
+/* Very small screens (360px and below) - show 4 items: dashboard (1), filters (2), notifications (3), hamburger (always) */
+/* Note: Priority 4 doesn't exist (search/filter/category are in filters dropdown) */
 @media (max-width: 360px) {
+    .nav-link[data-priority-nav="4"],
     .nav-link[data-priority-nav="5"],
     .nav-link[data-priority-nav="6"],
     .nav-link[data-priority-nav="7"],
     .nav-link[data-priority-nav="8"],
     .nav-link[data-priority-nav="9"],
-    .nav-link[data-priority-nav="10"],
-    .nav-link[data-priority-nav="11"] {
+    .nav-link[data-priority-nav="10"] {
         display: none;
     }
 
@@ -23,25 +24,25 @@
         display: flex;
     }
 
+    .overflow-menu .nav-link[data-priority-overflow="4"],
     .overflow-menu .nav-link[data-priority-overflow="5"],
     .overflow-menu .nav-link[data-priority-overflow="6"],
     .overflow-menu .nav-link[data-priority-overflow="7"],
     .overflow-menu .nav-link[data-priority-overflow="8"],
     .overflow-menu .nav-link[data-priority-overflow="9"],
-    .overflow-menu .nav-link[data-priority-overflow="10"],
-    .overflow-menu .nav-link[data-priority-overflow="11"] {
+    .overflow-menu .nav-link[data-priority-overflow="10"] {
         display: flex;
     }
 }
 
-/* Small screens (420px and below) - show 6 items (priorities 1-5: adds notifications) */
+/* Small screens (420px and below) - show 5 items: dashboard (1), filters (2), notifications (3), browse (5), hamburger (always) */
+/* Note: Priority 4 (search/filter/category) no longer exists as separate nav links - they're in the filters dropdown */
 @media (max-width: 420px) {
     .nav-link[data-priority-nav="6"],
     .nav-link[data-priority-nav="7"],
     .nav-link[data-priority-nav="8"],
     .nav-link[data-priority-nav="9"],
-    .nav-link[data-priority-nav="10"],
-    .nav-link[data-priority-nav="11"] {
+    .nav-link[data-priority-nav="10"] {
         display: none;
     }
 
@@ -53,19 +54,63 @@
     .overflow-menu .nav-link[data-priority-overflow="7"],
     .overflow-menu .nav-link[data-priority-overflow="8"],
     .overflow-menu .nav-link[data-priority-overflow="9"],
-    .overflow-menu .nav-link[data-priority-overflow="10"],
-    .overflow-menu .nav-link[data-priority-overflow="11"] {
+    .overflow-menu .nav-link[data-priority-overflow="10"] {
         display: flex;
     }
 }
 
-/* Medium screens (480px and below) - show 7 items (priorities 1-6: adds language) */
+/* Medium-small screens (480px and below) - show 6 items (priorities 1-6: adds language) */
 @media (max-width: 480px) {
+    .nav-link[data-priority-nav="6"],
     .nav-link[data-priority-nav="7"],
     .nav-link[data-priority-nav="8"],
     .nav-link[data-priority-nav="9"],
-    .nav-link[data-priority-nav="10"],
-    .nav-link[data-priority-nav="11"] {
+    .nav-link[data-priority-nav="10"] {
+        display: none;
+    }
+
+    .nav-link.hamburger {
+        display: flex;
+    }
+
+    .overflow-menu .nav-link[data-priority-overflow="6"],
+    .overflow-menu .nav-link[data-priority-overflow="7"],
+    .overflow-menu .nav-link[data-priority-overflow="8"],
+    .overflow-menu .nav-link[data-priority-overflow="9"],
+    .overflow-menu .nav-link[data-priority-overflow="10"] {
+        display: flex;
+    }
+}
+
+/* Medium screens (540px and below) - show 6 items (priorities 1-5: adds browse) */
+@media (max-width: 540px) {
+    .nav-link[data-priority-nav="6"],
+    .nav-link[data-priority-nav="7"],
+    .nav-link[data-priority-nav="8"],
+    .nav-link[data-priority-nav="9"],
+    .nav-link[data-priority-nav="10"] {
+        display: none;
+    }
+
+    .nav-link.hamburger {
+        display: flex;
+    }
+
+    .overflow-menu .nav-link[data-priority-overflow="6"],
+    .overflow-menu .nav-link[data-priority-overflow="7"],
+    .overflow-menu .nav-link[data-priority-overflow="8"],
+    .overflow-menu .nav-link[data-priority-overflow="9"],
+    .overflow-menu .nav-link[data-priority-overflow="10"] {
+        display: flex;
+    }
+}
+
+/* Medium-large screens (600px and below) - show 7 items (priorities 1-6: adds language) */
+@media (max-width: 600px) {
+    .nav-link[data-priority-nav="7"],
+    .nav-link[data-priority-nav="8"],
+    .nav-link[data-priority-nav="9"],
+    .nav-link[data-priority-nav="10"] {
         display: none;
     }
 
@@ -76,18 +121,16 @@
     .overflow-menu .nav-link[data-priority-overflow="7"],
     .overflow-menu .nav-link[data-priority-overflow="8"],
     .overflow-menu .nav-link[data-priority-overflow="9"],
-    .overflow-menu .nav-link[data-priority-overflow="10"],
-    .overflow-menu .nav-link[data-priority-overflow="11"] {
+    .overflow-menu .nav-link[data-priority-overflow="10"] {
         display: flex;
     }
 }
 
-/* Large screens (600px and below) - show 8 items (priorities 1-7: adds tutorial) */
-@media (max-width: 600px) {
+/* Large screens (680px and below) - show 8 items (priorities 1-7: adds tutorial/home) */
+@media (max-width: 680px) {
     .nav-link[data-priority-nav="8"],
     .nav-link[data-priority-nav="9"],
-    .nav-link[data-priority-nav="10"],
-    .nav-link[data-priority-nav="11"] {
+    .nav-link[data-priority-nav="10"] {
         display: none;
     }
 
@@ -97,14 +140,45 @@
 
     .overflow-menu .nav-link[data-priority-overflow="8"],
     .overflow-menu .nav-link[data-priority-overflow="9"],
-    .overflow-menu .nav-link[data-priority-overflow="10"],
-    .overflow-menu .nav-link[data-priority-overflow="11"] {
+    .overflow-menu .nav-link[data-priority-overflow="10"] {
         display: flex;
     }
 }
 
+/* Extra large screens (760px and below) - show 9 items (priorities 1-8: adds newGame) */
+@media (max-width: 760px) {
+    .nav-link[data-priority-nav="9"],
+    .nav-link[data-priority-nav="10"] {
+        display: none;
+    }
 
-/* Hamburger is always visible - no hiding logic needed */
+    .nav-link.hamburger {
+        display: flex;
+    }
+
+    .overflow-menu .nav-link[data-priority-overflow="9"],
+    .overflow-menu .nav-link[data-priority-overflow="10"] {
+        display: flex;
+    }
+}
+
+/* Very large screens (840px and below) - show 10 items (priorities 1-9: adds contact) */
+@media (max-width: 840px) {
+    .nav-link[data-priority-nav="10"] {
+        display: none;
+    }
+
+    .nav-link.hamburger {
+        display: flex;
+    }
+
+    .overflow-menu .nav-link[data-priority-overflow="10"] {
+        display: flex;
+    }
+}
+
+/* Above 840px - all items visible, hamburger still visible (some actions only accessible via hamburger menu) */
+/* Note: Hamburger menu should always be visible regardless of screen size */
 
 /* About and Contact buttons are always visible in overflow menu - no hiding logic needed */
 .overflow-menu .nav-link.about,

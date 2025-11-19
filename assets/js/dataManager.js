@@ -56,6 +56,9 @@ export class DataManager {
             }
         };
 
+        // Reset search/filters/category from URL on page load (URL is source of truth)
+        this.resetFiltersFromUrl();
+
         // Move this after cache initialization and add explicit check for empty string
         if (!this.cache.search || this.cache.search.trim() === '') {
             console.log('No search term found, clearing search results');
@@ -1171,6 +1174,52 @@ export class DataManager {
 
     getCategory() {
         return this.cache.category;
+    }
+
+    /**
+     * Reset search/filters/category cache from URL on page load
+     * URL is the source of truth - cache should match current page's URL
+     */
+    resetFiltersFromUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        // Reset search from URL
+        const search = urlParams.get('search') || '';
+        this.cache.search = search;
+        
+        // Reset filters from URL
+        const hasContributed = urlParams.get('hasContributed');
+        const bookmarked = urlParams.get('bookmarked');
+        const gameState = urlParams.get('gameState');
+        
+        // Convert URL string values to backend values
+        const convertedHasContributed = hasContributed === null || hasContributed === 'all' ? null :
+                                       hasContributed === 'contributor' ? true :
+                                       hasContributed === 'mine' ? 'mine' :
+                                       null;
+        
+        const convertedBookmarked = bookmarked === null || bookmarked === 'all' ? null :
+                                   bookmarked === 'bookmarked' ? true :
+                                   bookmarked === 'not_bookmarked' ? false :
+                                   null;
+        
+        this.cache.filters = {
+            hasContributed: convertedHasContributed,
+            gameState: gameState || 'all',
+            bookmarked: convertedBookmarked
+        };
+        
+        // Reset category from URL
+        const category = urlParams.get('category') || null;
+        this.cache.category = category;
+        
+        // Clear search results if no search term
+        if (!search || search.trim() === '') {
+            this.cache.searchResults = {
+                rootId: null,
+                nodes: {}
+            };
+        }
     }
 
     setCategory(category) {

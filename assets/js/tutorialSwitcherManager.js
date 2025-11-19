@@ -36,12 +36,18 @@ export class TutorialSwitcherManager {
                     switcher.classList.remove('open');
                 });
             });
-            
-            // Close dropdown when clicking outside
-            document.addEventListener('click', () => {
-                switcher.classList.remove('open');
-            });
         });
+            
+        // Close dropdowns when clicking outside (single listener for all switchers)
+        if (this.tutorialSwitchers.length > 0) {
+            document.addEventListener('click', (e) => {
+                this.tutorialSwitchers.forEach(switcher => {
+                    if (!switcher.contains(e.target)) {
+                switcher.classList.remove('open');
+                    }
+                });
+            });
+        }
         
         // Handle submenu tutorial links (overflow menu)
         const submenuTutorialLinks = document.querySelectorAll('.submenu-content.tutorial-submenu a[data-tutorial]');

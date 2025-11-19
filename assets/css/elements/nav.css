@@ -11,6 +11,5 @@ nav {
     width: 100%;
     height: var(--header-height);
     z-index: 4;
-    overflow-x: hidden; /* Prevent horizontal scroll */
-    /* overflow-y: hidden; */ /* Prevent vertical scroll */
+    overflow: visible; /* Allow dropdowns to appear and prevent clipping */
 }

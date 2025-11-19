@@ -51,6 +51,7 @@ import { ContactModalManager } from './contactModalManager.js';
 import { InvitationTokenManager } from './invitationTokenManager.js';
 import { InvitationLinkManager } from './invitationLinkManager.js';
 import { TutorialSwitcherManager } from './tutorialSwitcherManager.js';
+import { FiltersSwitcherManager } from './filtersSwitcherManager.js';
 import { DashboardManager } from './dashboardManager.js';
 import { LinkFilterPreserver } from './linkFilterPreserver.js';
 import { CategoryHeaderManager } from './categoryHeaderManager.js';
@@ -209,6 +210,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   updateManager.initialize();
   
   window.menuManager = new MenuManager();
+  
+  // Initialize FiltersSwitcherManager after menuManager is available
+  new FiltersSwitcherManager();
 
   const gameSearchFilterManager = new GameSearchFilterManager(uiManager);
   const filterManager = new FilterManager();

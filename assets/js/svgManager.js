@@ -1962,7 +1962,7 @@ export class SVGManager{
 
    static get filtersSVG() {
       return `
-         <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-5.0 -10.0 110.0 135.0" fill="currentColor" stroke="none">
+         <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="20 20 60 70" fill="currentColor" stroke="none">
             <path d="m30.16 20c-3.5391 0-6.4297 2.8789-6.4297 6.4297 0 3.1719 2.3984 5.8984 5.5117 6.3594v47.141h1.8398v-47.141c3.1211-0.44922 5.5117-3.1797 5.5117-6.3594 0-3.5508-2.8789-6.4297-6.4297-6.4297z" fill="currentColor" stroke="none"/>
             <path d="m47.68 20.07v47.141c-3.1094 0.46094-5.5117 3.1914-5.5117 6.3594 0 3.5508 2.8906 6.4297 6.4297 6.4297 3.5391 0 6.4414-2.8789 6.4414-6.4297 0-3.1797-2.3984-5.9102-5.5195-6.3594v-47.141z" fill="currentColor" stroke="none"/>
             <path d="m70.75 43.641v-23.57h-1.8398v23.57c-3.1094 0.46094-5.5 3.1914-5.5 6.3594 0 3.1719 2.3906 5.8984 5.5 6.3594v23.57h1.8398v-23.57c3.1211-0.44922 5.5195-3.1797 5.5195-6.3594s-2.3984-5.9102-5.5195-6.3594z" fill="currentColor" stroke="none"/>

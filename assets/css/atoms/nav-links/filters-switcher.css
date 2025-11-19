@@ -1,0 +1,103 @@
+/* Filters Switcher Styles */
+/* All base styles inherited from nav-link.css */
+
+.nav-link.filters-switcher .current-filters {
+    padding: 4px 2px;
+    cursor: pointer;
+    border-radius: 3px;
+    font-size: 0.5em;
+    text-transform: uppercase;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+}
+
+/* Style the filters SVG icon in the filters switcher */
+.nav-link.filters-switcher .current-filters svg,
+.nav-link.filters-switcher .current-filters .icon svg {
+    fill: currentColor;
+    stroke: currentColor;
+    width: 20px;
+    height: 20px;
+}
+
+/* SVG hover state - match other nav elements */
+.nav-link.filters-switcher:hover .current-filters svg,
+.nav-link.filters-switcher:hover .current-filters .icon svg {
+    fill: pink;
+}
+
+.nav-link.filters-switcher .current-filters:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-link.filters-switcher .filters-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: #333;
+    border-radius: 3px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    display: none;
+    min-width: 150px;
+    z-index: 4;
+}
+
+.nav-link.filters-switcher.open .filters-dropdown {
+    display: block;
+}
+
+.nav-link.filters-switcher .filters-dropdown a {
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.7em;
+    color: #fff;
+    white-space: nowrap;
+    cursor: pointer;
+    border-bottom: 1px solid #444;
+    text-decoration: none;
+}
+
+.nav-link.filters-switcher .filters-dropdown a:last-child {
+    border-bottom: none;
+}
+
+.nav-link.filters-switcher .filters-dropdown a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Style icons in dropdown */
+.nav-link.filters-switcher .filters-dropdown a .icon svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+    stroke: currentColor;
+}
+
+/* Active state: light pink icon when filters/search/category are applied */
+.nav-link.filters-switcher .filters-dropdown a.active .icon svg {
+    fill: var(--color-love, #ff69b4);
+    stroke: var(--color-love, #ff69b4);
+}
+
+/* Visible state: greyed out background when menu is currently visible */
+.nav-link.filters-switcher .filters-dropdown a.visible {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Both active and visible: pink icon + greyed background */
+.nav-link.filters-switcher .filters-dropdown a.active.visible {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Divider between menu items and view/hide all */
+.nav-link.filters-switcher .filters-dropdown-divider {
+    height: 1px;
+    background-color: #444;
+    margin: 4px 0;
+}
+

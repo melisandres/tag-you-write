@@ -14,6 +14,10 @@
     "category_tooltip": "filtrer par catégorie",
     "filters": "Filtres",
     "filters_tooltip": "options de filtre, recherche et catégorie",
+    "view_all": "Tout afficher",
+    "view_all_tooltip": "afficher toutes les options de filtre",
+    "hide_all": "Tout masquer",
+    "hide_all_tooltip": "masquer toutes les options de filtre",
     "filter": "Filtrer",
     "filter_tooltip": "filtrer les textes",
     "browse": "Explorer",
@@ -640,6 +644,7 @@
       "browseCategory": "Parcourir cette catégorie"
     },
     "category-header": {
+      "all": "Toutes les histoires",
       "myStories": {
         "": "Mes histoires",
         "drafts": "Mes histoires > Brouillons",

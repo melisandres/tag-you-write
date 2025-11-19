@@ -14,7 +14,7 @@
     align-items: center;
     padding: 0 20px;
     transform: translateY(-100%);
-    transition: transform 0.5s;
+    transition: transform 0.5s ease-in-out;
     z-index: 3;
     color: white;
 }
@@ -43,16 +43,90 @@
 .game-count {
     color: var(--color-grey-light);
     font-size: var(--font-size-xsmall);
-    background: var(--color-black-light);
     padding: 2px 8px;
-    border-radius: 12px;
-    border: 1px solid var(--color-grey-dark);
+/*     border-radius: 12px;
+    border: 1px solid var(--color-grey-dark); */
+}
+
+/* Filter status icons - small indicators next to game count */
+.filter-status-icons {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 4px;
+}
+
+.filter-status-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px; /* Slightly larger for better clickability */
+    height: 16px;
+    cursor: pointer; /* Indicate clickability */
+    padding: 2px; /* Add padding for larger click target */
+    border-radius: 3px;
+    transition: background-color 0.2s, transform 0.2s;
+}
+
+.filter-status-icon:hover {
+    transform: scale(1.1); /* Slight scale on hover */
+}
+
+.filter-status-icon svg {
+    width: 14px; /* Slightly larger to match container */
+    height: 14px;
+    fill: var(--color-love); /* Pink color to match active state */
+    stroke: var(--color-love); /* Override inline stroke="none" in filterSVG */
+    fill-opacity: 1; /* Ensure full opacity */
+    opacity: 1; /* Ensure no transparency */
+    color: var(--color-love); /* Set currentColor for filterSVG's inline fill="currentColor" */
+    transition: opacity 0.2s;
+}
+
+.filter-status-icon:hover svg {
+    opacity: 0.9; /* Slight opacity change on hover for feedback */
+}
+
+/* Target paths specifically to override inline stroke="none" and fill="currentColor" */
+.filter-status-icon svg path {
+    fill: var(--color-love) !important;
+    stroke: var(--color-love) !important;
+    stroke-width: 1px; /* Ensure stroke is visible */
+    fill-opacity: 1 !important; /* Ensure full opacity */
 }
 
 .header-actions {
     display: flex;
     align-items: center;
     gap: 12px;
+    position: relative;
+}
+
+/* Close menu button (in header container, bigger) */
+.close-category-menu {
+    position: absolute;
+    right: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    height: 44px;
+    width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-category-menu svg {
+    width: 24px;
+    height: 24px;
+    fill: white;
+}
+
+.close-category-menu:hover svg {
+    fill: var(--hover-color);
 }
 
 /* Future: Category dropdown button */

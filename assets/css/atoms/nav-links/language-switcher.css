@@ -32,6 +32,7 @@ nav .nav-link.language-switcher .current-language:hover {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     display: none;
     min-width: 100%;
+    z-index: 4;
 }
 
 .nav-link.language-switcher.open .language-dropdown {

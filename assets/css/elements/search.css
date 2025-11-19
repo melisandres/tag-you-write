@@ -95,30 +95,12 @@ g.node > path.search-match {
     z-index: 3;
 }
 
-.close-search {
-    position: absolute;
-    right: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 8px;
-    height: 36px;
-    width: 36px;
+/* Search input wrapper for positioning clear button inside input */
+.search-input-wrapper {
+    flex: 1;
+    position: relative;
     display: flex;
     align-items: center;
-    justify-content: center;
-}
-
-.close-search svg {
-    width: 20px;
-    height: 20px;
-    fill: white;
-}
-
-.close-search:hover svg {
-    fill: var(--hover-color);
 }
 
 .search-input {
@@ -127,9 +109,75 @@ g.node > path.search-match {
     background: var(--color-black-light);
     border: 1px solid var(--color-grey-dark);
     border-radius: 20px;
-    padding: 0 16px;
+    padding: 0 40px 0 16px; /* Extra padding on right for clear button */
     color: white;
     font-size: 16px;
+}
+
+/* Clear search input button (inside input, smaller) */
+.clear-search-input {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    height: 24px;
+    width: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.clear-search-input:hover {
+    opacity: 1;
+}
+
+.clear-search-input svg {
+    width: 16px;
+    height: 16px;
+    fill: white;
+}
+
+.clear-search-input:hover svg {
+    fill: var(--hover-color);
+}
+
+/* Show clear button with full opacity when input has value */
+.search-input-wrapper:has(.search-input:not(:placeholder-shown)) .clear-search-input,
+.search-input-wrapper:has(.search-input:focus) .clear-search-input {
+    opacity: 1;
+}
+
+/* Close menu button (in menu container, bigger) */
+.close-search-menu {
+    position: absolute;
+    right: 0px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    height: 44px;
+    width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-search-menu svg {
+    width: 24px;
+    height: 24px;
+    fill: white;
+}
+
+.close-search-menu:hover svg {
+    fill: var(--hover-color);
 }
 
 .search-input:focus {

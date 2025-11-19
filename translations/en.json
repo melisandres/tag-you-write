@@ -15,6 +15,10 @@
       "category_tooltip": "filter by category",
       "filters": "Filters",
       "filters_tooltip": "filter, search, and category options",
+      "view_all": "View All",
+      "view_all_tooltip": "show all filter options",
+      "hide_all": "Hide All",
+      "hide_all_tooltip": "hide all filter options",
       "filter": "Filter",
       "filter_tooltip": "filter texts",
       "browse": "Browse",
@@ -641,6 +645,7 @@
     "browseCategory": "Browse this category"
   },
   "category-header": {
+    "all": "All stories",
     "myStories": {
       "": "My Stories",
       "drafts": "My Stories > Drafts",

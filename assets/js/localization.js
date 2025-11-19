@@ -161,12 +161,18 @@ export class Localization {
           switcher.classList.remove('open'); // Close dropdown after selection
         });
       });
-      
-      // Close dropdown when clicking outside
-      document.addEventListener('click', () => {
-        switcher.classList.remove('open');
-      });
     });
+      
+    // Close dropdowns when clicking outside (single listener for all switchers)
+    if (languageSwitchers.length > 0) {
+      document.addEventListener('click', (e) => {
+        languageSwitchers.forEach(switcher => {
+          if (!switcher.contains(e.target)) {
+        switcher.classList.remove('open');
+          }
+        });
+      });
+    }
     
     // Handle submenu language links (overflow menu)
     submenuLanguageLinks.forEach(link => {

@@ -100,7 +100,6 @@ export class FilterManager {
      * Creates the filter buttons and sets their initial state
      */
     initializeUI() {
-        if (this.filterNavLink) {
             // Set the class name for hasContributed
             const hasContributed = this.dataManager.cache.filters.hasContributed;
             const hasContributedClass = hasContributed === null ? 'all' : hasContributed === true ? 'contributor' : 'mine';
@@ -109,10 +108,9 @@ export class FilterManager {
             const bookmarked = this.dataManager.cache.filters.bookmarked;
             const bookmarkedClass = bookmarked === null ? 'all' : bookmarked === true ? 'bookmarked' : 'not-bookmarked';
             
-            // Create the filter menu content
+        // Create the filter menu content (nav link may not exist if using filters submenu)
             this.filterMenu.innerHTML = `
                 <div class="filter-options">
-                    <button class="close-filter">${SVGManager.xSVG}</button>
                     ${ this.currentWriterId !== 'null' ? `
                     <button class="filter-button my-games-filter" aria-label="Filter My Stories">
                         <span class="filter-icon ${hasContributedClass}">
@@ -144,8 +142,8 @@ export class FilterManager {
                     ` : ''
                     }
                 </div>
+                <button class="close-filter-menu" aria-label="Close filter menu">${SVGManager.xSVG}</button>
             `;
-        }
         this.updateNavLink();
         
         // Apply translations to the newly created elements
@@ -158,22 +156,18 @@ export class FilterManager {
      * Bind event listeners to filter menu elements
      */
     bindEvents() {
-        if (!this.filterNavLink) {
-            return;
-        }
-
         // Toggle filter menu when nav link is clicked (if nav link exists)
         // Note: Nav link may not exist if using filters submenu
         if (this.filterNavLink) {
-            this.filterNavLink.addEventListener('click', () => {
-                this.toggleFilterMenu();
-            });
+        this.filterNavLink.addEventListener('click', () => {
+            this.toggleFilterMenu();
+        });
         }
         
-        // Close button event
-        const closeButton = this.filterMenu.querySelector('.close-filter');
-        if (closeButton) {
-            closeButton.addEventListener('click', () => this.toggleFilterMenu());
+        // Close menu button (in menu container) - only closes menu, keeps filters
+        const closeMenuButton = this.filterMenu.querySelector('.close-filter-menu');
+        if (closeMenuButton) {
+            closeMenuButton.addEventListener('click', () => this.toggleFilterMenu());
         }
 
         // Contribution filter button event
@@ -341,7 +335,7 @@ export class FilterManager {
         // Use 'menu-open' instead of 'active' for menu state
         // Nav link may not exist if using filters submenu
         if (this.filterNavLink) {
-            this.filterNavLink.classList.toggle('menu-open', isVisible);
+        this.filterNavLink.classList.toggle('menu-open', isVisible);
         }
     }
 

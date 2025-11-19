@@ -1,37 +1,69 @@
 import { eventBus } from './eventBus.js';
+import { SVGManager } from './svgManager.js';
 
 export class CategoryHeaderManager {
     constructor() {
         this.categoryHeader = document.getElementById('categoryHeader');
-        this.categoryNavLink = document.querySelector('.nav-link.category');
+        // Category link is now in the filters dropdown, not a standalone nav link
+        this.categoryNavLink = document.querySelector('a[data-filter-menu="category"]');
         this.menuManager = window.menuManager; // Assuming MenuManager is global
+        this.dataManager = window.dataManager;
+        this.searchMenu = document.querySelector('.search-menu');
+        this.searchInput = this.searchMenu ? this.searchMenu.querySelector('.search-input') : null;
         
         // No mapping needed - we'll construct the translation key directly
         
+        this.initializeCloseButton();
+        this.initializeFilterIcons();
         this.initializeFromURL();
         this.setupEventListeners();
-        this.bindNavLink();
+        // Note: bindNavLink() is no longer needed - FiltersSwitcherManager handles clicks
         // Set initial nav link state
         this.updateNavLink();
+        // Update filter icons on initial load (with a small delay to ensure dataManager is ready)
+        // Also check URL directly in case filters were loaded from URL
+        setTimeout(() => {
+            this.updateFilterIcons();
+        }, 100);
     }
     
     /**
-     * Bind click event to category nav link
+     * Initialize the close button for the category header
      */
-    bindNavLink() {
-        if (!this.categoryNavLink) {
-            return;
-        }
+    initializeCloseButton() {
+        if (!this.categoryHeader) return;
         
-        // Toggle category header when nav link is clicked
-        this.categoryNavLink.addEventListener('click', (e) => {
-            e.preventDefault(); // Prevent default link behavior if it's an anchor
-            this.toggleCategoryHeader();
+        const headerActions = this.categoryHeader.querySelector('.header-actions');
+        if (!headerActions) return;
+        
+        // Check if close button already exists
+        if (headerActions.querySelector('.close-category-menu')) return;
+        
+        // Create close button
+        const closeButton = document.createElement('button');
+        closeButton.className = 'close-category-menu';
+        closeButton.setAttribute('aria-label', 'Close category menu');
+        closeButton.innerHTML = SVGManager.xSVG;
+        
+        // Bind click event
+        closeButton.addEventListener('click', () => {
+            this.closeCategoryHeader();
         });
+        
+        headerActions.appendChild(closeButton);
+    }
+    
+    /**
+     * Close the category header (keeps category active)
+     */
+    closeCategoryHeader() {
+        // Just close the header, don't clear the category
+        this.hideCategoryHeader();
     }
     
     /**
      * Toggle the category header visibility
+     * Note: Click handling is done by FiltersSwitcherManager, this is just a helper method
      */
     toggleCategoryHeader() {
         if (this.menuManager) {
@@ -67,6 +99,26 @@ export class CategoryHeaderManager {
             this.updateNavLink(); // Update nav link active state when category changes
         });
         
+        // Listen for filter changes to update icons
+        eventBus.on('filterApplied', () => {
+            this.updateFilterIcons();
+        });
+        
+        // Listen for search changes to update icons
+        eventBus.on('searchApplied', () => {
+            this.updateFilterIcons();
+        });
+        
+        // Listen to search input changes for immediate feedback
+        // Note: search input might not exist yet, so we'll set it up when available
+        this.setupSearchInputListener();
+        
+        // Also listen for search menu toggling in case input becomes available
+        eventBus.on('searchMenuToggled', () => {
+            this.setupSearchInputListener();
+            this.updateFilterIcons();
+        });
+        
         // Listen for game list updates to update the count
         eventBus.on('gamesListUpdated', (games) => this.updateGameCount(games.length));
         eventBus.on('gamesAdded', (games) => this.updateGameCountFromAddition(games));
@@ -75,7 +127,14 @@ export class CategoryHeaderManager {
         // Listen for URL changes (if using history API)
         window.addEventListener('popstate', () => {
             this.initializeFromURL();
+            this.updateFilterIcons();
         });
+        
+        // Also listen for when filters might be loaded from URL (FilterManager initialization)
+        // Use a small delay to catch filters loaded from URL on page load
+        setTimeout(() => {
+            this.updateFilterIcons();
+        }, 200);
 
     }
     
@@ -109,7 +168,8 @@ export class CategoryHeaderManager {
             
             this.showCategoryHeader(translationKey);
         } else {
-            this.hideCategoryHeader();
+            // Show "All stories" when no category is selected
+            this.showCategoryHeader('category-header.all');
         }
     }
     
@@ -139,7 +199,7 @@ export class CategoryHeaderManager {
         
         // Update menu positions and category header state
         if (this.menuManager) {
-            this.menuManager.setCategoryHeaderVisible(true);
+        this.menuManager.setCategoryHeaderVisible(true);
         }
         
         // Update nav link active state (based on category selection)
@@ -157,7 +217,7 @@ export class CategoryHeaderManager {
         
         // Update menu positions and category header state
         if (this.menuManager) {
-            this.menuManager.setCategoryHeaderVisible(false);
+        this.menuManager.setCategoryHeaderVisible(false);
         }
         
         // Update nav link active state (based on category selection)
@@ -214,6 +274,132 @@ export class CategoryHeaderManager {
             const currentCount = parseInt(gameCount.textContent.match(/\d+/)?.[0] || '0');
             const newCount = Math.max(0, currentCount - (Array.isArray(gameIds) ? gameIds.length : 1));
             gameCount.textContent = `(${newCount})`;
+        }
+    }
+    
+    /**
+     * Initialize filter icons container next to game count
+     */
+    initializeFilterIcons() {
+        if (!this.categoryHeader) return;
+        
+        const gameCount = this.categoryHeader.querySelector('.game-count');
+        if (!gameCount) return;
+        
+        // Check if icons container already exists
+        let iconsContainer = this.categoryHeader.querySelector('.filter-status-icons');
+        if (!iconsContainer) {
+            iconsContainer = document.createElement('span');
+            iconsContainer.className = 'filter-status-icons';
+            // Insert after game-count
+            gameCount.parentNode.insertBefore(iconsContainer, gameCount.nextSibling);
+        }
+    }
+    
+    /**
+     * Check if filters are actually applied (not just menu visible)
+     */
+    hasAppliedFilters() {
+        if (!this.dataManager) return false;
+        
+        const filters = this.dataManager.getFilters();
+        if (!filters) return false;
+        
+        // Check if any filter is not at default state
+        return filters.hasContributed !== null || 
+               filters.gameState !== 'all' || 
+               filters.bookmarked !== null;
+    }
+    
+    /**
+     * Setup search input listener (may be called multiple times if input becomes available later)
+     */
+    setupSearchInputListener() {
+        // Try to get search input if not already cached
+        if (!this.searchInput && this.searchMenu) {
+            this.searchInput = this.searchMenu.querySelector('.search-input');
+        }
+        
+        // Add input listener if input exists and doesn't already have one
+        if (this.searchInput && !this.searchInput.hasAttribute('data-filter-icons-listener')) {
+            this.searchInput.setAttribute('data-filter-icons-listener', 'true');
+            this.searchInput.addEventListener('input', () => {
+                this.updateFilterIcons();
+            });
+        }
+    }
+    
+    /**
+     * Check if search is actually applied (has search term)
+     */
+    hasAppliedSearch() {
+        // Try to get search input if not already cached
+        if (!this.searchInput && this.searchMenu) {
+            this.searchInput = this.searchMenu.querySelector('.search-input');
+        }
+        
+        // Check search input value (for immediate feedback while typing)
+        if (this.searchInput && this.searchInput.value.trim().length > 0) {
+            return true;
+        }
+        
+        // Also check dataManager cache (for actual applied state)
+        if (this.dataManager) {
+            const search = this.dataManager.getSearch();
+            return search && search.trim().length > 0;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Update filter/search icons in category header
+     */
+    updateFilterIcons() {
+        if (!this.categoryHeader) return;
+        
+        const iconsContainer = this.categoryHeader.querySelector('.filter-status-icons');
+        if (!iconsContainer) {
+            this.initializeFilterIcons();
+            return;
+        }
+        
+        const hasFilters = this.hasAppliedFilters();
+        const hasSearch = this.hasAppliedSearch();
+        
+        // Clear existing icons
+        iconsContainer.innerHTML = '';
+        
+        // Add filter icon if filters are active
+        if (hasFilters) {
+            const filterIcon = document.createElement('span');
+            filterIcon.className = 'filter-status-icon filter-icon';
+            filterIcon.innerHTML = SVGManager.filterSVG;
+            filterIcon.setAttribute('aria-label', 'Active filters - click to open filter menu');
+            filterIcon.setAttribute('title', 'Open filter menu');
+            filterIcon.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (this.menuManager) {
+                    this.menuManager.toggleMenu('filter');
+                }
+            });
+            iconsContainer.appendChild(filterIcon);
+        }
+        
+        // Add search icon if search is active
+        if (hasSearch) {
+            const searchIcon = document.createElement('span');
+            searchIcon.className = 'filter-status-icon search-icon';
+            searchIcon.innerHTML = SVGManager.searchSVG;
+            searchIcon.setAttribute('aria-label', 'Active search - click to open search menu');
+            searchIcon.setAttribute('title', 'Open search menu');
+            searchIcon.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (this.menuManager) {
+                    this.menuManager.toggleMenu('search');
+                }
+            });
+            iconsContainer.appendChild(searchIcon);
         }
     }
 }

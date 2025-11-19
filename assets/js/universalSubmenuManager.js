@@ -158,7 +158,7 @@ export class UniversalSubmenuManager {
                     return; // Let their own handlers work
                 }
                 
-                console.log(`UniversalSubmenuManager: ${submenuType} trigger clicked in nav`);
+
                 e.preventDefault();
                 e.stopPropagation();
                 this.showSubmenu('nav', submenuType);

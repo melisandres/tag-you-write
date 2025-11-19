@@ -18,29 +18,30 @@
     transform: translateY(0);
 }
 
-.close-filter {
+/* Close menu button (in menu container, bigger) */
+.close-filter-menu {
     position: absolute;
-    right: 16px;
+    right: 0px;
     top: 50%;
     transform: translateY(-50%);
     background: none;
     border: none;
     cursor: pointer;
-    padding: 8px;
-    height: 36px;
-    width: 36px;
+    padding: 10px;
+    height: 44px;
+    width: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.close-filter svg {
-    width: 20px;
-    height: 20px;
+.close-filter-menu svg {
+    width: 24px;
+    height: 24px;
     fill: white;
 }
 
-.close-filter:hover svg {
+.close-filter-menu:hover svg {
     fill: var(--hover-color);
 }
 

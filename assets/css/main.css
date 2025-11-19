@@ -13,6 +13,7 @@
 @import url(./atoms/nav-links/notifications.css);
 @import url(./atoms/nav-links/language-switcher.css);
 @import url(./atoms/nav-links/tutorial-switcher.css);
+@import url(./atoms/nav-links/filters-switcher.css);
 @import url(./atoms/nav-links/dev-mode-toggle.css);
 @import url(./atoms/nav-links/home.css);
 @import url(./atoms/nav-links/browse.css);

@@ -23,41 +23,64 @@ export class SearchManager {
     initializeUI() {
         console.log('Initializing search UI');
         console.log('this.searchNavLink', this.searchNavLink);
-        if (this.searchNavLink) {
-            // Add search input HTML
-            this.searchMenu.innerHTML = `
-                <div class="search-options">
-                    <input type="text" class="search-input" data-i18n-placeholder="search.placeholder" placeholder="search games...">
-                    <button class="close-search">${SVGManager.xSVG}</button>
-                </div>
-            `;
-            window.i18n.updatePageTranslations(this.searchMenu);
-            this.searchInput = this.searchMenu.querySelector('.search-input');
+        // Only initialize if search menu exists (not on all pages)
+        if (!this.searchMenu) {
+            console.log('Search menu not found on this page, skipping UI initialization');
+            return;
         }
+        // Add search input HTML (nav link may not exist if using filters submenu)
+        this.searchMenu.innerHTML = `
+            <div class="search-options">
+            <div class="search-input-wrapper">
+                <input type="text" class="search-input" data-i18n-placeholder="search.placeholder" placeholder="search games...">
+                <button class="clear-search-input" aria-label="Clear search">${SVGManager.xSVG}</button>
+            </div>
+        </div>
+        <button class="close-search-menu" aria-label="Close search menu">${SVGManager.xSVG}</button>
+        `;
+        window.i18n.updatePageTranslations(this.searchMenu);
+        this.searchInput = this.searchMenu.querySelector('.search-input');
     }
 
     bindEvents() {
         console.log('Binding search events');
+        // Only bind events if search menu exists (not on all pages)
+        if (!this.searchMenu) {
+            console.log('Search menu not found on this page, skipping event binding');
+            return;
+        }
         // Toggle search menu when nav link is clicked (if nav link exists)
         // Note: Nav link may not exist if using filters submenu
         if (this.searchNavLink) {
-            this.searchNavLink.addEventListener('click', (e) => {
-                console.log('Search link clicked');
-                e.preventDefault(); // Prevent default link behavior
-                this.toggleSearchMenu();
-            });
+        this.searchNavLink.addEventListener('click', (e) => {
+            console.log('Search link clicked');
+            e.preventDefault(); // Prevent default link behavior
+            this.toggleSearchMenu();
+        });
         }
         
-        const closeButton = this.searchMenu.querySelector('.close-search');
-        if (closeButton) {
-            closeButton.addEventListener('click', () => {
+        // Clear search input button (inside input) - only clears, doesn't close menu
+        const clearInputButton = this.searchMenu.querySelector('.clear-search-input');
+        if (clearInputButton) {
+            clearInputButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+            if (this.searchInput) {
+                this.searchInput.value = '';
+                this.updateNavLink();
+                this.updateUrlWithSearch('');
+                this.handleSearchInput('');
+                    this.searchInput.focus(); // Keep focus on input after clearing
+                    // Update button opacity after clearing
+                    clearInputButton.style.opacity = '0.7';
+            }
+        });
+        }
+        
+        // Close menu button (in menu container) - only closes menu, keeps search
+        const closeMenuButton = this.searchMenu.querySelector('.close-search-menu');
+        if (closeMenuButton) {
+            closeMenuButton.addEventListener('click', () => {
                 this.toggleSearchMenu();
-                if (this.searchInput) {
-                    this.searchInput.value = '';
-                    this.updateNavLink();
-                    this.updateUrlWithSearch('');
-                    this.handleSearchInput('');
-                }
             });
         }
 
@@ -67,7 +90,13 @@ export class SearchManager {
         });
 
         // Handle input changes with debouncing
-        if (this.searchInput) {
+        if (this.searchInput && clearInputButton) {
+            // Update clear button visibility on input
+            this.searchInput.addEventListener('input', (e) => {
+                const hasValue = e.target.value.length > 0;
+                clearInputButton.style.opacity = hasValue ? '1' : '0.7';
+            });
+            
             this.searchInput.addEventListener('input', this.debounce((e) => {
                 const searchValue = e.target.value;
                 this.handleSearchInput(searchValue);
@@ -140,6 +169,7 @@ export class SearchManager {
     }
 
     toggleSearchMenu() {
+        if (!this.searchMenu) return;
         this.menuManager.toggleMenu('search');
         const isVisible = this.searchMenu.classList.contains('visible');
         
@@ -151,6 +181,7 @@ export class SearchManager {
     }
 
     handleFilterMenuToggle(isFilterVisible) {
+        if (!this.searchMenu) return;
         if (this.searchMenu.classList.contains('visible')) {
             this.searchMenu.style.transform = isFilterVisible ? 
                 `translateY(${getComputedStyle(document.documentElement).getPropertyValue('--filters-height')})` : 'translateY(0)';
@@ -167,12 +198,19 @@ export class SearchManager {
     }
 
     syncSearchInputWithUrl() {
+        if (!this.searchMenu) return;
         const params = new URLSearchParams(window.location.search);
         const searchValue = params.get('search') || '';
         console.log('Syncing search input with URL:', searchValue);
         if (this.searchInput) {
             this.searchInput.value = searchValue;
             this.updateNavLink();
+            
+            // Update clear button opacity based on search value
+            const clearInputButton = this.searchMenu.querySelector('.clear-search-input');
+            if (clearInputButton) {
+                clearInputButton.style.opacity = searchValue.length > 0 ? '1' : '0.7';
+            }
         }
     }
 

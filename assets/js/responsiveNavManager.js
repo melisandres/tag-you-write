@@ -5,18 +5,17 @@
 export class ResponsiveNavManager {
     constructor() {
         this.priorities = {
-            'dashboard': 1,
-            'search': 2,
-            'filter': 3,
-            'category': 4,
-            'notifications': 5,
-            'browse': 6,
-            'language': 7,
-            'tutorial': 8,
-            'home': 8,
-            'newGame': 9,
-            'contact': 10,
-            'logout': 11
+            'dashboard': 1,  // Always visible on small screens (if applicable)
+            'filters': 2,   // Always visible on small screens (if applicable) - Filters switcher (consolidates filter, search, category)
+            'notifications': 3,  // Always visible on small screens
+            // Note: search, filter, and category no longer exist as separate nav links - they're inside the filters dropdown
+            'browse': 4,
+            'tutorial': 5,
+            'language': 6,
+            'newGame': 7,
+            'contact': 8,
+            'logout': 9,
+            'home': 10
         };
         this.init();
     }
@@ -62,6 +61,7 @@ export class ResponsiveNavManager {
         }
         
         // Check for class names that might indicate item type
+        if (item.classList.contains('filters-switcher')) return 'filters';
         if (item.classList.contains('category')) return 'category';
         if (item.classList.contains('home')) return 'home';
         if (item.classList.contains('dashboard-nav')) return 'dashboard';

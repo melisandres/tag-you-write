@@ -19,26 +19,18 @@
     {% else %}
         {% set categoryTranslationKey = 'category-header.' ~ categoryParts[0] ~ '.' ~ categoryParts[1] %}
     {% endif %}
+{% else %}
+    {% set categoryTranslationKey = 'category-header.all' %}
+{% endif %}
     <div class="game-list-category-header visible" id="categoryHeader">
         <div class="category-breadcrumb">
             <span class="category-name" data-i18n="{{ categoryTranslationKey }}">{{ translate(categoryTranslationKey) }}</span>
             <span class="game-count">({{ texts|length }})</span>
         </div>
         <div class="header-actions">
-            <!-- Future: Category dropdown button -->
-        </div>
-    </div>
-{% else %}
-<div class="game-list-category-header" id="categoryHeader">
-    <div class="category-breadcrumb">
-        <span class="category-name"></span>
-        <span class="game-count"></span>
-    </div>
-    <div class="header-actions">
-        <!-- Future: Category dropdown button -->
+        <!-- Close button added via JavaScript -->
     </div>
 </div>
-{% endif %}
 
 <div data-stories class="stories">
 {% for text in texts %}

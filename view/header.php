@@ -71,6 +71,53 @@
         </a>
         {% endif %}
 
+        {# Filters Switcher - replaces individual filter, search, and category links #}
+        {% if title_key == 'page_title.texts' or title_key == 'page_title.dashboard' or title_key == 'page_title.story_collab' %}
+            <div class="nav-link filters-switcher" data-item="filters" data-i18n-title="nav.filters_tooltip" title="{{ translate('nav.filters_tooltip') }}">
+                <div class="current-filters" data-svg="filters" data-i18n-title="nav.filters_tooltip" title="{{ translate('nav.filters_tooltip') }}">
+                </div>
+                <div class="nav-text" data-i18n="nav.filters">
+                    {{ translate('nav.filters') }}
+                </div>
+                <div class="filters-dropdown">
+                    {% if title_key == 'page_title.texts' %}
+                        <a data-filter-menu="category" data-i18n="nav.category" data-i18n-title="nav.category_tooltip" title="{{ translate('nav.category_tooltip') }}">
+                            <span class="icon" data-svg="category"></span>
+                            <span data-i18n="nav.category">{{ translate('nav.category') }}</span>
+                        </a>
+                    {% endif %}
+                    {% if title_key == 'page_title.texts' or title_key == 'page_title.story_collab' or title_key == 'page_title.dashboard' %}
+                        <a data-filter-menu="search" data-i18n="nav.search" data-i18n-title="nav.search_tooltip" title="{{ translate('nav.search_tooltip') }}">
+                            <span class="icon" data-svg="search"></span>
+                            <span data-i18n="nav.search">{{ translate('nav.search') }}</span>
+                        </a>
+                    {% endif %}
+        {% if title_key == 'page_title.texts' or title_key == 'page_title.dashboard' %}
+                        <a data-filter-menu="filter" data-i18n="nav.filter" data-i18n-title="nav.filter_tooltip" title="{{ translate('nav.filter_tooltip') }}">
+                            <span class="icon" data-svg="filter"></span>
+                            <span data-i18n="nav.filter">{{ translate('nav.filter') }}</span>
+                        </a>
+                    {% endif %}
+                    <div class="filters-dropdown-divider"></div>
+                    <a data-filter-action="view-all" data-i18n="nav.view_all" data-i18n-title="nav.view_all_tooltip" title="{{ translate('nav.view_all_tooltip') }}">
+                        <span data-i18n="nav.view_all">{{ translate('nav.view_all') }}</span>
+                    </a>
+                    <a data-filter-action="hide-all" data-i18n="nav.hide_all" data-i18n-title="nav.hide_all_tooltip" title="{{ translate('nav.hide_all_tooltip') }}">
+                        <span data-i18n="nav.hide_all">{{ translate('nav.hide_all') }}</span>
+            </a> 
+                </div>
+            </div>
+        {% else %} 
+            <a class="nav-link texts" data-item="browse" href="{{ langUrl('text') }}">
+                <span class="icon" data-svg="browse" data-i18n-title="nav.browse_tooltip" title="{{ translate('nav.browse_tooltip') }}"></span>
+                <span class="nav-text" data-i18n="nav.browse">
+                    {{ translate('nav.browse') }}
+                </span>
+            </a>  
+        {% endif %}
+
+        {# OLD CODE - COMMENTED OUT #}
+        {#
         {% if title_key == 'page_title.texts' %}
             <a class="nav-link category" data-item="category">
                 <span class="icon" data-svg="category" data-i18n-title="nav.category_tooltip" title="{{ translate('nav.category_tooltip') }}"></span>
@@ -86,13 +133,6 @@
                 <span class="nav-text" data-i18n="nav.filter">
                     {{ translate('nav.filter') }}
                 </span>
-            </a> 
-        {% else %} 
-            <a class="nav-link texts" data-item="browse" href="{{ langUrl('text') }}">
-                <span class="icon" data-svg="browse" data-i18n-title="nav.browse_tooltip" title="{{ translate('nav.browse_tooltip') }}"></span>
-                <span class="nav-text" data-i18n="nav.browse">
-                    {{ translate('nav.browse') }}
-                </span>
             </a>  
         {% endif %}
 
@@ -104,6 +144,7 @@
                 </span>
             </a>
         {% endif %}
+        #}
 
     {% if guest and title_key != 'page_title.login' %}
         <a class="nav-link writers" data-item="login" href="{{ langUrl('login') }}">
@@ -253,6 +294,57 @@
             </div>
             {% endif %}
 
+            {# Filters Switcher - replaces individual filter, search, and category links #}
+            {% if title_key == 'page_title.texts' or title_key == 'page_title.dashboard' or title_key == 'page_title.story_collab' %}
+            <div class="overflow-menu-item">
+                <div class="nav-link filters-switcher" data-item="filters" data-i18n-title="nav.filters_tooltip" title="{{ translate('nav.filters_tooltip') }}">
+                    <div class="current-filters" data-svg="filters" data-i18n-title="nav.filters_tooltip" title="{{ translate('nav.filters_tooltip') }}">
+                    </div>
+                    <div class="nav-text" data-i18n="nav.filters">
+                        {{ translate('nav.filters') }}
+                    </div>
+                    <div class="filters-dropdown">
+                        {% if title_key == 'page_title.texts' %}
+                            <a data-filter-menu="category" data-i18n="nav.category" data-i18n-title="nav.category_tooltip" title="{{ translate('nav.category_tooltip') }}">
+                                <span class="icon" data-svg="category"></span>
+                                <span data-i18n="nav.category">{{ translate('nav.category') }}</span>
+                            </a>
+                        {% endif %}
+                        {% if title_key == 'page_title.texts' or title_key == 'page_title.story_collab' or title_key == 'page_title.dashboard' %}
+                            <a data-filter-menu="search" data-i18n="nav.search" data-i18n-title="nav.search_tooltip" title="{{ translate('nav.search_tooltip') }}">
+                                <span class="icon" data-svg="search"></span>
+                                <span data-i18n="nav.search">{{ translate('nav.search') }}</span>
+                            </a>
+                        {% endif %}
+                        {% if title_key == 'page_title.texts' or title_key == 'page_title.dashboard' %}
+                            <a data-filter-menu="filter" data-i18n="nav.filter" data-i18n-title="nav.filter_tooltip" title="{{ translate('nav.filter_tooltip') }}">
+                                <span class="icon" data-svg="filter"></span>
+                                <span data-i18n="nav.filter">{{ translate('nav.filter') }}</span>
+                            </a>
+                        {% endif %}
+                        <div class="filters-dropdown-divider"></div>
+                        <a data-filter-action="view-all" data-i18n="nav.view_all" data-i18n-title="nav.view_all_tooltip" title="{{ translate('nav.view_all_tooltip') }}">
+                            <span data-i18n="nav.view_all">{{ translate('nav.view_all') }}</span>
+                        </a>
+                        <a data-filter-action="hide-all" data-i18n="nav.hide_all" data-i18n-title="nav.hide_all_tooltip" title="{{ translate('nav.hide_all_tooltip') }}">
+                            <span data-i18n="nav.hide_all">{{ translate('nav.hide_all') }}</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="overflow-menu-item">
+                <a class="nav-link texts" data-item="browse" href="{{ langUrl('text') }}">
+                    <span class="icon" data-svg="browse" data-i18n-title="nav.browse_tooltip" title="{{ translate('nav.browse_tooltip') }}"></span>
+                    <span class="nav-text" data-i18n="nav.browse">
+                        {{ translate('nav.browse') }}
+                    </span>
+                </a>
+            </div>
+            {% endif %}
+
+            {# OLD CODE - COMMENTED OUT #}
+            {#
             <!-- Category Link -->
             {% if title_key == 'page_title.texts' %}
             <div class="overflow-menu-item">
@@ -297,6 +389,7 @@
                 </a>
             </div>
             {% endif %}
+            #}
 
             <!-- Login Link (for guests) -->
             {% if guest and title_key != 'page_title.login' %}
