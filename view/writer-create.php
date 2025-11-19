@@ -35,7 +35,6 @@
             </select>
         </label> 
         {% endif %} -->
-        <input type="hidden" name="privilege_id" value=2>
         <input type="hidden" name="currentPage" value="writer-create.php">
         <div class="form-btns">
             <button class="save" type="button" data-status="writerSave" data-button-type="save">

@@ -48,7 +48,8 @@ class ControllerWriter extends Controller{
     }
 
     public function store(){
-        //TODO: I think the privileges are being set by a hidden selectbox... this is not secure. But if the priveileges don't give access to anything important... you might be able to do it that way
+        // Security: Privilege is now hardcoded to beta_tester for new registrations -- this is for the length of the beta testing period
+        // Any privilege_id in POST is removed to prevent privilege escalation
         $privileges = '';
         $errors = "";
 
@@ -88,6 +89,23 @@ class ControllerWriter extends Controller{
                 exit();
             }
 
+            // Get beta_tester privilege ID by querying the privilege column
+            // TODO: this will need to be changed when the beta testing period ends
+            $privilege = new Privilege;
+            $betaTesterPrivilege = $privilege->selectId('beta_tester', 'privilege');
+            
+            if (!$betaTesterPrivilege) {
+                // Fallback: if beta_tester doesn't exist, log error and use default privilege 2
+                error_log("Warning: beta_tester privilege not found in database. Using what is the beta tester privilege id in the database (4).");
+                $betaTesterId = 4;
+            } else {
+                $betaTesterId = $betaTesterPrivilege['id'];
+            }
+
+            // Always set privilege_id to beta_tester for new account registrations
+            // (ignoring any value that might have been sent in POST)
+            $_POST['privilege_id'] = $betaTesterId;
+
             $writer = new Writer;
             $options =[
                 'cost'=>10,
@@ -101,7 +119,7 @@ class ControllerWriter extends Controller{
             //for now
             if($insert) {
                 $_SESSION['writer_id'] = $insert;
-                $_SESSION['privilege'] = 2;
+                $_SESSION['privilege'] = $betaTesterId;
                 $_SESSION['fingerPrint'] = md5($_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR']);
                 $_SESSION['writer_firstName'] = $firstName;
                 $_SESSION['writer_lastName'] = $lastName;
