@@ -1,6 +1,7 @@
 import { eventBus } from './eventBus.js';
 import { SVGManager } from './svgManager.js';
 import { createColorScale } from './createColorScale.js';
+import { DiffManager } from './diffManager.js';
 
 export class ModalUpdateManager {
   constructor() {
@@ -23,6 +24,13 @@ export class ModalUpdateManager {
         this.applyCurrentActivityIndicators(container, textId);
     });
     eventBus.on('searchApplied', this.handleSearchApplied.bind(this));
+    // Targeted event for re-highlighting content after diff toggle (doesn't trigger full search refresh)
+    eventBus.on('rehighlightModalContent', ({ container, textId }) => {
+        const searchTerm = window.dataManager.getSearch();
+        if (searchTerm && container && textId) {
+            this.highlightModalContent(container, textId, searchTerm);
+        }
+    });
     eventBus.on('nodeTextContentUpdate', this.handleNodeTextContentUpdate.bind(this));
     eventBus.on('updateNodeWinner', this.handleChooseWinner.bind(this));
     eventBus.on('nodePermissionsChanged', this.handlePermissionsChanged.bind(this));
@@ -361,10 +369,25 @@ export class ModalUpdateManager {
       node.title = window.i18n ? window.i18n.translate("general.untitled") : "Untitled";
     }
 
+    // Check if modal is in diff mode
+    const writingElement = container.querySelector('.writing');
+    const isDiffMode = writingElement && (
+      writingElement.classList.contains('diff-view') || 
+      writingElement.dataset.diffMode === 'diff'
+    );
+    
+    // Determine writing content based on diff mode
+    let writingContent = node.writing;
+    if (isDiffMode && DiffManager.hasDiff(node)) {
+      // Use diff HTML if in diff mode
+      writingContent = DiffManager.renderDiff(node.diff_json, node.writing);
+      console.log('ModalUpdateManager: Using diff HTML for writing content');
+    }
+
     // First, clear all existing highlights by restoring original content
     const elements = {
         headline: { selector: '.headline', content: node.title },
-        writing: { selector: '.writing', content: node.writing },
+        writing: { selector: '.writing', content: writingContent },
         note: { selector: '.note:not(button)', content: node.note ? `<p>P.S... </p>${node.note}` : '' },
         author: { selector: '.author', content: node.writer_name }
     };
@@ -379,6 +402,19 @@ export class ModalUpdateManager {
             // Special handling for the headline with data-i18n attribute
             if (selector === '.headline' && element.dataset.i18n === 'general.untitled') {
                 element.innerHTML = window.i18n ? window.i18n.translate("general.untitled") : "Untitled";
+            } else if (selector === '.writing') {
+                // For writing element, restore content and ensure correct classes
+                element.innerHTML = content;
+                // Ensure diff-view/normal-view classes are correct
+                if (isDiffMode) {
+                    element.classList.remove('normal-view');
+                    element.classList.add('diff-view');
+                    element.dataset.diffMode = 'diff';
+                } else {
+                    element.classList.remove('diff-view');
+                    element.classList.add('normal-view');
+                    element.dataset.diffMode = 'normal';
+                }
             } else {
                 element.innerHTML = content;
             }
@@ -403,10 +439,20 @@ export class ModalUpdateManager {
             }
         }
 
-        if (nodeMatches.writingMatches && node.writing) {  // Check if content exists
+        if (nodeMatches.writingMatches) {  // Check if content exists
             const element = container.querySelector('.writing');
             if (element) {
-                element.innerHTML = this.highlightText(node.writing, searchTerm);
+                // Check if modal is in diff mode
+                const isDiffMode = element.classList.contains('diff-view') || element.dataset.diffMode === 'diff';
+                
+                if (isDiffMode && DiffManager.hasDiff(node)) {
+                    // For diff mode, render diff HTML and then highlight it
+                    const diffHtml = DiffManager.renderDiff(node.diff_json, node.writing);
+                    // highlightText can handle HTML by processing text nodes
+                    element.innerHTML = this.highlightText(diffHtml, searchTerm);
+                } else if (node.writing) {
+                    element.innerHTML = this.highlightText(node.writing, searchTerm);
+                }
             }
         }
 

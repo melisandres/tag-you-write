@@ -2,6 +2,7 @@ import { SVGManager } from './svgManager.js';
 import { SeenManager } from './seenManager.js';
 import { createColorScale } from './createColorScale.js'; // Import the utility function
 import { eventBus } from './eventBus.js';
+import { DiffManager } from './diffManager.js';
 
 export class ShelfVisualizer {
   constructor(container) {
@@ -118,6 +119,12 @@ export class ShelfVisualizer {
       statusClass = "published-late";
     }
 
+    // Check if diff data exists and render accordingly
+    const hasDiff = DiffManager.hasDiff(node);
+    const showDiffByDefault = hasDiff; // Default to diff view if available
+    const diffHtml = hasDiff ? DiffManager.renderDiff(node.diff_json, node.writing) : '';
+    const normalHtml = node.writing || '';
+
     return `
       <li class="node ${statusClass}" data-story-id="${node.id}" style="--node-depth: ${depth}">
         <div class="node-headline ${isWinner}">
@@ -143,8 +150,19 @@ export class ShelfVisualizer {
             ${(node.permissions.canPublish || node.permissions.canPublishTooLate) ? this.getPublishForm(node) : ''}
             ${node.permissions.canDelete ? this.getDeleteForm(node) : ''}
           </div>
-          <p>
-            ${node.writing}
+          ${hasDiff ? `
+            <div class="diff-toggle-container">
+              <button class="diff-toggle ${showDiffByDefault ? 'active' : ''}" data-diff-mode="diff" data-story-id="${node.id}" data-i18n-title="modal.show_diff" title="Show diff">
+                <span data-i18n="modal.diff">Diff</span>
+                ${node.diff_count ? `<span class="diff-count">(${node.diff_count})</span>` : ''}
+              </button>
+              <button class="diff-toggle ${!showDiffByDefault ? 'active' : ''}" data-diff-mode="normal" data-story-id="${node.id}" data-i18n-title="modal.show_normal" title="Show normal text">
+                <span data-i18n="modal.normal">Normal</span>
+              </button>
+            </div>
+          ` : ''}
+          <p class="writing-content ${hasDiff && showDiffByDefault ? 'diff-view' : 'normal-view'}" data-story-id="${node.id}">
+            ${showDiffByDefault ? diffHtml : normalHtml}
           </p>
           <span class="date"> ${node.date}</span>
           ${note}
@@ -395,10 +413,64 @@ export class ShelfVisualizer {
         }
       });
     });
+
+    // Add event listeners for diff toggle buttons
+    const diffToggles = this.container.querySelectorAll('.diff-toggle');
+    diffToggles.forEach(toggle => {
+      toggle.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent triggering the node open/close
+        this.handleDiffToggle(e);
+      });
+    });
     
     // Re-apply SVG colors to ensure proper rendering
     this.applySVGColors(this.container);
   }
+
+  handleDiffToggle(event) {
+    const button = event.currentTarget;
+    const mode = button.dataset.diffMode;
+    const storyId = button.dataset.storyId;
+    const nodeElement = this.container.querySelector(`[data-story-id="${storyId}"]`);
+    
+    if (!nodeElement) return;
+    
+    const writingContent = nodeElement.querySelector('.writing-content');
+    if (!writingContent) return;
+    
+    // Get node data from DataManager
+    const nodeData = window.dataManager?.getNode(storyId);
+    if (!nodeData) {
+      console.warn('Shelf: Could not find node data for text ID:', storyId);
+      return;
+    }
+    
+    const allToggles = nodeElement.querySelectorAll('.diff-toggle');
+    
+    // Update active state
+    allToggles.forEach(toggle => toggle.classList.remove('active'));
+    button.classList.add('active');
+    
+    // Update content based on mode
+    if (mode === 'diff') {
+      writingContent.classList.remove('normal-view');
+      writingContent.classList.add('diff-view');
+      const diffHtml = DiffManager.renderDiff(nodeData.diff_json, nodeData.writing);
+      writingContent.innerHTML = diffHtml;
+    } else {
+      writingContent.classList.remove('diff-view');
+      writingContent.classList.add('normal-view');
+      writingContent.innerHTML = nodeData.writing || '';
+    }
+    
+    // Re-apply search highlighting if there's an active search
+    const searchTerm = window.dataManager?.getSearch();
+    if (searchTerm) {
+      // Emit targeted event that only triggers highlighting, not full shelf redraw
+      eventBus.emit('rehighlightShelfContent', nodeElement);
+    }
+  }
+
 }
 
 

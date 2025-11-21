@@ -15,7 +15,9 @@ class Text extends Crud{
                         'note',
                         'note_date', 
                         'game_id',
-                        'status_id'
+                        'status_id',
+                        'diff_json',
+                        'diff_count'
                         ];
 
     // This is used to get ONE, MANY, or ALL texts. the ID_VALUE can be the TEXT_ID, if you only want one text (3rd param false), or the GAME_ID (3rd param true), if you want one arborescence of texts, FINALLY, if you want only an array of texts, that have been modified since a timestamp, add it as MODIFIED_SINCE parameter.The arborescence is built in the controllerText, the permissions are added there as well. 

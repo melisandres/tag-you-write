@@ -13,6 +13,7 @@ RequirePage::controller('ControllerGame');
 RequirePage::controller('ControllerGameInvitation');
 RequirePage::model('Notification');
 RequirePage::model('Event');
+RequirePage::service('DiffService');
 
 class ControllerText extends Controller{
 
@@ -404,6 +405,11 @@ class ControllerText extends Controller{
             'modified_at' => date('Y-m-d H:i:s')
         ];
 
+        // Generate diff data if publishing
+        $diffData = $this->generateAndSaveDiff($input['writing'], $parentId, null, $status);
+        $textToSave['diff_json'] = $diffData['diff_json'];
+        $textToSave['diff_count'] = $diffData['diff_count'];
+
         // Modified_at currentlyrefresh the UI... so it permits the writer of the text to retrieve it when they return to the page, and the Modified_since endpoint retrieves it... only for them. 
 
         //save the text
@@ -737,6 +743,11 @@ class ControllerText extends Controller{
             'modified_at' => date('Y-m-d H:i:s')
         ];
 
+        // Generate diff data if publishing
+        $diffData = $this->generateAndSaveDiff($textData['writing'], $textData['parent_id'], $textId, $statusName);
+        $data['diff_json'] = $diffData['diff_json'];
+        $data['diff_count'] = $diffData['diff_count'];
+
         $success = $text->update($data);
     
         // If the publish was a success, make modifications to the game
@@ -961,6 +972,11 @@ class ControllerText extends Controller{
             'date' => date('Y-m-d H:i:s'),
             'modified_at' => date('Y-m-d H:i:s')
         ];
+
+        // Generate diff data if publishing
+        $diffData = $this->generateAndSaveDiff($input['writing'], $textData['parent_id'], $textId, $status);
+        $newText['diff_json'] = $diffData['diff_json'];
+        $newText['diff_count'] = $diffData['diff_count'];
 
         $update = $text->update($newText);
 
@@ -1371,6 +1387,47 @@ class ControllerText extends Controller{
         }
 
         return $invitationEmailResult;
+    }
+
+    /**
+     * Helper method to generate and save diff data.
+     *
+     * @param string $childText The new text (child).
+     * @param int|null $parentId The ID of the parent text.
+     * @param int|null $textId The ID of the current text being saved/updated.
+     * @param string $status The status of the text (e.g., 'published', 'draft').
+     * @return array An associative array containing 'diff_json' and 'diff_count'.
+     */
+    private function generateAndSaveDiff($childText, $parentId, $textId, $status) {
+        $diffJson = null;
+        $diffCount = null;
+
+        // Only generate diff if the text is being published
+        if ($status === 'published' || $status === 'published_late') {
+            $diffService = new DiffService();
+            $parentText = '';
+
+            if ($parentId) {
+                $textModel = new Text();
+                $parentData = $textModel->selectTexts(null, $parentId); // Fetch parent without current_writer filter
+                if ($parentData && isset($parentData['writing'])) {
+                    $parentText = $parentData['writing'];
+                }
+            } else {
+                // TODO: Root texts compare to empty string - consider removing this logic if it feels broken later.
+                // For root texts, compare against an empty string.
+                $parentText = '';
+            }
+
+            $diffBlocks = $diffService->diff($childText, $parentText);
+            $diffJson = json_encode($diffBlocks);
+            $diffCount = $diffService->count($diffBlocks);
+        }
+
+        return [
+            'diff_json' => $diffJson,
+            'diff_count' => $diffCount
+        ];
     }
 }
 

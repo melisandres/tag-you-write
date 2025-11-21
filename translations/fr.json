@@ -619,7 +619,11 @@
     "draft": "BROUILLON",
     "published_late": "PUBLIÉ EN RETARD",
     "winner": "GAGNANT",
-    "ps": "P.S..."
+    "ps": "P.S...",
+    "diff": "Diff",
+    "normal": "Normal",
+    "show_diff": "Afficher la vue diff",
+    "show_normal": "Afficher le texte normal"
   },
   "tooltips": {
     "contributor": "☆ contributeur",

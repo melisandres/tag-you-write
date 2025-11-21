@@ -113,6 +113,68 @@ div.writing.visible{
     transition: height 8s ease-in-out;
 }
 
+/* Diff toggle styles for shelf */
+.with-shelf .diff-toggle-container {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+    margin-top: 5px;
+}
+
+.with-shelf .diff-toggle {
+    padding: 4px 16px;
+    min-width: 80px;
+    border: 1px solid var(--color-grey-light, #ccc);
+    background: var(--color-white-lightest, #f9f9f9);
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 11px;
+    transition: all 0.2s ease;
+}
+
+.with-shelf .diff-toggle:hover {
+    background: var(--color-white, #fff);
+    border-color: var(--color-accent, #666);
+}
+
+.with-shelf .diff-toggle.active {
+    background: var(--color-primary-dark);
+    color: white;
+    border-color: var(--color-primary-dark);
+}
+
+.with-shelf .diff-count {
+    font-size: 9px;
+    opacity: 0.8;
+    margin-left: 4px;
+}
+
+/* Diff text styles for shelf - ensure same font size as normal text */
+.with-shelf .writing-content .diff-equal,
+.with-shelf .writing-content .diff-delete,
+.with-shelf .writing-content .diff-insert,
+.with-shelf .writing .diff-equal,
+.with-shelf .writing .diff-delete,
+.with-shelf .writing .diff-insert {
+    font-size: 16px;
+    font-weight: 100;
+    line-height: inherit;
+}
+
+.with-shelf .diff-delete {
+    text-decoration: line-through;
+    color: #cc0000;
+}
+
+.with-shelf .diff-insert {
+    color: #006600;
+    background-color: rgba(200, 255, 200, 0.3); /* Light green background - adjust opacity (0.3) or color as needed */
+}
+
+.with-shelf .diff-equal {
+    /* Normal text - no special styling needed */
+}
+
 .node.draft .votes path{
     fill: var(--color-grey);
     stroke: var(--color-love);

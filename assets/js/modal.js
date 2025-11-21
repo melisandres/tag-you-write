@@ -1,6 +1,7 @@
 import { SVGManager } from './svgManager.js';
 import { createColorScale } from './createColorScale.js';
 import { eventBus } from './eventBus.js';
+import { DiffManager } from './diffManager.js';
 
 export class Modal {
     constructor(modalElement) {
@@ -34,6 +35,34 @@ export class Modal {
       console.log("untitledDataI18n", untitledDataI18n);
       console.log("data.title", data.title);
 
+      // Check if diff data exists and render accordingly
+      const hasDiff = DiffManager.hasDiff(data);
+      const showDiffByDefault = hasDiff; // Default to diff view if available
+      
+      // Render diff HTML if available
+      let diffHtml = '';
+      if (hasDiff) {
+        console.log('Modal: Rendering diff for text ID:', data.id, 'diff_json:', data.diff_json);
+        diffHtml = DiffManager.renderDiff(data.diff_json, data.writing);
+        console.log('Modal: Rendered diffHtml length:', diffHtml.length);
+        // Only fall back to normal text if diffHtml is completely empty
+        // Even if it's the same content, we want to show it with diff styling
+        if (!diffHtml || diffHtml.trim() === '') {
+          console.log('Modal: diffHtml is empty, using writing as fallback');
+          diffHtml = data.writing || '';
+        } else {
+          console.log('Modal: Using rendered diffHtml');
+        }
+      }
+      
+      const normalHtml = data.writing || '';
+      
+      // Debug: Log what we're about to render
+      console.log('Modal: hasDiff:', hasDiff, 'showDiffByDefault:', showDiffByDefault, 'will render:', showDiffByDefault ? 'diffHtml' : 'normalHtml');
+      
+      // Store original data for toggle
+      this.currentModalData = data;
+
       // build the modal content
       this.modalContent.innerHTML = `
             <div class="top-info ${data.text_status}">
@@ -49,7 +78,20 @@ export class Modal {
             </div>
             <h2 class="headline" ${untitledDataI18n}>${data.title || untitledText}</h2>
             <h3 class="author"> -&nbsp${data.firstName} ${data.lastName}&nbsp- </h3>
-            <div class="writing">${data.writing}</div>
+            ${hasDiff ? `
+              <div class="diff-toggle-container">
+                <button class="diff-toggle ${showDiffByDefault ? 'active' : ''}" data-diff-mode="diff" data-i18n-title="modal.show_diff" title="Show diff">
+                  <span data-i18n="modal.diff">Diff</span>
+                  ${data.diff_count ? `<span class="diff-count">(${data.diff_count})</span>` : ''}
+                </button>
+                <button class="diff-toggle ${!showDiffByDefault ? 'active' : ''}" data-diff-mode="normal" data-i18n-title="modal.show_normal" title="Show normal text">
+                  <span data-i18n="modal.normal">Normal</span>
+                </button>
+              </div>
+            ` : ''}
+            <div class="writing ${hasDiff && showDiffByDefault ? 'diff-view' : 'normal-view'}" data-diff-mode="${showDiffByDefault ? 'diff' : 'normal'}" data-text-id="${data.id}">
+              ${showDiffByDefault ? diffHtml : normalHtml}
+            </div>
             <div class="note">${noteHtml}</div>
         </div>
       `;
@@ -122,12 +164,67 @@ export class Modal {
       closeButton.addEventListener('click', this.hideModal.bind(this));
     }
     
+    // Add event listeners for diff toggle buttons
+    const diffToggles = this.modalElement.querySelectorAll('.diff-toggle');
+    diffToggles.forEach(toggle => {
+      toggle.addEventListener('click', this.handleDiffToggle.bind(this));
+    });
+    
     // Emit event after modal is fully drawn
     eventBus.emit('modalDrawComplete', {
         container: this.modalElement,
         textId: data.id
     });
   }
+
+  handleDiffToggle(event) {
+    const button = event.currentTarget;
+    const mode = button.dataset.diffMode;
+    const writingDiv = this.modalElement.querySelector('.writing');
+    const allToggles = this.modalElement.querySelectorAll('.diff-toggle');
+    
+    if (!writingDiv) return;
+    
+    // Get the text ID to retrieve data from DataManager
+    const textId = writingDiv.dataset.textId;
+    if (!textId) return;
+    
+    // Get node data from DataManager
+    const nodeData = window.dataManager?.getNode(textId);
+    if (!nodeData) {
+      console.warn('Modal: Could not find node data for text ID:', textId);
+      return;
+    }
+    
+    // Update active state
+    allToggles.forEach(toggle => toggle.classList.remove('active'));
+    button.classList.add('active');
+    
+    // Update content based on mode
+    if (mode === 'diff') {
+      writingDiv.classList.remove('normal-view');
+      writingDiv.classList.add('diff-view');
+      writingDiv.dataset.diffMode = 'diff';
+      const diffHtml = DiffManager.renderDiff(nodeData.diff_json, nodeData.writing);
+      writingDiv.innerHTML = diffHtml;
+    } else {
+      writingDiv.classList.remove('diff-view');
+      writingDiv.classList.add('normal-view');
+      writingDiv.dataset.diffMode = 'normal';
+      writingDiv.innerHTML = nodeData.writing || '';
+    }
+    
+    // Re-apply search highlighting if there's an active search
+    const searchTerm = window.dataManager?.getSearch();
+    if (searchTerm) {
+      // Emit targeted event that only triggers highlighting, not full search refresh
+      eventBus.emit('rehighlightModalContent', { 
+        container: this.modalElement, 
+        textId: textId 
+      });
+    }
+  }
+
 
   getNumberOfVotes(data) {
     const maxVotes = (data.playerCount || 1) - 1;

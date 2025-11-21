@@ -1,7 +1,11 @@
 {
     "require": {
-        "twig/twig": "^3.7",
+        "twig/twig": "3.3.8",
         "phpmailer/phpmailer": "^6.8",
-        "predis/predis": "^3.0"
+        "predis/predis": "^3.0",
+        "jfcherng/php-diff": "6.10.17"
+    },
+    "config": {
+        "platform-check": false
     }
 }

@@ -799,13 +799,17 @@ export class DataManager {
         // Normalize the data
         // Note: text_status can be: 'draft', 'incomplete_draft', 'published', 'published_late'
         // All status values are preserved as-is from the backend
+        // Explicitly preserve diff_json and diff_count fields
         const normalizedData = {
             ...nodeData,
             id: stringId,
             parent_id: nodeData.parent_id ? String(nodeData.parent_id) : null,
             game_id: String(nodeData.game_id),
             children: nodeData.children || [],
-            permissions: nodeData.permissions || {}
+            permissions: nodeData.permissions || {},
+            // Explicitly preserve diff fields
+            diff_json: nodeData.diff_json || null,
+            diff_count: nodeData.diff_count !== undefined ? nodeData.diff_count : null
         };
 
         this.cache.nodesMap.set(stringId, normalizedData);

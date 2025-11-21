@@ -620,7 +620,11 @@
     "draft": "DRAFT",
     "published_late": "PUBLISHED LATE",
     "winner": "WINNER",
-    "ps": "P.S..."
+    "ps": "P.S...",
+    "diff": "Diff",
+    "normal": "Normal",
+    "show_diff": "Show diff view",
+    "show_normal": "Show normal text view"
   },
   "tooltips": {
     "contributor": "☆ contributor",

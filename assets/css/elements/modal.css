@@ -169,6 +169,64 @@
     }
 }
 
+/* Diff toggle styles */
+.diff-toggle-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    margin-top: 10px;
+}
+
+.diff-toggle {
+    padding: 5px 15px;
+    border: 1px solid var(--color-grey-light, #ccc);
+    background: var(--color-white-lightest, #f9f9f9);
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 12px;
+    transition: all 0.2s ease;
+}
+
+.diff-toggle:hover {
+    background: var(--color-white, #fff);
+    border-color: var(--color-accent, #666);
+}
+
+.diff-toggle.active {
+    background: var(--color-primary-dark);
+    color: white;
+    border-color: var(--color-primary-dark);
+}
+
+.diff-count {
+    font-size: 10px;
+    opacity: 0.8;
+    margin-left: 5px;
+}
+
+/* Diff text styles - ensure same font size as normal text */
+.writing .diff-equal,
+.writing .diff-delete,
+.writing .diff-insert {
+    font-size: 15px;
+    font-weight: 100;
+    line-height: inherit;
+}
+
+.diff-delete {
+    text-decoration: line-through;
+    color: #cc0000;
+}
+
+.diff-insert {
+    color: #006600;
+    background-color: rgba(200, 255, 200, 0.3); /* Light green background - adjust opacity (0.3) or color as needed */
+}
+
+.diff-equal {
+    /* Normal text - no special styling needed */
+}
+
 /* Move middle section to second row when modal is very narrow to prevent overlap */
 @container modal (max-width: 450px) {
     .modal .top-info {

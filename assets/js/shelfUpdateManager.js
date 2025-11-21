@@ -2,6 +2,7 @@ import { eventBus } from './eventBus.js';
 import { SVGManager } from './svgManager.js';
 import { createColorScale } from './createColorScale.js';
 import { SearchHighlighter } from './searchHighlighter.js';
+import { DiffManager } from './diffManager.js';
 
 export class ShelfUpdateManager {
   constructor() {
@@ -54,6 +55,14 @@ export class ShelfUpdateManager {
         
         // Apply current activity indicators after shelf rendering
         this.applyCurrentActivityIndicators(container);
+    });
+    
+    // Targeted event for re-highlighting shelf content after diff toggle (doesn't trigger full search refresh)
+    eventBus.on('rehighlightShelfContent', (container) => {
+        const searchTerm = this.dataManager.getSearch();
+        if (searchTerm && container) {
+            this.highlightShelfContent(container, searchTerm);
+        }
     });
 
 
@@ -108,9 +117,27 @@ export class ShelfUpdateManager {
 
         // Highlight writing if it matches
         if (nodeData.writingMatches) {
-          // This is the critical part - filter out buttons and SVGs
+          // Get the node data from DataManager to check for diff
+          const nodeDataFromManager = this.dataManager.getNode(storyId);
+          
+          // Check for writing-content (diff/normal text container) or fall back to p in writing
+          const writingContentElement = node.querySelector('.writing-content');
           const writingElement = node.querySelector('.writing');
-          if (writingElement) {
+          
+          if (writingContentElement) {
+            // New structure with diff toggle - check if in diff mode
+            const isDiffMode = writingContentElement.classList.contains('diff-view');
+            
+            if (isDiffMode && nodeDataFromManager && DiffManager.hasDiff(nodeDataFromManager)) {
+              // Diff mode - render diff HTML and highlight it
+              const diffHtml = DiffManager.renderDiff(nodeDataFromManager.diff_json, nodeDataFromManager.writing);
+              writingContentElement.innerHTML = this.highlightText(diffHtml, searchTerm);
+            } else if (nodeDataFromManager && nodeDataFromManager.writing) {
+              // Normal mode - highlight normal text
+              writingContentElement.innerHTML = this.highlightText(nodeDataFromManager.writing, searchTerm);
+            }
+          } else if (writingElement) {
+            // Old structure - filter out buttons and SVGs
             const paragraphs = Array.from(writingElement.querySelectorAll('p'))
               .filter(p => !p.closest('button') && !p.closest('svg'));
             
