@@ -1242,6 +1242,9 @@ export class DataManager {
             value: category 
         });
         
+        // Emit categoryChanged event for components that listen to it
+        eventBus.emit('categoryChanged', category);
+        
         console.log('🎯 DataManager: Category set to:', category);
     }
 

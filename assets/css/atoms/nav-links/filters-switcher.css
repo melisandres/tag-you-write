@@ -84,6 +84,12 @@
     stroke: var(--color-love, #ff69b4);
 }
 
+/* Target path elements directly to override inline SVG attributes */
+.nav-link.filters-switcher .filters-dropdown a.active .icon svg path {
+    fill: var(--color-love, #ff69b4) !important;
+    stroke: var(--color-love, #ff69b4) !important;
+}
+
 /* Visible state: greyed out background when menu is currently visible */
 .nav-link.filters-switcher .filters-dropdown a.visible {
     background-color: rgba(255, 255, 255, 0.15);

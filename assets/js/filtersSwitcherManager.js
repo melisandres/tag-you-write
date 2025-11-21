@@ -131,8 +131,22 @@ export class FiltersSwitcherManager {
             });
         }
 
-        // Initial update
-        this.updateActiveStates();
+        // Listen for URL changes (browser back/forward navigation)
+        window.addEventListener('popstate', () => {
+            this.updateActiveStates();
+        });
+
+        // Initial update - check URL directly for category (since category doesn't have a menu)
+        // This ensures the active state is set correctly on page load
+        // Use requestAnimationFrame to ensure DOM is ready
+        requestAnimationFrame(() => {
+            this.updateActiveStates();
+        });
+        
+        // Also update after a delay to catch any initialization timing issues
+        setTimeout(() => {
+            this.updateActiveStates();
+        }, 300);
     }
 
     /**

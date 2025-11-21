@@ -179,6 +179,24 @@ label .ck.ck-content.ck-editor__editable {
     border-color: var(--color-grey-light) !important;
 }
 
+/* Ensure CKEditor toolbar stays below navigation (nav z-index is 4) */
+.ck-sticky-panel,
+.ck-sticky-panel__content,
+.ck-toolbar {
+    z-index: 2 !important;
+}
+
+/* Ensure CKEditor powered-by badge stays below navigation */
+.ck-powered-by,
+.ck-powered-by-ckeditor,
+.ck-editor__powered-by,
+.ck-powered-by a,
+[class*="powered-by"],
+.ck-editor__bottom,
+.ck-editor__bottom * {
+    z-index: 2 !important;
+}
+
 .ck.ck-editor__editable:not(.ck-editor__nested-editable).ck-focused {
     border-color: var(--color-accent) !important;
     box-shadow: 0 0 0 0px var(--color-accent) !important;
