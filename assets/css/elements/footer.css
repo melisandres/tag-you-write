@@ -194,8 +194,7 @@ footer {
     
     .footer-about-btn:hover,
     .footer-contact-btn:hover {
-        background-color: var(--color-love, #ff69b4);
-        color: white;
+        color: var(--color-love, #ff69b4);
         border-color: var(--color-love, #ff69b4);
     }
     
@@ -205,12 +204,15 @@ footer {
     }
     
     .footer-activity-indicator {
-        background-color: var(--dark-bg-color-secondary, #2a2a2a);
         border-color: var(--dark-border-color, #333333);
+    }
+
+    .footer-activity-indicator .icon svg {
+        fill: var(--color-white-lightest);
+        stroke: var(--color-white-lightest);
     }
     
     .footer-activity-indicator:hover {
-        background-color: var(--dark-hover-bg-color, #333333);
         border-color: var(--color-love, #ff69b4);
     }
     

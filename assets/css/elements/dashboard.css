@@ -447,7 +447,7 @@
     }
     
     .category-title.has-unreads {
-        color: var(--color-accent);
+        color: var(--color-primary-dark);
     }
     
     .dashboard-game-item {
@@ -463,8 +463,8 @@
     }
     
     .unread-indicator {
-        background: var(--color-accent);
-        border-color: var(--color-accent);
+        background: var(--color-primary-dark);
+        border-color: var(--color-primary-dark);
         color: var(--color-greyscale-darkest);
     }
     

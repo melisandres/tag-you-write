@@ -179,6 +179,12 @@ export class DashboardManager {
             // Insert game in ordered position
             this.insertGameInOrderedPosition(gameElement, gamesContainer);
             
+            // Notify LinkFilterPreserver that a new link was added to the DOM
+            // This ensures the new link gets updated with current filters/search
+            if (gameElement.hasAttribute('data-preserve-filters')) {
+                eventBus.emit('linkAdded', { link: gameElement });
+            }
+            
             // Start entrance animation and update count together
             gameElement.classList.add('entering');
             this.updateCategoryCountByCategory(category);
@@ -418,10 +424,19 @@ export class DashboardManager {
         gamesContainer.innerHTML = '';
         
         // Add filtered games
+        const newLinks = [];
         games.forEach(game => {
             const gameElement = this.createGameElement(game);
             gamesContainer.appendChild(gameElement);
+            if (gameElement.hasAttribute('data-preserve-filters')) {
+                newLinks.push(gameElement);
+            }
         });
+        
+        // Notify LinkFilterPreserver about all new links added
+        if (newLinks.length > 0) {
+            eventBus.emit('linksAdded', { links: newLinks });
+        }
         
         // Initialize activity indicators for newly added games (SVGs already populated in createGameElement)
         // But we need to ensure they're ready to receive activity updates
@@ -465,10 +480,18 @@ export class DashboardManager {
         console.log('🎮 DashboardManager: game.text_id:', game.text_id);
         console.log('🎮 DashboardManager: game.id:', game.id);
         
-        const gameElement = document.createElement('div');
+        // Create an <a> element instead of <div> to match server-side template
+        const gameElement = document.createElement('a');
         gameElement.className = 'dashboard-game-item';
+        
+        // Set href to the game collaboration page
+        const textId = game.text_id || game.id;
+        gameElement.href = window.i18n.createUrl(`text/collab/${textId}`);
+        
+        // Set data attributes
+        gameElement.setAttribute('data-preserve-filters', 'true');
         gameElement.setAttribute('data-game-id', game.game_id);
-        gameElement.setAttribute('data-text-id', game.text_id || game.id);
+        gameElement.setAttribute('data-text-id', textId);
         
         const title = game.title || window.i18n.translate('general.untitled');
         

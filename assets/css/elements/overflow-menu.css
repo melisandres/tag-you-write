@@ -316,7 +316,28 @@ body.overflow-menu-open {
         background-color: var(--dark-bg-color, #1a1a1a);
         color: var(--dark-text-color, #ffffff);
     }
-    
+
+    .overflow-menu-close .icon svg {
+        fill: var(--color-white-lightest);
+        stroke: var(--color-white-lightest);
+    }
+
+    .overflow-menu .back-text {
+        color: var(--color-white-lightest);
+    }
+
+    .overflow-menu-back .back-arrow {
+        color: var(--color-white-lightest);
+    }
+
+    .overflow-menu-back:hover .back-arrow {
+        color: var(--color-love, #ff69b4);
+    }
+
+    .overflow-menu-back:hover {
+        background-color: #1a1a1a;
+    }
+
     .overflow-menu-header {
         background-color: var(--dark-bg-color, #1a1a1a);
         border-bottom-color: var(--dark-border-color, #333333);
@@ -327,11 +348,15 @@ body.overflow-menu-open {
     }
     
     .overflow-menu .nav-link:hover {
-        background-color: var(--dark-hover-bg-color, #333333);
+        background-color: #1a1a1a;
     }
     
     .overflow-menu .nav-link .icon {
         fill: var(--dark-text-color, #ffffff);
+    }
+    
+    .overflow-menu .nav-link .nav-text {
+        color: var(--dark-text-color, #ffffff);
     }
     
     .overflow-menu .language-dropdown a,
@@ -355,4 +380,10 @@ body.overflow-menu-open {
         font-weight: bold;
         background-color: rgba(77, 171, 247, 0.1);
     }
+
+    .submenu-content h3, .submenu-content a {
+        color: var(--color-white-lightest);
+    }
+
+
 }

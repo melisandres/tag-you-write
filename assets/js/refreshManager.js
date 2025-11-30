@@ -430,6 +430,10 @@ export class RefreshManager {
 
         // Save to localStorage
         const pageState = JSON.parse(localStorage.getItem('pageState') || '{}');
+        // Ensure form object exists before setting properties
+        if (!pageState.form) {
+            pageState.form = {};
+        }
         pageState.form.data = formDataObj;
         pageState.form.type = formType;
         pageState.form.lastDatabaseState = this.autoSaveManager.lastSavedContent;

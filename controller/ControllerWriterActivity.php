@@ -36,11 +36,20 @@ class ControllerWriterActivity extends Controller {
             }
             
             // Get JSON input
-            $input = json_decode(file_get_contents('php://input'), true);
+            $rawInput = file_get_contents('php://input');
+            $input = json_decode($rawInput, true);
             
-            if (!$input) {
+            // Check for JSON parsing errors
+            if (json_last_error() !== JSON_ERROR_NONE) {
                 http_response_code(400);
-                echo json_encode(['error' => 'Invalid JSON input']);
+                echo json_encode(['error' => 'Invalid JSON input', 'json_error' => json_last_error_msg()]);
+                return;
+            }
+            
+            // Check if input is null or empty (but valid JSON)
+            if ($input === null || empty($input)) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Empty or invalid input data']);
                 return;
             }
 

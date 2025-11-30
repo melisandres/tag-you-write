@@ -455,11 +455,60 @@ body.contact-modal-open {
         color: var(--dark-text-color, #ffffff);
     }
     
-    .contact-form input[type="email"]:focus,
-    .contact-form input[type="text"]:focus,
-    .contact-form select:focus,
-    .contact-form textarea:focus {
+    /* Focus states - keep dark background, ensure text is visible */
+    .contact-form label:not(.has-feedback) input:focus,
+    .contact-form label:not(.has-feedback) textarea:focus,
+    .contact-form label:not(.has-feedback) select:focus {
+        background-color: var(--dark-bg-color-secondary, #2a2a2a) !important;
+        color: var(--dark-text-color, #ffffff) !important;
         border-color: var(--color-love, #ff69b4);
+    }
+    
+    .contact-form label.has-feedback input:focus,
+    .contact-form label.has-feedback textarea:focus,
+    .contact-form label.has-feedback select:focus {
+        background-color: var(--dark-bg-color-secondary, #2a2a2a) !important;
+        color: var(--dark-text-color, #ffffff);
+        border-color: var(--color-love, #ff69b4);
+        box-shadow: 0px 20px 7px 9px rgb(59 59 27) !important;
+        outline: none;
+    }
+    
+    /* Placeholder text - visible in dark mode */
+    .contact-form input::placeholder,
+    .contact-form textarea::placeholder {
+        color: var(--dark-text-color-secondary, #cccccc) !important;
+        opacity: 0.7;
+    }
+    
+    /* Close button icon */
+    .contact-modal-close .icon svg {
+        fill: var(--dark-text-color, #ffffff);
+        stroke: var(--dark-text-color, #ffffff);
+    }
+    
+    .contact-modal-close:hover {
+        color: var(--dark-text-color-secondary, #cccccc);
+    }
+    
+    /* Subject change button */
+    .subject-change-btn {
+        background: var(--dark-text-color, #ffffff);
+        color: var(--dark-bg-color, #1a1a1a);
+    }
+    
+    .subject-change-btn:hover {
+        background: var(--dark-text-color-secondary, #cccccc);
+    }
+    
+    /* Form button titles */
+    .contact-form .form-btns .title {
+        color: var(--dark-text-color-secondary, #cccccc);
+    }
+    
+    /* Checkbox label text */
+    label.contact-newsletter-label span {
+        color: var(--dark-text-color, #ffffff);
     }
     
     .contact-cancel-btn {

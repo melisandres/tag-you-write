@@ -33,6 +33,12 @@ export class LinkFilterPreserver {
         eventBus.on('filterApplied', () => this.updateAllLinks());
         eventBus.on('searchApplied', () => this.updateAllLinks());
         
+        // Listen for dynamically added links (single link)
+        eventBus.on('linkAdded', (data) => this.handleLinkAdded(data.link));
+        
+        // Listen for dynamically added links (multiple links)
+        eventBus.on('linksAdded', (data) => this.handleLinksAdded(data.links));
+        
         // Initial update to ensure links are correct on page load
         this.updateAllLinks();
     }
@@ -120,6 +126,53 @@ export class LinkFilterPreserver {
                 this.updateLink(link);
             }
         });
+    }
+    
+    /**
+     * Handle a single link being added dynamically
+     * Adds it to cache and updates it with current filters/search
+     */
+    handleLinkAdded(link) {
+        if (!link || !link.hasAttribute('data-preserve-filters')) {
+            return;
+        }
+        
+        // Add to cache if not already present
+        if (!this.cachedLinks.includes(link)) {
+            this.cachedLinks.push(link);
+            console.log('LinkFilterPreserver: Added new link to cache');
+        }
+        
+        // Update the link immediately with current filters/search
+        this.updateLink(link);
+    }
+    
+    /**
+     * Handle multiple links being added dynamically
+     * Adds them to cache and updates them with current filters/search
+     */
+    handleLinksAdded(links) {
+        if (!Array.isArray(links) || links.length === 0) {
+            return;
+        }
+        
+        let addedCount = 0;
+        links.forEach(link => {
+            if (link && link.hasAttribute('data-preserve-filters')) {
+                // Add to cache if not already present
+                if (!this.cachedLinks.includes(link)) {
+                    this.cachedLinks.push(link);
+                    addedCount++;
+                }
+                
+                // Update the link immediately with current filters/search
+                this.updateLink(link);
+            }
+        });
+        
+        if (addedCount > 0) {
+            console.log(`LinkFilterPreserver: Added ${addedCount} new links to cache`);
+        }
     }
 }
 
