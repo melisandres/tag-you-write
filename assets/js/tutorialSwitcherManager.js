@@ -78,6 +78,7 @@ export class TutorialSwitcherManager {
         // Listen for tutorial closed events
         eventBus.on('tutorialClosed', () => {
             this.clearTutorialActiveStates();
+            this.updateNavLink();
         });
 
         // if there is an active tutorial in local storage, then load the tutorial modal
@@ -86,7 +87,11 @@ export class TutorialSwitcherManager {
                 const activeTutorial = localStorage.getItem('activeTutorial');
                 const tutorialData = JSON.parse(activeTutorial);
                 this.tutorialModal.showTutorial(tutorialData.tutorialType);
+                this.updateNavLink();
             });
+        } else {
+            // Update nav-link state on initial load (in case modal is visible from previous session)
+            this.updateNavLink();
         }
     }
 
@@ -95,10 +100,12 @@ export class TutorialSwitcherManager {
             this.initTutorialModal().then(() => {
                 this.tutorialModal.showTutorial(tutorialType);
                 this.updateTutorialActiveStates();
+                this.updateNavLink();
             });
         } else {
             this.tutorialModal.showTutorial(tutorialType);
             this.updateTutorialActiveStates();
+            this.updateNavLink();
         }
     }
 
@@ -223,6 +230,30 @@ export class TutorialSwitcherManager {
         const submenuTutorialLinks = document.querySelectorAll('.submenu-content.tutorial-submenu a[data-tutorial]');
         submenuTutorialLinks.forEach(link => {
             link.classList.remove('active');
+        });
+    }
+
+    /**
+     * Update the tutorial nav-link to show active state when tutorial is visible
+     * Similar to notificationsMenuManager.updateNavLink()
+     */
+    updateNavLink() {
+        // Get the tutorial modal element
+        const tutorialModal = document.querySelector('.tutorial-modal-background');
+        if (!tutorialModal) {
+            // If modal doesn't exist, ensure nav-link is not active
+            this.tutorialSwitchers.forEach(switcher => {
+                switcher.classList.remove('active');
+            });
+            return;
+        }
+
+        // Check if tutorial modal is visible (not hidden with display-none)
+        const hasActiveTutorial = !tutorialModal.classList.contains('display-none');
+        
+        // Update all tutorial switcher nav-links
+        this.tutorialSwitchers.forEach(switcher => {
+            switcher.classList.toggle('active', hasActiveTutorial);
         });
     }
 } 

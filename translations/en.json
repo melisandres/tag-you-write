@@ -25,6 +25,8 @@
       "browse_tooltip": "browse texts",
       "language": "Language",
       "language_tooltip": "change language",
+      "english": "English",
+      "french": "French",
       "search": "Search",
       "search_tooltip": "keyword search",
       "newGame": "New Collaboration",
@@ -35,16 +37,18 @@
       "tutorial_tooltip": "view tutorials",
       "dashboard": "Dashboard",
       "dashboard_tooltip": "view dashboard",
-      "tutorial_start_game": "Start a Game",
+      "tutorial_start_game": "start collaboration",
       "tutorial_start_game_tooltip": "learn how to start a new collaboration",
-      "tutorial_contribute": "Contribute to a Game",
+      "tutorial_contribute": "join collaboration",
       "tutorial_contribute_tooltip": "learn how to contribute to existing games",
-      "tutorial_vote": "Vote on Text Nodes",
+      "tutorial_vote": "vote on contributions",
       "tutorial_vote_tooltip": "learn how to vote on text nodes",
       "login": "Log in",
       "login_tooltip": "log in",
       "logout": "Logout",
       "logout_tooltip": "logout",
+      "me": "Me",
+      "me_tooltip": "me",
       "menu": "Menu",
       "menu_tooltip": "menu",
       "back": "Back",
@@ -52,9 +56,16 @@
       "about_tooltip": "about this site",
       "contact": "Contact",
       "contact_tooltip": "contact us",
+      "places": "Places",
+      "places_tooltip": "view places",
+      "dev_mode": "Dev Mode",
+      "dev_mode_tooltip": "switch dev mode",
       "dev_mode_admin": "Admin",
+      "dev_mode_admin_tooltip": "admin mode",
       "dev_mode_regular": "Regular User",
-      "dev_mode_beta": "Beta Tester"
+      "dev_mode_regular_tooltip": "regular user mode",
+      "dev_mode_beta": "Beta Tester",
+      "dev_mode_beta_tooltip": "beta tester mode"
   },
   "notifications": {
     "notification_game_won": "Game Won!",
@@ -662,7 +673,8 @@
       "other": "Stories I Can Join > Other"
     },
     "inspiration": {
-      "": "Inspiration"
+      "": "Inspiration",
+      "closed": "Inspiration > Closed"
     }
   },
   "tutorial": {
@@ -681,14 +693,18 @@
         "find": {
           "title": "Find...",
           "substeps": {
-            "symbol": "Click the <span class='info-icon' data-svg='newGame'></span> symbol. Where is it? Top navigation, or overflow menu <span class='info-icon' data-svg='hamburger'></span> (depends on your screen size)."
+            "home": "In the <span class='info-icon' data-svg='places'></span> (top navigation) menu. Click on the <span class='info-icon' data-svg='dashboard'></span> icon.",
+            "dashboard": "Click on the <span class='info-icon' data-svg='newGame'></span> next to \"My Stories\"."
           }
         },
         "write": {
           "title": "Write",
           "substeps": {
-            "create": "Choose a title. Create a prompt. Write a starter text. Consider the relationship between these as a playground--foster tension, conflict, poetry, existential questions.",
-            "publish": "When ready, <span class='info-icon' data-svg='publish'></span> \"publish\" to launch the experience, or you can always second guess yourself and <span class='info-icon' data-svg='delete'></span> delete everything, or save <span class='info-icon' data-svg='save'></span> what you have as a draft."
+            "create": "<strong>Start</strong> a collaboration. We’ll guide you through the process. As you write, consider your words as a playground--foster questions, tension, conflict, the quietly poetic.",
+            "title": "Create a <strong>title</strong>--to help guide your collaborators. This will be the title of the final piece.",
+            "prompt": "Your <strong>prompt</strong> will guide iterations. Goerges Saunders may have said that good writing articulates a question, not its answer--let this guide you.",
+            "writing": "<strong>Write</strong> something. No more than 50 words. This will be changed, added to, and cut. Write the imperfect, so that it can be perfected.",
+            "publish": "Before <span class='info-icon' data-svg='publish'></span> \"publishing\", optionally: add comma-seperated keywords (for searchability), make this \"private\", or invite someone (we'll send them a link)."
           }
         },
         "success": {
@@ -705,23 +721,25 @@
         "browse": {
           "title": "Browse",
           "substeps": {
-            "dashboard": "Click on the <span class='info-icon' data-svg='dashboard'></span> dashboard icon in the navigation or in the overflow menu <span class='info-icon' data-svg='hamburger'></span>.",
-            "explore": "Explore \"Stories I Can Join\". Click on the <span class='info-icon' data-svg='browse'></span> library icon for a detailed list view OR directly on the category name, and then on any title, to view just that story.",
-            "view": "Click on a title to view the story tree <span class='info-icon' data-svg='tree'></span> or shelf&nbsp;<span class='info-icon' data-svg='shelf'></span>."
+            "dashboard": "In the top navigation <span class='info-icon' data-svg='places'></span> places menu, click on the <span class='info-icon' data-svg='dashboard'></span> dashboard icon.",
+            "explore": "Under <strong>\"Stories I Can Join\"</strong>, click on the <span class='info-icon' data-svg='browse'></span> icon to the right of <strong>\"Other\"</strong>, or <strong>\"Invitations\"</strong> (if you have any). Either will bring you to a more detailed list.",
+            "view": "Click on different titles to view story trees <span class='info-icon' data-svg='tree'></span>."
           }
         },
         "choose": {
           "title": "Choose...",
           "substeps": {
-            "explore": "Click on hearts <span class='info-icon' data-svg='heartOutline'></span> / titles. Explore evolving stories. Choose a text you'd like to push in a new direction.",
-            "iterate": "Click the <span class='info-icon' data-svg='iterate'></span> \"iterate\" button, to start writing."
+            "explore": "Click on the <span class='info-icon' data-svg='heartOutline'></span> icons / titles to explore evolving stories. A story tree can also be viewed more \"linearly\" as a list <span class='info-icon' data-svg='shelf'></span> (\"shelf\" view).",
+            "iterate": "When find a text you'd like to branch from, click the <span class='info-icon' data-svg='iterate'></span> \"iterate\" button, to start writing."
           }
         },
         "contribute": {
           "title": "Contribute",
           "substeps": {
-            "write": "Change the text. Do so judiciously and fearlessly. Describe your changes in three words. If you want, add a keyword or two... we might use them to organize the stories some day.",
-            "publish": "When ready, <span class='info-icon' data-svg='publish'></span> \"publish\" to make your iteration available to others, or you can delete <span class='info-icon' data-svg='delete'></span> your iteration, or save <span class='info-icon' data-svg='save'></span> what you have as a draft."
+            "write": "<strong>Start</strong> your contribution. We'll guide you through the process.",
+            "title": "<strong>Describe your changes</strong> in three words or less (ex: changed the tense, added flashback...).",
+            "writing": "<strong>Change the text</strong>. Additions and removals are both counted--try both. Don't be shy.",
+            "publish": "Publish <span class='info-icon' data-svg='publish'></span> when ready. Optionally, add comma-seperated <strong>keywords</strong> for searchability."
           }
         },
         "success": {
@@ -738,9 +756,9 @@
         "browse": {
           "title": "Browse",
           "substeps": {
-            "dashboard": "To vote on stories you've contributed to, start by visiting your <span class='info-icon' data-svg='dashboard'></span> dashboard (from the navigation or overflow menu <span class='info-icon' data-svg='hamburger'></span>). *New? The \"Contribute to a Story\" tutorial will help you get started.",
-            "active": "In \"My Stories\" > \"Active\", look for shared collaborations. Click on the <span class='info-icon' data-svg='browse'></span> \"Active\" library icon for a detailed list OR directly on the category name, and then on any title.",
-            "view": "Click on a title to view the story tree <span class='info-icon' data-svg='tree'></span> or shelf <span class='info-icon' data-svg='shelf'></span>."
+            "dashboard": "Click on \"places\" <span class='info-icon' data-svg='places'></span> (top navigation) to visit your dashboard <span class='info-icon' data-svg='dashboard'></span>. *You may only vote on other people's contributions to stories you've published to. If you are new, the \"Contribute to a Story\" tutorial will help you get started.",
+            "active": "In <strong>\"My Stories\"</strong>, your shared collaborations will be listed. Click on the <span class='info-icon' data-svg='browse'></span> icon to the right of <strong>\"Active (no drafts pending)\"</strong> for a detailed list.",
+            "view": "Click on a title to view the story tree <span class='info-icon' data-svg='tree'></span>."
           }
         },
         "vote": {

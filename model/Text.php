@@ -30,6 +30,7 @@ class Text extends Crud{
                         game.open_for_changes AS openForChanges,
                         game.joinable_by_all AS joinable_by_all,
                         game.visible_to_all AS visible_to_all,
+                        game.is_test AS is_test,
                         text_status.status AS text_status,
                         text.modified_at AS modified_at,
                         root_text.title AS game_title,

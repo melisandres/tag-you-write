@@ -4,8 +4,6 @@ import { eventBus } from './eventBus.js';
  * DropdownCoordinator - Coordinates main navigation dropdowns via eventBus
  * Ensures only one dropdown is open at a time by closing others when one opens
  * 
- * This is separate from UniversalSubmenuManager which handles overflow menu submenus
- * 
  * Architecture: Uses eventBus for loose coupling - managers emit events, coordinator listens
  */
 export class DropdownCoordinator {
@@ -64,10 +62,21 @@ export class DropdownCoordinator {
             }
         });
 
-        // Close any active overflow menu submenu (if overflow menu is open)
-        if (window.universalSubmenuManager && window.universalSubmenuManager.activeSubmenu) {
-            window.universalSubmenuManager.hideActiveSubmenu();
-        }
+        // Close places switcher dropdowns
+        const placesSwitchers = document.querySelectorAll('.places-switcher');
+        placesSwitchers.forEach(switcher => {
+            if (switcher !== excludeElement) {
+                switcher.classList.remove('open');
+            }
+        });
+
+        // Close me switcher dropdowns
+        const meSwitchers = document.querySelectorAll('.me-switcher');
+        meSwitchers.forEach(switcher => {
+            if (switcher !== excludeElement) {
+                switcher.classList.remove('open');
+            }
+        });
     }
 }
 

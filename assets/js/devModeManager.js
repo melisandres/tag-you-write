@@ -147,23 +147,6 @@ export class DevModeManager {
                 link.classList.remove('active');
             }
         });
-
-        // Update overflow menu current privilege display
-        const overflowCurrent = document.querySelector('.overflow-menu .dev-mode-toggle .current-privilege');
-        if (overflowCurrent) {
-            overflowCurrent.textContent = privilegeAbbr;
-        }
-
-        // Update overflow menu submenu
-        const submenuLinks = document.querySelectorAll('.dev-mode-submenu a[data-privilege]');
-        submenuLinks.forEach(link => {
-            const linkPrivilegeId = parseInt(link.getAttribute('data-privilege'));
-            if (linkPrivilegeId === privilegeId) {
-                link.classList.add('active');
-            } else {
-                link.classList.remove('active');
-            }
-        });
     }
 
     /**

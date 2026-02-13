@@ -24,12 +24,3 @@
     stroke: none;
 }
 
-/* Overflow menu specific styling */
-.overflow-menu .nav-link.category .icon svg {
-    width: 24px;
-    height: 24px;
-    transform: scale(1.2) translateY(1px); /* Scale and shift down slightly to center */
-    fill: currentColor;
-    stroke: none;
-}
-

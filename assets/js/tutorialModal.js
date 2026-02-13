@@ -13,6 +13,7 @@ export class TutorialModal {
         this.visitedSubsteps = new Set(); // Track visited substeps across all tutorials
         this.formValidationState = { canPublish: false }; // Track form validation state
         this.tutorialSuccess = false; // Track if tutorial has been completed successfully
+        this.focusedField = null; // Track currently focused form field name
         
         // Track modal and shelf state for tutorial context
         this.uiState = {
@@ -69,8 +70,12 @@ export class TutorialModal {
                         skipStep: 'userLoggedIn && page === "create"', // Skip if logged in and on create page or if tutorial is completed
                         substeps: [
                             {
-                                text: 'tutorial.start-game.steps.find.substeps.symbol',
-                                showWhen: 'page === "home" && userLoggedIn', // Only show when...
+                                text: 'tutorial.start-game.steps.find.substeps.home',
+                                showWhen: 'page !== "dashboard" && userLoggedIn', // Only show when not on dashboard page and logged in
+                            },
+                            {
+                                text: 'tutorial.start-game.steps.find.substeps.dashboard',
+                                showWhen: 'page === "dashboard" && userLoggedIn', // Only show when on dashboard page
                             }
                         ]
                     },
@@ -80,12 +85,28 @@ export class TutorialModal {
                         substeps: [
                             {
                                 text: 'tutorial.start-game.steps.write.substeps.create',
-                                showWhen: 'page === "create" && !canPublish', // Only show when form is not valid for publishing
+                                showWhen: 'page === "create" && !canPublish && !focusedField', // Show when form is not valid and no field is focused
                                                              
                             },
                             {
+                                text: 'tutorial.start-game.steps.write.substeps.title',
+                                showWhen: 'page === "create" && focusedField === "title"',
+                                position: 'top', // Move modal to top on mobile for this substep
+                            },
+                            {
+                                text: 'tutorial.start-game.steps.write.substeps.prompt',
+                                showWhen: 'page === "create" && focusedField === "prompt"',
+                                position: 'top', // Move modal to top on mobile for this substep
+                            },
+                            {
+                                text: 'tutorial.start-game.steps.write.substeps.writing',
+                                showWhen: 'page === "create" && focusedField === "writing"',
+                                position: 'top', // Move modal to top on mobile for this substep
+                            },
+                            {
                                 text: 'tutorial.start-game.steps.write.substeps.publish',
-                                showWhen: 'page === "create" && canPublish', // Only show when form is valid for publishing
+                                showWhen: 'page === "create" && (focusedField === "keywords" || focusedField === "invitees" || (canPublish && !focusedField))',
+                                position: 'top', // Move modal to top on mobile for this substep
                             }
                         ]
                     },
@@ -146,11 +167,22 @@ export class TutorialModal {
                         substeps: [
                             {
                                 text: 'tutorial.contribute.steps.contribute.substeps.write',
-                                showWhen: 'page === "iterate" || page === "edit" && !canPublish',
+                                showWhen: '(page === "iterate" || page === "edit") && !canPublish && !focusedField',
+                            },
+                            {
+                                text: 'tutorial.contribute.steps.contribute.substeps.title',
+                                showWhen: '(page === "iterate" || page === "edit") && focusedField === "title"',
+                                position: 'top', // Move modal to top on mobile for this substep
+                            },
+                            {
+                                text: 'tutorial.contribute.steps.contribute.substeps.writing',
+                                showWhen: '(page === "iterate" || page === "edit") && focusedField === "writing"',
+                                position: 'top', // Move modal to top on mobile for this substep
                             },
                             {
                                 text: 'tutorial.contribute.steps.contribute.substeps.publish',
-                                showWhen: 'page === "iterate" || page === "edit" && canPublish', // Only show when form is valid for publishing
+                                showWhen: '(page === "iterate" || page === "edit") && (focusedField === "keywords" || (canPublish && !focusedField))',
+                                position: 'top', // Move modal to top on mobile for this substep
                             }
                         ]
                     },
@@ -232,7 +264,7 @@ export class TutorialModal {
         this.addResizeListener();
 
         // Set up form field focus tracking if on create page
-        // this.setupFormFocusTracking();
+        this.setupFormFocusTracking();
         
         // Listen for form validation changes
         this.setupValidationListener();
@@ -445,6 +477,9 @@ export class TutorialModal {
         // Update all navigation elements
         this.updateAllNavigation();
         
+        // Update modal positioning for field-focused substeps on mobile devices
+        this.updateModalPositionForField();
+        
         // Save tutorial state
         this.saveTutorialState();
         
@@ -461,6 +496,7 @@ export class TutorialModal {
 
     hideTutorial() {
         this.modalElement.classList.add('display-none');
+        this.modalElement.classList.remove('tutorial-field-focused'); // Remove field-focused class when hiding
         this.removePageMargin();
         this.tutorialSuccess = false; // Reset success state when closing tutorial
         this.stopContextChecking = false; // Reset context checking flag
@@ -553,16 +589,19 @@ export class TutorialModal {
         // Find the most appropriate substep for current context
         let availableSubstepIndex = 0;
         
-        // Always find the best substep for the current context
-            for (let i = 0; i < step.substeps.length; i++) {
-                const substep = step.substeps[i];
-                const isValid = this.evaluateShowWhen(substep.showWhen, context);
+        // Single pass: evaluate all substeps in order
+        for (let i = 0; i < step.substeps.length; i++) {
+            const substep = step.substeps[i];
+            
+            // Evaluate showWhen condition - all logic is now in showWhen conditions
+            const isValid = this.evaluateShowWhen(substep.showWhen, context);
             console.log(`Substep ${i}: isValid=${isValid}, showWhen="${substep.showWhen}"`);
-                if (isValid) {
-                    availableSubstepIndex = i; // Select the first valid substep
-                    break; // Stop at the first valid substep
-                }
+            console.log(`  Context: page="${context.page}", canPublish=${context.canPublish}, focusedField=${context.focusedField}`);
+            if (isValid) {
+                availableSubstepIndex = i; // Select the first valid substep
+                break; // Stop at the first valid substep
             }
+        }
         
         console.log(`Selected substep: ${availableSubstepIndex}`);
         
@@ -603,6 +642,9 @@ export class TutorialModal {
         
         // Update all navigation elements
         this.updateAllNavigation();
+        
+        // Update modal positioning for field-focused substeps on mobile devices
+        this.updateModalPositionForField();
         
         // Save state
         this.saveTutorialState();
@@ -787,6 +829,9 @@ export class TutorialModal {
             
             // Update all navigation elements
             this.updateAllNavigation();
+            
+            // Update modal positioning for field-focused substeps on mobile devices
+            this.updateModalPositionForField();
         
         // Save state
         this.saveTutorialState();
@@ -1032,7 +1077,8 @@ export class TutorialModal {
             modalTextId: this.uiState.modalTextId, // ID of the open modal's text
             openShelfCount: this.uiState.openShelfCount, // Number of open shelf nodes
             hasOpenShelf: this.uiState.openShelfCount > 0, // Whether any shelf nodes are open
-            success: this.tutorialSuccess // Whether tutorial has been completed successfully
+            success: this.tutorialSuccess, // Whether tutorial has been completed successfully
+            focusedField: this.focusedField // Currently focused form field name (e.g., 'title', 'prompt', 'writing', 'invitees', or null)
         };
     }
 
@@ -1060,21 +1106,51 @@ export class TutorialModal {
      * Update validation state from available sources
      */
     updateValidationState() {
-        console.log('TutorialModal: Checking validation state sources...');
-        console.log('TutorialModal: refreshManager exists:', !!window.refreshManager);
-        console.log('TutorialModal: refreshManager.getFormValidity():', window.refreshManager ? window.refreshManager.getFormValidity() : 'N/A');
-        console.log('TutorialModal: validationManager exists:', !!window.validationManager);
+        // Determine the formType for the current page
+        const form = document.getElementById('main-form');
+        const formType = form?.getAttribute('data-form-type') || 'root';
+        
+        const previousCanPublish = this.formValidationState.canPublish;
         
         if (window.refreshManager && window.refreshManager.getFormValidity() !== null) {
-            const storedValidityState = window.refreshManager.getFormValidity();
-            this.formValidationState.canPublish = storedValidityState.canPublish;
-            console.log('TutorialModal: Set validation state from RefreshManager', storedValidityState);
+            const storedValidity = window.refreshManager.getFormValidity();
+            // storedValidity is an object keyed by formType: { root: {...}, iteration: {...} }
+            if (storedValidity && typeof storedValidity === 'object') {
+                // Check if it's stored by formType (new format)
+                if (storedValidity[formType]) {
+                    this.formValidationState.canPublish = storedValidity[formType].canPublish || false;
+                } 
+                // Check if it's stored at root level (legacy format)
+                else if (storedValidity.canPublish !== undefined) {
+                    this.formValidationState.canPublish = storedValidity.canPublish;
+                }
+            }
         } else if (window.validationManager) {
-            const currentValidationState = window.validationManager.getCurrentValidationState();
-            this.formValidationState.canPublish = currentValidationState.canPublish;
-            console.log('TutorialModal: Set validation state from ValidationManager', currentValidationState);
+            // Get validation state for the specific formType
+            const formValidity = window.validationManager.formValidity?.[formType];
+            if (formValidity && typeof formValidity === 'object') {
+                // Check if there are any fields validated
+                const fieldValues = Object.values(formValidity);
+                if (fieldValues.length > 0) {
+                    // All fields must be valid for publishing
+                    this.formValidationState.canPublish = fieldValues.every(field => field.canPublish);
+                } else {
+                    this.formValidationState.canPublish = false;
+                }
+            } else {
+                this.formValidationState.canPublish = false;
+            }
         } else {
-            console.log('TutorialModal: No validation state available, using default canPublish: false');
+            this.formValidationState.canPublish = false;
+        }
+        
+        // Debug logging
+        console.log(`📋 TutorialModal: updateValidationState - formType="${formType}", canPublish changed from ${previousCanPublish} to ${this.formValidationState.canPublish}`);
+        
+        // If canPublish changed, invalidate context so it gets re-evaluated
+        if (previousCanPublish !== this.formValidationState.canPublish) {
+            console.log(`📋 TutorialModal: canPublish changed, invalidating context`);
+            this.invalidateContext();
         }
     }
 
@@ -1169,7 +1245,7 @@ export class TutorialModal {
         
         try {
             // Create a safe evaluation function
-            const { page, userLoggedIn, canPublish, showcase, showcaseVisible, category, gameId, modalOpen, modalTextId, openShelfCount, hasOpenShelf, success } = context;
+            const { page, userLoggedIn, canPublish, showcase, showcaseVisible, category, gameId, modalOpen, modalTextId, openShelfCount, hasOpenShelf, success, focusedField } = context;
             
             // Replace the condition string with actual values
             let expression = condition
@@ -1184,7 +1260,8 @@ export class TutorialModal {
                 .replace(/modalTextId/g, modalTextId ? `"${modalTextId}"` : 'null')
                 .replace(/openShelfCount/g, openShelfCount)
                 .replace(/hasOpenShelf/g, hasOpenShelf)
-                .replace(/success/g, success);
+                .replace(/success/g, success)
+                .replace(/focusedField/g, focusedField ? `"${focusedField}"` : 'null');
             
             console.log('Evaluated expression:', expression);
             
@@ -1210,12 +1287,18 @@ export class TutorialModal {
 
     handleValidationChange(validationStatus) {
         console.log('TutorialModal: Received validationChanged event', validationStatus);
+        console.log('  Previous canPublish:', this.formValidationState.canPublish);
+        console.log('  New canPublish:', validationStatus.canPublish);
         
         // Only update if there's an actual change in canPublish status
         if (this.formValidationState.canPublish !== validationStatus.canPublish) {
             this.formValidationState.canPublish = validationStatus.canPublish;
+            console.log('✅ TutorialModal: canPublish updated to', this.formValidationState.canPublish);
             console.log('formValidationState', this.formValidationState);
             console.log('currentTutorial', this.currentTutorial);
+            
+            // Invalidate context so it gets re-evaluated with new canPublish value
+            this.invalidateContext();
             
             // Update tutorial context if we're currently showing a tutorial
             if (this.currentTutorial) {
@@ -1303,30 +1386,109 @@ export class TutorialModal {
         return null;
     }
     
-    handleFieldFocus(field) {
-        const fieldName = field.name;
+    handleCKEditorFocus(editableElement) {
+        // Find the source textarea element for this CKEditor instance
+        let sourceTextarea = null;
+        let fieldName = null;
         
-        // Show the corresponding tutorial substep
-        this.showSubstepForField(fieldName);
-    }
-
-    showSubstepForField(fieldName) {
-        if (!this.currentTutorial) return;
-        
-        const tutorial = this.tutorials[this.currentTutorial];
-        const step = tutorial.steps[this.currentStep];
-        
-        // Find substep with matching field
-        step.substeps.forEach((substep, index) => {
-            if (substep.field === fieldName) {
-                this.goToSubstep(index);
+        // Method 1: Look for the textarea in the same label/parent container
+        // CKEditor places the editable inside a container, and the original textarea is usually nearby
+        const label = editableElement.closest('label');
+        if (label) {
+            sourceTextarea = label.querySelector('textarea');
+            if (sourceTextarea && sourceTextarea.name) {
+                fieldName = sourceTextarea.name;
             }
-        });
+        }
+        
+        // Method 2: Check CKEditor instances to find which editor this belongs to
+        if (!fieldName && window.CKEditorInstances) {
+            // Iterate through all CKEditor instances
+            for (const [name, editor] of Object.entries(window.CKEditorInstances)) {
+                try {
+                    // Check if this editable element belongs to this editor instance
+                    // CKEditor 5 stores the editable element in editor.editing.view.domRoots
+                    const editorElement = editor.editing?.view?.domRoots?.get('main');
+                    if (editorElement && (editorElement === editableElement || editorElement.contains(editableElement))) {
+                        fieldName = name;
+                        break;
+                    }
+                } catch (e) {
+                    // If we can't access the editor structure, try next method
+                }
+            }
+        }
+        
+        // Method 3: Fallback - traverse up from editable to find associated textarea
+        if (!fieldName) {
+            const ckEditorContainer = editableElement.closest('.ck-editor');
+            if (ckEditorContainer) {
+                // The textarea is usually a sibling or in the same parent
+                const parent = ckEditorContainer.parentElement;
+                if (parent) {
+                    sourceTextarea = parent.querySelector('textarea');
+                    if (sourceTextarea && sourceTextarea.name) {
+                        fieldName = sourceTextarea.name;
+                    }
+                }
+            }
+        }
+        
+        if (fieldName) {
+            this.setFocusedField(fieldName);
+        }
     }
 
-    /*     setupFormFocusTracking() {
-        // Only set up form tracking on create pages
-        if (!this.isCreatePage()) return;
+    handleFieldFocus(field) {
+        let fieldName = null;
+        
+        // Handle fields with name attribute
+        if (field.name) {
+            fieldName = field.name;
+        }
+        // Handle fields with id (like invitees-input which has no name)
+        else if (field.id) {
+            // Map id to field name for tutorial matching
+            if (field.id === 'invitees-input') {
+                fieldName = 'invitees';
+            }
+        }
+        
+        if (fieldName) {
+            this.setFocusedField(fieldName);
+        }
+    }
+
+    /**
+     * Set the currently focused field and trigger context re-evaluation
+     * This replaces the direct navigation approach with a unified context-based approach
+     */
+    setFocusedField(fieldName) {
+        this.focusedField = fieldName;
+        this.invalidateContext();
+        this.updateTutorialForContext();
+    }
+
+    /**
+     * Clear the focused field (e.g., when field loses focus)
+     */
+    clearFocusedField() {
+        if (this.focusedField !== null) {
+            this.focusedField = null;
+            this.invalidateContext();
+            this.updateTutorialForContext();
+        }
+    }
+
+    setupFormFocusTracking() {
+        // Only set up form tracking on create/iterate/edit pages
+        const path = window.location.pathname;
+        const isFormPage = path.includes('/text/create') || 
+                          path.includes('/text/iterate') || 
+                          path.includes('/text/edit') ||
+                          this.isCreatePage();
+        
+        if (!isFormPage) return;
         
         // Track form field focus
         const form = document.getElementById('main-form');
@@ -1334,11 +1496,38 @@ export class TutorialModal {
         
         // Listen for field focus
         form.addEventListener('focusin', (e) => {
-            this.handleFieldFocus(e.target);
+            // Only track focus on actual input fields (not hidden fields or UI helpers without names)
+            const target = e.target;
+            
+            // Handle regular input/textarea fields
+            if (target.matches('input, textarea') && 
+                (target.name || target.id === 'invitees-input')) {
+                this.handleFieldFocus(target);
+            }
+            // Handle CKEditor editable areas
+            else if (target.matches('.ck-editor__editable, .ck-content')) {
+                this.handleCKEditorFocus(target);
+            }
+        });
+
+        // Listen for field blur (focusout) to clear focused field
+        form.addEventListener('focusout', (e) => {
+            // Small delay to allow focus to move to another field first
+            setTimeout(() => {
+                // Check if focus moved to another form field
+                const activeElement = document.activeElement;
+                const isFormField = activeElement && (
+                    activeElement.matches('input, textarea') ||
+                    activeElement.matches('.ck-editor__editable, .ck-content')
+                );
+                
+                // Only clear if focus didn't move to another form field
+                if (!isFormField) {
+                    this.clearFocusedField();
+                }
+            }, 100);
         });
     }
-
- */
 
     /*
      * FIELD-SPECIFIC TUTORIAL IMPLEMENTATION GUIDE:
@@ -1418,6 +1607,45 @@ export class TutorialModal {
     removePageMargin() {
         // Remove CSS class from body
         document.body.classList.remove('tutorial-active');
+    }
+
+    /**
+     * Check if device is mobile/tablet where keyboard appears on focus
+     */
+    isMobileDevice() {
+        // Check for touch device and small screen (where keyboard typically appears)
+        const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        const isSmallScreen = window.innerWidth <= 768 || window.innerHeight <= 768;
+        
+        // Also check user agent for mobile devices
+        const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        return (hasTouch && isSmallScreen) || isMobileUA;
+    }
+
+    /**
+     * Update modal position class based on substep's position property
+     * and if we're on a mobile device (where keyboard will appear)
+     */
+    updateModalPositionForField() {
+        if (!this.currentTutorial) return;
+        
+        const tutorial = this.tutorials[this.currentTutorial];
+        const step = tutorial.steps[this.currentStep];
+        const substep = step.substeps[this.currentSubstep];
+        
+        // Check if substep has position: 'top' property
+        const shouldMoveToTop = substep.position === 'top';
+        
+        // Check if we're on a mobile device where keyboard appears
+        const isMobile = this.isMobileDevice();
+        
+        // Add/remove class when both conditions are met
+        if (shouldMoveToTop && isMobile) {
+            this.modalElement.classList.add('tutorial-field-focused');
+        } else {
+            this.modalElement.classList.remove('tutorial-field-focused');
+        }
     }
 
     // ============================================================================

@@ -52,7 +52,14 @@
     
     {% for section in sections %}
         <section class="dashboard-section {{ section.cssClass }}">
-            <h2 data-i18n="{{ section.title }}">{{ translate(section.title) }}</h2>
+            <div class="dashboard-section-header">
+                <h2 data-i18n="{{ section.title }}">{{ translate(section.title) }}</h2>
+                {% if not guest and section.key == 'myStories' %}
+                    <a class="header-new-game-link" href="{{ langUrl('text/create?new=true') }}" data-i18n-title="nav.newGame_tooltip" title="{{ translate('nav.newGame_tooltip') }}">
+                        <span class="icon" data-svg="newGame"></span>
+                    </a>
+                {% endif %}
+            </div>
             
             {% for subcategory in section.subcategories %}
                 {% set categoryData = dashboardData[section.key][subcategory.key] %}

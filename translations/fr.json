@@ -24,6 +24,8 @@
     "browse_tooltip": "explorer les textes",
     "language": "Langue",
     "language_tooltip": "changer de langue",
+    "english": "Anglais",
+    "french": "Français",
     "search": "Rechercher",
     "search_tooltip": "rechercher par mot-clé",
     "newGame": "Nouvelle Collaboration",
@@ -34,16 +36,18 @@
       "tutorial_tooltip": "tutoriel",
       "dashboard": "Tableau de Bord",
       "dashboard_tooltip": "voir le tableau de bord",
-    "tutorial_start_game": "Commencer une partie",
+    "tutorial_start_game": "démarrer une collaboration",
     "tutorial_start_game_tooltip": "apprendre à commencer une nouvelle collaboration",
-    "tutorial_contribute": "Contribuer à une partie",
+    "tutorial_contribute": "rejoindre une collaboration",
     "tutorial_contribute_tooltip": "apprendre à contribuer aux jeux existants",
-    "tutorial_vote": "Voter sur les noeuds de texte",
+    "tutorial_vote": "voter sur les contributions",
     "tutorial_vote_tooltip": "apprendre à voter sur les noeuds de texte",
     "login": "Connexion",
     "login_tooltip": "connexion",
     "logout": "Quitter",
     "logout_tooltip": "déconnexion",
+    "me": "Moi",
+    "me_tooltip": "moi",
     "menu": "Menu",
     "menu_tooltip": "menu",
     "back": "Retour",
@@ -51,9 +55,16 @@
     "about_tooltip": "à propos de ce site",
     "contact": "Contact",
     "contact_tooltip": "nous contacter",
+    "places": "Lieux",
+    "places_tooltip": "voir les lieux",
+    "dev_mode": "Mode Dev",
+    "dev_mode_tooltip": "changer le mode dev",
     "dev_mode_admin": "Administrateur",
+    "dev_mode_admin_tooltip": "mode administrateur",
     "dev_mode_regular": "Utilisateur Régulier",
-    "dev_mode_beta": "Testeur Bêta"
+    "dev_mode_regular_tooltip": "mode utilisateur régulier",
+    "dev_mode_beta": "Testeur Bêta",
+    "dev_mode_beta_tooltip": "mode testeur bêta"
   },
   "notifications": {
     "notification_game_won": "Partie Gagnée!",
@@ -307,7 +318,7 @@
     "collaborate_step_one_text": "Le tien, ou un pseudonyme — et une courte bio, réelle ou inventée.",
     "collaborate_step_two_title": "2. Explore",
     "collaborate_step_two_text": "Grimpe dans un arbre à histoires. Lis entre les feuilles <span class='info-icon' data-svg='browse'></span>. Laisse tes jambes se balancer du haut d’une branche <span class='info-icon' data-svg='dashboard'></span>. Chaque branche est une nouvelle version, écrite par un nouvel ami — ou un rival.",
-    "collaborate_step_three_title": "3. Ajoute ta voix ",
+    "collaborate_step_three_title": "3. Ajoute ta voix",
     "collaborate_step_three_text": "Chaque version est à la fois un hommage et une transgression <span class='info-icon' data-svg='publish'></span>. Trouve ton équilibre.",
     "collaborate_step_four_title": "4. Trace ton chemin",
     "collaborate_step_four_text": "Laisse une empreinte sur les textes qui t’en laissent une. Quelque part, une version finira par résonner — pour tout le monde.",
@@ -661,7 +672,8 @@
         "other": "Histoires disponibles > Autres"
       },
       "inspiration": {
-        "": "Inspiration"
+        "": "Inspiration",
+        "closed": "Inspiration > Fermées"
       }
     },
     "tutorial": {
@@ -680,14 +692,18 @@
           "find": {
             "title": "Trouver...",
             "substeps": {
-              "symbol": "Cliquez sur le symbole <span class='info-icon' data-svg='newGame'></span>. Où est-il? Navigation supérieure, ou menu déroulant <span class='info-icon' data-svg='hamburger'></span> (selon la taille de votre écran)."
+              "home": "Dans le menu <span class='info-icon' data-svg='places'></span> (navigation supérieure). Cliquez sur l'icône <span class='info-icon' data-svg='dashboard'></span>.",
+              "dashboard": "Cliquez sur l'icône <span class='info-icon' data-svg='newGame'></span> à côté de \"Mes histoires\"."
             }
           },
           "write": {
             "title": "Écrire",
             "substeps": {
-              "create": "Choisissez un titre. Créez un texte incitatif. Écrivez un texte de départ. Considérez la relation entre ces éléments comme un terrain de jeu--favorisez la tension, le conflit, la poésie, les questions existentielles.",
-              "publish": "Quand vous êtes prêt, <span class='info-icon' data-svg='publish'></span> \"publiez\" pour lancer l'expérience, ou vous pouvez toujours douter de vous-même et <span class='info-icon' data-svg='delete'></span> tout supprimer, ou sauvegarder <span class='info-icon' data-svg='save'></span> ce que vous avez comme brouillon."
+              "create": "<strong>Commencez</strong> une collaboration. Nous vous guiderons tout au long du processus. En écrivant, considérez vos mots comme un terrain de jeu--favorisez les questions, la tension, le conflit, le poétique.",
+              "title": "Créez un <strong>titre</strong>--pour aider à guider vos collaborateurs. Ce sera le titre de l'œuvre finale.",
+              "prompt": "Votre <strong>texte incitatif</strong> guidera les itérations. Georges Saunders a peut-être dit que l'écriture articule une question, pas sa réponse--laissez cela vous guider.",
+              "writing": "<strong>Écrivez</strong> quelque chose. Pas plus de 50 mots. Ce sera modifié, complété et coupé. Écrivez l'imparfait, pour qu'il puisse être perfectionné.",
+              "publish": "Avant de <span class='info-icon' data-svg='publish'></span> \"publier\", optionnellement : ajoutez des mots-clés séparés par des virgules (pour la recherche), rendez ceci \"privé\", ou invitez quelqu'un (nous lui enverrons un lien)."
             }
           },
           "success": {
@@ -704,23 +720,25 @@
           "browse": {
             "title": "Parcourir",
             "substeps": {
-              "dashboard": "Cliquez sur l'icône <span class='info-icon' data-svg='dashboard'></span> tableau de bord dans la navigation ou dans le menu déroulant <span class='info-icon' data-svg='hamburger'></span>.",
-              "explore": "Explorez \"Histoires disponibles\". Cliquez sur l'icône <span class='info-icon' data-svg='browse'></span> bibliothèque pour une vue détaillée OU directement sur le nom de la catégorie, puis sur n'importe quel titre, pour voir cette histoire.",
-              "view": "Cliquez sur un titre pour voir l'arbre <span class='info-icon' data-svg='tree'></span> ou le rayon <span class='info-icon' data-svg='shelf'></span> de l'histoire."
+              "dashboard": "Dans le menu <span class='info-icon' data-svg='places'></span> (navigation supérieure). Cliquez sur l'icône <span class='info-icon' data-svg='dashboard'></span>.",
+              "explore": "Sous <strong>\"Histoires disponibles\"</strong>, cliquez sur l'icône <span class='info-icon' data-svg='browse'></span> à droite de <strong>\"Autres\"</strong>, ou <strong>\"Invitations\"</strong> (si vous en avez). Cela vous amènera à une liste détaillée.",
+              "view": "Cliquez sur un titre pour voir l'arboréscence <span class='info-icon' data-svg='tree'></span>."
             }
           },
           "choose": {
             "title": "Choisir...",
             "substeps": {
-              "explore": "Cliquez sur les cœurs <span class='info-icon' data-svg='heartOutline'></span> / titres. Explorez les histoires en évolution. Choisissez un texte que vous aimeriez pousser dans une nouvelle direction.",
-              "iterate": "Cliquez sur le bouton <span class='info-icon' data-svg='iterate'></span> \"itérer\", pour commencer à écrire."
+              "explore": "Cliquez sur les cœurs <span class='info-icon' data-svg='heartOutline'></span> / titres afin d'explorer les histoires en évolution. Une arboréscence peut également être vue plus \"linéairement\" comme une liste <span class='info-icon' data-svg='shelf'></span> (option \"rayon\").",
+              "iterate": "Lorsque vous trouvez un text que vous voulez changer, cliquez sur le bouton <span class='info-icon' data-svg='iterate'></span> \"itérer\", pour commencer à écrire."
             }
           },
           "contribute": {
             "title": "Contribuer",
             "substeps": {
-              "write": "Changez le texte. Faites-le judicieusement et sans crainte. Décrivez vos changements en trois mots. Si vous voulez, ajoutez un mot-clé ou deux... nous pourrions les utiliser pour organiser les histoires un jour.",
-              "publish": "Quand vous êtes prêt, <span class='info-icon' data-svg='publish'></span> \"publiez\" pour rendre votre itération disponible aux autres, ou vous pouvez supprimer <span class='info-icon' data-svg='delete'></span> votre itération, ou sauvegarder <span class='info-icon' data-svg='save'></span> ce que vous avez comme brouillon."
+              "write": "<strong>Commencez</strong> votre contribution. Nous vous guiderons tout au long du processus.",
+              "title": "<strong>Décrivez vos changements</strong> en trois mots ou moins (ex: changé le temps, ajouté un flashback...).",
+              "writing": "<strong>Changez le texte</strong>. Les ajouts et suppressions sont tous comptés--essayez les deux. N'ayez pas peur.",
+              "publish": "Publiez <span class='info-icon' data-svg='publish'></span> quand vous êtes prêt. Optionnellement, ajoutez des <strong>mots-clés</strong> séparés par des virgules."
             }
           },
           "success": {
@@ -737,9 +755,9 @@
           "browse": {
             "title": "Parcourir",
             "substeps": {
-              "dashboard": "Pour voter sur les histoires auxquelles vous avez contribué, commencez par visiter votre <span class='info-icon' data-svg='dashboard'></span> tableau de bord (depuis la navigation ou le menu déroulant <span class='info-icon' data-svg='hamburger'></span>). *Nouveau? Le tutoriel \"Contribuer à une histoire\" vous aidera à commencer.",
-              "active": "Dans \"Mes histoires\" > \"Actif\", cherchez les collaborations partagées. Cliquez sur l'icône <span class='info-icon' data-svg='browse'></span> bibliothèque \"Actif\" pour une liste détaillée OU directement sur le nom de la catégorie, puis sur n'importe quel titre.",
-              "view": "Cliquez sur un titre pour voir l'arbre <span class='info-icon' data-svg='tree'></span> ou le rayon <span class='info-icon' data-svg='shelf'></span> de l'histoire."
+              "dashboard": "Cliquez sur l'icone <span class='info-icon' data-svg='places'></span> (navigation supérieure) pour visiter votre tableau de bord <span class='info-icon' data-svg='dashboard'></span>. *Vous ne pouvez voter que sur les contributions d'autres personnes à des histoires que vous avez publiées. Si vous êtes nouveau, le tutoriel \"Contribuer à une histoire\" vous aidera à commencer.",
+              "active": "Dans <strong>\"Mes histoires\"</strong>, vos collaborations partagées seront listées. Cliquez sur l'icône <span class='info-icon' data-svg='browse'></span> à droite de <strong>\"Actif (aucun brouillon en attente)\"</strong> pour une liste détaillée.",
+              "view": "Cliquez sur un titre pour voir l'arboréscence <span class='info-icon' data-svg='tree'></span>."
             }
           },
           "vote": {

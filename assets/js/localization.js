@@ -402,7 +402,48 @@ export class Localization {
             this.updateTooltips();
         } else {
             // Standard text translation
-            element.textContent = this.translate(key, params);
+            // Check if element has child elements with data-svg (icons) or other important children
+            // If so, preserve children and only update text in child elements with matching data-i18n
+            const hasSvgChildren = element.querySelector('[data-svg]') !== null;
+            const hasI18nChildren = element.querySelector('[data-i18n]') !== null;
+            
+            if (hasSvgChildren || hasI18nChildren) {
+                // Element has important children (icons, nested i18n elements)
+                // Find child with matching data-i18n key and update only that child
+                const childWithI18n = element.querySelector(`[data-i18n="${key}"]`);
+                if (childWithI18n) {
+                    // Update the child element that has the matching data-i18n
+                    childWithI18n.textContent = this.translate(key, params);
+                } else {
+                    // No matching child element found, but parent has data-i18n
+                    // This means the parent element itself should be translated
+                    // We need to preserve children (SVG and i18n children) but translate parent's text nodes
+                    // Child elements with their own data-i18n will be handled in their own iteration
+                    // Collect all text nodes and replace them with a single translated text node
+                    const textNodes = Array.from(element.childNodes).filter(node => 
+                        node.nodeType === Node.TEXT_NODE && node.textContent.trim()
+                    );
+                    if (textNodes.length > 0) {
+                        // Get the translation once
+                        const translatedText = this.translate(key, params);
+                        // Store the insertion point (next sibling of first text node, or null if it's the last)
+                        const firstTextNode = textNodes[0];
+                        const insertBeforeNode = firstTextNode.nextSibling;
+                        // Remove all text nodes
+                        textNodes.forEach(node => node.remove());
+                        // Insert a single text node with the translation at the stored position
+                        // If insertBeforeNode is null, appendChild will add it at the end
+                        if (insertBeforeNode) {
+                            element.insertBefore(document.createTextNode(translatedText), insertBeforeNode);
+                        } else {
+                            element.appendChild(document.createTextNode(translatedText));
+                        }
+                    }
+                }
+            } else {
+                // No important children, safe to replace entire text content
+                element.textContent = this.translate(key, params);
+            }
         }
     });
     

@@ -52,12 +52,11 @@ import { InvitationTokenManager } from './invitationTokenManager.js';
 import { InvitationLinkManager } from './invitationLinkManager.js';
 import { TutorialSwitcherManager } from './tutorialSwitcherManager.js';
 import { FiltersSwitcherManager } from './filtersSwitcherManager.js';
+import { PlacesSwitcherManager } from './placesSwitcherManager.js';
+import { MeSwitcherManager } from './meSwitcherManager.js';
 import { DashboardManager } from './dashboardManager.js';
 import { LinkFilterPreserver } from './linkFilterPreserver.js';
 import { CategoryHeaderManager } from './categoryHeaderManager.js';
-import { HamburgerMenuManager } from './hamburgerMenuManager.js';
-import { ResponsiveNavManager } from './responsiveNavManager.js';
-import { UniversalSubmenuManager } from './universalSubmenuManager.js';
 import { DropdownCoordinator } from './dropdownCoordinator.js';
 import { SVGManager } from './svgManager.js';
 import { TextSwitcherManager } from './textSwitcherManager.js';
@@ -218,6 +217,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Initialize FiltersSwitcherManager after menuManager is available
   new FiltersSwitcherManager();
 
+  // Initialize PlacesSwitcherManager
+  new PlacesSwitcherManager();
+
+  // Initialize MeSwitcherManager
+  new MeSwitcherManager();
+
   const gameSearchFilterManager = new GameSearchFilterManager(uiManager);
   const filterManager = new FilterManager();
   window.searchHighlighter = new SearchHighlighter();
@@ -226,14 +231,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Initialize CategoryHeaderManager AFTER other menu managers
   window.categoryHeaderManager = new CategoryHeaderManager();
 
-  // Initialize HamburgerMenuManager
-  window.hamburgerMenuManager = new HamburgerMenuManager();
-
-  // Initialize ResponsiveNavManager
-  window.responsiveNavManager = new ResponsiveNavManager();
-
-  // Initialize UniversalSubmenuManager
-  window.universalSubmenuManager = new UniversalSubmenuManager();
 
   // Initialize DevModeManager (for admin privilege toggle)
   new DevModeManager();

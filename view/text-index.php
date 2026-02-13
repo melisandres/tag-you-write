@@ -28,6 +28,11 @@
             <span class="game-count">({{ texts|length }})</span>
         </div>
         <div class="header-actions">
+        {% if not guest %}
+            <a class="header-new-game-link" href="{{ langUrl('text/create?new=true') }}" data-i18n-title="nav.newGame_tooltip" title="{{ translate('nav.newGame_tooltip') }}">
+                <span class="icon" data-svg="newGame"></span>
+            </a>
+        {% endif %}
         <!-- Close button added via JavaScript -->
     </div>
 </div>

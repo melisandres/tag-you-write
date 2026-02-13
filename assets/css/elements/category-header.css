@@ -102,6 +102,45 @@
     position: relative;
 }
 
+/* New Game Link in header actions */
+.header-new-game-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    margin-right: 30px;
+    height: 36px;
+    width: 36px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: opacity 0.2s, transform 0.2s;
+    border-radius: 4px;
+}
+
+.header-new-game-link:hover {
+    color: var(--color-black-light);
+}
+
+.header-new-game-link .icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.header-new-game-link .icon svg {
+    width: 20px;
+    height: 20px;
+    fill: white;
+    transition: fill 0.2s;
+}
+
+.header-new-game-link:hover .icon svg {
+    fill: var(--hover-color);
+}
+
 /* Close menu button (in header container, bigger) */
 .close-category-menu {
     position: absolute;

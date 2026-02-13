@@ -296,6 +296,45 @@ main, .main-content, #main {
     display: none;
 }
 
+/* Adjust modal position when field is focused on mobile devices (keyboard visible) */
+.tutorial-modal-background.tutorial-field-focused {
+    /* Move modal to top to stay above keyboard */
+    bottom: auto;
+    top: 0;
+    transform: none;
+    max-height: 50vh;
+    overflow-y: auto;
+}
+
+/* Override browse icon colors in tutorial - each path gets a different color */
+.tutorial-modal .info-icon[data-svg="browse"] {
+    background: var(--color-white);
+}
+
+/* Override the broad .info-icon path rule from info.css that sets fill/stroke to black */
+/* First path (left book): light purple */
+/* .tutorial-modal .info-icon[data-svg="browse"] svg path:nth-of-type(1) {
+    fill: var(--color-secondary-light);
+    stroke: var(--color-secondary-light);
+} */
+
+/* Second path (middle book): middle value (blend of purple and grey) */
+/* .tutorial-modal .info-icon[data-svg="browse"] svg path:nth-of-type(2) {
+    fill: rgb(152, 131, 151);
+    stroke: rgb(152, 131, 151);
+} */
+
+/* Third path (right book): dark grey */
+/* .tutorial-modal .info-icon[data-svg="browse"] svg path:nth-of-type(3) {
+    fill: var(--color-grey-dark);
+    stroke: var(--color-grey-dark);
+} */
+
+.tutorial-modal .info-icon[data-svg="browse"] svg path {
+    fill: var(--color-grey-dark);
+    stroke: var(--color-grey-dark);
+} 
+
 /* Responsive design */
 @media (max-width: 768px) {
     .tutorial-modal-content {

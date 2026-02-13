@@ -269,7 +269,7 @@ export class ContactModalManager {
      * Handle clicks on contact buttons (nav/footer) to open modal
      */
     handleOpenTrigger(e) {
-        const contactLink = e.target.closest('.overflow-menu .nav-link.contact, .footer-contact-btn');
+        const contactLink = e.target.closest('.nav-link.contact, .footer-contact-btn');
         
         if (contactLink) {
             e.preventDefault();

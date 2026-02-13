@@ -37,8 +37,7 @@ a.nav-link {
 
 /* Common hover state for all nav-links */
 a.nav-link:hover,
-.nav-link:hover,
-.overflow-menu .nav-link:hover {
+.nav-link:hover {
     border-bottom: hotpink solid 3px;
     color: pink;
 }

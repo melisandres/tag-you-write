@@ -1,7 +1,7 @@
-/* Tutorial Switcher Styles */
+/* Me Switcher Styles */
 /* All base styles inherited from nav-link.css */
 
-.nav-link.tutorial-switcher .current-tutorial {
+.nav-link.me-switcher .current-me {
     padding: 4px 2px;
     cursor: pointer;
     border-radius: 3px;
@@ -10,27 +10,35 @@
     color: inherit;
     display: flex;
     align-items: center;
+    justify-content: center;
     pointer-events: auto;
 }
 
-/* Style the help SVG icon in the tutorial switcher */
-.nav-link.tutorial-switcher .current-tutorial svg {
+/* Style the me SVG icon in the me switcher */
+.nav-link.me-switcher .current-me svg,
+.nav-link.me-switcher .current-me .icon svg {
     fill: currentColor;
     stroke: currentColor;
-    width: 19px;
-    height: 19px;
+    width: 20px;
+    height: 20px;
+    transform: scale(2.2);
+    translate: 0 6px;
 }
 
+.nav-link.me-switcher .current-me text {
+    display: none;
+}
 /* SVG hover state - match other nav elements */
-.nav-link.tutorial-switcher:hover .current-tutorial svg {
+.nav-link.me-switcher:hover .current-me svg,
+.nav-link.me-switcher:hover .current-me .icon svg {
     fill: pink;
 }
 
-.nav-link.tutorial-switcher .current-tutorial:hover {
+.nav-link.me-switcher .current-me:hover {
     background-color: rgba(255, 255, 255, 0.1);
 }
 
-.nav-link.tutorial-switcher .tutorial-dropdown {
+.nav-link.me-switcher .me-dropdown {
     position: absolute;
     top: 100%;
     left: 0;
@@ -42,21 +50,22 @@
     z-index: 4;
 }
 
-.nav-link.tutorial-switcher.open .tutorial-dropdown {
+.nav-link.me-switcher.open .me-dropdown {
     display: block;
 }
 
-.nav-link.tutorial-switcher .tutorial-dropdown-subtitle {
+.nav-link.me-switcher .me-dropdown-subtitle {
     padding: 8px 12px;
     font-size: 0.6em;
     font-weight: bold;
     text-transform: uppercase;
     color: #aaa;
     border-bottom: 1px solid #444;
-    pointer-events: none;
+    pointer-events: auto; /* Allow pointer events so tooltip can be shown */
+    cursor: pointer; /* Show default cursor to indicate it's not clickable */
 }
 
-.nav-link.tutorial-switcher .tutorial-dropdown a {
+.nav-link.me-switcher .me-dropdown a {
     padding: 8px 12px;
     display: flex;
     align-items: center;
@@ -69,26 +78,34 @@
     text-decoration: none;
 }
 
-.nav-link.tutorial-switcher .tutorial-dropdown a:last-child {
+.nav-link.me-switcher .me-dropdown a:last-child {
     border-bottom: none;
 }
 
-.nav-link.tutorial-switcher .tutorial-dropdown a:hover {
+.nav-link.me-switcher .me-dropdown a:hover {
     background-color: rgba(255, 255, 255, 0.1);
 }
 
 /* Style icons in dropdown */
-.nav-link.tutorial-switcher .tutorial-dropdown a .icon {
+.nav-link.me-switcher .me-dropdown a .icon {
     flex-shrink: 0; /* Prevent icon from shrinking */
 }
 
-.nav-link.tutorial-switcher .tutorial-dropdown a .icon svg {
+.nav-link.me-switcher .me-dropdown a .icon svg {
     width: 16px;
     height: 16px;
     fill: currentColor;
     stroke: currentColor;
 }
 
-.nav-link.tutorial-switcher .tutorial-dropdown a.active {
+/* Active state for language links */
+.nav-link.me-switcher .me-dropdown a.active {
     background-color: rgba(255, 255, 255, 0.2);
-} 
+}
+
+/* Divider between language section and logout */
+.nav-link.me-switcher .me-dropdown-divider {
+    height: 1px;
+    background-color: #444;
+    margin: 4px 0;
+}
