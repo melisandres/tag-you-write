@@ -36,6 +36,8 @@
       "tutorial_tooltip": "tutoriel",
       "dashboard": "Tableau de Bord",
       "dashboard_tooltip": "voir le tableau de bord",
+      "tutorial_start_here": "commencez ici",
+      "tutorial_start_here_tooltip": "apprendre les bases du site",
     "tutorial_start_game": "démarrer une collaboration",
     "tutorial_start_game_tooltip": "apprendre à commencer une nouvelle collaboration",
     "tutorial_contribute": "rejoindre une collaboration",
@@ -83,8 +85,8 @@
     "made_with_love": "programmé avec amour, Mélisandre"
   },
   "about": {
-    "title": "À propos de Tag You Write",
-    "description": "<p>Tag You Write est une expérience en mouvement — une exploration de l'écriture comme jeu. C'est un espace où de courts textes se façonnent et se re-façonnent entre plusieurs mains, jusqu'à ce que le processus s'inscrive dans le texte lui-même et qu'il trouve sa propre voix. C'est un lieu où confier un petit texte — non pas à l'esprit collectif, ni à l'esprit artificiel, mais à quelques esprits singuliers, imparfaits — pour la réécriture, la soustraction, et la surprise. Il n'existe pas de voie tracée d'avance. Tag You Write cherche plutôt à ouvrir le passage — à laisser place aux détours, aux bifurcations, et aux voyages qu'ils peuvent inspirer.</p>",
+    "title": "À propos de Palinodes",
+    "description": "<p>Palinodes est une expérience en mouvement — une exploration de l'écriture comme jeu. C'est un espace où de courts textes se façonnent et se re-façonnent entre plusieurs mains, jusqu'à ce que le processus s'inscrive dans le texte lui-même et qu'il trouve sa propre voix. C'est un lieu où confier un petit texte — non pas à l'esprit collectif, ni à l'esprit artificiel, mais à quelques esprits singuliers, imparfaits — pour la réécriture, la soustraction, et la surprise. Il n'existe pas de voie tracée d'avance. Palinodes cherche plutôt à ouvrir le passage — à laisser place aux détours, aux bifurcations, et aux voyages qu'ils peuvent inspirer.</p>",
     "creator": {
       "bio": "Créé par Melisandre Schofield, une écrivaine et développeuse web avec un parcours en arts visuels et narratologie expérimentale. Elle conçoit des outils et des expériences qui réunissent les gens — pas seulement pour écrire, mais pour jouer, se surprendre mutuellement, et redécouvrir la chimie étrange de l'imagination partagée."
     }
@@ -311,7 +313,7 @@
     "write_a_phrase2": "et attendez qu'il se déplie.",
     "login": "connexion",
     "browse": "explorer les collaborations",
-    "how": "comment ça marche",
+    "how": "commencez ici",
     "how_to_collaborate": "Une invitation",
     "log_in": "connexion",
     "collaborate_step_one_title": "1. Inscris un nom",
@@ -587,8 +589,8 @@
     "validation_failed": "Validation échouée",
     "invalid_json": "Données reçues invalides",
     "account_created_email": {
-      "email_title": "Bienvenue dans la famille Tag You Write",
-      "email_message": "Bienvenue {name}! Tag You Write est une expérience. J'espère qu'il sera un moyen amusant de rédiger des petites pièces collaborativement. Si vous avez des problèmes avec votre compte, ou des retours, n'hésitez pas à cliquer sur \"répondre\"."
+      "email_title": "Bienvenue dans la famille Palinodes",
+      "email_message": "Bienvenue {name}! Palinodes est une expérience. J'espère qu'il sera un moyen amusant de rédiger des petites pièces collaborativement. Si vous avez des problèmes avec votre compte, ou des retours, n'hésitez pas à cliquer sur \"répondre\"."
     },
     "password_reset": {
       "email_title": "Demande de réinitialisation de mot de passe",
@@ -603,7 +605,7 @@
   "email": {
     "game_invitation": {
       "subject": "{inviterName} vous invite à collaborer sur \"{gameTitle}\"",
-      "message": "Bonjour {recipientName},\n\n{inviterName} vous a invité(e) à collaborer sur un projet d'écriture appelé \"{gameTitle}\".\n\nInvite: {gamePrompt}\n\nCliquez sur le lien ci-dessous pour rejoindre la collaboration:\n{invitationUrl}\n\nBonne écriture!\n\nL'équipe Tag You Write"
+      "message": "Bonjour {recipientName},\n\n{inviterName} vous a invité(e) à collaborer sur un projet d'écriture appelé \"{gameTitle}\".\n\nInvite: {gamePrompt}\n\nCliquez sur le lien ci-dessous pour rejoindre la collaboration:\n{invitationUrl}\n\nBonne écriture!\n\nL'équipe Palinodes"
     },
     "contact_form": {
       "subject": "Formulaire de contact : {subject}",
@@ -683,6 +685,32 @@
           "substeps": {
             "navigation": "Cliquez sur le bouton de connexion <span class='info-icon' data-svg='logIn'></span> dans la navigation.",
             "credentials": "Entrez vos identifiants ou créez un compte."
+          }
+        }
+      },
+      "start-here": {
+        "title": "Commencez ici",
+        "steps": {
+          "navigate": {
+            "title": "Naviguer",
+            "substeps": {
+              "navigation": "Le menu de navigation est en haut de l'écran. Cliquez sur <span class='info-icon' data-svg='places'></span> pour les pages, ou <span class='info-icon' data-svg='how'></span> pour les tutoriels. Lorsque vous êtes connecté, <span class='info-icon' data-svg='notification'></span> et <span class='info-icon' data-svg='user'></span> vous donnent accès à vos notifications et votre profil. Pour continuer, appuyez sur >> (ci-dessous)."
+            }
+          },
+          "browse": {
+            "title": "Parcourir",
+            "substeps": {
+              "places-explanation": "Dans le menu <span class='info-icon' data-svg='places'></span>, cliquez sur <span class='info-icon black-background' data-svg='browse'></span> pour voir les histoires qui ont été commencées publiquement.",
+              "list-explanation": "Parcourez la liste d'arbres d'histoires. Chaque titre représente une collaboration. Cliquez sur n'importe quel titre pour voir l'arborescence de la collaborations <span class='info-icon' data-svg='tree'></span>.",
+              "story-trees-explanation": "Ceci est un arbre d'histoire. Chaque branche est une nouvelle version écrite par un contributeur différent. Cliquez sur un titre ou un cœur <span class='info-icon' data-svg='heartOutline'></span> pour lire une version.",
+              "story-nodes-explanation": "Les histoires grandissent par itération. Les collaborateurs votent sur les versions. Lorsqu'une version reçoit suffisamment de votes, elle devient le texte final, et son cœur est remplacé par une étoile. Appuyez sur >> pour continuer (ci-dessous)."
+            }
+          },
+          "success": {
+            "title": "Vous avez appris les bases!",
+            "substeps": {
+              "congratulations": "Vous avez appris les bases! Vous pouvez parcourir librement. Pour écrire ou voter, vous aurez besoin d'un compte. Pour apprendre comment commencer une histoire, rejoindre une collaboration, ou voter sur les nœuds de texte, accédez aux tutoriels dans la navigation (<span class='info-icon' data-svg='how'></span>)."
+            }
           }
         }
       },
@@ -771,6 +799,26 @@
             "title": "Vous l'avez fait!",
             "substeps": {
               "congratulations": "🎉 Excellent! Vous avez émis ou retiré votre vote! Le tutoriel est maintenant terminé."
+            }
+          }
+        }
+      },
+      "navigation": {
+        "title": "Navigation",
+        "steps": {
+          "navigation": {
+            "title": "Navigation",
+            "substeps": {
+              "overview": "En haut de l'écran, vous pouvez utiliser la navigation pour parcourir les histoires, accéder aux tutoriels (?), voir votre profil et voir les notifications."
+            }
+          },
+          "browsing": {
+            "title": "Parcourir",
+            "substeps": {
+              "one": "Cliquez sur \"Lieux\" et \"Explorer\" pour voir les histoires qui ont été commencées publiquement.",
+              "two": "Ceci est une liste d'arbres d'histoires publiques. Chaque titre est une collaboration en cours. Cliquez sur n'importe quel titre pour voir l'\"arbre d'histoire\".",
+              "three": "Ceci est un arbre d'histoire. Chaque branche est une nouvelle version écrite par un contributeur différent. Cliquez sur un titre de branche ou un cœur pour lire une version.",
+              "four": "Lorsque vous ajoutez une version, vous répondez à une branche spécifique. L'histoire grandit vers l'extérieur par la variation. Les collaborateurs votent sur les versions. Lorsqu'une version reçoit suffisamment de votes, elle devient le texte final."
             }
           }
         }

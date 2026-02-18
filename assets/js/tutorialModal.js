@@ -58,6 +58,55 @@ export class TutorialModal {
         };
         
         this.tutorials = {
+            'start-here': {
+                title: 'tutorial.start-here.title',
+                completion: {
+                    triggerEvent: 'reachedLastStep', // Success when user advances to last step (no external event)
+                },
+                steps: [
+                    {
+                        title: 'tutorial.start-here.steps.navigate.title',
+                        skipStep: 'readStep', 
+                        substeps: [
+                            {
+                                text: 'tutorial.start-here.steps.navigate.substeps.navigation', // TODO: You can add "press >> to continue" here. 
+                            }
+                        ]
+                    },
+                    {
+                        title: 'tutorial.start-here.steps.browse.title',
+                        substeps: [
+                            {
+                                text: 'tutorial.start-here.steps.browse.substeps.places-explanation',
+                                showWhen: 'page !== "texts"',
+                            },
+                            {
+                                text: 'tutorial.start-here.steps.browse.substeps.list-explanation',
+                                showWhen: 'page === "texts" && !showcaseVisible',
+                            },
+                            {
+                                text: 'tutorial.start-here.steps.browse.substeps.story-trees-explanation',
+                                showWhen: 'page === "texts" && showcaseVisible &&  !modalOpen',
+                            },
+                            {
+                                text: 'tutorial.start-here.steps.browse.substeps.story-nodes-explanation',
+                                showWhen: 'page === "texts" && showcaseVisible && modalOpen',
+                                requireManualAdvance: true,
+                            }
+                        ]
+                    },
+                    {
+                        title: 'tutorial.start-here.steps.success.title',
+                        skipStep: '!success', // Same as other tutorials: hide from breadcrumbs until reached
+                        substeps: [
+                            {
+                                text: 'tutorial.start-here.steps.success.substeps.congratulations',
+                                showWhen: 'success'
+                            }
+                        ]
+                    }
+                ]
+            },
             'start-game': {
                 title: 'tutorial.start-game.title',
                 completion: {
@@ -259,6 +308,9 @@ export class TutorialModal {
         
         // Bind close button event
         this.bindCloseEvent();
+        
+        // Delegate arrow clicks so they work when tutorial is restored from localStorage
+        this.setupArrowClickDelegation();
         
         // Listen for window resize to adjust margin
         this.addResizeListener();
@@ -525,10 +577,21 @@ export class TutorialModal {
             return;
         }
         
+        const tutorial = this.tutorials[this.currentTutorial];
+        const currentStepDef = tutorial.steps[this.currentStep];
+        if (currentStepDef && currentStepDef.skipStep === 'readStep') {
+            this.updateTutorialDisplay();
+            return;
+        }
+        const currentSubstepDef = currentStepDef?.substeps?.[this.currentSubstep];
+        if (currentSubstepDef?.requireManualAdvance) {
+            this.updateTutorialDisplay();
+            return;
+        }
+        
         // Ensure validation state is up to date before context evaluation
         this.updateValidationState();
         
-        const tutorial = this.tutorials[this.currentTutorial];
         const context = this.getCachedContext();
         console.log('🎯 TUTORIAL: Context in updateTutorialForContext:', context);
         console.log('🎯 TUTORIAL: Current step/substep:', this.currentStep, this.currentSubstep);
@@ -559,7 +622,10 @@ export class TutorialModal {
             try {
                 for (let i = 0; i < tutorial.steps.length; i++) {
                     const step = tutorial.steps[i];
-                    const shouldSkip = this.evaluateSkipStep(step.skipStep, context);
+                    // readStep: only skip when we've already moved past it (so we don't jump back to it on context change)
+                    const shouldSkip = step.skipStep === 'readStep'
+                        ? this.currentStep > i
+                        : this.evaluateSkipStep(step.skipStep, context);
                     console.log(`Step ${i} (${step.title}): shouldSkip=${shouldSkip}, skipStep="${step.skipStep}"`);
                     
                     if (!shouldSkip) {
@@ -684,6 +750,9 @@ export class TutorialModal {
         // Show the modal
         this.modalElement.classList.remove('display-none');
         
+        // Ensure arrow button states are correct (arrow clicks are handled by delegated listener in constructor)
+        this.updateNavigationButtons();
+        
         // Add margin to page content
         setTimeout(() => this.addPageMargin(), 10); // Small delay to ensure modal is rendered
     }
@@ -693,24 +762,27 @@ export class TutorialModal {
     // 3. NAVIGATION & USER INTERACTION
     // ============================================================================
 
+    /**
+     * Delegate prev/next arrow clicks on the modal so they work even when the tutorial
+     * is restored from localStorage (showTutorialWithCurrentState doesn't call bindNavigationEvents).
+     */
+    setupArrowClickDelegation() {
+        this.modalElement.addEventListener('click', (e) => {
+            const prevBtn = e.target.closest('.tutorial-arrow.prev');
+            if (prevBtn && !prevBtn.disabled) {
+                this.navigatePrevious();
+                return;
+            }
+            const nextBtn = e.target.closest('.tutorial-arrow.next');
+            if (nextBtn && !nextBtn.disabled) {
+                this.navigateNext();
+                return;
+            }
+        });
+    }
 
     bindNavigationEvents() {
-        const prevButton = this.elements.prevButton;
-        const nextButton = this.elements.nextButton;
-        
-        if (prevButton) {
-            prevButton.addEventListener('click', () => {
-                this.navigatePrevious();
-            });
-        }
-        
-        if (nextButton) {
-            nextButton.addEventListener('click', () => {
-                this.navigateNext();
-            });
-        }
-        
-        // Update button states
+        // Arrow clicks are handled by setupArrowClickDelegation(). Just update button states here.
         this.updateNavigationButtons();
     }
 
@@ -724,6 +796,7 @@ export class TutorialModal {
             this.goToSubstep(this.currentSubstep - 1, true); // true = manual navigation
             return;
         }
+        
         
         // If at first substep, try to go to previous step
         if (this.currentStep > 0) {
@@ -751,10 +824,26 @@ export class TutorialModal {
         if (this.currentStep < tutorial.steps.length - 1) {
             // For manual navigation, go to the first substep of the next step
             // regardless of context validity
-            const nextStep = tutorial.steps[this.currentStep + 1];
-            this.currentStep = this.currentStep + 1;
-            this.currentSubstep = 0;
-            this.updateTutorialDisplay();
+            const nextStepIndex = this.currentStep + 1;
+            const nextStep = tutorial.steps[nextStepIndex];
+            const context = this.getCachedContext();
+
+            // For manual navigation, bypass readStep check (pass isManualNavigation: true)
+            const shouldSkip = this.evaluateSkipStep(nextStep.skipStep, context, true);
+
+            if (!shouldSkip) {
+                this.currentStep = nextStepIndex;
+                this.currentSubstep = 0;
+                if (nextStepIndex === tutorial.steps.length - 1 && tutorial.completion?.triggerEvent === 'reachedLastStep') {
+                    this.handleTutorialCompletion('reachedLastStep', { stepIndex: nextStepIndex });
+                } else {
+                    this.updateTutorialDisplay();
+                }
+            } else if (nextStep.skipStep === '!success' && tutorial.completion?.triggerEvent === 'reachedLastStep') {
+                this.currentStep = nextStepIndex;
+                this.currentSubstep = 0;
+                this.handleTutorialCompletion('reachedLastStep', { stepIndex: nextStepIndex });
+            }
         }
     }
 
@@ -930,7 +1019,8 @@ export class TutorialModal {
             // Determine step state
             const shouldSkip = this.evaluateSkipStep(step.skipStep, context);
             const isSuccessStep = context.success && this.currentStep === tutorial.steps.length - 1;
-            const isSuccessBreadcrumb = index === tutorial.steps.length - 1; // "Success!" step
+            // Check if this step is actually a success step (has skipStep: '!success')
+            const isSuccessBreadcrumb = step.skipStep === '!success';
             
             // State 1: Regular tutorial steps - hide only the success breadcrumb
             if (!isSuccessStep && isSuccessBreadcrumb) {
@@ -973,7 +1063,6 @@ export class TutorialModal {
         if (!prevButton || !nextButton) return;
         
         const tutorial = this.tutorials[this.currentTutorial];
-        const step = tutorial.steps[this.currentStep];
         const context = this.getCachedContext();
         
         // Hide navigation buttons if on the success step
@@ -985,19 +1074,17 @@ export class TutorialModal {
             return;
         }
         
-        // Show navigation buttons for regular steps
-        prevButton.classList.remove('display-none');
+        // Next button: always show on non-success steps; disable at the very end
         nextButton.classList.remove('display-none');
-        
-        // For manual navigation, be more permissive
-        // Previous navigation: allow if not at the very beginning
-        const canGoBack = this.currentSubstep > 0 || this.currentStep > 0;
-        prevButton.disabled = !canGoBack;
-        
-        // Next navigation: allow if not at the very end
-        const canGoForward = this.currentSubstep < step.substeps.length - 1 || 
-                             this.currentStep < tutorial.steps.length - 1;
-        nextButton.disabled = !canGoForward;
+
+        // Prev button: hide at the very beginning (step 0, substep 0) instead of disabling
+        const atStart = this.currentSubstep === 0 && this.currentStep === 0;
+        if (atStart) {
+            prevButton.classList.add('display-none');
+        } else {
+            prevButton.classList.remove('display-none');
+            prevButton.disabled = false;
+        }
     }
 
     /**
@@ -1078,7 +1165,8 @@ export class TutorialModal {
             openShelfCount: this.uiState.openShelfCount, // Number of open shelf nodes
             hasOpenShelf: this.uiState.openShelfCount > 0, // Whether any shelf nodes are open
             success: this.tutorialSuccess, // Whether tutorial has been completed successfully
-            focusedField: this.focusedField // Currently focused form field name (e.g., 'title', 'prompt', 'writing', 'invitees', or null)
+            focusedField: this.focusedField, // Currently focused form field name (e.g., 'title', 'prompt', 'writing', 'invitees', or null)
+            readStep: this.isCurrentStepRead(), // Whether the current step has been read
         };
     }
 
@@ -1226,10 +1314,29 @@ export class TutorialModal {
     // 6. TUTORIAL LOGIC & EVALUATION
     // ============================================================================
 
-    evaluateSkipStep(skipStep, context) {
+
+    /**
+     * Check if the current step has been read (any substep in the step has been visited)
+     */
+    isCurrentStepRead() {
+        if (!this.currentTutorial) return false;
+        const tutorial = this.tutorials[this.currentTutorial];
+        if (this.currentStep < 0 || this.currentStep >= tutorial.steps.length) return false;
+        
+        const step = tutorial.steps[this.currentStep];
+        // Check if any substep in current step has been visited
+        for (let i = 0; i < step.substeps.length; i++) {
+            if (this.visitedSubsteps.has(`${this.currentStep}-${i}`)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    evaluateSkipStep(skipStep, context, isManualNavigation = false) {
         if (!skipStep) return false; // No condition means don't skip
         
-        return this.evaluateCondition(skipStep, context);
+        return this.evaluateCondition(skipStep, context, isManualNavigation);
     }
 
     evaluateShowWhen(showWhen, context) {
@@ -1238,14 +1345,17 @@ export class TutorialModal {
         return this.evaluateCondition(showWhen, context);
     }
 
-    evaluateCondition(condition, context) {
+    evaluateCondition(condition, context, isManualNavigation = false) {
         if (!condition) return true;
         
         console.log('Evaluating condition:', condition, 'with context:', context);
         
         try {
             // Create a safe evaluation function
-            const { page, userLoggedIn, canPublish, showcase, showcaseVisible, category, gameId, modalOpen, modalTextId, openShelfCount, hasOpenShelf, success, focusedField } = context;
+            const { page, userLoggedIn, canPublish, showcase, showcaseVisible, category, gameId, modalOpen, modalTextId, openShelfCount, hasOpenShelf, success, focusedField, readStep } = context;
+
+            // For manual navigation, treat readStep as false (bypass read check)
+            const effectiveReadStep = isManualNavigation ? false : readStep;
             
             // Replace the condition string with actual values
             let expression = condition
@@ -1261,7 +1371,8 @@ export class TutorialModal {
                 .replace(/openShelfCount/g, openShelfCount)
                 .replace(/hasOpenShelf/g, hasOpenShelf)
                 .replace(/success/g, success)
-                .replace(/focusedField/g, focusedField ? `"${focusedField}"` : 'null');
+                .replace(/focusedField/g, focusedField ? `"${focusedField}"` : 'null')
+                .replace(/readStep/g, effectiveReadStep); // Use effectiveReadStep (false if manual nav)
             
             console.log('Evaluated expression:', expression);
             
@@ -1342,6 +1453,14 @@ export class TutorialModal {
                 this.updateTutorialForContext();
             } else {
                 console.log('🎯 TUTORIAL: Publish action does not match current tutorial');
+            }
+        } else if (eventType === 'reachedLastStep' && tutorial.completion.triggerEvent === 'reachedLastStep') {
+            const lastStepIndex = tutorial.steps.length - 1;
+            if (data?.stepIndex === lastStepIndex) {
+                console.log('🎯 TUTORIAL: Reached last step, setting success state');
+                this.tutorialSuccess = true;
+                this.invalidateContext();
+                this.updateTutorialForContext();
             }
         } else if (tutorial.completion.triggerEvent === eventType) {
             // For other events (like voteToggle), use direct matching

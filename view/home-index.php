@@ -19,7 +19,7 @@
                     <span class="svg-btn" data-svg="browse" data-i18n-title="home_index.browse" title="{{ translate('home_index.browse') }}"></span>
                     <span data-i18n="home_index.browse">{{ translate('home_index.browse') }}</span>
                 </a>
-                <a class="home-button how" href="#how">
+                <a class="home-button how" href="#" data-tutorial="start-here">
                     <span class="svg-btn" data-svg="how" data-i18n-title="home_index.how" title="{{ translate('home_index.how') }}"></span>
                     <span data-i18n="home_index.how">{{ translate('home_index.how') }}</span>
                 </a>

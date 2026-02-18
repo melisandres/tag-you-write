@@ -294,6 +294,20 @@ section.info > .info-heart-svg svg rect {
     background-color: var(--color-black);
 }
 
+.tutorial-modal .info-icon[data-svg="browse"] svg path {
+    fill: var(--color-grey-dark);
+    stroke: var(--color-grey-dark);
+} 
+
+.tutorial-modal .info-icon[data-svg="browse"].black-background {
+    background-color: var(--color-black);
+}
+
+.tutorial-modal .info-icon[data-svg="browse"].black-background svg path {
+    fill: var(--color-white);
+    stroke: var(--color-white);
+}
+
 .info-icon[data-svg="tree"], 
 .info-icon[data-svg="shelf"] {
     background-color: var(--color-white);
@@ -306,7 +320,11 @@ section.info > .info-heart-svg svg rect {
     stroke: var(--color-primary);
 }
 
-.info-icon[data-svg="iterate"], .info-icon[data-svg="newGame"]  {
+.info-icon[data-svg="iterate"] {
+    background-color: var(--color-write);
+}
+
+.info-icon[data-svg="newGame"]  {
     background-color: var(--color-white);
 }
 
@@ -372,7 +390,43 @@ section.info > .info-heart-svg svg rect {
 }
 
 .info-icon[data-svg="how"] {
-    background-color: var(--color-primary);
+    background-color: var(--color-black);
+}
+
+.info-icon[data-svg="how"] svg {
+    transform: scale(0.9);
+}
+
+.info-icon[data-svg="how"] svg path {
+    fill: var(--color-white);
+    stroke: var(--color-white);
+}
+
+.info-icon[data-svg="user"] {
+    background-color: var(--color-black);
+}
+
+.info-icon[data-svg="user"] svg {
+    transform: scale(2);
+    translate: 0 6px;
+}
+
+.info-icon[data-svg="user"] svg path {
+    fill: var(--color-white);
+    stroke: var(--color-white);
+}
+
+.info-icon[data-svg="notification"] {
+    background-color: var(--color-black);
+}
+
+.info-icon[data-svg="notification"] svg {
+    transform: scale(0.8) rotate(10deg);
+}
+
+.info-icon[data-svg="notification"] svg path {
+    fill: var(--color-white);
+    stroke: var(--color-white);
 }
 
 /* SVG size */

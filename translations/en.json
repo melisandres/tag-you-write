@@ -37,6 +37,8 @@
       "tutorial_tooltip": "view tutorials",
       "dashboard": "Dashboard",
       "dashboard_tooltip": "view dashboard",
+      "tutorial_start_here": "start here",
+      "tutorial_start_here_tooltip": "learn the basics of the site",
       "tutorial_start_game": "start collaboration",
       "tutorial_start_game_tooltip": "learn how to start a new collaboration",
       "tutorial_contribute": "join collaboration",
@@ -84,8 +86,8 @@
     "made_with_love": "Made with love by Melisandre"
   },
   "about": {
-    "title": "About Tag You Write",
-    "description": "<p>Tag You Write is an evolving experiment in writing as play. It's a space where short texts can be shaped and reshaped by different hands, until the process becomes etched into the text, and it finds its own voice. It's a space for offering a small text — not to the hive mind, nor the artificial one, but to a few singular, imperfect minds, for revision, erasure, and surprise. There's no single right path. Tag You Write tries to clear the way for many — and for the journeys they might incite.</p>",
+    "title": "About Palinodes",
+    "description": "<p>Palinodes is an evolving experiment in writing as play. It's a space where short texts can be shaped and reshaped by different hands, until the process becomes etched into the text, and it finds its own voice. It's a space for offering a small text — not to the hive mind, nor the artificial one, but to a few singular, imperfect minds, for revision, erasure, and surprise. There's no single right path. Palinodes tries to clear the way for many — and for the journeys they might incite.</p>",
     "creator": {
       "bio": "Created by Melisandre Schofield, a writer and web developer with a background in visual arts and experimental narrative. She builds tools and experiences that bring people together — not just to write, but to play, surprise one another, and rediscover the strange alchemy of shared imagination."
     }
@@ -313,10 +315,10 @@
     "write_a_phrase2": "and wait for it to unfold.",
     "login": "log in",
     "browse": "browse collaborations",
-    "how": "how it works",
+    "how": "start here",
     "how_to_collaborate": "An invitation",
     "collaborate_step_one_title": "1. Give us a name",
-    "collaborate_step_one_text": "Your own, or a pseudonym—and a short bio, real or imagined.",
+    "collaborate_step_one_text": "Your own, or a pseudonym—and a short bio, real or imagined. Palinodes is a collaborative writing game where stories branch and evolve through voting and revision.",
     "collaborate_step_two_title": "2. Explore",
     "collaborate_step_two_text": "Climb a story tree <span class='info-icon' data-svg='browse'></span>. Read through the leaves. Let your feet swing off a branch <span class='info-icon' data-svg='dashboard'></span>. Each branch is a new version, written by a new friend—or rival.",
     "collaborate_step_three_title": "3. Add your voice",
@@ -588,8 +590,8 @@
     "validation_failed": "Validation failed",
     "invalid_json": "Invalid data received",
     "account_created_email": {
-      "email_title": "Welcome to the Tag You Write family",
-      "email_message": "Welcome {name}! Tag you write is an experiment. I'm hoping it will be a fun way to write small pieces collaboratively. If you have any issues with your account, or any feedback, just hit \"reply\". Thanks for participating!"
+      "email_title": "Welcome to the Palinodes family",
+      "email_message": "Welcome {name}! Palinodes is an experiment. I'm hoping it will be a fun way to write small pieces collaboratively. If you have any issues with your account, or any feedback, just hit \"reply\". Thanks for participating!"
     },
     "password_reset": {
       "email_title": "Password Reset Request",
@@ -604,7 +606,7 @@
   "email": {
     "game_invitation": {
       "subject": "{inviterName} invites you to collaborate on \"{gameTitle}\"",
-      "message": "Hello {recipientName},\n\n{inviterName} has invited you to collaborate on a writing project called \"{gameTitle}\".\n\nPrompt: {gamePrompt}\n\nClick the link below to join the collaboration:\n{invitationUrl}\n\nHappy writing!\n\nThe Tag You Write Team"
+      "message": "Hello {recipientName},\n\n{inviterName} has invited you to collaborate on a writing project called \"{gameTitle}\".\n\nPrompt: {gamePrompt}\n\nClick the link below to join the collaboration:\n{invitationUrl}\n\nHappy writing!\n\nThe Palinodes Team"
     },
     "contact_form": {
       "subject": "Contact Form: {subject}",
@@ -684,6 +686,32 @@
         "substeps": {
           "navigation": "Click the login button <span class='info-icon' data-svg='logIn'></span> in the navigation.",
           "credentials": "Enter your credentials or create an account."
+        }
+      }
+    },
+    "start-here": {
+      "title": "Start Here",
+      "steps": {
+        "navigate": {
+          "title": "Navigate",
+          "substeps": {
+            "navigation": "Main navigation is on the top of the screen. Click on <span class='info-icon' data-svg='places'></span> for pages, or <span class='info-icon' data-svg='how'></span> for tutorials. When logged in, <span class='info-icon' data-svg='notification'></span> and <span class='info-icon' data-svg='user'></span> give you access to your notifications and your profile. To continue, press >> (below)."
+          }
+        },
+        "browse": {
+          "title": "Browse",
+          "substeps": {
+            "places-explanation": "In the <span class='info-icon' data-svg='places'></span> menu, click on <span class='info-icon black-background' data-svg='browse'></span> to see stories that have been started publicly.",
+            "list-explanation": "This is a list of collaborations. Click on any title to see the \"story tree.\"<span class='info-icon' data-svg='tree'></span>",
+            "story-trees-explanation": "This is a story tree. Each branch is a new version written by a different contributor. Click on a title or heart <span class='info-icon' data-svg='heartOutline'></span> to read a version.",
+            "story-nodes-explanation": "Stories grow outward through iteration. Collaborators vote on versions. When one version receives enough votes, it becomes the final text, and its heart is replaced by a star. Press >> to continue (below)."
+          }
+        },
+        "success": {
+          "title": "You've learned the basics!",
+          "substeps": {
+            "congratulations": "You've learned the basics! You can browse freely. To write or vote, you’ll need an account. To learn how to start a story, join a collaboration, or vote on text nodes, access tutorials in the navigation (<span class='info-icon' data-svg='how'></span>)."
+          }
         }
       }
     },

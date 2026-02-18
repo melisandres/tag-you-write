@@ -66,6 +66,10 @@
             </div>
             <div class="tutorial-dropdown">
                 <div class="tutorial-dropdown-subtitle" data-i18n="nav.tutorial">{{ translate('nav.tutorial') }}</div>
+                <a data-tutorial="start-here" data-i18n="nav.tutorial.start_here" data-i18n-title="nav.tutorial_start_here_tooltip" title="{{ translate('nav.tutorial_start_here_tooltip') }}">
+                    <span class="icon" data-svg="how"></span>
+                    <span data-i18n="nav.tutorial_start_here">{{ translate('nav.tutorial_start_here') }}</span>
+                </a>
                 <a data-tutorial="start-game" data-i18n="nav.tutorial_start_game" data-i18n-title="nav.tutorial_start_game_tooltip" title="{{ translate('nav.tutorial_start_game_tooltip') }}">
                     <span class="icon" data-svg="newGame"></span>
                     <span data-i18n="nav.tutorial_start_game">{{ translate('nav.tutorial_start_game') }}</span>

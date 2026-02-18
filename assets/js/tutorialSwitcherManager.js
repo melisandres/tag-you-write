@@ -65,6 +65,16 @@ export class TutorialSwitcherManager {
                 this.startTutorial(tutorialType);
             });
         });
+
+        // Handle standalone tutorial links (e.g. home index "start here" button)
+        document.querySelectorAll('a[data-tutorial]').forEach(link => {
+            if (link.closest('.tutorial-dropdown') || link.closest('.submenu-content.tutorial-submenu')) return;
+            const tutorialType = link.getAttribute('data-tutorial');
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.startTutorial(tutorialType);
+            });
+        });
         
         // Update active states for all tutorial links
         this.updateTutorialActiveStates();
@@ -82,11 +92,11 @@ export class TutorialSwitcherManager {
         });
 
         // if there is an active tutorial in local storage, then load the tutorial modal
+        // Note: TutorialModal constructor will automatically restore from localStorage via checkForActiveTutorial()
+        // So we just need to initialize it, not call showTutorial again
         if (localStorage.getItem('activeTutorial')) {
             this.initTutorialModal().then(() => {
-                const activeTutorial = localStorage.getItem('activeTutorial');
-                const tutorialData = JSON.parse(activeTutorial);
-                this.tutorialModal.showTutorial(tutorialData.tutorialType);
+                // TutorialModal constructor already handled restoration, just update nav link
                 this.updateNavLink();
             });
         } else {

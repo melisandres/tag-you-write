@@ -217,18 +217,18 @@ main, .main-content, #main {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 10px;
+    gap: 16px;
 }
 
 .tutorial-dots {
     display: flex;
-    gap: 8px;
+    gap: 12px;
     align-items: center;
 }
 
 .tutorial-dot {
-    width: 8px;
-    height: 8px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     background-color: var(--color-grey-dark);
     cursor: pointer;
@@ -241,7 +241,7 @@ main, .main-content, #main {
 
 .tutorial-dot.active {
     background-color: var(--color-primary) !important; /* Orange for active - trumps visited */
-    transform: scale(1.2) !important;
+    transform: scale(1.15) !important;
 }
 
 .tutorial-dot.disabled {
@@ -258,10 +258,10 @@ main, .main-content, #main {
     background: none;
     border: none;
     color: var(--color-grey-light);
-    font-size: 16px;
+    font-size: 45px;
     cursor: pointer;
-    padding: 5px;
-    border-radius: 3px;
+    padding: 0px 10px 8px 10px;
+    border-radius: 4px;
     transition: color 0.2s ease;
 }
 
@@ -330,10 +330,6 @@ main, .main-content, #main {
     stroke: var(--color-grey-dark);
 } */
 
-.tutorial-modal .info-icon[data-svg="browse"] svg path {
-    fill: var(--color-grey-dark);
-    stroke: var(--color-grey-dark);
-} 
 
 /* Responsive design */
 @media (max-width: 768px) {
@@ -359,12 +355,12 @@ main, .main-content, #main {
     }
     
     .tutorial-dots {
-        gap: 6px;
+        gap: 20px;
     }
     
     .tutorial-dot {
-        width: 6px;
-        height: 6px;
+        width: 25px;
+        height: 25px;
     }
     
     .tutorial-steps {
