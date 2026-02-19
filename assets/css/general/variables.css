@@ -79,7 +79,10 @@
     --color-error: rgba(238, 108, 108);
     --color-critical: rgba(150, 30, 30);
     --color-activity-adding-note: var(--color-success); 
+    --color-feedback-info:  rgb(61 162 61);
+    --color-feedback-warning:  rgb(129 118 229);
 
+    --color-success-light: rgba(127, 227, 127, 0.5);
     /* Ghost heart colors */
     --color-ghost-heart-lightest: rgba(255, 255, 255, 0.6);
     --color-ghost-heart-lighter: rgba(200, 200, 255, 0.6);

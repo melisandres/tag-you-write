@@ -70,14 +70,14 @@
       "dev_mode_beta_tooltip": "beta tester mode"
   },
   "notifications": {
-    "notification_game_won": "Game Won!",
-    "notification_game_closed": "Game Closed",
+    "notification_game_won": "Collaboration wrapped!",
+    "notification_game_closed": "Collaboration Closed",
     "notification_game_invitation": "New Collaboration Invitation",
     "notification_game_won_text": "The {game_title_link} collaboration is closed. Your iteration: \"{winning_title}\" has been unanimously chosen as the winner!",
     "notification_game_closed_text": "The {game_title_link} collaboration is closed. The winning text is \"{winning_title}\"",
     "notification_game_invitation_text": "You've been invited to collaborate on {game_title_link}",
-    "warning_game_won_title": "Game Closed",
-    "warning_game_closed_title": "Game Closed",
+    "warning_game_won_title": "Collaboration wrapped!",
+    "warning_game_closed_title": "Collaboration Closed",
     "warning_game_won_text": "The winning vote was just cast! The {game_title} collaboration is closed. Your iteration: \"{winning_title}\" has been unanimously chosen as the winner! Sadly, the text you are working on is no longer in the running.",
     "warning_game_closed_text": "The winning vote was just cast! The \"{game_title}\" collaboration is closed. The winning text is \"{winning_title}\". Sadly, the text you are working on is no longer in the running.",
     "no_notifications": "No notifications"
@@ -87,7 +87,7 @@
   },
   "about": {
     "title": "About Palinodes",
-    "description": "<p>Palinodes is an evolving experiment in writing as play. It's a space where short texts can be shaped and reshaped by different hands, until the process becomes etched into the text, and it finds its own voice. It's a space for offering a small text — not to the hive mind, nor the artificial one, but to a few singular, imperfect minds, for revision, erasure, and surprise. There's no single right path. Palinodes tries to clear the way for many — and for the journeys they might incite.</p>",
+    "description": "<p>Palinodes is an evolving experiment in writing as play. It's a space where short texts can be shaped and reshaped by different hands, until the process becomes etched into the text, and it finds its own voice. It's a space for offering a small text — not to the hive mind, nor the artificial one, but to a few singular, imperfect minds, for revision, erasure, and surprise. There's no wrong path. Palinodes tries to clear the way for many — and for the journeys they might incite.</p>",
     "creator": {
       "bio": "Created by Melisandre Schofield, a writer and web developer with a background in visual arts and experimental narrative. She builds tools and experiences that bring people together — not just to write, but to play, surprise one another, and rediscover the strange alchemy of shared imagination."
     }
@@ -173,7 +173,7 @@
     "iterating_on": "iterating on:",
     "prompt": "prompt:",
     "good_to_know": "good to know:",
-    "good_to_know_text": "<p>While your title and prompt will be carved in STONE, your text will be rehashed by all who join the game.</p> <p>May the best iteration win!</p>",
+    "good_to_know_text": "<p>While your title and prompt will be carved in STONE, your text will be rehashed by all who join the collaboration.</p> <p>May the best iteration win!</p>",
     "choose_a_title": "choose a title",
     "describe_your_changes": "describe your changes",
     "title_placeholder": "Elsewhere",
@@ -198,12 +198,12 @@
     "add_collaborator": "Add collaborator",
     "collaborator_selected": "Already selected",
     "loading": "Loading...",
-    "joinability_disabled_message": "The game cannot be joinable by all if it is not visible to all.",
-    "access_control": "who can interact with your game"
+    "joinability_disabled_message": "The collaboration cannot be joinable by all if it is not visible to all.",
+    "access_control": "who can interact with this collaboration"
   },
   "game_settings": {
-    "visibility_settings": "game visibility",
-    "join_settings": "game joinability",
+    "visibility_settings": "collab visibility",
+    "join_settings": "collab joinability",
     "visible_to_all": "All",
     "visible_to_all_description": "Anyone can see this collaboration in lists and searches",
     "visible_to_invited": "invitees only",
@@ -214,7 +214,7 @@
     "joinable_by_invited_description": "Only invited people can contribute to this collaboration",
     "access_control": "Access Control",
     "collaboration_settings": "Collaboration Settings",
-    "test_game_settings": "test game type",
+    "test_game_settings": "test collab type",
     "production_game": "Production",
     "dev_test_game": "Dev Test",
     "beta_test_game": "Beta Test"
@@ -258,9 +258,9 @@
     "gameRemoved": "Story deleted.",
     "gameRemovedFilterMismatch": "Story no longer matches search/filters.",
     "gameMovedToCategory": "Story moved to {category}",
-    "filterMismatchBanner": "This game doesn't match your current filters, search, or category, but it's shown because it's currently open in the showcase.",
-    "filterMismatchPlaceholder": "This game no longer matches your current filters, search, or category.",
-    "filterMismatchViewGame": "game page...",
+    "filterMismatchBanner": "This collaboration doesn't match your current filters, search, or category, but it's shown because it's currently open in the showcase.",
+    "filterMismatchPlaceholder": "This collaboration no longer matches your current filters, search, or category.",
+    "filterMismatchViewGame": "collaboration page...",
     "view_tree_tooltip": "view tree",
     "view_shelf_tooltip": "view shelf",
     "tree_tooltip": "tree",
@@ -277,7 +277,7 @@
     "login_tooltip": "log in",
     "bookmark_tooltip": "bookmark",
     "iterate_tooltip": "iterate",
-    "new_game_tooltip": "new game",
+    "new_game_tooltip": "new collaboration",
     "by": "by",
     "by_you": "by you",
     "by_other": "by {firstName} {lastName}",
@@ -360,9 +360,9 @@
   "warning": {
     "add_note": "Your note will be public, but you can edit it any time.",
     "publish": "You are about to publish this text. This action is irreversible.",
-    "new_game": "Ready to start a new game? This action cannot be undone.",
+    "new_game": "Ready to start a new collaboration? This action cannot be undone.",
     "delete": "Are you sure you want to delete this text? This action cannot be undone.",
-    "last_vote": "This vote confirms the grand winner and ends the game. Are you sure?",
+    "last_vote": "This vote confirms the grand winner and ends the collaboration. Are you sure?",
     "confirm": "Confirm",
     "cancel": "Cancel",
     "confirm_game_done": "Understood!",
@@ -375,8 +375,8 @@
     "confirmation_message_plural": "{count} invitations for {invited_email}, opened recently on this browser, can be linked to your account ({current_user_email}).",
     "immediate_visit_message": "This invitation sent to {invited_email} can be linked to this your account ({current_user_email}).",
     "immediate_visit_message_plural": "{count} invitations sent to {invited_email} can be linked to your account ({current_user_email}).",
-    "temporary_access_banner": "You are viewing this game via a temporary invitation. Link it to your account for permanent access.",
-    "temporary_access_banner_not_logged_in": "You are viewing this game via a temporary invitation. Log in to link it to your account for permanent access.",
+    "temporary_access_banner": "You are viewing this collaboration via a temporary invitation. Link it to your account for permanent access.",
+    "temporary_access_banner_not_logged_in": "You are viewing this collaboration via a temporary invitation. Log in to link it to your account for permanent access.",
     "link_to_account": "Link to Account"
   },
   "form_field": {
@@ -392,7 +392,7 @@
       "auto_success": "Auto-save!",
       "success": "Saved!",
       "permission_denied_iterate": "Permission to iterate denied",
-      "failed_create_game": "Failed to create a new game",
+      "failed_create_game": "Failed to create a new collaboration",
       "permission_denied_publish": "Permission to publish denied",
       "publish_success": "Published!",
       "publish_failed": "Failed to publish",
@@ -422,45 +422,45 @@
   },
   "front_val": {
     "word_count": {
-      "remaining": "you can add {remainingWords} word{pluralization}",
-      "over": "you are {remainingWords} word{pluralization} over the limit"
+      "remaining": "info: you can add {remainingWords} word{pluralization}",
+      "over": "*{remainingWords} word{pluralization} over the limit"
     },
     "root": {
       "title": {
-        "required": "*a name for the text to grow into",
+        "required": "*required",
         "max_char": "*100 characters max",
-        "typed": "*the title you choose will be carved in stone"
+        "typed": "*info: choose a title for your collaboration"
       },
       "writing": {
-        "required": "*don't be too precious...",
-        "typed": "*whatever you write will be subject to iteration",
+        "required": "*required",
+        "typed": "*info: whatever you write will be subject to iteration",
         "max_word_count": "*add 50 words max",
-        "max_word_count_warning_threshold": "*nearing 50 words..."
+        "max_word_count_warning_threshold": "*warning: nearing 50 words..."
       },
       "prompt": {
-        "typed": "*your prompt will be the yardstick for all iterations",
-        "required": "*a prompt to steer all iterations",
+        "typed": "*info: your prompt will be the yardstick for all iterations",
+        "required": "*required",
         "max_word_count": "*100 words max.",
         "max_character_count_critical": "*500 characters max."
       },
       "keywords": {
-        "typed": "*max 3 keywords, separated by commas please",
+        "typed": "*info: separate keywords by commas please",
         "max_keywords": "*5 keywords max--comma separated",
         "max_character_count": "*255 characters max",
-        "keyword_word_count": "*a keyword can be 2 words, but no more. Invalid keywords: {invalidKeywords}"
+        "keyword_word_count": "*a keyword can be composed of 2 words, but no more. Invalid keywords: {invalidKeywords}. Separate keywords by commas, please."
       },
       "invitees": {
         "invalid_format": "*invalid invitation format",
         "max_invitees": "*maximum 10 invitees allowed",
-        "typed": "*invitation list",
+        "typed": "",
         "required_when_access_limited": "*Invitees required when access is limited to invitees only"
       },
       "visible_to_all": {
         "invalid_value": "*invalid visibility setting"
       },
       "joinable_by_all": {
-        "invalid_value": "Joinability setting must be either '0' or '1'",
-        "must_follow_visibility": "*Joinability must be limited when visibility is limited to invitees"
+        "invalid_value": "*invalid joinability setting'",
+        "must_follow_visibility": "*when visibility is limited to invitees, joinability must also be limited to them"
       },
       "access_control": {
         "no_invitees_for_limited_access": "*Cannot publish: Access is limited to invitees but no invitees have been added."
@@ -469,27 +469,27 @@
     "iteration": {
       "title": {
         "required": "*required",
-        "typed": "*3 words or less",
+        "typed": "*info: 3 words or less",
         "max_character_count_critical": "*100 characters max"
       },
       "writing": {
         "required": "*required",
         "max_word_count": "*add 50 words max",
-        "max_word_count_warning_threshold": "*nearing 50 words...",
-        "writing_changes": "*required"
+        "max_word_count_warning_threshold": "*warning: nearing 50 words...",
+        "writing_changes": "*changes required"
       },
       "keywords": {
-        "typed": "*max 3 keywords, separated by commas please",
+        "typed": "*info: separate keywords by commas please",
         "max_keywords": "*5 keywords max--comma separated",
         "max_character_count": "*255 characters max",
-        "keyword_word_count": "*a keyword can be 2 words, but no more. Invalid keywords: {invalidKeywords}"
+        "keyword_word_count": "*a keyword can be composed of 2 words, but no more. Invalid keywords: {invalidKeywords}. Separate keywords by commas, please."
       }
     },
     "addingNote": {
       "note": {
         "required": "*required",
         "max_word_count": "*50 words max",
-        "max_word_count_warning_threshold": "*nearing 50 words..."
+        "max_word_count_warning_threshold": "*warning: nearing 50 words..."
       }
     },
     "login": {
@@ -509,7 +509,7 @@
         "required": "*required",
         "max_character_count": "*20 characters max",
         "min_character_count": "*6 characters min",
-        "pattern": "*only letters and numbers allowed"
+        "pattern": "*only letters and numbers allowed"  
       }
     },
     "forgotPassword": {
@@ -567,8 +567,8 @@
   },
   "error": {
     "text_not_found": "Text not found",
-    "no_game_specified": "No game specified",
-    "game_not_found": "Game not found",
+    "no_game_specified": "No collaboration specified",
+    "game_not_found": "Collaboration not found",
     "game_does_not_exist": "Something went wrong. Sorry. The requested text does not exist.", 
     "no_text_id_provided": "No text ID provided",
     "permission_denied_edit": "Sorry! You don't have permission to edit this text.",
@@ -738,13 +738,13 @@
         "success": {
           "title": "You did it!",
           "substeps": {
-            "congratulations": "🎉 Congratulations! You've successfully started a game! The tutorial is now complete."
+            "congratulations": "🎉 Congratulations! You've successfully started a collaboration! The tutorial is now complete."
           }
         }
       }
     },
     "contribute": {
-      "title": "How to Contribute to a Game",
+      "title": "How to Contribute to a text",
       "steps": {
         "browse": {
           "title": "Browse",

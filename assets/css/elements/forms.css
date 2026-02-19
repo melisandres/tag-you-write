@@ -128,11 +128,11 @@ label .ck.ck-content.ck-editor__editable {
 }
 
 .form-page .feedback.info, .form-page .feedback.info{
-    color: var(--color-info);
+    color: var(--color-feedback-info);
 }
 
 .form-page .feedback.warning, .form-page .feedback.warning{
-    color: var(--color-warning);
+    color: var(--color-feedback-warning);
 }
 
 .form-page span.additional-info{

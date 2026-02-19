@@ -288,11 +288,11 @@
 }
 
 .contact-form .feedback.info {
-    color: var(--color-info);
+    color: var(--color-feedback-info);
 }
 
 .contact-form .feedback.warning {
-    color: var(--color-warning);
+    color: var(--color-feedback-warning);
 }
 
 .contact-form textarea {

@@ -69,14 +69,14 @@
     "dev_mode_beta_tooltip": "mode testeur bêta"
   },
   "notifications": {
-    "notification_game_won": "Partie Gagnée!",
-    "notification_game_closed": "Partie Terminée",
+    "notification_game_won": "Collaboration bouclée!",
+    "notification_game_closed": "Collaboration Terminée",
     "notification_game_invitation": "Nouvelle invitation de collaboration",
     "notification_game_won_text": "La collaboration {game_title_link} est terminée. Votre itération : \"{winning_title}\" a été choisie à l'unanimité comme gagnante !",
     "notification_game_closed_text": "La collaboration {game_title_link} est terminée. Le texte gagnant est \"{winning_title}\"",
     "notification_game_invitation_text": "Vous avez été invité(e) à collaborer sur {game_title_link}",
-    "warning_game_won_title": "Partie Gagnée!",
-    "warning_game_closed_title": "Partie Terminée",
+    "warning_game_won_title": "Collaboration bouclée!",
+    "warning_game_closed_title": "Collaboration Terminée",
     "warning_game_won_text": "Le vote gagnant vient de voter! La collaboration {game_title} est terminée. Votre itération : \"{winning_title}\" a été choisie à l'unanimité comme gagnante ! Malheureusement, le texte que vous écrivez ne pourra pas être considéré.",
     "warning_game_closed_text": "Le vote gagnant vient de voter! La collaboration \"{game_title}\" est terminée. Le texte gagnant est \"{winning_title}\". Malheureusement, le texte que vous écrivez ne pourra pas être considéré.",
     "no_notifications": "Aucune notification"
@@ -172,7 +172,7 @@
     "iterating_on": "itérer sur:",
     "prompt": "texte incitatif:",
     "good_to_know": "bon à savoir:",
-    "good_to_know_text": "<p>Tant que votre titre et votre texte incitatif seront sculptés dans la pierre, votre texte sera réécrit par tous ceux qui rejoignent la partie.</p> <p>Le meilleur texte sera choisi à l'unanimité!</p>",
+    "good_to_know_text": "<p>Tant que votre titre et votre texte incitatif seront sculptés dans la pierre, votre texte sera réécrit par tous ceux qui rejoignent la collaboration.</p> <p>Le meilleur texte sera choisi à l'unanimité!</p>",
     "choose_a_title": "choisir un titre",
     "describe_your_changes": "décrire vos modifications",
     "title_placeholder": "Ailleurs",
@@ -197,12 +197,12 @@
     "add_collaborator": "Ajouter collaborateur",
     "collaborator_selected": "Déjà sélectionné",
     "loading": "Chargement...",
-    "joinability_disabled_message": "Le jeu ne peut pas être accessible à tous si il n'est pas visible par tous.",
-    "access_control": "qui peut intéragir avec votre jeu"
+    "joinability_disabled_message": "La collaboration ne peut pas être accessible à tous si il n'est pas visible par tous.",
+    "access_control": "qui peut intéragir avec cette collaboration"
   },
   "game_settings": {
-    "visibility_settings": "visibilité du jeu",
-    "join_settings": "participation au jeu",
+    "visibility_settings": "visibilité de la collab",
+    "join_settings": "participation à la collab",
     "visible_to_all": "Tous",
     "visible_to_all_description": "Tout le monde peut voir cette collaboration dans les listes et recherches",
     "visible_to_invited": "invités seulement",
@@ -213,7 +213,7 @@
     "joinable_by_invited_description": "Seules les personnes invitées peuvent contribuer à cette collaboration",
     "access_control": "Contrôle d'accès",
     "collaboration_settings": "Paramètres de collaboration",
-    "test_game_settings": "type de jeu de test",
+    "test_game_settings": "type de collab de test",
     "production_game": "Production",
     "dev_test_game": "Test Dev",
     "beta_test_game": "Test Bêta"
@@ -255,9 +255,9 @@
     "gameRemoved": "Histoire supprimée.",
     "gameRemovedFilterMismatch": "Histoire ne correspond plus à votre recherche/filtres.",
     "gameMovedToCategory": "Histoire déplacée vers {category}",
-    "filterMismatchBanner": "Ce jeu ne correspond pas à vos filtres, recherche ou catégorie actuels, mais il est affiché car il est actuellement ouvert dans la vitrine.",
-    "filterMismatchPlaceholder": "Ce jeu ne correspond plus à vos filtres, recherche ou catégorie actuels.",
-    "filterMismatchViewGame": "page du jeu...",
+    "filterMismatchBanner": "Cette collaboration ne correspond pas à vos filtres, recherche ou catégorie actuels, mais il est affiché car il est actuellement ouvert dans la vitrine.",
+    "filterMismatchPlaceholder": "Cette collaboration ne correspond plus à vos filtres, recherche ou catégorie actuels.",
+    "filterMismatchViewGame": "page du collaboration...",
     "pending": "À VENIR",
     "open": "OUVERTE",
     "view_tree_tooltip": "voir l'arbre",
@@ -276,7 +276,7 @@
     "login_tooltip": "connexion",
     "bookmark_tooltip": "suivre",
     "iterate_tooltip": "iterer",
-    "new_game_tooltip": "nouvelle partie",
+    "new_game_tooltip": "nouvelle collaboration",
     "by": "par",
     "by_you": "votre texte",
     "by_other": "par {firstName} {lastName}",
@@ -374,8 +374,8 @@
     "confirmation_message_plural": "{count} invitations pour {invited_email}, ouvertes récemment depuis ce navigateur, peuvent être liées à votre compte ({current_user_email}).",
     "immediate_visit_message": "Cette invitation envoyée à {invited_email} peut-être lié à votre compte ({current_user_email}).",
     "immediate_visit_message_plural": "{count} invitations envoyées à {invited_email} peuvent être liées à votre compte ({current_user_email}).",
-    "temporary_access_banner": "Vous consultez ce jeu via une invitation temporaire. Liez-le à votre compte pour un accès permanent.",
-    "temporary_access_banner_not_logged_in": "Vous consultez ce jeu via une invitation temporaire. Connectez-vous pour le lier à votre compte pour un accès permanent.",
+    "temporary_access_banner": "Vous consultez cette collaboration via une invitation temporaire. Liez-le à votre compte pour un accès permanent.",
+    "temporary_access_banner_not_logged_in": "Vous consultez cette collaboration via une invitation temporaire. Connectez-vous pour le lier à votre compte pour un accès permanent.",
     "link_to_account": "Lier au compte"
   },
   "form_field": {
@@ -421,37 +421,37 @@
   },
   "front_val": {
     "word_count": {
-      "remaining": "vous pouvez ajouter {remainingWords} mot{pluralization}",
-      "over": "vous êtes {remainingWords} mot{pluralization} au-dessus de la limite"
+      "remaining": "info: vous pouvez ajouter {remainingWords} mot{pluralization}",
+      "over": "*{remainingWords} mot{pluralization} au-dessus de la limite"
     },
     "root": {
       "title": {
-        "required": "*un titre pour le texte à grandir",
+        "required": "*requis",
         "max_char": "*100 caractères max",
-        "typed": "*le titre que vous choisissez sera sculpté dans la pierre"
+        "typed": "*info: choisir un titre pour votre collaboration"
       },
       "writing": {
-        "required": "*ne soyez pas trop précieux...",
-        "typed": "*ce que vous écrivez sera soumis à itération",
+        "required": "*requis",
+        "typed": "*info: ce que vous écrivez sera soumis à itération",
         "max_word_count": "*ajoutez 50 mots max",
-        "max_word_count_warning_threshold": "*vous approchez de 50 mots..."
+        "max_word_count_warning_threshold": "*avertissement: presque 50 mots..."
       },
       "prompt": {
-        "typed": "*votre texte incitatif sera le yardstick pour toutes les itérations",
-        "required": "*un texte incitatif pour diriger toutes les itérations",
+        "typed": "*info: le texte incitatif guidera les itérations futures",
+        "required": "*requis",
         "max_word_count": "*100 mots max.",
         "max_character_count_critical": "*500 caractères max."
       },
       "keywords": {
-        "typed": "*max 3 mots-clés, séparés par des virgules",
+        "typed": "*info: séparez les mots-clés par des virgules",
         "max_keywords": "*5 mots-clés max--séparés par des virgules",
         "max_character_count": "*255 caractères max",
-        "keyword_word_count": "*un mot-clé peut être de 2 mots, mais pas plus. Mots-clés invalides: {invalidKeywords}"
+        "keyword_word_count": "*un mot-clé peut être composé de 2 mots, mais pas plus. Mots-clés invalides: {invalidKeywords}. Séparez les mots-clés par des virgules s'il vous plaît."
       },
       "invitees": {
         "invalid_format": "*format d'invitation invalide",
         "max_invitees": "*maximum 10 invités autorisés",
-        "typed": "*liste d'invitations",
+        "typed": "",
         "required_when_access_limited": "*Invités requis lorsque l'accès est limité aux invités seulement"
       },
       "visible_to_all": {
@@ -459,7 +459,7 @@
       },
       "joinable_by_all": {
         "invalid_value": "*paramètre d'accessibilité invalide",
-        "must_follow_visibility": "*L'accessibilité doit être limitée lorsque la visibilité est limitée aux invités"
+        "must_follow_visibility": "*l'orsque la visibilité est limitée aux invités, l'accessibilité doit l'être aussi"
       },
       "access_control": {
         "no_invitees_for_limited_access": "*Impossible de publier: L'accès est limité aux invités mais aucun invité n'a été ajouté."
@@ -474,21 +474,21 @@
       "writing": {
         "required": "*requis",
         "max_word_count": "*ajoutez 50 mots max",
-        "max_word_count_warning_threshold": "*vous approchez de 50 mots...",
+        "max_word_count_warning_threshold": "*avertissement: presque 50 mots...",
         "writing_changes": "*modifications requises"
       },
       "keywords": {
-        "typed": "*max 3 mots-clés, séparés par des virgules",
+        "typed": "*info: séparez les mots-clés par des virgules",
         "max_keywords": "*5 mots-clés max--séparés par des virgules",
         "max_character_count": "*255 caractères max",
-        "keyword_word_count": "*un mot-clé peut être de 2 mots, mais pas plus. Mots-clés invalides: {invalidKeywords}"
+        "keyword_word_count": "*un mot-clé peut être composé de 2 mots, mais pas plus. Mots-clés invalides: {invalidKeywords}. Séparez les mots-clés par des virgules, s'il vous plaît."
       }   
     },
     "addingNote": {
       "note": {
         "required": "*requis",
         "max_word_count": "*50 mots max",
-        "max_word_count_warning_threshold": "*vous approchez de 50 mots..."
+        "max_word_count_warning_threshold": "*avertissement: presque 50 mots..."
       }
     },
     "login": {
@@ -566,8 +566,8 @@
   },
   "error": {
     "text_not_found": "Texte non trouvé",
-    "no_game_specified": "Aucune partie spécifiée",
-    "game_not_found": "Partie non trouvée", 
+    "no_game_specified": "Aucune collaboration spécifiée",
+    "game_not_found": "Collaboration non trouvée", 
     "game_does_not_exist": "Quelque chose s'est mal passé. Désolé. Le texte demandé n'existe pas.",
     "no_text_id_provided": "Aucun ID de texte spécifié",
     "permission_denied_edit": "Désolé! Vous n'avez pas les permissions pour modifier ce texte.",
@@ -737,13 +737,13 @@
           "success": {
             "title": "Vous l'avez fait!",
             "substeps": {
-              "congratulations": "🎉 Félicitations! Vous avez réussi à commencer un jeu! Le tutoriel est maintenant terminé."
+              "congratulations": "🎉 Félicitations! Vous avez réussi à commencer une collaboration! Le tutoriel est maintenant terminé."
             }
           }
         }
       },
       "contribute": {
-        "title": "Comment contribuer à un jeu",
+        "title": "Comment contribuer à un texte",
         "steps": {
           "browse": {
             "title": "Parcourir",
