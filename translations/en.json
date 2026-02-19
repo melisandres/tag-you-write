@@ -317,13 +317,14 @@
     "browse": "browse collaborations",
     "how": "start here",
     "how_to_collaborate": "An invitation",
-    "collaborate_step_one_title": "1. Give us a name",
-    "collaborate_step_one_text": "Your own, or a pseudonym—and a short bio, real or imagined. Palinodes is a collaborative writing game where stories branch and evolve through voting and revision.",
-    "collaborate_step_two_title": "2. Explore",
+    "how_to_collaborate_palinodes_description": "Palinodes is a collaborative writing game where stories branch and evolve through voting and revision.",
+    "collaborate_step_one_title": "Give us a name",
+    "collaborate_step_one_text": "Your own, or a pseudonym—and a short bio, real or imagined.",
+    "collaborate_step_two_title": "Explore",
     "collaborate_step_two_text": "Climb a story tree <span class='info-icon' data-svg='browse'></span>. Read through the leaves. Let your feet swing off a branch <span class='info-icon' data-svg='dashboard'></span>. Each branch is a new version, written by a new friend—or rival.",
-    "collaborate_step_three_title": "3. Add your voice",
+    "collaborate_step_three_title": "Add your voice",
     "collaborate_step_three_text": "Each version is both an homage and a transgression. <span class='info-icon' data-svg='publish'></span> Find your balance.",
-    "collaborate_step_four_title": "4. Mark your path",
+    "collaborate_step_four_title": "Mark your path",
     "collaborate_step_four_text": "Leave a mark on the texts that mark you, as you wander. Somewhere, a version will feel right — to everyone.",
     "how_to_start_new_collaboration": "",
     "create_collaboration_step_one_title": "Go first",
@@ -331,7 +332,7 @@
     "create_collaboration_step_two_title": "Take it slow",
     "create_collaboration_step_two_text": "You can cobble together a sentence or two, and hold it invisibly in your hands <span class='info-icon' data-svg='locked'></span>. Part your fingers for a friend or two, keep the scribbles to a whisper.",
     "create_collaboration_step_three_title": "Need a guide?",
-    "create_collaboration_step_three_text": "We’ve drawn you a map. <span class='info-icon' data-svg='how'></span>. You can pull it out at any time—or fold us a note of your own."
+    "create_collaboration_step_three_text": "We’ve drawn you a map. <span class='info-icon' data-svg='how'></span>. You can pull it out at any time—or fold us a note of your own <span class='info-icon' data-svg='contact'></span>."
   },
   "filters": {
     "contribution": {
@@ -692,6 +693,12 @@
     "start-here": {
       "title": "Start Here",
       "steps": {
+        "what-is-this": {
+          "title": "What is this?",
+          "substeps": {
+            "introduction": "Palinodes is a collaborative writing game. You can join an existing collaboration, or start your own. A starting text is iterated upon, each version branching out like a tree. The final version is chosen by voting. To continue, press >> (below)."
+          }
+        },
         "navigate": {
           "title": "Navigate",
           "substeps": {

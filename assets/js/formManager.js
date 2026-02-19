@@ -530,9 +530,34 @@ export class FormManager {
                     type: 'success'
                 }));
 
-                // REDIRECT: New account created
-                // Uses smart redirect logic (no backend redirectUrl in response)
-                const redirectUrl = await this.getSmartRedirectUrl(response);
+                // Only queue start-here tutorial if: no active tutorial in progress, and start-here not already completed
+                const hasActiveTutorial = !!localStorage.getItem('activeTutorial');
+                let startHereCompleted = false;
+                if (!hasActiveTutorial) {
+                    try {
+                        const completedRaw = localStorage.getItem('completedTutorials');
+                        if (completedRaw) {
+                            const completed = JSON.parse(completedRaw);
+                            startHereCompleted = completed['start-here'] === true;
+                        }
+                    } catch (e) { /* ignore */ }
+                }
+                const shouldOpenTutorial = !hasActiveTutorial && !startHereCompleted;
+
+                if (shouldOpenTutorial) {
+                    const tutorialType = data.openTutorial || 'start-here';
+                    // Use activeTutorial (same key the modal restores from) so the next page shows this tutorial from step 0
+                    localStorage.setItem('activeTutorial', JSON.stringify({
+                        tutorialType,
+                        step: 0,
+                        substep: 0,
+                        visitedSubsteps: [],
+                        tutorialSuccess: false
+                    }));
+                }
+
+                // REDIRECT: New account created — backend can send redirectUrl; new page renders with user logged in
+                const redirectUrl = await this.getSmartRedirectUrl(response, data.redirectUrl);
                 this.executeRedirect(redirectUrl);
             } else {
                 eventBus.emit('showToast', {

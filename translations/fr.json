@@ -315,14 +315,15 @@
     "browse": "explorer les collaborations",
     "how": "commencez ici",
     "how_to_collaborate": "Une invitation",
+    "how_to_collaborate_palinodes_description": "Palinodes est un jeu d'écriture collaborative où les histoires se développent par itération et vote.",
     "log_in": "connexion",
-    "collaborate_step_one_title": "1. Inscris un nom",
+    "collaborate_step_one_title": "Inscris un nom",
     "collaborate_step_one_text": "Le tien, ou un pseudonyme — et une courte bio, réelle ou inventée.",
-    "collaborate_step_two_title": "2. Explore",
+    "collaborate_step_two_title": "Explore",
     "collaborate_step_two_text": "Grimpe dans un arbre à histoires. Lis entre les feuilles <span class='info-icon' data-svg='browse'></span>. Laisse tes jambes se balancer du haut d’une branche <span class='info-icon' data-svg='dashboard'></span>. Chaque branche est une nouvelle version, écrite par un nouvel ami — ou un rival.",
-    "collaborate_step_three_title": "3. Ajoute ta voix",
+    "collaborate_step_three_title": "Ajoute ta voix",
     "collaborate_step_three_text": "Chaque version est à la fois un hommage et une transgression <span class='info-icon' data-svg='publish'></span>. Trouve ton équilibre.",
-    "collaborate_step_four_title": "4. Trace ton chemin",
+    "collaborate_step_four_title": "Trace ton chemin",
     "collaborate_step_four_text": "Laisse une empreinte sur les textes qui t’en laissent une. Quelque part, une version finira par résonner — pour tout le monde.",
     "how_to_start_new_collaboration": "",
     "create_collaboration_step_one_title": "Vas-y en premier",
@@ -330,7 +331,7 @@
     "create_collaboration_step_two_title": "Prends ton temps",
     "create_collaboration_step_two_text": "Tu peux bricoler un amas de mots et les garder, invisibles, dans tes mains. <span class='info-icon' data-svg='locked'></span> Écarte un peu les doigts pour un ami ou deux; on peut griffonner à voix basse.",
     "create_collaboration_step_three_title": "Besoin d’un guide?",
-    "create_collaboration_step_three_text": "On t’a dessiné une carte <span class='info-icon' data-svg='how'></span>. Tu peux la déplier quand tu veux — ou nous glisser un mot plié en retour."
+    "create_collaboration_step_three_text": "On t’a dessiné une carte <span class='info-icon' data-svg='how'></span>. Tu peux la déplier quand tu veux — ou nous glisser un mot plié en retour <span class='info-icon' data-svg='contact'></span>."
   },
   "filters": {
     "contribution": {
@@ -691,6 +692,12 @@
       "start-here": {
         "title": "Commencez ici",
         "steps": {
+          "what-is-this": {
+            "title": "C'est quoi?",
+            "substeps": {
+              "introduction": "Palinodes est un jeu d'écriture collaborative. On peut rejoindre une collaboration existante ou démarrer la notre. Un texte de départ est modifié, chaque version une nouvelle branche dans une arborescence. La version finale est choisie par vote. Pour continuer, appuyez sur >> (ci-dessous)."
+            }
+          },
           "navigate": {
             "title": "Naviguer",
             "substeps": {

@@ -91,4 +91,20 @@
 
 .nav-link.tutorial-switcher .tutorial-dropdown a.active {
     background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Green checkmark between icon and title for completed tutorials */
+.nav-link.tutorial-switcher .tutorial-dropdown a .tutorial-completed-check,
+.tutorial-completed-check {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    color: #22c55e;
+}
+
+.nav-link.tutorial-switcher .tutorial-dropdown a .tutorial-completed-check svg,
+.tutorial-completed-check svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
 } 

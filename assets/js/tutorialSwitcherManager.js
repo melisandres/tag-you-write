@@ -10,9 +10,46 @@ export class TutorialSwitcherManager {
         this.setupValidationListener();
     }
 
+    // -------------------------------------------------------------------------
+    // Storage (same keys as TutorialModal)
+    // -------------------------------------------------------------------------
+
+    /** @returns {object|null} Parsed active tutorial state or null. */
+    getActiveTutorialFromStorage() {
+        const raw = localStorage.getItem('activeTutorial');
+        if (!raw) return null;
+        try {
+            return JSON.parse(raw);
+        } catch (e) {
+            return null;
+        }
+    }
+
+    /** @returns {Record<string, boolean>} Completed tutorials, e.g. { 'start-here': true }. */
+    getCompletedTutorialsFromStorage() {
+        try {
+            const raw = localStorage.getItem('completedTutorials');
+            if (!raw) return {};
+            const data = JSON.parse(raw);
+            return typeof data === 'object' && data !== null ? data : {};
+        } catch (e) {
+            return {};
+        }
+    }
+
     initTutorialSwitcher() {
+        // Restore active tutorial from storage first (e.g. after account creation → redirect).
+        // Run before the early return so we show the modal even if this page has no .tutorial-switcher in the DOM.
+        if (this.getActiveTutorialFromStorage()) {
+            this.initTutorialModal().then(() => {
+                this.updateNavLink();
+            });
+        } else {
+            this.updateNavLink();
+        }
+
         if (this.tutorialSwitchers.length === 0) return;
-        
+
         this.tutorialSwitchers.forEach(switcher => {
             const currentTutorialElement = switcher.querySelector('.current-tutorial');
             const tutorialLinks = switcher.querySelectorAll('.tutorial-dropdown a[data-tutorial]');
@@ -76,33 +113,32 @@ export class TutorialSwitcherManager {
             });
         });
         
-        // Update active states for all tutorial links
+        // Update active states and completed checkmarks for all tutorial links
         this.updateTutorialActiveStates();
+        this.updateCompletedTutorialIndicators();
 
         // Listen for overflow menu tutorial selection events
         document.addEventListener('submenu:tutorial:selected', (e) => {
             console.log('TutorialSwitcherManager: Received submenu tutorial selection:', e.detail.tutorial);
             this.startTutorial(e.detail.tutorial);
         });
+
+        // Open tutorial via event bus (e.g. accountCreated or other flows)
+        eventBus.on('openTutorial', (e) => {
+            const tutorial = e.detail?.tutorial;
+            if (tutorial) this.startTutorial(tutorial);
+        });
         
         // Listen for tutorial closed events
         eventBus.on('tutorialClosed', () => {
             this.clearTutorialActiveStates();
+            this.updateCompletedTutorialIndicators();
             this.updateNavLink();
         });
 
-        // if there is an active tutorial in local storage, then load the tutorial modal
-        // Note: TutorialModal constructor will automatically restore from localStorage via checkForActiveTutorial()
-        // So we just need to initialize it, not call showTutorial again
-        if (localStorage.getItem('activeTutorial')) {
-            this.initTutorialModal().then(() => {
-                // TutorialModal constructor already handled restoration, just update nav link
-                this.updateNavLink();
-            });
-        } else {
-            // Update nav-link state on initial load (in case modal is visible from previous session)
-            this.updateNavLink();
-        }
+        eventBus.on('tutorialCompleted', () => {
+            this.updateCompletedTutorialIndicators();
+        });
     }
 
     startTutorial(tutorialType) {
@@ -188,18 +224,8 @@ export class TutorialSwitcherManager {
      * Update active states for all tutorial links (main nav and overflow menu)
      */
     updateTutorialActiveStates() {
-        // Get current active tutorial from localStorage
-        const activeTutorial = localStorage.getItem('activeTutorial');
-        let currentTutorialType = null;
-        
-        if (activeTutorial) {
-            try {
-                const tutorialData = JSON.parse(activeTutorial);
-                currentTutorialType = tutorialData.tutorialType;
-            } catch (e) {
-                console.warn('Failed to parse activeTutorial from localStorage:', e);
-            }
-        }
+        const tutorialData = this.getActiveTutorialFromStorage();
+        const currentTutorialType = tutorialData?.tutorialType ?? null;
         
         // Update main nav tutorial links
         const mainNavTutorialLinks = document.querySelectorAll('.tutorial-dropdown a[data-tutorial]');
@@ -226,6 +252,41 @@ export class TutorialSwitcherManager {
         });
     }
     
+    /**
+     * Update green checkmark between icon and title for completed tutorials.
+     */
+    updateCompletedTutorialIndicators() {
+        const completed = this.getCompletedTutorialsFromStorage();
+        const linkSelectors = [
+            '.tutorial-dropdown a[data-tutorial]',
+            '.submenu-content.tutorial-submenu a[data-tutorial]'
+        ];
+        const links = linkSelectors.flatMap(sel => Array.from(document.querySelectorAll(sel)));
+
+        links.forEach(link => {
+            const tutorialType = link.getAttribute('data-tutorial');
+            const isCompleted = completed[tutorialType] === true;
+            let checkEl = link.querySelector('.tutorial-completed-check');
+
+            if (isCompleted) {
+                if (!checkEl) {
+                    checkEl = document.createElement('span');
+                    checkEl.className = 'tutorial-completed-check';
+                    checkEl.setAttribute('aria-hidden', 'true');
+                    checkEl.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
+                    const icon = link.querySelector('.icon');
+                    if (icon) {
+                        link.insertBefore(checkEl, icon.nextSibling);
+                    } else {
+                        link.insertBefore(checkEl, link.firstChild);
+                    }
+                }
+            } else if (checkEl) {
+                checkEl.remove();
+            }
+        });
+    }
+
     /**
      * Clear active states for all tutorial links (main nav and overflow menu)
      */

@@ -142,6 +142,7 @@ class ControllerWriter extends Controller{
 
                 $response['success'] = true;
                 $response['message'] = 'auth.account_created';
+                $response['redirectUrl'] = 'dashboard'; // New page is rendered with user logged in
                 echo json_encode($response);
 
                 // Send email after response is sent

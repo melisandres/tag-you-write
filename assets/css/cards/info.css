@@ -10,6 +10,12 @@ section.info{
     overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
+.info-text-description {
+    font-size: 1.2rem;
+    font-weight: 100;
+    padding: 0px 10px 30px 10px;
+    text-align: left;
+}
 /* Apply same styling to div.info in form pages */
 .form-page div.info {
     display: flex;
@@ -102,7 +108,6 @@ section.info{
 
 .info h2 {
     font-size: 1.4em;
-    margin-bottom: 0.5em;
 }
 
 .info h3 {
@@ -435,6 +440,18 @@ section.info > .info-heart-svg svg rect {
     height: 1.5em;
 }
 
+.info-icon[data-svg="contact"] {
+    background-color: var(--color-white);
+}
+
+.info-icon[data-svg="contact"] svg path {
+    fill: var(--color-white);
+    stroke: var(--color-dark-grey);
+}
+
+.info-icon[data-svg="contact"] svg {
+    transform: scale(0.9);
+}
 /* About Section Styles */
 .about-section {
     padding-top: var(--spacing-extra-extra-large);

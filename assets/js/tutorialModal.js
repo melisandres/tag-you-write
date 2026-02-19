@@ -13,6 +13,7 @@ export class TutorialModal {
         this.visitedSubsteps = new Set(); // Track visited substeps across all tutorials
         this.formValidationState = { canPublish: false }; // Track form validation state
         this.tutorialSuccess = false; // Track if tutorial has been completed successfully
+        this.completedTutorials = {}; // Track all completed tutorials: { tutorialName: true }
         this.focusedField = null; // Track currently focused form field name
         
         // Track modal and shelf state for tutorial context
@@ -64,6 +65,15 @@ export class TutorialModal {
                     triggerEvent: 'reachedLastStep', // Success when user advances to last step (no external event)
                 },
                 steps: [
+                    {
+                        title: 'tutorial.start-here.steps.what-is-this.title',
+                        skipStep: 'readStep',
+                        substeps: [
+                            {
+                                text: 'tutorial.start-here.steps.what-is-this.substeps.introduction',
+                            }
+                        ]
+                    },
                     {
                         title: 'tutorial.start-here.steps.navigate.title',
                         skipStep: 'readStep', 
@@ -717,6 +727,9 @@ export class TutorialModal {
     }
 
     checkForActiveTutorial() {
+        // Load completed tutorials from localStorage
+        this.loadCompletedTutorials();
+        
         const activeTutorial = localStorage.getItem('activeTutorial');
         
         if (activeTutorial) {
@@ -1424,9 +1437,7 @@ export class TutorialModal {
     }
 
 
-    handleTutorialCompletion(eventType, data) {
-        console.log('🎯 TUTORIAL: Handling completion for', eventType, 'in tutorial', this.currentTutorial);
-        
+    handleTutorialCompletion(eventType, data) {        
         if (!this.currentTutorial) {
             console.log('🎯 TUTORIAL: No current tutorial, skipping completion');
             return;
@@ -1438,39 +1449,31 @@ export class TutorialModal {
             return;
         }
         
-        console.log('🎯 TUTORIAL: Tutorial completion config:', tutorial.completion);
-        console.log('🎯 TUTORIAL: Expected trigger event:', tutorial.completion.triggerEvent);
-        console.log('🎯 TUTORIAL: Received event type:', eventType);
-        
-        // For publishSuccess events, check if the action matches the current tutorial
+        let completed = false;
         if (eventType === 'publishSuccess') {
             const action = this.determineTutorialAction(data);
             if (action && tutorial.completion.triggerEvent === action) {
-                console.log('🎯 TUTORIAL: Tutorial completed! Setting success state');
-                this.tutorialSuccess = true;
-                console.log('🎯 TUTORIAL: tutorialSuccess set to:', this.tutorialSuccess);
-                this.invalidateContext();
-                this.updateTutorialForContext();
+                completed = true;
             } else {
                 console.log('🎯 TUTORIAL: Publish action does not match current tutorial');
             }
         } else if (eventType === 'reachedLastStep' && tutorial.completion.triggerEvent === 'reachedLastStep') {
             const lastStepIndex = tutorial.steps.length - 1;
             if (data?.stepIndex === lastStepIndex) {
-                console.log('🎯 TUTORIAL: Reached last step, setting success state');
-                this.tutorialSuccess = true;
-                this.invalidateContext();
-                this.updateTutorialForContext();
+                completed = true;
             }
         } else if (tutorial.completion.triggerEvent === eventType) {
-            // For other events (like voteToggle), use direct matching
-            console.log('🎯 TUTORIAL: Tutorial completed! Setting success state');
+            completed = true;
+        } else {
+            console.log('🎯 TUTORIAL: Event type does not match expected trigger');
+        }
+        
+        if (completed) {
             this.tutorialSuccess = true;
+            this.markTutorialAsCompleted(this.currentTutorial);
             console.log('🎯 TUTORIAL: tutorialSuccess set to:', this.tutorialSuccess);
             this.invalidateContext();
             this.updateTutorialForContext();
-        } else {
-            console.log('🎯 TUTORIAL: Event type does not match expected trigger');
         }
     }
 
@@ -1709,7 +1712,62 @@ export class TutorialModal {
     }
 
 
-     // ============================================================================
+    /**
+     * Mark a tutorial as completed and persist to localStorage
+     * @param {string} tutorialName - The name/type of the tutorial (e.g., 'start-here', 'contribute')
+     */
+    markTutorialAsCompleted(tutorialName) {
+        if (!tutorialName) {
+            console.warn('🎯 TUTORIAL: Cannot mark tutorial as completed - no tutorial name provided');
+            return;
+        }
+
+        // Initialize completedTutorials if it doesn't exist
+        if (!this.completedTutorials) {
+            this.completedTutorials = {};
+        }
+
+        // Mark tutorial as completed
+        this.completedTutorials[tutorialName] = true;
+
+        // Persist to localStorage
+        localStorage.setItem('completedTutorials', JSON.stringify(this.completedTutorials));
+
+        eventBus.emit('tutorialCompleted', { tutorialType: tutorialName });
+
+        console.log('🎯 TUTORIAL: Marked tutorial as completed:', tutorialName);
+        console.log('🎯 TUTORIAL: Completed tutorials:', this.completedTutorials);
+    }
+
+    /**
+     * Load completed tutorials from localStorage
+     */
+    loadCompletedTutorials() {
+        try {
+            const stored = localStorage.getItem('completedTutorials');
+            if (stored) {
+                this.completedTutorials = JSON.parse(stored);
+                console.log('🎯 TUTORIAL: Loaded completed tutorials from localStorage:', this.completedTutorials);
+            } else {
+                this.completedTutorials = {};
+                console.log('🎯 TUTORIAL: No completed tutorials found in localStorage, initializing empty object');
+            }
+        } catch (error) {
+            console.error('🎯 TUTORIAL: Error loading completed tutorials from localStorage:', error);
+            this.completedTutorials = {};
+        }
+    }
+
+    /**
+     * Check if a tutorial has been completed
+     * @param {string} tutorialName - The name/type of the tutorial
+     * @returns {boolean} - True if the tutorial has been completed
+     */
+    isTutorialCompleted(tutorialName) {
+        return this.completedTutorials && this.completedTutorials[tutorialName] === true;
+    }
+
+    // ============================================================================
     // 9. UI UTILITIES
     // ============================================================================
     

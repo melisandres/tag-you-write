@@ -28,8 +28,9 @@
         <section class="info" id="how">
             <div class="info-container">
                 <h2 data-i18n="home_index.how_to_collaborate">{{ translate('home_index.how_to_collaborate') }}</h2>
+                <p class="info-text-description" data-i18n="home_index.how_to_collaborate_palinodes_description">{{ translate('home_index.how_to_collaborate_palinodes_description') }}</p>
                 <ol>
-                    <li>                
+<!--                     <li>                
                         <h3>
                             <span data-i18n="home_index.collaborate_step_one_title">{{ translate('home_index.collaborate_step_one_title') }}</span>
                             <span class="info-icon" data-svg="logIn" {# data-i18n-title="home_index.login" title="{{ translate('home_index.login') }}" #}></span>
@@ -37,7 +38,7 @@
                         <div class="info-text-container" data-i18n="home_index.collaborate_step_one_text">    
                             {{ translate('home_index.collaborate_step_one_text') }}
                         </div>
-                    </li>
+                    </li> -->
                     <li>
                         <h3>
                             <span data-i18n="home_index.collaborate_step_two_title">{{ translate('home_index.collaborate_step_two_title') }}</span>
